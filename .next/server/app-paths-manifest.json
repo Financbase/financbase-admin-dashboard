@@ -1,8 +1,0 @@
-{
-  "/(dashboard)/expenses/page": "app/(dashboard)/expenses/page.js",
-  "/(dashboard)/clients/page": "app/(dashboard)/clients/page.js",
-  "/(dashboard)/financial/page": "app/(dashboard)/financial/page.js",
-  "/settings/profile/page": "app/settings/profile/page.js",
-  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js",
-  "/(dashboard)/unified/page": "app/(dashboard)/unified/page.js"
-}
