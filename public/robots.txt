@@ -1,0 +1,34 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://financbase.pages.dev/sitemap.xml
+
+# Disallow common sensitive paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /node_modules/
+Disallow: /*.json$
+Disallow: /*?*
+
+# Allow crawling of public pages
+Allow: /
+Allow: /about
+Allow: /pricing
+Allow: /contact
+Allow: /blog/
+Allow: /docs/
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Block common bots that don't respect robots.txt
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /

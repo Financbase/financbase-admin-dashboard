@@ -1,0 +1,84 @@
+/**
+ * Invoices API Route
+ * Handles invoice CRUD operations
+ */
+
+import { auth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { InvoiceService } from '@/lib/services/invoice-service';
+
+/**
+ * GET /api/invoices
+ * Fetch all invoices for the authenticated user
+ */
+export async function GET(req: NextRequest) {
+	try {
+		const { userId } = await auth();
+
+		if (!userId) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
+
+		// Parse query parameters
+		const searchParams = req.nextUrl.searchParams;
+		const status = searchParams.get('status') || undefined;
+		const clientId = searchParams.get('clientId') ? parseInt(searchParams.get('clientId')!) : undefined;
+		const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50;
+		const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0;
+
+		const invoices = await InvoiceService.getAll(userId, {
+			status,
+			clientId,
+			limit,
+			offset,
+		});
+
+		return NextResponse.json(invoices);
+	} catch (error) {
+		console.error('Error fetching invoices:', error);
+		return NextResponse.json(
+			{ error: 'Failed to fetch invoices' },
+			{ status: 500 }
+		);
+	}
+}
+
+/**
+ * POST /api/invoices
+ * Create a new invoice
+ */
+export async function POST(req: NextRequest) {
+	try {
+		const { userId } = await auth();
+
+		if (!userId) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
+
+		const body = await req.json();
+
+		// Validate required fields
+		if (!body.clientName || !body.clientEmail || !body.items || !body.issueDate || !body.dueDate) {
+			return NextResponse.json(
+				{ error: 'Missing required fields' },
+				{ status: 400 }
+			);
+		}
+
+		const invoice = await InvoiceService.create({
+			userId,
+			...body,
+			issueDate: new Date(body.issueDate),
+			dueDate: new Date(body.dueDate),
+		});
+
+		return NextResponse.json(invoice, { status: 201 });
+	} catch (error) {
+		console.error('Error creating invoice:', error);
+		return NextResponse.json(
+			{ error: 'Failed to create invoice' },
+			{ status: 500 }
+		);
+	}
+}
+

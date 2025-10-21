@@ -1,0 +1,56 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - heading "Sign in to Financbase" [level=1] [ref=e8]
+        - paragraph [ref=e9]: Welcome back! Please sign in to continue
+      - generic [ref=e10]:
+        - generic [ref=e12]:
+          - button "Sign in with Facebook Facebook" [ref=e13] [cursor=pointer]:
+            - generic [ref=e14]:
+              - generic:
+                - img "Sign in with Facebook"
+              - generic [ref=e15]: Facebook
+          - button "Sign in with Google Google" [ref=e16] [cursor=pointer]:
+            - generic [ref=e17]:
+              - generic:
+                - img "Sign in with Google"
+              - generic [ref=e18]: Google
+        - paragraph [ref=e21]: or
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e27]:
+              - generic [ref=e29]: Email address
+              - textbox "Email address" [ref=e30]:
+                - /placeholder: Enter your email address
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Password
+                  - generic:
+                    - textbox "Password":
+                      - /placeholder: Enter your password
+                    - button "Show password":
+                      - img
+          - button "Continue" [ref=e32] [cursor=pointer]:
+            - generic [ref=e33]:
+              - text: Continue
+              - img [ref=e34]
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: Don’t have an account?
+        - link "Sign up" [ref=e39] [cursor=pointer]:
+          - /url: http://127.0.0.1:3010/auth/sign-up#/?redirect_url=http%3A%2F%2F127.0.0.1%3A3010%2Fdashboard
+      - generic [ref=e41]:
+        - generic [ref=e43]:
+          - paragraph [ref=e44]: Secured by
+          - link "Clerk logo" [ref=e45] [cursor=pointer]:
+            - /url: https://go.clerk.com/components
+            - img [ref=e46]
+        - paragraph [ref=e51]: Development mode
+  - alert [ref=e52]
+```

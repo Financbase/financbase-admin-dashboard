@@ -1,0 +1,365 @@
+import { getDbOrThrow } from "@/lib/db";
+import { landingPages } from "@/lib/db/schemas/cms.schema";
+import type {
+	CreateLandingPageInput,
+	LandingPage,
+	LandingPageMetadata,
+	UpdateLandingPageInput,
+} from "@/types/landing-page";
+import { auth } from "@clerk/nextjs/server";
+import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import {
+	BarChart3,
+	Database,
+	Search,
+	Server,
+	Trash2,
+	XCircle,
+} from "lucide-react";
+
+/**
+ * Landing Page Service
+ * Handles all database operations for landing pages
+ */
+
+/**
+ * Get all landing pages with optional filtering
+ */
+export async function getLandingPages(options?: {
+	status?: "draft" | "published" | "archived";
+	search?: string;
+	limit?: number;
+	offset?: number;
+}): Promise<{ pages: LandingPage[]; total: number }> {
+	try {
+		const { userId, orgId } = await auth();
+
+		if (!userId) {
+			throw new Error("Unauthorized");
+		}
+
+		// Build where conditions
+		const conditions = [];
+
+		if (options?.status) {
+			conditions.push(eq(landingPages.status, options.status));
+		}
+
+		if (options?.search) {
+			conditions.push(
+				or(
+					ilike(landingPages.title, `%${options.search}%`),
+					ilike(landingPages.slug, `%${options.search}%`),
+					ilike(landingPages.content, `%${options.search}%`),
+				),
+			);
+		}
+
+		// Get total count
+		const countResult = await getDbOrThrow()
+			.select({ count: sql<number>`count(*)::int` })
+			.from(landingPages)
+			.where(conditions.length > 0 ? and(...conditions) : undefined);
+
+		const total = countResult[0]?.count || 0;
+
+		// Get pages with pagination
+		const pages = await getDbOrThrow()
+			.select()
+			.from(landingPages)
+			.where(conditions.length > 0 ? and(...conditions) : undefined)
+			.orderBy(desc(landingPages.updatedAt))
+			.limit(options?.limit || 50)
+			.offset(options?.offset || 0);
+
+		return {
+			pages: pages as LandingPage[],
+			total,
+		};
+	} catch (error) {
+		console.error("Error getting landing pages:", error);
+		throw error;
+	}
+}
+
+/**
+ * Get a single landing page by ID
+ */
+export async function getLandingPageById(
+	id: number,
+): Promise<LandingPage | null> {
+	try {
+		const { userId } = await auth();
+
+		if (!userId) {
+			throw new Error("Unauthorized");
+		}
+
+		const result = await getDbOrThrow()
+			.select()
+			.from(landingPages)
+			.where(eq(landingPages.id, id))
+			.limit(1);
+
+		return (result[0] as LandingPage) || null;
+	} catch (error) {
+		console.error("Error getting landing page:", error);
+		throw error;
+	}
+}
+
+/**
+ * Get a landing page by slug
+ */
+export async function getLandingPageBySlug(
+	slug: string,
+): Promise<LandingPage | null> {
+	try {
+		const result = await getDbOrThrow()
+			.select()
+			.from(landingPages)
+			.where(eq(landingPages.slug, slug))
+			.limit(1);
+
+		return (result[0] as LandingPage) || null;
+	} catch (error) {
+		console.error("Error getting landing page by slug:", error);
+		throw error;
+	}
+}
+
+/**
+ * Create a new landing page
+ */
+export async function createLandingPage(
+	input: CreateLandingPageInput,
+): Promise<LandingPage> {
+	try {
+		const { userId, orgId } = await auth();
+
+		if (!userId) {
+			throw new Error("Unauthorized");
+		}
+
+		// Check if slug already exists
+		const existing = await getLandingPageBySlug(input.slug);
+		if (existing) {
+			throw new Error("A landing page with this slug already exists");
+		}
+
+		const result = await getDbOrThrow()
+			.insert(landingPages)
+			.values({
+				title: input.title,
+				slug: input.slug,
+				content: input.content || null,
+				status: input.status || "draft",
+				template: input.template || "default",
+				authorId: userId,
+				organizationId: orgId ? Number.parseInt(orgId) : null,
+				metadata: input.metadata ? JSON.stringify(input.metadata) : null,
+				seoTitle: input.seoTitle || null,
+				seoDescription: input.seoDescription || null,
+				seoKeywords: input.seoKeywords || null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
+
+		return result[0] as LandingPage;
+	} catch (error) {
+		console.error("Error creating landing page:", error);
+		throw error;
+	}
+}
+
+/**
+ * Update a landing page
+ */
+export async function updateLandingPage(
+	input: UpdateLandingPageInput,
+): Promise<LandingPage> {
+	try {
+		const { userId } = await auth();
+
+		if (!userId) {
+			throw new Error("Unauthorized");
+		}
+
+		// Check if page exists
+		const existing = await getLandingPageById(input.id);
+		if (!existing) {
+			throw new Error("Landing page not found");
+		}
+
+		// If slug is being updated, check for conflicts
+		if (input.slug && input.slug !== existing.slug) {
+			const conflicting = await getLandingPageBySlug(input.slug);
+			if (conflicting) {
+				throw new Error("A landing page with this slug already exists");
+			}
+		}
+
+		const updateData: Record<string, unknown> = {
+			updatedAt: new Date(),
+		};
+
+		if (input.title !== undefined) updateData.title = input.title;
+		if (input.slug !== undefined) updateData.slug = input.slug;
+		if (input.content !== undefined) updateData.content = input.content;
+		if (input.status !== undefined) updateData.status = input.status;
+		if (input.template !== undefined) updateData.template = input.template;
+		if (input.metadata !== undefined)
+			updateData.metadata = JSON.stringify(input.metadata);
+		if (input.seoTitle !== undefined) updateData.seoTitle = input.seoTitle;
+		if (input.seoDescription !== undefined)
+			updateData.seoDescription = input.seoDescription;
+		if (input.seoKeywords !== undefined)
+			updateData.seoKeywords = input.seoKeywords;
+
+		const result = await getDbOrThrow()
+			.update(landingPages)
+			.set(updateData)
+			.where(eq(landingPages.id, input.id))
+			.returning();
+
+		return result[0] as LandingPage;
+	} catch (error) {
+		console.error("Error updating landing page:", error);
+		throw error;
+	}
+}
+
+/**
+ * Delete a landing page
+ */
+export async function deleteLandingPage(id: number): Promise<void> {
+	try {
+		const { userId } = await auth();
+
+		if (!userId) {
+			throw new Error("Unauthorized");
+		}
+
+		await getDbOrThrow().delete(landingPages).where(eq(landingPages.id, id));
+	} catch (error) {
+		console.error("Error deleting landing page:", error);
+		throw error;
+	}
+}
+
+/**
+ * Duplicate a landing page
+ */
+export async function duplicateLandingPage(id: number): Promise<LandingPage> {
+	try {
+		const { userId } = await auth();
+
+		if (!userId) {
+			throw new Error("Unauthorized");
+		}
+
+		const original = await getLandingPageById(id);
+		if (!original) {
+			throw new Error("Landing page not found");
+		}
+
+		// Generate unique slug
+		let newSlug = `${original.slug}-copy`;
+		let counter = 1;
+		while (await getLandingPageBySlug(newSlug)) {
+			counter++;
+			newSlug = `${original.slug}-copy-${counter}`;
+		}
+
+		const metadata: LandingPageMetadata | undefined = original.metadata
+			? JSON.parse(original.metadata)
+			: undefined;
+
+		return await createLandingPage({
+			title: `${original.title} (Copy)`,
+			slug: newSlug,
+			content: original.content || undefined,
+			status: "draft",
+			template: original.template || undefined,
+			metadata,
+			seoTitle: original.seoTitle || undefined,
+			seoDescription: original.seoDescription || undefined,
+			seoKeywords: original.seoKeywords || undefined,
+		});
+	} catch (error) {
+		console.error("Error duplicating landing page:", error);
+		throw error;
+	}
+}
+
+/**
+ * Get landing page analytics
+ */
+export async function getLandingPageAnalytics(id: number) {
+	try {
+		const { userId } = await auth();
+
+		if (!userId) {
+			throw new Error("Unauthorized");
+		}
+
+		const db = getDbOrThrow();
+		const pageIdStr = id.toString();
+
+		// Get total views (page view events)
+		const viewsResult = await db.execute(sql`
+				SELECT CAST(COUNT(*) AS INTEGER) as count
+				FROM analytics_events
+				WHERE event_name = 'page_view' AND properties->>'pageId' = ${pageIdStr}
+			`);
+
+		// Get unique visitors (distinct session IDs)
+		const uniqueVisitorsResult = await db.execute(sql`
+				SELECT CAST(COUNT(DISTINCT session_id) AS INTEGER) as count
+				FROM analytics_events
+				WHERE event_name = 'page_view' AND properties->>'pageId' = ${pageIdStr}
+			`);
+
+		// Get conversions (form submissions or CTA clicks)
+		const conversionsResult = await db.execute(sql`
+				SELECT CAST(COUNT(*) AS INTEGER) as count
+				FROM analytics_events
+				WHERE (event_name = 'form_submit' OR event_name = 'cta_click')
+				  AND properties->>'pageId' = ${pageIdStr}
+			`);
+
+		// Get bounces (sessions with only one event)
+		const bouncesResult = await db.execute(sql`
+				SELECT CAST(COUNT(*) AS INTEGER) as count
+				FROM (
+					SELECT session_id
+					FROM analytics_events
+					WHERE properties->>'pageId' = ${pageIdStr}
+					GROUP BY session_id
+					HAVING COUNT(*) = 1
+				) as bounced_sessions
+			`);
+
+		const views = (viewsResult.rows[0] as any)?.count || 0;
+		const uniqueVisitors = (uniqueVisitorsResult.rows[0] as any)?.count || 0;
+		const conversions = (conversionsResult.rows[0] as any)?.count || 0;
+		const bounces = (bouncesResult.rows[0] as any)?.count || 0;
+
+		return {
+			views,
+			uniqueVisitors,
+			conversionRate: views > 0 ? (conversions / views) * 100 : 0,
+			bounceRate: uniqueVisitors > 0 ? (bounces / uniqueVisitors) * 100 : 0,
+		};
+	} catch (error) {
+		console.error("Error getting landing page analytics:", error);
+		// Return zeros on error instead of throwing
+		return {
+			views: 0,
+			uniqueVisitors: 0,
+			conversionRate: 0,
+			bounceRate: 0,
+		};
+	}
+}

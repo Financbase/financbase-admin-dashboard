@@ -1,0 +1,32 @@
+/* Dashboard-specific styles */
+.dashboard-container {
+	@apply min-h-screen bg-background;
+}
+
+.dashboard-nav {
+	@apply border-b bg-card;
+}
+
+.dashboard-main {
+	@apply flex-1;
+}
+
+.dashboard-card {
+	@apply rounded-lg border bg-card p-6;
+}
+
+.dashboard-stat {
+	@apply flex items-center space-x-2;
+}
+
+.dashboard-stat-value {
+	@apply text-2xl font-bold;
+}
+
+.dashboard-stat-label {
+	@apply text-sm font-medium;
+}
+
+.dashboard-stat-change {
+	@apply text-xs text-muted-foreground;
+}

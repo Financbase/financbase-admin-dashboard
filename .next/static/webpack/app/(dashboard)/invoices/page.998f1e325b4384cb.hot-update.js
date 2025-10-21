@@ -1,0 +1,21 @@
+/*
+ * ATTENTION: An "eval-source-map" devtool has been used.
+ * This devtool is neither made for production nor for readable output files.
+ * It uses "eval()" calls to create a separate source file with attached SourceMaps in the browser devtools.
+ * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
+ * or disable the default devtool with "devtool: false".
+ * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
+ */
+self["webpackHotUpdate_N_E"]("app/(dashboard)/invoices/page",{
+
+/***/ "(app-pages-browser)/./node_modules/.pnpm/next@14.2.33_@babel+core@7.28.4_@playwright+test@1.56.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22%2FUsers%2Fjonathanpizarro%2FProjects%2Ftemplates%2Ffinancbase-admin-dashboard%2Fcomponents%2Finvoices%2Finvoice-list.tsx%22%2C%22ids%22%3A%5B%22InvoiceList%22%5D%7D&server=false!":
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/.pnpm/next@14.2.33_@babel+core@7.28.4_@playwright+test@1.56.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22%2FUsers%2Fjonathanpizarro%2FProjects%2Ftemplates%2Ffinancbase-admin-dashboard%2Fcomponents%2Finvoices%2Finvoice-list.tsx%22%2C%22ids%22%3A%5B%22InvoiceList%22%5D%7D&server=false! ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+eval(__webpack_require__.ts("Promise.resolve(/*! import() eager */).then(__webpack_require__.bind(__webpack_require__, /*! ./components/invoices/invoice-list.tsx */ \"(app-pages-browser)/./components/invoices/invoice-list.tsx\"));\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKGFwcC1wYWdlcy1icm93c2VyKS8uL25vZGVfbW9kdWxlcy8ucG5wbS9uZXh0QDE0LjIuMzNfQGJhYmVsK2NvcmVANy4yOC40X0BwbGF5d3JpZ2h0K3Rlc3RAMS41Ni4xX3JlYWN0LWRvbUAxOC4zLjFfcmVhY3RAMTguMy4xX19yZWFjdEAxOC4zLjEvbm9kZV9tb2R1bGVzL25leHQvZGlzdC9idWlsZC93ZWJwYWNrL2xvYWRlcnMvbmV4dC1mbGlnaHQtY2xpZW50LWVudHJ5LWxvYWRlci5qcz9tb2R1bGVzPSU3QiUyMnJlcXVlc3QlMjIlM0ElMjIlMkZVc2VycyUyRmpvbmF0aGFucGl6YXJybyUyRlByb2plY3RzJTJGdGVtcGxhdGVzJTJGZmluYW5jYmFzZS1hZG1pbi1kYXNoYm9hcmQlMkZjb21wb25lbnRzJTJGaW52b2ljZXMlMkZpbnZvaWNlLWxpc3QudHN4JTIyJTJDJTIyaWRzJTIyJTNBJTVCJTIySW52b2ljZUxpc3QlMjIlNUQlN0Qmc2VydmVyPWZhbHNlISIsIm1hcHBpbmdzIjoiQUFBQSxzTUFBK0siLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly9fTl9FLz83NzU0Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCgvKiB3ZWJwYWNrTW9kZTogXCJlYWdlclwiLCB3ZWJwYWNrRXhwb3J0czogW1wiSW52b2ljZUxpc3RcIl0gKi8gXCIvVXNlcnMvam9uYXRoYW5waXphcnJvL1Byb2plY3RzL3RlbXBsYXRlcy9maW5hbmNiYXNlLWFkbWluLWRhc2hib2FyZC9jb21wb25lbnRzL2ludm9pY2VzL2ludm9pY2UtbGlzdC50c3hcIik7XG4iXSwibmFtZXMiOltdLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@14.2.33_@babel+core@7.28.4_@playwright+test@1.56.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22%2FUsers%2Fjonathanpizarro%2FProjects%2Ftemplates%2Ffinancbase-admin-dashboard%2Fcomponents%2Finvoices%2Finvoice-list.tsx%22%2C%22ids%22%3A%5B%22InvoiceList%22%5D%7D&server=false!\n"));
+
+/***/ })
+
+});
