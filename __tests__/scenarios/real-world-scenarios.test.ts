@@ -7,12 +7,66 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 // Mock all services
-vi.mock('@/lib/services/client-service');
-vi.mock('@/lib/services/lead-management-service');
-vi.mock('@/lib/services/transaction-service');
-vi.mock('@/lib/services/account-service');
-vi.mock('@/lib/services/adboard-service');
-vi.mock('@/lib/services/unified-dashboard-service');
+const mockClientService = {
+  createClient: vi.fn(),
+  getClientById: vi.fn(),
+  updateClient: vi.fn(),
+  getClientStats: vi.fn(),
+};
+
+const mockLeadManagementService = {
+  createLead: vi.fn(),
+  getLeadById: vi.fn(),
+  updateLeadStatus: vi.fn(),
+  createLeadActivity: vi.fn(),
+  convertLeadToClient: vi.fn(),
+  getLeadStats: vi.fn(),
+};
+
+const mockTransactionService = {
+  getFinancialAnalysis: vi.fn(),
+  createTransaction: vi.fn(),
+  updateTransaction: vi.fn(),
+};
+
+const mockAccountService = {
+  getAccountBalance: vi.fn(),
+  updateAccount: vi.fn(),
+};
+
+const mockAdboardService = {
+  getCampaignPerformance: vi.fn(),
+  updateCampaign: vi.fn(),
+};
+
+const mockUnifiedDashboardService = {
+  getDataConsistencyReport: vi.fn(),
+  syncData: vi.fn(),
+};
+
+vi.mock('@/lib/services/client-service', () => ({
+  ClientService: mockClientService,
+}));
+
+vi.mock('@/lib/services/lead-management-service', () => ({
+  LeadManagementService: mockLeadManagementService,
+}));
+
+vi.mock('@/lib/services/transaction-service', () => ({
+  TransactionService: mockTransactionService,
+}));
+
+vi.mock('@/lib/services/account-service', () => ({
+  AccountService: mockAccountService,
+}));
+
+vi.mock('@/lib/services/adboard-service', () => ({
+  AdboardService: mockAdboardService,
+}));
+
+vi.mock('@/lib/services/unified-dashboard-service', () => ({
+  UnifiedDashboardService: mockUnifiedDashboardService,
+}));
 
 describe('Real-World Business Scenarios', () => {
   beforeEach(() => {
@@ -21,9 +75,6 @@ describe('Real-World Business Scenarios', () => {
 
   describe('Complete Lead-to-Client Conversion Workflow', () => {
     it('should handle a complete lead conversion with all related data', async () => {
-      const { LeadManagementService } = await import('@/lib/services/lead-management-service');
-      const { ClientService } = await import('@/lib/services/client-service');
-      const { TransactionService } = await import('@/lib/services/transaction-service');
 
       // 1. Create initial lead
       const mockLead = {
@@ -40,7 +91,7 @@ describe('Real-World Business Scenarios', () => {
         createdAt: new Date(),
       };
 
-      vi.mocked(LeadManagementService.createLead).mockResolvedValue(mockLead);
+      mockLeadManagementService.createLead.mockResolvedValue(mockLead);
 
       // 2. Add lead activities
       const mockActivity = {
@@ -54,7 +105,7 @@ describe('Real-World Business Scenarios', () => {
         createdAt: new Date(),
       };
 
-      vi.mocked(LeadManagementService.createLeadActivity).mockResolvedValue(mockActivity);
+      vi.mocked(mockLeadManagementService.createLeadActivity).mockResolvedValue(mockActivity);
 
       // 3. Create lead tasks
       const mockTask = {
@@ -68,7 +119,7 @@ describe('Real-World Business Scenarios', () => {
         createdAt: new Date(),
       };
 
-      vi.mocked(LeadManagementService.createLeadTask).mockResolvedValue(mockTask);
+      vi.mocked(mockLeadManagementService.createLeadTask).mockResolvedValue(mockTask);
 
       // 4. Update lead status to qualified
       const mockQualifiedLead = {
@@ -77,7 +128,7 @@ describe('Real-World Business Scenarios', () => {
         notes: 'Lead qualified after discovery call',
       };
 
-      vi.mocked(LeadManagementService.updateLeadStatus).mockResolvedValue(mockQualifiedLead);
+      vi.mocked(mockLeadManagementService.updateLeadStatus).mockResolvedValue(mockQualifiedLead);
 
       // 5. Convert lead to client
       const mockClient = {
@@ -104,8 +155,8 @@ describe('Real-World Business Scenarios', () => {
         clientId: 'client-123',
       };
 
-      vi.mocked(LeadManagementService.convertLeadToClient).mockResolvedValue(mockConversion);
-      vi.mocked(ClientService.createClient).mockResolvedValue(mockClient);
+      vi.mocked(mockLeadManagementService.convertLeadToClient).mockResolvedValue(mockConversion);
+      vi.mocked(mockClientService.createClient).mockResolvedValue(mockClient);
 
       // 6. Create initial transaction for the client
       const mockTransaction = {
@@ -120,10 +171,10 @@ describe('Real-World Business Scenarios', () => {
         createdAt: new Date(),
       };
 
-      vi.mocked(TransactionService.createTransaction).mockResolvedValue(mockTransaction);
+      vi.mocked(mockTransactionService.createTransaction).mockResolvedValue(mockTransaction);
 
       // Execute the complete workflow
-      const lead = await LeadManagementService.createLead({
+      const lead = await mockLeadManagementService.createLead({
         userId: 'user-123',
         firstName: 'John',
         lastName: 'Doe',
@@ -134,7 +185,7 @@ describe('Real-World Business Scenarios', () => {
         estimatedValue: 50000,
       });
 
-      const activity = await LeadManagementService.createLeadActivity({
+      const activity = await mockLeadManagementService.createLeadActivity({
         userId: 'user-123',
         leadId: lead.id,
         type: 'call',
@@ -144,7 +195,7 @@ describe('Real-World Business Scenarios', () => {
         nextSteps: 'Send proposal',
       });
 
-      const task = await LeadManagementService.createLeadTask({
+      const task = await mockLeadManagementService.createLeadTask({
         userId: 'user-123',
         leadId: lead.id,
         title: 'Send proposal',
@@ -153,14 +204,14 @@ describe('Real-World Business Scenarios', () => {
         dueDate: new Date(),
       });
 
-      const qualifiedLead = await LeadManagementService.updateLeadStatus(
+      const qualifiedLead = await mockLeadManagementService.updateLeadStatus(
         lead.id,
         'user-123',
         'qualified',
         'Lead qualified after discovery call'
       );
 
-      const conversion = await LeadManagementService.convertLeadToClient(
+      const conversion = await mockLeadManagementService.convertLeadToClient(
         lead.id,
         'user-123',
         {
@@ -173,7 +224,7 @@ describe('Real-World Business Scenarios', () => {
         }
       );
 
-      const transaction = await TransactionService.createTransaction({
+      const transaction = await mockTransactionService.createTransaction({
         userId: 'user-123',
         clientId: conversion.clientId,
         type: 'income',
@@ -209,7 +260,7 @@ describe('Real-World Business Scenarios', () => {
         updatedAt: new Date(),
       };
 
-      vi.mocked(ClientService.updateClient).mockResolvedValue(mockUpdatedClient);
+      vi.mocked(mockClientService.updateClient).mockResolvedValue(mockUpdatedClient);
 
       // Mock related transactions update
       const mockUpdatedTransactions = [
@@ -221,7 +272,7 @@ describe('Real-World Business Scenarios', () => {
         },
       ];
 
-      vi.mocked(TransactionService.getTransactionsByClient).mockResolvedValue(mockUpdatedTransactions);
+      vi.mocked(mockTransactionService.getTransactionsByClient).mockResolvedValue(mockUpdatedTransactions);
 
       // Mock dashboard metrics update
       const mockUpdatedMetrics = {
@@ -240,17 +291,17 @@ describe('Real-World Business Scenarios', () => {
         },
       };
 
-      vi.mocked(UnifiedDashboardService.getUnifiedMetrics).mockResolvedValue(mockUpdatedMetrics);
+      vi.mocked(mockUnifiedDashboardService.getUnifiedMetrics).mockResolvedValue(mockUpdatedMetrics);
 
       // Execute the synchronization
-      const updatedClient = await ClientService.updateClient('client-123', 'user-123', {
+      const updatedClient = await mockClientService.updateClient('client-123', 'user-123', {
         companyName: 'Updated Company Name',
         email: 'updated@company.com',
         phone: '+1234567890',
       });
 
-      const relatedTransactions = await TransactionService.getTransactionsByClient('client-123', 'user-123');
-      const updatedMetrics = await UnifiedDashboardService.getUnifiedMetrics('user-123');
+      const relatedTransactions = await mockTransactionService.getTransactionsByClient('client-123', 'user-123');
+      const updatedMetrics = await mockUnifiedDashboardService.getUnifiedMetrics('user-123');
 
       // Verify synchronization
       expect(updatedClient).toEqual(mockUpdatedClient);
@@ -300,7 +351,7 @@ describe('Real-World Business Scenarios', () => {
         },
       };
 
-      vi.mocked(UnifiedDashboardService.getUnifiedMetrics).mockResolvedValue(mockFinancialData);
+      vi.mocked(mockUnifiedDashboardService.getUnifiedMetrics).mockResolvedValue(mockFinancialData);
 
       // Mock transaction analysis
       const mockTransactionAnalysis = {
@@ -319,7 +370,7 @@ describe('Real-World Business Scenarios', () => {
         ],
       };
 
-      vi.mocked(TransactionService.getFinancialAnalysis).mockResolvedValue(mockTransactionAnalysis);
+      vi.mocked(mockTransactionService.getFinancialAnalysis).mockResolvedValue(mockTransactionAnalysis);
 
       // Mock client analysis
       const mockClientAnalysis = {
@@ -334,12 +385,12 @@ describe('Real-World Business Scenarios', () => {
         averageClientLifetime: 24, // months
       };
 
-      vi.mocked(ClientService.getClientAnalysis).mockResolvedValue(mockClientAnalysis);
+      vi.mocked(mockClientService.getClientAnalysis).mockResolvedValue(mockClientAnalysis);
 
       // Execute financial health analysis
-      const unifiedMetrics = await UnifiedDashboardService.getUnifiedMetrics('user-123');
-      const transactionAnalysis = await TransactionService.getFinancialAnalysis('user-123');
-      const clientAnalysis = await ClientService.getClientAnalysis('user-123');
+      const unifiedMetrics = await mockUnifiedDashboardService.getUnifiedMetrics('user-123');
+      const transactionAnalysis = await mockTransactionService.getFinancialAnalysis('user-123');
+      const clientAnalysis = await mockClientService.getClientAnalysis('user-123');
 
       // Calculate financial health score
       const profitMargin = transactionAnalysis.profitMargin;
@@ -388,7 +439,7 @@ describe('Real-World Business Scenarios', () => {
         overallCTR: 2.5,
       };
 
-      vi.mocked(AdboardService.getCampaignPerformance).mockResolvedValue(mockCampaignPerformance);
+      vi.mocked(mockAdboardService.getCampaignPerformance).mockResolvedValue(mockCampaignPerformance);
 
       // Mock optimization recommendations
       const mockOptimizations = [
@@ -412,11 +463,11 @@ describe('Real-World Business Scenarios', () => {
         },
       ];
 
-      vi.mocked(AdboardService.getOptimizationRecommendations).mockResolvedValue(mockOptimizations);
+      vi.mocked(mockAdboardService.getOptimizationRecommendations).mockResolvedValue(mockOptimizations);
 
       // Execute campaign optimization analysis
-      const performance = await AdboardService.getCampaignPerformance('user-123');
-      const optimizations = await AdboardService.getOptimizationRecommendations('user-123');
+      const performance = await mockAdboardService.getCampaignPerformance('user-123');
+      const optimizations = await mockAdboardService.getOptimizationRecommendations('user-123');
 
       // Analyze performance trends
       const monthlyGrowth = performance.monthlySpend.map((month, index) => {
@@ -481,10 +532,10 @@ describe('Real-World Business Scenarios', () => {
         ],
       };
 
-      vi.mocked(UnifiedDashboardService.getDataConsistencyReport).mockResolvedValue(mockConsistencyReport);
+      vi.mocked(mockUnifiedDashboardService.getDataConsistencyReport).mockResolvedValue(mockConsistencyReport);
 
       // Execute data consistency check
-      const consistencyReport = await UnifiedDashboardService.getDataConsistencyReport('user-123');
+      const consistencyReport = await mockUnifiedDashboardService.getDataConsistencyReport('user-123');
 
       // Verify data consistency
       expect(consistencyReport).toEqual(mockConsistencyReport);
@@ -521,11 +572,11 @@ describe('Real-World Business Scenarios', () => {
         campaigns: null,
       };
 
-      vi.mocked(UnifiedDashboardService.getUnifiedMetrics).mockResolvedValue(mockPartialData);
+      vi.mocked(mockUnifiedDashboardService.getUnifiedMetrics).mockResolvedValue(mockPartialData);
 
       // Execute with error handling
       try {
-        const metrics = await UnifiedDashboardService.getUnifiedMetrics('user-123');
+        const metrics = await mockUnifiedDashboardService.getUnifiedMetrics('user-123');
         
         // Verify partial data is still usable
         expect(metrics.revenue).toBeDefined();

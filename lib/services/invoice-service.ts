@@ -239,7 +239,7 @@ export async function recordInvoicePayment(
 	reference?: string
 ) {
 	// Get current invoice
-	const invoice = await getInvoiceById(invoiceId, userId);
+	const invoice = await getInvoiceById(invoiceId.toString(), userId);
 	if (!invoice) {
 		throw new Error('Invoice not found');
 	}

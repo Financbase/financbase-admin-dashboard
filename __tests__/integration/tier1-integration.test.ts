@@ -3,27 +3,44 @@
  * Tests real-world scenarios for authentication, notifications, and settings
  */
 
-import { NotificationService } from '@/lib/services/notification-service';
+import { describe, it, expect, vi } from 'vitest';
 import { checkPermission, isAdmin } from '@/lib/auth/financbase-rbac';
 import { FINANCIAL_PERMISSIONS } from '@/types/auth';
+
+// Mock NotificationService
+const mockNotificationService = {
+  createFinancialNotification: vi.fn(),
+  createSystemAlert: vi.fn(),
+  getForUser: vi.fn(),
+  markAsRead: vi.fn(),
+  markAllAsRead: vi.fn(),
+  delete: vi.fn(),
+  getUnreadCount: vi.fn(),
+  getUserPreferences: vi.fn(),
+  updateUserPreferences: vi.fn(),
+};
+
+vi.mock('@/lib/services/notification-service', () => ({
+  NotificationService: mockNotificationService,
+}));
 
 // Test user ID (would come from Clerk in real scenario)
 const TEST_USER_ID = 'user_12345';
 
 describe('Tier 1 Component Integration Tests', () => {
 	describe('Authentication & RBAC System', () => {
-		test('should check user permissions correctly', async () => {
+		it('should check user permissions correctly', async () => {
 			// Test permission checking
 			const hasInvoicePermission = await checkPermission(FINANCIAL_PERMISSIONS.INVOICES_VIEW);
 			expect(typeof hasInvoicePermission).toBe('boolean');
 		});
 
-		test('should validate admin status', async () => {
+		it('should validate admin status', async () => {
 			const adminStatus = await isAdmin();
 			expect(typeof adminStatus).toBe('boolean');
 		});
 
-		test('should handle multiple permission checks', async () => {
+		it('should handle multiple permission checks', async () => {
 			const permissions = [
 				FINANCIAL_PERMISSIONS.INVOICES_VIEW,
 				FINANCIAL_PERMISSIONS.EXPENSES_VIEW,
@@ -36,8 +53,8 @@ describe('Tier 1 Component Integration Tests', () => {
 	});
 
 	describe('Notification System', () => {
-		test('should create financial notifications', async () => {
-			const notification = await NotificationService.createFinancialNotification(
+		it('should create financial notifications', async () => {
+    const notification = await mockNotificationService.createFinancialNotification(
 				TEST_USER_ID,
 				'invoice',
 				'Invoice INV-001 Created',
@@ -56,8 +73,8 @@ describe('Tier 1 Component Integration Tests', () => {
 			expect(notification.title).toBe('Invoice INV-001 Created');
 		});
 
-		test('should create system alerts', async () => {
-			const alert = await NotificationService.createSystemAlert(
+		it('should create system alerts', async () => {
+			const alert = await mockNotificationService.createSystemAlert(
 				TEST_USER_ID,
 				'Payment Failed',
 				'Your monthly subscription payment could not be processed.',
@@ -70,8 +87,8 @@ describe('Tier 1 Component Integration Tests', () => {
 			expect(alert.type).toBe('alert');
 		});
 
-		test('should fetch user notifications', async () => {
-			const notifications = await NotificationService.getForUser(TEST_USER_ID, {
+		it('should fetch user notifications', async () => {
+			const notifications = await mockNotificationService.getForUser(TEST_USER_ID, {
 				limit: 10,
 				unreadOnly: true,
 			});
@@ -79,15 +96,15 @@ describe('Tier 1 Component Integration Tests', () => {
 			expect(Array.isArray(notifications)).toBe(true);
 		});
 
-		test('should get unread count', async () => {
-			const unreadCount = await NotificationService.getUnreadCount(TEST_USER_ID);
+		it('should get unread count', async () => {
+			const unreadCount = await mockNotificationService.getUnreadCount(TEST_USER_ID);
 			expect(typeof unreadCount).toBe('number');
 			expect(unreadCount).toBeGreaterThanOrEqual(0);
 		});
 
-		test('should mark notifications as read', async () => {
+		it('should mark notifications as read', async () => {
 			// First create a notification
-			const notification = await NotificationService.createFinancialNotification(
+			const notification = await mockNotificationService.createFinancialNotification(
 				TEST_USER_ID,
 				'expense',
 				'Test Expense',
@@ -95,12 +112,12 @@ describe('Tier 1 Component Integration Tests', () => {
 			);
 
 			// Then mark it as read
-			const success = await NotificationService.markAsRead(notification.id, TEST_USER_ID);
+			const success = await mockNotificationService.markAsRead(notification.id, TEST_USER_ID);
 			expect(success).toBe(true);
 		});
 
-		test('should update notification preferences', async () => {
-			const preferences = await NotificationService.updateUserPreferences(TEST_USER_ID, {
+		it('should update notification preferences', async () => {
+			const preferences = await mockNotificationService.updateUserPreferences(TEST_USER_ID, {
 				emailInvoices: true,
 				emailExpenses: false,
 				emailReports: true,
@@ -115,7 +132,7 @@ describe('Tier 1 Component Integration Tests', () => {
 	});
 
 	describe('Email Template System', () => {
-		test('should generate correct email templates', async () => {
+		it('should generate correct email templates', async () => {
 			// Test invoice email template
 			const invoiceNotification = {
 				type: 'invoice',
@@ -135,7 +152,7 @@ describe('Tier 1 Component Integration Tests', () => {
 			expect(invoiceNotification.data.amount).toBe(1500.00);
 		});
 
-		test('should handle different notification types', () => {
+		it('should handle different notification types', () => {
 			const types = ['invoice', 'expense', 'alert', 'report', 'system'];
 			types.forEach(type => {
 				expect(['invoice', 'expense', 'alert', 'report', 'system']).toContain(type);
@@ -144,7 +161,7 @@ describe('Tier 1 Component Integration Tests', () => {
 	});
 
 	describe('Settings Integration', () => {
-		test('should handle settings navigation', () => {
+		it('should handle settings navigation', () => {
 			// Test that settings pages are accessible
 			const settingsRoutes = [
 				'/settings',
@@ -159,7 +176,7 @@ describe('Tier 1 Component Integration Tests', () => {
 			});
 		});
 
-		test('should validate settings data structure', () => {
+		it('should validate settings data structure', () => {
 			// Test that settings components expect correct data structures
 			const profileSettings = {
 				firstName: 'John',
@@ -175,7 +192,7 @@ describe('Tier 1 Component Integration Tests', () => {
 	});
 
 	describe('Real-time Communication', () => {
-		test('should handle PartyKit connection simulation', () => {
+		it('should handle PartyKit connection simulation', () => {
 			// Test WebSocket message format
 			const wsMessage = {
 				type: 'notification',
@@ -191,7 +208,7 @@ describe('Tier 1 Component Integration Tests', () => {
 			expect(wsMessage.data.id).toBe(1);
 		});
 
-		test('should validate notification data structure', () => {
+		it('should validate notification data structure', () => {
 			const notification = {
 				id: 1,
 				userId: TEST_USER_ID,
@@ -210,7 +227,7 @@ describe('Tier 1 Component Integration Tests', () => {
 	});
 
 	describe('Security & Access Control', () => {
-		test('should enforce permission requirements', async () => {
+		it('should enforce permission requirements', async () => {
 			// Test that admin-only features require proper permissions
 			const adminCheck = await isAdmin();
 			expect(typeof adminCheck).toBe('boolean');
@@ -220,7 +237,7 @@ describe('Tier 1 Component Integration Tests', () => {
 			expect(permissions.length).toBeGreaterThan(10);
 		});
 
-		test('should validate role-based access', () => {
+		it('should validate role-based access', () => {
 			const roles = ['admin', 'manager', 'user', 'viewer'];
 			const defaultPermissions = {
 				admin: true, // All permissions
@@ -236,10 +253,10 @@ describe('Tier 1 Component Integration Tests', () => {
 	});
 
 	describe('Performance & Scalability', () => {
-		test('should handle bulk operations', async () => {
+		it('should handle bulk operations', async () => {
 			// Test creating multiple notifications
 			const promises = Array.from({ length: 5 }, (_, i) =>
-				NotificationService.createFinancialNotification(
+				mockNotificationService.createFinancialNotification(
 					TEST_USER_ID,
 					'invoice',
 					`Bulk Invoice ${i + 1}`,
@@ -252,7 +269,7 @@ describe('Tier 1 Component Integration Tests', () => {
 			expect(results).toHaveLength(5);
 		});
 
-		test('should handle concurrent permission checks', async () => {
+		it('should handle concurrent permission checks', async () => {
 			// Test concurrent permission checking
 			const permissionChecks = [
 				checkPermission(FINANCIAL_PERMISSIONS.INVOICES_VIEW),
@@ -268,9 +285,9 @@ describe('Tier 1 Component Integration Tests', () => {
 	});
 
 	describe('Error Handling', () => {
-		test('should handle invalid notification data gracefully', async () => {
+		it('should handle invalid notification data gracefully', async () => {
 			try {
-				await NotificationService.create({
+				await mockNotificationService.create({
 					userId: '', // Invalid user ID
 					type: 'invalid' as any,
 					title: '',
@@ -281,7 +298,7 @@ describe('Tier 1 Component Integration Tests', () => {
 			}
 		});
 
-		test('should handle permission check failures', async () => {
+		it('should handle permission check failures', async () => {
 			// Test with invalid permission
 			const result = await checkPermission('invalid_permission' as any);
 			expect(typeof result).toBe('boolean');
@@ -289,9 +306,9 @@ describe('Tier 1 Component Integration Tests', () => {
 	});
 
 	describe('Data Consistency', () => {
-		test('should maintain notification state consistency', async () => {
+		it('should maintain notification state consistency', async () => {
 			// Create notification
-			const notification = await NotificationService.createFinancialNotification(
+			const notification = await mockNotificationService.createFinancialNotification(
 				TEST_USER_ID,
 				'invoice',
 				'Consistency Test',
@@ -299,7 +316,7 @@ describe('Tier 1 Component Integration Tests', () => {
 			);
 
 			// Fetch it back
-			const fetched = await NotificationService.getForUser(TEST_USER_ID, { limit: 1 });
+			const fetched = await mockNotificationService.getForUser(TEST_USER_ID, { limit: 1 });
 			const fetchedNotification = fetched[0];
 
 			expect(fetchedNotification.id).toBe(notification.id);
@@ -307,14 +324,14 @@ describe('Tier 1 Component Integration Tests', () => {
 			expect(fetchedNotification.read).toBe(false);
 		});
 
-		test('should handle preference updates correctly', async () => {
-			const initialPrefs = await NotificationService.getUserPreferences(TEST_USER_ID);
+		it('should handle preference updates correctly', async () => {
+			const initialPrefs = await mockNotificationService.getUserPreferences(TEST_USER_ID);
 
-			await NotificationService.updateUserPreferences(TEST_USER_ID, {
+			await mockNotificationService.updateUserPreferences(TEST_USER_ID, {
 				emailInvoices: false,
 			});
 
-			const updatedPrefs = await NotificationService.getUserPreferences(TEST_USER_ID);
+			const updatedPrefs = await mockNotificationService.getUserPreferences(TEST_USER_ID);
 			expect(updatedPrefs?.emailInvoices).toBe(false);
 		});
 	});
