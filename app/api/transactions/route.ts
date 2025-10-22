@@ -5,11 +5,11 @@ import { TransactionService } from '@/lib/services/transaction-service';
 import { z } from 'zod';
 
 const createTransactionSchema = z.object({
-	type: z.enum(['credit', 'debit']),
+	type: z.enum(['income', 'expense', 'transfer', 'payment']),
 	amount: z.number().positive('Amount must be positive'),
 	currency: z.string().default('USD'),
-	description: z.string().min(1, 'Description is required'),
-	category: z.string().min(1, 'Category is required'),
+	description: z.string().optional(),
+	category: z.string().optional(),
 	paymentMethod: z.string().optional(),
 	referenceId: z.string().optional(),
 	referenceType: z.string().optional(),
@@ -27,11 +27,13 @@ export async function GET(request: NextRequest) {
 		}
 
 		const { searchParams } = new URL(request.url);
-		const type = searchParams.get('type') as 'credit' | 'debit' | null;
+		const type = searchParams.get('type') as 'income' | 'expense' | 'transfer' | 'payment' | null;
 		const status = searchParams.get('status') || undefined;
 		const category = searchParams.get('category') || undefined;
-		const startDate = searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : undefined;
-		const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined;
+		const startDateParam = searchParams.get('startDate');
+		const endDateParam = searchParams.get('endDate');
+		const startDate = startDateParam ? new Date(startDateParam) : undefined;
+		const endDate = endDateParam ? new Date(endDateParam) : undefined;
 		const search = searchParams.get('search') || undefined;
 		const limit = parseInt(searchParams.get('limit') || '50');
 		const offset = parseInt(searchParams.get('offset') || '0');

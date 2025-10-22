@@ -61,7 +61,7 @@ import { toast } from 'sonner';
 interface Expense {
 	id: number;
 	description: string;
-	amount: string;
+	amount: number;
 	category: string;
 	vendor?: string;
 	date: string;

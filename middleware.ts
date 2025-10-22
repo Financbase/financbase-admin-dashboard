@@ -6,20 +6,23 @@ const isProtectedRoute = (request: NextRequest) => {
 
 	// Protect dashboard routes
 	if (pathname.startsWith("/dashboard")) {
-		// Allow dashboard access for testing if test credentials are provided
-		if (process.env.TEST_USER_EMAIL && process.env.NODE_ENV === 'development') {
-			return false;
-		}
 		return true;
 	}
 
-	// Protect API routes except test routes and health check
+	// Protect API routes except public endpoints
 	if (pathname.startsWith("/api/")) {
 		// Allow public access to health check for monitoring
 		if (pathname === "/api/health") {
 			return false;
 		}
-		return !pathname.startsWith("/api/test-");
+		
+		// Allow test routes for development/testing
+		if (pathname.startsWith("/api/test-")) {
+			return false;
+		}
+		
+		// Protect all other API routes (including transactions)
+		return true;
 	}
 
 	return false;
@@ -27,7 +30,17 @@ const isProtectedRoute = (request: NextRequest) => {
 
 export default clerkMiddleware(async (auth, request) => {
 	if (isProtectedRoute(request)) {
-		await auth.protect();
+		const { userId } = await auth();
+		
+		// For API routes, return explicit 401 JSON instead of redirect
+		if (request.nextUrl.pathname.startsWith("/api/")) {
+			if (!userId) {
+				return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+			}
+		} else {
+			// For non-API routes, use Clerk's default protection
+			await auth.protect();
+		}
 	}
 
 	// Simple CORS headers for performance
@@ -39,15 +52,15 @@ export default clerkMiddleware(async (auth, request) => {
 	response.headers.set("X-XSS-Protection", "1; mode=block");
 	response.headers.set("Referrer-Policy", "origin-when-cross-origin");
 
-	// Content Security Policy - restrictive but functional
+	// Content Security Policy - comprehensive for all services
 	const cspValue = [
 		"default-src 'self'",
-		"script-src 'self' 'unsafe-inline' 'unsafe-eval' *.clerk.accounts.dev *.clerk.dev",
-		"style-src 'self' 'unsafe-inline' fonts.googleapis.com",
-		"img-src 'self' data: https: blob:",
-		"font-src 'self' fonts.gstatic.com",
-		"connect-src 'self' *.clerk.accounts.dev *.clerk.dev wss: https:",
-		"frame-src 'self' *.clerk.accounts.dev *.clerk.dev",
+		"script-src 'self' 'unsafe-inline' 'unsafe-eval' *.clerk.accounts.dev *.clerk.dev *.sentry.io *.posthog.com js.stripe.com *.uploadthing.com *.algolia.net *.algolianet.com",
+		"style-src 'self' 'unsafe-inline' fonts.googleapis.com *.uploadthing.com",
+		"img-src 'self' data: https: blob: *.clerk.accounts.dev *.clerk.dev *.uploadthing.com *.algolia.net *.algolianet.com *.stripe.com *.posthog.com",
+		"font-src 'self' fonts.gstatic.com fonts.googleapis.com",
+		"connect-src 'self' *.clerk.accounts.dev *.clerk.dev *.sentry.io *.posthog.com api.openai.com api.resend.com *.algolia.net *.algolianet.com *.uploadthing.com api.stripe.com *.anthropic.com *.google.com *.partykit.dev wss: https:",
+		"frame-src 'self' *.clerk.accounts.dev *.clerk.dev js.stripe.com *.uploadthing.com",
 		"object-src 'none'",
 		"base-uri 'self'",
 		"form-action 'self'",

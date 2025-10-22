@@ -1,17 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
 	ArrowRight,
-	BookOpen,
+	Search,
+	User,
 	Eye,
 	Heart,
-	Search,
-	TrendingUp,
-	User,
 } from "lucide-react";
-import Link from "next/link";
 
 // Simple blog data
 const blogPosts = [
@@ -63,9 +60,9 @@ const categories = ["All", "AI & Technology", "Engineering", "Analytics", "Busin
 
 export default function BlogPage() {
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+		<div className="min-h-screen bg-background">
 			{/* Hero Section */}
-			<section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+			<section className="py-20 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
 				<div className="max-w-6xl mx-auto px-6">
 					<div className="text-center text-white">
 						<h1 className="text-4xl md:text-6xl font-bold mb-6">
@@ -90,14 +87,14 @@ export default function BlogPage() {
 			</section>
 
 			{/* Categories */}
-			<section className="py-8 bg-white dark:bg-gray-800 border-b">
+			<section className="py-8 bg-card border-b">
 				<div className="max-w-6xl mx-auto px-6">
 								<div className="flex flex-wrap gap-2">
 						{categories.map((category) => (
 							<Badge
 											key={category}
 								variant={category === "All" ? "default" : "outline"}
-								className="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20"
+								className="cursor-pointer hover:bg-primary/10"
 											>
 												{category}
 							</Badge>
@@ -170,7 +167,7 @@ export default function BlogPage() {
 			</section>
 
 							{/* Newsletter Signup */}
-			<section className="py-16 bg-blue-50 dark:bg-blue-900/20">
+			<section className="py-16 bg-primary/5">
 				<div className="max-w-4xl mx-auto px-6 text-center">
 					<h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
 											Stay Updated

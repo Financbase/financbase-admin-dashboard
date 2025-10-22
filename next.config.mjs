@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	eslint: {
-		ignoreDuringBuilds: true,
+		ignoreDuringBuilds: false,
 	},
 	typescript: {
-		ignoreBuildErrors: true,
+		ignoreBuildErrors: false,
 	},
 	experimental: {
 		serverActions: {
@@ -27,7 +27,7 @@ const nextConfig = {
 	// Bundle analyzer (only in development)
 	...(process.env.ANALYZE === 'true' && {
 		eslint: {
-			ignoreDuringBuilds: true,
+			ignoreDuringBuilds: false,
 		},
 	}),
 

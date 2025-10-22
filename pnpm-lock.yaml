@@ -279,6 +279,9 @@ importers:
       '@types/node':
         specifier: ^24.9.0
         version: 24.9.1
+      '@types/pg':
+        specifier: ^8.15.5
+        version: 8.15.5
       '@types/react':
         specifier: ^19.2.2
         version: 19.2.2

@@ -10,11 +10,11 @@ import { useQuery } from "@tanstack/react-query";
 interface Transaction {
 	id: string;
 	transactionNumber: string;
-	type: 'credit' | 'debit';
+	type: 'income' | 'expense' | 'transfer' | 'payment';
 	amount: string;
 	currency: string;
-	description: string;
-	category: string;
+	description?: string;
+	category?: string;
 	status: 'pending' | 'completed' | 'failed' | 'cancelled';
 	paymentMethod?: string;
 	referenceId?: string;
@@ -23,7 +23,7 @@ interface Transaction {
 	transactionDate: string;
 	processedAt?: string;
 	notes?: string;
-	metadata?: string;
+	metadata?: Record<string, unknown>;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -131,7 +131,7 @@ export default function TransactionsPage() {
 					<div className="mt-3">
 						<div className="text-2xl font-bold text-green-600">${stats.totalInflow.toLocaleString()}</div>
 						<p className="text-xs text-muted-foreground mt-1">
-							From {transactions.filter(t => t.type === 'credit').length} transactions
+							From {transactions.filter(t => t.type === 'income').length} transactions
 						</p>
 					</div>
 				</div>
@@ -143,7 +143,7 @@ export default function TransactionsPage() {
 					<div className="mt-3">
 						<div className="text-2xl font-bold text-red-600">${stats.totalOutflow.toLocaleString()}</div>
 						<p className="text-xs text-muted-foreground mt-1">
-							From {transactions.filter(t => t.type === 'debit').length} transactions
+							From {transactions.filter(t => t.type === 'expense').length} transactions
 						</p>
 					</div>
 				</div>
@@ -224,31 +224,31 @@ export default function TransactionsPage() {
 								</tr>
 							) : (
 								transactions.map((txn) => (
-									<tr key={txn.id} className="border-b hover:bg-muted/50 transition-colors">
+								<tr key={txn.id} className="border-b hover:bg-muted/50 transition-colors">
 										<td className="p-4 font-mono text-sm">{txn.transactionNumber}</td>
 										<td className="p-4 text-sm">{new Date(txn.transactionDate).toLocaleDateString()}</td>
-										<td className="p-4 text-sm">{txn.description}</td>
-										<td className="p-4 text-sm">{txn.category}</td>
+									<td className="p-4 text-sm">{txn.description}</td>
+									<td className="p-4 text-sm">{txn.category}</td>
 										<td className="p-4 text-sm">{txn.paymentMethod || 'N/A'}</td>
-										<td className={`p-4 text-sm text-right font-semibold ${txn.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
-											{txn.type === 'credit' ? '+' : '-'}${Number(txn.amount).toFixed(2)}
+										<td className={`p-4 text-sm text-right font-semibold ${txn.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+											{txn.type === 'income' ? '+' : '-'}${Number(txn.amount).toFixed(2)}
 										</td>
-										<td className="p-4">
-											<Badge 
-												variant={
-													txn.status === 'completed' ? 'default' : 
-													txn.status === 'pending' ? 'secondary' : 
-													'destructive'
-												}
-												className="text-xs"
-											>
-												{txn.status}
-											</Badge>
-										</td>
-										<td className="p-4">
-											<Button variant="ghost" size="sm">View</Button>
-										</td>
-									</tr>
+									<td className="p-4">
+										<Badge 
+											variant={
+												txn.status === 'completed' ? 'default' : 
+												txn.status === 'pending' ? 'secondary' : 
+												'destructive'
+											}
+											className="text-xs"
+										>
+											{txn.status}
+										</Badge>
+									</td>
+									<td className="p-4">
+										<Button variant="ghost" size="sm">View</Button>
+									</td>
+								</tr>
 								))
 							)}
 						</tbody>

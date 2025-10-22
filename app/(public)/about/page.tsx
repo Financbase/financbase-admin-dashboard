@@ -84,7 +84,7 @@ export default function AboutPage() {
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Hero Section */}
-			<section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 relative overflow-hidden">
+			<section className="py-20 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden">
 				<div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
 				<div className="max-w-6xl mx-auto px-6 relative">
 					<div className="text-center text-white">
@@ -105,7 +105,6 @@ export default function AboutPage() {
 							</Button>
 							<Button
 								asChild
-								variant="outline"
 								size="lg"
 								className="border-white text-white hover:bg-white hover:text-blue-600"
 							>
@@ -136,7 +135,7 @@ export default function AboutPage() {
 								className="p-8 text-center hover:shadow-lg transition-all duration-300 bg-card border"
 							>
 								<CardContent className="p-0">
-									<div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white">
+									<div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
 										{index === 0 && <Zap className="w-8 h-8" />}
 										{index === 1 && <Users className="w-8 h-8" />}
 										{index === 2 && <Target className="w-8 h-8" />}
@@ -186,7 +185,7 @@ export default function AboutPage() {
 										"{testimonial.content}"
 									</p>
 									<div className="flex items-center gap-3">
-										<div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+										<div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
 											{testimonial.avatar}
 										</div>
 										<div>
@@ -223,7 +222,7 @@ export default function AboutPage() {
 							<div key={stat.label} className="text-center group">
 								<Card className="h-full p-6 hover:shadow-lg transition-all duration-300 bg-card border">
 									<CardContent className="p-0">
-										<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors duration-300">
+										<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors duration-300">
 											{stat.icon}
 										</div>
 										<div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -232,7 +231,7 @@ export default function AboutPage() {
 										<p className="text-gray-600 dark:text-gray-400 text-sm">
 											{stat.label}
 										</p>
-										<div className="w-10 h-0.5 bg-blue-600 mx-auto mt-3 group-hover:w-16 transition-all duration-300" />
+										<div className="w-10 h-0.5 bg-primary mx-auto mt-3 group-hover:w-16 transition-all duration-300" />
 									</CardContent>
 								</Card>
 							</div>
@@ -242,7 +241,7 @@ export default function AboutPage() {
 			</section>
 
 			{/* CTA Section */}
-			<section className="py-20 bg-blue-600">
+			<section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-700">
 				<div className="max-w-4xl mx-auto px-6 text-center">
 					<h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
 						Join the Financbase Community

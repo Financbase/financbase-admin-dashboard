@@ -103,7 +103,7 @@ export default function PricingPage() {
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Hero Section */}
-			<section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 relative overflow-hidden">
+			<section className="py-20 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden">
 				<div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
 				<div className="max-w-6xl mx-auto px-6 relative">
 					<div className="text-center text-white">
@@ -133,7 +133,7 @@ export default function PricingPage() {
 							>
 								{plan.popular && (
 									<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-										<Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1">
+										<Badge className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-1">
 											<Star className="h-4 w-4 mr-1" />
 											Most Popular
 										</Badge>
@@ -162,7 +162,7 @@ export default function PricingPage() {
 									</ul>
 
 									<Button
-										className={`w-full ${plan.popular ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700' : ''}`}
+										className={`w-full ${plan.popular ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800' : ''}`}
 										variant={plan.popular ? 'default' : 'outline'}
 										size="lg"
 									>
@@ -280,7 +280,7 @@ export default function PricingPage() {
 						{addOns.map((addon) => (
 							<Card key={addon.name} className="text-center hover:shadow-lg transition-all duration-300">
 								<CardHeader>
-									<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white">
+									<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
 										<addon.icon className="w-8 h-8" />
 									</div>
 									<CardTitle className="text-lg">{addon.name}</CardTitle>
@@ -347,7 +347,7 @@ export default function PricingPage() {
 			</section>
 
 			{/* CTA Section */}
-			<section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+			<section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-700">
 				<div className="max-w-4xl mx-auto px-6 text-center">
 					<h2 className="text-3xl font-bold text-white mb-4">
 						Ready to Get Started?

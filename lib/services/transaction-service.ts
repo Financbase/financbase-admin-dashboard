@@ -4,7 +4,7 @@
  */
 
 import { db } from '@/lib/db';
-import { transactions, type Transaction, type NewTransaction } from '@/lib/db/schemas/transactions.schema';
+import { transactions, type Transaction } from '@/lib/db/schemas/transactions.schema';
 import { eq, and, desc, gte, lte, or, sql, ilike } from 'drizzle-orm';
 
 interface CreateTransactionInput {
@@ -136,11 +136,11 @@ export async function getTransactions(
 	}
 
 	if (options?.status) {
-		conditions.push(eq(transactions.status, options.status as any));
+		conditions.push(eq(transactions.status, options.status));
 	}
 
 	if (options?.category) {
-		conditions.push(eq(transactions.category, options.category as any));
+		conditions.push(eq(transactions.category, options.category));
 	}
 
 	if (options?.startDate) {
@@ -211,7 +211,7 @@ export async function updateTransactionStatus(
 ): Promise<Transaction> {
 	const [updated] = await db.update(transactions)
 		.set({
-			status: status as any,
+			status: status,
 			processedAt: status === 'completed' ? new Date() : null,
 			updatedAt: new Date(),
 		})
@@ -261,8 +261,8 @@ export async function getTransactionStats(userId: string): Promise<TransactionSt
 	const monthlyTrend = await db
 		.select({
 			month: sql<string>`to_char(${transactions.transactionDate}, 'YYYY-MM')`,
-			inflow: sql<number>`sum(case when ${transactions.type} = 'credit' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
-			outflow: sql<number>`sum(case when ${transactions.type} = 'debit' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
+			inflow: sql<number>`sum(case when ${transactions.type} = 'income' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
+			outflow: sql<number>`sum(case when ${transactions.type} = 'expense' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
 		})
 		.from(transactions)
 		.where(and(
@@ -318,7 +318,10 @@ export async function reconcileTransactions(userId: string): Promise<{
 		if (!duplicates.has(key)) {
 			duplicates.set(key, []);
 		}
-		duplicates.get(key)!.push(transaction);
+		const duplicateGroup = duplicates.get(key);
+		if (duplicateGroup) {
+			duplicateGroup.push(transaction);
+		}
 	});
 
 	const duplicateCount = Array.from(duplicates.values())

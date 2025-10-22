@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # Test PostgreSQL database
+  postgres-test:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=financbase_test
+      - POSTGRES_USER=financbase_test_user
+      - POSTGRES_PASSWORD=financbase_test_password
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5432"  # Use different port to avoid conflicts
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financbase_test_user -d financbase_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_test_data:
+
+networks:
+  default:
+    name: financbase_test_network

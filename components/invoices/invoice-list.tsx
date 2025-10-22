@@ -49,11 +49,11 @@ interface Invoice {
 	id: number;
 	invoiceNumber: string;
 	clientName: string;
-	total: string;
+	total: number;
 	status: string;
 	issueDate: string;
 	dueDate: string;
-	amountPaid: string;
+	amountPaid: number;
 }
 
 export function InvoiceList() {

@@ -5,21 +5,25 @@
 
 import { testDb } from './test-db';
 import * as schema from '../lib/db/schemas/index';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql as dsql } from 'drizzle-orm';
 
 // Test data factories
 export class TestDataFactory {
   static async createTestUser(overrides: Partial<typeof schema.users.$inferInsert> = {}) {
     const userData = {
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       email: 'test@example.com',
       name: 'Test User',
-      role: 'user' as const,
       isActive: true,
+      role: 'user' as const,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       ...overrides,
     };
 
-    await testDb.insert(schema.users).values(userData);
-    return userData;
+    // Use schema-aware Drizzle insert
+    const [user] = await testDb.insert(schema.users).values(userData).returning();
+    return user;
   }
 
   static async createTestClient(userId: string, overrides: Partial<typeof schema.clients.$inferInsert> = {}) {
@@ -68,8 +72,8 @@ export class TestDataFactory {
       id: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId,
       transactionNumber: `TXN-${Date.now()}`,
-      type: 'credit' as const,
-      amount: '10000.00',
+      type: 'income' as const, // Updated to use income instead of credit
+      amount: 10000.00, // Store as number, not string
       currency: 'USD',
       description: 'Test transaction',
       category: 'income' as const,
@@ -257,7 +261,7 @@ export class TestDataCleanup {
 
     for (const tableName of tablesToClean) {
       try {
-        await testDb.execute(sql.raw(`DELETE FROM "${tableName}" WHERE id LIKE '${prefix}%'`));
+        await testDb.execute(dsql.raw(`DELETE FROM "${tableName}" WHERE id LIKE '${prefix}%'`));
       } catch (error) {
         // Ignore constraint errors during cleanup
         console.warn(`Could not delete from ${tableName}:`, error);

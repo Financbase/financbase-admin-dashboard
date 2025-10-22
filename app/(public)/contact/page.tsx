@@ -1,15 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import { useId } from "react";
 
 export default function ContactPage() {
+	const firstNameId = useId();
+	const lastNameId = useId();
+	const emailId = useId();
+	const companyId = useId();
+	const subjectId = useId();
+	const messageId = useId();
+
 	return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
 			{/* Hero Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-20 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             Get in Touch
@@ -32,34 +40,34 @@ export default function ContactPage() {
                   <form className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" placeholder="John" />
+                        <Label htmlFor={firstNameId}>First Name</Label>
+                        <Input id={firstNameId} placeholder="John" />
                       </div>
                       <div>
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" placeholder="Doe" />
+                        <Label htmlFor={lastNameId}>Last Name</Label>
+                        <Input id={lastNameId} placeholder="Doe" />
                       </div>
                     </div>
                     
                     <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" placeholder="john@example.com" />
+                      <Label htmlFor={emailId}>Email</Label>
+                      <Input id={emailId} type="email" placeholder="john@example.com" />
 										</div>
 
                     <div>
-                      <Label htmlFor="company">Company</Label>
-                      <Input id="company" placeholder="Your Company" />
+                      <Label htmlFor={companyId}>Company</Label>
+                      <Input id={companyId} placeholder="Your Company" />
 										</div>
                     
                     <div>
-                      <Label htmlFor="subject">Subject</Label>
-                      <Input id="subject" placeholder="How can we help?" />
+                      <Label htmlFor={subjectId}>Subject</Label>
+                      <Input id={subjectId} placeholder="How can we help?" />
 									</div>
 
                     <div>
-                      <Label htmlFor="message">Message</Label>
+                      <Label htmlFor={messageId}>Message</Label>
                       <Textarea 
-                        id="message" 
+                        id={messageId} 
                         placeholder="Tell us more about your inquiry..."
                         className="min-h-[120px]"
 										/>
@@ -150,7 +158,7 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-white dark:bg-gray-800">
+      <section className="py-20 bg-muted/30">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-center mb-12">
             Frequently Asked Questions

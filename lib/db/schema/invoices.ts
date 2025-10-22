@@ -69,7 +69,7 @@ export const invoices = pgTable('financbase_invoices', {
  * Clients Table
  * Stores client/customer information
  */
-export const clients = pgTable('clients', {
+export const clients = pgTable('financbase_clients', {
 	id: serial('id').primaryKey(),
 	userId: text('user_id').notNull(),
 	
@@ -95,13 +95,13 @@ export const clients = pgTable('clients', {
 	status: text('status').default('active').notNull(), // active, inactive, archived
 	
 	// Statistics (denormalized for performance)
-	totalInvoiced: decimal('total_invoiced', { precision: 12, scale: 2 }).default('0'),
-	totalPaid: decimal('total_paid', { precision: 12, scale: 2 }).default('0'),
-	outstandingBalance: decimal('outstanding_balance', { precision: 12, scale: 2 }).default('0'),
+	totalInvoiced: decimal('total_invoiced', { precision: 12, scale: 2 }),
+	totalPaid: decimal('total_paid', { precision: 12, scale: 2 }),
+	outstandingBalance: decimal('outstanding_balance', { precision: 12, scale: 2 }),
 	
 	// Metadata
 	notes: text('notes'),
-	tags: jsonb('tags').$type<string[]>(),
+	tags: jsonb('tags'),
 	
 	// Timestamps
 	createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -112,7 +112,7 @@ export const clients = pgTable('clients', {
  * Invoice Payments Table
  * Tracks individual payments against invoices
  */
-export const invoicePayments = pgTable('invoice_payments', {
+export const invoicePayments = pgTable('financbase_invoice_payments', {
 	id: serial('id').primaryKey(),
 	invoiceId: integer('invoice_id').references(() => invoices.id).notNull(),
 	userId: text('user_id').notNull(),
@@ -137,7 +137,7 @@ export const invoicePayments = pgTable('invoice_payments', {
  * Invoice Templates Table
  * Stores reusable invoice templates
  */
-export const invoiceTemplates = pgTable('invoice_templates', {
+export const invoiceTemplates = pgTable('financbase_invoice_templates', {
 	id: serial('id').primaryKey(),
 	userId: text('user_id').notNull(),
 	
@@ -148,11 +148,7 @@ export const invoiceTemplates = pgTable('invoice_templates', {
 	// Default values
 	terms: text('terms'),
 	footer: text('footer'),
-	defaultItems: jsonb('default_items').$type<Array<{
-		description: string;
-		quantity: number;
-		unitPrice: number;
-	}>>(),
+	defaultItems: jsonb('default_items'),
 	
 	// Settings
 	taxRate: decimal('tax_rate', { precision: 5, scale: 2 }).default('0'),

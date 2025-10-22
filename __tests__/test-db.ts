@@ -1,17 +1,39 @@
 /**
  * Test Database Configuration
  * Real database testing setup for Vitest
+ * Supports both local PostgreSQL and Neon serverless
  */
 
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { neon } from '@neondatabase/serverless';
+import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import { sql as dsql } from 'drizzle-orm';
 import * as schema from '../lib/db/schemas/index';
 
-// Test database connection - uses the same Neon database but with test isolation
-const testConnectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_MD6PAjcl0TWR@ep-curly-wave-adu3fywi-pooler.c-2.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require';
+// Determine which database to use for testing
+const useLocalPostgres = process.env.TEST_DB_TYPE === 'local-postgres' || process.env.TEST_DB_TYPE === 'local';
 
-const sql = neon(testConnectionString);
-export const testDb = drizzle(sql, { schema });
+// Test database connection
+let sql: ReturnType<typeof neon> | Pool;
+let testDb: ReturnType<typeof drizzle> | ReturnType<typeof drizzlePg>;
+
+if (useLocalPostgres) {
+  // Local PostgreSQL connection
+  const testConnectionString = process.env.TEST_DATABASE_URL || 'postgresql://financbase_test_user:financbase_test_password@localhost:5433/financbase_test';
+  const pool = new Pool({
+    connectionString: testConnectionString,
+  });
+  sql = pool;
+  testDb = drizzlePg(pool, { schema });
+} else {
+  // Neon serverless connection
+  const testConnectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_MD6PAjcl0TWR@ep-curly-wave-adu3fywi-pooler.c-2.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require';
+  sql = neon(testConnectionString);
+  testDb = drizzle(sql, { schema });
+}
+
+export { testDb };
 
 // Test database utilities
 export class TestDatabase {
@@ -66,8 +88,13 @@ export class TestDatabase {
 
     for (const tableName of tablesToClean) {
       try {
-        // Use raw SQL to safely delete test data
-        await testDb.execute(sql.raw(`DELETE FROM "${tableName}" WHERE id LIKE 'test-%' OR id LIKE 'user-%' OR id LIKE 'client-%' OR id LIKE 'lead-%' OR id LIKE 'project-%' OR id LIKE 'campaign-%'`));
+        if (useLocalPostgres) {
+          // For local PostgreSQL, use the Pool directly
+          await (sql as Pool).query(`DELETE FROM "${tableName}" WHERE id LIKE 'test-%' OR id LIKE 'user-%' OR id LIKE 'client-%' OR id LIKE 'lead-%' OR id LIKE 'project-%' OR id LIKE 'campaign-%'`);
+        } else {
+          // For Neon, use Drizzle's sql helper
+          await testDb.execute(dsql.raw(`DELETE FROM "${tableName}" WHERE id LIKE 'test-%' OR id LIKE 'user-%' OR id LIKE 'client-%' OR id LIKE 'lead-%' OR id LIKE 'project-%' OR id LIKE 'campaign-%'`));
+        }
       } catch (error) {
         // Ignore errors for tables that don't exist or other issues
         console.warn(`Could not clean table ${tableName}:`, error);

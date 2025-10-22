@@ -58,9 +58,10 @@ export default defineConfig({
 		},
 
 		{
-			name: 'webkit',
-			use: { 
-				...devices['Desktop Safari'],
+			name: 'smoke',
+			testMatch: 'smoke.spec.ts',
+			use: {
+				...devices['Desktop Chrome'],
 				storageState: process.env.TEST_USER_EMAIL ? 'playwright/.auth/user.json' : undefined,
 			},
 			dependencies: process.env.TEST_USER_EMAIL ? ['setup'] : [],

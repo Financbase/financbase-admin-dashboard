@@ -6,16 +6,20 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Copy package files
-COPY package.json package-lock.json* ./
-RUN \
-  if [ -f package-lock.json ]; then npm ci --only=production; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prod
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
+
+# Install pnpm for builder
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -25,8 +29,8 @@ ENV CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
 ENV DATABASE_URL=${DATABASE_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 
-# Build the application
-RUN npm run build
+# Install all dependencies (including dev dependencies) and build
+RUN pnpm install --frozen-lockfile && pnpm build
 
 # Production image, copy all the files and run next
 FROM base AS runner

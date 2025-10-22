@@ -122,4 +122,4 @@ export default class FinancbaseServer implements Party.Server {
   async onError(conn: Party.Connection, error: Error) {
     console.error(`Error in room ${this.party.id}:`, error);
   }
-} satisfies PartyKitServer;
+} satisfies Party.Server;
