@@ -20,6 +20,16 @@ export * from "./projects.schema";
 export * from "./time-entries.schema";
 export * from "./tasks.schema";
 
+// Adboard
+export * from "./campaigns.schema";
+export * from "./ad-groups.schema";
+export * from "./ads.schema";
+
+// Lead Management
+export * from "./leads.schema";
+export * from "./lead-activities.schema";
+export * from "./lead-tasks.schema";
+
 // Analytics and reporting
 export * from "./analytics.schema";
 

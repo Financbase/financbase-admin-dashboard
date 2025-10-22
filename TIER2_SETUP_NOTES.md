@@ -9,6 +9,7 @@ pnpm add ai
 ```
 
 This package provides:
+
 - `useChat` hook for managing chat state
 - `OpenAIStream` for streaming responses
 - `StreamingTextResponse` for Edge runtime support
@@ -28,10 +29,13 @@ OPENAI_MODEL=gpt-4-turbo-preview
 ## Usage
 
 ### 1. Full Page Interface
+
 Navigate to `/gpt` for the dedicated Financbase GPT page.
 
 ### 2. Widget (Floating Chat)
+
 Add to your layout:
+
 ```typescript
 import { FinancbaseGPTWidget } from '@/components/financbase-gpt';
 
@@ -46,7 +50,9 @@ export default function Layout() {
 ```
 
 ### 3. Embedded Chat
+
 Use anywhere in your app:
+
 ```typescript
 import { FinancbaseGPTChat } from '@/components/financbase-gpt';
 
@@ -59,9 +65,9 @@ import { FinancbaseGPTChat } from '@/components/financbase-gpt';
 ## Next Steps
 
 After installing dependencies:
+
 1. Add financial data queries to `/app/api/ai/financbase-gpt/route.ts`
 2. Update `getFinancialContext()` with your actual database tables
 3. Test with sample queries
 4. Customize quick actions in the chat interface
 5. Add widget to your dashboard layout
-

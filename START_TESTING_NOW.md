@@ -1,4 +1,4 @@
-# 🚀 START TESTING NOW!
+# 🚀 START TESTING NOW
 
 **Your development server is running and ready!**
 
@@ -7,42 +7,51 @@
 ## 🎯 **Quick Start Testing**
 
 ### **Step 1: Open Your Browser**
+
 ```
 Navigate to: http://localhost:3010
 ```
 
 ### **Step 2: Sign In**
+
 - Use your Clerk account
 - Or create a new account
 
 ### **Step 3: Test Each Feature**
 
 #### **Dashboard** (1 min)
-- Go to: http://localhost:3010/dashboard
+
+- Go to: <http://localhost:3010/dashboard>
 - Check: Navigation works, no errors
 
 #### **Financial Overview** (2 min)
-- Go to: http://localhost:3010/financial
+
+- Go to: <http://localhost:3010/financial>
 - Check: Charts render, tabs work
 
 #### **Invoices** (3 min)
-- Go to: http://localhost:3010/invoices
+
+- Go to: <http://localhost:3010/invoices>
 - Check: List loads, search works, "New Invoice" button
 
 #### **Expenses** (3 min)
-- Go to: http://localhost:3010/expenses
+
+- Go to: <http://localhost:3010/expenses>
 - Check: List loads, filters work, "New Expense" button
 
 #### **Reports** ⭐ **NEW** (3 min)
-- Go to: http://localhost:3010/reports
+
+- Go to: <http://localhost:3010/reports>
 - Check: List loads, "Templates" button works
 
 #### **Financbase GPT** (2 min)
-- Go to: http://localhost:3010/gpt
+
+- Go to: <http://localhost:3010/gpt>
 - Check: Chat loads, try sending a message
 
 #### **Settings** (1 min)
-- Go to: http://localhost:3010/settings
+
+- Go to: <http://localhost:3010/settings>
 - Check: All tabs load, profile shows
 
 ---
@@ -50,12 +59,14 @@ Navigate to: http://localhost:3010
 ## 🔍 **What to Look For**
 
 ### ✅ **Good Signs**
+
 - Pages load in < 2 seconds
 - No red errors in console
 - Navigation works smoothly
 - Data displays correctly (even if empty)
 
 ### ❌ **Red Flags**
+
 - Page doesn't load (white screen)
 - Console shows errors
 - Navigation broken
@@ -77,16 +88,19 @@ After testing, let me know:
 ## 🎯 **Expected Results**
 
 ### **Best Case Scenario**
+
 - ✅ All 7 features work perfectly
 - ✅ No errors
 - ✅ Ready for Tier 3 implementation
 
 ### **Realistic Scenario**
+
 - ✅ 95% works great
 - ⚠️ Minor issues found (styling, edge cases)
 - 🔧 Quick fixes needed
 
 ### **Worst Case Scenario**
+
 - ⚠️ Major issues found
 - ❌ Need significant fixes
 - 🔧 More development time needed
@@ -104,7 +118,7 @@ After testing, let me know:
 
 ## 🚀 **Ready to Begin!**
 
-**Your server is running on http://localhost:3010**
+**Your server is running on <http://localhost:3010>**
 
 **Start testing now and report back with your results!**
 

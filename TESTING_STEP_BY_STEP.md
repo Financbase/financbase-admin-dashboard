@@ -1,6 +1,6 @@
 # 🧪 Tier 2 Testing - Step by Step Guide
 
-**Server**: http://localhost:3010  
+**Server**: <http://localhost:3010>  
 **Status**: ✅ **READY TO TEST**
 
 ---
@@ -16,12 +16,14 @@
 ## 📋 **Pre-Testing Checklist**
 
 ### ✅ **Server Status**
+
 - [x] Development server running on port 3010
 - [x] Server responding with HTTP 200
 - [x] Health endpoint working
 - [x] All services configured (OpenAI, Resend, Algolia, Sentry)
 
 ### ✅ **Environment Setup**
+
 - [ ] Browser ready (Chrome/Firefox/Safari)
 - [ ] DevTools open (F12)
 - [ ] Console tab visible
@@ -33,7 +35,7 @@
 
 ### **Step 1: Open the Application** (1 min)
 
-1. **Navigate to**: http://localhost:3010
+1. **Navigate to**: <http://localhost:3010>
 2. **Expected**: Landing page or redirect to sign-in
 3. **Check**: No console errors (red messages)
 4. **Note**: If you see a 404, the server might not be running
@@ -47,9 +49,9 @@
 
 ### **Step 3: Dashboard Test** (2 min)
 
-1. **Navigate to**: http://localhost:3010/dashboard
+1. **Navigate to**: <http://localhost:3010/dashboard>
 2. **Expected**: Dashboard loads with navigation
-3. **Check**: 
+3. **Check**:
    - Navigation sidebar visible
    - No loading errors
    - Charts/metrics display (even if empty)
@@ -57,7 +59,7 @@
 
 ### **Step 4: Financial Overview** (3 min)
 
-1. **Navigate to**: http://localhost:3010/financial
+1. **Navigate to**: <http://localhost:3010/financial>
 2. **Expected**: Financial dashboard with tabs
 3. **Check**:
    - Overview tab loads
@@ -68,7 +70,7 @@
 
 ### **Step 5: Invoices Management** (3 min)
 
-1. **Navigate to**: http://localhost:3010/invoices
+1. **Navigate to**: <http://localhost:3010/invoices>
 2. **Expected**: Invoice list page loads
 3. **Check**:
    - Stats cards at top (even if showing 0)
@@ -79,7 +81,7 @@
 
 ### **Step 6: Expenses Management** (3 min)
 
-1. **Navigate to**: http://localhost:3010/expenses
+1. **Navigate to**: <http://localhost:3010/expenses>
 2. **Expected**: Expense list page loads
 3. **Check**:
    - Stats cards at top (even if showing 0)
@@ -90,32 +92,32 @@
 
 ### **Step 7: Reports System** ⭐ **NEW** (3 min)
 
-1. **Navigate to**: http://localhost:3010/reports
+1. **Navigate to**: <http://localhost:3010/reports>
 2. **Expected**: Reports page loads
 3. **Check**:
    - Report list loads (even if empty)
    - "Templates" button present
    - Filter options visible
-4. **Test**: 
+4. **Test**:
    - Click "Templates" button (should open template gallery)
    - Try to create a report from template
 
 ### **Step 8: Financbase GPT** (2 min)
 
-1. **Navigate to**: http://localhost:3010/gpt
+1. **Navigate to**: <http://localhost:3010/gpt>
 2. **Expected**: AI chat interface loads
 3. **Check**:
    - Chat interface visible
    - Input field present
    - Quick action buttons visible
-4. **Test**: 
+4. **Test**:
    - Type a message and send
    - Try quick action buttons
    - Check if AI responds (requires OpenAI API key)
 
 ### **Step 9: Settings** (2 min)
 
-1. **Navigate to**: http://localhost:3010/settings
+1. **Navigate to**: <http://localhost:3010/settings>
 2. **Expected**: Settings page loads
 3. **Check**:
    - All tabs visible (Profile, Security, Notifications, etc.)
@@ -128,6 +130,7 @@
 ## 🔍 **What to Look For**
 
 ### ✅ **Good Signs**
+
 - Pages load in < 2 seconds
 - No red errors in console
 - Navigation works smoothly
@@ -136,6 +139,7 @@
 - Charts render (even if empty)
 
 ### ❌ **Red Flags**
+
 - Page doesn't load (white screen)
 - Console shows red errors
 - Navigation broken
@@ -148,31 +152,40 @@
 ## 🚨 **Common Issues & Solutions**
 
 ### **Issue**: Page shows 404
+
 **Solution**: Check if server is running
+
 ```bash
 pnpm dev
 ```
 
 ### **Issue**: Authentication not working
+
 **Solution**: Check .env.local has Clerk keys
+
 ```
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 ```
 
 ### **Issue**: AI not responding
+
 **Solution**: Check .env.local has OpenAI key
+
 ```
 OPENAI_API_KEY=sk-...
 ```
 
 ### **Issue**: Database errors
+
 **Solution**: Check .env.local has database URL
+
 ```
 DATABASE_URL=postgresql://...
 ```
 
 ### **Issue**: Console warnings
+
 **Solution**: These are usually safe to ignore if not errors
 
 ---
@@ -180,6 +193,7 @@ DATABASE_URL=postgresql://...
 ## 📊 **Testing Results Template**
 
 ### **Dashboard Test**
+
 - **Status**: ⏳ **PENDING**
 - **Load Time**: ___ seconds
 - **Console Errors**: ___
@@ -187,6 +201,7 @@ DATABASE_URL=postgresql://...
 - **Notes**: ___
 
 ### **Financial Overview Test**
+
 - **Status**: ⏳ **PENDING**
 - **Load Time**: ___ seconds
 - **Console Errors**: ___
@@ -194,6 +209,7 @@ DATABASE_URL=postgresql://...
 - **Notes**: ___
 
 ### **Invoices Test**
+
 - **Status**: ⏳ **PENDING**
 - **Load Time**: ___ seconds
 - **Console Errors**: ___
@@ -201,6 +217,7 @@ DATABASE_URL=postgresql://...
 - **Notes**: ___
 
 ### **Expenses Test**
+
 - **Status**: ⏳ **PENDING**
 - **Load Time**: ___ seconds
 - **Console Errors**: ___
@@ -208,6 +225,7 @@ DATABASE_URL=postgresql://...
 - **Notes**: ___
 
 ### **Reports Test**
+
 - **Status**: ⏳ **PENDING**
 - **Load Time**: ___ seconds
 - **Console Errors**: ___
@@ -215,6 +233,7 @@ DATABASE_URL=postgresql://...
 - **Notes**: ___
 
 ### **Financbase GPT Test**
+
 - **Status**: ⏳ **PENDING**
 - **Load Time**: ___ seconds
 - **Console Errors**: ___
@@ -222,6 +241,7 @@ DATABASE_URL=postgresql://...
 - **Notes**: ___
 
 ### **Settings Test**
+
 - **Status**: ⏳ **PENDING**
 - **Load Time**: ___ seconds
 - **Console Errors**: ___
@@ -232,7 +252,8 @@ DATABASE_URL=postgresql://...
 
 ## 🎯 **Success Criteria**
 
-### **All Tests Pass If**:
+### **All Tests Pass If**
+
 - ✅ All 7 pages load successfully
 - ✅ No critical console errors
 - ✅ Navigation works between pages
@@ -240,12 +261,14 @@ DATABASE_URL=postgresql://...
 - ✅ Charts and components render
 - ✅ Authentication works properly
 
-### **Minor Issues Acceptable**:
+### **Minor Issues Acceptable**
+
 - ⚠️ Empty data (expected for new accounts)
 - ⚠️ Console warnings (not errors)
 - ⚠️ Slow initial load (first time)
 
-### **Critical Issues to Fix**:
+### **Critical Issues to Fix**
+
 - ❌ Pages not loading
 - ❌ Console errors
 - ❌ Broken navigation
@@ -256,20 +279,25 @@ DATABASE_URL=postgresql://...
 ## 📝 **Testing Notes**
 
 ### **Browser Used**: ___
+
 ### **Operating System**: ___
+
 ### **Test Duration**: ___
+
 ### **Overall Experience**: ___
 
 ---
 
 ## 🚀 **Next Steps**
 
-### **If All Tests Pass**:
+### **If All Tests Pass**
+
 1. ✅ Mark all features as tested
 2. ✅ Move to Tier 3 implementation
 3. ✅ Begin with Workflows & Automations
 
-### **If Issues Found**:
+### **If Issues Found**
+
 1. ❌ Document the issues
 2. 🔧 Fix critical issues first
 3. 🔄 Re-test after fixes

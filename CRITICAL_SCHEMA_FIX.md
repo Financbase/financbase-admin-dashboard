@@ -28,6 +28,7 @@ The Drizzle ORM schema in `lib/db/schema/invoices.ts` **DOES NOT MATCH** the act
 ## 🎯 **Impact Analysis**
 
 ### **What's Broken**
+
 - ❌ **Invoice Creation**: Forms submit but fail silently
 - ❌ **Database Operations**: All CRUD operations fail
 - ❌ **API Routes**: Return 404 errors
@@ -35,6 +36,7 @@ The Drizzle ORM schema in `lib/db/schema/invoices.ts` **DOES NOT MATCH** the act
 - ❌ **Data Persistence**: Nothing gets saved
 
 ### **Why This Happened**
+
 1. **Schema Evolution**: Database was modified but Drizzle schema wasn't updated
 2. **Migration Issues**: Database migrations didn't sync with code
 3. **Type Mismatches**: UUID vs Integer/Text conflicts
@@ -45,6 +47,7 @@ The Drizzle ORM schema in `lib/db/schema/invoices.ts` **DOES NOT MATCH** the act
 ## 🔧 **Immediate Fix Required**
 
 ### **Step 1: Update Drizzle Schema**
+
 ```typescript
 // lib/db/schema/invoices.ts
 export const invoices = pgTable('invoices', {
@@ -60,6 +63,7 @@ export const invoices = pgTable('invoices', {
 ```
 
 ### **Step 2: Update Service Layer**
+
 ```typescript
 // lib/services/invoice-service.ts
 interface CreateInvoiceInput {
@@ -70,6 +74,7 @@ interface CreateInvoiceInput {
 ```
 
 ### **Step 3: Update API Routes**
+
 ```typescript
 // app/api/invoices/route.ts
 // Ensure proper UUID handling
@@ -80,6 +85,7 @@ interface CreateInvoiceInput {
 ## 🚨 **Critical Status**
 
 **Current State**: ❌ **COMPLETELY BROKEN**
+
 - Forms don't submit to database
 - API routes return 404 errors
 - No data persistence
@@ -92,12 +98,14 @@ interface CreateInvoiceInput {
 ## 📋 **Action Plan**
 
 ### **Immediate (Critical)**
+
 1. ✅ **Fix Drizzle Schema** - Update to match actual database
 2. ✅ **Update Service Layer** - Handle UUIDs properly
 3. ✅ **Test Form Submissions** - Verify end-to-end functionality
 4. ✅ **Add Error Handling** - Show users when things fail
 
 ### **Next Steps**
+
 1. **Audit All Schemas** - Check other tables for mismatches
 2. **Update All Services** - Ensure consistency across the app
 3. **Add Validation** - Prevent future schema mismatches
@@ -108,6 +116,7 @@ interface CreateInvoiceInput {
 ## 🏆 **Expected Outcome**
 
 After fixing the schema mismatch:
+
 - ✅ **Forms will submit successfully**
 - ✅ **Data will persist to database**
 - ✅ **API routes will work properly**

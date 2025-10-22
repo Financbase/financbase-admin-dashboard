@@ -101,12 +101,16 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 
 			const response = await fetch(url, {
 				method,
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include',
 				body: JSON.stringify(data),
 			});
 
 			if (!response.ok) {
-				throw new Error('Failed to save invoice');
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(errorData.error || `Failed to save invoice: ${response.status} ${response.statusText}`);
 			}
 
 			return response.json();
@@ -116,8 +120,8 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 			toast.success(invoiceId ? 'Invoice updated' : 'Invoice created');
 			router.push('/invoices');
 		},
-		onError: () => {
-			toast.error('Failed to save invoice');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to save invoice');
 		},
 	});
 

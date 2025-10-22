@@ -24,24 +24,28 @@ Financbase is a comprehensive financial management platform designed for modern 
 ## 🚀 Key Features
 
 ### 🤖 AI-Powered Financial Intelligence
+
 - **Smart Transaction Categorization** - AI automatically categorizes expenses and income
 - **Predictive Analytics** - Revenue forecasting and financial planning
 - **Risk Assessment** - Automated risk analysis and recommendations
 - **Budget Optimization** - AI-powered budget suggestions and optimization
 
 ### ⚡ Real-Time Collaboration
+
 - **Live Financial Updates** - Real-time synchronization across all devices
 - **Collaborative Dashboards** - Multi-user financial management
 - **Instant Notifications** - Real-time alerts for financial events
 - **Shared Reports** - Collaborative financial reporting and analysis
 
 ### 🔍 Advanced Search & Analytics
+
 - **Universal Search** - Search across all financial data instantly
 - **Smart Filtering** - Advanced filters for invoices, expenses, clients
 - **Custom Dashboards** - Personalized financial insights and reports
 - **Export Capabilities** - Multiple export formats for reporting
 
 ### 📧 Professional Communication
+
 - **Automated Invoicing** - Professional invoice generation and delivery
 - **Client Notifications** - Automated payment reminders and updates
 - **Email Templates** - Branded email communications
@@ -50,6 +54,7 @@ Financbase is a comprehensive financial management platform designed for modern 
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **Next.js 14** - React framework with App Router
 - **TypeScript 5.9** - Type-safe JavaScript
 - **Tailwind CSS** - Utility-first CSS framework
@@ -58,6 +63,7 @@ Financbase is a comprehensive financial management platform designed for modern 
 - **Zustand** - State management
 
 ### Backend & APIs
+
 - **Next.js API Routes** - Serverless API endpoints
 - **Drizzle ORM** - Type-safe database operations
 - **Neon PostgreSQL** - Serverless database
@@ -65,11 +71,13 @@ Financbase is a comprehensive financial management platform designed for modern 
 - **Resend** - Email delivery service
 
 ### Real-Time & Search
+
 - **PartyKit** - Real-time WebSocket server
 - **Algolia** - Advanced search capabilities
 - **WebSockets** - Real-time data synchronization
 
 ### DevOps & Monitoring
+
 - **Docker** - Containerization
 - **GitHub Actions** - CI/CD pipeline
 - **Sentry** - Error tracking and monitoring
@@ -77,6 +85,7 @@ Financbase is a comprehensive financial management platform designed for modern 
 - **Prometheus + Grafana** - Infrastructure monitoring
 
 ### Security & Performance
+
 - **Arcjet** - Rate limiting and security
 - **UploadThing** - Secure file uploads
 - **Clerk** - Authentication and user management
@@ -95,29 +104,34 @@ Financbase is a comprehensive financial management platform designed for modern 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-org/financbase-admin-dashboard.git
    cd financbase-admin-dashboard
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your configuration
    ```
 
 4. **Set up the database**
+
    ```bash
    npm run db:generate
    npm run db:push
    ```
 
 5. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -259,6 +273,7 @@ npm run start
 ### Metrics Dashboard
 
 Access Grafana at `http://localhost:3001` (in production stack) for:
+
 - Application performance metrics
 - Database connection statistics
 - Error rates and response times
@@ -267,6 +282,7 @@ Access Grafana at `http://localhost:3001` (in production stack) for:
 ### Error Tracking
 
 Errors are automatically tracked via Sentry. Access the dashboard at your Sentry project URL for:
+
 - Real-time error monitoring
 - Performance tracing
 - Release health tracking
@@ -274,16 +290,19 @@ Errors are automatically tracked via Sentry. Access the dashboard at your Sentry
 ## 🔒 Security
 
 ### Authentication
+
 - **Clerk Integration** - Secure user authentication and session management
 - **Multi-Factor Authentication** - Optional 2FA for enhanced security
 - **Role-Based Access Control** - Granular permissions for different user types
 
 ### Data Protection
+
 - **End-to-End Encryption** - All data encrypted in transit and at rest
 - **GDPR Compliance** - Data protection and privacy controls
 - **Audit Logging** - Comprehensive activity tracking for compliance
 
 ### Infrastructure Security
+
 - **Rate Limiting** - Protection against abuse and DDoS attacks
 - **Bot Detection** - Advanced threat detection and blocking
 - **Container Security** - Minimal attack surface with security best practices
@@ -310,22 +329,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 ### Documentation
+
 - [API Documentation](./docs/api/README.md)
 - [Deployment Guide](./docs/deployment/README.md)
 - [Development Guide](./docs/development/README.md)
 
 ### Community
+
 - [GitHub Issues](https://github.com/your-org/financbase-admin-dashboard/issues) - Bug reports and feature requests
 - [GitHub Discussions](https://github.com/your-org/financbase-admin-dashboard/discussions) - Questions and discussions
 
 ### Professional Support
+
 For enterprise support and custom development:
-- Email: support@financbase.com
+
+- Email: <support@financbase.com>
 - Slack: [Join our community](https://financbase-slack.herokuapp.com)
 
 ## 🗺️ Roadmap
 
 ### Current Release (v1.0.0)
+
 - ✅ Complete financial dashboard with AI insights
 - ✅ Multi-market module support (Freelancer, Real Estate)
 - ✅ Real-time collaboration features
@@ -333,6 +357,7 @@ For enterprise support and custom development:
 - ✅ Production deployment infrastructure
 
 ### Upcoming Features (v1.1.0)
+
 - 🔄 Advanced reporting and analytics
 - 🔄 Mobile application
 - 🔄 Third-party integrations (QuickBooks, Xero)
@@ -340,6 +365,7 @@ For enterprise support and custom development:
 - 🔄 Advanced budgeting features
 
 ### Future Vision (v2.0.0)
+
 - 🎯 Global market expansion
 - 🎯 Advanced AI financial advisor
 - 🎯 Blockchain integration for financial transparency
