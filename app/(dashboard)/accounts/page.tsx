@@ -1,20 +1,183 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Building2, CreditCard, Wallet } from "lucide-react";
+import { Search, Plus, Building2, CreditCard, Wallet, Loader2, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+interface Account {
+	id: string;
+	accountName: string;
+	accountType: 'checking' | 'savings' | 'credit_card' | 'investment' | 'loan' | 'other';
+	bankName?: string;
+	lastFourDigits?: string;
+	currency: string;
+	currentBalance: string;
+	availableBalance: string;
+	creditLimit?: string;
+	status: 'active' | 'inactive' | 'closed' | 'suspended';
+	isPrimary: boolean;
+	isReconciled: boolean;
+	lastReconciledAt?: string;
+	lastSyncAt?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+interface AccountStats {
+	totalAccounts: number;
+	activeAccounts: number;
+	totalBalance: number;
+	totalCreditLimit: number;
+	availableCredit: number;
+	accountsByType: Array<{
+		type: string;
+		count: number;
+		totalBalance: number;
+	}>;
+	recentActivity: Array<{
+		accountId: string;
+		accountName: string;
+		transactionCount: number;
+		totalAmount: number;
+		lastActivity: string;
+	}>;
+}
+
+interface ReconciliationResult {
+	accountId: string;
+	accountName: string;
+	bookBalance: number;
+	bankBalance: number;
+	difference: number;
+	lastReconciled: string | null;
+	needsReconciliation: boolean;
+	unreconciledTransactions: number;
+}
 
 export default function AccountsPage() {
-	const accounts = [
-		{ id: "ACC-001", name: "Business Checking", type: "Checking", institution: "Chase Bank", accountNumber: "****4532", balance: 124592.45, status: "active", lastSync: "2024-10-21" },
-		{ id: "ACC-002", name: "Business Savings", type: "Savings", institution: "Chase Bank", accountNumber: "****7891", balance: 85000.00, status: "active", lastSync: "2024-10-21" },
-		{ id: "ACC-003", name: "Business Credit Card", type: "Credit", institution: "American Express", accountNumber: "****3002", balance: -12450.00, status: "active", lastSync: "2024-10-21" },
-		{ id: "ACC-004", name: "Merchant Account", type: "Merchant", institution: "Stripe", accountNumber: "****8765", balance: 45231.89, status: "active", lastSync: "2024-10-21" },
-		{ id: "ACC-005", name: "Payroll Account", type: "Checking", institution: "Wells Fargo", accountNumber: "****2103", balance: 67500.00, status: "active", lastSync: "2024-10-20" },
-		{ id: "ACC-006", name: "Investment Account", type: "Investment", institution: "Vanguard", accountNumber: "****9421", balance: 250000.00, status: "active", lastSync: "2024-10-20" },
-	];
+	const [searchQuery, setSearchQuery] = useState("");
 
-	const totalAssets = accounts.filter(a => a.balance > 0).reduce((sum, a) => sum + a.balance, 0);
-	const totalLiabilities = Math.abs(accounts.filter(a => a.balance < 0).reduce((sum, a) => sum + a.balance, 0));
+	// Fetch accounts data
+	const { data: accountsData, isLoading: accountsLoading, error: accountsError } = useQuery({
+		queryKey: ['accounts', searchQuery],
+		queryFn: async () => {
+			const params = new URLSearchParams();
+			if (searchQuery) params.append('search', searchQuery);
+
+			const response = await fetch(`/api/accounts?${params.toString()}`);
+			if (!response.ok) throw new Error('Failed to fetch accounts');
+			return response.json();
+		},
+	});
+
+	// Fetch account stats
+	const { data: statsData, isLoading: statsLoading } = useQuery({
+		queryKey: ['account-stats'],
+		queryFn: async () => {
+			const response = await fetch('/api/accounts/stats');
+			if (!response.ok) throw new Error('Failed to fetch account stats');
+			return response.json();
+		},
+	});
+
+	// Fetch reconciliation status
+	const { data: reconciliationData, isLoading: reconciliationLoading } = useQuery({
+		queryKey: ['account-reconciliation'],
+		queryFn: async () => {
+			const response = await fetch('/api/accounts/reconcile');
+			if (!response.ok) throw new Error('Failed to fetch reconciliation status');
+			return response.json();
+		},
+	});
+
+	const accounts: Account[] = accountsData?.accounts || [];
+	const stats: AccountStats = statsData?.stats || {
+		totalAccounts: 0,
+		activeAccounts: 0,
+		totalBalance: 0,
+		totalCreditLimit: 0,
+		availableCredit: 0,
+		accountsByType: [],
+		recentActivity: [],
+	};
+
+	const reconciliationStatus: ReconciliationResult[] = reconciliationData?.reconciliationStatus || [];
+
+	const getAccountTypeIcon = (type: string) => {
+		switch (type) {
+			case 'checking':
+			case 'savings':
+				return <Building2 className="h-4 w-4" />;
+			case 'credit_card':
+				return <CreditCard className="h-4 w-4" />;
+			default:
+				return <Wallet className="h-4 w-4" />;
+		}
+	};
+
+	const getAccountTypeColor = (type: string) => {
+		switch (type) {
+			case 'checking':
+				return 'bg-blue-100 text-blue-800';
+			case 'savings':
+				return 'bg-green-100 text-green-800';
+			case 'credit_card':
+				return 'bg-purple-100 text-purple-800';
+			case 'investment':
+				return 'bg-yellow-100 text-yellow-800';
+			case 'loan':
+				return 'bg-red-100 text-red-800';
+			default:
+				return 'bg-gray-100 text-gray-800';
+		}
+	};
+
+	const getStatusBadgeVariant = (status: string) => {
+		switch (status) {
+			case 'active':
+				return 'default';
+			case 'inactive':
+				return 'secondary';
+			case 'closed':
+				return 'destructive';
+			case 'suspended':
+				return 'destructive';
+			default:
+				return 'secondary';
+		}
+	};
+
+	if (accountsLoading || statsLoading || reconciliationLoading) {
+		return (
+			<div className="space-y-8 p-8">
+				<div className="flex items-center justify-center h-64">
+					<Loader2 className="h-8 w-8 animate-spin" />
+				</div>
+			</div>
+		);
+	}
+
+	if (accountsError) {
+		return (
+			<div className="space-y-8 p-8">
+				<div className="text-center text-red-600">
+					Error loading accounts: {accountsError.message}
+				</div>
+			</div>
+		);
+	}
+
+	const totalAssets = accounts
+		.filter(a => Number(a.currentBalance) > 0)
+		.reduce((sum, a) => sum + Number(a.currentBalance), 0);
+	
+	const totalLiabilities = Math.abs(accounts
+		.filter(a => Number(a.currentBalance) < 0)
+		.reduce((sum, a) => sum + Number(a.currentBalance), 0));
+	
 	const netWorth = totalAssets - totalLiabilities;
 
 	return (
@@ -43,7 +206,7 @@ export default function AccountsPage() {
 					<div className="mt-3">
 						<div className="text-2xl font-bold text-green-600">${totalAssets.toLocaleString()}</div>
 						<p className="text-xs text-muted-foreground mt-1">
-							Across {accounts.filter(a => a.balance > 0).length} accounts
+							Across {accounts.filter(a => Number(a.currentBalance) > 0).length} accounts
 						</p>
 					</div>
 				</div>
@@ -79,13 +242,56 @@ export default function AccountsPage() {
 						<h3 className="text-sm font-medium text-muted-foreground">Active Accounts</h3>
 					</div>
 					<div className="mt-3">
-						<div className="text-2xl font-bold">{accounts.filter(a => a.status === 'active').length}</div>
+						<div className="text-2xl font-bold">{stats.activeAccounts}</div>
 						<p className="text-xs text-muted-foreground mt-1">
 							Connected and synced
 						</p>
 					</div>
 				</div>
 			</div>
+
+			{/* Reconciliation Status */}
+			{reconciliationStatus.length > 0 && (
+				<div className="rounded-lg border bg-card">
+					<div className="p-6 border-b">
+						<h3 className="text-lg font-semibold">Reconciliation Status</h3>
+						<p className="text-sm text-muted-foreground">Account reconciliation overview</p>
+					</div>
+					<div className="p-6 space-y-3">
+						{reconciliationStatus.map((status) => (
+							<div key={status.accountId} className="flex items-center justify-between p-4 rounded-lg border">
+								<div className="flex items-center gap-3">
+									{status.needsReconciliation ? (
+										<AlertCircle className="h-5 w-5 text-yellow-600" />
+									) : (
+										<CheckCircle className="h-5 w-5 text-green-600" />
+									)}
+									<div>
+										<p className="font-medium">{status.accountName}</p>
+										<p className="text-sm text-muted-foreground">
+											Book: ${status.bookBalance.toLocaleString()} | 
+											Bank: ${status.bankBalance.toLocaleString()}
+											{status.difference > 0 && (
+												<span className="text-yellow-600 ml-2">
+													(Diff: ${status.difference.toLocaleString()})
+												</span>
+											)}
+										</p>
+									</div>
+								</div>
+								<div className="flex items-center gap-2">
+									<Badge variant={status.needsReconciliation ? 'destructive' : 'default'}>
+										{status.needsReconciliation ? 'Needs Reconciliation' : 'Reconciled'}
+									</Badge>
+									<Button variant="outline" size="sm">
+										Reconcile
+									</Button>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			)}
 
 			{/* Accounts by Type */}
 			<div className="grid gap-6 lg:grid-cols-3">
@@ -95,14 +301,19 @@ export default function AccountsPage() {
 						<p className="text-sm text-muted-foreground">Checking & Savings</p>
 					</div>
 					<div className="p-6 space-y-3">
-						{accounts.filter(a => a.type === 'Checking' || a.type === 'Savings').map((acc) => (
+						{accounts.filter(a => a.accountType === 'checking' || a.accountType === 'savings').map((acc) => (
 							<div key={acc.id} className="flex items-center justify-between">
 								<div>
-									<p className="font-medium text-sm">{acc.name}</p>
-									<p className="text-xs text-muted-foreground">{acc.accountNumber}</p>
+									<p className="font-medium text-sm">{acc.accountName}</p>
+									<p className="text-xs text-muted-foreground">
+										{acc.lastFourDigits ? `****${acc.lastFourDigits}` : acc.bankName}
+									</p>
 								</div>
 								<div className="text-right">
-									<p className="font-semibold">${acc.balance.toLocaleString()}</p>
+									<p className="font-semibold">${Number(acc.currentBalance).toLocaleString()}</p>
+									{acc.isPrimary && (
+										<Badge variant="outline" className="text-xs">Primary</Badge>
+									)}
 								</div>
 							</div>
 						))}
@@ -115,14 +326,21 @@ export default function AccountsPage() {
 						<p className="text-sm text-muted-foreground">Cards & Lines of Credit</p>
 					</div>
 					<div className="p-6 space-y-3">
-						{accounts.filter(a => a.type === 'Credit').map((acc) => (
+						{accounts.filter(a => a.accountType === 'credit_card').map((acc) => (
 							<div key={acc.id} className="flex items-center justify-between">
 								<div>
-									<p className="font-medium text-sm">{acc.name}</p>
-									<p className="text-xs text-muted-foreground">{acc.accountNumber}</p>
+									<p className="font-medium text-sm">{acc.accountName}</p>
+									<p className="text-xs text-muted-foreground">
+										{acc.lastFourDigits ? `****${acc.lastFourDigits}` : acc.bankName}
+									</p>
 								</div>
 								<div className="text-right">
-									<p className="font-semibold text-red-600">${Math.abs(acc.balance).toLocaleString()}</p>
+									<p className="font-semibold text-red-600">${Math.abs(Number(acc.currentBalance)).toLocaleString()}</p>
+									{acc.creditLimit && (
+										<p className="text-xs text-muted-foreground">
+											Limit: ${Number(acc.creditLimit).toLocaleString()}
+										</p>
+									)}
 								</div>
 							</div>
 						))}
@@ -132,17 +350,19 @@ export default function AccountsPage() {
 				<div className="rounded-lg border bg-card">
 					<div className="p-6 border-b">
 						<h3 className="text-lg font-semibold">Other Accounts</h3>
-						<p className="text-sm text-muted-foreground">Investments & Merchant</p>
+						<p className="text-sm text-muted-foreground">Investments & Loans</p>
 					</div>
 					<div className="p-6 space-y-3">
-						{accounts.filter(a => a.type === 'Investment' || a.type === 'Merchant').map((acc) => (
+						{accounts.filter(a => a.accountType === 'investment' || a.accountType === 'loan' || a.accountType === 'other').map((acc) => (
 							<div key={acc.id} className="flex items-center justify-between">
 								<div>
-									<p className="font-medium text-sm">{acc.name}</p>
-									<p className="text-xs text-muted-foreground">{acc.accountNumber}</p>
+									<p className="font-medium text-sm">{acc.accountName}</p>
+									<p className="text-xs text-muted-foreground">
+										{acc.lastFourDigits ? `****${acc.lastFourDigits}` : acc.bankName}
+									</p>
 								</div>
 								<div className="text-right">
-									<p className="font-semibold">${acc.balance.toLocaleString()}</p>
+									<p className="font-semibold">${Number(acc.currentBalance).toLocaleString()}</p>
 								</div>
 							</div>
 						))}
@@ -159,6 +379,7 @@ export default function AccountsPage() {
 							<p className="text-sm text-muted-foreground">Complete list of connected accounts</p>
 						</div>
 						<Button variant="outline" size="sm">
+							<RefreshCw className="mr-2 h-4 w-4" />
 							Sync All
 						</Button>
 					</div>
@@ -168,6 +389,8 @@ export default function AccountsPage() {
 							<Input
 								placeholder="Search accounts..."
 								className="pl-10"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
 						</div>
 					</div>
@@ -188,26 +411,52 @@ export default function AccountsPage() {
 							</tr>
 						</thead>
 						<tbody>
-							{accounts.map((account) => (
-								<tr key={account.id} className="border-b hover:bg-muted/50 transition-colors">
-									<td className="p-4 font-medium">{account.name}</td>
-									<td className="p-4 text-sm">{account.type}</td>
-									<td className="p-4 text-sm">{account.institution}</td>
-									<td className="p-4 font-mono text-sm">{account.accountNumber}</td>
-									<td className={`p-4 text-sm text-right font-semibold ${account.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-										${Math.abs(account.balance).toLocaleString()}
-									</td>
-									<td className="p-4 text-sm">{account.lastSync}</td>
-									<td className="p-4">
-										<Badge variant={account.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-											{account.status}
-										</Badge>
-									</td>
-									<td className="p-4">
-										<Button variant="ghost" size="sm">View</Button>
+							{accounts.length === 0 ? (
+								<tr>
+									<td colSpan={8} className="text-center py-8 text-muted-foreground">
+										No accounts found. Connect your first account to get started.
 									</td>
 								</tr>
-							))}
+							) : (
+								accounts.map((account) => (
+									<tr key={account.id} className="border-b hover:bg-muted/50 transition-colors">
+										<td className="p-4">
+											<div className="flex items-center gap-2">
+												{getAccountTypeIcon(account.accountType)}
+												<div>
+													<p className="font-medium">{account.accountName}</p>
+													{account.isPrimary && (
+														<Badge variant="outline" className="text-xs">Primary</Badge>
+													)}
+												</div>
+											</div>
+										</td>
+										<td className="p-4">
+											<Badge className={`text-xs ${getAccountTypeColor(account.accountType)}`}>
+												{account.accountType.replace('_', ' ')}
+											</Badge>
+										</td>
+										<td className="p-4 text-sm">{account.bankName || 'N/A'}</td>
+										<td className="p-4 font-mono text-sm">
+											{account.lastFourDigits ? `****${account.lastFourDigits}` : 'N/A'}
+										</td>
+										<td className={`p-4 text-sm text-right font-semibold ${Number(account.currentBalance) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+											${Math.abs(Number(account.currentBalance)).toLocaleString()}
+										</td>
+										<td className="p-4 text-sm">
+											{account.lastSyncAt ? new Date(account.lastSyncAt).toLocaleDateString() : 'Never'}
+										</td>
+										<td className="p-4">
+											<Badge variant={getStatusBadgeVariant(account.status)} className="text-xs">
+												{account.status}
+											</Badge>
+										</td>
+										<td className="p-4">
+											<Button variant="ghost" size="sm">View</Button>
+										</td>
+									</tr>
+								))
+							)}
 						</tbody>
 					</table>
 				</div>
@@ -215,4 +464,3 @@ export default function AccountsPage() {
 		</div>
 	);
 }
-

@@ -18,12 +18,9 @@ export const invoices = pgTable('invoices', {
 	
 	// Client information
 	clientId: uuid('client_id').notNull(), // Foreign key to clients table
-	clientName: text('client_name').notNull(),
-	clientEmail: text('client_email').notNull(),
-	clientAddress: text('client_address'),
-	clientPhone: text('client_phone'),
 	
 	// Financial details
+	amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
 	currency: text('currency').default('USD').notNull(),
 	subtotal: decimal('subtotal', { precision: 12, scale: 2 }).notNull(),
 	taxRate: decimal('tax_rate', { precision: 5, scale: 2 }).default('0'),
@@ -48,15 +45,7 @@ export const invoices = pgTable('invoices', {
 	terms: text('terms'),
 	footer: text('footer'),
 	
-	// Line items (stored as JSONB for flexibility)
-	items: jsonb('items').$type<Array<{
-		id: string;
-		description: string;
-		quantity: number;
-		unitPrice: number;
-		taxRate?: number;
-		total: number;
-	}>>().notNull(),
+	// Line items are stored in separate table (invoice_line_items)
 	
 	// Recurring invoice settings
 	isRecurring: boolean('is_recurring').default(false).notNull(),

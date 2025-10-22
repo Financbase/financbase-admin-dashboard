@@ -10,26 +10,18 @@ import { NotificationHelpers } from './notification-service';
 
 interface CreateInvoiceInput {
 	userId: string;
-	clientId?: string;
-	clientName: string;
-	clientEmail: string;
-	clientAddress?: string;
-	clientPhone?: string;
-	items: Array<{
-		id: string;
-		description: string;
-		quantity: number;
-		unitPrice: number;
-		taxRate?: number;
-		total: number;
-	}>;
+	clientId: string;
+	amount: number;
+	subtotal: number;
+	total: number;
+	currency?: string;
+	taxRate?: number;
+	taxAmount?: number;
+	discountAmount?: number;
 	issueDate: Date;
 	dueDate: Date;
-	taxRate?: number;
-	discountAmount?: number;
 	notes?: string;
 	terms?: string;
-	currency?: string;
 }
 
 interface UpdateInvoiceInput extends Partial<CreateInvoiceInput> {
@@ -85,29 +77,23 @@ function calculateTotals(
  */
 export async function createInvoice(input: CreateInvoiceInput): Promise<Invoice> {
 	const invoiceNumber = await generateInvoiceNumber(input.userId);
-	const totals = calculateTotals(input.items, input.taxRate, input.discountAmount);
 
 	const [invoice] = await db.insert(invoices).values({
 		userId: input.userId,
 		invoiceNumber,
 		clientId: input.clientId,
-		clientName: input.clientName,
-		clientEmail: input.clientEmail,
-		clientAddress: input.clientAddress,
-		clientPhone: input.clientPhone,
+		amount: input.amount.toFixed(2),
+		subtotal: input.subtotal.toFixed(2),
+		total: input.total.toFixed(2),
 		currency: input.currency || 'USD',
-		items: input.items,
-		subtotal: totals.subtotal.toFixed(2),
-		taxRate: input.taxRate?.toFixed(2) || '0',
-		taxAmount: totals.taxAmount.toFixed(2),
+		taxRate: (input.taxRate || 0).toFixed(2),
+		taxAmount: (input.taxAmount || 0).toFixed(2),
 		discountAmount: (input.discountAmount || 0).toFixed(2),
-		total: totals.total.toFixed(2),
 		issueDate: input.issueDate,
 		dueDate: input.dueDate,
 		status: 'draft',
 		notes: input.notes,
 		terms: input.terms,
-		amountPaid: '0',
 	}).returning();
 
 	// Send notification

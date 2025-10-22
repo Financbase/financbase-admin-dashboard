@@ -12,6 +12,13 @@ export * from "./expenses.schema";
 export * from "./clients.schema";
 export * from "./transactions.schema";
 export * from "./accounts.schema";
+export * from "./payment-methods.schema";
+export * from "./payments.schema";
+
+// Freelance Hub
+export * from "./projects.schema";
+export * from "./time-entries.schema";
+export * from "./tasks.schema";
 
 // Analytics and reporting
 export * from "./analytics.schema";

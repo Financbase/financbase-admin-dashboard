@@ -6,6 +6,9 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { InvoiceService } from '@/lib/services/invoice-service';
+import { db } from '@/lib/db';
+import { clients } from '@/lib/db/schema/clients';
+import { eq, and } from 'drizzle-orm';
 
 /**
  * GET /api/invoices
@@ -65,11 +68,33 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
+		// Calculate totals from items
+		const subtotal = body.items.reduce((sum: number, item: any) => sum + (item.quantity * item.unitPrice), 0);
+		const taxAmount = (subtotal - (body.discountAmount || 0)) * ((body.taxRate || 0) / 100);
+		const total = subtotal - (body.discountAmount || 0) + taxAmount;
+
+		// Create or find client
+		const clientId = await createOrFindClient(userId, {
+			companyName: body.clientName,
+			email: body.clientEmail,
+			phone: body.clientPhone,
+			address: body.clientAddress,
+		});
+
 		const invoice = await InvoiceService.create({
 			userId,
-			...body,
+			clientId,
+			amount: total,
+			subtotal,
+			total,
+			currency: body.currency || 'USD',
+			taxRate: body.taxRate || 0,
+			taxAmount,
+			discountAmount: body.discountAmount || 0,
 			issueDate: new Date(body.issueDate),
 			dueDate: new Date(body.dueDate),
+			notes: body.notes,
+			terms: body.terms,
 		});
 
 		return NextResponse.json(invoice, { status: 201 });
@@ -80,5 +105,38 @@ export async function POST(req: NextRequest) {
 			{ status: 500 }
 		);
 	}
+}
+
+/**
+ * Create or find a client by email
+ */
+async function createOrFindClient(userId: string, clientData: {
+	companyName: string;
+	email: string;
+	phone?: string;
+	address?: string;
+}): Promise<string> {
+	// Try to find existing client by email
+	const existingClient = await db.query.clients.findFirst({
+		where: and(
+			eq(clients.userId, userId),
+			eq(clients.email, clientData.email)
+		),
+	});
+
+	if (existingClient) {
+		return existingClient.id;
+	}
+
+	// Create new client
+	const [newClient] = await db.insert(clients).values({
+		userId,
+		companyName: clientData.companyName,
+		email: clientData.email,
+		phone: clientData.phone,
+		address: clientData.address,
+	}).returning();
+
+	return newClient.id;
 }
 

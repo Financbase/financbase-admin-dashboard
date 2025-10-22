@@ -1,24 +1,213 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Download, Filter, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Search, Plus, Download, Filter, CheckCircle, Clock, XCircle, Loader2, CreditCard, Building, DollarSign, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+interface PaymentMethod {
+	id: string;
+	userId: string;
+	accountId?: string;
+	paymentMethodType: 'stripe' | 'paypal' | 'square' | 'bank_transfer' | 'check' | 'cash' | 'other';
+	name: string;
+	description?: string;
+	status: 'active' | 'inactive' | 'suspended' | 'failed';
+	isDefault: boolean;
+	processingFee?: string;
+	fixedFee?: string;
+	currency: string;
+	isTestMode: boolean;
+	lastUsedAt?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+interface Payment {
+	id: string;
+	userId: string;
+	paymentMethodId: string;
+	invoiceId?: string;
+	paymentType: 'invoice_payment' | 'refund' | 'chargeback' | 'adjustment' | 'transfer';
+	amount: string;
+	currency: string;
+	processingFee: string;
+	netAmount: string;
+	description?: string;
+	reference?: string;
+	status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'refunded' | 'partially_refunded';
+	processedAt?: string;
+	failedAt?: string;
+	refundedAt?: string;
+	failureReason?: string;
+	failureCode?: string;
+	refundAmount: string;
+	refundReason?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+interface PaymentStats {
+	totalPayments: number;
+	totalAmount: number;
+	successfulPayments: number;
+	failedPayments: number;
+	averagePaymentAmount: number;
+	paymentMethodsCount: number;
+	recentPayments: Array<{
+		id: string;
+		amount: number;
+		status: string;
+		paymentMethodName: string;
+		createdAt: string;
+	}>;
+	paymentsByMethod: Array<{
+		paymentMethodType: string;
+		count: number;
+		totalAmount: number;
+	}>;
+	monthlyTrend: Array<{
+		month: string;
+		payments: number;
+		amount: number;
+	}>;
+}
 
 export default function PaymentsPage() {
-	const payments = [
-		{ id: "PAY-2024-001", date: "2024-10-21", client: "Acme Corporation", invoice: "INV-001", method: "Bank Transfer", amount: 5499.99, status: "completed", processor: "Stripe" },
-		{ id: "PAY-2024-002", date: "2024-10-21", client: "TechStart Inc", invoice: "INV-023", method: "Credit Card", amount: 1250.00, status: "completed", processor: "Stripe" },
-		{ id: "PAY-2024-003", date: "2024-10-20", client: "Global Industries", invoice: "INV-045", method: "Wire Transfer", amount: 8999.99, status: "pending", processor: "Manual" },
-		{ id: "PAY-2024-004", date: "2024-10-20", client: "Tech Solutions Ltd", invoice: "INV-012", method: "ACH", amount: 2299.50, status: "completed", processor: "Plaid" },
-		{ id: "PAY-2024-005", date: "2024-10-19", client: "Digital Dynamics", invoice: "INV-089", method: "PayPal", amount: 750.00, status: "completed", processor: "PayPal" },
-		{ id: "PAY-2024-006", date: "2024-10-19", client: "Creative Studios", invoice: "INV-067", method: "Credit Card", amount: 3200.00, status: "failed", processor: "Stripe" },
-		{ id: "PAY-2024-007", date: "2024-10-18", client: "Startup Labs", invoice: "INV-034", method: "Bank Transfer", amount: 1850.00, status: "completed", processor: "Stripe" },
-		{ id: "PAY-2024-008", date: "2024-10-18", client: "Innovation Corp", invoice: "INV-078", method: "Credit Card", amount: 4500.00, status: "processing", processor: "Stripe" },
-	];
+	const [searchQuery, setSearchQuery] = useState("");
+
+	// Fetch payment methods
+	const { data: paymentMethodsData, isLoading: paymentMethodsLoading } = useQuery({
+		queryKey: ['payment-methods'],
+		queryFn: async () => {
+			const response = await fetch('/api/payment-methods');
+			if (!response.ok) throw new Error('Failed to fetch payment methods');
+			return response.json();
+		},
+	});
+
+	// Fetch payments data
+	const { data: paymentsData, isLoading: paymentsLoading, error: paymentsError } = useQuery({
+		queryKey: ['payments', searchQuery],
+		queryFn: async () => {
+			const params = new URLSearchParams();
+			if (searchQuery) params.append('search', searchQuery);
+
+			const response = await fetch(`/api/payments?${params.toString()}`);
+			if (!response.ok) throw new Error('Failed to fetch payments');
+			return response.json();
+		},
+	});
+
+	// Fetch payment stats
+	const { data: statsData, isLoading: statsLoading } = useQuery({
+		queryKey: ['payment-stats'],
+		queryFn: async () => {
+			const response = await fetch('/api/payments/stats');
+			if (!response.ok) throw new Error('Failed to fetch payment stats');
+			return response.json();
+		},
+	});
+
+	const paymentMethods: PaymentMethod[] = paymentMethodsData?.paymentMethods || [];
+	const payments: Payment[] = paymentsData?.payments || [];
+	const stats: PaymentStats = statsData?.stats || {
+		totalPayments: 0,
+		totalAmount: 0,
+		successfulPayments: 0,
+		failedPayments: 0,
+		averagePaymentAmount: 0,
+		paymentMethodsCount: 0,
+		recentPayments: [],
+		paymentsByMethod: [],
+		monthlyTrend: [],
+	};
+
+	const getPaymentMethodIcon = (type: string) => {
+		switch (type) {
+			case 'stripe':
+				return <CreditCard className="h-4 w-4" />;
+			case 'paypal':
+			case 'square':
+				return <Building className="h-4 w-4" />;
+			case 'bank_transfer':
+				return <Building className="h-4 w-4" />;
+			default:
+				return <DollarSign className="h-4 w-4" />;
+		}
+	};
+
+	const getPaymentMethodColor = (type: string) => {
+		switch (type) {
+			case 'stripe':
+				return 'bg-purple-100 text-purple-800';
+			case 'paypal':
+				return 'bg-blue-100 text-blue-800';
+			case 'square':
+				return 'bg-green-100 text-green-800';
+			case 'bank_transfer':
+				return 'bg-gray-100 text-gray-800';
+			default:
+				return 'bg-gray-100 text-gray-800';
+		}
+	};
+
+	const getStatusIcon = (status: string) => {
+		switch (status) {
+			case 'completed':
+				return <CheckCircle className="h-4 w-4 text-green-600" />;
+			case 'failed':
+				return <XCircle className="h-4 w-4 text-red-600" />;
+			case 'processing':
+			case 'pending':
+				return <Clock className="h-4 w-4 text-yellow-600" />;
+			default:
+				return <Clock className="h-4 w-4 text-gray-600" />;
+		}
+	};
+
+	const getStatusBadgeVariant = (status: string) => {
+		switch (status) {
+			case 'completed':
+				return 'default';
+			case 'failed':
+				return 'destructive';
+			case 'processing':
+			case 'pending':
+				return 'secondary';
+			case 'refunded':
+				return 'outline';
+			default:
+				return 'secondary';
+		}
+	};
+
+	if (paymentMethodsLoading || paymentsLoading || statsLoading) {
+		return (
+			<div className="space-y-8 p-8">
+				<div className="flex items-center justify-center h-64">
+					<Loader2 className="h-8 w-8 animate-spin" />
+				</div>
+			</div>
+		);
+	}
+
+	if (paymentsError) {
+		return (
+			<div className="space-y-8 p-8">
+				<div className="text-center text-red-600">
+					Error loading payments: {paymentsError.message}
+				</div>
+			</div>
+		);
+	}
 
 	const completedPayments = payments.filter(p => p.status === 'completed');
-	const totalCompleted = completedPayments.reduce((sum, p) => sum + p.amount, 0);
+	const totalCompleted = completedPayments.reduce((sum, p) => sum + Number(p.amount), 0);
 	const pendingPayments = payments.filter(p => p.status === 'pending' || p.status === 'processing');
-	const totalPending = pendingPayments.reduce((sum, p) => sum + p.amount, 0);
+	const totalPending = pendingPayments.reduce((sum, p) => sum + Number(p.amount), 0);
 	const failedPayments = payments.filter(p => p.status === 'failed');
 
 	return (
@@ -84,7 +273,7 @@ export default function PaymentsPage() {
 					</div>
 					<div className="mt-3">
 						<div className="text-2xl font-bold text-blue-600">
-							{((completedPayments.length / payments.length) * 100).toFixed(1)}%
+							{payments.length > 0 ? ((completedPayments.length / payments.length) * 100).toFixed(1) : 0}%
 						</div>
 						<p className="text-xs text-muted-foreground mt-1">
 							Payment success rate
@@ -97,32 +286,75 @@ export default function PaymentsPage() {
 			<div className="grid gap-6 lg:grid-cols-3">
 				<div className="rounded-lg border bg-card">
 					<div className="p-6 border-b">
+						<h3 className="text-lg font-semibold">Payment Methods</h3>
+						<p className="text-sm text-muted-foreground">Available payment options</p>
+					</div>
+					<div className="p-6 space-y-3">
+						{paymentMethods.length === 0 ? (
+							<div className="text-center text-muted-foreground py-4">
+								No payment methods configured
+							</div>
+						) : (
+							paymentMethods.map((method) => (
+								<div key={method.id} className="flex items-center justify-between p-3 rounded-lg border">
+									<div className="flex items-center gap-3">
+										{getPaymentMethodIcon(method.paymentMethodType)}
+										<div>
+											<p className="font-medium text-sm">{method.name}</p>
+											<p className="text-xs text-muted-foreground">
+												{method.paymentMethodType.replace('_', ' ')}
+												{method.isDefault && ' • Default'}
+											</p>
+										</div>
+									</div>
+									<div className="flex items-center gap-2">
+										<Badge className={`text-xs ${getPaymentMethodColor(method.paymentMethodType)}`}>
+											{method.status}
+										</Badge>
+										{method.isTestMode && (
+											<Badge variant="outline" className="text-xs">Test</Badge>
+										)}
+									</div>
+								</div>
+							))
+						)}
+					</div>
+				</div>
+
+				<div className="rounded-lg border bg-card">
+					<div className="p-6 border-b">
 						<h3 className="text-lg font-semibold">By Payment Method</h3>
 						<p className="text-sm text-muted-foreground">Distribution of payment types</p>
 					</div>
 					<div className="p-6 space-y-4">
-						{[
-							{ method: "Bank Transfer", count: 3, amount: 18549.99, color: "bg-blue-600" },
-							{ method: "Credit Card", count: 3, amount: 8950.00, color: "bg-purple-600" },
-							{ method: "ACH", count: 1, amount: 2299.50, color: "bg-green-600" },
-							{ method: "PayPal", count: 1, amount: 750.00, color: "bg-orange-600" },
-						].map((method) => (
-							<div key={method.method}>
-								<div className="flex items-center justify-between mb-2">
-									<span className="text-sm font-medium">{method.method}</span>
-									<span className="text-sm text-muted-foreground">
-										{method.count} ({((method.count / payments.length) * 100).toFixed(0)}%)
-									</span>
-								</div>
-								<div className="h-2 bg-muted rounded-full overflow-hidden">
-									<div 
-										className={`h-full ${method.color} rounded-full`}
-										style={{ width: `${(method.count / payments.length) * 100}%` }}
-									></div>
-								</div>
-								<p className="text-xs text-muted-foreground mt-1">${method.amount.toLocaleString()}</p>
+						{stats.paymentsByMethod.length === 0 ? (
+							<div className="text-center text-muted-foreground py-4">
+								No payment data available
 							</div>
-						))}
+						) : (
+							stats.paymentsByMethod.map((method, index) => {
+								const colors = ["bg-blue-600", "bg-purple-600", "bg-green-600", "bg-orange-600"];
+								const percentage = stats.totalPayments > 0 ? (method.count / stats.totalPayments) * 100 : 0;
+								
+								return (
+									<div key={method.paymentMethodType}>
+										<div className="flex items-center justify-between mb-2">
+											<span className="text-sm font-medium">{method.paymentMethodType.replace('_', ' ')}</span>
+											<span className="text-sm text-muted-foreground">
+												{method.count} ({percentage.toFixed(0)}%)
+											</span>
+										</div>
+										<div className="h-2 bg-muted rounded-full overflow-hidden">
+											<div 
+												className={`h-full ${colors[index % colors.length]} rounded-full`}
+												style={{ width: `${percentage}%` }}
+											></div>
+										</div>
+										<p className="text-xs text-muted-foreground mt-1">${method.totalAmount.toLocaleString()}</p>
+									</div>
+								);
+							})
+						)}
 					</div>
 				</div>
 
@@ -132,55 +364,29 @@ export default function PaymentsPage() {
 						<p className="text-sm text-muted-foreground">Latest payment updates</p>
 					</div>
 					<div className="p-6 space-y-3">
-						{payments.slice(0, 4).map((payment) => (
-							<div key={payment.id} className="flex items-center justify-between border-b pb-3 last:border-0">
-								<div>
-									<p className="font-medium text-sm">{payment.client}</p>
-									<p className="text-xs text-muted-foreground">{payment.id}</p>
-								</div>
-								<div className="text-right">
-									<p className="font-semibold text-sm">${payment.amount.toLocaleString()}</p>
-									<Badge 
-										variant={
-											payment.status === 'completed' ? 'default' : 
-											payment.status === 'pending' || payment.status === 'processing' ? 'secondary' : 
-											'destructive'
-										}
-										className="text-xs"
-									>
-										{payment.status}
-									</Badge>
-								</div>
+						{stats.recentPayments.length === 0 ? (
+							<div className="text-center text-muted-foreground py-4">
+								No recent payments
 							</div>
-						))}
-					</div>
-				</div>
-
-				<div className="rounded-lg border bg-card">
-					<div className="p-6 border-b">
-						<h3 className="text-lg font-semibold">Payment Processors</h3>
-						<p className="text-sm text-muted-foreground">Integration status</p>
-					</div>
-					<div className="p-6 space-y-3">
-						{[
-							{ processor: "Stripe", status: "active", count: 5 },
-							{ processor: "Plaid", status: "active", count: 1 },
-							{ processor: "PayPal", status: "active", count: 1 },
-							{ processor: "Manual", status: "active", count: 1 },
-						].map((proc) => (
-							<div key={proc.processor} className="flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<div className="h-2 w-2 rounded-full bg-green-500"></div>
-									<span className="text-sm font-medium">{proc.processor}</span>
+						) : (
+							stats.recentPayments.slice(0, 4).map((payment) => (
+								<div key={payment.id} className="flex items-center justify-between border-b pb-3 last:border-0">
+									<div>
+										<p className="font-medium text-sm">{payment.paymentMethodName}</p>
+										<p className="text-xs text-muted-foreground">{payment.id}</p>
+									</div>
+									<div className="text-right">
+										<p className="font-semibold text-sm">${payment.amount.toLocaleString()}</p>
+										<Badge 
+											variant={getStatusBadgeVariant(payment.status)}
+											className="text-xs"
+										>
+											{payment.status}
+										</Badge>
+									</div>
 								</div>
-								<div className="flex items-center gap-2">
-									<span className="text-xs text-muted-foreground">{proc.count} payments</span>
-									<Badge variant="outline" className="text-xs">
-										{proc.status}
-									</Badge>
-								</div>
-							</div>
-						))}
+							))
+						)}
 					</div>
 				</div>
 			</div>
@@ -202,6 +408,10 @@ export default function PaymentsPage() {
 								<Download className="mr-2 h-4 w-4" />
 								Export
 							</Button>
+							<Button variant="outline" size="sm">
+								<RefreshCw className="mr-2 h-4 w-4" />
+								Sync
+							</Button>
 						</div>
 					</div>
 					<div className="mt-4">
@@ -210,6 +420,8 @@ export default function PaymentsPage() {
 							<Input
 								placeholder="Search payments..."
 								className="pl-10"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
 						</div>
 					</div>
@@ -221,42 +433,51 @@ export default function PaymentsPage() {
 							<tr>
 								<th className="text-left p-4 font-medium text-sm">Payment ID</th>
 								<th className="text-left p-4 font-medium text-sm">Date</th>
-								<th className="text-left p-4 font-medium text-sm">Client</th>
-								<th className="text-left p-4 font-medium text-sm">Invoice</th>
+								<th className="text-left p-4 font-medium text-sm">Type</th>
+								<th className="text-left p-4 font-medium text-sm">Description</th>
 								<th className="text-left p-4 font-medium text-sm">Method</th>
-								<th className="text-left p-4 font-medium text-sm">Processor</th>
 								<th className="text-right p-4 font-medium text-sm">Amount</th>
+								<th className="text-right p-4 font-medium text-sm">Fee</th>
 								<th className="text-left p-4 font-medium text-sm">Status</th>
 								<th className="text-left p-4 font-medium text-sm">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
-							{payments.map((payment) => (
-								<tr key={payment.id} className="border-b hover:bg-muted/50 transition-colors">
-									<td className="p-4 font-mono text-sm">{payment.id}</td>
-									<td className="p-4 text-sm">{payment.date}</td>
-									<td className="p-4 text-sm">{payment.client}</td>
-									<td className="p-4 font-mono text-sm">{payment.invoice}</td>
-									<td className="p-4 text-sm">{payment.method}</td>
-									<td className="p-4 text-sm">{payment.processor}</td>
-									<td className="p-4 text-sm text-right font-semibold">${payment.amount.toFixed(2)}</td>
-									<td className="p-4">
-										<Badge 
-											variant={
-												payment.status === 'completed' ? 'default' : 
-												payment.status === 'pending' || payment.status === 'processing' ? 'secondary' : 
-												'destructive'
-											}
-											className="text-xs"
-										>
-											{payment.status}
-										</Badge>
-									</td>
-									<td className="p-4">
-										<Button variant="ghost" size="sm">View</Button>
+							{payments.length === 0 ? (
+								<tr>
+									<td colSpan={9} className="text-center py-8 text-muted-foreground">
+										No payments found. Record your first payment to get started.
 									</td>
 								</tr>
-							))}
+							) : (
+								payments.map((payment) => (
+									<tr key={payment.id} className="border-b hover:bg-muted/50 transition-colors">
+										<td className="p-4 font-mono text-sm">{payment.id}</td>
+										<td className="p-4 text-sm">{new Date(payment.createdAt).toLocaleDateString()}</td>
+										<td className="p-4 text-sm">{payment.paymentType.replace('_', ' ')}</td>
+										<td className="p-4 text-sm">{payment.description || 'N/A'}</td>
+										<td className="p-4 text-sm">
+											{paymentMethods.find(m => m.id === payment.paymentMethodId)?.name || 'Unknown'}
+										</td>
+										<td className="p-4 text-sm text-right font-semibold">${Number(payment.amount).toFixed(2)}</td>
+										<td className="p-4 text-sm text-right text-muted-foreground">${Number(payment.processingFee).toFixed(2)}</td>
+										<td className="p-4">
+											<div className="flex items-center gap-2">
+												{getStatusIcon(payment.status)}
+												<Badge 
+													variant={getStatusBadgeVariant(payment.status)}
+													className="text-xs"
+												>
+													{payment.status}
+												</Badge>
+											</div>
+										</td>
+										<td className="p-4">
+											<Button variant="ghost" size="sm">View</Button>
+										</td>
+									</tr>
+								))
+							)}
 						</tbody>
 					</table>
 				</div>
@@ -264,4 +485,3 @@ export default function PaymentsPage() {
 		</div>
 	);
 }
-
