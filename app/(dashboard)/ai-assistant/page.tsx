@@ -1,151 +1,359 @@
-import { Badge } from "@/components/ui/badge";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Bot, Zap, TrendingUp, DollarSign, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { 
+	Send, 
+	Bot, 
+	User, 
+	MessageSquare, 
+	Sparkles, 
+	TrendingUp,
+	AlertCircle,
+	CheckCircle,
+	Lightbulb,
+	Loader2,
+	Plus,
+	Trash2
+} from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+interface ChatMessage {
+	id: string;
+	conversationId: string;
+	role: 'user' | 'assistant';
+	content: string;
+	metadata?: {
+		suggestions?: string[];
+		relatedData?: {
+			invoices?: Array<{ id: string; amount: number; status: string }>;
+			expenses?: Array<{ id: string; amount: number; category: string }>;
+			clients?: Array<{ id: string; name: string; status: string }>;
+		};
+		confidence?: number;
+	};
+	createdAt: string;
+}
+
+interface Conversation {
+	id: string;
+	userId: string;
+	title: string;
+	lastMessageAt: string;
+	messageCount: number;
+	createdAt: string;
+}
 
 export default function AIAssistantPage() {
+	const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+	const [inputMessage, setInputMessage] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const queryClient = useQueryClient();
+
+	// Fetch conversations
+	const { data: conversationsData, isLoading: conversationsLoading } = useQuery({
+		queryKey: ['ai-conversations'],
+		queryFn: async () => {
+			const response = await fetch('/api/ai/chat/conversations');
+			if (!response.ok) throw new Error('Failed to fetch conversations');
+			return response.json();
+		},
+	});
+
+	// Fetch messages for selected conversation
+	const { data: messagesData, isLoading: messagesLoading } = useQuery({
+		queryKey: ['ai-messages', selectedConversation],
+		queryFn: async () => {
+			if (!selectedConversation) return { messages: [] };
+			const response = await fetch(`/api/ai/chat/conversations/${selectedConversation}`);
+			if (!response.ok) throw new Error('Failed to fetch messages');
+			return response.json();
+		},
+		enabled: !!selectedConversation,
+	});
+
+	// Fetch conversation suggestions
+	const { data: suggestionsData } = useQuery({
+		queryKey: ['ai-suggestions'],
+		queryFn: async () => {
+			const response = await fetch('/api/ai/chat/suggestions');
+			if (!response.ok) throw new Error('Failed to fetch suggestions');
+			return response.json();
+		},
+	});
+
+	// Send message mutation
+	const sendMessageMutation = useMutation({
+		mutationFn: async (message: string) => {
+			if (!selectedConversation) {
+				// Create new conversation
+				const convResponse = await fetch('/api/ai/chat/conversations', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ title: message.slice(0, 50) }),
+				});
+				const { conversation } = await convResponse.json();
+				setSelectedConversation(conversation.id);
+				
+				// Send message to new conversation
+				const response = await fetch('/api/ai/chat/messages', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						conversationId: conversation.id,
+						message,
+					}),
+				});
+				return response.json();
+			} else {
+				// Send message to existing conversation
+				const response = await fetch('/api/ai/chat/messages', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						conversationId: selectedConversation,
+						message,
+					}),
+				});
+				return response.json();
+			}
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['ai-messages', selectedConversation] });
+			queryClient.invalidateQueries({ queryKey: ['ai-conversations'] });
+			setInputMessage("");
+		},
+	});
+
+	const conversations: Conversation[] = conversationsData?.conversations || [];
+	const messages: ChatMessage[] = messagesData?.messages || [];
+	const suggestions: string[] = suggestionsData?.suggestions || [];
+
+	// Auto-scroll to bottom when new messages arrive
+	useEffect(() => {
+		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+	}, [messages]);
+
+	const handleSendMessage = async () => {
+		if (!inputMessage.trim() || isLoading) return;
+		
+		setIsLoading(true);
+		try {
+			await sendMessageMutation.mutateAsync(inputMessage);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const handleSuggestionClick = (suggestion: string) => {
+		setInputMessage(suggestion);
+	};
+
+	const handleNewConversation = () => {
+		setSelectedConversation(null);
+		setInputMessage("");
+	};
+
 	return (
-		<div className="space-y-8 p-8">
-			{/* Header */}
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-3xl font-bold tracking-tight">AI Assistant</h1>
-					<p className="text-muted-foreground">
-						Get instant financial insights and guidance powered by AI
-					</p>
-				</div>
-				<Badge variant="secondary">Beta</Badge>
-			</div>
-
-			{/* Hero Section */}
-			<div className="rounded-lg border bg-gradient-to-r from-blue-50 to-purple-50 p-12 text-center">
-				<div className="flex justify-center mb-6">
-					<div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-100">
-						<Bot className="h-10 w-10 text-blue-600" />
+		<div className="flex h-[calc(100vh-4rem)]">
+			{/* Sidebar - Conversations */}
+			<div className="w-80 border-r bg-muted/30 flex flex-col">
+				<div className="p-4 border-b">
+					<div className="flex items-center justify-between mb-4">
+						<h2 className="text-lg font-semibold">Conversations</h2>
+						<Button size="sm" onClick={handleNewConversation}>
+							<Plus className="h-4 w-4" />
+						</Button>
 					</div>
+					{conversationsLoading ? (
+						<div className="flex items-center justify-center py-4">
+							<Loader2 className="h-4 w-4 animate-spin" />
 				</div>
-				<h2 className="text-3xl font-bold mb-4">Your Personal Financial AI</h2>
-				<p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-					Ask questions about your finances, get instant analysis, and receive personalized recommendations—all powered by advanced AI.
-				</p>
-				<div className="flex justify-center gap-3">
-					<Button size="lg">
-						<MessageSquare className="mr-2 h-5 w-5" />
-						Start Chat
-					</Button>
-					<Button variant="outline" size="lg">
-						View Examples
-					</Button>
+					) : conversations.length === 0 ? (
+						<div className="text-center text-muted-foreground py-4">
+							No conversations yet. Start a new chat!
 				</div>
-			</div>
-
-			{/* Capabilities */}
-			<div>
-				<h3 className="text-2xl font-semibold mb-6">What AI Assistant Can Do</h3>
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{[
-						{
-							icon: TrendingUp,
-							title: "Financial Analysis",
-							description: "Get instant analysis of your revenue, expenses, and cash flow trends with actionable insights.",
-							examples: ["What's my profit margin?", "Analyze my monthly expenses"]
-						},
-						{
-							icon: DollarSign,
-							title: "Budget Optimization",
-							description: "Identify opportunities to reduce costs and optimize your budget for better financial health.",
-							examples: ["Where can I cut costs?", "Optimize my spending"]
-						},
-						{
-							icon: FileText,
-							title: "Report Generation",
-							description: "Generate custom financial reports and summaries in seconds with natural language commands.",
-							examples: ["Create Q4 report", "Summarize this month"]
-						},
-						{
-							icon: Bot,
-							title: "Smart Recommendations",
-							description: "Receive personalized recommendations based on your financial patterns and industry best practices.",
-							examples: ["How to improve cash flow?", "Best payment terms?"]
-						},
-						{
-							icon: Zap,
-							title: "Quick Calculations",
-							description: "Perform complex financial calculations instantly without manual spreadsheet work.",
-							examples: ["Calculate ROI", "Project next quarter revenue"]
-						},
-						{
-							icon: MessageSquare,
-							title: "Natural Conversations",
-							description: "Chat naturally about your finances without learning complex commands or formulas.",
-							examples: ["Explain my dashboard", "What should I focus on?"]
-						},
-					].map((capability, index) => (
-						<div key={index} className="p-6 rounded-lg border bg-card hover:shadow-md transition-shadow">
-							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 mb-4">
-								<capability.icon className="h-6 w-6 text-blue-600" />
-							</div>
-							<h4 className="text-lg font-semibold mb-2">{capability.title}</h4>
-							<p className="text-sm text-muted-foreground mb-4">{capability.description}</p>
+					) : (
 							<div className="space-y-2">
-								{capability.examples.map((example, i) => (
-									<div key={i} className="text-xs p-2 rounded bg-muted">
-										"{example}"
+							{conversations.map((conversation) => (
+								<div
+									key={conversation.id}
+									className={`p-3 rounded-lg cursor-pointer transition-colors ${
+										selectedConversation === conversation.id
+											? 'bg-primary text-primary-foreground'
+											: 'hover:bg-muted'
+									}`}
+									onClick={() => setSelectedConversation(conversation.id)}
+								>
+									<div className="font-medium text-sm truncate">
+										{conversation.title}
 									</div>
-								))}
+									<div className="text-xs opacity-70">
+										{conversation.messageCount} messages
 							</div>
 						</div>
 					))}
 				</div>
+					)}
 			</div>
 
-			{/* Quick Actions */}
-			<div className="rounded-lg border bg-card p-6">
-				<h3 className="text-xl font-semibold mb-4">Popular Questions</h3>
-				<div className="grid gap-3 md:grid-cols-2">
-					{[
-						"What's my current cash runway?",
-						"How can I improve my profit margins?",
-						"Which clients are most profitable?",
-						"What's my average invoice payment time?",
-						"Show me expense trends for last 3 months",
-						"Compare Q3 vs Q4 revenue",
-						"What's my client acquisition cost?",
-						"Identify my largest expense categories",
-					].map((question, index) => (
+				{/* Suggestions */}
+				{suggestions.length > 0 && (
+					<div className="p-4 border-b">
+						<h3 className="text-sm font-medium mb-3">Quick Questions</h3>
+						<div className="space-y-2">
+							{suggestions.slice(0, 4).map((suggestion, index) => (
 						<Button
 							key={index}
 							variant="outline"
-							className="justify-start text-left h-auto py-3"
+									size="sm"
+									className="w-full justify-start text-left h-auto py-2"
+									onClick={() => handleSuggestionClick(suggestion)}
 						>
-							<MessageSquare className="mr-2 h-4 w-4 shrink-0" />
-							<span className="truncate">{question}</span>
+									<MessageSquare className="mr-2 h-3 w-3 shrink-0" />
+									<span className="text-xs truncate">{suggestion}</span>
 						</Button>
 					))}
 				</div>
+					</div>
+				)}
 			</div>
 
-			{/* Features Notice */}
-			<div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
-				<div className="flex items-start gap-3">
-					<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100">
+			{/* Main Chat Area */}
+			<div className="flex-1 flex flex-col">
+				{/* Header */}
+				<div className="p-4 border-b bg-muted/30">
+					<div className="flex items-center gap-3">
+						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
 						<Bot className="h-4 w-4 text-blue-600" />
 					</div>
 					<div>
-						<h4 className="font-semibold mb-2">AI Assistant Coming Soon</h4>
-						<p className="text-sm text-muted-foreground mb-4">
-							We're building an advanced AI assistant powered by the latest language models. 
-							It will understand your financial data, provide intelligent insights, and help you make better business decisions.
-						</p>
-						<ul className="space-y-1 text-sm text-muted-foreground">
-							<li>• Context-aware responses based on your financial data</li>
-							<li>• Natural language understanding for easy interaction</li>
-							<li>• Real-time data analysis and insights</li>
-							<li>• Personalized recommendations and action items</li>
-						</ul>
+							<h1 className="font-semibold">AI Financial Assistant</h1>
+							<p className="text-sm text-muted-foreground">
+								Ask me anything about your finances
+							</p>
+						</div>
+					</div>
+				</div>
+
+				{/* Messages */}
+				<div className="flex-1 overflow-y-auto p-4 space-y-4">
+					{!selectedConversation ? (
+						<div className="flex items-center justify-center h-full">
+							<div className="text-center">
+								<div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 mx-auto mb-4">
+									<Bot className="h-8 w-8 text-blue-600" />
+								</div>
+								<h3 className="text-lg font-semibold mb-2">Start a New Conversation</h3>
+								<p className="text-muted-foreground mb-6">
+									Ask me anything about your finances, get insights, and receive personalized recommendations.
+								</p>
+								<div className="space-y-2">
+									{suggestions.slice(0, 3).map((suggestion, index) => (
+										<Button
+											key={index}
+											variant="outline"
+											className="w-full justify-start"
+											onClick={() => handleSuggestionClick(suggestion)}
+										>
+											<MessageSquare className="mr-2 h-4 w-4" />
+											{suggestion}
+										</Button>
+									))}
+								</div>
+							</div>
+						</div>
+					) : messagesLoading ? (
+						<div className="flex items-center justify-center h-full">
+							<Loader2 className="h-6 w-6 animate-spin" />
+						</div>
+					) : messages.length === 0 ? (
+						<div className="flex items-center justify-center h-full">
+							<div className="text-center">
+								<Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+								<p className="text-muted-foreground">Start the conversation!</p>
+							</div>
+						</div>
+					) : (
+						messages.map((message) => (
+							<div
+								key={message.id}
+								className={`flex gap-3 ${
+									message.role === 'user' ? 'justify-end' : 'justify-start'
+								}`}
+							>
+								{message.role === 'assistant' && (
+									<div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+										<Bot className="h-4 w-4 text-blue-600" />
+									</div>
+								)}
+								<div
+									className={`max-w-[80%] rounded-lg p-3 ${
+										message.role === 'user'
+											? 'bg-primary text-primary-foreground'
+											: 'bg-muted'
+									}`}
+								>
+									<div className="whitespace-pre-wrap">{message.content}</div>
+									{message.metadata?.suggestions && message.metadata.suggestions.length > 0 && (
+										<div className="mt-3 space-y-1">
+											{message.metadata.suggestions.map((suggestion, index) => (
+												<Button
+													key={index}
+													variant="ghost"
+													size="sm"
+													className="h-auto py-1 px-2 text-xs"
+													onClick={() => handleSuggestionClick(suggestion)}
+												>
+													{suggestion}
+												</Button>
+											))}
+										</div>
+									)}
+									{message.metadata?.confidence && (
+										<div className="mt-2 text-xs opacity-70">
+											Confidence: {message.metadata.confidence}%
+										</div>
+									)}
+								</div>
+								{message.role === 'user' && (
+									<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
+										<User className="h-4 w-4 text-primary-foreground" />
+									</div>
+								)}
+							</div>
+						))
+					)}
+					<div ref={messagesEndRef} />
+				</div>
+
+				{/* Input */}
+				<div className="p-4 border-t">
+					<div className="flex gap-2">
+						<Input
+							placeholder="Ask me anything about your finances..."
+							value={inputMessage}
+							onChange={(e) => setInputMessage(e.target.value)}
+							onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+							disabled={isLoading}
+						/>
+						<Button 
+							onClick={handleSendMessage}
+							disabled={!inputMessage.trim() || isLoading}
+						>
+							{isLoading ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								<Send className="h-4 w-4" />
+							)}
+						</Button>
 					</div>
 				</div>
 			</div>
 		</div>
 	);
 }
-

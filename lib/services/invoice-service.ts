@@ -10,7 +10,7 @@ import { NotificationHelpers } from './notification-service';
 
 interface CreateInvoiceInput {
 	userId: string;
-	clientId?: number;
+	clientId?: string;
 	clientName: string;
 	clientEmail: string;
 	clientAddress?: string;
@@ -33,7 +33,7 @@ interface CreateInvoiceInput {
 }
 
 interface UpdateInvoiceInput extends Partial<CreateInvoiceInput> {
-	id: number;
+	id: string;
 	status?: string;
 }
 
@@ -123,7 +123,7 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<Invoice>
 /**
  * Get invoice by ID
  */
-export async function getInvoiceById(id: number, userId: string): Promise<Invoice | null> {
+export async function getInvoiceById(id: string, userId: string): Promise<Invoice | null> {
 	const invoice = await db.query.invoices.findFirst({
 		where: and(
 			eq(invoices.id, id),
@@ -214,7 +214,7 @@ export async function updateInvoice(input: UpdateInvoiceInput): Promise<Invoice>
 /**
  * Mark invoice as sent
  */
-export async function markInvoiceAsSent(id: number, userId: string): Promise<Invoice> {
+export async function markInvoiceAsSent(id: string, userId: string): Promise<Invoice> {
 	const [updated] = await db.update(invoices)
 		.set({
 			status: 'sent',
@@ -287,7 +287,7 @@ export async function recordInvoicePayment(
 /**
  * Delete invoice
  */
-export async function deleteInvoice(id: number, userId: string): Promise<void> {
+export async function deleteInvoice(id: string, userId: string): Promise<void> {
 	await db.delete(invoices)
 		.where(and(
 			eq(invoices.id, id),

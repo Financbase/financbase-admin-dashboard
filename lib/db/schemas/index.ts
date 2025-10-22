@@ -11,6 +11,7 @@ export * from "./invoices.schema";
 export * from "./expenses.schema";
 export * from "./clients.schema";
 export * from "./transactions.schema";
+export * from "./accounts.schema";
 
 // Analytics and reporting
 export * from "./analytics.schema";

@@ -2,22 +2,22 @@
  * Database schema for invoice management
  */
 
-import { pgTable, serial, text, decimal, timestamp, jsonb, integer, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, decimal, timestamp, jsonb, integer, boolean, uuid } from 'drizzle-orm/pg-core';
 
 /**
  * Invoices Table
  * Main table for storing invoice data
  */
 export const invoices = pgTable('invoices', {
-	id: serial('id').primaryKey(),
-	userId: text('user_id').notNull(),
+	id: uuid('id').primaryKey().defaultRandom(),
+	userId: uuid('user_id').notNull(),
 	
 	// Invoice identification
 	invoiceNumber: text('invoice_number').unique().notNull(),
 	reference: text('reference'), // Optional reference number
 	
 	// Client information
-	clientId: integer('client_id'), // Foreign key to clients table
+	clientId: uuid('client_id').notNull(), // Foreign key to clients table
 	clientName: text('client_name').notNull(),
 	clientEmail: text('client_email').notNull(),
 	clientAddress: text('client_address'),
