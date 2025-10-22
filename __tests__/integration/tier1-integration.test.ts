@@ -18,11 +18,78 @@ const mockNotificationService = {
   getUnreadCount: vi.fn(),
   getUserPreferences: vi.fn(),
   updateUserPreferences: vi.fn(),
+  create: vi.fn(),
 };
 
 vi.mock('@/lib/services/notification-service', () => ({
   NotificationService: mockNotificationService,
 }));
+
+// Set up mock implementations
+mockNotificationService.createFinancialNotification.mockImplementation(async (userId, type, title, message, data, actionUrl) => ({
+  id: 1,
+  userId,
+  type,
+  title,
+  message,
+  data,
+  actionUrl,
+  read: false,
+  createdAt: new Date(),
+}));
+
+mockNotificationService.createSystemAlert.mockImplementation(async (userId, title, message, priority, actionUrl) => ({
+  id: 2,
+  userId,
+  type: 'alert',
+  category: 'system',
+  priority,
+  title,
+  message,
+  actionUrl,
+  read: false,
+  createdAt: new Date(),
+}));
+
+mockNotificationService.getForUser.mockImplementation(async (userId, filters) => {
+  // Return mock notifications for the user
+  return [{
+    id: 1,
+    userId,
+    type: 'invoice',
+    title: 'Consistency Test',
+    message: 'Testing notification consistency',
+    read: false,
+    createdAt: new Date(),
+  }];
+});
+
+mockNotificationService.getUnreadCount.mockResolvedValue(5);
+mockNotificationService.markAsRead.mockResolvedValue(true);
+mockNotificationService.getUserPreferences.mockResolvedValue({
+  emailInvoices: true,
+  emailExpenses: true,
+  emailReports: true,
+  emailAlerts: true,
+  pushRealtime: true,
+  pushDaily: true,
+});
+
+mockNotificationService.updateUserPreferences.mockImplementation(async (userId, updates) => {
+  // Update the mock to return the updated preferences
+  mockNotificationService.getUserPreferences.mockResolvedValue({
+    emailInvoices: updates.emailInvoices ?? true,
+    emailExpenses: updates.emailExpenses ?? true,
+    emailReports: updates.emailReports ?? true,
+    emailAlerts: updates.emailAlerts ?? true,
+    pushRealtime: updates.pushRealtime ?? true,
+    pushDaily: updates.pushDaily ?? true,
+  });
+  return {
+    ...updates,
+    userId,
+  };
+});
 
 // Test user ID (would come from Clerk in real scenario)
 const TEST_USER_ID = 'user_12345';
@@ -286,6 +353,9 @@ describe('Tier 1 Component Integration Tests', () => {
 
 	describe('Error Handling', () => {
 		it('should handle invalid notification data gracefully', async () => {
+			// Mock create method for this test
+			mockNotificationService.create = vi.fn().mockRejectedValue(new Error('Invalid data'));
+			
 			try {
 				await mockNotificationService.create({
 					userId: '', // Invalid user ID
@@ -293,6 +363,7 @@ describe('Tier 1 Component Integration Tests', () => {
 					title: '',
 					message: '',
 				});
+				expect.fail('Should have thrown an error');
 			} catch (error) {
 				expect(error).toBeDefined();
 			}

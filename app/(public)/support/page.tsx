@@ -4,6 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	AlertCircle,
 	ArrowLeft,
@@ -33,13 +36,80 @@ import {
 	Shield,
 	Users,
 	Zap,
+	ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+interface ContactFormData {
+	name: string;
+	email: string;
+	subject: string;
+	priority: string;
+	category: string;
+	message: string;
+}
+
 export default function SupportPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [openFaq, setOpenFaq] = useState<number | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [formData, setFormData] = useState<ContactFormData>({
+		name: "",
+		email: "",
+		subject: "",
+		priority: "medium",
+		category: "general",
+		message: "",
+	});
+	const [formErrors, setFormErrors] = useState<Partial<ContactFormData>>({});
+	const [submitMessage, setSubmitMessage] = useState("");
+
+	const validateForm = (): boolean => {
+		const errors: Partial<ContactFormData> = {};
+
+		if (!formData.name.trim()) errors.name = "Name is required";
+		if (!formData.email.trim()) errors.email = "Email is required";
+		if (!formData.email.includes("@")) errors.email = "Valid email is required";
+		if (!formData.subject.trim()) errors.subject = "Subject is required";
+		if (!formData.message.trim()) errors.message = "Message is required";
+		if (formData.message.length < 10) errors.message = "Message must be at least 10 characters";
+
+		setFormErrors(errors);
+		return Object.keys(errors).length === 0;
+	};
+
+	const handleInputChange = (field: keyof ContactFormData, value: string) => {
+		setFormData(prev => ({ ...prev, [field]: value }));
+		setFormErrors(prev => ({ ...prev, [field]: "" }));
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+
+		if (!validateForm()) return;
+
+		setIsSubmitting(true);
+
+		try {
+			// Simulate API call
+			await new Promise(resolve => setTimeout(resolve, 2000));
+
+			setSubmitMessage("✅ Thank you! We've received your message and will respond within 24 hours.");
+			setFormData({
+				name: "",
+				email: "",
+				subject: "",
+				priority: "medium",
+				category: "general",
+				message: "",
+			});
+		} catch (error) {
+			setSubmitMessage("❌ Something went wrong. Please try again or contact us directly.");
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 
 	const faqItems = [
 		{
@@ -206,144 +276,275 @@ export default function SupportPage() {
 
 			<div className="container mx-auto px-4 py-16">
 				<div className="max-w-6xl mx-auto">
-					{/* Contact Methods */}
-					<div className="mb-16">
-						<h2 className="text-2xl font-semibold mb-6">Get in Touch</h2>
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-							{contactMethods.map((method, index) => (
-								<Card
-									key={`contact-method-${index}`}
-									className="group hover:shadow-lg transition-all duration-200"
-								>
-									<CardContent className="p-6 text-center">
-										<div className="inline-flex p-3 rounded-full bg-primary/10 text-primary mb-4">
-											<method.icon className="h-6 w-6" />
-										</div>
-										<h3 className="text-lg font-semibold mb-2">
-											{method.title}
-										</h3>
-										<p className="text-muted-foreground mb-4">
-											{method.description}
-										</p>
-										<div className="space-y-2 text-sm">
-											<div className="flex items-center justify-center gap-2">
-												<Clock className="h-4 w-4 text-muted-foreground" />
-												<span>{method.availability}</span>
-											</div>
-											<div className="flex items-center justify-center gap-2">
-												<CheckCircle className="h-4 w-4 text-green-600" />
-												<span className={method.color}>
-													{method.responseTime}
-												</span>
-											</div>
-										</div>
-										<Button className="w-full mt-4" variant="outline">
-											Get Started
-										</Button>
-									</CardContent>
-								</Card>
-							))}
-						</div>
-					</div>
+					{/* Interactive Tabs Section */}
+					<Tabs defaultValue="categories" className="space-y-8">
+						<TabsList className="grid w-full grid-cols-4">
+							<TabsTrigger value="categories">Browse Topics</TabsTrigger>
+							<TabsTrigger value="faq">FAQ</TabsTrigger>
+							<TabsTrigger value="contact">Contact Us</TabsTrigger>
+							<TabsTrigger value="support">Support Options</TabsTrigger>
+						</TabsList>
 
-					{/* Support Categories */}
-					<div className="mb-16">
-						<h2 className="text-2xl font-semibold mb-6">Browse by Category</h2>
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-							{supportCategories.map((category, index) => (
-								<Link
-									key={`category-${index}`}
-									href={`/support/category/${category.title.toLowerCase().replace(/\s+/g, "-")}`}
-								>
-									<Card className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
-										<CardContent className="p-6">
-											<div className="flex items-start gap-4">
-												<div
-													className={`p-3 rounded-lg ${category.color} text-white`}
-												>
-													<category.icon className="h-6 w-6" />
-												</div>
-												<div className="flex-1">
-													<h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
-														{category.title}
-													</h3>
-													<p className="text-muted-foreground mb-3">
-														{category.description}
-													</p>
-													<div className="flex items-center gap-2 text-sm text-muted-foreground">
-														<FileText className="h-4 w-4" />
-														<span>{category.articles} articles</span>
-													</div>
-												</div>
-												<ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-											</div>
-										</CardContent>
-									</Card>
-								</Link>
-							))}
-						</div>
-					</div>
-
-					{/* Popular Articles */}
-					<div className="mb-16">
-						<h2 className="text-2xl font-semibold mb-6">Popular Articles</h2>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							{popularArticles.map((article, index) => (
-								<Link key={`article-${index}`} href={article.href}>
-									<Card className="group hover:shadow-md transition-all duration-200">
-										<CardContent className="p-6">
-											<div className="flex items-center justify-between">
-												<div className="flex-1">
-													<h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
-														{article.title}
-													</h3>
-													<div className="flex items-center gap-2 text-sm text-muted-foreground">
-														<Users className="h-4 w-4" />
-														<span>{article.views} views</span>
-													</div>
-												</div>
-												<ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-											</div>
-										</CardContent>
-									</Card>
-								</Link>
-							))}
-						</div>
-					</div>
-
-					{/* FAQ Section */}
-					<div className="mb-16">
-						<h2 className="text-2xl font-semibold mb-6">
-							Frequently Asked Questions
-						</h2>
-						<div className="space-y-4">
-							{faqItems.map((item, index) => (
-								<Card key={`faq-${index}`} className="overflow-hidden">
-									<button
-										type="button"
-										className="w-full p-6 text-left hover:bg-muted/50 transition-colors"
-										onClick={() => setOpenFaq(openFaq === index ? null : index)}
+						{/* Categories Tab */}
+						<TabsContent value="categories" className="space-y-8">
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+								{supportCategories.map((category) => (
+									<Link
+										key={`category-${category.title.toLowerCase().replace(/\s+/g, '-')}`}
+										href={`/support/category/${category.title.toLowerCase().replace(/\s+/g, "-")}`}
 									>
-										<div className="flex items-center justify-between">
-											<h3 className="font-semibold text-lg">{item.question}</h3>
-											{openFaq === index ? (
-												<ChevronUp className="h-5 w-5 text-muted-foreground" />
-											) : (
-												<ChevronDown className="h-5 w-5 text-muted-foreground" />
+										<Card className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+											<CardContent className="p-6">
+												<div className="flex items-start gap-4">
+													<div
+														className={`p-3 rounded-lg ${category.color} text-white`}
+													>
+														<category.icon className="h-6 w-6" />
+													</div>
+													<div className="flex-1">
+														<h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
+															{category.title}
+														</h3>
+														<p className="text-muted-foreground mb-3">
+															{category.description}
+														</p>
+														<div className="flex items-center gap-2 text-sm text-muted-foreground">
+															<FileText className="h-4 w-4" />
+															<span>{category.articles} articles</span>
+														</div>
+													</div>
+													<ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+												</div>
+											</CardContent>
+										</Card>
+									</Link>
+								))}
+							</div>
+						</TabsContent>
+
+						{/* FAQ Tab */}
+						<TabsContent value="faq" className="space-y-8">
+							<div className="space-y-4">
+								{faqItems.map((item) => (
+									<Card key={`faq-${item.question.toLowerCase().replace(/\s+/g, '-').slice(0, 50)}`} className="overflow-hidden">
+										<button
+											type="button"
+											className="w-full p-6 text-left hover:bg-muted/50 transition-colors"
+											onClick={() => setOpenFaq(openFaq === faqItems.indexOf(item) ? null : faqItems.indexOf(item))}
+										>
+											<div className="flex items-center justify-between">
+												<h3 className="font-semibold text-lg">{item.question}</h3>
+												{openFaq === faqItems.indexOf(item) ? (
+													<ChevronUp className="h-5 w-5 text-muted-foreground" />
+												) : (
+													<ChevronDown className="h-5 w-5 text-muted-foreground" />
+												)}
+											</div>
+										</button>
+										{openFaq === faqItems.indexOf(item) && (
+											<div className="px-6 pb-6">
+												<p className="text-muted-foreground leading-relaxed">
+													{item.answer}
+												</p>
+											</div>
+										)}
+									</Card>
+								))}
+							</div>
+						</TabsContent>
+
+						{/* Contact Form Tab */}
+						<TabsContent value="contact" className="space-y-8">
+							<div className="max-w-2xl mx-auto">
+								<h2 className="text-2xl font-semibold mb-6 text-center">
+									Send us a Message
+								</h2>
+								<p className="text-muted-foreground text-center mb-8">
+									Fill out the form below and we'll get back to you as soon as possible.
+								</p>
+
+								{submitMessage && (
+									<div className={`mb-6 p-4 rounded-lg border ${
+										submitMessage.includes('✅')
+											? 'bg-green-50 border-green-200 text-green-800'
+											: 'bg-red-50 border-red-200 text-red-800'
+									}`}>
+										{submitMessage}
+									</div>
+								)}
+
+								<form onSubmit={handleSubmit} className="space-y-6">
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+										<div>
+											<label htmlFor="name" className="block text-sm font-medium mb-2">
+												Full Name *
+											</label>
+											<Input
+												id="name"
+												type="text"
+												value={formData.name}
+												onChange={(e) => handleInputChange('name', e.target.value)}
+												className={formErrors.name ? 'border-red-500' : ''}
+												placeholder="Enter your full name"
+											/>
+											{formErrors.name && (
+												<p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
 											)}
 										</div>
-									</button>
-									{openFaq === index && (
-										<div className="px-6 pb-6">
-											<p className="text-muted-foreground leading-relaxed">
-												{item.answer}
-											</p>
+										<div>
+											<label htmlFor="email" className="block text-sm font-medium mb-2">
+												Email Address *
+											</label>
+											<Input
+												id="email"
+												type="email"
+												value={formData.email}
+												onChange={(e) => handleInputChange('email', e.target.value)}
+												className={formErrors.email ? 'border-red-500' : ''}
+												placeholder="Enter your email address"
+											/>
+											{formErrors.email && (
+												<p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+											)}
 										</div>
-									)}
-								</Card>
-							))}
-						</div>
-					</div>
+									</div>
+
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+										<div>
+											<label htmlFor="subject" className="block text-sm font-medium mb-2">
+												Subject *
+											</label>
+											<Input
+												id="subject"
+												type="text"
+												value={formData.subject}
+												onChange={(e) => handleInputChange('subject', e.target.value)}
+												className={formErrors.subject ? 'border-red-500' : ''}
+												placeholder="Brief description of your issue"
+											/>
+											{formErrors.subject && (
+												<p className="text-red-500 text-sm mt-1">{formErrors.subject}</p>
+											)}
+										</div>
+										<div>
+											<label htmlFor="category" className="block text-sm font-medium mb-2">
+												Category
+											</label>
+											<Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+												<SelectTrigger>
+													<SelectValue placeholder="Select a category" />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="general">General Inquiry</SelectItem>
+													<SelectItem value="technical">Technical Support</SelectItem>
+													<SelectItem value="billing">Billing & Account</SelectItem>
+													<SelectItem value="feature">Feature Request</SelectItem>
+													<SelectItem value="bug">Bug Report</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
+									</div>
+
+									<div>
+										<label htmlFor="priority" className="block text-sm font-medium mb-2">
+											Priority
+										</label>
+										<Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
+											<SelectTrigger className="w-full md:w-48">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="low">Low - General question</SelectItem>
+												<SelectItem value="medium">Medium - Issue affecting work</SelectItem>
+												<SelectItem value="high">High - Urgent issue</SelectItem>
+												<SelectItem value="critical">Critical - System down</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+
+									<div>
+										<label htmlFor="message" className="block text-sm font-medium mb-2">
+											Message *
+										</label>
+										<Textarea
+											id="message"
+											value={formData.message}
+											onChange={(e) => handleInputChange('message', e.target.value)}
+											className={`min-h-32 ${formErrors.message ? 'border-red-500' : ''}`}
+											placeholder="Please describe your issue or question in detail..."
+										/>
+										{formErrors.message && (
+											<p className="text-red-500 text-sm mt-1">{formErrors.message}</p>
+										)}
+									</div>
+
+									<Button
+										type="submit"
+										disabled={isSubmitting}
+										className="w-full"
+									>
+										{isSubmitting ? (
+											<>
+												<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+												Sending...
+											</>
+										) : (
+											<>
+												<Mail className="h-4 w-4 mr-2" />
+												Send Message
+											</>
+										)}
+									</Button>
+								</form>
+							</div>
+						</TabsContent>
+
+						{/* Support Options Tab */}
+						<TabsContent value="support" className="space-y-8">
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+								{contactMethods.map((method) => (
+									<Card
+										key={`contact-${method.title.toLowerCase().replace(/\s+/g, '-')}`}
+										className="group hover:shadow-md transition-all duration-200"
+									>
+										<CardContent className="p-6">
+											<div className="flex items-start gap-4">
+												<div className="p-3 rounded-lg bg-primary/10 text-primary">
+													<method.icon className="h-6 w-6" />
+												</div>
+												<div className="flex-1">
+													<div className="flex items-center justify-between mb-2">
+														<h3 className="font-semibold">
+															{method.title}
+														</h3>
+														<Badge
+															variant="secondary"
+															className="text-xs"
+														>
+															{method.availability}
+														</Badge>
+													</div>
+													<p className="text-sm text-muted-foreground mb-4">
+														{method.description}
+													</p>
+													<Button
+														asChild
+														size="sm"
+														className="group-hover:bg-primary/90"
+													>
+														<Link href="/contact">
+															Get Started
+															<ExternalLink className="h-3 w-3 ml-1" />
+														</Link>
+													</Button>
+												</div>
+											</div>
+											</CardContent>
+										</Card>
+									))}
+							</div>
+						</TabsContent>
+					</Tabs>
 
 					{/* Still Need Help */}
 					<Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">

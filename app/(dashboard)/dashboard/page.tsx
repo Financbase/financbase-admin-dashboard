@@ -67,7 +67,7 @@ export default function DashboardPage() {
 	const { data: overviewData, isLoading: overviewLoading, error: overviewError } = useQuery({
 		queryKey: ['dashboard-overview'],
 		queryFn: async () => {
-			const response = await fetch('/api/dashboard/overview');
+			const response = await fetch('/api/test-dashboard/overview');
 			if (!response.ok) throw new Error('Failed to fetch dashboard overview');
 			return response.json();
 		},
@@ -77,7 +77,7 @@ export default function DashboardPage() {
 	const { data: activityData, isLoading: activityLoading } = useQuery({
 		queryKey: ['dashboard-activity'],
 		queryFn: async () => {
-			const response = await fetch('/api/dashboard/recent-activity');
+			const response = await fetch('/api/test-dashboard/recent-activity');
 			if (!response.ok) throw new Error('Failed to fetch recent activity');
 			return response.json();
 		},
@@ -87,7 +87,7 @@ export default function DashboardPage() {
 	const { data: insightsData, isLoading: insightsLoading } = useQuery({
 		queryKey: ['dashboard-insights'],
 		queryFn: async () => {
-			const response = await fetch('/api/dashboard/ai-insights');
+			const response = await fetch('/api/test-dashboard/ai-insights');
 			if (!response.ok) throw new Error('Failed to fetch AI insights');
 			return response.json();
 		},

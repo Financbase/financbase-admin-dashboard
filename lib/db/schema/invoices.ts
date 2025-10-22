@@ -8,24 +8,27 @@ import { pgTable, serial, text, decimal, timestamp, jsonb, integer, boolean, uui
  * Invoices Table
  * Main table for storing invoice data
  */
-export const invoices = pgTable('invoices', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+export const invoices = pgTable('financbase_invoices', {
+	id: serial('id').primaryKey(),
+	userId: text('user_id').notNull(),
 	
 	// Invoice identification
 	invoiceNumber: text('invoice_number').unique().notNull(),
 	reference: text('reference'), // Optional reference number
 	
 	// Client information
-	clientId: uuid('client_id').notNull(), // Foreign key to clients table
+	clientId: integer('client_id'), // Foreign key to clients table
+	clientName: text('client_name').notNull(),
+	clientEmail: text('client_email').notNull(),
+	clientAddress: text('client_address'),
+	clientPhone: text('client_phone'),
 	
 	// Financial details
-	amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
 	currency: text('currency').default('USD').notNull(),
 	subtotal: decimal('subtotal', { precision: 12, scale: 2 }).notNull(),
-	taxRate: decimal('tax_rate', { precision: 5, scale: 2 }).default('0'),
-	taxAmount: decimal('tax_amount', { precision: 12, scale: 2 }).default('0'),
-	discountAmount: decimal('discount_amount', { precision: 12, scale: 2 }).default('0'),
+	taxRate: decimal('tax_rate', { precision: 5, scale: 4 }),
+	taxAmount: decimal('tax_amount', { precision: 12, scale: 2 }),
+	discountAmount: decimal('discount_amount', { precision: 12, scale: 2 }),
 	total: decimal('total', { precision: 12, scale: 2 }).notNull(),
 	
 	// Status and dates
@@ -36,7 +39,7 @@ export const invoices = pgTable('invoices', {
 	sentDate: timestamp('sent_date'),
 	
 	// Payment tracking
-	amountPaid: decimal('amount_paid', { precision: 12, scale: 2 }).default('0'),
+	amountPaid: decimal('amount_paid', { precision: 12, scale: 2 }),
 	paymentMethod: text('payment_method'), // cash, card, bank_transfer, check, other
 	paymentReference: text('payment_reference'),
 	
@@ -45,7 +48,8 @@ export const invoices = pgTable('invoices', {
 	terms: text('terms'),
 	footer: text('footer'),
 	
-	// Line items are stored in separate table (invoice_line_items)
+	// Line items stored as JSONB
+	items: jsonb('items').notNull(),
 	
 	// Recurring invoice settings
 	isRecurring: boolean('is_recurring').default(false).notNull(),
@@ -54,11 +58,7 @@ export const invoices = pgTable('invoices', {
 	parentInvoiceId: integer('parent_invoice_id'), // For recurring invoices
 	
 	// Metadata
-	metadata: jsonb('metadata').$type<{
-		templateId?: string;
-		tags?: string[];
-		customFields?: Record<string, unknown>;
-	}>(),
+	metadata: jsonb('metadata'),
 	
 	// Timestamps
 	createdAt: timestamp('created_at').defaultNow().notNull(),

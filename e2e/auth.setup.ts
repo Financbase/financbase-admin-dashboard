@@ -15,6 +15,8 @@ setup('authenticate', async ({ page }) => {
 	}
 
 	try {
+		console.log('🔧 Setting up authentication for:', process.env.TEST_USER_EMAIL);
+
 		// Go to dashboard first to trigger auth redirect
 		await page.goto('/dashboard');
 
@@ -23,6 +25,8 @@ setup('authenticate', async ({ page }) => {
 
 		// Check if we're on sign-in page
 		const currentUrl = page.url();
+		console.log('📍 Current URL:', currentUrl);
+
 		if (currentUrl.includes('/sign-in')) {
 			console.log('🔐 Authentication required, signing in...');
 
@@ -48,6 +52,8 @@ setup('authenticate', async ({ page }) => {
 
 			// Wait for redirect to dashboard
 			await page.waitForURL('/dashboard', { timeout: 20000 });
+		} else {
+			console.log('✅ Dashboard loaded directly (middleware bypass active)');
 		}
 
 		// Ensure user is authenticated and dashboard loads

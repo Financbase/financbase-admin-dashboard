@@ -12,6 +12,7 @@ const mockClientService = {
   getClientById: vi.fn(),
   updateClient: vi.fn(),
   getClientStats: vi.fn(),
+  getClientAnalysis: vi.fn(),
 };
 
 const mockLeadManagementService = {
@@ -19,6 +20,7 @@ const mockLeadManagementService = {
   getLeadById: vi.fn(),
   updateLeadStatus: vi.fn(),
   createLeadActivity: vi.fn(),
+  createLeadTask: vi.fn(),
   convertLeadToClient: vi.fn(),
   getLeadStats: vi.fn(),
 };
@@ -27,6 +29,7 @@ const mockTransactionService = {
   getFinancialAnalysis: vi.fn(),
   createTransaction: vi.fn(),
   updateTransaction: vi.fn(),
+  getTransactionsByClient: vi.fn(),
 };
 
 const mockAccountService = {
@@ -37,11 +40,13 @@ const mockAccountService = {
 const mockAdboardService = {
   getCampaignPerformance: vi.fn(),
   updateCampaign: vi.fn(),
+  getOptimizationRecommendations: vi.fn(),
 };
 
 const mockUnifiedDashboardService = {
   getDataConsistencyReport: vi.fn(),
   syncData: vi.fn(),
+  getUnifiedMetrics: vi.fn(),
 };
 
 vi.mock('@/lib/services/client-service', () => ({

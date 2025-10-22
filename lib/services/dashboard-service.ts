@@ -7,8 +7,7 @@ import { db } from '@/lib/db';
 import { clients } from '@/lib/db/schemas/clients.schema';
 import { invoices } from '@/lib/db/schemas/invoices.schema';
 import { expenses } from '@/lib/db/schemas/expenses.schema';
-import { payments } from '@/lib/db/schemas/payments.schema';
-import { eq, and, desc, gte, lte, sql } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 
 interface DashboardOverview {
 	revenue: {
@@ -90,9 +89,9 @@ export async function getDashboardOverview(userId: string): Promise<DashboardOve
 	const [invoiceData] = await db
 		.select({
 			total: sql<number>`count(*)`,
-			pending: sql<number>`count(case when ${invoices.status} in ('draft', 'sent', 'viewed') then 1 end)`,
-			overdue: sql<number>`count(case when ${invoices.status} in ('sent', 'viewed') and ${invoices.dueDate} < ${now} then 1 end)`,
-			totalAmount: sql<number>`sum(case when ${invoices.status} in ('draft', 'sent', 'viewed', 'partial') then ${invoices.total}::numeric else 0 end)`,
+			pending: sql<number>`count(case when ${invoices.status} in ('draft', 'sent') then 1 end)`,
+			overdue: sql<number>`count(case when ${invoices.status} in ('sent') and ${invoices.dueDate} < ${now} then 1 end)`,
+			totalAmount: sql<number>`sum(case when ${invoices.status} in ('draft', 'sent') then ${invoices.total}::numeric else 0 end)`,
 		})
 		.from(invoices)
 		.where(eq(invoices.userId, userId));
@@ -101,8 +100,8 @@ export async function getDashboardOverview(userId: string): Promise<DashboardOve
 	const [expenseData] = await db
 		.select({
 			total: sql<number>`sum(${expenses.amount}::numeric)`,
-			thisMonth: sql<number>`sum(case when ${expenses.date} >= ${startOfMonth} then ${expenses.amount}::numeric else 0 end)`,
-			lastMonth: sql<number>`sum(case when ${expenses.date} >= ${startOfLastMonth} and ${expenses.date} <= ${endOfLastMonth} then ${expenses.amount}::numeric else 0 end)`,
+			thisMonth: sql<number>`sum(case when ${expenses.expenseDate} >= ${startOfMonth} then ${expenses.amount}::numeric else 0 end)`,
+			lastMonth: sql<number>`sum(case when ${expenses.expenseDate} >= ${startOfLastMonth} and ${expenses.expenseDate} <= ${endOfLastMonth} then ${expenses.amount}::numeric else 0 end)`,
 		})
 		.from(expenses)
 		.where(eq(expenses.userId, userId));
@@ -184,7 +183,7 @@ export async function getRecentActivity(userId: string, limit: number = 10): Pro
 		activities.push({
 			id: invoice.id,
 			type: 'invoice',
-			description: `Invoice ${invoice.invoiceNumber} created for ${invoice.clientName}`,
+			description: `Invoice ${invoice.invoiceNumber} created`,
 			amount: Number(invoice.total),
 			status: invoice.status,
 			createdAt: invoice.createdAt.toISOString(),
@@ -197,7 +196,7 @@ export async function getRecentActivity(userId: string, limit: number = 10): Pro
 			type: 'expense',
 			description: `Expense: ${expense.description}`,
 			amount: Number(expense.amount),
-			status: expense.status,
+			status: 'completed', // expenses don't have status field
 			createdAt: expense.createdAt.toISOString(),
 		});
 	});

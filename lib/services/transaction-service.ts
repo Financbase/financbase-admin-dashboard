@@ -9,11 +9,11 @@ import { eq, and, desc, gte, lte, or, sql, ilike } from 'drizzle-orm';
 
 interface CreateTransactionInput {
 	userId: string;
-	type: 'credit' | 'debit';
+	type: 'income' | 'expense' | 'transfer' | 'payment';
 	amount: number;
 	currency?: string;
-	description: string;
-	category: string;
+	description?: string;
+	category?: string;
 	paymentMethod?: string;
 	referenceId?: string;
 	referenceType?: string;
@@ -84,7 +84,7 @@ export async function createTransaction(input: CreateTransactionInput): Promise<
 		amount: input.amount.toFixed(2),
 		currency: input.currency || 'USD',
 		description: input.description,
-		category: input.category as any,
+		category: input.category,
 		status: 'pending',
 		paymentMethod: input.paymentMethod,
 		referenceId: input.referenceId,
@@ -92,7 +92,7 @@ export async function createTransaction(input: CreateTransactionInput): Promise<
 		accountId: input.accountId,
 		transactionDate: input.transactionDate,
 		notes: input.notes,
-		metadata: input.metadata ? JSON.stringify(input.metadata) : null,
+		metadata: input.metadata,
 		updatedAt: new Date(),
 	}).returning();
 
@@ -119,7 +119,7 @@ export async function getTransactionById(id: string, userId: string): Promise<Tr
 export async function getTransactions(
 	userId: string,
 	options?: {
-		type?: 'credit' | 'debit';
+		type?: 'income' | 'expense' | 'transfer' | 'payment';
 		status?: string;
 		category?: string;
 		startDate?: Date;
@@ -232,8 +232,8 @@ export async function getTransactionStats(userId: string): Promise<TransactionSt
 	const [basicStats] = await db
 		.select({
 			totalTransactions: sql<number>`count(*)`,
-			totalInflow: sql<number>`sum(case when ${transactions.type} = 'credit' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
-			totalOutflow: sql<number>`sum(case when ${transactions.type} = 'debit' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
+			totalInflow: sql<number>`sum(case when ${transactions.type} = 'income' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
+			totalOutflow: sql<number>`sum(case when ${transactions.type} = 'expense' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
 			pendingTransactions: sql<number>`count(case when ${transactions.status} = 'pending' then 1 end)`,
 			completedTransactions: sql<number>`count(case when ${transactions.status} = 'completed' then 1 end)`,
 		})

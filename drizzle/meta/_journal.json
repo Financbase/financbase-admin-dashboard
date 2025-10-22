@@ -8,6 +8,13 @@
       "when": 1761067503902,
       "tag": "0000_daily_siren",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1761108297663,
+      "tag": "0001_thankful_cloak",
+      "breakpoints": true
     }
   ]
 }

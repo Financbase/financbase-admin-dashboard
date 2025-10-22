@@ -5,25 +5,17 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import {
 	ArrowRight,
-	ArrowUp,
 	BarChart3,
 	BookOpen,
 	ChevronRight,
-	Clock,
 	Code,
 	FileText,
-	Globe,
-	Headphones,
 	HelpCircle,
-	Key,
-	LayoutDashboard,
-	Link2,
 	Search,
 	Settings,
 	Shield,
 	Smartphone,
 	Users,
-	Zap,
 } from "lucide-react";
 
 // ISR configuration
@@ -162,7 +154,7 @@ async function getDocsPageData() {
 		popularArticles: [
 			{
 				title: "Getting Started with Financbase API",
-				href: "/docs/api/getting-started",
+				href: "/docs/api",
 				views: "2.1k",
 			},
 			{
@@ -172,12 +164,12 @@ async function getDocsPageData() {
 			},
 			{
 				title: "Authentication Best Practices",
-				href: "/docs/security/auth",
+				href: "/docs/api/auth",
 				views: "1.5k",
 			},
 			{
-				title: "Rate Limiting Guide",
-				href: "/docs/api/rate-limits",
+				title: "Analytics Dashboard Guide",
+				href: "/docs/analytics",
 				views: "1.2k",
 			},
 		],
@@ -363,7 +355,7 @@ export default async function DocsPage({ searchParams }: DocsPageProps) {
 										</Link>
 									</Button>
 									<Button variant="outline" asChild>
-										<Link href="/docs/help">
+										<Link href="/support">
 											<BookOpen className="h-4 w-4 mr-2" />
 											Browse Help Center
 										</Link>

@@ -1,27 +1,18 @@
 "use client";
 
-import { FinancbaseLogo } from "@/components/ui/financbase-logo";
+import { FinancbaseLogo } from "@/components/core/ui/layout/financbase-logo";
 import {
-	BookOpen,
-	Building2,
 	Github,
-	Headphones,
-	Key,
-	Link2,
 	Linkedin,
 	Mail,
-	Shield,
 	Twitter,
 } from "lucide-react";
 import Link from "next/link";
-import * as React from "react";
 
 const navigation = {
 	product: [
-		{ name: "Features", href: "/features" },
 		{ name: "Pricing", href: "/pricing" },
 		{ name: "Security", href: "/security" },
-		{ name: "Integrations", href: "/integrations" },
 	],
 	resources: [
 		{ name: "Documentation", href: "/docs" },
@@ -67,7 +58,7 @@ export function PublicFooter() {
 					{/* Brand */}
 					<div className="lg:col-span-1">
 						<div className="mb-4">
-							<Link href="/">
+							<Link href="/" className="inline-block">
 								<FinancbaseLogo size="md" />
 							</Link>
 						</div>

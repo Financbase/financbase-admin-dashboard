@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useDashboardDateRange } from "@/contexts/dashboard-context";
 import { useDashboardStats } from "@/hooks/use-dashboard-data-optimized";
 import { formatPercentage } from "@/lib/format-utils";
@@ -14,7 +15,6 @@ import {
 	Users,
 	XCircle,
 } from "lucide-react";
-import type React from "react";
 import EmptyState from "./empty-state";
 import DashboardErrorBoundary from "./error-boundary";
 
