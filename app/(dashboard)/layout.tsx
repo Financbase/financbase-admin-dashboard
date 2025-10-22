@@ -5,6 +5,9 @@ import { useUser } from "@clerk/nextjs";
 import { Suspense } from "react";
 import "./dashboard.css";
 
+// Force dynamic rendering for all dashboard pages
+export const dynamic = 'force-dynamic';
+
 export default function DashboardLayout({
 	children,
 }: {

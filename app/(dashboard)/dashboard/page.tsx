@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Loader2, TrendingUp, TrendingDown, Users, DollarSign, FileText, Receipt } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 

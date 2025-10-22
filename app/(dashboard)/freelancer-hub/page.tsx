@@ -13,7 +13,7 @@ import {
 	Clock,
 	Play,
 	Pause,
-	Stop,
+	Square,
 	Plus,
 	Search,
 	Loader2,
@@ -341,7 +341,7 @@ export default function FreelancerHubPage() {
 											<Pause className="h-4 w-4" />
 										</Button>
 										<Button variant="destructive" size="sm">
-											<Stop className="h-4 w-4" />
+											<Square className="h-4 w-4" />
 										</Button>
 									</div>
 								</div>

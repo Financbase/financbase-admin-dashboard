@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, jsonb, boolean, integer } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, jsonb, boolean as pgBoolean, integer } from 'drizzle-orm/pg-core';
 
 // User API Keys Schema for BYOK (Bring Your Own Key)
 export const userApiKeys = pgTable('user_api_keys', {
@@ -22,8 +22,8 @@ export const userApiKeys = pgTable('user_api_keys', {
 	currentUsage: text('current_usage').default('0'), // Current month usage
 
 	// Status and validation
-	isActive: boolean('is_active').default(true),
-	isValid: boolean('is_valid').default(true),
+	isActive: pgBoolean('is_active').default(true),
+	isValid: pgBoolean('is_valid').default(true),
 	lastValidated: timestamp('last_validated'),
 
 	// Provider-specific settings
@@ -52,20 +52,20 @@ export const userAiPreferences = pgTable('user_ai_preferences', {
 	preferredModels: jsonb('preferred_models'), // { provider: { model: priority } }
 
 	// Usage preferences
-	autoSwitchProvider: boolean('auto_switch_provider').default(false), // Auto-switch if quota exceeded
+	autoSwitchProvider: pgBoolean('auto_switch_provider').default(false), // Auto-switch if quota exceeded
 	maxTokensPerRequest: integer('max_tokens_per_request').default(4000),
 	maxRequestsPerMinute: integer('max_requests_per_minute').default(60),
 
 	// Cost optimization
-	enableCostOptimization: boolean('enable_cost_optimization').default(true),
+	enableCostOptimization: pgBoolean('enable_cost_optimization').default(true),
 	preferredCostModel: text('preferred_cost_model').default('balanced'), // 'speed', 'cost', 'quality', 'balanced'
 
 	// Privacy settings
-	storeConversationHistory: boolean('store_conversation_history').default(true),
-	allowAnalytics: boolean('allow_analytics').default(true),
+	storeConversationHistory: pgBoolean('store_conversation_history').default(true),
+	allowAnalytics: pgBoolean('allow_analytics').default(true),
 
 	// Notification preferences
-	notifyOnQuotaLow: boolean('notify_on_quota_low').default(true),
+	notifyOnQuotaLow: pgBoolean('notify_on_quota_low').default(true),
 	quotaWarningThreshold: integer('quota_warning_threshold').default(80), // Percentage
 
 	createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -92,7 +92,7 @@ export const aiUsageTracking = pgTable('ai_usage_tracking', {
 
 	// Request metadata
 	requestType: text('request_type'), // 'completion', 'chat', 'embedding', etc.
-	success: boolean('success').default(true),
+	success: pgBoolean('success').default(true),
 
 	// Performance metrics
 	responseTime: integer('response_time'), // in milliseconds
@@ -129,13 +129,13 @@ export const aiProviderConfigs = pgTable('ai_provider_configs', {
 	rateLimits: jsonb('rate_limits'), // { requests_per_minute, tokens_per_minute }
 
 	// Features support
-	supportsStreaming: boolean('supports_streaming').default(true),
-	supportsFunctionCalling: boolean('supports_function_calling').default(false),
-	supportsVision: boolean('supports_vision').default(false),
-	supportsAudio: boolean('supports_audio').default(false),
+	supportsStreaming: pgBoolean('supports_streaming').default(true),
+	supportsFunctionCalling: pgBoolean('supports_function_calling').default(false),
+	supportsVision: pgBoolean('supports_vision').default(false),
+	supportsAudio: pgBoolean('supports_audio').default(false),
 
 	// Status
-	isActive: boolean('is_active').default(true),
+	isActive: pgBoolean('is_active').default(true),
 	lastUpdated: timestamp('last_updated').defaultNow().notNull(),
 
 	createdAt: timestamp('created_at').defaultNow().notNull(),

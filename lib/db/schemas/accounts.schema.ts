@@ -3,9 +3,9 @@ import {
 	text,
 	timestamp,
 	uuid,
-	boolean,
 	numeric,
 	pgEnum,
+	boolean as pgBoolean,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
 
@@ -43,8 +43,8 @@ export const accounts = pgTable("accounts", {
 	creditLimit: numeric("credit_limit", { precision: 12, scale: 2 }), // For credit cards
 	interestRate: numeric("interest_rate", { precision: 5, scale: 4 }), // Annual percentage rate
 	status: accountStatusEnum("status").default("active").notNull(),
-	isPrimary: boolean("is_primary").default(false),
-	isReconciled: boolean("is_reconciled").default(false),
+	isPrimary: pgBoolean("is_primary").default(false),
+	isReconciled: pgBoolean("is_reconciled").default(false),
 	lastReconciledAt: timestamp("last_reconciled_at"),
 	lastSyncAt: timestamp("last_sync_at"),
 	externalId: text("external_id"), // For bank API integration

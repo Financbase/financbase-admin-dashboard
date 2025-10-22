@@ -22,6 +22,13 @@ interface CreateInvoiceInput {
 	dueDate: Date;
 	notes?: string;
 	terms?: string;
+	items?: Array<{
+		id: string;
+		description: string;
+		quantity: number;
+		unitPrice: number;
+		total: number;
+	}>;
 }
 
 interface UpdateInvoiceInput extends Partial<CreateInvoiceInput> {
@@ -97,10 +104,12 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<Invoice>
 	}).returning();
 
 	// Send notification
-	await NotificationHelpers.invoice.created(
+	await NotificationHelpers.createFinancialNotification(
 		input.userId,
-		invoiceNumber,
-		totals.total
+		'invoice',
+		'Invoice Created',
+		`Invoice ${invoiceNumber} has been created for $${input.total.toFixed(2)}`,
+		{ invoiceId: invoice.id, invoiceNumber, amount: input.total }
 	);
 
 	return invoice;
@@ -264,7 +273,13 @@ export async function recordInvoicePayment(
 
 	// Send notification if fully paid
 	if (newStatus === 'paid') {
-		await NotificationHelpers.invoice.paid(userId, invoice.invoiceNumber, total);
+		await NotificationHelpers.createFinancialNotification(
+			userId,
+			'invoice',
+			'Invoice Paid',
+			`Invoice ${invoice.invoiceNumber} has been paid for $${total.toFixed(2)}`,
+			{ invoiceId: invoice.id, invoiceNumber: invoice.invoiceNumber, amount: total }
+		);
 	}
 
 	return updated;
@@ -359,10 +374,12 @@ export async function checkOverdueInvoices(userId: string): Promise<void> {
 			.where(eq(invoices.id, invoice.id));
 
 		// Send notification
-		await NotificationHelpers.invoice.overdue(
+		await NotificationHelpers.createFinancialNotification(
 			userId,
-			invoice.invoiceNumber,
-			parseFloat(invoice.total)
+			'invoice',
+			'Invoice Overdue',
+			`Invoice ${invoice.invoiceNumber} is now overdue for $${parseFloat(invoice.total).toFixed(2)}`,
+			{ invoiceId: invoice.id, invoiceNumber: invoice.invoiceNumber, amount: parseFloat(invoice.total) }
 		);
 	}
 }

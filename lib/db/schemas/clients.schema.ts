@@ -3,8 +3,8 @@ import {
 	text,
 	timestamp,
 	uuid,
-	boolean,
 	jsonb,
+	boolean as pgBoolean,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
 
@@ -23,7 +23,7 @@ export const clients = pgTable("clients", {
 	taxId: text("tax_id"),
 	currency: text("currency").default("USD"),
 	paymentTerms: text("payment_terms").default("net30"),
-	isActive: boolean("is_active").default(true),
+	isActive: pgBoolean("is_active").default(true),
 	notes: text("notes"),
 	metadata: jsonb("metadata"),
 	contractorId: uuid("contractor_id"),

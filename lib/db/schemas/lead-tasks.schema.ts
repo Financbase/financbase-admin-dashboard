@@ -3,14 +3,14 @@ import {
 	text,
 	timestamp,
 	uuid,
-	boolean,
 	numeric,
 	pgEnum,
+	boolean as pgBoolean,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
 import { leads } from "./leads.schema";
 
-export const taskStatusEnum = pgEnum("task_status", [
+export const leadTaskStatusEnum = pgEnum("task_status", [
 	"pending",
 	"in_progress",
 	"completed",
@@ -18,7 +18,7 @@ export const taskStatusEnum = pgEnum("task_status", [
 	"overdue"
 ]);
 
-export const taskPriorityEnum = pgEnum("task_priority", [
+export const leadTaskPriorityEnum = pgEnum("task_priority", [
 	"low",
 	"medium",
 	"high",
@@ -33,8 +33,8 @@ export const leadTasks = pgTable("lead_tasks", {
 	// Task details
 	title: text("title").notNull(),
 	description: text("description"),
-	status: taskStatusEnum("status").default("pending").notNull(),
-	priority: taskPriorityEnum("priority").default("medium").notNull(),
+	status: leadTaskStatusEnum("status").default("pending").notNull(),
+	priority: leadTaskPriorityEnum("priority").default("medium").notNull(),
 	
 	// Task scheduling
 	dueDate: timestamp("due_date"),
@@ -45,7 +45,7 @@ export const leadTasks = pgTable("lead_tasks", {
 	assignedTo: uuid("assigned_to"), // User ID of assigned person
 	
 	// Task tracking
-	isRecurring: boolean("is_recurring").default(false),
+	isRecurring: pgBoolean("is_recurring").default(false),
 	recurrencePattern: text("recurrence_pattern"), // daily, weekly, monthly, etc.
 	parentTaskId: uuid("parent_task_id"), // For subtasks
 	

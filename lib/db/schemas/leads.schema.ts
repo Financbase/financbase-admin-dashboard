@@ -80,7 +80,7 @@ export const leads = pgTable("leads", {
 	metadata: text("metadata"), // JSON string for additional data
 	
 	// Conversion tracking
-	convertedToClient: boolean("converted_to_client").default(false),
+	convertedToClient: pgBoolean("converted_to_client").default(false),
 	clientId: uuid("client_id"), // Reference to clients table if converted
 	
 	createdAt: timestamp("created_at").defaultNow(),

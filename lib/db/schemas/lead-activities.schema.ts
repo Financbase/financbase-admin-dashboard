@@ -5,6 +5,7 @@ import {
 	uuid,
 	numeric,
 	pgEnum,
+	boolean as pgBoolean,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
 import { leads } from "./leads.schema";
@@ -50,7 +51,7 @@ export const leadActivities = pgTable("lead_activities", {
 	notes: text("notes"),
 	
 	// Follow-up tracking
-	requiresFollowUp: boolean("requires_follow_up").default(false),
+	requiresFollowUp: pgBoolean("requires_follow_up").default(false),
 	followUpDate: timestamp("follow_up_date"),
 	
 	// Additional data

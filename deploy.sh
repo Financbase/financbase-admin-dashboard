@@ -52,7 +52,7 @@ check_environment_file() {
 # Install dependencies
 install_dependencies() {
     print_status "Installing dependencies..."
-    npm ci --only=production
+    pnpm install --frozen-lockfile
     print_success "Dependencies installed"
 }
 
@@ -78,9 +78,14 @@ run_migrations() {
 build_application() {
     print_status "Building application for $ENVIRONMENT..."
 
-    # Set environment variables for build
+    # Set environment variables for build (filter out problematic ones)
     export NODE_ENV=production
-    export $(grep -v '^#' "$PROJECT_ROOT/.env.$ENVIRONMENT" | xargs)
+    while IFS='=' read -r key value; do
+        # Skip empty keys and keys with special characters
+        if [[ $key =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] && [[ -n $key ]]; then
+            export "$key=$value"
+        fi
+    done < <(grep -v '^#' "$PROJECT_ROOT/.env.$ENVIRONMENT" | grep -v 'CSP_HEADER')
 
     npm run build
     print_success "Application built successfully"
@@ -90,7 +95,7 @@ build_application() {
 run_tests() {
     if [ "$ENVIRONMENT" = "production" ]; then
         print_status "Running production tests..."
-        npm run test:run
+        pnpm test:run
         print_success "All tests passed"
     fi
 }
@@ -104,8 +109,20 @@ deploy() {
             ;;
         "staging")
             print_status "Deploying to staging environment..."
-            # Add staging deployment logic here (e.g., Vercel, Railway, etc.)
-            print_warning "Staging deployment requires manual trigger via CI/CD"
+            print_status "Building application for staging..."
+            npm run build
+
+            print_status "Staging deployment ready!"
+            print_status "To deploy to staging:"
+            print_status "1. Push to the 'develop' branch to trigger CI/CD deployment"
+            print_status "2. Or deploy manually using: vercel --prod"
+            print_status "3. Or use Docker: docker build -t financbase-staging . && docker run -p 3000:3000 financbase-staging"
+
+            # Check if Vercel CLI is available for deployment
+            if command -v vercel &> /dev/null; then
+                print_status "Vercel CLI detected, attempting deployment..."
+                vercel --prod || print_warning "Vercel deployment failed, please deploy manually"
+            fi
             ;;
         "production")
             print_status "Deploying to production environment..."

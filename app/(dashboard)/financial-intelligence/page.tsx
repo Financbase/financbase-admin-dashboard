@@ -1,7 +1,12 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, AlertCircle, Brain, Target, DollarSign, BarChart3, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+
+// Force dynamic rendering to prevent static generation
+export const dynamic = 'force-dynamic';
 
 interface FinancialHealthScore {
 	overall: number;

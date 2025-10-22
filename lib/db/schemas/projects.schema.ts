@@ -3,9 +3,9 @@ import {
 	text,
 	timestamp,
 	uuid,
-	boolean,
 	numeric,
 	pgEnum,
+	boolean as pgBoolean,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
 import { clients } from "./clients.schema";
@@ -47,9 +47,9 @@ export const projects = pgTable("projects", {
 	currency: text("currency").default("USD").notNull(),
 	
 	// Project settings
-	isBillable: boolean("is_billable").default(true),
-	allowOvertime: boolean("allow_overtime").default(false),
-	requireApproval: boolean("require_approval").default(false),
+	isBillable: pgBoolean("is_billable").default(true),
+	allowOvertime: pgBoolean("allow_overtime").default(false),
+	requireApproval: pgBoolean("require_approval").default(false),
 	
 	// Progress tracking
 	progress: numeric("progress", { precision: 5, scale: 2 }).default("0"), // 0-100%

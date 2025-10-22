@@ -7,7 +7,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
 
-export const clients = pgTable("clients", {
+export const invoiceClients = pgTable("clients", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	name: text("name").notNull(),
 	email: text("email"),
@@ -24,7 +24,7 @@ export const clients = pgTable("clients", {
 export const invoices = pgTable("invoices", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	invoiceNumber: text("invoice_number").notNull().unique(),
-	clientId: uuid("client_id").references(() => clients.id),
+	clientId: uuid("client_id").references(() => invoiceClients.id),
 	amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
 	currency: text("currency").default("USD"),
 	status: text("status", { enum: ["draft", "sent", "paid", "overdue", "cancelled"] }).default("draft"),

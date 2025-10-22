@@ -1,9 +1,14 @@
+"use client";
+
 /**
  * Invoices Page
  * Main page for invoice management
  */
 
 import { InvoiceList } from '@/components/invoices/invoice-list';
+
+// Force dynamic rendering to prevent static generation
+export const dynamic = 'force-dynamic';
 
 export default function InvoicesPage() {
 	return (

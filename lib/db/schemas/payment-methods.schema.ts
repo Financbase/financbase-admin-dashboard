@@ -3,9 +3,9 @@ import {
 	text,
 	timestamp,
 	uuid,
-	boolean,
 	numeric,
 	pgEnum,
+	boolean as pgBoolean,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
 import { accounts } from "./accounts.schema";
@@ -53,15 +53,14 @@ export const paymentMethods = pgTable("payment_methods", {
 	bankAccountNumber: text("bank_account_number"),
 	bankRoutingNumber: text("bank_routing_number"),
 	
-	// Configuration
-	isDefault: boolean("is_default").default(false),
+	isDefault: pgBoolean("is_default").default(false),
 	processingFee: numeric("processing_fee", { precision: 5, scale: 4 }), // Percentage
 	fixedFee: numeric("fixed_fee", { precision: 8, scale: 2 }), // Fixed amount
 	currency: text("currency").default("USD").notNull(),
 	
 	// Status and metadata
 	status: paymentMethodStatusEnum("status").default("active").notNull(),
-	isTestMode: boolean("is_test_mode").default(false),
+	isTestMode: pgBoolean("is_test_mode").default(false),
 	lastUsedAt: timestamp("last_used_at"),
 	metadata: text("metadata"), // JSON string for additional configuration
 	notes: text("notes"),

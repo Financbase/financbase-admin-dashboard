@@ -3,9 +3,9 @@ import {
 	text,
 	timestamp,
 	uuid,
-	boolean,
 	numeric,
 	pgEnum,
+	boolean as pgBoolean,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
 import { projects } from "./projects.schema";
@@ -31,20 +31,19 @@ export const timeEntries = pgTable("time_entries", {
 	duration: numeric("duration", { precision: 8, scale: 2 }), // in hours
 	status: timeEntryStatusEnum("status").default("draft").notNull(),
 	
-	// Billing
-	isBillable: boolean("is_billable").default(true),
+	isBillable: pgBoolean("is_billable").default(true),
 	hourlyRate: numeric("hourly_rate", { precision: 8, scale: 2 }),
 	totalAmount: numeric("total_amount", { precision: 12, scale: 2 }),
 	currency: text("currency").default("USD").notNull(),
 	
 	// Approval workflow
-	requiresApproval: boolean("requires_approval").default(false),
-	isApproved: boolean("is_approved").default(false),
+	requiresApproval: pgBoolean("requires_approval").default(false),
+	isApproved: pgBoolean("is_approved").default(false),
 	approvedBy: uuid("approved_by"),
 	approvedAt: timestamp("approved_at"),
 	
 	// Billing status
-	isBilled: boolean("is_billed").default(false),
+	isBilled: pgBoolean("is_billed").default(false),
 	billedAt: timestamp("billed_at"),
 	invoiceId: uuid("invoice_id"),
 	
