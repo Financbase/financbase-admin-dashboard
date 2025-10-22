@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, checkDatabaseHealth } from '@/lib/db';
 
 /**
  * GET /api/health
@@ -24,14 +24,14 @@ export async function GET(request: NextRequest) {
 		// Database health check with real connectivity test and timeout
 		let databaseStatus = 'disconnected';
 		try {
-			// Perform a lightweight query to test database connectivity with timeout
-			const dbPromise = db.execute('SELECT 1');
-			const timeoutPromise = new Promise((_, reject) => 
+			// Use the unified health check function with timeout
+			const healthPromise = checkDatabaseHealth();
+			const timeoutPromise = new Promise<boolean>((_, reject) => 
 				setTimeout(() => reject(new Error('Database timeout')), 5000)
 			);
 			
-			await Promise.race([dbPromise, timeoutPromise]);
-			databaseStatus = 'connected';
+			const isHealthy = await Promise.race([healthPromise, timeoutPromise]);
+			databaseStatus = isHealthy ? 'connected' : 'disconnected';
 		} catch (error) {
 			databaseStatus = 'disconnected';
 			console.error('Database health check failed:', error);

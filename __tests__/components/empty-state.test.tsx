@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest'
-import React from 'react'
 import { render, screen, fireEvent } from '@/src/test/test-utils'
 import EmptyState, { EmptyStates } from '@/components/core/empty-state'
 import { BarChart3 } from 'lucide-react'

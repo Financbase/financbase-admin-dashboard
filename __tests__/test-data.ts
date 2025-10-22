@@ -67,13 +67,13 @@ export class TestDataFactory {
     return leadData;
   }
 
-  static async createTestTransaction(userId: string, clientId: string, overrides: Partial<typeof schema.transactions.$inferInsert> = {}) {
+  static async createTestTransaction(userId: string, overrides: Partial<typeof schema.transactions.$inferInsert> = {}) {
     const transactionData = {
       id: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId,
       transactionNumber: `TXN-${Date.now()}`,
       type: 'income' as const, // Updated to use income instead of credit
-      amount: 10000.00, // Store as number, not string
+      amount: '10000.00', // Store as string for numeric precision
       currency: 'USD',
       description: 'Test transaction',
       category: 'income' as const,
@@ -131,22 +131,22 @@ export class TestDataFactory {
   // Bulk seeding utilities
   static async seedBasicTestData(userId?: string) {
     // Create a test user if not provided
-    const testUser = userId ? { id: userId } : await this.createTestUser();
+    const testUser = userId ? { id: userId } : await TestDataFactory.createTestUser();
 
     // Create test client
-    const testClient = await this.createTestClient(testUser.id);
+    const testClient = await TestDataFactory.createTestClient(testUser.id);
 
     // Create test lead
-    const testLead = await this.createTestLead(testUser.id);
+    const testLead = await TestDataFactory.createTestLead(testUser.id);
 
     // Create test transaction
-    const testTransaction = await this.createTestTransaction(testUser.id, testClient.id);
+    const testTransaction = await TestDataFactory.createTestTransaction(testUser.id);
 
     // Create test project
-    const testProject = await this.createTestProject(testUser.id, testClient.id);
+    const testProject = await TestDataFactory.createTestProject(testUser.id, testClient.id);
 
     // Create test campaign
-    const testCampaign = await this.createTestCampaign(testUser.id);
+    const testCampaign = await TestDataFactory.createTestCampaign(testUser.id);
 
     return {
       user: testUser,
@@ -159,10 +159,10 @@ export class TestDataFactory {
   }
 
   static async seedComplexTestData(userId?: string) {
-    const basicData = await this.seedBasicTestData(userId);
+    const basicData = await TestDataFactory.seedBasicTestData(userId);
 
     // Add more complex relationships
-    const { user, client, lead, project } = basicData;
+    const { user, lead, project } = basicData;
 
     // Create lead activities
     const leadActivity = {

@@ -4,11 +4,10 @@
  * Supports both local PostgreSQL and Neon serverless
  */
 
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import { neon } from '@neondatabase/serverless';
-import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle as drizzleNeon } from 'drizzle-orm/neon-serverless';
 import { sql as dsql } from 'drizzle-orm';
+import { Pool } from 'pg';
 import * as schema from '../lib/db/schemas/index';
 
 // Determine which database to use for testing
@@ -16,7 +15,7 @@ const useLocalPostgres = process.env.TEST_DB_TYPE === 'local-postgres' || proces
 
 // Test database connection
 let sql: ReturnType<typeof neon> | Pool;
-let testDb: ReturnType<typeof drizzle> | ReturnType<typeof drizzlePg>;
+let testDb: ReturnType<typeof drizzle> | ReturnType<typeof drizzleNeon>;
 
 if (useLocalPostgres) {
   // Local PostgreSQL connection
@@ -25,12 +24,12 @@ if (useLocalPostgres) {
     connectionString: testConnectionString,
   });
   sql = pool;
-  testDb = drizzlePg(pool, { schema });
+  testDb = drizzle(pool, { schema });
 } else {
   // Neon serverless connection
   const testConnectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_MD6PAjcl0TWR@ep-curly-wave-adu3fywi-pooler.c-2.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require';
   sql = neon(testConnectionString);
-  testDb = drizzle(sql, { schema });
+  testDb = drizzleNeon(sql, { schema });
 }
 
 export { testDb };

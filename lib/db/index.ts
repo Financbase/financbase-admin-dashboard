@@ -40,8 +40,8 @@ const createDatabaseConnection = () => {
 		// Use pg.Pool for local development and traditional PostgreSQL
 		const pool = new Pool({
 			connectionString: databaseUrl,
-			min: parseInt(process.env.DATABASE_POOL_MIN || '2'),
-			max: parseInt(process.env.DATABASE_POOL_MAX || '10'),
+			min: parseInt(process.env.DATABASE_POOL_MIN || '2', 10),
+			max: parseInt(process.env.DATABASE_POOL_MAX || '10', 10),
 			idleTimeoutMillis: 30000,
 			connectionTimeoutMillis: 2000,
 		});
@@ -63,6 +63,37 @@ export const getConnectionInfo = () => ({
 	driver: getDatabaseDriver(),
 	url: process.env.DATABASE_URL?.replace(/\/\/.*@/, '//***:***@'), // Mask credentials
 });
+
+// Database health check function
+export async function checkDatabaseHealth(): Promise<boolean> {
+	try {
+		const driver = getDatabaseDriver();
+		
+		if (driver === 'neon') {
+			// For Neon, we need to create a new connection for health check
+			const sql = neon(process.env.DATABASE_URL || '');
+			await sql`SELECT 1`;
+		} else {
+			// For PostgreSQL pool, we can use the existing connection
+			await db.execute('SELECT 1');
+		}
+		return true;
+	} catch (error) {
+		console.error('Database health check failed:', error);
+		return false;
+	}
+}
+
+// Graceful shutdown function
+export async function closeDatabaseConnection(): Promise<void> {
+	const driver = getDatabaseDriver();
+	
+	if (driver === 'pool') {
+		// For pool driver, we need to close the pool
+		// Note: This is a simplified approach - in practice, you'd need to track the pool instance
+		console.log('Closing database pool connection...');
+	}
+}
 
 // Export common database utilities
 export { sql } from 'drizzle-orm';

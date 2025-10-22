@@ -111,7 +111,7 @@ export default function FAQ() {
           <div className="space-y-4">
             {faqs.map((faq, index) => (
               <motion.div
-                key={index}
+                key={faq.question}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -119,6 +119,7 @@ export default function FAQ() {
               >
                 <Card className="border-0 bg-white/70 backdrop-blur-sm hover:bg-white/80 transition-colors">
                   <button
+                    type="button"
                     className="w-full p-6 text-left hover:bg-gray-50/50 transition-colors"
                     onClick={() => toggleItem(index)}
                   >

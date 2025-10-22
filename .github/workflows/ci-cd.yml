@@ -148,11 +148,68 @@ jobs:
           path: .next/
           retention-days: 1
 
+  # End-to-End Tests
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm playwright install --with-deps
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+          path: .next/
+
+      - name: Run E2E tests
+        run: pnpm e2e
+        env:
+          CI: true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-test-results
+          path: playwright-report/
+          retention-days: 7
+
   # Docker Build and Push
   docker:
     name: Docker Build & Push
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, e2e-tests]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     steps:
       - name: Checkout code
@@ -193,7 +250,7 @@ jobs:
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    needs: [build, docker]
+    needs: [build, docker, e2e-tests]
     if: github.ref == 'refs/heads/develop'
     environment: staging
     steps:
@@ -217,7 +274,7 @@ jobs:
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [build, docker]
+    needs: [build, docker, e2e-tests]
     if: github.ref == 'refs/heads/main'
     environment: production
     steps:
@@ -238,8 +295,8 @@ jobs:
           # Example: curl -f https://your-domain.com/api/health
 
   # End-to-End Tests (Optional - runs on staging)
-  e2e-tests:
-    name: E2E Tests
+  smoke-tests:
+    name: Smoke Tests on Staging
     runs-on: ubuntu-latest
     needs: deploy-staging
     if: github.ref == 'refs/heads/develop'
@@ -263,15 +320,15 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm playwright install --with-deps
 
-      - name: Run E2E tests
-        run: pnpm e2e
+      - name: Run smoke tests against staging
+        run: pnpm playwright test smoke.spec.ts --project=smoke
         env:
           BASE_URL: ${{ secrets.STAGING_URL }}
 
-      - name: Upload E2E test results
+      - name: Upload smoke test results
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: playwright-report
+          name: smoke-test-results
           path: playwright-report/
           retention-days: 7

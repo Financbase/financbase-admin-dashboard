@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 import {
 	ArrowRight,
 	Search,
@@ -111,9 +112,11 @@ export default function BlogPage() {
 							<Card key={post.id} className="group hover:shadow-lg transition-all duration-300">
 								<CardHeader className="p-0">
 									<div className="relative overflow-hidden rounded-t-lg">
-										<img
+										<Image
 											src={post.image}
 											alt={post.title}
+											width={400}
+											height={192}
 											className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
 										/>
 										<div className="absolute top-4 left-4">

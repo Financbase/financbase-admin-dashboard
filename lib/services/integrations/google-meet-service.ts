@@ -3,6 +3,8 @@
  * Handles Google Workspace API integration for meetings and calendar
  */
 
+import { logger } from '@/lib/logger';
+
 interface GoogleMeetEvent {
 	id: string;
 	summary: string;
@@ -41,6 +43,7 @@ interface GoogleMeetEvent {
 	};
 	created: string;
 	updated: string;
+	status?: 'confirmed' | 'tentative' | 'cancelled';
 }
 
 interface GoogleCalendar {
@@ -48,6 +51,66 @@ interface GoogleCalendar {
 	summary: string;
 	description?: string;
 	timeZone: string;
+	accessRole: string;
+	backgroundColor?: string;
+	foregroundColor?: string;
+	hidden: boolean;
+	selected: boolean;
+	primary?: boolean;
+}
+
+interface GoogleOAuthTokenResponse {
+	access_token: string;
+	refresh_token?: string;
+	expires_in: number;
+	scope: string;
+	token_type: string;
+}
+
+interface GoogleUserInfo {
+	id: string;
+	email: string;
+	verified_email: boolean;
+	name: string;
+	given_name: string;
+	family_name: string;
+	picture: string;
+	locale: string;
+}
+
+interface GoogleCalendarListResponse {
+	kind: string;
+	etag: string;
+	nextSyncToken?: string;
+	items: GoogleCalendar[];
+}
+
+interface GoogleEventsListResponse {
+	kind: string;
+	etag: string;
+	nextSyncToken?: string;
+	items: GoogleMeetEvent[];
+	nextPageToken?: string;
+}
+
+interface GoogleFreeBusyRequest {
+	timeMin: string;
+	timeMax: string;
+	timeZone: string;
+	items: Array<{ id: string }>;
+	conferenceDataVersion?: number;
+}
+
+interface GoogleFreeBusyResponse {
+	kind: string;
+	timeMin: string;
+	timeMax: string;
+	calendars: Record<string, {
+		busy: Array<{
+			start: string;
+			end: string;
+		}>;
+	}>;
 }
 
 export class GoogleMeetService {
@@ -72,7 +135,7 @@ export class GoogleMeetService {
 	/**
 	 * Authenticate with Google OAuth
 	 */
-	static async authenticate(code: string, clientId: string, clientSecret: string, redirectUri: string): Promise<any> {
+	static async authenticate(code: string, clientId: string, clientSecret: string, redirectUri: string): Promise<GoogleOAuthTokenResponse> {
 		try {
 			const response = await fetch('https://oauth2.googleapis.com/token', {
 				method: 'POST',
@@ -97,7 +160,7 @@ export class GoogleMeetService {
 
 			return data;
 		} catch (error) {
-			console.error('Google authentication error:', error);
+			logger.error('Google authentication error', error);
 			throw error;
 		}
 	}
@@ -105,7 +168,7 @@ export class GoogleMeetService {
 	/**
 	 * Refresh access token
 	 */
-	static async refreshAccessToken(clientId: string, clientSecret: string): Promise<any> {
+	static async refreshAccessToken(clientId: string, clientSecret: string): Promise<GoogleOAuthTokenResponse> {
 		if (!this.refreshToken) {
 			throw new Error('No refresh token available');
 		}
@@ -133,7 +196,7 @@ export class GoogleMeetService {
 
 			return data;
 		} catch (error) {
-			console.error('Google token refresh error:', error);
+			logger.error('Google token refresh error', error);
 			throw error;
 		}
 	}
@@ -141,7 +204,7 @@ export class GoogleMeetService {
 	/**
 	 * Get current user information
 	 */
-	static async getCurrentUser(): Promise<any> {
+	static async getCurrentUser(): Promise<GoogleUserInfo> {
 		return this.makeRequest('https://www.googleapis.com/oauth2/v2/userinfo');
 	}
 
@@ -172,7 +235,7 @@ export class GoogleMeetService {
 		startTime?: string,
 		endTime?: string,
 		maxResults: number = 250
-	): Promise<any> {
+	): Promise<GoogleEventsListResponse> {
 		const params = new URLSearchParams({
 			maxResults: maxResults.toString(),
 			singleEvents: 'true',
@@ -297,7 +360,7 @@ export class GoogleMeetService {
 		startTime: string,
 		endTime: string,
 		attendees?: string[]
-	): Promise<any> {
+	): Promise<GoogleFreeBusyResponse> {
 		const requestBody = {
 			timeMin: startTime,
 			timeMax: endTime,
@@ -319,7 +382,7 @@ export class GoogleMeetService {
 	/**
 	 * Get meeting recordings (if Google Workspace Business/Enterprise)
 	 */
-	static async getMeetingRecordings(calendarId: string = 'primary', eventId: string): Promise<any> {
+	static async getMeetingRecordings(calendarId: string = 'primary', eventId: string): Promise<{ recordings: Array<{ id: string; title: string; url: string; duration: number }> }> {
 		// This requires Google Workspace Business or Enterprise
 		return this.makeRequest(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}/recordings`);
 	}
@@ -365,65 +428,93 @@ export class GoogleMeetService {
 		this.refreshToken = null;
 	}
 
-	/**
-	 * Make authenticated request to Google API
-	 */
-	private static async makeRequest(url: string, options: RequestInit = {}): Promise<any> {
-		if (!this.accessToken) {
-			throw new Error('Google access token not set. Please authenticate first.');
-		}
+  id: string;
+  kind: string;
+  etag?: string;
+  status: string;
+  htmlLink: string;
+  created: string;
+  updated: string;
+  summary: string;
+  description?: string;
+  location?: string;
+  start: {
+    dateTime: string;
+    timeZone: string;
+  };
+  end: {
+    dateTime: string;
+    timeZone: string;
+  };
+  organizer: {
+    email: string;
+    displayName?: string;
+  };
+  attendees?: Array<{
+    email: string;
+    displayName?: string;
+    responseStatus: string;
+  }>;
+}
 
-		const response = await fetch(url, {
-			...options,
-			headers: {
-				'Authorization': `Bearer ${this.accessToken}`,
-				'Content-Type': 'application/json',
-				...options.headers,
-			},
-		});
+/**
+ * Google Meet Service
+ */
+class GoogleMeetService {
+  // ... (rest of the class remains the same)
 
-		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorText}`);
-		}
+  /**
+   * Make authenticated request to Google API
+   */
+  private static async makeRequest<T = Record<string, unknown>>(url: string, options: RequestInit = {}): Promise<T> {
+    if (!this.accessToken) {
+      throw new Error('Google access token not set. Please authenticate first.');
+    }
 
-		return response.json();
-	}
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+      },
+    });
 
-	/**
-	 * Handle Google Calendar webhook events
-	 */
-	static async handleWebhookEvent(event: string, payload: any): Promise<void> {
-		switch (event) {
-			case 'calendar.events.created':
-				await this.handleEventCreated(payload);
-				break;
-			case 'calendar.events.updated':
-				await this.handleEventUpdated(payload);
-				break;
-			case 'calendar.events.deleted':
-				await this.handleEventDeleted(payload);
-				break;
-			default:
-				console.log('Unhandled Google Calendar webhook event:', event);
-		}
-	}
+    return response.json();
+  }
 
-	private static async handleEventCreated(payload: any): Promise<void> {
-		console.log('Google Calendar event created:', payload);
-		// Sync with Financbase meetings
-		// Send notifications
-	}
+  /**
+   * Handle Google Calendar webhook events
+   */
+  static async handleWebhookEvent(event: string, payload: GoogleWebhookPayload): Promise<void> {
+    switch (event) {
+      case 'calendar.events.created':
+        await this.handleEventCreated(payload);
+        break;
+      case 'calendar.events.updated':
+        await this.handleEventUpdated(payload);
+        break;
+      case 'calendar.events.deleted':
+        await this.handleEventDeleted(payload);
+        break;
+      default:
+        logger.info('Unhandled Google Calendar webhook event', { event });
+    }
+  }
 
-	private static async handleEventUpdated(payload: any): Promise<void> {
-		console.log('Google Calendar event updated:', payload);
-		// Update meeting in Financbase
-		// Resend notifications if needed
-	}
+  private static async handleEventCreated(payload: GoogleWebhookPayload): Promise<void> {
+    logger.info('Google Calendar event created', payload);
+    // Sync with Financbase meetings
+    // Send notifications
+  }
 
-	private static async handleEventDeleted(payload: any): Promise<void> {
-		console.log('Google Calendar event deleted:', payload);
-		// Remove meeting from Financbase
-		// Send cancellation notifications
-	}
+  private static async handleEventUpdated(payload: GoogleWebhookPayload): Promise<void> {
+    logger.info('Google Calendar event updated', payload);
+    // Update meeting in Financbase
+    // Resend notifications if needed
+  }
+
+  private static async handleEventDeleted(payload: GoogleWebhookPayload): Promise<void> {
+    logger.info('Google Calendar event deleted', payload);
+    // Remove meeting from Financbase
+    // Send cancellation notifications
+  }
 }

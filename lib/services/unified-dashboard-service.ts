@@ -94,46 +94,72 @@ interface DashboardLayout {
  * Get unified metrics for the dashboard
  */
 export async function getUnifiedMetrics(userId: string): Promise<UnifiedMetrics> {
-	// Get financial overview
-	const [financialData] = await db
+	// Get financial overview - separate queries to avoid cartesian joins
+	const [revenueData] = await db
 		.select({
-			totalRevenue: sql<number>`sum(${invoices.totalAmount}::numeric)`,
+			totalRevenue: sql<number>`sum(${invoices.total}::numeric)`,
+		})
+		.from(invoices)
+		.where(eq(invoices.userId, userId));
+
+	const [expenseData] = await db
+		.select({
 			totalExpenses: sql<number>`sum(${expenses.amount}::numeric)`,
 		})
-		.from(invoices)
-		.leftJoin(expenses, eq(invoices.userId, expenses.userId))
-		.where(eq(invoices.userId, userId));
+		.from(expenses)
+		.where(eq(expenses.userId, userId));
 
-	// Get business metrics
-	const [businessData] = await db
+	// Get business metrics - separate queries to avoid cross-products
+	const [clientData] = await db
 		.select({
-			totalClients: sql<number>`count(distinct ${clients.id})`,
-			activeProjects: sql<number>`count(case when ${projects.status} = 'active' then 1 end)`,
-			activeCampaigns: sql<number>`count(case when ${campaigns.status} = 'active' then 1 end)`,
+			totalClients: sql<number>`count(*)`,
 		})
 		.from(clients)
-		.leftJoin(projects, eq(clients.userId, projects.userId))
-		.leftJoin(campaigns, eq(clients.userId, campaigns.userId))
 		.where(eq(clients.userId, userId));
 
-	// Get performance indicators
-	const [performanceData] = await db
+	const [projectData] = await db
 		.select({
-			averageInvoiceValue: sql<number>`avg(${invoices.totalAmount}::numeric)`,
-			paymentSuccessRate: sql<number>`count(case when ${payments.status} = 'completed' then 1 end) * 100.0 / count(*)`,
-			campaignROAS: sql<number>`avg(${campaigns.roas}::numeric)`,
+			activeProjects: sql<number>`count(case when ${projects.status} = 'active' then 1 end)`,
+		})
+		.from(projects)
+		.where(eq(projects.userId, userId));
+
+	const [campaignData] = await db
+		.select({
+			activeCampaigns: sql<number>`count(case when ${campaigns.status} = 'active' then 1 end)`,
+		})
+		.from(campaigns)
+		.where(eq(campaigns.userId, userId));
+
+	// Get performance indicators - separate queries
+	const [invoicePerformanceData] = await db
+		.select({
+			averageInvoiceValue: sql<number>`avg(${invoices.total}::numeric)`,
 		})
 		.from(invoices)
-		.leftJoin(payments, eq(invoices.userId, payments.userId))
-		.leftJoin(campaigns, eq(invoices.userId, campaigns.userId))
 		.where(eq(invoices.userId, userId));
+
+	const [paymentData] = await db
+		.select({
+			totalPayments: sql<number>`count(*)`,
+			completedPayments: sql<number>`count(case when ${payments.status} = 'completed' then 1 end)`,
+		})
+		.from(payments)
+		.where(eq(payments.userId, userId));
+
+	const [campaignPerformanceData] = await db
+		.select({
+			campaignROAS: sql<number>`avg(${campaigns.roas}::numeric)`,
+		})
+		.from(campaigns)
+		.where(eq(campaigns.userId, userId));
 
 	// Get recent activity
 	const recentInvoices = await db
 		.select({
 			id: invoices.id,
 			clientName: clients.companyName,
-			amount: invoices.totalAmount,
+			amount: invoices.total,
 			status: invoices.status,
 			createdAt: invoices.createdAt,
 		})
@@ -183,23 +209,28 @@ export async function getUnifiedMetrics(userId: string): Promise<UnifiedMetrics>
 		.orderBy(desc(campaigns.createdAt))
 		.limit(5);
 
-	const totalRevenue = Number(financialData?.totalRevenue || 0);
-	const totalExpenses = Number(financialData?.totalExpenses || 0);
+	const totalRevenue = Number(revenueData?.totalRevenue || 0);
+	const totalExpenses = Number(expenseData?.totalExpenses || 0);
 	const netIncome = totalRevenue - totalExpenses;
+
+	// Calculate payment success rate
+	const totalPayments = Number(paymentData?.totalPayments || 0);
+	const completedPayments = Number(paymentData?.completedPayments || 0);
+	const paymentSuccessRate = totalPayments > 0 ? (completedPayments / totalPayments) * 100 : 0;
 
 	return {
 		totalRevenue,
 		totalExpenses,
 		netIncome,
 		cashFlow: netIncome, // Simplified for now
-		totalClients: businessData?.totalClients || 0,
-		activeProjects: businessData?.activeProjects || 0,
-		activeCampaigns: businessData?.activeCampaigns || 0,
-		averageInvoiceValue: Number(performanceData?.averageInvoiceValue || 0),
-		paymentSuccessRate: Number(performanceData?.paymentSuccessRate || 0),
+		totalClients: Number(clientData?.totalClients || 0),
+		activeProjects: Number(projectData?.activeProjects || 0),
+		activeCampaigns: Number(campaignData?.activeCampaigns || 0),
+		averageInvoiceValue: Number(invoicePerformanceData?.averageInvoiceValue || 0),
+		paymentSuccessRate,
 		clientRetentionRate: 85, // Placeholder - would need historical data
 		projectCompletionRate: 78, // Placeholder - would need historical data
-		campaignROAS: Number(performanceData?.campaignROAS || 0),
+		campaignROAS: Number(campaignPerformanceData?.campaignROAS || 0),
 		revenueGrowth: 12.5, // Placeholder - would need historical comparison
 		clientGrowth: 8.3, // Placeholder - would need historical comparison
 		projectGrowth: 15.2, // Placeholder - would need historical comparison
@@ -268,7 +299,7 @@ async function getRevenueChartData(userId: string) {
 	const revenueData = await db
 		.select({
 			month: sql<string>`to_char(${invoices.createdAt}, 'YYYY-MM')`,
-			revenue: sql<number>`sum(${invoices.totalAmount}::numeric)`,
+			revenue: sql<number>`sum(${invoices.total}::numeric)`,
 		})
 		.from(invoices)
 		.where(and(
@@ -385,8 +416,8 @@ async function getCashFlowData(userId: string) {
 	const cashFlowData = await db
 		.select({
 			month: sql<string>`to_char(${transactions.transactionDate}, 'YYYY-MM')`,
-			inflow: sql<number>`sum(case when ${transactions.type} = 'credit' then ${transactions.amount}::numeric else 0 end)`,
-			outflow: sql<number>`sum(case when ${transactions.type} = 'debit' then ${transactions.amount}::numeric else 0 end)`,
+			inflow: sql<number>`sum(case when ${transactions.type} = 'income' then ${transactions.amount}::numeric else 0 end)`,
+			outflow: sql<number>`sum(case when ${transactions.type} = 'expense' then ${transactions.amount}::numeric else 0 end)`,
 		})
 		.from(transactions)
 		.where(and(

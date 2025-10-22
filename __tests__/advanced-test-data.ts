@@ -92,7 +92,7 @@ export class AdvancedTestDataManager {
       const user = faker.helpers.arrayElement(users);
       const client = faker.helpers.arrayElement(clients.filter(c => c.userId === user.id));
       const transaction = await TestDataFactory.createTestTransaction(user.id, client.id, {
-        type: faker.helpers.arrayElement(['credit', 'debit']),
+        type: faker.helpers.arrayElement(['income', 'expense', 'transfer', 'payment']),
         amount: faker.finance.amount({ min: 100, max: 10000, dec: 2 }),
         currency: client.currency,
         description: faker.finance.transactionDescription(),

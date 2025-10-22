@@ -5,7 +5,7 @@ import { TransactionService } from '@/lib/services/transaction-service';
 import { z } from 'zod';
 
 const updateTransactionSchema = z.object({
-	type: z.enum(['credit', 'debit']).optional(),
+	type: z.enum(['income', 'expense', 'transfer', 'payment']).optional(),
 	amount: z.number().positive().optional(),
 	currency: z.string().optional(),
 	description: z.string().min(1).optional(),

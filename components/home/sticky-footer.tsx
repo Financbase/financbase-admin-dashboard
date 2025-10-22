@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { ArrowRight, CheckCircle, Star } from "lucide-react"
 import Link from "next/link"
 
@@ -27,7 +26,7 @@ export default function StickyFooter() {
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <span className="font-medium text-gray-900">Everything you need:</span>
             {features.map((feature, index) => (
-              <div key={index} className="flex items-center gap-1">
+              <div key={feature} className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <span>{feature}</span>
                 {index < features.length - 1 && (

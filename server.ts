@@ -1,7 +1,8 @@
-import type { PartyKitServer } from "partykit/server";
+import PartyKitServer from "partykit/server";
+import type { Connection, Room } from "partykit/server";
 
 export default {
-  async onConnect(connection, room) {
+  async onConnect(connection: Connection, room: Room) {
     // Handle user connection to collaboration room
     console.log(`User ${connection.id} connected to room ${room.id}`);
 
@@ -25,7 +26,7 @@ export default {
     });
   },
 
-  async onMessage(message, connection, room) {
+  async onMessage(message: string | ArrayBuffer | ArrayBufferView, connection: Connection, room: Room) {
     try {
       const data = JSON.parse(message);
 
@@ -74,7 +75,7 @@ export default {
     }
   },
 
-  async onClose(connection, room) {
+  async onClose(connection: Connection, room: Room) {
     console.log(`User ${connection.id} disconnected from room ${room.id}`);
 
     // Broadcast user leaving
@@ -88,12 +89,12 @@ export default {
     await this.cleanupUserData(connection.id, room);
   },
 
-  async onError(connection, error) {
+  async onError(connection: Connection, error: Error) {
     console.error(`Connection error for ${connection.id}:`, error);
   },
 
   // Message handlers
-  async handleSendMessage(data: any, connection: any, room: any) {
+  async handleSendMessage(data: Record<string, unknown>, connection: Connection, room: Room) {
     const message = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type: "message",
@@ -113,6 +114,7 @@ export default {
     roomMessages.push(message);
 
     // Keep only last 1000 messages per channel
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channelMessages = roomMessages.filter((msg: any) => msg.channelId === message.channelId);
     if (channelMessages.length > 1000) {
       const overflow = channelMessages.length - 1000;
@@ -125,7 +127,7 @@ export default {
     room.broadcast(message);
   },
 
-  async handleTypingStart(data: any, connection: any, room: any) {
+  async handleTypingStart(data: Record<string, unknown>, connection: Connection, room: Room) {
     room.broadcast({
       type: "typing_start",
       userId: connection.id,
@@ -134,7 +136,7 @@ export default {
     }, [connection.id]); // Send to all except sender
   },
 
-  async handleTypingStop(data: any, connection: any, room: any) {
+  async handleTypingStop(data: Record<string, unknown>, connection: Connection, room: Room) {
     room.broadcast({
       type: "typing_stop",
       userId: connection.id,
@@ -142,7 +144,7 @@ export default {
     }, [connection.id]); // Send to all except sender
   },
 
-  async handleUserActivity(data: any, connection: any, room: any) {
+  async handleUserActivity(data: Record<string, unknown>, connection: Connection, room: Room) {
     // Update user activity status
     const userActivity = {
       userId: connection.id,
@@ -171,7 +173,7 @@ export default {
     }
   },
 
-  async handleJoinChannel(data: any, connection: any, room: any) {
+  async handleJoinChannel(data: Record<string, unknown>, connection: Connection, room: Room) {
     // Track user channel membership
     const userChannels = room.storage.get(`user_channels_${connection.id}`) || [];
     if (!userChannels.includes(data.channelId)) {
@@ -181,6 +183,7 @@ export default {
 
     // Send channel history to user
     const messages = room.storage.get("messages") || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channelMessages = messages.filter((msg: any) => msg.channelId === data.channelId);
 
     connection.send({
@@ -190,14 +193,14 @@ export default {
     });
   },
 
-  async handleLeaveChannel(data: any, connection: any, room: any) {
+  async handleLeaveChannel(data: Record<string, unknown>, connection: Connection, room: Room) {
     // Remove user from channel
     const userChannels = room.storage.get(`user_channels_${connection.id}`) || [];
     const filteredChannels = userChannels.filter((channelId: string) => channelId !== data.channelId);
     await room.storage.put(`user_channels_${connection.id}`, filteredChannels);
   },
 
-  async handleCreateMeeting(data: any, connection: any, room: any) {
+  async handleCreateMeeting(data: Record<string, unknown>, connection: Connection, room: Room) {
     const meeting = {
       id: `meeting_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       title: data.title,
@@ -221,8 +224,9 @@ export default {
     });
   },
 
-  async handleJoinMeeting(data: any, connection: any, room: any) {
+  async handleJoinMeeting(data: Record<string, unknown>, connection: Connection, room: Room) {
     const meetings = room.storage.get("meetings") || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const meeting = meetings.find((m: any) => m.id === data.meetingId);
 
     if (meeting && !meeting.participants.includes(connection.id)) {
@@ -236,8 +240,9 @@ export default {
     }
   },
 
-  async handleMeetingAction(data: any, connection: any, room: any) {
+  async handleMeetingAction(data: Record<string, unknown>, connection: Connection, room: Room) {
     const meetings = room.storage.get("meetings") || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const meetingIndex = meetings.findIndex((m: any) => m.id === data.meetingId);
 
     if (meetingIndex !== -1) {
@@ -271,7 +276,7 @@ export default {
     }
   },
 
-  async cleanupUserData(userId: string, room: any) {
+  async cleanupUserData(userId: string, room: Room) {
     // Clean up user-specific data when they disconnect
     await room.storage.delete(`user_channels_${userId}`);
     await room.storage.delete(`user_typing_${userId}`);

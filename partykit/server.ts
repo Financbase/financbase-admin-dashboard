@@ -1,9 +1,10 @@
-import type * as Party from "partykit/server";
+import Server from "partykit/server";
+import type { Connection, Context, Party } from "partykit/server";
 
-export default class FinancbaseServer implements Party.Server {
-  constructor(readonly party: Party.Party) {}
+export default class FinancbaseServer implements Server {
+  constructor(readonly party: Party) {}
 
-  async onConnect(conn: Party.Connection, ctx: Party.Context) {
+  async onConnect(conn: Connection, ctx: Context) {
     // Handle new connections
     console.log(`New connection to room: ${this.party.id}`);
 
@@ -26,7 +27,7 @@ export default class FinancbaseServer implements Party.Server {
     }));
   }
 
-  async onMessage(message: string, sender: Party.Connection) {
+  async onMessage(message: string, sender: Connection) {
     try {
       const data = JSON.parse(message);
 
@@ -48,7 +49,7 @@ export default class FinancbaseServer implements Party.Server {
     }
   }
 
-  private async handleNotificationMessage(data: any, sender: Party.Connection) {
+  private async handleNotificationMessage(data: Record<string, unknown>, sender: Connection) {
     switch (data.type) {
       case 'notification':
         // Broadcast notification to all connections in the room
@@ -77,7 +78,7 @@ export default class FinancbaseServer implements Party.Server {
     }
   }
 
-  private async handleGeneralMessage(data: any, sender: Party.Connection) {
+  private async handleGeneralMessage(data: Record<string, unknown>, sender: Connection) {
     switch (data.type) {
       case 'financial_update':
         // Broadcast financial updates to all connections
@@ -115,11 +116,11 @@ export default class FinancbaseServer implements Party.Server {
     }
   }
 
-  async onClose(conn: Party.Connection) {
+  async onClose(_conn: Connection) {
     console.log(`Connection closed for room: ${this.party.id}`);
   }
 
-  async onError(conn: Party.Connection, error: Error) {
+  async onError(_conn: Connection, error: Error) {
     console.error(`Error in room ${this.party.id}:`, error);
   }
-} satisfies Party.Server;
+}

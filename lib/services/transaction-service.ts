@@ -64,7 +64,7 @@ async function generateTransactionNumber(userId: string): Promise<string> {
 	if (lastTransaction?.transactionNumber) {
 		const parts = lastTransaction.transactionNumber.split('-');
 		const lastPart = parts[parts.length - 1];
-		const lastSequence = parseInt(lastPart || '0');
+		const lastSequence = parseInt(lastPart || '0', 10);
 		sequence = lastSequence + 1;
 	}
 

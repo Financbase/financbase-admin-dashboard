@@ -309,8 +309,8 @@ export async function getPerformanceMetrics(userId: string): Promise<Performance
 	// Get cash flow (simplified)
 	const [cashFlowData] = await db
 		.select({
-			inflow: sql<number>`sum(case when ${transactions.type} = 'credit' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
-			outflow: sql<number>`sum(case when ${transactions.type} = 'debit' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
+			inflow: sql<number>`sum(case when ${transactions.type} = 'income' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
+			outflow: sql<number>`sum(case when ${transactions.type} = 'expense' and ${transactions.status} = 'completed' then ${transactions.amount}::numeric else 0 end)`,
 		})
 		.from(transactions)
 		.where(eq(transactions.userId, userId));

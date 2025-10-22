@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
 		const startDate = startDateParam ? new Date(startDateParam) : undefined;
 		const endDate = endDateParam ? new Date(endDateParam) : undefined;
 		const search = searchParams.get('search') || undefined;
-		const limit = parseInt(searchParams.get('limit') || '50');
-		const offset = parseInt(searchParams.get('offset') || '0');
+		const limit = parseInt(searchParams.get('limit') || '50', 10);
+		const offset = parseInt(searchParams.get('offset') || '0', 10);
 
 		const transactions = await TransactionService.getAll(userId, {
 			type,

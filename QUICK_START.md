@@ -101,33 +101,20 @@ Uses **Clerk** authentication - Sign in with your credentials or create an accou
 
 ### All Migrations Applied ✅
 
-**24 tables** across 4 migrations:
+**24 tables** across 2 migrations:
 
-1. **Foundation** (8 tables)
-   - notification_preferences
-   - user_preferences
-   - privacy_settings
-   - security_settings
+1. **Foundation** (`0000_daily_siren.sql`)
+   - users, clients, invoices, expenses
+   - notification_preferences, user_preferences
+   - privacy_settings, security_settings
    - financbase_notifications
-   - (+ 3 support tables)
 
-2. **Invoices** (4 tables)
-   - financbase_clients
-   - financbase_invoices
-   - financbase_invoice_payments
-   - financbase_invoice_templates
-
-3. **Expenses** (4 tables)
-   - financbase_expenses
-   - financbase_expense_categories (9 defaults)
-   - financbase_expense_attachments
-   - financbase_expense_approval_log
-
-4. **Reports** (4 tables) ⭐ NEW
-   - financbase_reports
-   - financbase_report_schedules
-   - financbase_report_history
-   - financbase_report_templates (5 defaults)
+2. **Extended Schema** (`0001_thankful_cloak.sql`)
+   - transactions (with income/expense/transfer/payment types)
+   - accounts, payment_methods, payments
+   - projects, time_entries, tasks
+   - campaigns, ad_groups, ads
+   - leads, lead_activities, lead_tasks
 
 **Connection**: Already configured in `.env.local`
 
@@ -438,6 +425,14 @@ pnpm test:e2e           # Run E2E tests
 ### Issue: TypeScript errors
 
 **Solution**: Run `pnpm type-check` to see all errors
+
+### Issue: Transaction type errors
+
+**Solution**: The application now uses `income`/`expense`/`transfer`/`payment` instead of `credit`/`debit`. Run `pnpm db:check` to verify schema alignment.
+
+### Issue: Database schema mismatch
+
+**Solution**: Run `pnpm db:push` to apply schema changes after the transaction type updates.
 
 ---
 

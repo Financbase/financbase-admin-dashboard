@@ -97,7 +97,7 @@ export class MarketplaceService {
 		const { category, status, search, limit = 50, offset = 0 } = filters;
 
 		let query = "SELECT * FROM cms.products WHERE 1=1";
-		const params: any[] = [];
+		const params: (string | number | null)[] = [];
 		let paramCount = 0;
 
 		const whereConditions: string[] = [];
@@ -206,7 +206,7 @@ export class MarketplaceService {
 		data: Partial<Omit<MarketplaceProduct, "id" | "createdAt" | "updatedAt">>,
 	): Promise<MarketplaceProduct> {
 		const updates: string[] = [];
-		const params: any[] = [];
+		const params: (string | number | null | Date)[] = [];
 		let paramCount = 0;
 
 		Object.entries(data).forEach(([key, value]) => {
@@ -306,7 +306,7 @@ export class MarketplaceService {
 		data: Partial<Omit<MarketplaceVendor, "id" | "createdAt" | "updatedAt">>,
 	): Promise<MarketplaceVendor> {
 		const updates: string[] = [];
-		const params: any[] = [];
+		const params: (string | number | null | Date)[] = [];
 		let paramCount = 0;
 
 		Object.entries(data).forEach(([key, value]) => {
@@ -366,7 +366,7 @@ export class MarketplaceService {
 			LEFT JOIN cms.vendors v ON po.vendor_id = v.id
 			LEFT JOIN cms.purchase_order_items poi ON po.id = poi.po_id
 		`;
-		const params: any[] = [];
+		const params: (string | number | null)[] = [];
 		let paramCount = 0;
 
 		const whereConditions: string[] = [];

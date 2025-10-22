@@ -1,177 +1,292 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Smoke tests for critical user flows
- * These tests validate that the core functionality works end-to-end
+ * Smoke Tests for Financbase Admin Dashboard
+ * 
+ * These tests validate core functionality after deployment to staging/production.
+ * They should run quickly and cover the most critical user flows.
+ * 
+ * Run with: pnpm e2e --grep "smoke"
  */
-test.describe('Smoke Tests - Core Flows', () => {
-	test.beforeEach(async ({ page }) => {
-		// Navigate to dashboard to ensure we're authenticated and ready for tests
-		await page.goto('/dashboard');
-		await expect(page.locator('text=Dashboard')).toBeVisible();
-	});
 
-	test('should complete full client lifecycle', async ({ page }) => {
-		// Test 1: Create a new client
+test.describe('Smoke Tests - Core Functionality', () => {
+	test.beforeEach(async ({ page }) => {
+    // Set a longer timeout for smoke tests as they run against deployed environments
+    test.setTimeout(60000);
+  });
+
+  test('Health endpoint is accessible', async ({ page }) => {
+    const response = await page.request.get('/api/health');
+    expect(response.status()).toBe(200);
+    
+    const healthData = await response.json();
+    expect(healthData.status).toBe('healthy');
+    expect(healthData.database).toBe('connected');
+  });
+
+  test('Application loads and shows sign-in page', async ({ page }) => {
+    await page.goto('/');
+    
+    // Should redirect to sign-in or show sign-in form
+    await expect(page).toHaveURL(/.*sign.*|.*auth.*|.*login.*/);
+    
+    // Check for Clerk sign-in elements or custom sign-in form
+    const hasClerkSignIn = await page.locator('[data-clerk-element="sign-in"]').count() > 0;
+    const hasCustomSignIn = await page.locator('input[type="email"], input[name="email"]').count() > 0;
+    
+    expect(hasClerkSignIn || hasCustomSignIn).toBeTruthy();
+  });
+
+  test('Dashboard loads after authentication', async ({ page }) => {
+    // This test assumes you have test credentials or session state
+    // You may need to implement authentication setup in beforeEach
+		await page.goto('/dashboard');
+    
+    // Should show dashboard elements
+    await expect(page.locator('h1, h2, [data-testid="dashboard-title"]')).toBeVisible();
+    
+    // Check for navigation elements
+    await expect(page.locator('nav, [role="navigation"]')).toBeVisible();
+  });
+
+  test('Client creation flow works', async ({ page }) => {
+    // Navigate to clients page
 		await page.goto('/dashboard/clients');
 
-		// Look for "Add Client" or similar button
-		const addClientButton = page.locator('button:has-text("Add Client"), button:has-text("New Client"), [data-testid="add-client"]');
-		if (await addClientButton.isVisible()) {
-			await addClientButton.click();
-
-			// Fill client form (adjust selectors based on actual form)
-			await page.fill('input[name*="name"], input[placeholder*="name" i]', 'Test Client ABC');
-			await page.fill('input[name*="email"], input[placeholder*="email" i]', 'client@example.com');
-			await page.fill('input[name*="company"], input[placeholder*="company" i]', 'ABC Corporation');
+    // Click create client button
+    await page.click('button:has-text("Create"), button:has-text("Add"), [data-testid="create-client"]');
+    
+    // Fill in client form
+    await page.fill('input[name="name"], input[placeholder*="name" i]', 'Test Client');
+    await page.fill('input[name="email"], input[type="email"]', 'test@example.com');
 
 			// Submit form
-			const submitButton = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Create")');
-			await submitButton.click();
+    await page.click('button[type="submit"], button:has-text("Save"), button:has-text("Create")');
+    
+    // Verify success (client appears in list or success message)
+    await expect(page.locator('text=Test Client, text=test@example.com')).toBeVisible();
+  });
 
-			// Verify client appears in list
-			await expect(page.locator('text=Test Client ABC')).toBeVisible();
-		}
-
-		// Test 2: Verify clients list view loads
-		await expect(page.locator('text=Client')).toBeVisible();
-	});
-
-	test('should complete invoice workflow', async ({ page }) => {
-		// Navigate to invoices
+  test('Invoice creation flow works', async ({ page }) => {
+    // Navigate to invoices page
 		await page.goto('/dashboard/invoices');
 
-		// Test 3: Create invoice (if UI allows)
-		const createInvoiceButton = page.locator('button:has-text("Create Invoice"), button:has-text("New Invoice"), [data-testid="create-invoice"]');
-		if (await createInvoiceButton.isVisible()) {
-			await createInvoiceButton.click();
+    // Click create invoice button
+    await page.click('button:has-text("Create"), button:has-text("Add"), [data-testid="create-invoice"]');
+    
+    // Fill in invoice form
+    await page.fill('input[name="client_name"], input[placeholder*="client" i]', 'Test Client');
+    await page.fill('input[name="amount"], input[type="number"]', '100.00');
+    
+    // Submit form
+    await page.click('button[type="submit"], button:has-text("Save"), button:has-text("Create")');
+    
+    // Verify success
+    await expect(page.locator('text=Test Client, text=$100')).toBeVisible();
+  });
 
-			// Fill basic invoice details
-			await page.fill('input[name*="amount"], input[placeholder*="amount" i]', '1000');
-			await page.fill('input[name*="description"], textarea[placeholder*="description" i]', 'Test invoice for smoke test');
-
-			// Submit invoice
-			const submitButton = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Create")');
-			await submitButton.click();
-
-			// Verify invoice appears in list
-			await expect(page.locator('text=$1,000.00')).toBeVisible();
-		}
-
-		// Test 4: Verify invoices list loads
-		await expect(page.locator('text=Invoice')).toBeVisible();
-	});
-
-	test('should handle expense workflow', async ({ page }) => {
-		// Navigate to expenses
+  test('Expense creation flow works', async ({ page }) => {
+    // Navigate to expenses page
 		await page.goto('/dashboard/expenses');
 
-		// Test 5: Create expense (if UI allows)
-		const addExpenseButton = page.locator('button:has-text("Add Expense"), button:has-text("New Expense"), [data-testid="add-expense"]');
-		if (await addExpenseButton.isVisible()) {
-			await addExpenseButton.click();
+    // Click create expense button
+    await page.click('button:has-text("Create"), button:has-text("Add"), [data-testid="create-expense"]');
+    
+    // Fill in expense form
+    await page.fill('input[name="description"], input[placeholder*="description" i]', 'Test Expense');
+    await page.fill('input[name="amount"], input[type="number"]', '50.00');
+    
+    // Submit form
+    await page.click('button[type="submit"], button:has-text("Save"), button:has-text("Create")');
+    
+    // Verify success
+    await expect(page.locator('text=Test Expense, text=$50')).toBeVisible();
+  });
 
-			// Fill expense form
-			await page.fill('input[name*="amount"], input[placeholder*="amount" i]', '250');
-			await page.fill('input[name*="description"], textarea[placeholder*="description" i]', 'Test expense for smoke test');
-
-			// Submit expense
-			const submitButton = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Create")');
-			await submitButton.click();
-
-			// Verify expense appears in list
-			await expect(page.locator('text=$250.00')).toBeVisible();
-		}
-
-		// Test 6: Verify expenses list loads
-		await expect(page.locator('text=Expense')).toBeVisible();
-	});
-
-	test('should validate payment recording', async ({ page }) => {
-		// Navigate to payments
-		await page.goto('/dashboard/payments');
-
-		// Test 7: Record payment (if UI allows)
-		const recordPaymentButton = page.locator('button:has-text("Record Payment"), button:has-text("Add Payment"), [data-testid="record-payment"]');
-		if (await recordPaymentButton.isVisible()) {
-			await recordPaymentButton.click();
-
-			// Fill payment details
-			await page.fill('input[name*="amount"], input[placeholder*="amount" i]', '500');
+  test('Payment recording works', async ({ page }) => {
+    // Navigate to invoices page
+    await page.goto('/dashboard/invoices');
+    
+    // Find an invoice and click record payment
+    await page.click('button:has-text("Payment"), button:has-text("Pay"), [data-testid="record-payment"]');
+    
+    // Fill in payment form
+    await page.fill('input[name="amount"], input[type="number"]', '100.00');
+    await page.selectOption('select[name="method"], select[name="payment_method"]', 'bank_transfer');
 
 			// Submit payment
-			const submitButton = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Record")');
-			await submitButton.click();
+    await page.click('button[type="submit"], button:has-text("Record"), button:has-text("Save")');
+    
+    // Verify payment was recorded
+    await expect(page.locator('text=Payment recorded, text=Paid')).toBeVisible();
+  });
 
-			// Verify payment appears in list
-			await expect(page.locator('text=$500.00')).toBeVisible();
-		}
+  test('Expense approval works', async ({ page }) => {
+    // Navigate to expenses page
+    await page.goto('/dashboard/expenses');
+    
+    // Find an expense and click approve
+    await page.click('button:has-text("Approve"), [data-testid="approve-expense"]');
+    
+    // Confirm approval
+    await page.click('button:has-text("Confirm"), button:has-text("Yes")');
+    
+    // Verify expense was approved
+    await expect(page.locator('text=Approved, text=Status: approved')).toBeVisible();
+  });
 
-		// Test 8: Verify payments list loads
-		await expect(page.locator('text=Payment')).toBeVisible();
-	});
+  test('List views display data correctly', async ({ page }) => {
+    // Test clients list
+    await page.goto('/dashboard/clients');
+    await expect(page.locator('table, [role="table"], .grid')).toBeVisible();
+    
+    // Test invoices list
+    await page.goto('/dashboard/invoices');
+    await expect(page.locator('table, [role="table"], .grid')).toBeVisible();
+    
+    // Test expenses list
+    await page.goto('/dashboard/expenses');
+    await expect(page.locator('table, [role="table"], .grid')).toBeVisible();
+  });
 
-	test('should validate dashboard navigation', async ({ page }) => {
-		// Test 9: Verify main navigation works
+  test('Navigation works between pages', async ({ page }) => {
+    const navigationItems = [
+      { name: 'Dashboard', url: '/dashboard' },
+      { name: 'Clients', url: '/dashboard/clients' },
+      { name: 'Invoices', url: '/dashboard/invoices' },
+      { name: 'Expenses', url: '/dashboard/expenses' },
+      { name: 'Reports', url: '/dashboard/reports' },
+    ];
+
+    for (const item of navigationItems) {
+      await page.goto(item.url);
+      await expect(page).toHaveURL(item.url);
+      
+      // Check that page loads without errors
+      await expect(page.locator('body')).toBeVisible();
+    }
+  });
+
+  test('API endpoints respond correctly', async ({ page }) => {
+    const apiEndpoints = [
+      '/api/health',
+      '/api/clients',
+      '/api/invoices',
+      '/api/expenses',
+    ];
+
+    for (const endpoint of apiEndpoints) {
+      const response = await page.request.get(endpoint);
+      
+      // Should return 200 or 401 (if protected)
+      expect([200, 401]).toContain(response.status());
+    }
+  });
+
+  test('Error handling works gracefully', async ({ page }) => {
+    // Test 404 page
+    await page.goto('/non-existent-page');
+    await expect(page.locator('text=404, text=Not Found, text=Page not found')).toBeVisible();
+    
+    // Test invalid API endpoint
+    const response = await page.request.get('/api/invalid-endpoint');
+    expect([404, 401]).toContain(response.status());
+  });
+
+  test('Performance metrics are acceptable', async ({ page }) => {
+		const startTime = Date.now();
+
 		await page.goto('/dashboard');
 
-		// Check dashboard loads
-		await expect(page.locator('text=Dashboard')).toBeVisible();
+		const loadTime = Date.now() - startTime;
+    
+    // Dashboard should load within 5 seconds
+    expect(loadTime).toBeLessThan(5000);
+    
+    // Check for performance issues
+    const consoleErrors = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
+    
+    await page.waitForLoadState('networkidle');
+    
+    // Should not have critical console errors
+    const criticalErrors = consoleErrors.filter(error => 
+      error.includes('Failed to load') || 
+      error.includes('NetworkError') ||
+      error.includes('TypeError')
+    );
+    
+    expect(criticalErrors.length).toBe(0);
+  });
+});
 
-		// Test navigation to different sections
-		const navigationLinks = [
-			{ text: 'Clients', url: '/dashboard/clients' },
-			{ text: 'Invoices', url: '/dashboard/invoices' },
-			{ text: 'Expenses', url: '/dashboard/expenses' },
-			{ text: 'Payments', url: '/dashboard/payments' },
-		];
+test.describe('Smoke Tests - Authentication', () => {
+  test('Sign-in flow works', async ({ page }) => {
+    await page.goto('/');
+    
+    // Should show sign-in form
+    await expect(page.locator('input[type="email"], input[name="email"]')).toBeVisible();
+    
+    // Fill in test credentials (adjust based on your test setup)
+    await page.fill('input[type="email"], input[name="email"]', 'test@example.com');
+    await page.fill('input[type="password"], input[name="password"]', 'testpassword123');
+    
+    // Submit form
+    await page.click('button[type="submit"], button:has-text("Sign In"), button:has-text("Login")');
+    
+    // Should redirect to dashboard
+    await expect(page).toHaveURL(/.*dashboard.*/);
+  });
 
-		for (const nav of navigationLinks) {
-			// Look for navigation link
-			const navLink = page.locator(`a:has-text("${nav.text}"), [href*="${nav.url}"]`).first();
-			if (await navLink.isVisible()) {
-				await navLink.click();
-				await expect(page.locator(`text=${nav.text}`)).toBeVisible();
-			}
-		}
-	});
-
-	test('should validate API health endpoint', async ({ page }) => {
-		// Test 10: API health check
-		const response = await page.request.get('/api/health');
-		expect(response.ok()).toBeTruthy();
-
-		const healthData = await response.json();
-		expect(healthData.status).toBe('healthy');
-		expect(healthData.database).toBe('connected');
+  test('Sign-out flow works', async ({ page }) => {
+    // Assuming user is already signed in
+    await page.goto('/dashboard');
+    
+    // Click sign-out button
+    await page.click('button:has-text("Sign Out"), button:has-text("Logout"), [data-testid="sign-out"]');
+    
+    // Should redirect to sign-in page
+    await expect(page).toHaveURL(/.*sign.*|.*auth.*|.*login.*/);
 	});
 });
 
-/**
- * Performance smoke tests
- */
-test.describe('Performance Smoke Tests', () => {
-	test('should load dashboard within acceptable time', async ({ page }) => {
-		const startTime = Date.now();
+test.describe('Smoke Tests - Data Integrity', () => {
+  test('Database connectivity is working', async ({ page }) => {
+    const response = await page.request.get('/api/health');
+    const healthData = await response.json();
+    
+    expect(healthData.database).toBe('connected');
+    expect(healthData.overall).toBe('healthy');
+  });
 
-		await page.goto('/dashboard');
-		await page.waitForLoadState('networkidle');
-
-		const loadTime = Date.now() - startTime;
-		expect(loadTime).toBeLessThan(5000); // Should load within 5 seconds
-
-		console.log(`📊 Dashboard load time: ${loadTime}ms`);
-	});
-
-	test('should respond to API calls quickly', async ({ page }) => {
-		// Test API response times
-		const startTime = Date.now();
-		const response = await page.request.get('/api/health');
-		const responseTime = Date.now() - startTime;
-
-		expect(response.ok()).toBeTruthy();
-		expect(responseTime).toBeLessThan(1000); // API should respond within 1 second
-
-		console.log(`📊 Health API response time: ${responseTime}ms`);
-	});
+  test('CRUD operations work end-to-end', async ({ page }) => {
+    // Create a client
+    await page.goto('/dashboard/clients');
+    await page.click('button:has-text("Create"), button:has-text("Add")');
+    await page.fill('input[name="name"]', 'Smoke Test Client');
+    await page.fill('input[name="email"]', 'smoke@test.com');
+    await page.click('button[type="submit"]');
+    
+    // Verify client was created
+    await expect(page.locator('text=Smoke Test Client')).toBeVisible();
+    
+    // Edit the client
+    await page.click('button:has-text("Edit"), [data-testid="edit-client"]');
+    await page.fill('input[name="name"]', 'Updated Smoke Test Client');
+    await page.click('button[type="submit"]');
+    
+    // Verify client was updated
+    await expect(page.locator('text=Updated Smoke Test Client')).toBeVisible();
+    
+    // Delete the client
+    await page.click('button:has-text("Delete"), [data-testid="delete-client"]');
+    await page.click('button:has-text("Confirm"), button:has-text("Yes")');
+    
+    // Verify client was deleted
+    await expect(page.locator('text=Updated Smoke Test Client')).not.toBeVisible();
+  });
 });

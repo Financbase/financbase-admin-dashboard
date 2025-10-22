@@ -120,7 +120,7 @@ export default function UnifiedDashboardPage() {
 	};
 
 	const getTransactionIcon = (type: string) => {
-		return type === 'credit' ? (
+		return type === 'income' ? (
 			<TrendingUp className="h-4 w-4 text-green-600" />
 		) : (
 			<TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
@@ -312,8 +312,8 @@ export default function UnifiedDashboardPage() {
 										</div>
 									</div>
 									<div className="text-right">
-										<p className={`font-semibold ${txn.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
-											{txn.type === 'credit' ? '+' : '-'}${txn.amount.toLocaleString()}
+										<p className={`font-semibold ${txn.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+											{txn.type === 'income' ? '+' : '-'}${txn.amount.toLocaleString()}
 										</p>
 										<Badge variant="outline" className="text-xs mt-1">
 											{txn.type}

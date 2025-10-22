@@ -4,7 +4,11 @@
  */
 
 import { vi } from 'vitest';
+import React from 'react';
 import '@testing-library/jest-dom';
+
+// Add React to global scope for JSX support
+global.React = React;
 
 // Mock Next.js modules
 vi.mock('next/navigation', () => ({
@@ -78,21 +82,14 @@ vi.mock('@clerk/nextjs', () => ({
 
 // Mock React Query
 vi.mock('@tanstack/react-query', () => ({
-  useQuery: vi.fn(({ queryFn, queryKey }) => ({
-    data: queryFn ? queryFn() : null,
-    isLoading: false,
-    isError: false,
-    error: null,
-    refetch: vi.fn(),
+  useQuery: vi.fn(),
+  useMutation: vi.fn(),
+  QueryClient: vi.fn().mockImplementation(() => ({
+    getQueryData: vi.fn(),
+    setQueryData: vi.fn(),
+    invalidateQueries: vi.fn(),
+    refetchQueries: vi.fn(),
   })),
-  useMutation: vi.fn(() => ({
-    mutate: vi.fn(),
-    mutateAsync: vi.fn(),
-    isLoading: false,
-    isError: false,
-    error: null,
-  })),
-  QueryClient: vi.fn(),
   QueryClientProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
@@ -485,12 +482,24 @@ Object.defineProperty(window, 'scrollTo', {
   value: vi.fn(),
 });
 
-// Mock console methods to reduce noise in tests
-global.console = {
-  ...console,
-  log: vi.fn(),
-  debug: vi.fn(),
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-};
+// Mock lucide-react icons
+vi.mock('lucide-react', () => ({
+  Loader2: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'loader' }, 'Loading...'),
+  TrendingUp: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'trending-up' }, '↑'),
+  TrendingDown: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'trending-down' }, '↓'),
+  DollarSign: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'dollar-sign' }, '$'),
+  ShoppingCart: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'shopping-cart' }, '🛒'),
+  Users: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'users' }, '👥'),
+  Package: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'package' }, '📦'),
+  Activity: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'activity' }, '📊'),
+  Star: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'star' }, '⭐'),
+  BarChart3: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'bar-chart' }, '📈'),
+  Briefcase: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'briefcase' }, '💼'),
+  CheckCircle: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'check-circle' }, '✅'),
+  Eye: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'eye' }, '👁️'),
+  MoreHorizontal: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'more-horizontal' }, '⋯'),
+  XCircle: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'x-circle' }, '❌'),
+  Key: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'key' }, '🔑'),
+  LayoutDashboard: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'layout-dashboard' }, '🏠'),
+  Minus: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'minus' }, '-'),
+}));

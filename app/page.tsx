@@ -1,11 +1,7 @@
 import Link from 'next/link'
 import { FinancbaseLogo } from '@/components/ui/financbase-logo'
+import { Button } from '@/components/ui/button'
 import Hero from '@/components/home/hero'
-import Features from '@/components/home/features'
-import Testimonials from '@/components/home/testimonials'
-import Pricing from '@/components/home/pricing'
-import FAQ from '@/components/home/faq'
-import StickyFooter from '@/components/home/sticky-footer'
 
 export default function Home() {
 	return (
@@ -20,23 +16,20 @@ export default function Home() {
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-6">
-              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Features
-              </a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Pricing
-              </a>
-              <a href="#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Testimonials
-              </a>
-              <a href="#faq" className="text-gray-600 hover:text-gray-900 transition-colors">
-                FAQ
-              </a>
               <Link href="/about" className="text-gray-600 hover:text-gray-900 transition-colors">
                 About
               </Link>
+              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Pricing
+              </Link>
               <Link href="/contact" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Contact
+              </Link>
+              <Link href="/docs" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Docs
+              </Link>
+              <Link href="/blog" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Blog
               </Link>
             </div>
             <div className="flex items-center space-x-3">
@@ -60,18 +53,30 @@ export default function Home() {
       {/* Main Content */}
       <main>
         <Hero />
-        <div id="features">
-          <Features />
-        </div>
-        <div id="pricing">
-          <Pricing />
-        </div>
-        <div id="testimonials">
-          <Testimonials />
-        </div>
-        <div id="faq">
-          <FAQ />
-        </div>
+
+        {/* Simple CTA Section */}
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+              Ready to Transform Your Financial Operations?
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Join thousands of businesses already using Financbase to make smarter financial decisions.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="px-8 py-4 text-lg">
+                <Link href="/auth/sign-up">
+                  Start Free Trial
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="px-8 py-4 text-lg">
+                <Link href="/about">
+                  Learn More
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
@@ -87,10 +92,10 @@ export default function Home() {
             <div>
               <h3 className="font-semibold text-white mb-4">Product</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
                 <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
-                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/docs" className="hover:text-white transition-colors">Documentation</Link></li>
               </ul>
             </div>
             <div>
@@ -105,10 +110,10 @@ export default function Home() {
             <div>
               <h3 className="font-semibold text-white mb-4">Support</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
                 <li><Link href="/docs" className="hover:text-white transition-colors">Documentation</Link></li>
                 <li><Link href="/support" className="hover:text-white transition-colors">Support</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+                <li><Link href="/legal" className="hover:text-white transition-colors">Legal</Link></li>
               </ul>
             </div>
           </div>
@@ -117,9 +122,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
-      {/* Sticky Footer CTA */}
-      <StickyFooter />
     </div>
 	)
 }

@@ -1,13 +1,13 @@
 # 🏦 Financbase Admin Dashboard
 
-**The Complete Financial Management Platform for Modern Businesses**
+The Complete Financial Management Platform for Modern Businesses
 
 [![CI/CD Pipeline](https://github.com/your-org/financbase-admin-dashboard/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/your-org/financbase-admin-dashboard/actions/workflows/ci-cd.yml)
 [![Docker Build](https://img.shields.io/badge/docker-ready-blue.svg)](https://docker.com)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://typescriptlang.org)
 
-## 🌟 Overview
+## Overview
 
 Financbase is a comprehensive financial management platform designed for modern businesses across multiple market segments. Built with cutting-edge technologies and AI-powered insights, it provides real-time financial intelligence, automated workflows, and enterprise-grade security.
 
@@ -91,12 +91,21 @@ Financbase is a comprehensive financial management platform designed for modern 
 - **Clerk** - Authentication and user management
 - **ESLint + Prettier** - Code quality
 
-## 🚀 Quick Start
+## 🔒 Security & API Policy
+
+### API Authentication Policy
+
+Financbase implements a strict authentication policy for API routes:
+
+- **Public Routes**: Only `/api/health` and `/api/test-*` endpoints are publicly accessible
+- **Protected Routes**: All other API routes require authentication via Clerk
+- **401 Response**: Unauthenticated requests return `401 Unauthorized` with JSON error message
+- **Client Handling**: Client-side fetchers automatically redirect to `/sign-in` on 401 errors
 
 ### Prerequisites
 
 - Node.js 20.x or later
-- npm or yarn
+- pnpm 8.x or later
 - PostgreSQL database
 - OpenAI API key
 - Clerk authentication account
@@ -113,7 +122,7 @@ Financbase is a comprehensive financial management platform designed for modern 
 2. **Install dependencies**
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Set up environment variables**
@@ -123,25 +132,30 @@ Financbase is a comprehensive financial management platform designed for modern 
    # Edit .env.local with your configuration
    ```
 
+   **Environment Templates:**
+   - `.env.example` - Local development
+   - `.env.staging.template` - Staging deployment
+   - `.env.production.template` - Production deployment
+
 4. **Set up the database**
 
    ```bash
-   npm run db:generate
-   npm run db:push
+   pnpm db:generate
+   pnpm db:push
    ```
+
+   **Note:** The application uses transaction types: `income`, `expense`, `transfer`, `payment` (migrated from `credit`/`debit`).
 
 5. **Start the development server**
 
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-## 🏗️ Project Structure
-
-```
+```text
 financbase-admin-dashboard/
 ├── .github/workflows/          # CI/CD pipeline configuration
 ├── __tests__/                  # Unit and integration tests
@@ -178,25 +192,25 @@ financbase-admin-dashboard/
 
 ```bash
 # Development
-npm run dev              # Start development server
-npm run build           # Build for production
-npm run start           # Start production server
+pnpm dev              # Start development server
+pnpm build           # Build for production
+pnpm start           # Start production server
 
 # Testing
-npm test                # Run tests in watch mode
-npm run test:run        # Run tests once
-npm run test:coverage   # Run with coverage report
-npm run e2e             # Run end-to-end tests
+pnpm test                # Run tests in watch mode
+pnpm test:run        # Run tests once
+pnpm test:coverage   # Run with coverage report
+pnpm e2e             # Run end-to-end tests
 
 # Database
-npm run db:generate     # Generate database schema
-npm run db:push         # Push schema to database
-npm run db:studio       # Open database studio
+pnpm db:generate     # Generate database schema
+pnpm db:push         # Push schema to database
+pnpm db:studio       # Open database studio
 
 # Code Quality
-npm run lint            # Run ESLint
-npm run type-check      # Run TypeScript checks
-npm run format          # Format code with Prettier
+pnpm lint            # Run ESLint
+pnpm type-check      # Run TypeScript checks
+pnpm format          # Format code with Prettier
 
 # Deployment
 ./deploy.sh development # Deploy to development
@@ -255,8 +269,8 @@ docker-compose -f docker-compose.production.yml --profile backup up -d
 
 ```bash
 # Build and deploy
-npm run build
-npm run start
+pnpm build
+pnpm start
 
 # Or use the deployment script
 ./deploy.sh production
@@ -372,8 +386,6 @@ For enterprise support and custom development:
 - 🎯 Multi-language support
 - 🎯 Enterprise SSO integration
 
----
+## 🏦 Financbase: Where Finance Meets Function - The Foundation of Modern Business
 
-**🏦 Financbase: Where Finance Meets Function - The Foundation of Modern Business**
-
-*Built with ❤️ for modern businesses ready to scale*
+Built with ❤️ for modern businesses ready to scale

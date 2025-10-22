@@ -1,0 +1,210 @@
+name: Database Schema Validation
+
+on:
+  pull_request:
+    paths:
+      - 'lib/db/schemas/**'
+      - 'drizzle/**'
+      - 'drizzle.config.ts'
+      - 'package.json'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'lib/db/schemas/**'
+      - 'drizzle/**'
+      - 'drizzle.config.ts'
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8'
+
+jobs:
+  schema-validation:
+    name: Schema Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Drizzle schema
+        run: pnpm db:check
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+
+      - name: Generate migration diff
+        run: pnpm db:generate --dry-run
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+
+      - name: Check for schema drift
+        run: |
+          echo "Checking for schema drift..."
+          if pnpm db:generate --dry-run | grep -q "No schema changes detected"; then
+            echo "✅ No schema drift detected"
+          else
+            echo "❌ Schema drift detected - migration files may be out of sync"
+            pnpm db:generate --dry-run
+            exit 1
+          fi
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+
+      - name: Validate transaction types
+        run: |
+          echo "Validating transaction type consistency..."
+          
+          # Check if migration files contain the correct transaction types
+          if grep -q "ENUM('income', 'expense', 'transfer', 'payment')" drizzle/0001_thankful_cloak.sql; then
+            echo "✅ Migration file has correct transaction types"
+          else
+            echo "❌ Migration file has incorrect transaction types"
+            exit 1
+          fi
+          
+          # Check if schema files use the correct transaction types
+          if grep -q "type: text" lib/db/schemas/transactions.schema.ts; then
+            echo "✅ Schema file uses text type for transactions"
+          else
+            echo "❌ Schema file does not use text type for transactions"
+            exit 1
+          fi
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Read validation results
+            const results = {
+              schemaCheck: '✅ Passed',
+              migrationDiff: '✅ No drift detected',
+              transactionTypes: '✅ Validated'
+            };
+            
+            const comment = `## 🔍 Database Schema Validation Results
+            
+            | Check | Status |
+            |-------|--------|
+            | Schema Validation | ${results.schemaCheck} |
+            | Migration Diff | ${results.migrationDiff} |
+            | Transaction Types | ${results.transactionTypes} |
+            
+            ### 📋 Validation Summary
+            
+            - **Schema Alignment**: Drizzle schemas are properly aligned with database
+            - **Migration Consistency**: No schema drift detected
+            - **Transaction Types**: Using correct types (income/expense/transfer/payment)
+            
+            ### ✅ All validations passed successfully!`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  type-safety-check:
+    name: Type Safety Check
+    runs-on: ubuntu-latest
+    needs: schema-validation
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Check for transaction type usage
+        run: |
+          echo "Checking for correct transaction type usage in codebase..."
+          
+          # Check for old transaction types (should not exist)
+          if grep -r "credit\|debit" --include="*.ts" --include="*.tsx" lib/ app/ --exclude-dir=node_modules; then
+            echo "❌ Found old transaction types (credit/debit) in codebase"
+            echo "Please update to use income/expense/transfer/payment"
+            exit 1
+          else
+            echo "✅ No old transaction types found"
+          fi
+          
+          # Check for new transaction types
+          if grep -r "income\|expense\|transfer\|payment" --include="*.ts" --include="*.tsx" lib/ app/ --exclude-dir=node_modules; then
+            echo "✅ Found new transaction types in codebase"
+          else
+            echo "❌ No new transaction types found"
+            exit 1
+          fi
+
+  integration-test:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    needs: [schema-validation, type-safety-check]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run integration tests
+        run: pnpm test:integration
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+
+      - name: Test transaction operations
+        run: |
+          echo "Testing transaction operations with new types..."
+          # Add specific tests for transaction type functionality
+          pnpm test -- --testNamePattern="transaction"

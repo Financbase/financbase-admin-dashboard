@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-import { Loader2, TrendingUp, TrendingDown, Users, DollarSign, FileText, Receipt } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 interface DashboardOverview {
@@ -67,7 +65,12 @@ export default function DashboardPage() {
 	const { data: overviewData, isLoading: overviewLoading, error: overviewError } = useQuery({
 		queryKey: ['dashboard-overview'],
 		queryFn: async () => {
-			const response = await fetch('/api/test-dashboard/overview');
+			const response = await fetch('/api/test-dashboard-overview');
+			if (response.status === 401) {
+				// Redirect to sign-in on authentication error
+				window.location.href = '/sign-in';
+				throw new Error('Authentication required');
+			}
 			if (!response.ok) throw new Error('Failed to fetch dashboard overview');
 			return response.json();
 		},
@@ -77,7 +80,12 @@ export default function DashboardPage() {
 	const { data: activityData, isLoading: activityLoading } = useQuery({
 		queryKey: ['dashboard-activity'],
 		queryFn: async () => {
-			const response = await fetch('/api/test-dashboard/recent-activity');
+			const response = await fetch('/api/test-dashboard-activity');
+			if (response.status === 401) {
+				// Redirect to sign-in on authentication error
+				window.location.href = '/sign-in';
+				throw new Error('Authentication required');
+			}
 			if (!response.ok) throw new Error('Failed to fetch recent activity');
 			return response.json();
 		},
@@ -87,7 +95,12 @@ export default function DashboardPage() {
 	const { data: insightsData, isLoading: insightsLoading } = useQuery({
 		queryKey: ['dashboard-insights'],
 		queryFn: async () => {
-			const response = await fetch('/api/test-dashboard/ai-insights');
+			const response = await fetch('/api/test-dashboard-insights');
+			if (response.status === 401) {
+				// Redirect to sign-in on authentication error
+				window.location.href = '/sign-in';
+				throw new Error('Authentication required');
+			}
 			if (!response.ok) throw new Error('Failed to fetch AI insights');
 			return response.json();
 		},
@@ -184,13 +197,13 @@ export default function DashboardPage() {
 				<div className="rounded-lg border bg-card p-6">
 					<h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
 					<div className="space-y-2">
-						<button className="w-full text-left p-3 rounded-lg border hover:bg-muted">
+						<button type="button" className="w-full text-left p-3 rounded-lg border hover:bg-muted">
 							Create New Invoice
 						</button>
-						<button className="w-full text-left p-3 rounded-lg border hover:bg-muted">
+						<button type="button" className="w-full text-left p-3 rounded-lg border hover:bg-muted">
 							Add Expense
 						</button>
-						<button className="w-full text-left p-3 rounded-lg border hover:bg-muted">
+						<button type="button" className="w-full text-left p-3 rounded-lg border hover:bg-muted">
 							Add Client
 						</button>
 					</div>
@@ -233,8 +246,8 @@ export default function DashboardPage() {
 					) : (
 						<div className="space-y-2 text-sm">
 							{insights.slice(0, 3).map((insight, index) => (
-								<div 
-									key={index}
+								<div
+									key={`${insight.type}-${insight.title}-${index}`}
 									className={`p-2 rounded ${
 										insight.type === 'success' ? 'bg-green-50 dark:bg-green-900/20' :
 										insight.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20' :
@@ -246,7 +259,7 @@ export default function DashboardPage() {
 										{insight.description}
 									</div>
 									{insight.action && (
-										<button className="text-xs text-blue-600 hover:underline mt-1">
+										<button type="button" className="text-xs text-blue-600 hover:underline mt-1">
 											{insight.action}
 										</button>
 									)}

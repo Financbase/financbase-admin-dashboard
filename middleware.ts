@@ -56,6 +56,7 @@ export default clerkMiddleware(async (auth, request) => {
 	const cspValue = [
 		"default-src 'self'",
 		"script-src 'self' 'unsafe-inline' 'unsafe-eval' *.clerk.accounts.dev *.clerk.dev *.sentry.io *.posthog.com js.stripe.com *.uploadthing.com *.algolia.net *.algolianet.com",
+		"worker-src 'self' blob: *.clerk.accounts.dev *.clerk.dev",
 		"style-src 'self' 'unsafe-inline' fonts.googleapis.com *.uploadthing.com",
 		"img-src 'self' data: https: blob: *.clerk.accounts.dev *.clerk.dev *.uploadthing.com *.algolia.net *.algolianet.com *.stripe.com *.posthog.com",
 		"font-src 'self' fonts.gstatic.com fonts.googleapis.com",

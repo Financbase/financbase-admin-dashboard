@@ -1,6 +1,6 @@
 CREATE TYPE "public"."transaction_category" AS ENUM('income', 'expense', 'transfer', 'refund', 'fee', 'tax', 'payroll', 'office', 'marketing', 'software', 'utilities', 'travel', 'other');--> statement-breakpoint
 CREATE TYPE "public"."transaction_status" AS ENUM('pending', 'completed', 'failed', 'cancelled');--> statement-breakpoint
-CREATE TYPE "public"."transaction_type" AS ENUM('credit', 'debit');--> statement-breakpoint
+CREATE TYPE "public"."transaction_type" AS ENUM('income', 'expense', 'transfer', 'payment');--> statement-breakpoint
 CREATE TYPE "public"."account_status" AS ENUM('active', 'inactive', 'closed', 'suspended');--> statement-breakpoint
 CREATE TYPE "public"."account_type" AS ENUM('checking', 'savings', 'credit_card', 'investment', 'loan', 'other');--> statement-breakpoint
 CREATE TYPE "public"."payment_method_status" AS ENUM('active', 'inactive', 'suspended', 'failed');--> statement-breakpoint
@@ -29,8 +29,8 @@ CREATE TABLE "transactions" (
 	"type" "transaction_type" NOT NULL,
 	"amount" numeric(10, 2) NOT NULL,
 	"currency" text DEFAULT 'USD',
-	"description" text NOT NULL,
-	"category" "transaction_category" NOT NULL,
+	"description" text,
+	"category" text,
 	"status" "transaction_status" DEFAULT 'pending',
 	"payment_method" text,
 	"reference_id" text,
