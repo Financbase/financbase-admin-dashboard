@@ -4,7 +4,8 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { ExpenseService } from '@/lib/services/expense-service';
 
 /**
@@ -12,7 +13,7 @@ import { ExpenseService } from '@/lib/services/expense-service';
  * Fetch a single expense
  */
 export async function GET(
-	req: NextRequest,
+	_req: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
 	try {
@@ -80,7 +81,7 @@ export async function PUT(
  * Delete an expense
  */
 export async function DELETE(
-	req: NextRequest,
+	_req: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
 	try {

@@ -83,34 +83,51 @@ export function EnhancedNotificationsPanel() {
 		},
 	});
 
-	// Real-time updates via PartyKit (if available)
-	// TODO: Implement PartyKit WebSocket connection
-	// This is a placeholder for real-time notification updates
-	// Uncomment when PartyKit is properly configured
-	
-	/*
+	// Real-time updates via PartyKit
 	useEffect(() => {
 		if (!user?.id) return;
 
-		const socket = new WebSocket(`${process.env.NEXT_PUBLIC_PARTYKIT_HOST}/party/notifications-${user.id}`);
-		
-		socket.onmessage = (event) => {
-			const data = JSON.parse(event.data);
-			if (data.type === 'notification') {
-				queryClient.invalidateQueries({ queryKey: ['notifications'] });
-				
-				// Show toast for new notification
-				toast.info(data.data.title, {
-					description: data.data.message,
-				});
-			}
-		};
+		// Use PartySocket for real-time notifications
+		let socket: WebSocket | null = null;
+
+		try {
+			const wsUrl = `${process.env.NEXT_PUBLIC_PARTYKIT_HOST}/party/notifications-${user.id}`;
+			socket = new WebSocket(wsUrl);
+
+			socket.onmessage = (event) => {
+				try {
+					const data = JSON.parse(event.data);
+					if (data.type === 'notification') {
+						queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+						// Show toast for new notification
+						toast.info(data.data.title, {
+							description: data.data.message,
+							action: data.data.actionUrl ? {
+								label: 'View',
+								onClick: () => window.location.href = data.data.actionUrl,
+							} : undefined,
+						});
+					}
+				} catch (error) {
+					console.error('Error parsing notification data:', error);
+				}
+			};
+
+			socket.onerror = (error) => {
+				console.error('WebSocket error:', error);
+			};
+
+		} catch (error) {
+			console.error('Error setting up WebSocket:', error);
+		}
 
 		return () => {
-			socket.close();
+			if (socket) {
+				socket.close();
+			}
 		};
 	}, [user?.id, queryClient]);
-	*/
 
 	const handleNotificationClick = (notification: Notification) => {
 		// Mark as read

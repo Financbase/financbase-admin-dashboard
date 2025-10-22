@@ -4,7 +4,8 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { ExpenseService } from '@/lib/services/expense-service';
 
 /**
@@ -12,7 +13,7 @@ import { ExpenseService } from '@/lib/services/expense-service';
  * Approve an expense
  */
 export async function POST(
-	req: NextRequest,
+	_req: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
 	try {

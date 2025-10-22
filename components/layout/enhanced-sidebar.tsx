@@ -101,6 +101,12 @@ const navigationItems = [
 		badge: null,
 	},
 	{
+		name: "Collaboration",
+		href: "/collaboration",
+		icon: MessageSquare,
+		badge: "New",
+	},
+	{
 		name: "Settings",
 		href: "/settings",
 		icon: Settings,

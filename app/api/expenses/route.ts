@@ -4,7 +4,8 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { ExpenseService } from '@/lib/services/expense-service';
 
 /**
@@ -25,15 +26,15 @@ export async function GET(req: NextRequest) {
 		const category = searchParams.get('category') || undefined;
 		const billable = searchParams.get('billable') === 'true' ? true : 
 		                 searchParams.get('billable') === 'false' ? false : undefined;
-		const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50;
-		const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0;
+		const limitStr = searchParams.get('limit');
+		const limit = limitStr ? parseInt(limitStr) : 50;
+		const offsetStr = searchParams.get('offset');
+		const offset = offsetStr ? parseInt(offsetStr) : 0;
 
-		const startDate = searchParams.get('startDate') 
-			? new Date(searchParams.get('startDate')!) 
-			: undefined;
-		const endDate = searchParams.get('endDate') 
-			? new Date(searchParams.get('endDate')!) 
-			: undefined;
+		const startDateStr = searchParams.get('startDate');
+		const startDate = startDateStr ? new Date(startDateStr) : undefined;
+		const endDateStr = searchParams.get('endDate');
+		const endDate = endDateStr ? new Date(endDateStr) : undefined;
 
 		const expenses = await ExpenseService.getAll(userId, {
 			status,

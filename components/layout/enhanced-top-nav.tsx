@@ -23,30 +23,30 @@ import {
 } from "@/components/ui/sheet";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+	Activity,
 	BarChart3,
 	Bell,
-	ChevronDown,
+	BookOpen,
 	DollarSign,
-	Filter,
+	FileText,
 	HelpCircle,
-	Key,
-	LayoutDashboard,
-	Link2,
 	LogOut,
 	Menu,
+	MessageSquare,
 	Monitor,
 	Moon,
 	Search,
 	Settings,
+	Shield,
 	Sun,
 	TrendingUp,
 	User,
 	X,
-	Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+import { useState, useEffect } from "react";
 
 interface EnhancedTopNavProps {
 	onMenuClick?: () => void;
@@ -67,7 +67,7 @@ export function EnhancedTopNav({
 	const [isScrolled, setIsScrolled] = useState(false);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
-	const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+	const { setTheme } = useTheme();
 
 	const pathname = usePathname();
 
@@ -197,17 +197,61 @@ export function EnhancedTopNav({
 						</Sheet>
 
 						{/* Notifications */}
-						<Button variant="ghost" size="icon" className="relative">
-							<Bell className="h-5 w-5" />
-							{notifications > 0 && (
-								<Badge
-									variant="destructive"
-									className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-								>
-									{notifications > 9 ? "9+" : notifications}
-								</Badge>
-							)}
-						</Button>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" size="icon" className="relative">
+									<Bell className="h-5 w-5" />
+									{notifications > 0 && (
+										<Badge
+											variant="destructive"
+											className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+										>
+											{notifications > 9 ? "9+" : notifications}
+										</Badge>
+									)}
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end" className="w-80">
+								<DropdownMenuLabel>Notifications</DropdownMenuLabel>
+								<DropdownMenuSeparator />
+								<div className="max-h-80 overflow-y-auto">
+									<DropdownMenuItem className="flex flex-col items-start p-4">
+										<div className="flex items-center gap-2 w-full">
+											<div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+											<span className="text-sm font-medium">New Payment Received</span>
+											<span className="text-xs text-muted-foreground ml-auto">2m ago</span>
+										</div>
+										<p className="text-xs text-muted-foreground mt-1">
+											Payment of $2,500 received from Acme Corp
+										</p>
+									</DropdownMenuItem>
+									<DropdownMenuItem className="flex flex-col items-start p-4">
+										<div className="flex items-center gap-2 w-full">
+											<div className="w-2 h-2 bg-green-500 rounded-full"></div>
+											<span className="text-sm font-medium">Invoice Overdue</span>
+											<span className="text-xs text-muted-foreground ml-auto">1h ago</span>
+										</div>
+										<p className="text-xs text-muted-foreground mt-1">
+											Invoice #INV-2024-001 is 5 days overdue
+										</p>
+									</DropdownMenuItem>
+									<DropdownMenuItem className="flex flex-col items-start p-4">
+										<div className="flex items-center gap-2 w-full">
+											<div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+											<span className="text-sm font-medium">Expense Alert</span>
+											<span className="text-xs text-muted-foreground ml-auto">3h ago</span>
+										</div>
+										<p className="text-xs text-muted-foreground mt-1">
+											Monthly expenses exceeded budget by 15%
+										</p>
+									</DropdownMenuItem>
+								</div>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem className="text-center">
+									View All Notifications
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
 
 						{/* Theme Toggle */}
 						<DropdownMenu>
@@ -235,9 +279,48 @@ export function EnhancedTopNav({
 						</DropdownMenu>
 
 						{/* Help */}
-						<Button variant="ghost" size="icon">
-							<HelpCircle className="h-5 w-5" />
-						</Button>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" size="icon">
+									<HelpCircle className="h-5 w-5" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end" className="w-80">
+								<DropdownMenuLabel>Help & Support</DropdownMenuLabel>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem asChild>
+									<Link href="/docs" className="flex items-center">
+										<FileText className="mr-2 h-4 w-4" />
+										Documentation
+									</Link>
+								</DropdownMenuItem>
+								<DropdownMenuItem asChild>
+									<Link href="/guides" className="flex items-center">
+										<BookOpen className="mr-2 h-4 w-4" />
+										User Guides
+									</Link>
+								</DropdownMenuItem>
+								<DropdownMenuItem asChild>
+									<Link href="/support" className="flex items-center">
+										<MessageSquare className="mr-2 h-4 w-4" />
+										Contact Support
+									</Link>
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem asChild>
+									<Link href="/api/health" className="flex items-center">
+										<Activity className="mr-2 h-4 w-4" />
+										System Status
+									</Link>
+								</DropdownMenuItem>
+								<DropdownMenuItem asChild>
+									<Link href="/legal" className="flex items-center">
+										<Shield className="mr-2 h-4 w-4" />
+										Legal & Privacy
+									</Link>
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
 
 						{/* User Menu */}
 						<DropdownMenu>

@@ -5,8 +5,7 @@
  * Displays list of invoices with filters and actions
  */
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +42,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/core/ui/navigation/dropdown-menu';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Invoice {
@@ -58,6 +57,7 @@ interface Invoice {
 }
 
 export function InvoiceList() {
+	const router = useRouter();
 	const [statusFilter, setStatusFilter] = useState<string>('all');
 	const [searchQuery, setSearchQuery] = useState('');
 
@@ -150,7 +150,7 @@ export function InvoiceList() {
 							<CardTitle>Invoices</CardTitle>
 							<CardDescription>Manage your invoices</CardDescription>
 						</div>
-						<Button>
+						<Button onClick={() => router.push('/invoices/new')}>
 							<Plus className="h-4 w-4 mr-2" />
 							New Invoice
 						</Button>
@@ -193,7 +193,7 @@ export function InvoiceList() {
 							<p className="text-muted-foreground">
 								{searchQuery ? 'No invoices found matching your search' : 'No invoices yet'}
 							</p>
-							<Button className="mt-4">
+							<Button className="mt-4" onClick={() => router.push('/invoices/new')}>
 								<Plus className="h-4 w-4 mr-2" />
 								Create your first invoice
 							</Button>
@@ -246,11 +246,11 @@ export function InvoiceList() {
 													</Button>
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end">
-													<DropdownMenuItem>
+													<DropdownMenuItem onClick={() => router.push(`/invoices/${invoice.id}`)}>
 														<Eye className="h-4 w-4 mr-2" />
 														View
 													</DropdownMenuItem>
-													<DropdownMenuItem>
+													<DropdownMenuItem onClick={() => router.push(`/invoices/${invoice.id}/edit`)}>
 														<Edit className="h-4 w-4 mr-2" />
 														Edit
 													</DropdownMenuItem>

@@ -1,23 +1,108 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Download, Filter, Plus } from "lucide-react";
+import { Search, Download, Filter, Plus, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+interface Transaction {
+	id: string;
+	transactionNumber: string;
+	type: 'credit' | 'debit';
+	amount: string;
+	currency: string;
+	description: string;
+	category: string;
+	status: 'pending' | 'completed' | 'failed' | 'cancelled';
+	paymentMethod?: string;
+	referenceId?: string;
+	referenceType?: string;
+	accountId?: string;
+	transactionDate: string;
+	processedAt?: string;
+	notes?: string;
+	metadata?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+interface TransactionStats {
+	totalTransactions: number;
+	totalInflow: number;
+	totalOutflow: number;
+	netFlow: number;
+	pendingTransactions: number;
+	completedTransactions: number;
+	categoryBreakdown: Array<{
+		category: string;
+		amount: number;
+		count: number;
+	}>;
+	monthlyTrend: Array<{
+		month: string;
+		inflow: number;
+		outflow: number;
+		net: number;
+	}>;
+}
 
 export default function TransactionsPage() {
-	const transactions = [
-		{ id: "TXN-2024-001", date: "2024-10-21", description: "Payment from Acme Corporation", category: "Income", amount: 5499.99, status: "completed", type: "credit", method: "Bank Transfer" },
-		{ id: "TXN-2024-002", date: "2024-10-21", description: "Office Supplies - Staples", category: "Office", amount: 245.00, status: "completed", type: "debit", method: "Credit Card" },
-		{ id: "TXN-2024-003", date: "2024-10-20", description: "Software Subscription - Adobe", category: "Software", amount: 899.99, status: "pending", type: "debit", method: "ACH" },
-		{ id: "TXN-2024-004", date: "2024-10-20", description: "Payment from Tech Solutions Ltd", category: "Income", amount: 2299.50, status: "completed", type: "credit", method: "Wire Transfer" },
-		{ id: "TXN-2024-005", date: "2024-10-19", description: "Cloud Hosting - AWS", category: "Utilities", amount: 150.00, status: "completed", type: "debit", method: "Credit Card" },
-		{ id: "TXN-2024-006", date: "2024-10-19", description: "Marketing Campaign - Google Ads", category: "Marketing", amount: 1250.00, status: "completed", type: "debit", method: "Credit Card" },
-		{ id: "TXN-2024-007", date: "2024-10-18", description: "Payment from Global Industries", category: "Income", amount: 8999.99, status: "failed", type: "credit", method: "Bank Transfer" },
-		{ id: "TXN-2024-008", date: "2024-10-18", description: "Payroll - October", category: "Payroll", amount: 35000.00, status: "completed", type: "debit", method: "ACH" },
-	];
+	const [searchQuery, setSearchQuery] = useState("");
 
-	const totalCredit = transactions.filter(t => t.type === 'credit' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0);
-	const totalDebit = transactions.filter(t => t.type === 'debit' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0);
-	const netFlow = totalCredit - totalDebit;
+	// Fetch transactions data
+	const { data: transactionsData, isLoading: transactionsLoading, error: transactionsError } = useQuery({
+		queryKey: ['transactions', searchQuery],
+		queryFn: async () => {
+			const params = new URLSearchParams();
+			if (searchQuery) params.append('search', searchQuery);
+			
+			const response = await fetch(`/api/transactions?${params.toString()}`);
+			if (!response.ok) throw new Error('Failed to fetch transactions');
+			return response.json();
+		},
+	});
+
+	// Fetch transaction stats
+	const { data: statsData, isLoading: statsLoading } = useQuery({
+		queryKey: ['transaction-stats'],
+		queryFn: async () => {
+			const response = await fetch('/api/transactions/stats');
+			if (!response.ok) throw new Error('Failed to fetch transaction stats');
+			return response.json();
+		},
+	});
+
+	const transactions: Transaction[] = transactionsData?.transactions || [];
+	const stats: TransactionStats = statsData?.stats || {
+		totalTransactions: 0,
+		totalInflow: 0,
+		totalOutflow: 0,
+		netFlow: 0,
+		pendingTransactions: 0,
+		completedTransactions: 0,
+		categoryBreakdown: [],
+		monthlyTrend: [],
+	};
+
+	if (transactionsLoading || statsLoading) {
+		return (
+			<div className="space-y-8 p-8">
+				<div className="flex items-center justify-center h-64">
+					<Loader2 className="h-8 w-8 animate-spin" />
+				</div>
+			</div>
+		);
+	}
+
+	if (transactionsError) {
+		return (
+			<div className="space-y-8 p-8">
+				<div className="text-center text-red-600">
+					Error loading transactions: {transactionsError.message}
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-8 p-8">
@@ -42,7 +127,7 @@ export default function TransactionsPage() {
 						<h3 className="text-sm font-medium text-muted-foreground">Total Inflow</h3>
 					</div>
 					<div className="mt-3">
-						<div className="text-2xl font-bold text-green-600">${totalCredit.toLocaleString()}</div>
+						<div className="text-2xl font-bold text-green-600">${stats.totalInflow.toLocaleString()}</div>
 						<p className="text-xs text-muted-foreground mt-1">
 							From {transactions.filter(t => t.type === 'credit').length} transactions
 						</p>
@@ -54,7 +139,7 @@ export default function TransactionsPage() {
 						<h3 className="text-sm font-medium text-muted-foreground">Total Outflow</h3>
 					</div>
 					<div className="mt-3">
-						<div className="text-2xl font-bold text-red-600">${totalDebit.toLocaleString()}</div>
+						<div className="text-2xl font-bold text-red-600">${stats.totalOutflow.toLocaleString()}</div>
 						<p className="text-xs text-muted-foreground mt-1">
 							From {transactions.filter(t => t.type === 'debit').length} transactions
 						</p>
@@ -66,8 +151,8 @@ export default function TransactionsPage() {
 						<h3 className="text-sm font-medium text-muted-foreground">Net Cash Flow</h3>
 					</div>
 					<div className="mt-3">
-						<div className={`text-2xl font-bold ${netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-							${netFlow.toLocaleString()}
+						<div className={`text-2xl font-bold ${stats.netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+							${stats.netFlow.toLocaleString()}
 						</div>
 						<p className="text-xs text-muted-foreground mt-1">This period</p>
 					</div>
@@ -78,7 +163,7 @@ export default function TransactionsPage() {
 						<h3 className="text-sm font-medium text-muted-foreground">Pending</h3>
 					</div>
 					<div className="mt-3">
-						<div className="text-2xl font-bold">{transactions.filter(t => t.status === 'pending').length}</div>
+						<div className="text-2xl font-bold">{stats.pendingTransactions}</div>
 						<p className="text-xs text-muted-foreground mt-1">Awaiting processing</p>
 					</div>
 				</div>
@@ -129,33 +214,41 @@ export default function TransactionsPage() {
 							</tr>
 						</thead>
 						<tbody>
-							{transactions.map((txn) => (
-								<tr key={txn.id} className="border-b hover:bg-muted/50 transition-colors">
-									<td className="p-4 font-mono text-sm">{txn.id}</td>
-									<td className="p-4 text-sm">{txn.date}</td>
-									<td className="p-4 text-sm">{txn.description}</td>
-									<td className="p-4 text-sm">{txn.category}</td>
-									<td className="p-4 text-sm">{txn.method}</td>
-									<td className={`p-4 text-sm text-right font-semibold ${txn.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
-										{txn.type === 'credit' ? '+' : '-'}${txn.amount.toFixed(2)}
-									</td>
-									<td className="p-4">
-										<Badge 
-											variant={
-												txn.status === 'completed' ? 'default' : 
-												txn.status === 'pending' ? 'secondary' : 
-												'destructive'
-											}
-											className="text-xs"
-										>
-											{txn.status}
-										</Badge>
-									</td>
-									<td className="p-4">
-										<Button variant="ghost" size="sm">View</Button>
+							{transactions.length === 0 ? (
+								<tr>
+									<td colSpan={8} className="text-center py-8 text-muted-foreground">
+										No transactions found. Create your first transaction to get started.
 									</td>
 								</tr>
-							))}
+							) : (
+								transactions.map((txn) => (
+									<tr key={txn.id} className="border-b hover:bg-muted/50 transition-colors">
+										<td className="p-4 font-mono text-sm">{txn.transactionNumber}</td>
+										<td className="p-4 text-sm">{new Date(txn.transactionDate).toLocaleDateString()}</td>
+										<td className="p-4 text-sm">{txn.description}</td>
+										<td className="p-4 text-sm">{txn.category}</td>
+										<td className="p-4 text-sm">{txn.paymentMethod || 'N/A'}</td>
+										<td className={`p-4 text-sm text-right font-semibold ${txn.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+											{txn.type === 'credit' ? '+' : '-'}${Number(txn.amount).toFixed(2)}
+										</td>
+										<td className="p-4">
+											<Badge 
+												variant={
+													txn.status === 'completed' ? 'default' : 
+													txn.status === 'pending' ? 'secondary' : 
+													'destructive'
+												}
+												className="text-xs"
+											>
+												{txn.status}
+											</Badge>
+										</td>
+										<td className="p-4">
+											<Button variant="ghost" size="sm">View</Button>
+										</td>
+									</tr>
+								))
+							)}
 						</tbody>
 					</table>
 				</div>

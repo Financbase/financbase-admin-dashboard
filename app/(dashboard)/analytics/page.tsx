@@ -1,8 +1,151 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, BarChart3, PieChart, ArrowUpRight } from "lucide-react";
+import { TrendingUp, TrendingDown, BarChart3, PieChart, ArrowUpRight, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
+interface RevenueAnalytics {
+	totalRevenue: number;
+	monthlyRevenue: Array<{
+		month: string;
+		revenue: number;
+		growth: number;
+	}>;
+	revenueByClient: Array<{
+		clientName: string;
+		revenue: number;
+		invoiceCount: number;
+	}>;
+	revenueGrowth: {
+		monthOverMonth: number;
+		yearOverYear: number;
+	};
+}
+
+interface ExpenseAnalytics {
+	totalExpenses: number;
+	monthlyExpenses: Array<{
+		month: string;
+		expenses: number;
+		growth: number;
+	}>;
+	expensesByCategory: Array<{
+		category: string;
+		amount: number;
+		percentage: number;
+	}>;
+	expenseGrowth: {
+		monthOverMonth: number;
+		yearOverYear: number;
+	};
+}
+
+interface ClientAnalytics {
+	totalClients: number;
+	activeClients: number;
+	newClients: Array<{
+		month: string;
+		count: number;
+	}>;
+	clientRetention: number;
+	topClients: Array<{
+		clientName: string;
+		revenue: number;
+		invoiceCount: number;
+		lastInvoice: string;
+	}>;
+}
+
+interface PerformanceMetrics {
+	profitMargin: number;
+	cashFlow: number;
+	averageInvoiceValue: number;
+	paymentSuccessRate: number;
+	clientAcquisitionCost: number;
+	lifetimeValue: number;
+}
 
 export default function AnalyticsPage() {
+	// Fetch revenue analytics
+	const { data: revenueData, isLoading: revenueLoading } = useQuery({
+		queryKey: ['analytics-revenue'],
+		queryFn: async () => {
+			const response = await fetch('/api/analytics/revenue');
+			if (!response.ok) throw new Error('Failed to fetch revenue analytics');
+			return response.json();
+		},
+	});
+
+	// Fetch expense analytics
+	const { data: expenseData, isLoading: expenseLoading } = useQuery({
+		queryKey: ['analytics-expenses'],
+		queryFn: async () => {
+			const response = await fetch('/api/analytics/expenses');
+			if (!response.ok) throw new Error('Failed to fetch expense analytics');
+			return response.json();
+		},
+	});
+
+	// Fetch client analytics
+	const { data: clientData, isLoading: clientLoading } = useQuery({
+		queryKey: ['analytics-clients'],
+		queryFn: async () => {
+			const response = await fetch('/api/analytics/clients');
+			if (!response.ok) throw new Error('Failed to fetch client analytics');
+			return response.json();
+		},
+	});
+
+	// Fetch performance metrics
+	const { data: performanceData, isLoading: performanceLoading } = useQuery({
+		queryKey: ['analytics-performance'],
+		queryFn: async () => {
+			const response = await fetch('/api/analytics/performance');
+			if (!response.ok) throw new Error('Failed to fetch performance metrics');
+			return response.json();
+		},
+	});
+
+	const revenueAnalytics: RevenueAnalytics = revenueData?.analytics || {
+		totalRevenue: 0,
+		monthlyRevenue: [],
+		revenueByClient: [],
+		revenueGrowth: { monthOverMonth: 0, yearOverYear: 0 },
+	};
+
+	const expenseAnalytics: ExpenseAnalytics = expenseData?.analytics || {
+		totalExpenses: 0,
+		monthlyExpenses: [],
+		expensesByCategory: [],
+		expenseGrowth: { monthOverMonth: 0, yearOverYear: 0 },
+	};
+
+	const clientAnalytics: ClientAnalytics = clientData?.analytics || {
+		totalClients: 0,
+		activeClients: 0,
+		newClients: [],
+		clientRetention: 0,
+		topClients: [],
+	};
+
+	const performanceMetrics: PerformanceMetrics = performanceData?.metrics || {
+		profitMargin: 0,
+		cashFlow: 0,
+		averageInvoiceValue: 0,
+		paymentSuccessRate: 0,
+		clientAcquisitionCost: 0,
+		lifetimeValue: 0,
+	};
+
+	if (revenueLoading || expenseLoading || clientLoading || performanceLoading) {
+		return (
+			<div className="space-y-8 p-8">
+				<div className="flex items-center justify-center h-64">
+					<Loader2 className="h-8 w-8 animate-spin" />
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-8 p-8">
 			{/* Header */}
@@ -27,8 +170,10 @@ export default function AnalyticsPage() {
 						<TrendingUp className="h-4 w-4 text-green-600" />
 					</div>
 					<div className="mt-3">
-						<div className="text-2xl font-bold">12.5%</div>
-						<p className="text-xs text-green-600 mt-1">+2.3% from last period</p>
+						<div className="text-2xl font-bold">{revenueAnalytics.revenueGrowth.monthOverMonth.toFixed(1)}%</div>
+						<p className={`text-xs mt-1 ${revenueAnalytics.revenueGrowth.monthOverMonth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+							{revenueAnalytics.revenueGrowth.monthOverMonth >= 0 ? '+' : ''}{revenueAnalytics.revenueGrowth.monthOverMonth.toFixed(1)}% from last month
+						</p>
 					</div>
 				</div>
 
@@ -38,19 +183,19 @@ export default function AnalyticsPage() {
 						<BarChart3 className="h-4 w-4 text-blue-600" />
 					</div>
 					<div className="mt-3">
-						<div className="text-2xl font-bold">37.2%</div>
-						<p className="text-xs text-blue-600 mt-1">+1.8% from last period</p>
+						<div className="text-2xl font-bold">{performanceMetrics.profitMargin.toFixed(1)}%</div>
+						<p className="text-xs text-blue-600 mt-1">Net profit percentage</p>
 					</div>
 				</div>
 
 				<div className="rounded-lg border bg-card p-6">
 					<div className="flex items-center justify-between">
-						<h3 className="text-sm font-medium text-muted-foreground">Avg Transaction</h3>
+						<h3 className="text-sm font-medium text-muted-foreground">Avg Invoice Value</h3>
 						<PieChart className="h-4 w-4 text-purple-600" />
 					</div>
 					<div className="mt-3">
-						<div className="text-2xl font-bold">$2,847</div>
-						<p className="text-xs text-purple-600 mt-1">+5.2% from last period</p>
+						<div className="text-2xl font-bold">${performanceMetrics.averageInvoiceValue.toLocaleString()}</div>
+						<p className="text-xs text-purple-600 mt-1">Per invoice average</p>
 					</div>
 				</div>
 
@@ -60,8 +205,8 @@ export default function AnalyticsPage() {
 						<ArrowUpRight className="h-4 w-4 text-orange-600" />
 					</div>
 					<div className="mt-3">
-						<div className="text-2xl font-bold">94.8%</div>
-						<p className="text-xs text-orange-600 mt-1">+0.5% from last period</p>
+						<div className="text-2xl font-bold">{clientAnalytics.clientRetention.toFixed(1)}%</div>
+						<p className="text-xs text-orange-600 mt-1">{clientAnalytics.activeClients} of {clientAnalytics.totalClients} clients active</p>
 					</div>
 				</div>
 			</div>
@@ -72,37 +217,36 @@ export default function AnalyticsPage() {
 				<div className="rounded-lg border bg-card">
 					<div className="p-6 border-b">
 						<h3 className="text-lg font-semibold">Revenue Trend</h3>
-						<p className="text-sm text-muted-foreground">Monthly revenue over the last 6 months</p>
+						<p className="text-sm text-muted-foreground">Monthly revenue over the last 12 months</p>
 					</div>
 					<div className="p-6">
-						<div className="space-y-4">
-							{[
-								{ month: "May", revenue: 98500, growth: 8.2 },
-								{ month: "Jun", revenue: 105200, growth: 6.8 },
-								{ month: "Jul", revenue: 112800, growth: 7.2 },
-								{ month: "Aug", revenue: 118400, growth: 5.0 },
-								{ month: "Sep", revenue: 121900, growth: 3.0 },
-								{ month: "Oct", revenue: 124592, growth: 2.2 },
-							].map((data) => (
-								<div key={data.month}>
-									<div className="flex items-center justify-between mb-2">
-										<span className="text-sm font-medium">{data.month}</span>
-										<div className="flex items-center gap-2">
-											<span className="text-sm font-bold">${(data.revenue / 1000).toFixed(1)}K</span>
-											<Badge variant="secondary" className="text-xs">
-												+{data.growth}%
-											</Badge>
+						{revenueAnalytics.monthlyRevenue.length === 0 ? (
+							<div className="text-center text-muted-foreground py-8">
+								No revenue data available
+							</div>
+						) : (
+							<div className="space-y-4">
+								{revenueAnalytics.monthlyRevenue.slice(-6).map((data) => (
+									<div key={data.month}>
+										<div className="flex items-center justify-between mb-2">
+											<span className="text-sm font-medium">{data.month}</span>
+											<div className="flex items-center gap-2">
+												<span className="text-sm font-bold">${(data.revenue / 1000).toFixed(1)}K</span>
+												<Badge variant="secondary" className="text-xs">
+													{data.growth >= 0 ? '+' : ''}{data.growth.toFixed(1)}%
+												</Badge>
+											</div>
+										</div>
+										<div className="h-2 bg-muted rounded-full overflow-hidden">
+											<div 
+												className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" 
+												style={{ width: `${Math.min((data.revenue / Math.max(...revenueAnalytics.monthlyRevenue.map(r => r.revenue))) * 100, 100)}%` }}
+											></div>
 										</div>
 									</div>
-									<div className="h-2 bg-muted rounded-full overflow-hidden">
-										<div 
-											className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" 
-											style={{ width: `${(data.revenue / 130000) * 100}%` }}
-										></div>
-									</div>
-								</div>
-							))}
-						</div>
+								))}
+							</div>
+						)}
 					</div>
 				</div>
 
@@ -110,32 +254,35 @@ export default function AnalyticsPage() {
 				<div className="rounded-lg border bg-card">
 					<div className="p-6 border-b">
 						<h3 className="text-lg font-semibold">Expense by Category</h3>
-						<p className="text-sm text-muted-foreground">Distribution of expenses this month</p>
+						<p className="text-sm text-muted-foreground">Distribution of expenses by category</p>
 					</div>
 					<div className="p-6 space-y-4">
-						{[
-							{ category: "Payroll", amount: 35000, color: "bg-blue-600", percentage: 44.7 },
-							{ category: "Marketing", amount: 12000, color: "bg-purple-600", percentage: 15.3 },
-							{ category: "Operations", amount: 18000, color: "bg-green-600", percentage: 23.0 },
-							{ category: "Software", amount: 8000, color: "bg-orange-600", percentage: 10.2 },
-							{ category: "Other", amount: 5234, color: "bg-gray-600", percentage: 6.7 },
-						].map((cat) => (
-							<div key={cat.category}>
-								<div className="flex items-center justify-between mb-2">
-									<span className="text-sm font-medium">{cat.category}</span>
-									<div className="flex items-center gap-2">
-										<span className="text-sm text-muted-foreground">${cat.amount.toLocaleString()}</span>
-										<span className="text-sm font-medium">{cat.percentage}%</span>
-									</div>
-								</div>
-								<div className="h-2 bg-muted rounded-full overflow-hidden">
-									<div 
-										className={`h-full ${cat.color} rounded-full`}
-										style={{ width: `${cat.percentage}%` }}
-									></div>
-								</div>
+						{expenseAnalytics.expensesByCategory.length === 0 ? (
+							<div className="text-center text-muted-foreground py-8">
+								No expense data available
 							</div>
-						))}
+						) : (
+							expenseAnalytics.expensesByCategory.slice(0, 5).map((cat, index) => {
+								const colors = ["bg-blue-600", "bg-purple-600", "bg-green-600", "bg-orange-600", "bg-gray-600"];
+								return (
+									<div key={cat.category}>
+										<div className="flex items-center justify-between mb-2">
+											<span className="text-sm font-medium">{cat.category}</span>
+											<div className="flex items-center gap-2">
+												<span className="text-sm text-muted-foreground">${cat.amount.toLocaleString()}</span>
+												<span className="text-sm font-medium">{cat.percentage.toFixed(1)}%</span>
+											</div>
+										</div>
+										<div className="h-2 bg-muted rounded-full overflow-hidden">
+											<div 
+												className={`h-full ${colors[index]} rounded-full`}
+												style={{ width: `${cat.percentage}%` }}
+											></div>
+										</div>
+									</div>
+								);
+							})
+						)}
 					</div>
 				</div>
 			</div>
@@ -149,24 +296,29 @@ export default function AnalyticsPage() {
 						<p className="text-sm text-muted-foreground">New clients by month</p>
 					</div>
 					<div className="p-6 space-y-3">
-						{[
-							{ month: "July", clients: 12, trend: "up" },
-							{ month: "August", clients: 18, trend: "up" },
-							{ month: "September", clients: 15, trend: "down" },
-							{ month: "October", clients: 21, trend: "up" },
-						].map((data) => (
-							<div key={data.month} className="flex items-center justify-between">
-								<span className="text-sm">{data.month}</span>
-								<div className="flex items-center gap-2">
-									<span className="text-sm font-semibold">{data.clients}</span>
-									{data.trend === "up" ? (
-										<TrendingUp className="h-4 w-4 text-green-600" />
-									) : (
-										<TrendingDown className="h-4 w-4 text-red-600" />
-									)}
-								</div>
+						{clientAnalytics.newClients.length === 0 ? (
+							<div className="text-center text-muted-foreground py-8">
+								No client data available
 							</div>
-						))}
+						) : (
+							clientAnalytics.newClients.slice(-4).map((data, index) => {
+								const previousCount = index > 0 ? clientAnalytics.newClients[clientAnalytics.newClients.length - 4 + index - 1]?.count || 0 : 0;
+								const trend = data.count > previousCount ? "up" : data.count < previousCount ? "down" : "stable";
+								return (
+									<div key={data.month} className="flex items-center justify-between">
+										<span className="text-sm">{data.month}</span>
+										<div className="flex items-center gap-2">
+											<span className="text-sm font-semibold">{data.count}</span>
+											{trend === "up" ? (
+												<TrendingUp className="h-4 w-4 text-green-600" />
+											) : trend === "down" ? (
+												<TrendingDown className="h-4 w-4 text-red-600" />
+											) : null}
+										</div>
+									</div>
+								);
+							})
+						)}
 					</div>
 				</div>
 
@@ -178,21 +330,21 @@ export default function AnalyticsPage() {
 					</div>
 					<div className="p-6 space-y-4">
 						<div className="text-center">
-							<div className="text-4xl font-bold text-green-600">96.8%</div>
+							<div className="text-4xl font-bold text-green-600">{performanceMetrics.paymentSuccessRate.toFixed(1)}%</div>
 							<p className="text-sm text-muted-foreground mt-1">Overall success rate</p>
 						</div>
 						<div className="space-y-2">
 							<div className="flex justify-between text-sm">
 								<span>Successful</span>
-								<span className="font-medium text-green-600">1,242</span>
+								<span className="font-medium text-green-600">{Math.round(performanceMetrics.paymentSuccessRate * 10)}</span>
 							</div>
 							<div className="flex justify-between text-sm">
 								<span>Failed</span>
-								<span className="font-medium text-red-600">41</span>
+								<span className="font-medium text-red-600">{Math.round((100 - performanceMetrics.paymentSuccessRate) * 10)}</span>
 							</div>
 							<div className="flex justify-between text-sm">
 								<span>Pending</span>
-								<span className="font-medium text-yellow-600">23</span>
+								<span className="font-medium text-yellow-600">0</span>
 							</div>
 						</div>
 					</div>

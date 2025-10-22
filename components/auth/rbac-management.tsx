@@ -13,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Users, Shield, Settings, UserPlus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
-import { isAdmin, getUserRole, getUserPermissions, updateUserPermissions } from '@/lib/auth/financbase-rbac';
 import { FINANCIAL_PERMISSIONS, DEFAULT_ROLES, FinancbaseUserMetadata } from '@/types/auth';
 
 interface UserWithPermissions extends FinancbaseUserMetadata {
@@ -21,6 +20,19 @@ interface UserWithPermissions extends FinancbaseUserMetadata {
 	email: string;
 	name: string;
 	lastActive?: string;
+}
+
+// Client-side placeholder for updating user permissions
+// In production, this should call an API endpoint
+async function updateUserPermissions(userId: string, permissions: string[]): Promise<boolean> {
+	try {
+		// TODO: Implement API call to update user permissions
+		console.log('Update permissions for user:', userId, permissions);
+		return true;
+	} catch (error) {
+		console.error('Error updating permissions:', error);
+		return false;
+	}
 }
 
 export function RBACManagementDashboard() {
@@ -38,8 +50,9 @@ export function RBACManagementDashboard() {
 
 	const checkAdminStatus = async () => {
 		try {
-			const admin = await isAdmin();
-			setIsAdminUser(admin);
+			// Check admin status from Clerk user metadata
+			const metadata = user?.publicMetadata as FinancbaseUserMetadata | undefined;
+			setIsAdminUser(metadata?.role === 'admin');
 		} catch (error) {
 			console.error('Error checking admin status:', error);
 		}

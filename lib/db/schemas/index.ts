@@ -10,6 +10,7 @@ export * from "./organizations.schema";
 export * from "./invoices.schema";
 export * from "./expenses.schema";
 export * from "./clients.schema";
+export * from "./transactions.schema";
 
 // Analytics and reporting
 export * from "./analytics.schema";
