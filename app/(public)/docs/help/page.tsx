@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
@@ -18,8 +18,6 @@ import {
 	Phone,
 	Mail,
 	ExternalLink,
-	ChevronRight,
-	AlertCircle,
 	CheckCircle,
 	Info,
 	Lightbulb,
@@ -341,8 +339,8 @@ export default function HelpPage() {
 									Frequently Asked Questions
 								</h2>
 								<div className="space-y-4">
-									{faqData.map((faq, index) => (
-										<Card key={index}>
+									{faqData.map((faq) => (
+										<Card key={faq.question}>
 											<CardHeader>
 												<div className="flex items-start gap-3">
 													<HelpCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />

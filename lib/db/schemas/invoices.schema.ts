@@ -6,26 +6,13 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
-
-export const invoiceClients = pgTable("clients", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	name: text("name").notNull(),
-	email: text("email"),
-	phone: text("phone"),
-	company: text("company"),
-	address: text("address"),
-	taxId: text("tax_id"),
-	notes: text("notes"),
-	createdBy: uuid("created_by").references(() => users.id),
-	createdAt: timestamp("created_at").defaultNow(),
-	updatedAt: timestamp("updated_at").defaultNow(),
-});
+import { clients } from "./clients.schema";
 
 export const invoices = pgTable("invoices", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	invoiceNumber: text("invoice_number").notNull().unique(),
 	userId: uuid("user_id").references(() => users.id),
-	clientId: uuid("client_id").references(() => invoiceClients.id),
+	clientId: uuid("client_id").references(() => clients.id),
 	status: text("status", { enum: ["draft", "sent", "viewed", "paid", "overdue", "cancelled"] }).default("draft"),
 	issueDate: timestamp("issue_date").defaultNow(),
 	dueDate: timestamp("due_date"),

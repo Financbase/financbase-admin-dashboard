@@ -454,14 +454,14 @@ async function getTopClientsData(userId: string) {
 		.select({
 			clientId: clients.id,
 			clientName: clients.companyName,
-			totalRevenue: sql<number>`sum(${invoices.totalAmount}::numeric)`,
+			totalRevenue: sql<number>`sum(${invoices.total}::numeric)`,
 			invoiceCount: sql<number>`count(${invoices.id})`,
 		})
 		.from(clients)
 		.leftJoin(invoices, eq(clients.id, invoices.clientId))
 		.where(eq(clients.userId, userId))
 		.groupBy(clients.id, clients.companyName)
-		.orderBy(desc(sql`sum(${invoices.totalAmount}::numeric)`))
+		.orderBy(desc(sql`sum(${invoices.total}::numeric)`))
 		.limit(5);
 
 	return topClients.map(client => ({

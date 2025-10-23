@@ -1,5 +1,5 @@
-import { CollaborationDashboard } from '@/components/collaboration/collaboration-dashboard';
+import { CollaborationHub } from '@/components/collaboration/collaboration-hub';
 
 export default function CollaborationPage() {
-	return <CollaborationDashboard />;
+	return <CollaborationHub />;
 }

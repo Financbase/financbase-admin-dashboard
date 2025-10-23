@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Team Collaboration - Financbase",
-	description: "Team collaboration tools - chat, meetings, and real-time communication",
+	title: "Enhanced Collaboration Hub - Financbase",
+	description: "Advanced team collaboration tools - workspaces, client management, approval workflows, real-time chat, and practice management for accounting professionals",
 };
 
 export default function CollaborationLayout({
@@ -12,7 +12,7 @@ export default function CollaborationLayout({
 }) {
 	return (
 		<div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-			{/* Collaboration-specific navigation and layout */}
+			{/* Enhanced collaboration navigation and layout */}
 			<div className="lg:pl-64">
 				{children}
 			</div>

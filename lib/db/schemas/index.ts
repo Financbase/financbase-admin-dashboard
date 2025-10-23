@@ -33,5 +33,37 @@ export * from "./lead-tasks.schema";
 // Analytics and reporting
 export * from "./analytics.schema";
 
+// Real Estate
+export * from "./real-estate.schema";
+// Note: real-estate-expanded.schema has conflicting exports with projects.schema
+// Only import specific types that don't conflict
+export type {
+	Contractor,
+	NewContractor,
+	ProjectTask,
+	NewProjectTask,
+	ServiceRequest,
+	NewServiceRequest,
+	TenantApplication,
+	NewTenantApplication,
+	Lender,
+	NewLender,
+	LoanApplication,
+	NewLoanApplication,
+	RealEstateProfessional,
+	NewRealEstateProfessional,
+	PropertyListing,
+	NewPropertyListing,
+} from "./real-estate-expanded.schema";
+
 // Activity tracking
 export * from "./activities.schema";
+
+// Workflows and automation
+export * from "./workflows.schema";
+
+// AI Bookkeeping and Reconciliation
+export * from "./reconciliation.schema";
+
+// Bill Pay Automation and Document Processing
+export * from "./bill-pay.schema";

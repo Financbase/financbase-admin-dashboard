@@ -5,6 +5,21 @@ export { default as CohortsDashboard } from './cohorts-dashboard';
 export { default as AdvancedRealtimeDashboard } from './advanced-realtime-dashboard';
 export { default as SegmentsDashboard } from './segments-dashboard';
 
+// Advanced Analytics Features
+export { default as PredictiveDashboard } from './predictive-dashboard';
+export { ReportBuilder } from './report-builder';
+export { BenchmarkingInsights } from './benchmarking-insights';
+
+// Chart Components
+export {
+	InteractiveChart,
+	RevenueChart,
+	ExpenseBreakdownChart,
+	KPIOverviewCards,
+	ChartConfig,
+	ChartDataPoint
+} from './advanced-charts';
+
 // Placeholder for additional analytics components
 export function AnalyticsTemplates() {
 	return (

@@ -15,6 +15,20 @@
       "when": 1761108297663,
       "tag": "0001_thankful_cloak",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1737667200000,
+      "tag": "0005_ai_bookkeeping_reconciliation",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1737667300000,
+      "tag": "0006_bill_pay_automation",
+      "breakpoints": true
     }
   ]
 }

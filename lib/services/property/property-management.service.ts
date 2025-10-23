@@ -7,7 +7,6 @@ import {
 	Trash2,
 	TrendingDown,
 } from "lucide-react";
-import { db } from "../db/connection";
 import {
 	type Lease,
 	type MaintenanceRequest,
@@ -33,7 +32,7 @@ import {
 	propertyROI,
 	propertyUnits,
 	tenants,
-} from "../db/schema-real-estate";
+} from "@/lib/db/schemas/real-estate.schema";
 
 export interface PropertyMetrics {
 	totalProperties: number;

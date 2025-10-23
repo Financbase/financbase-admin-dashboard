@@ -1,6 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import React from 'react'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@/src/test/test-utils'
 import { FreelancerDashboardOverview } from '@/components/freelancer/dashboard-overview'
+
+// Mock lucide-react icons
+vi.mock('lucide-react', () => ({
+	Users: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-users` }, '👥'),
+	Briefcase: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-briefcase` }, '💼'),
+	CheckCircle: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-check-circle` }, '✅'),
+	DollarSign: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-dollar-sign` }, '$'),
+	TrendingUp: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-trending-up` }, '↗'),
+	Star: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-star` }, '⭐'),
+}))
 
 describe('FreelancerDashboardOverview', () => {
 	it('renders freelancer dashboard', () => {

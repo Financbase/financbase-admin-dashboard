@@ -5,8 +5,30 @@ import DashboardPage from '@/app/(dashboard)/dashboard/page'
 
 // Mock lucide-react icons specifically for this test
 vi.mock('lucide-react', () => ({
-  Loader2: ({ className }: { className?: string }) => React.createElement('div', { className, 'data-testid': 'loader' }, 'Loading...'),
+  Loader2: ({ className }: { className?: string }) => React.createElement('div', {
+    className: `${className} animate-spin`,
+    'data-testid': 'loader'
+  }, 'Loading...'),
 }))
+
+// Mock fetch API calls
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+  }),
+  useSearchParams: () => ({
+    get: vi.fn(),
+  }),
+  usePathname: () => '/',
+}))
+
+// Mock global fetch
+global.fetch = vi.fn()
 
 // Mock useQuery and QueryClient
 vi.mock('@tanstack/react-query', () => ({
@@ -43,6 +65,10 @@ describe('DashboardPage', () => {
 					},
 					isLoading: false,
 					error: null,
+					isError: false,
+					isPending: false,
+					isSuccess: true,
+					refetch: vi.fn(),
 				}
 			}
 			if (queryKey[0] === 'dashboard-activity') {
@@ -55,6 +81,10 @@ describe('DashboardPage', () => {
 					},
 					isLoading: false,
 					error: null,
+					isError: false,
+					isPending: false,
+					isSuccess: true,
+					refetch: vi.fn(),
 				}
 			}
 			if (queryKey[0] === 'dashboard-insights') {
@@ -67,9 +97,21 @@ describe('DashboardPage', () => {
 					},
 					isLoading: false,
 					error: null,
+					isError: false,
+					isPending: false,
+					isSuccess: true,
+					refetch: vi.fn(),
 				}
 			}
-			return { data: null, isLoading: false, error: null }
+			return {
+				data: null,
+				isLoading: false,
+				error: null,
+				isError: false,
+				isPending: false,
+				isSuccess: false,
+				refetch: vi.fn(),
+			}
 		})
 	})
 
@@ -132,9 +174,21 @@ describe('DashboardPage', () => {
 					data: null,
 					isLoading: true,
 					error: null,
+					isError: false,
+					isPending: true,
+					isSuccess: false,
+					refetch: vi.fn(),
 				}
 			}
-			return { data: null, isLoading: false, error: null }
+			return {
+				data: null,
+				isLoading: false,
+				error: null,
+				isError: false,
+				isPending: false,
+				isSuccess: false,
+				refetch: vi.fn(),
+			}
 		})
 
 		render(<DashboardPage />)

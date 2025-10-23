@@ -1,6 +1,15 @@
-import { describe, it, expect } from 'vitest'
+import React from 'react'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@/src/test/test-utils'
 import { MetricsCard, MetricData } from '@/components/core/metrics-card'
+
+// Mock lucide-react icons
+vi.mock('lucide-react', () => ({
+	Activity: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-activity` }, '📊'),
+	TrendingUp: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-trending-up` }, '↗'),
+	TrendingDown: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-trending-down` }, '↘'),
+	Minus: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-minus` }, '-'),
+}))
 
 describe('MetricsCard', () => {
 	const mockMetrics: MetricData[] = [

@@ -97,7 +97,7 @@ export default defineConfig({
 	],
 
 	/* Run your local dev server before starting the tests */
-	webServer: {
+	webServer: process.env.CI ? undefined : {
 		command: 'pnpm dev',
 		url: 'http://127.0.0.1:3010',
 		reuseExistingServer: !process.env.CI,

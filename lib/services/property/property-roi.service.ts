@@ -19,7 +19,7 @@ import {
 	propertyROI,
 	propertyUnits,
 	tenants,
-} from "../db/schema-real-estate";
+} from "@/lib/db/schemas/real-estate.schema";
 
 export interface ROIComparison {
 	propertyId: string;

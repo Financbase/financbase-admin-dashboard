@@ -162,16 +162,16 @@ export async function getExpenseAnalytics(userId: string): Promise<ExpenseAnalyt
 
 	const monthlyExpenses = await db
 		.select({
-			month: sql<string>`to_char(${expenses.date}, 'YYYY-MM')`,
+			month: sql<string>`to_char(${expenses.expenseDate}, 'YYYY-MM')`,
 			expenses: sql<number>`sum(${expenses.amount}::numeric)`,
 		})
 		.from(expenses)
 		.where(and(
 			eq(expenses.userId, userId),
-			gte(expenses.date, twelveMonthsAgo)
+			gte(expenses.expenseDate, twelveMonthsAgo)
 		))
-		.groupBy(sql`to_char(${expenses.date}, 'YYYY-MM')`)
-		.orderBy(sql`to_char(${expenses.date}, 'YYYY-MM')`);
+		.groupBy(sql`to_char(${expenses.expenseDate}, 'YYYY-MM')`)
+		.orderBy(sql`to_char(${expenses.expenseDate}, 'YYYY-MM')`);
 
 	// Get expenses by category
 	const expensesByCategory = await db

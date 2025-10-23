@@ -1,0 +1,220 @@
+name: Performance Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'app/api/**'
+      - 'lib/**'
+      - 'performance-tests/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'app/api/**'
+      - 'lib/**'
+      - 'performance-tests/**'
+  schedule:
+    # Run performance tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test against'
+        required: true
+        default: 'local'
+        type: choice
+        options:
+          - local
+          - staging
+          - production
+      test_type:
+        description: 'Type of performance test to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - load
+          - stress
+          - endpoints
+          - monitor
+
+jobs:
+  performance-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        test-type: [load, stress, endpoints]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install k6
+        run: |
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build application
+        run: npm run build
+
+      - name: Start application
+        run: |
+          npm run start &
+          sleep 30
+          curl -f http://localhost:3010/api/health || exit 1
+
+      - name: Run performance tests
+        run: |
+          cd performance-tests
+          case "${{ matrix.test-type }}" in
+            "load")
+              npm run test:load:local
+              ;;
+            "stress")
+              npm run test:stress:local
+              ;;
+            "endpoints")
+              npm run test:endpoints:local
+              ;;
+          esac
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-results-${{ matrix.test-type }}-${{ github.run_id }}
+          path: performance-tests/performance-results-*/
+          retention-days: 30
+
+  performance-monitoring:
+    runs-on: ubuntu-latest
+    needs: performance-tests
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install k6
+        run: |
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build application
+        run: npm run build
+
+      - name: Start application
+        run: |
+          npm run start &
+          sleep 30
+          curl -f http://localhost:3010/api/health || exit 1
+
+      - name: Run performance monitoring
+        run: |
+          cd performance-tests
+          npm run test:monitor
+
+      - name: Upload monitoring results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-monitoring-${{ github.run_id }}
+          path: performance-tests/monitoring-results.json
+          retention-days: 30
+
+  performance-report:
+    runs-on: ubuntu-latest
+    needs: [performance-tests, performance-monitoring]
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Generate performance report
+        run: |
+          echo "# Performance Test Results" > performance-report.md
+          echo "" >> performance-report.md
+          echo "## Test Summary" >> performance-report.md
+          echo "- **Date**: $(date)" >> performance-report.md
+          echo "- **Commit**: ${{ github.sha }}" >> performance-report.md
+          echo "- **Branch**: ${{ github.ref_name }}" >> performance-report.md
+          echo "" >> performance-report.md
+          
+          # Check if any tests failed
+          if [ -d "performance-results-load-${{ github.run_id }}" ] || [ -d "performance-results-stress-${{ github.run_id }}" ] || [ -d "performance-results-endpoints-${{ github.run_id }}" ]; then
+            echo "## Test Results" >> performance-report.md
+            echo "Performance tests completed successfully." >> performance-report.md
+            echo "" >> performance-report.md
+            echo "### Generated Reports" >> performance-report.md
+            echo "- Load Test Results" >> performance-report.md
+            echo "- Stress Test Results" >> performance-report.md
+            echo "- Endpoint-Specific Test Results" >> performance-report.md
+            echo "- Performance Monitoring Results" >> performance-report.md
+          else
+            echo "## Test Results" >> performance-report.md
+            echo "⚠️ Some performance tests may have failed or not completed." >> performance-report.md
+          fi
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report-${{ github.run_id }}
+          path: performance-report.md
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('performance-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+  performance-alerts:
+    runs-on: ubuntu-latest
+    needs: [performance-tests, performance-monitoring]
+    if: failure()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Send performance alert
+        run: |
+          echo "🚨 Performance tests failed!"
+          echo "Please check the test results and investigate performance issues."
+          echo "Review the uploaded artifacts for detailed information."

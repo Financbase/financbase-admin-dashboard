@@ -22,7 +22,7 @@ import {
 	propertyIncome,
 	propertyUnits,
 	tenants,
-} from "../db/schema-real-estate";
+} from "@/lib/db/schemas/real-estate.schema";
 
 export interface RentalIncomeSummary {
 	propertyId: string;

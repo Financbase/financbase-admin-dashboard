@@ -1,3 +1,4 @@
+import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@/src/test/test-utils'
 import OverviewStats from '@/components/core/overview-stats'
@@ -32,6 +33,16 @@ vi.mock('@/lib/format-utils', () => {
 		formatPercentage: mockFormatPercentage
 	}
 })
+
+// Mock lucide-react icons
+vi.mock('lucide-react', () => ({
+	DollarSign: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-dollar-sign` }, '$'),
+	ShoppingCart: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-shopping-cart` }, '🛒'),
+	Users: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-users` }, '👥'),
+	Package: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-package` }, '📦'),
+	TrendingUp: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-trending-up` }, '↗'),
+	TrendingDown: ({ className }: { className?: string }) => React.createElement('div', { className: `${className} lucide-trending-down` }, '↘'),
+}))
 
 describe('OverviewStats', () => {
 	const mockStats = {
