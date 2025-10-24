@@ -7,8 +7,8 @@ import { BYOKService } from '@/lib/services/byok-service';
  * Update API key (status, name, etc.)
  */
 export async function PUT(
-	request: NextRequest,
-	{ params }: { params: { keyId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -36,7 +36,9 @@ export async function PUT(
 		});
 
 	} catch (error) {
-		console.error('Error updating API key:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error updating API key:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update API key' },
 			{ status: 500 }
@@ -49,8 +51,8 @@ export async function PUT(
  * Delete an API key
  */
 export async function DELETE(
-	request: NextRequest,
-	{ params }: { params: { keyId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -69,7 +71,9 @@ export async function DELETE(
 		});
 
 	} catch (error) {
-		console.error('Error deleting API key:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error deleting API key:', error);
 		return NextResponse.json(
 			{ error: 'Failed to delete API key' },
 			{ status: 500 }

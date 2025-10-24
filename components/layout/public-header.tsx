@@ -101,10 +101,10 @@ export function PublicHeader() {
 
 						<div className="hidden md:flex items-center space-x-2">
 							<Button variant="ghost" asChild>
-								<Link href="/auth/signin">Sign In</Link>
+								<Link href="/auth/sign-in">Sign In</Link>
 							</Button>
 							<Button asChild>
-								<Link href="/auth/signup">Get Started</Link>
+								<Link href="/auth/sign-up">Get Started</Link>
 							</Button>
 						</div>
 
@@ -170,10 +170,10 @@ export function PublicHeader() {
 										asChild
 										className="w-full justify-start"
 									>
-										<Link href="/auth/signin">Sign In</Link>
+										<Link href="/auth/sign-in">Sign In</Link>
 									</Button>
 									<Button asChild className="w-full">
-										<Link href="/auth/signup">Get Started</Link>
+										<Link href="/auth/sign-up">Get Started</Link>
 									</Button>
 								</div>
 							</div>

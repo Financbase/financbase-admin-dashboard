@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils';
 import { 
   Zap, 
   Search, 
-  Filter, 
   Star, 
   Download, 
   Play,
@@ -22,7 +21,6 @@ import {
   TrendingUp,
   Settings,
   Brain,
-  Mail,
   Bell
 } from 'lucide-react';
 
@@ -368,7 +366,7 @@ export function WorkflowTemplates({
               <TabsContent value="steps" className="space-y-4">
                 <div className="space-y-2">
                   {selectedTemplate.templateConfig.steps.map((step: any, index: number) => (
-                    <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
+                    <div key={`step-${step.id || index}`} className="flex items-center gap-3 p-3 border rounded-lg">
                       <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-xs font-medium">
                         {index + 1}
                       </div>
@@ -387,7 +385,7 @@ export function WorkflowTemplates({
               <TabsContent value="triggers" className="space-y-4">
                 <div className="space-y-2">
                   {selectedTemplate.templateConfig.triggers.map((trigger: any, index: number) => (
-                    <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
+                    <div key={`trigger-${trigger.id || index}`} className="flex items-center gap-3 p-3 border rounded-lg">
                       <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-xs font-medium">
                         {index + 1}
                       </div>

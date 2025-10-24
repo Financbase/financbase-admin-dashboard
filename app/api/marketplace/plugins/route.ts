@@ -1,106 +1,93 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { db } from '@/lib/db';
+import { marketplacePlugins } from '@/lib/db/schemas';
+import { eq, and, like, desc, asc, sql } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
-	try {
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-		// Mock marketplace plugins data
-		const plugins = [
-			{
-				id: 1,
-				name: 'Stripe Integration',
-				description: 'Accept payments directly through your invoices with Stripe payment processing.',
-				version: '2.1.0',
-				author: 'Financbase Team',
-				category: 'integrations',
-				tags: ['payments', 'stripe', 'billing'],
-				icon: '/icons/stripe.png',
-				rating: 4.8,
-				reviewCount: 156,
-				installationCount: 2847,
-				pricingModel: 'free',
-				isVerified: true,
-				isFeatured: true,
-			},
-			{
-				id: 2,
-				name: 'Advanced Reporting',
-				description: 'Generate detailed financial reports with custom dashboards and export options.',
-				version: '1.5.2',
-				author: 'DataViz Solutions',
-				category: 'reporting',
-				tags: ['reports', 'analytics', 'dashboard'],
-				rating: 4.6,
-				reviewCount: 89,
-				installationCount: 1243,
-				pricingModel: 'freemium',
-				price: 29,
-				isVerified: true,
-				isFeatured: false,
-			},
-			{
-				id: 3,
-				name: 'Invoice Automation',
-				description: 'Automatically send invoices, track payments, and follow up on overdue accounts.',
-				version: '3.0.1',
-				author: 'AutoFinance Inc',
-				category: 'automation',
-				tags: ['automation', 'invoices', 'reminders'],
-				rating: 4.9,
-				reviewCount: 203,
-				installationCount: 3892,
-				pricingModel: 'subscription',
-				price: 19,
-				isVerified: true,
-				isFeatured: true,
-			},
-		];
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category') || 'all';
+    const search = searchParams.get('search') || '';
+    const sort = searchParams.get('sort') || 'popular';
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const offset = parseInt(searchParams.get('offset') || '0');
 
-		return NextResponse.json(plugins);
-	} catch (error) {
-		console.error('Error fetching marketplace plugins:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-	}
-}
+    // Build query conditions
+    let query = db
+      .select()
+      .from(marketplacePlugins)
+      .where(eq(marketplacePlugins.isActive, true));
 
-export async function POST(request: NextRequest) {
-	try {
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+    // Filter by category
+    if (category !== 'all') {
+      query = query.where(and(
+        eq(marketplacePlugins.isActive, true),
+        eq(marketplacePlugins.category, category)
+      ));
+    }
 
-		const body = await request.json();
-		const { name, description, category, version, entryPoint } = body;
+    // Filter by search term
+    if (search) {
+      query = query.where(and(
+        eq(marketplacePlugins.isActive, true),
+        category !== 'all' ? eq(marketplacePlugins.category, category) : undefined,
+        sql`(
+          ${marketplacePlugins.name} ILIKE ${`%${search}%`} OR
+          ${marketplacePlugins.description} ILIKE ${`%${search}%`} OR
+          ${marketplacePlugins.tags}::text ILIKE ${`%${search}%`}
+        )`
+      ));
+    }
 
-		if (!name || !description || !category || !version || !entryPoint) {
-			return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-		}
+    // Apply sorting
+    switch (sort) {
+      case 'newest':
+        query = query.orderBy(desc(marketplacePlugins.createdAt));
+        break;
+      case 'rating':
+        query = query.orderBy(desc(marketplacePlugins.rating));
+        break;
+      case 'downloads':
+        query = query.orderBy(desc(marketplacePlugins.downloadCount));
+        break;
+      case 'name':
+        query = query.orderBy(asc(marketplacePlugins.name));
+        break;
+      case 'popular':
+      default:
+        query = query.orderBy(desc(marketplacePlugins.installCount));
+        break;
+    }
 
-		// Mock new plugin submission
-		const newPlugin = {
-			id: Date.now(),
-			userId,
-			name,
-			description,
-			category,
-			version,
-			entryPoint,
-			status: 'pending',
-			isVerified: false,
-			installationCount: 0,
-			rating: 0,
-			reviewCount: 0,
-			createdAt: new Date().toISOString(),
-		};
+    // Apply pagination
+    const plugins = await query.limit(limit).offset(offset);
 
-		return NextResponse.json(newPlugin, { status: 201 });
-	} catch (error) {
-		console.error('Error submitting plugin:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-	}
+    // Get total count for pagination
+    const totalCount = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(marketplacePlugins)
+      .where(eq(marketplacePlugins.isActive, true));
+
+    return NextResponse.json({
+      plugins,
+      pagination: {
+        total: totalCount[0]?.count || 0,
+        limit,
+        offset,
+        hasMore: offset + limit < (totalCount[0]?.count || 0)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching marketplace plugins:', error);
+    return NextResponse.json({ 
+      error: 'Failed to fetch plugins',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
 }

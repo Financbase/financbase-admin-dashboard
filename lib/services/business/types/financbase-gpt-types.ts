@@ -56,6 +56,7 @@ export interface QueryRequest {
 	}>;
 	analysisType?: 'general' | 'invoice' | 'expense' | 'report' | 'forecast' | 'budget';
 	urgency?: 'low' | 'medium' | 'high' | 'urgent';
+	userId?: string;
 	userPreferences?: {
 		responseStyle: 'brief' | 'detailed' | 'technical';
 		language: string;

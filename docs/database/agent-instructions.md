@@ -1,11 +1,13 @@
 # LLM Agent Instructions for Database Operations
 
 ## 🎯 Purpose
+
 This document provides specific instructions for LLM coding agents working with the Neon database project. Follow these guidelines to ensure consistent, secure, and efficient database operations.
 
 ## 🚨 Critical Rules for All Agents
 
 ### 1. ALWAYS Check Branch Status First
+
 ```sql
 -- REQUIRED: Check current context before ANY database operations
 SELECT 
@@ -15,6 +17,7 @@ SELECT
 ```
 
 ### 2. ALWAYS Verify Security Status
+
 ```sql
 -- REQUIRED: Check RLS status before table modifications
 SELECT 
@@ -32,6 +35,7 @@ ORDER BY schemaname, tablename;
 ```
 
 ### 3. NEVER Bypass Security
+
 - **All tables have RLS enabled** - respect this
 - **User data isolation is enforced** - maintain this
 - **Admin access is required** for system changes
@@ -40,6 +44,7 @@ ORDER BY schemaname, tablename;
 ## 🔄 Workflow Selection Guide
 
 ### For New Features
+
 ```
 1. Use: dev-feature-1, dev-feature-2, or dev-feature-3
 2. Test: Thoroughly in development environment
@@ -48,6 +53,7 @@ ORDER BY schemaname, tablename;
 ```
 
 ### For Security Updates
+
 ```
 1. Use: database-audit-staging branch
 2. Test: All security measures thoroughly
@@ -56,6 +62,7 @@ ORDER BY schemaname, tablename;
 ```
 
 ### For Emergency Fixes
+
 ```
 1. Use: hotfix branch
 2. Test: Quickly but thoroughly
@@ -66,7 +73,9 @@ ORDER BY schemaname, tablename;
 ## 🛡️ Security Requirements
 
 ### Before Any Table Changes
+
 1. **Check RLS Status**
+
    ```sql
    SELECT schemaname, tablename, rowsecurity 
    FROM pg_tables 
@@ -75,6 +84,7 @@ ORDER BY schemaname, tablename;
    ```
 
 2. **Verify Existing Policies**
+
    ```sql
    SELECT schemaname, tablename, policyname, cmd, qual 
    FROM pg_policies 
@@ -83,6 +93,7 @@ ORDER BY schemaname, tablename;
    ```
 
 3. **Implement Proper Policies**
+
    ```sql
    -- Example RLS Policy Implementation
    CREATE POLICY table_select_policy ON schema.table 
@@ -101,6 +112,7 @@ ORDER BY schemaname, tablename;
 ## 📋 Pre-Deployment Checklist
 
 ### ✅ Security Checklist
+
 - [ ] RLS enabled on all new tables
 - [ ] Appropriate policies created
 - [ ] User isolation maintained
@@ -108,6 +120,7 @@ ORDER BY schemaname, tablename;
 - [ ] Security policies tested
 
 ### ✅ Workflow Checklist
+
 - [ ] Appropriate branch selected
 - [ ] Testing completed in development
 - [ ] Integration testing done (if applicable)
@@ -115,6 +128,7 @@ ORDER BY schemaname, tablename;
 - [ ] Documentation updated
 
 ### ✅ Performance Checklist
+
 - [ ] Indexes created for frequently queried columns
 - [ ] Query performance tested
 - [ ] Table statistics updated
@@ -123,6 +137,7 @@ ORDER BY schemaname, tablename;
 ## 🔍 Monitoring and Maintenance
 
 ### Regular Security Checks
+
 ```sql
 -- Check for vulnerable tables
 SELECT schemaname, tablename, rowsecurity 
@@ -144,6 +159,7 @@ ORDER BY t.schemaname, t.tablename;
 ```
 
 ### Performance Monitoring
+
 ```sql
 -- Check table activity
 SELECT 
@@ -173,7 +189,9 @@ LIMIT 10;
 ## 🚨 Emergency Procedures
 
 ### Security Incident Response
+
 1. **Immediate Assessment**
+
    ```sql
    -- Check for vulnerable tables
    SELECT schemaname, tablename, 'VULNERABLE' as status
@@ -198,12 +216,15 @@ LIMIT 10;
    - Monitor for recurrence
 
 ### Database Issues
+
 1. **Check Branch Status**
+
    ```sql
    SELECT current_database(), current_user, now();
    ```
 
 2. **Verify Security**
+
    ```sql
    SELECT schemaname, tablename, rowsecurity 
    FROM pg_tables 
@@ -219,6 +240,7 @@ LIMIT 10;
 ## 📚 Documentation Requirements
 
 ### When Making Changes
+
 1. **Update Workflow Documentation**
    - Record the change in `workflow_documentation` table
    - Update branch management records
@@ -237,6 +259,7 @@ LIMIT 10;
 ## 🎯 Best Practices Summary
 
 ### ✅ DO
+
 - Always check branch status before operations
 - Verify security status before table changes
 - Use appropriate branches for different tasks
@@ -246,6 +269,7 @@ LIMIT 10;
 - Follow established workflows
 
 ### ❌ DON'T
+
 - Never bypass security for convenience
 - Never disable RLS without proper justification
 - Never deploy untested code to production
@@ -257,6 +281,7 @@ LIMIT 10;
 ## 🔧 Quick Reference Commands
 
 ### Essential Queries
+
 ```sql
 -- Check current context
 SELECT current_database(), current_user, now();
@@ -272,6 +297,7 @@ SELECT * FROM public.branch_management;
 ```
 
 ### Emergency Commands
+
 ```sql
 -- Quick security check
 SELECT schemaname, tablename, 'VULNERABLE' as status

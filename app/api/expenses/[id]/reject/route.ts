@@ -14,7 +14,7 @@ import { ExpenseService } from '@/lib/services/expense-service';
  */
 export async function POST(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -23,7 +23,8 @@ export async function POST(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(params.id);
+		const { id: idParam } = await params;
+		const id = parseInt(idParam);
 		const body = await req.json();
 		const reason = body.reason;
 
@@ -37,7 +38,9 @@ export async function POST(
 
 		return NextResponse.json(rejected);
 	} catch (error) {
-		console.error('Error rejecting expense:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error rejecting expense:', error);
 		return NextResponse.json(
 			{ error: 'Failed to reject expense' },
 			{ status: 500 }

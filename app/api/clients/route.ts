@@ -18,7 +18,7 @@ const createClientSchema = z.object({
 	currency: z.string().default('USD'),
 	paymentTerms: z.string().default('net30'),
 	notes: z.string().optional(),
-	metadata: z.record(z.any()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export async function GET(request: NextRequest) {

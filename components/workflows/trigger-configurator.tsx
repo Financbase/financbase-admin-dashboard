@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useId } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,12 +10,10 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { 
   Settings, 
   Database, 
-  Clock, 
   Webhook, 
   Play, 
   CheckCircle,
@@ -97,7 +95,6 @@ const SCHEDULE_EXAMPLES = [
 
 export function TriggerConfigurator({
   triggers,
-  onTriggersChange,
   onAddTrigger,
   onUpdateTrigger,
   onDeleteTrigger
@@ -110,6 +107,14 @@ export function TriggerConfigurator({
     filters: {},
     isActive: true,
   });
+  
+  const eventTypeId = useId();
+  const webhookUrlId = useId();
+  const scheduleExpressionId = useId();
+  const conditionsId = useId();
+  const triggerActiveId = useId();
+  const scheduleExpressionEditId = useId();
+  const webhookUrlEditId = useId();
 
   const handleAddTrigger = () => {
     if (!newTrigger.eventType) return;
@@ -249,7 +254,7 @@ export function TriggerConfigurator({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="eventType">Trigger Type</Label>
+              <Label htmlFor={eventTypeId}>Trigger Type</Label>
               <Select
                 value={newTrigger.eventType}
                 onValueChange={(value) => setNewTrigger(prev => ({ ...prev, eventType: value as any }))}
@@ -275,9 +280,9 @@ export function TriggerConfigurator({
 
             {newTrigger.eventType === 'webhook' && (
               <div className="space-y-2">
-                <Label htmlFor="webhookUrl">Webhook URL</Label>
+                <Label htmlFor={webhookUrlId}>Webhook URL</Label>
                 <Input
-                  id="webhookUrl"
+                  id={webhookUrlId}
                   value={newTrigger.webhookUrl || ''}
                   onChange={(e) => setNewTrigger(prev => ({ ...prev, webhookUrl: e.target.value }))}
                   placeholder="https://api.example.com/webhook"
@@ -287,7 +292,7 @@ export function TriggerConfigurator({
 
             {newTrigger.eventType === 'schedule' && (
               <div className="space-y-2">
-                <Label htmlFor="scheduleExpression">Schedule Expression (Cron)</Label>
+                <Label htmlFor={scheduleExpressionId}>Schedule Expression (Cron)</Label>
                 <Select
                   value={newTrigger.scheduleExpression}
                   onValueChange={(value) => setNewTrigger(prev => ({ ...prev, scheduleExpression: value }))}
@@ -315,9 +320,9 @@ export function TriggerConfigurator({
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="conditions">Conditions (Optional)</Label>
+              <Label htmlFor={conditionsId}>Conditions (Optional)</Label>
               <Textarea
-                id="conditions"
+                id={conditionsId}
                 value={JSON.stringify(newTrigger.conditions || {}, null, 2)}
                 onChange={(e) => {
                   try {
@@ -337,11 +342,11 @@ export function TriggerConfigurator({
 
             <div className="flex items-center space-x-2">
               <Switch
-                id="isActive"
+                id={triggerActiveId}
                 checked={newTrigger.isActive ?? true}
                 onCheckedChange={(checked) => setNewTrigger(prev => ({ ...prev, isActive: checked }))}
               />
-              <Label htmlFor="isActive">Trigger is active</Label>
+              <Label htmlFor={triggerActiveId}>Trigger is active</Label>
             </div>
 
             <div className="flex gap-2">
@@ -375,9 +380,9 @@ export function TriggerConfigurator({
 
               <TabsContent value="conditions" className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="triggerConditions">Execution Conditions</Label>
+                  <Label htmlFor={conditionsId}>Execution Conditions</Label>
                   <Textarea
-                    id="triggerConditions"
+                    id={conditionsId}
                     value={JSON.stringify(selectedTrigger.conditions, null, 2)}
                     onChange={(e) => {
                       try {
@@ -396,9 +401,9 @@ export function TriggerConfigurator({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="triggerFilters">Data Filters</Label>
+                  <Label htmlFor={`${conditionsId}-filters`}>Data Filters</Label>
                   <Textarea
-                    id="triggerFilters"
+                    id={`${conditionsId}-filters`}
                     value={JSON.stringify(selectedTrigger.filters, null, 2)}
                     onChange={(e) => {
                       try {
@@ -420,20 +425,20 @@ export function TriggerConfigurator({
               <TabsContent value="settings" className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <Switch
-                    id="triggerActive"
+                    id={triggerActiveId}
                     checked={selectedTrigger.isActive}
                     onCheckedChange={(checked) => 
                       handleUpdateTrigger({ ...selectedTrigger, isActive: checked })
                     }
                   />
-                  <Label htmlFor="triggerActive">Trigger is active</Label>
+                  <Label htmlFor={triggerActiveId}>Trigger is active</Label>
                 </div>
 
                 {selectedTrigger.eventType === 'schedule' && (
                   <div className="space-y-2">
-                    <Label htmlFor="scheduleExpression">Schedule Expression</Label>
+                    <Label htmlFor={scheduleExpressionEditId}>Schedule Expression</Label>
                     <Input
-                      id="scheduleExpression"
+                      id={scheduleExpressionEditId}
                       value={selectedTrigger.scheduleExpression || ''}
                       onChange={(e) => 
                         handleUpdateTrigger({ ...selectedTrigger, scheduleExpression: e.target.value })
@@ -445,9 +450,9 @@ export function TriggerConfigurator({
 
                 {selectedTrigger.eventType === 'webhook' && (
                   <div className="space-y-2">
-                    <Label htmlFor="webhookUrl">Webhook URL</Label>
+                    <Label htmlFor={webhookUrlEditId}>Webhook URL</Label>
                     <Input
-                      id="webhookUrl"
+                      id={webhookUrlEditId}
                       value={selectedTrigger.webhookUrl || ''}
                       onChange={(e) => 
                         handleUpdateTrigger({ ...selectedTrigger, webhookUrl: e.target.value })

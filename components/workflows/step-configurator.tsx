@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
 import { 
   Settings, 
   Mail, 
@@ -22,9 +21,7 @@ import {
   Target, 
   Play,
   Save,
-  TestTube,
-  AlertTriangle,
-  CheckCircle
+  TestTube
 } from 'lucide-react';
 
 interface WorkflowStep {
@@ -47,7 +44,21 @@ interface StepConfiguratorProps {
   isTesting?: boolean;
 }
 
-const STEP_CONFIGURATIONS = {
+interface FieldConfig {
+  key: string;
+  label: string;
+  type: 'text' | 'textarea' | 'select' | 'number';
+  required?: boolean;
+  placeholder?: string;
+  options?: string[];
+}
+
+const STEP_CONFIGURATIONS: Record<string, {
+  icon: any;
+  title: string;
+  description: string;
+  fields: FieldConfig[];
+}> = {
   email: {
     icon: Mail,
     title: 'Email Configuration',
@@ -131,6 +142,11 @@ export function StepConfigurator({
 }: StepConfiguratorProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [activeTab, setActiveTab] = useState('configuration');
+  const nameId = useId();
+  const timeoutId = useId();
+  const retryCountId = useId();
+  const isActiveId = useId();
+  const conditionsId = useId();
 
   useEffect(() => {
     if (step) {
@@ -289,9 +305,9 @@ export function StepConfigurator({
           <TabsContent value="settings" className="space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Step Name</Label>
+                <Label htmlFor={nameId}>Step Name</Label>
                 <Input
-                  id="name"
+                  id={nameId}
                   value={formData.name || ''}
                   onChange={(e) => handleFieldChange('name', e.target.value)}
                   placeholder="Enter step name"
@@ -300,9 +316,9 @@ export function StepConfigurator({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="timeout">Timeout (seconds)</Label>
+                  <Label htmlFor={timeoutId}>Timeout (seconds)</Label>
                   <Input
-                    id="timeout"
+                    id={timeoutId}
                     type="number"
                     value={formData.timeout || 300}
                     onChange={(e) => handleFieldChange('timeout', parseInt(e.target.value) || 300)}
@@ -312,9 +328,9 @@ export function StepConfigurator({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="retryCount">Retry Count</Label>
+                  <Label htmlFor={retryCountId}>Retry Count</Label>
                   <Input
-                    id="retryCount"
+                    id={retryCountId}
                     type="number"
                     value={formData.retryCount || 0}
                     onChange={(e) => handleFieldChange('retryCount', parseInt(e.target.value) || 0)}
@@ -326,11 +342,11 @@ export function StepConfigurator({
 
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="isActive"
+                  id={isActiveId}
                   checked={formData.isActive !== undefined ? formData.isActive : true}
                   onCheckedChange={(checked) => handleFieldChange('isActive', checked)}
                 />
-                <Label htmlFor="isActive">Step is active</Label>
+                <Label htmlFor={isActiveId}>Step is active</Label>
               </div>
             </div>
           </TabsContent>
@@ -338,16 +354,16 @@ export function StepConfigurator({
           <TabsContent value="conditions" className="space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="conditions">Execution Conditions</Label>
+                <Label htmlFor={conditionsId}>Execution Conditions</Label>
                 <Textarea
-                  id="conditions"
+                  id={conditionsId}
                   value={formData.conditions || ''}
                   onChange={(e) => handleFieldChange('conditions', e.target.value)}
                   placeholder="Enter conditions for step execution (e.g., amount > 1000)"
                   rows={4}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Use variables like {{trigger_data.field}} or {{step_results.previous_step}}
+                  Use variables like {"{trigger_data.field}"} or {"{step_results.previous_step}"}
                 </p>
               </div>
 

@@ -2,8 +2,11 @@
  * User Preferences Settings Page
  */
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Palette, Globe, Calendar } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Palette, Bell, Shield } from 'lucide-react';
+import { UserPreferencesManager } from '@/components/settings/user-preferences-manager';
+import { NotificationPreferencesManager } from '@/components/settings/notification-preferences-manager';
+import { PrivacySettingsManager } from '@/components/settings/privacy-settings-manager';
 
 export default function PreferencesSettingsPage() {
 	return (
@@ -15,56 +18,34 @@ export default function PreferencesSettingsPage() {
 				</p>
 			</div>
 
-			<Card>
-				<CardHeader>
-					<div className="flex items-center gap-2">
-						<Palette className="h-5 w-5" />
-						<CardTitle>Appearance</CardTitle>
-					</div>
-					<CardDescription>
-						Customize the look and feel of the application
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<p className="text-sm text-muted-foreground">
-						Theme and appearance settings coming soon.
-					</p>
-				</CardContent>
-			</Card>
+			<Tabs defaultValue="general" className="space-y-4">
+				<TabsList className="grid w-full grid-cols-3">
+					<TabsTrigger value="general" className="flex items-center gap-2">
+						<Palette className="h-4 w-4" />
+						General
+					</TabsTrigger>
+					<TabsTrigger value="notifications" className="flex items-center gap-2">
+						<Bell className="h-4 w-4" />
+						Notifications
+					</TabsTrigger>
+					<TabsTrigger value="privacy" className="flex items-center gap-2">
+						<Shield className="h-4 w-4" />
+						Privacy
+					</TabsTrigger>
+				</TabsList>
 
-			<Card>
-				<CardHeader>
-					<div className="flex items-center gap-2">
-						<Globe className="h-5 w-5" />
-						<CardTitle>Language & Region</CardTitle>
-					</div>
-					<CardDescription>
-						Set your preferred language and regional settings
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<p className="text-sm text-muted-foreground">
-						Localization settings coming soon.
-					</p>
-				</CardContent>
-			</Card>
+				<TabsContent value="general" className="space-y-4">
+					<UserPreferencesManager />
+				</TabsContent>
 
-			<Card>
-				<CardHeader>
-					<div className="flex items-center gap-2">
-						<Calendar className="h-5 w-5" />
-						<CardTitle>Date & Time</CardTitle>
-					</div>
-					<CardDescription>
-						Configure date and time display preferences
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<p className="text-sm text-muted-foreground">
-						Date and time preferences coming soon.
-					</p>
-				</CardContent>
-			</Card>
+				<TabsContent value="notifications" className="space-y-4">
+					<NotificationPreferencesManager />
+				</TabsContent>
+
+				<TabsContent value="privacy" className="space-y-4">
+					<PrivacySettingsManager />
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 }

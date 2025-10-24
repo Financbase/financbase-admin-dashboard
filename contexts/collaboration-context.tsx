@@ -190,68 +190,6 @@ export function CollaborationProvider({ children, roomId = 'financbase-main' }: 
     }
   }, [user]);
 
-  // WebSocket connection management
-  const connect = useCallback((roomIdToConnect?: string) => {
-    if (ws?.readyState === WebSocket.OPEN) return;
-
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    const connectionRoomId = roomIdToConnect || roomId;
-
-    const websocketUrl = `${protocol}//${host}/partykit/financbase-partykit/${connectionRoomId}`;
-
-    console.log('Connecting to:', websocketUrl);
-
-    const websocket = new WebSocket(websocketUrl);
-
-    websocket.onopen = () => {
-      console.log('Connected to collaboration server');
-      setState(prev => ({
-        ...prev,
-        isConnected: true,
-        connectionId: `user_${Date.now()}`,
-      }));
-    };
-
-    websocket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        handleIncomingMessage(data);
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
-
-    websocket.onclose = () => {
-      console.log('Disconnected from collaboration server');
-      setState(prev => ({
-        ...prev,
-        isConnected: false,
-        connectionId: null,
-      }));
-
-      // Auto-reconnect after 3 seconds
-      setTimeout(() => {
-        if (state.currentUser) {
-          connect(connectionRoomId);
-        }
-      }, 3000);
-    };
-
-    websocket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    setWs(websocket);
-  }, [roomId, state.currentUser]);
-
-  const disconnect = useCallback(() => {
-    if (ws) {
-      ws.close();
-      setWs(null);
-    }
-  }, [ws]);
-
   // Handle incoming WebSocket messages
   const handleIncomingMessage = useCallback((data: any) => {
     setState(prev => {
@@ -353,6 +291,60 @@ export function CollaborationProvider({ children, roomId = 'financbase-main' }: 
     });
   }, []);
 
+  // WebSocket connection management
+  const connect = useCallback((roomIdToConnect?: string) => {
+    // Get PartyKit host from environment or use default
+    const partykitHost = process.env.NEXT_PUBLIC_PARTYKIT_HOST || 'localhost:1999';
+    const protocol = partykitHost.includes('localhost') ? 'ws' : 'wss';
+    const connectionRoomId = roomIdToConnect || roomId;
+
+    const websocketUrl = `${protocol}://${partykitHost}/parties/financbase-partykit/${connectionRoomId}`;
+
+    console.log('Connecting to:', websocketUrl);
+
+    const websocket = new WebSocket(websocketUrl);
+
+    websocket.onopen = () => {
+      console.log('Connected to collaboration server');
+      setState(prev => ({
+        ...prev,
+        isConnected: true,
+        connectionId: `user_${Date.now()}`,
+      }));
+    };
+
+    websocket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        handleIncomingMessage(data);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    websocket.onclose = () => {
+      console.log('Disconnected from collaboration server');
+      setState(prev => ({
+        ...prev,
+        isConnected: false,
+        connectionId: null,
+      }));
+
+      // Auto-reconnect after 3 seconds
+      setTimeout(() => {
+        if (state.currentUser) {
+          connect(connectionRoomId);
+        }
+      }, 3000);
+    };
+
+    websocket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    setWs(websocket);
+  }, [roomId, state.currentUser, handleIncomingMessage]);
+
   // Send WebSocket message
   const sendMessage = useCallback((data: any) => {
     if (ws?.readyState === WebSocket.OPEN && state.currentUser) {
@@ -421,6 +413,13 @@ export function CollaborationProvider({ children, roomId = 'financbase-main' }: 
   const startMeetingAction = useCallback((meetingId: string, action: string) => {
     sendMessage({ type: 'meeting_action', meetingId, action });
   }, [sendMessage]);
+
+  const disconnect = useCallback(() => {
+    if (ws) {
+      ws.close();
+      setWs(null);
+    }
+  }, [ws]);
 
   // Auto-connect when user is available
   useEffect(() => {

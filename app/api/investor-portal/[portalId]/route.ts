@@ -14,8 +14,8 @@ import { eq, and, sql } from 'drizzle-orm';
 
 // GET /api/investor-portal/[portalId] - Public access to investor portal
 export async function GET(
-	request: NextRequest,
-	{ params }: { params: { portalId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ portalId: string }> }
 ) {
 	try {
 		const { portalId } = params;
@@ -67,7 +67,7 @@ export async function GET(
 
 		// Fetch metrics based on allowed metrics
 		const allowedMetrics = portalData.allowedMetrics || [];
-		const metrics: any = {};
+		const metrics: unknown = {};
 
 		if (allowedMetrics.includes('revenue') || allowedMetrics.length === 0) {
 			const [revenueData] = await db
@@ -205,7 +205,9 @@ export async function GET(
 
 		return NextResponse.json(portalResponse);
 	} catch (error) {
-		console.error('Error fetching investor portal:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching investor portal:', error);
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 }

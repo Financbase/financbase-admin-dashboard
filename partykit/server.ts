@@ -1,5 +1,24 @@
-import Server from "partykit/server";
-import type { Connection, Context, Party } from "partykit/server";
+// Define PartyKit types since they're not available for import
+interface Connection extends WebSocket {
+  id: string;
+  state: any;
+  setState(state: any): void;
+}
+
+interface Room {
+  id: string;
+  storage: {
+    get(key: string): any;
+    put(key: string, value: any): Promise<void>;
+    delete(key: string): Promise<void>;
+  };
+  broadcast(msg: any, without?: string[]): void;
+  getConnections(): Iterable<Connection>;
+}
+
+interface ConnectionContext {
+  request: Request;
+}
 
 interface Message {
   id: string;
@@ -48,71 +67,91 @@ interface Meeting {
   endedAt?: string;
 }
 
-export default class FinancbaseServer implements Server {
-  private rooms: Map<string, any> = new Map();
+interface RoomState {
+  users: Array<{
+    id: string;
+    name: string;
+    avatar?: string;
+    status: 'online' | 'away' | 'busy';
+    connectedAt: string;
+  }>;
+  channels: Channel[];
+  meetings: Meeting[];
+  messages: Map<string, Message[]>;
+}
 
-  constructor(readonly party: Party) {}
+export default class FinancbaseServer {
+  constructor(public room: Room) {}
 
-  async onConnect(conn: Connection, ctx: Context) {
-    console.log(`New connection to room: ${this.party.id}`);
+  async onConnect(connection: Connection, ctx: ConnectionContext): Promise<void> {
+    console.log(`New connection to room: ${this.room.id}`);
 
     // Handle collaboration rooms
-    if (this.party.id.startsWith('financbase-')) {
-      await this.handleCollaborationConnect(conn, ctx);
+    if (this.room.id.startsWith('financbase-')) {
+      await this.handleCollaborationConnect(connection, ctx);
       return;
     }
 
     // Handle notification rooms
-    if (this.party.id.startsWith('notifications-')) {
-      conn.send(JSON.stringify({
+    if (this.room.id.startsWith('notifications-')) {
+      connection.send(JSON.stringify({
         type: 'connected',
-        room: this.party.id,
+        room: this.room.id,
         timestamp: new Date().toISOString()
       }));
       return;
     }
 
     // Default welcome message
-    conn.send(JSON.stringify({
+    connection.send(JSON.stringify({
       type: 'welcome',
-      message: `Connected to ${this.party.id}`,
+      message: `Connected to ${this.room.id}`,
       timestamp: new Date().toISOString(),
     }));
   }
 
-  private async handleCollaborationConnect(conn: Connection, ctx: Context) {
-    // Get current room state
-    const roomState = this.getRoomState();
-
-    // Send current room state to new connection
-    conn.send(JSON.stringify({
-      type: 'room_state',
-      users: roomState.users,
-      channels: roomState.channels,
-      meetings: roomState.meetings,
-      timestamp: new Date().toISOString(),
-    }));
-
-    // Notify other users that someone joined
-    this.party.broadcast(JSON.stringify({
-      type: 'user_joined',
-      userId: conn.id,
-      timestamp: new Date().toISOString(),
-    }), [conn.id]);
-  }
-
-  async onMessage(message: string, sender: Connection) {
+  private async handleCollaborationConnect(connection: Connection, ctx: ConnectionContext): Promise<void> {
     try {
-      const data = JSON.parse(message);
+      // Get current room state
+      const roomState = this.getRoomState();
+
+      // Send current room state to new connection
+      connection.send(JSON.stringify({
+        type: 'room_state',
+        users: roomState.users || [],
+        channels: roomState.channels || [],
+        meetings: roomState.meetings || [],
+        timestamp: new Date().toISOString(),
+      }));
+
+      // Notify other users that someone joined
+      this.room.broadcast(JSON.stringify({
+        type: 'user_joined',
+        userId: connection.id,
+        timestamp: new Date().toISOString(),
+      }), [connection.id]);
+    } catch (error) {
+      console.error('Error in collaboration connect:', error);
+      connection.send(JSON.stringify({
+        type: 'error',
+        message: 'Failed to initialize collaboration session',
+        timestamp: new Date().toISOString(),
+      }));
+    }
+  }
+
+  async onMessage(message: string | ArrayBuffer | ArrayBufferView, sender: Connection): Promise<void> {
+    try {
+      const data = JSON.parse(message as string);
 
       // Handle collaboration messages
-      if (this.party.id.startsWith('financbase-')) {
+      if (this.room.id.startsWith('financbase-')) {
         await this.handleCollaborationMessage(data, sender);
         return;
       }
 
       // Handle notification messages
-      if (this.party.id.startsWith('notifications-')) {
+      if (this.room.id.startsWith('notifications-')) {
         await this.handleNotificationMessage(data, sender);
         return;
       }
@@ -129,7 +168,7 @@ export default class FinancbaseServer implements Server {
     }
   }
 
-  private async handleCollaborationMessage(data: Record<string, unknown>, sender: Connection) {
+  private async handleCollaborationMessage(data: Record<string, unknown>, sender: Connection): Promise<void> {
     switch (data.type) {
       case 'join_channel':
         await this.handleJoinChannel(data, sender);
@@ -172,7 +211,7 @@ export default class FinancbaseServer implements Server {
     }
   }
 
-  private async handleJoinChannel(data: Record<string, unknown>, sender: Connection) {
+  private async handleJoinChannel(data: Record<string, unknown>, sender: Connection): Promise<void> {
     const { channelId } = data as { channelId: string };
 
     // Send channel history to the user
@@ -185,7 +224,7 @@ export default class FinancbaseServer implements Server {
     }));
 
     // Notify others that user joined channel
-    this.party.broadcast(JSON.stringify({
+    this.room.broadcast(JSON.stringify({
       type: 'channel_joined',
       channelId,
       userId: sender.id,
@@ -193,11 +232,11 @@ export default class FinancbaseServer implements Server {
     }), [sender.id]);
   }
 
-  private async handleLeaveChannel(data: Record<string, unknown>, sender: Connection) {
+  private async handleLeaveChannel(data: Record<string, unknown>, sender: Connection): Promise<void> {
     const { channelId } = data as { channelId: string };
 
     // Notify others that user left channel
-    this.party.broadcast(JSON.stringify({
+    this.room.broadcast(JSON.stringify({
       type: 'channel_left',
       channelId,
       userId: sender.id,
@@ -205,7 +244,7 @@ export default class FinancbaseServer implements Server {
     }), [sender.id]);
   }
 
-  private async handleSendMessage(data: Record<string, unknown>, sender: Connection) {
+  private async handleSendMessage(data: Record<string, unknown>, sender: Connection): Promise<void> {
     const message = {
       id: `msg_${Date.now()}_${Math.random()}`,
       type: 'message' as const,
@@ -221,7 +260,7 @@ export default class FinancbaseServer implements Server {
     this.addMessageToChannel(data.channelId as string, message);
 
     // Broadcast message to all connections in the room
-    this.party.broadcast(JSON.stringify({
+    this.room.broadcast(JSON.stringify({
       ...message,
     }));
 
@@ -229,8 +268,8 @@ export default class FinancbaseServer implements Server {
     this.updateChannelLastMessage(data.channelId as string, message);
   }
 
-  private async handleTypingStart(data: Record<string, unknown>, sender: Connection) {
-    this.party.broadcast(JSON.stringify({
+  private async handleTypingStart(data: Record<string, unknown>, sender: Connection): Promise<void> {
+    this.room.broadcast(JSON.stringify({
       type: 'typing_start',
       userId: sender.id,
       userName: data.userName || 'Anonymous',
@@ -239,8 +278,8 @@ export default class FinancbaseServer implements Server {
     }), [sender.id]);
   }
 
-  private async handleTypingStop(data: Record<string, unknown>, sender: Connection) {
-    this.party.broadcast(JSON.stringify({
+  private async handleTypingStop(data: Record<string, unknown>, sender: Connection): Promise<void> {
+    this.room.broadcast(JSON.stringify({
       type: 'typing_stop',
       userId: sender.id,
       channelId: data.channelId,
@@ -248,7 +287,7 @@ export default class FinancbaseServer implements Server {
     }), [sender.id]);
   }
 
-  private async handleCreateMeeting(data: Record<string, unknown>, sender: Connection) {
+  private async handleCreateMeeting(data: Record<string, unknown>, sender: Connection): Promise<void> {
     const meeting = {
       id: `meeting_${Date.now()}_${Math.random()}`,
       title: data.title as string,
@@ -264,21 +303,21 @@ export default class FinancbaseServer implements Server {
     this.addMeetingToRoom(meeting);
 
     // Broadcast meeting creation
-    this.party.broadcast(JSON.stringify({
+    this.room.broadcast(JSON.stringify({
       type: 'meeting_created',
       meeting,
       timestamp: new Date().toISOString(),
     }));
   }
 
-  private async handleJoinMeeting(data: Record<string, unknown>, sender: Connection) {
+  private async handleJoinMeeting(data: Record<string, unknown>, sender: Connection): Promise<void> {
     const { meetingId } = data as { meetingId: string };
 
     // Update meeting participants
     const updatedMeeting = this.updateMeetingParticipants(meetingId, sender.id, 'join');
 
     if (updatedMeeting) {
-      this.party.broadcast(JSON.stringify({
+      this.room.broadcast(JSON.stringify({
         type: 'meeting_updated',
         meeting: updatedMeeting,
         timestamp: new Date().toISOString(),
@@ -286,10 +325,10 @@ export default class FinancbaseServer implements Server {
     }
   }
 
-  private async handleMeetingAction(data: Record<string, unknown>, sender: Connection) {
+  private async handleMeetingAction(data: Record<string, unknown>, sender: Connection): Promise<void> {
     const { meetingId, action } = data as { meetingId: string; action: string };
 
-    let updatedMeeting;
+    let updatedMeeting: Meeting | null;
     switch (action) {
       case 'start':
         updatedMeeting = this.updateMeetingStatus(meetingId, 'active', { startedAt: new Date().toISOString() });
@@ -305,7 +344,7 @@ export default class FinancbaseServer implements Server {
     }
 
     if (updatedMeeting) {
-      this.party.broadcast(JSON.stringify({
+      this.room.broadcast(JSON.stringify({
         type: 'meeting_updated',
         meeting: updatedMeeting,
         timestamp: new Date().toISOString(),
@@ -313,10 +352,10 @@ export default class FinancbaseServer implements Server {
     }
   }
 
-  private async handleUserActivity(data: Record<string, unknown>, sender: Connection) {
+  private async handleUserActivity(data: Record<string, unknown>, sender: Connection): Promise<void> {
     // Broadcast user activity if specified
     if (data.broadcast) {
-      this.party.broadcast(JSON.stringify({
+      this.room.broadcast(JSON.stringify({
         type: 'user_activity',
         userId: sender.id,
         activity: data.activity,
@@ -326,10 +365,10 @@ export default class FinancbaseServer implements Server {
     }
   }
 
-  private async handleNotificationMessage(data: Record<string, unknown>, sender: Connection) {
+  private async handleNotificationMessage(data: Record<string, unknown>, sender: Connection): Promise<void> {
     switch (data.type) {
       case 'notification':
-        this.party.broadcast(JSON.stringify({
+        this.room.broadcast(JSON.stringify({
           type: 'notification',
           data: data.data,
           timestamp: new Date().toISOString(),
@@ -352,10 +391,10 @@ export default class FinancbaseServer implements Server {
     }
   }
 
-  private async handleGeneralMessage(data: Record<string, unknown>, sender: Connection) {
+  private async handleGeneralMessage(data: Record<string, unknown>, sender: Connection): Promise<void> {
     switch (data.type) {
       case 'financial_update':
-        this.party.broadcast(JSON.stringify({
+        this.room.broadcast(JSON.stringify({
           type: 'financial_update',
           data: data.payload,
           timestamp: new Date().toISOString(),
@@ -363,7 +402,7 @@ export default class FinancbaseServer implements Server {
         break;
 
       case 'user_activity':
-        this.party.broadcast(JSON.stringify({
+        this.room.broadcast(JSON.stringify({
           type: 'user_activity',
           data: data.payload,
           timestamp: new Date().toISOString(),
@@ -386,84 +425,102 @@ export default class FinancbaseServer implements Server {
     }
   }
 
+  async onClose(connection: Connection): Promise<void> {
+    console.log(`Connection closed for room: ${this.room.id}`);
+
+    // Notify others that user left
+    this.room.broadcast(JSON.stringify({
+      type: 'user_left',
+      userId: connection.id,
+      timestamp: new Date().toISOString(),
+    }));
+  }
+
+  async onError(connection: Connection, error: Error): Promise<void> {
+    console.error(`Error in room ${this.room.id}:`, error);
+  }
+
   // Helper methods for room state management
-  private getRoomState() {
-    if (!this.rooms.has(this.party.id)) {
-      this.rooms.set(this.party.id, {
-        users: [],
-        channels: [],
-        meetings: [],
-        messages: new Map(),
-      });
-    }
-    return this.rooms.get(this.party.id);
+  private getRoomState(): RoomState {
+    const users = this.room.storage.get("users") || [];
+    const channels = this.room.storage.get("channels") || [];
+    const meetings = this.room.storage.get("meetings") || [];
+    const messages = this.room.storage.get("messages") || new Map();
+
+    return {
+      users,
+      channels,
+      meetings,
+      messages,
+    };
   }
 
   private getChannelHistory(channelId: string): Message[] {
-    const roomState = this.getRoomState();
-    return roomState.messages.get(channelId) || [];
+    const messages = this.room.storage.get("messages") || new Map();
+    return messages.get(channelId) || [];
   }
 
-  private addMessageToChannel(channelId: string, message: Message) {
-    const roomState = this.getRoomState();
-    if (!roomState.messages.has(channelId)) {
-      roomState.messages.set(channelId, []);
+  private addMessageToChannel(channelId: string, message: Message): void {
+    const messages = this.room.storage.get("messages") || new Map();
+    if (!messages.has(channelId)) {
+      messages.set(channelId, []);
     }
-    roomState.messages.get(channelId).push(message);
+    messages.get(channelId).push(message);
+
+    // Keep only last 1000 messages per channel
+    const channelMessages = messages.get(channelId);
+    if (channelMessages.length > 1000) {
+      messages.set(channelId, channelMessages.slice(-1000));
+    }
+
+    this.room.storage.put("messages", messages);
   }
 
-  private updateChannelLastMessage(channelId: string, message: Message) {
-    const roomState = this.getRoomState();
-    const channel = roomState.channels.find((c: Channel) => c.id === channelId);
-    if (channel) {
-      channel.lastMessage = message;
+  private updateChannelLastMessage(channelId: string, message: Message): void {
+    const channels = this.room.storage.get("channels") || [];
+    const channelIndex = channels.findIndex((c: Channel) => c.id === channelId);
+    if (channelIndex !== -1) {
+      channels[channelIndex].lastMessage = message;
+      this.room.storage.put("channels", channels);
     }
   }
 
-  private addMeetingToRoom(meeting: Meeting) {
-    const roomState = this.getRoomState();
-    roomState.meetings.push(meeting);
+  private addMeetingToRoom(meeting: Meeting): void {
+    const meetings = this.room.storage.get("meetings") || [];
+    meetings.push(meeting);
+    this.room.storage.put("meetings", meetings);
   }
 
   private updateMeetingParticipants(meetingId: string, userId: string, action: 'join' | 'leave'): Meeting | null {
-    const roomState = this.getRoomState();
-    const meeting = roomState.meetings.find((m: Meeting) => m.id === meetingId);
-    if (!meeting) return null;
+    const meetings = this.room.storage.get("meetings") || [];
+    const meetingIndex = meetings.findIndex((m: Meeting) => m.id === meetingId);
+    if (meetingIndex === -1) return null;
 
+    const meeting = meetings[meetingIndex];
     if (action === 'join' && !meeting.participants.includes(userId)) {
       meeting.participants.push(userId);
     } else if (action === 'leave') {
       meeting.participants = meeting.participants.filter((p: string) => p !== userId);
     }
 
+    meetings[meetingIndex] = meeting;
+    this.room.storage.put("meetings", meetings);
     return meeting;
   }
 
   private updateMeetingStatus(meetingId: string, status: Meeting['status'], extraFields?: Partial<Meeting>): Meeting | null {
-    const roomState = this.getRoomState();
-    const meeting = roomState.meetings.find((m: Meeting) => m.id === meetingId);
-    if (!meeting) return null;
+    const meetings = this.room.storage.get("meetings") || [];
+    const meetingIndex = meetings.findIndex((m: Meeting) => m.id === meetingId);
+    if (meetingIndex === -1) return null;
 
+    const meeting = meetings[meetingIndex];
     meeting.status = status;
     if (extraFields) {
       Object.assign(meeting, extraFields);
     }
 
+    meetings[meetingIndex] = meeting;
+    this.room.storage.put("meetings", meetings);
     return meeting;
-  }
-
-  async onClose(_conn: Connection) {
-    console.log(`Connection closed for room: ${this.party.id}`);
-
-    // Notify others that user left
-    this.party.broadcast(JSON.stringify({
-      type: 'user_left',
-      userId: _conn.id,
-      timestamp: new Date().toISOString(),
-    }));
-  }
-
-  async onError(_conn: Connection, error: Error) {
-    console.error(`Error in room ${this.party.id}:`, error);
   }
 }

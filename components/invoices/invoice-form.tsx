@@ -29,7 +29,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { nanoid } from 'nanoid';
 
 interface LineItem {
@@ -117,11 +117,18 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['invoices'] });
-			toast.success(invoiceId ? 'Invoice updated' : 'Invoice created');
+			toast({
+				title: 'Success',
+				description: invoiceId ? 'Invoice updated' : 'Invoice created',
+			});
 			router.push('/invoices');
 		},
 		onError: (error: Error) => {
-			toast.error(error.message || 'Failed to save invoice');
+			toast({
+				title: 'Error',
+				description: error.message || 'Failed to save invoice',
+				variant: 'destructive',
+			});
 		},
 	});
 
@@ -170,12 +177,20 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 
 		// Validation
 		if (!formData.clientName || !formData.clientEmail) {
-			toast.error('Client name and email are required');
+			toast({
+				title: 'Error',
+				description: 'Client name and email are required',
+				variant: 'destructive',
+			});
 			return;
 		}
 
 		if (formData.items.length === 0 || formData.items.every(item => !item.description)) {
-			toast.error('At least one line item is required');
+			toast({
+				title: 'Error',
+				description: 'At least one line item is required',
+				variant: 'destructive',
+			});
 			return;
 		}
 

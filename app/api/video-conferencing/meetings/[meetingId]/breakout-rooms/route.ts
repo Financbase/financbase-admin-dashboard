@@ -44,7 +44,8 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(breakoutRooms);
 	} catch (error) {
-		console.error('Error fetching breakout rooms:', error);
+		// eslint-disable-next-line no-console
+    console.error('Error fetching breakout rooms:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -84,7 +85,8 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json(room, { status: 201 });
 	} catch (error) {
-		console.error('Error creating breakout room:', error);
+		// eslint-disable-next-line no-console
+    console.error('Error creating breakout room:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

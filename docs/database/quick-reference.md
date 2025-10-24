@@ -3,16 +3,19 @@
 ## 🚀 For LLM Agents - Quick Start
 
 ### 1. Check Current Status
+
 ```sql
 SELECT current_database(), current_user, now();
 ```
 
 ### 2. Verify Security
+
 ```sql
 SELECT schemaname, tablename, rowsecurity FROM pg_tables WHERE rowsecurity = false;
 ```
 
 ### 3. Choose Branch
+
 - **New features** → `dev-feature-1`, `dev-feature-2`, `dev-feature-3`
 - **Security updates** → `database-audit-staging`
 - **Emergency fixes** → `hotfix`
@@ -22,18 +25,21 @@ SELECT schemaname, tablename, rowsecurity FROM pg_tables WHERE rowsecurity = fal
 ## 📋 Workflow Quick Guide
 
 ### New Features
+
 1. Use `dev-feature-*` branch
 2. Test thoroughly
 3. Merge to `staging`
 4. Deploy to `main` after validation
 
 ### Security Updates
+
 1. Use `database-audit-staging`
 2. Validate security measures
 3. Get approval
 4. Deploy to `main`
 
 ### Emergency Fixes
+
 1. Use `hotfix` branch
 2. Test quickly but thoroughly
 3. Deploy directly to `main`

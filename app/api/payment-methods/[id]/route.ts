@@ -15,8 +15,8 @@ const updatePaymentMethodSchema = z.object({
 });
 
 export async function GET(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -24,7 +24,7 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const paymentMethod = await PaymentService.getPaymentMethodById(params.id, userId);
+		const paymentMethod = await PaymentService.getPaymentMethodById(id, userId);
 
 		if (!paymentMethod) {
 			return NextResponse.json({ error: 'Payment method not found' }, { status: 404 });
@@ -32,7 +32,9 @@ export async function GET(
 
 		return NextResponse.json({ paymentMethod });
 	} catch (error) {
-		console.error('Error fetching payment method:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching payment method:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch payment method' },
 			{ status: 500 }
@@ -41,8 +43,8 @@ export async function GET(
 }
 
 export async function PUT(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -53,18 +55,20 @@ export async function PUT(
 		const body = await request.json();
 		const validatedData = updatePaymentMethodSchema.parse(body);
 
-		const paymentMethod = await PaymentService.updatePaymentMethod(params.id, userId, validatedData);
+		const paymentMethod = await PaymentService.updatePaymentMethod(id, userId, validatedData);
 
 		return NextResponse.json({ paymentMethod });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Validation error', details: error.errors },
+				{ error: 'Validation error', details: error.issues },
 				{ status: 400 }
 			);
 		}
 
-		console.error('Error updating payment method:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error updating payment method:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update payment method' },
 			{ status: 500 }
@@ -73,8 +77,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -82,11 +86,13 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		await PaymentService.deletePaymentMethod(params.id, userId);
+		await PaymentService.deletePaymentMethod(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error deleting payment method:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error deleting payment method:', error);
 		return NextResponse.json(
 			{ error: 'Failed to delete payment method' },
 			{ status: 500 }

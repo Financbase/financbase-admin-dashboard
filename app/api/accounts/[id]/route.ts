@@ -17,20 +17,21 @@ const updateAccountSchema = z.object({
 	creditLimit: z.number().optional(),
 	interestRate: z.number().optional(),
 	notes: z.string().optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export async function GET(
 	request: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const account = await AccountService.getAccountById(params.id, userId);
+		const account = await AccountService.getAccountById(id, userId);
 
 		if (!account) {
 			return NextResponse.json({ error: 'Account not found' }, { status: 404 });
@@ -48,7 +49,7 @@ export async function GET(
 
 export async function PUT(
 	request: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -56,16 +57,17 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		const body = await request.json();
 		const validatedData = updateAccountSchema.parse(body);
 
-		const account = await AccountService.updateAccount(params.id, userId, validatedData);
+		const account = await AccountService.updateAccount(id, userId, validatedData);
 
 		return NextResponse.json({ account });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Validation error', details: error.errors },
+				{ error: 'Validation error', details: error.issues },
 				{ status: 400 }
 			);
 		}
@@ -80,7 +82,7 @@ export async function PUT(
 
 export async function DELETE(
 	request: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -88,7 +90,8 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		await AccountService.deleteAccount(params.id, userId);
+		const { id } = await params;
+		await AccountService.deleteAccount(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {

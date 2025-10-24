@@ -3,15 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-	ArrowRight,
-	Code,
-	Download,
-	Github,
-	Npm,
-	Python,
-	React,
-	Smartphone,
-	Terminal,
+ ArrowRight,
+ Code,
+ Download,
+ Github,
+ Package as Npm,
+ FileCode as Python,
+ Repeat as React,
+ Smartphone,
+ Terminal,
 } from "lucide-react";
 import Link from "next/link";
 

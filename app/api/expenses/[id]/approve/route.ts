@@ -14,7 +14,7 @@ import { ExpenseService } from '@/lib/services/expense-service';
  */
 export async function POST(
 	_req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -23,7 +23,8 @@ export async function POST(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(params.id);
+		const { id: idParam } = await params;
+		const id = parseInt(idParam);
 		
 		// Get the expense to find the owner
 		const expense = await ExpenseService.getById(id, userId);
@@ -35,7 +36,9 @@ export async function POST(
 
 		return NextResponse.json(approved);
 	} catch (error) {
-		console.error('Error approving expense:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error approving expense:', error);
 		return NextResponse.json(
 			{ error: 'Failed to approve expense' },
 			{ status: 500 }

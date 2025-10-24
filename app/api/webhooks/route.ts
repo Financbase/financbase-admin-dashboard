@@ -1,77 +1,123 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { WorkflowEngine } from '@/lib/services/workflow-engine';
+import { db } from '@/lib/db';
+import { webhooks } from '@/lib/db/schemas';
+import { eq, desc, and, like, or } from 'drizzle-orm';
+import { auth } from '@clerk/nextjs/server';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search');
+    const status = searchParams.get('status');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
+
+    let query = db.select().from(webhooks).where(eq(webhooks.userId, userId));
+
+    if (search) {
+      query = query.where(and(
+        eq(webhooks.userId, userId),
+        or(
+          like(webhooks.name, `%${search}%`),
+          like(webhooks.url, `%${search}%`)
+        )
+      ));
+    }
+
+    if (status) {
+      query = query.where(and(
+        eq(webhooks.userId, userId),
+        eq(webhooks.isActive, status === 'active')
+      ));
+    }
+
+    const userWebhooks = await query
+      .orderBy(desc(webhooks.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return NextResponse.json(userWebhooks);
+  } catch (error) {
+    console.error('Error fetching webhooks:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
 
 export async function POST(request: NextRequest) {
-	try {
-		const body = await request.json();
-		const signature = request.headers.get('x-signature');
-		const webhookSecret = request.headers.get('x-webhook-secret');
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-		// Verify webhook signature (if provided)
-		if (signature && webhookSecret) {
-			// In a real implementation, verify the signature
-			// const isValid = verifySignature(body, signature, webhookSecret);
-			// if (!isValid) {
-			//   return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
-			// }
-		}
+    const body = await request.json();
+    const { 
+      name, 
+      description, 
+      url, 
+      events, 
+      secret, 
+      retryPolicy, 
+      headers, 
+      filters, 
+      timeout,
+      organizationId 
+    } = body;
 
-		// Extract event information from webhook payload
-		const eventType = extractEventType(body);
-		const entityId = extractEntityId(body);
-		const entityType = extractEntityType(body);
+    if (!name || !url || !events || !Array.isArray(events) || events.length === 0) {
+      return NextResponse.json({ 
+        error: 'Name, URL, and events are required' 
+      }, { status: 400 });
+    }
 
-		if (!eventType || !entityId || !entityType) {
-			return NextResponse.json({ error: 'Invalid webhook payload' }, { status: 400 });
-		}
+    // Validate URL
+    try {
+      new URL(url);
+    } catch {
+      return NextResponse.json({ 
+        error: 'Invalid URL format' 
+      }, { status: 400 });
+    }
 
-		// Create webhook event record
-		await WorkflowEngine.createWebhookEvent(
-			'user_12345', // Would get from webhook configuration
-			eventType,
-			entityId,
-			entityType,
-			body
-		);
+    // Generate secret if not provided
+    const webhookSecret = secret || generateWebhookSecret();
 
-		// Acknowledge webhook
-		return NextResponse.json({ received: true, eventType, entityId }, { status: 200 });
+    const newWebhook = await db.insert(webhooks).values({
+      userId,
+      organizationId,
+      name,
+      description,
+      url,
+      secret: webhookSecret,
+      events,
+      retryPolicy: retryPolicy || {
+        maxRetries: 3,
+        retryDelay: 1000,
+        backoffMultiplier: 2
+      },
+      headers: headers || {},
+      filters: filters || {},
+      timeout: timeout || 30000,
+      isActive: true,
+    }).returning();
 
-	} catch (error) {
-		console.error('Webhook processing error:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-	}
+    return NextResponse.json(newWebhook[0], { status: 201 });
+  } catch (error) {
+    console.error('Error creating webhook:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
-function extractEventType(payload: any): string {
-	// Extract event type from common webhook formats
-	if (payload.event) return payload.event;
-	if (payload.type) return payload.type;
-	if (payload.action) return payload.action;
-
-	// Stripe format
-	if (payload.type && payload.type.startsWith('invoice.')) {
-		return payload.type.replace('invoice.', 'invoice_');
-	}
-
-	// Generic format
-	return payload.eventType || 'unknown';
-}
-
-function extractEntityId(payload: any): string {
-	// Extract entity ID from common webhook formats
-	if (payload.id) return payload.id;
-	if (payload.data?.id) return payload.data.id;
-	if (payload.data?.object?.id) return payload.data.object.id;
-
-	return payload.entityId || 'unknown';
-}
-
-function extractEntityType(payload: any): string {
-	// Extract entity type from common webhook formats
-	if (payload.object) return payload.object;
-	if (payload.data?.object) return payload.data.object;
-	if (payload.resource) return payload.resource;
-
-	return payload.entityType || 'unknown';
+function generateWebhookSecret(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 32; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
 }

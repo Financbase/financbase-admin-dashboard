@@ -1,523 +1,704 @@
-# 🚀 Financbase Deployment Guide
+# Financbase Deployment Guide
 
-## Overview
+This guide provides comprehensive instructions for deploying the Financbase platform across different environments and hosting providers.
 
-This guide provides comprehensive instructions for deploying Financbase to various environments, from development to production.
+## Table of Contents
 
-## 🏗️ Deployment Architecture
+1. [Prerequisites](#prerequisites)
+2. [Environment Setup](#environment-setup)
+3. [Database Setup](#database-setup)
+4. [Deployment Options](#deployment-options)
+5. [Environment Configuration](#environment-configuration)
+6. [Monitoring and Maintenance](#monitoring-and-maintenance)
+7. [Troubleshooting](#troubleshooting)
 
-Financbase supports multiple deployment strategies:
+## Prerequisites
 
-- **Development**: Local development with hot reload
-- **Docker**: Containerized deployment for consistency
-- **CI/CD**: Automated deployment via GitHub Actions
-- **Cloud Platforms**: Ready for Vercel, Netlify, Railway, etc.
+### System Requirements
 
-## 🚀 Quick Deployment
+#### Minimum Requirements
+- **Node.js**: 18.0.0 or higher
+- **npm**: 8.0.0 or higher
+- **PostgreSQL**: 14.0 or higher
+- **Redis**: 6.0 or higher (optional)
+- **Memory**: 2GB RAM minimum
+- **Storage**: 10GB available space
 
-### Using Docker (Recommended)
+#### Recommended Requirements
+- **Node.js**: 20.0.0 or higher
+- **npm**: 9.0.0 or higher
+- **PostgreSQL**: 15.0 or higher
+- **Redis**: 7.0 or higher
+- **Memory**: 4GB RAM or higher
+- **Storage**: 50GB available space
 
-#### Development Deployment
+### Required Services
+
+#### Database
+- **PostgreSQL**: Primary database
+- **Neon**: Recommended cloud PostgreSQL provider
+- **Alternative**: AWS RDS, Google Cloud SQL, or Azure Database
+
+#### Authentication
+- **Clerk**: User authentication and management
+- **Alternative**: Auth0, Firebase Auth, or custom JWT implementation
+
+#### External Services
+- **Stripe**: Payment processing
+- **Slack**: Team notifications
+- **QuickBooks**: Accounting integration
+- **Xero**: Accounting integration
+
+## Environment Setup
+
+### 1. Clone Repository
 
 ```bash
-# Clone and navigate to project
-git clone https://github.com/your-org/financbase-admin-dashboard.git
+git clone https://github.com/financbase/financbase-admin-dashboard.git
 cd financbase-admin-dashboard
-
-# Start development environment
-docker-compose up
-
-# Access at http://localhost:3000
 ```
 
-#### Production Deployment
+### 2. Install Dependencies
 
 ```bash
-# Start production environment with monitoring
-docker-compose -f docker-compose.production.yml up -d
-
-# Check status
-docker-compose -f docker-compose.production.yml ps
-
-# View logs
-docker-compose -f docker-compose.production.yml logs -f financbase
+npm install
 ```
 
-### Using Deployment Script
+### 3. Environment Variables
+
+Create a `.env.local` file in the root directory:
 
 ```bash
-# Make script executable (first time only)
-chmod +x deploy.sh
+# Database Configuration
+DATABASE_URL="postgresql://username:password@localhost:5432/financbase"
 
-# Deploy to different environments
-./deploy.sh development  # Local development
-./deploy.sh staging     # Staging environment
-./deploy.sh production  # Production environment
+# Authentication (Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
+NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
+NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL="/dashboard"
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL="/dashboard"
+
+# External Services
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PUBLISHABLE_KEY="pk_test_..."
+SLACK_BOT_TOKEN="xoxb-..."
+QUICKBOOKS_CLIENT_ID="your-client-id"
+QUICKBOOKS_CLIENT_SECRET="your-client-secret"
+XERO_CLIENT_ID="your-client-id"
+XERO_CLIENT_SECRET="your-client-secret"
+
+# Security
+NEXTAUTH_SECRET="your-nextauth-secret"
+NEXTAUTH_URL="http://localhost:3010"
+
+# Monitoring
+SENTRY_DSN="your-sentry-dsn"
+SENTRY_ORG="your-sentry-org"
+SENTRY_PROJECT="your-sentry-project"
+
+# Redis (Optional)
+REDIS_URL="redis://localhost:6379"
+
+# OAuth State Secret
+OAUTH_STATE_SECRET="your-oauth-state-secret"
 ```
 
-## 🔧 Environment Configuration
+### 4. Database Setup
 
-### Required Environment Variables
-
-Create a `.env.local` file (development) or `.env.production` file (production):
+#### Local Development
 
 ```bash
-# Copy template
-cp .env.production.template .env.production
+# Install PostgreSQL locally
+# macOS
+brew install postgresql
+brew services start postgresql
 
-# Edit with your actual values
-nano .env.production
+# Ubuntu/Debian
+sudo apt-get install postgresql postgresql-contrib
+sudo systemctl start postgresql
+
+# Create database
+createdb financbase
 ```
 
-#### Critical Variables
+#### Cloud Database (Neon)
 
-```env
-# Application
-NEXT_PUBLIC_APP_URL=https://your-domain.com
+1. **Create Neon Account**
+   - Visit [neon.tech](https://neon.tech)
+   - Sign up for a free account
+   - Create a new project
 
-# Authentication (Clerk) - REQUIRED
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
+2. **Get Connection String**
+   - Copy the connection string from Neon dashboard
+   - Update `DATABASE_URL` in `.env.local`
 
-# Database (Neon) - REQUIRED
-DATABASE_URL=postgresql://username:password@hostname/database
-
-# AI Services (OpenAI) - REQUIRED for AI features
-OPENAI_API_KEY=sk-...
-
-# Email (Resend) - REQUIRED for email features
-RESEND_API_KEY=re_...
-RESEND_FROM_EMAIL=noreply@your-domain.com
-```
-
-#### Optional but Recommended
-
-```env
-# Search (Algolia)
-NEXT_PUBLIC_ALGOLIA_APP_ID=...
-ALGOLIA_ADMIN_KEY=...
-
-# Analytics (PostHog)
-NEXT_PUBLIC_POSTHOG_KEY=phc_...
-NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
-
-# Error Tracking (Sentry)
-SENTRY_DSN=https://...
-NEXT_PUBLIC_SENTRY_DSN=https://...
-
-# Security (Arcjet)
-ARCJET_KEY=ajkey_...
-
-# File Storage (UploadThing)
-UPLOADTHING_SECRET=sk_live_...
-UPLOADTHING_APP_ID=...
-```
-
-## 🐳 Docker Deployment
-
-### Development with Docker
+#### Database Migration
 
 ```bash
-# Start all services
-docker-compose up
+# Generate migration files
+npm run db:generate
 
-# Start in background
-docker-compose up -d
+# Apply migrations
+npm run db:migrate
 
-# View logs
-docker-compose logs -f financbase
-
-# Stop services
-docker-compose down
+# Seed database (optional)
+npm run db:seed
 ```
 
-### Production with Docker
+## Deployment Options
 
-```bash
-# Start production stack
-docker-compose -f docker-compose.production.yml up -d
+### 1. Vercel Deployment (Recommended)
 
-# Start with backups enabled
-docker-compose -f docker-compose.production.yml --profile backup up -d
+#### Prerequisites
+- Vercel account
+- GitHub repository connected to Vercel
 
-# Check service health
-curl http://localhost:3000/api/health
-
-# Monitor with Grafana
-open http://localhost:3001
-```
-
-### Docker Commands Reference
-
-```bash
-# Build images
-docker-compose build
-
-# Rebuild specific service
-docker-compose build financbase
-
-# Scale services
-docker-compose up -d --scale financbase=3
-
-# Update containers
-docker-compose pull
-docker-compose up -d
-
-# Backup database
-docker exec financbase_postgres_1 pg_dump -U financbase_user financbase > backup.sql
-```
-
-## ☁️ Cloud Platform Deployment
-
-### Vercel (Recommended for Production)
+#### Deployment Steps
 
 1. **Connect Repository**
    ```bash
    # Install Vercel CLI
    npm i -g vercel
-
+   
    # Login to Vercel
    vercel login
-
-   # Link project
-   vercel link
-   ```
-
-2. **Configure Environment Variables**
-   - Go to Vercel Dashboard → Project Settings → Environment Variables
-   - Add all required environment variables from `.env.production.template`
-
-3. **Deploy**
-   ```bash
-   # Deploy to production
-   vercel --prod
-
-   # Deploy to preview
+   
+   # Deploy to Vercel
    vercel
    ```
 
-### Netlify Deployment
+2. **Configure Environment Variables**
+   - Go to Vercel dashboard
+   - Navigate to your project
+   - Go to Settings → Environment Variables
+   - Add all required environment variables
 
-1. **Build Configuration**
+3. **Configure Build Settings**
+   ```json
+   {
+     "buildCommand": "npm run build",
+     "outputDirectory": ".next",
+     "installCommand": "npm install",
+     "framework": "nextjs"
+   }
+   ```
+
+4. **Deploy**
    ```bash
-   # Create netlify.toml
-   cp netlify.toml.example netlify.toml
-   # Edit with your configuration
+   # Deploy to production
+   vercel --prod
    ```
 
-2. **Deploy**
-   ```bash
-   # Install Netlify CLI
-   npm i -g netlify-cli
+#### Vercel Configuration
 
-   # Deploy
-   netlify deploy --prod --dir=.next
-   ```
+Create `vercel.json` in the root directory:
 
-### Railway Deployment
-
-```bash
-# Install Railway CLI
-npm i -g @railway/cli
-
-# Login and link project
-railway login
-railway link
-
-# Add PostgreSQL service
-railway add postgresql
-
-# Set environment variables
-railway variables set NODE_ENV=production
-# ... add other variables
-
-# Deploy
-railway up
-```
-
-## 🔄 CI/CD Pipeline
-
-### GitHub Actions
-
-The project includes a complete CI/CD pipeline that:
-
-1. **Runs Tests** - Unit, integration, and E2E tests
-2. **Security Scanning** - Vulnerability checks and audits
-3. **Performance Testing** - Lighthouse CI for performance
-4. **Build Validation** - TypeScript and linting checks
-5. **Automated Deployment** - Deploy to staging/production
-
-### Manual Deployment
-
-```bash
-# Trigger deployment manually
-gh workflow run "CI/CD Pipeline"
-
-# Check deployment status
-gh run list
-```
-
-## 📊 Monitoring Setup
-
-### Health Monitoring
-
-```bash
-# Check application health
-curl https://your-domain.com/api/health
-
-# Should return:
-# {"status":"healthy","overall":"healthy",...}
-```
-
-### Grafana Dashboards
-
-1. **Access Grafana** (in production Docker stack)
-   ```
-   http://your-server:3001
-   ```
-
-2. **Default Credentials**
-   - Username: `admin`
-   - Password: Set in `GRAFANA_ADMIN_PASSWORD` environment variable
-
-3. **Available Dashboards**
-   - Financbase Application Dashboard
-   - Database Performance
-   - System Metrics
-
-### Prometheus Metrics
-
-Access Prometheus at `http://your-server:9090` for:
-- Application metrics
-- Database statistics
-- System performance data
-
-## 🔒 SSL/TLS Setup
-
-### Automatic (with Reverse Proxy)
-
-The Docker production stack includes Nginx with SSL termination:
-
-```bash
-# Generate SSL certificates
-sudo certbot certonly --standalone -d your-domain.com
-
-# Copy certificates to Nginx
-sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem ./ssl/
-sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem ./ssl/
-```
-
-### Manual SSL Configuration
-
-For custom SSL setup, update `nginx/production.conf`:
-
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name your-domain.com;
-
-    ssl_certificate /etc/nginx/ssl/fullchain.pem;
-    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
-
-    # SSL Security settings
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;
-    ssl_prefer_server_ciphers off;
+```json
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "CLERK_SECRET_KEY": "@clerk_secret_key",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "@clerk_publishable_key"
+  },
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
 }
 ```
 
-## 🗄️ Database Management
+### 2. Docker Deployment
 
-### Migrations
+#### Create Dockerfile
 
-```bash
-# Generate new migration
-npx drizzle-kit generate
+```dockerfile
+# Dockerfile
+FROM node:18-alpine AS base
 
-# Apply migrations
-npx drizzle-kit push
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
-# Check migration status
-npx drizzle-kit check
+# Install dependencies
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["node", "server.js"]
 ```
 
-### Backup and Recovery
+#### Create docker-compose.yml
 
-#### Automated Backups (Docker)
+```yaml
+version: '3.8'
 
-```bash
-# Enable backup service
-docker-compose -f docker-compose.production.yml --profile backup up -d
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    depends_on:
+      - postgres
+      - redis
 
-# List backups
-ls -la backups/
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=financbase
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
-# Restore from backup
-docker exec financbase_postgres_1 psql -U financbase_user -d financbase < backup.sql
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
 ```
 
-#### Manual Backup
+#### Deploy with Docker
 
 ```bash
-# Create backup
-pg_dump -h localhost -U financbase_user -d financbase > backup_$(date +%Y%m%d_%H%M%S).sql
+# Build and start services
+docker-compose up -d
 
-# Restore backup
-psql -h localhost -U financbase_user -d financbase < backup.sql
+# Run database migrations
+docker-compose exec app npm run db:migrate
+
+# Seed database
+docker-compose exec app npm run db:seed
 ```
 
-## 🚨 Troubleshooting
+### 3. AWS Deployment
+
+#### Using AWS Amplify
+
+1. **Connect Repository**
+   - Go to AWS Amplify console
+   - Connect your GitHub repository
+   - Select the main branch
+
+2. **Configure Build Settings**
+   ```yaml
+   version: 1
+   frontend:
+     phases:
+       preBuild:
+         commands:
+           - npm install
+       build:
+         commands:
+           - npm run build
+     artifacts:
+       baseDirectory: .next
+       files:
+         - '**/*'
+     cache:
+       paths:
+         - node_modules/**/*
+   ```
+
+3. **Environment Variables**
+   - Add all required environment variables in Amplify console
+   - Configure build environment variables
+
+#### Using AWS ECS
+
+1. **Create ECS Cluster**
+   ```bash
+   aws ecs create-cluster --cluster-name financbase
+   ```
+
+2. **Create Task Definition**
+   ```json
+   {
+     "family": "financbase",
+     "networkMode": "awsvpc",
+     "requiresCompatibilities": ["FARGATE"],
+     "cpu": "256",
+     "memory": "512",
+     "executionRoleArn": "arn:aws:iam::account:role/ecsTaskExecutionRole",
+     "containerDefinitions": [
+       {
+         "name": "financbase",
+         "image": "your-account.dkr.ecr.region.amazonaws.com/financbase:latest",
+         "portMappings": [
+           {
+             "containerPort": 3000,
+             "protocol": "tcp"
+           }
+         ],
+         "environment": [
+           {
+             "name": "DATABASE_URL",
+             "value": "postgresql://username:password@host:5432/database"
+           }
+         ]
+       }
+     ]
+   }
+   ```
+
+### 4. Google Cloud Deployment
+
+#### Using Cloud Run
+
+1. **Build and Push Image**
+   ```bash
+   # Build image
+   docker build -t gcr.io/PROJECT_ID/financbase .
+   
+   # Push to Google Container Registry
+   docker push gcr.io/PROJECT_ID/financbase
+   ```
+
+2. **Deploy to Cloud Run**
+   ```bash
+   gcloud run deploy financbase \
+     --image gcr.io/PROJECT_ID/financbase \
+     --platform managed \
+     --region us-central1 \
+     --allow-unauthenticated
+   ```
+
+### 5. Self-Hosted Deployment
+
+#### Using PM2
+
+1. **Install PM2**
+   ```bash
+   npm install -g pm2
+   ```
+
+2. **Create PM2 Configuration**
+   ```json
+   {
+     "apps": [
+       {
+         "name": "financbase",
+         "script": "npm",
+         "args": "start",
+         "cwd": "/path/to/financbase",
+         "instances": "max",
+         "exec_mode": "cluster",
+         "env": {
+           "NODE_ENV": "production",
+           "PORT": 3000
+         }
+       }
+     ]
+   }
+   ```
+
+3. **Start Application**
+   ```bash
+   pm2 start ecosystem.config.json
+   pm2 save
+   pm2 startup
+   ```
+
+#### Using Nginx
+
+1. **Install Nginx**
+   ```bash
+   # Ubuntu/Debian
+   sudo apt-get install nginx
+   
+   # macOS
+   brew install nginx
+   ```
+
+2. **Configure Nginx**
+   ```nginx
+   server {
+       listen 80;
+       server_name your-domain.com;
+       
+       location / {
+           proxy_pass http://localhost:3000;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+           proxy_cache_bypass $http_upgrade;
+       }
+   }
+   ```
+
+## Environment Configuration
+
+### 1. Development Environment
+
+```bash
+# .env.local
+NODE_ENV=development
+DATABASE_URL="postgresql://localhost:5432/financbase_dev"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
+```
+
+### 2. Staging Environment
+
+```bash
+# .env.staging
+NODE_ENV=staging
+DATABASE_URL="postgresql://staging-db:5432/financbase_staging"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
+```
+
+### 3. Production Environment
+
+```bash
+# .env.production
+NODE_ENV=production
+DATABASE_URL="postgresql://prod-db:5432/financbase_prod"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_live_..."
+CLERK_SECRET_KEY="sk_live_..."
+```
+
+## Monitoring and Maintenance
+
+### 1. Health Checks
+
+Create a health check endpoint:
+
+```typescript
+// app/api/health/route.ts
+export async function GET() {
+  try {
+    // Check database connection
+    await db.select().from(users).limit(1);
+    
+    // Check external services
+    const services = await checkExternalServices();
+    
+    return Response.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      services: services
+    });
+  } catch (error) {
+    return Response.json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error: error.message
+    }, { status: 500 });
+  }
+}
+```
+
+### 2. Logging Configuration
+
+```typescript
+// lib/logger.ts
+import winston from 'winston';
+
+const logger = winston.createLogger({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' }),
+    new winston.transports.Console({
+      format: winston.format.simple()
+    })
+  ]
+});
+
+export default logger;
+```
+
+### 3. Performance Monitoring
+
+```typescript
+// lib/monitoring.ts
+import * as Sentry from '@sentry/nextjs';
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 1.0,
+  profilesSampleRate: 1.0,
+});
+
+export { Sentry };
+```
+
+### 4. Database Maintenance
+
+```bash
+# Regular database maintenance
+npm run db:generate  # Generate new migrations
+npm run db:migrate  # Apply migrations
+npm run db:seed     # Seed data (if needed)
+
+# Database backup
+pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Database restore
+psql $DATABASE_URL < backup_20240101_120000.sql
+```
+
+## Troubleshooting
 
 ### Common Issues
 
-#### Build Errors
+#### 1. Database Connection Issues
+
+**Problem**: Cannot connect to database
+**Solution**: Check connection string and network access
 
 ```bash
-# Clear Next.js cache
-rm -rf .next
-
-# Reinstall dependencies
-rm -rf node_modules package-lock.json
-npm install
-
-# Check for TypeScript errors
-npm run type-check
-```
-
-#### Database Connection Issues
-
-```bash
-# Check database connectivity
-npx drizzle-kit check
-
-# Verify environment variables
-echo $DATABASE_URL
-
 # Test database connection
 psql $DATABASE_URL -c "SELECT 1;"
 ```
 
-#### Performance Issues
+#### 2. Authentication Issues
+
+**Problem**: Users cannot log in
+**Solution**: Verify Clerk configuration
 
 ```bash
-# Check memory usage
-docker stats
-
-# Monitor database performance
-docker exec financbase_postgres_1 psql -c "SELECT * FROM pg_stat_activity;"
-
-# Check application logs
-docker-compose logs -f financbase
+# Check environment variables
+echo $NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+echo $CLERK_SECRET_KEY
 ```
 
-### Logs and Debugging
+#### 3. Build Issues
 
-#### Application Logs
-
-```bash
-# View application logs
-docker-compose logs -f financbase
-
-# View specific service logs
-docker-compose logs -f postgres
-docker-compose logs -f redis
-```
-
-#### Error Tracking
-
-- **Sentry Dashboard**: Monitor errors in real-time
-- **Application Logs**: Check container logs for detailed errors
-- **Database Logs**: PostgreSQL logs for query issues
-
-### Performance Monitoring
-
-#### Key Metrics to Monitor
-
-1. **Response Time** - Should be < 200ms for most requests
-2. **Error Rate** - Should be < 1% in production
-3. **Database Connections** - Monitor connection pool usage
-4. **Memory Usage** - Should not exceed 80% of allocated memory
-5. **CPU Usage** - Should not exceed 70% consistently
-
-#### Performance Optimization
+**Problem**: Build fails
+**Solution**: Check dependencies and environment
 
 ```bash
-# Enable performance monitoring
-NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING=true
-
-# Enable query logging (development only)
-NEXT_PUBLIC_ENABLE_QUERY_LOGGING=true
-
-# Bundle analysis
-ANALYZE=true npm run build
-```
-
-## 🔧 Maintenance
-
-### Regular Tasks
-
-#### Daily
-- Monitor error rates and response times
-- Check database performance and connection counts
-- Review application logs for issues
-
-#### Weekly
-- Review analytics and user engagement metrics
-- Check backup integrity and rotation
-- Update dependencies for security patches
-
-#### Monthly
-- Performance testing and optimization
-- Security audit and vulnerability scanning
-- Database maintenance and optimization
-
-### Update Procedures
-
-#### Application Updates
-
-```bash
-# Pull latest changes
-git pull origin main
-
-# Install new dependencies
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
 npm install
-
-# Run tests
-npm run test:run
-
-# Build and deploy
 npm run build
-./deploy.sh production
 ```
 
-#### Database Schema Updates
+#### 4. Performance Issues
+
+**Problem**: Slow response times
+**Solution**: Check database queries and caching
 
 ```bash
-# Generate new migration
-npx drizzle-kit generate
+# Check database performance
+npm run db:analyze
 
-# Review migration file
-cat drizzle/migrations/$(ls -t drizzle/migrations/ | head -1)
-
-# Apply migration
-npx drizzle-kit push
+# Check application performance
+npm run performance:test
 ```
 
-## 📞 Support & Contact
+### Debugging
 
-### Getting Help
+#### 1. Enable Debug Logging
 
-1. **Documentation**: Check this deployment guide first
-2. **GitHub Issues**: Report bugs and request features
-3. **Discussions**: Ask questions in GitHub Discussions
-4. **Email Support**: support@financbase.com for enterprise customers
+```bash
+# Set debug environment variable
+export DEBUG=financbase:*
+npm run dev
+```
 
-### Emergency Contacts
+#### 2. Database Debugging
 
-- **Critical Issues**: Immediately contact technical lead
-- **Security Incidents**: Follow security incident response plan
-- **Data Loss**: Check automated backups and restore procedures
+```sql
+-- Check slow queries
+SELECT query, mean_time, calls 
+FROM pg_stat_statements 
+ORDER BY mean_time DESC 
+LIMIT 10;
+
+-- Check database size
+SELECT pg_size_pretty(pg_database_size('financbase'));
+```
+
+#### 3. Application Debugging
+
+```typescript
+// Add debug logging
+console.log('Debug info:', { 
+  workflowId, 
+  stepId, 
+  data: JSON.stringify(data, null, 2) 
+});
+```
+
+### Support
+
+#### 1. Documentation
+- [API Documentation](https://docs.financbase.com/api)
+- [Component Documentation](https://docs.financbase.com/components)
+- [Deployment Guide](https://docs.financbase.com/deployment)
+
+#### 2. Community
+- [Discord Community](https://discord.gg/financbase)
+- [GitHub Discussions](https://github.com/financbase/financbase-admin-dashboard/discussions)
+- [Stack Overflow](https://stackoverflow.com/questions/tagged/financbase)
+
+#### 3. Professional Support
+- [Enterprise Support](https://financbase.com/enterprise)
+- [Consulting Services](https://financbase.com/consulting)
+- [Training Programs](https://financbase.com/training)
 
 ---
 
-*Last updated: January 2024*
+**Need Help?** Contact our support team at [support@financbase.com](mailto:support@financbase.com) or visit our [Help Center](https://help.financbase.com).

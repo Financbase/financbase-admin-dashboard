@@ -4,6 +4,7 @@ import { z } from "zod";
 
 // Import base real estate tables
 export * from "./real-estate.schema";
+import { properties, propertyUnits, tenants } from "./real-estate.schema";
 
 // Contractors table
 export const contractors = pgTable("contractors", {
@@ -95,6 +96,7 @@ export const tenantApplications = pgTable("tenant_applications", {
 	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(),
 	unitId: uuid("unit_id").references(() => propertyUnits.id),
 	tenantId: uuid("tenant_id").references(() => tenants.id),
+	applicantId: uuid("applicant_id").references(() => tenants.id), // References the applicant (tenant)
 	firstName: text("first_name").notNull(),
 	lastName: text("last_name").notNull(),
 	email: text("email").notNull(),

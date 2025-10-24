@@ -152,12 +152,14 @@ export async function getTransactions(
 	}
 
 	if (options?.search) {
-		conditions.push(
-			or(
-				ilike(transactions.description, `%${options.search}%`),
-				ilike(transactions.transactionNumber, `%${options.search}%`)
-			)
-		);
+		const searchConditions = [
+			ilike(transactions.description, `%${options.search}%`),
+			ilike(transactions.transactionNumber, `%${options.search}%`)
+		].filter(Boolean); // Filter out any undefined conditions
+
+		if (searchConditions.length > 0) {
+			conditions.push(or(...searchConditions));
+		}
 	}
 
 	const results = await db.query.transactions.findMany({
@@ -179,6 +181,7 @@ export async function updateTransaction(input: UpdateTransactionInput): Promise<
 	const [updated] = await db.update(transactions)
 		.set({
 			...updateData,
+			amount: updateData.amount ? updateData.amount.toString() : undefined,
 			updatedAt: new Date(),
 		})
 		.where(and(
@@ -283,11 +286,13 @@ export async function getTransactionStats(userId: string): Promise<TransactionSt
 		netFlow,
 		pendingTransactions: Number(basicStats?.pendingTransactions || 0),
 		completedTransactions: Number(basicStats?.completedTransactions || 0),
-		categoryBreakdown: categoryBreakdown.map(row => ({
-			category: row.category,
-			amount: Number(row.amount),
-			count: Number(row.count),
-		})),
+		categoryBreakdown: categoryBreakdown
+			.filter((row): row is typeof row & { category: string } => row.category !== null)
+			.map(row => ({
+				category: row.category,
+				amount: Number(row.amount),
+				count: Number(row.count),
+			})),
 		monthlyTrend: monthlyTrend.map(row => ({
 			month: row.month,
 			inflow: Number(row.inflow),

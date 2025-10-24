@@ -14,7 +14,7 @@ import { ExpenseService } from '@/lib/services/expense-service';
  */
 export async function GET(
 	_req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -23,7 +23,8 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(params.id);
+		const { id: idParam } = await params;
+		const id = parseInt(idParam);
 		const expense = await ExpenseService.getById(id, userId);
 
 		if (!expense) {
@@ -32,7 +33,9 @@ export async function GET(
 
 		return NextResponse.json(expense);
 	} catch (error) {
-		console.error('Error fetching expense:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching expense:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch expense' },
 			{ status: 500 }
@@ -55,7 +58,7 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(params.id);
+		const id = parseInt(id);
 		const body = await req.json();
 
 		const expense = await ExpenseService.update({
@@ -68,7 +71,9 @@ export async function PUT(
 
 		return NextResponse.json(expense);
 	} catch (error) {
-		console.error('Error updating expense:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error updating expense:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update expense' },
 			{ status: 500 }
@@ -91,12 +96,14 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(params.id);
+		const id = parseInt(id);
 		await ExpenseService.delete(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error deleting expense:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error deleting expense:', error);
 		return NextResponse.json(
 			{ error: 'Failed to delete expense' },
 			{ status: 500 }

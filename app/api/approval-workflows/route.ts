@@ -4,14 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
-import { auditLogger } from '@/lib/services/security/audit-logging-service';
+import { auditLogger, AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
 
 // GET /api/approval-workflows - Get approval workflows
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -21,72 +21,16 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // This would query the database using Drizzle ORM
-    const mockWorkflows = [
-      {
-        id: 'workflow_1',
-        name: 'Manager Approval',
-        description: 'Standard approval workflow for bills over $1,000',
-        steps: [
-          {
-            id: 'step_1',
-            name: 'Manager Review',
-            type: 'role',
-            role: 'manager',
-            order: 1,
-            status: 'pending'
-          }
-        ],
-        conditions: {
-          amountThreshold: 1000,
-          vendorCategories: ['software', 'professional_services'],
-          requiredApprovers: []
-        },
-        status: 'active',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 'workflow_2',
-        name: 'Executive Approval',
-        description: 'High-value bill approval requiring executive sign-off',
-        steps: [
-          {
-            id: 'step_1',
-            name: 'Manager Review',
-            type: 'role',
-            role: 'manager',
-            order: 1,
-            status: 'pending'
-          },
-          {
-            id: 'step_2',
-            name: 'Executive Approval',
-            type: 'role',
-            role: 'executive',
-            order: 2,
-            status: 'pending'
-          }
-        ],
-        conditions: {
-          amountThreshold: 5000,
-          vendorCategories: ['all'],
-          requiredApprovers: []
-        },
-        status: 'active',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
-
-    const filteredWorkflows = mockWorkflows.filter(workflow => {
-      if (status && workflow.status !== status) return false;
-      return true;
+    // Query the database using Drizzle ORM
+    const workflows = await billPayService.getApprovalWorkflows(userId, {
+      status: status || undefined,
+      limit,
+      offset
     });
 
     return NextResponse.json({
-      workflows: filteredWorkflows.slice(offset, offset + limit),
-      total: filteredWorkflows.length,
+      workflows: workflows.data,
+      total: workflows.total,
       limit,
       offset
     });
@@ -103,7 +47,7 @@ export async function GET(request: NextRequest) {
 // POST /api/approval-workflows - Create new workflow
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -146,18 +90,18 @@ export async function POST(request: NextRequest) {
 
     await auditLogger.logEvent({
       userId,
-      eventType: 'approval_workflow_created',
+      eventType: AuditEventType.API_ACCESS,
       action: 'workflow_management',
       entityType: 'approval_workflow',
       entityId: workflow.id,
       description: `Approval workflow created: ${name}`,
-      riskLevel: 'low',
+      riskLevel: RiskLevel.LOW,
       metadata: {
         stepCount: steps.length,
         amountThreshold,
         vendorCategories
       },
-      complianceFlags: ['soc2']
+      complianceFlags: [ComplianceFramework.SOC2]
     });
 
     return NextResponse.json({ workflow }, { status: 201 });
@@ -172,38 +116,18 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/approvals/pending - Get pending approvals for user
-export async function PUT(request: NextRequest) {
+export async function PUT(_request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get pending approvals for current user
-    const mockPendingApprovals = [
-      {
-        id: 'approval_1',
-        billId: 'bill_2',
-        workflowId: 'workflow_1',
-        currentStep: 0,
-        status: 'pending',
-        initiatedBy: 'user_1',
-        initiatedAt: new Date(),
-        steps: [
-          {
-            id: 'step_1',
-            name: 'Manager Review',
-            type: 'role',
-            role: 'manager',
-            order: 1,
-            status: 'pending'
-          }
-        ]
-      }
-    ];
+    // Get pending approvals using service method instead of mock data
+    const pendingApprovals = await billPayService.getPendingApprovals(userId);
 
     return NextResponse.json({
-      approvals: mockPendingApprovals
+      approvals: pendingApprovals
     });
 
   } catch (error) {
@@ -216,15 +140,15 @@ export async function PUT(request: NextRequest) {
 }
 
 // POST /api/approvals/[id]/decide - Make approval decision
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    const { decision, comments } = body;
+    const { id, decision, comments } = body;
 
     if (!decision || !['approve', 'reject'].includes(decision)) {
       return NextResponse.json(
@@ -234,7 +158,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     // Process approval using service
-    const approval = await billPayService.processApproval(userId, params.id, decision, comments);
+    const approval = await billPayService.processApproval(userId, id, decision, comments);
 
     return NextResponse.json({
       success: true,

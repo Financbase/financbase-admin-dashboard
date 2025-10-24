@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@clerk/nextjs/server";
 import { AIMatchingEngine } from "@/lib/reconciliation/ai-matching-engine";
 import { ReconciliationService } from "@/lib/reconciliation/reconciliation-service";
 import { db } from "@/lib/db";
 import { reconciliationMatches } from "@/lib/db/schemas/reconciliation.schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, desc } from "drizzle-orm";
 
 /**
  * POST /api/reconciliation/match
@@ -12,9 +12,9 @@ import { eq, inArray } from "drizzle-orm";
  */
 export async function POST(request: NextRequest) {
 	try {
-		const session = await auth();
+		const { userId } = await auth();
 
-		if (!session?.user?.id) {
+		if (!userId) {
 			return NextResponse.json(
 				{ error: "Authentication required" },
 				{ status: 401 }
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 		// Save matches to database
 		if (matchResult.matches.length > 0) {
 			const matchesToSave = matchResult.matches.map(match => ({
-				sessionId,
+				sessionId: sessionId as string,
 				statementTransactionId: match.statementTransaction.id,
 				statementAmount: match.statementTransaction.amount.toString(),
 				statementDescription: match.statementTransaction.description,
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 				bookReference: match.bookTransaction.reference,
 				status: "matched" as const,
 				confidence: match.confidence,
-				confidenceScore: match.score * 100,
+				confidenceScore: (match.score * 100).toString(),
 				matchCriteria: match.criteria,
 				matchReason: match.reason,
 			}));
@@ -86,20 +86,20 @@ export async function POST(request: NextRequest) {
  * Get existing matches for a reconciliation session
  */
 export async function GET(
-	request: NextRequest,
-	{ params }: { params: { sessionId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
 	try {
-		const session = await auth();
+		const { userId } = await auth();
 
-		if (!session?.user?.id) {
+		if (!userId) {
 			return NextResponse.json(
 				{ error: "Authentication required" },
 				{ status: 401 }
 			);
 		}
 
-		const { sessionId } = params;
+		const { sessionId } = await params;
 
 		if (!sessionId) {
 			return NextResponse.json(

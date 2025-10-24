@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FinancBase Performance Test Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .pass { background-color: #d4edda; border-color: #c3e6cb; }
+        .fail { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .summary { background-color: #e7f3ff; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        h1 { color: #333; }
+        h2 { color: #555; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 FinancBase Performance Test Results</h1>
+        <p><strong>Test Date:</strong> $(date)</p>
+        <p><strong>Environment:</strong> ${ENVIRONMENT}</p>
+        <p><strong>Base URL:</strong> ${BASE_URL}</p>
+    </div>
+    
+    <div class="summary">
+        <h2>📊 Test Summary</h2>
+        <p>This report contains the results of comprehensive performance testing for the FinancBase Admin Dashboard.</p>
+        <p>The tests include load testing, stress testing, and endpoint-specific testing to ensure optimal performance under various conditions.</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>📈 Load Test Results</h2>
+        <p>Normal expected load scenarios with up to 20 concurrent users.</p>
+        <p><a href="performance-results.html">View Load Test Report</a></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔥 Stress Test Results</h2>
+        <p>High load testing with up to 200 concurrent users to identify breaking points.</p>
+        <p><a href="stress-test-summary.html">View Stress Test Report</a></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Endpoint-Specific Test Results</h2>
+        <p>Detailed testing of individual endpoints with realistic usage patterns.</p>
+        <p><a href="endpoint-specific-summary.html">View Endpoint Test Report</a></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Performance Monitoring</h2>
+        <p>Continuous monitoring of critical endpoints for performance validation.</p>
+        <p><a href="monitoring-summary.html">View Monitoring Report</a></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>💡 Recommendations</h2>
+        <h3>Based on Test Results</h3>
+        <ul>
+            <li>Review individual test reports for specific recommendations</li>
+            <li>Implement performance monitoring in production</li>
+            <li>Set up automated performance testing in CI/CD pipeline</li>
+            <li>Consider performance optimization based on identified bottlenecks</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>📋 Next Steps</h2>
+        <ul>
+            <li>Review all test reports and identify areas for improvement</li>
+            <li>Implement recommended optimizations</li>
+            <li>Set up continuous performance monitoring</li>
+            <li>Schedule regular performance testing</li>
+        </ul>
+    </div>
+</body>
+</html>

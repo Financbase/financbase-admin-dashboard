@@ -17,28 +17,31 @@ const updateClientSchema = z.object({
 	currency: z.string().optional(),
 	paymentTerms: z.string().optional(),
 	notes: z.string().optional(),
-	metadata: z.record(z.any()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 	isActive: z.boolean().optional(),
 });
 
 export async function GET(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const client = await ClientService.getById(params.id, userId);
+		const client = await ClientService.getById(id, userId);
 		if (!client) {
 			return NextResponse.json({ error: 'Client not found' }, { status: 404 });
 		}
 
 		return NextResponse.json({ client });
 	} catch (error) {
-		console.error('Error fetching client:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching client:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch client' },
 			{ status: 500 }
@@ -47,10 +50,11 @@ export async function GET(
 }
 
 export async function PUT(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -60,7 +64,7 @@ export async function PUT(
 		const validatedData = updateClientSchema.parse(body);
 
 		const client = await ClientService.update({
-			id: params.id,
+			id: id,
 			userId,
 			...validatedData,
 		});
@@ -69,12 +73,14 @@ export async function PUT(
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Validation error', details: error.errors },
+				{ error: 'Validation error', details: error.issues },
 				{ status: 400 }
 			);
 		}
 
-		console.error('Error updating client:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error updating client:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update client' },
 			{ status: 500 }
@@ -83,20 +89,23 @@ export async function PUT(
 }
 
 export async function DELETE(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		await ClientService.delete(params.id, userId);
+		await ClientService.delete(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error deleting client:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error deleting client:', error);
 		return NextResponse.json(
 			{ error: 'Failed to delete client' },
 			{ status: 500 }

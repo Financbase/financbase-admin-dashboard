@@ -9,7 +9,7 @@ import { NotificationService } from '@/lib/services/notification-service';
 
 export async function POST(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -21,9 +21,10 @@ export async function POST(
 			);
 		}
 
-		const notificationId = parseInt(params.id);
+		const { id: idParam } = await params;
+		const notificationId = parseInt(idParam);
 
-		if (isNaN(notificationId)) {
+		if (Number.Number.isNaN(notificationId)) {
 			return NextResponse.json(
 				{ error: 'Invalid notification ID' },
 				{ status: 400 }
@@ -42,7 +43,9 @@ export async function POST(
 
 		return NextResponse.json(notification);
 	} catch (error) {
-		console.error('Error marking notification as read:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error marking notification as read:', error);
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 }

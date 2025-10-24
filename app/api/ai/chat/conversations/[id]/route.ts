@@ -3,8 +3,8 @@ import { auth } from '@clerk/nextjs/server';
 import { AIAssistantService } from '@/lib/services/ai/ai-assistant-service';
 
 export async function GET(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -12,11 +12,13 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const messages = await AIAssistantService.getConversationMessages(params.id, userId);
+		const messages = await AIAssistantService.getConversationMessages(id, userId);
 
 		return NextResponse.json({ messages });
 	} catch (error) {
-		console.error('Error fetching conversation messages:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching conversation messages:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch conversation messages' },
 			{ status: 500 }
@@ -25,8 +27,8 @@ export async function GET(
 }
 
 export async function DELETE(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -34,11 +36,13 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		await AIAssistantService.deleteConversation(params.id, userId);
+		await AIAssistantService.deleteConversation(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error deleting conversation:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error deleting conversation:', error);
 		return NextResponse.json(
 			{ error: 'Failed to delete conversation' },
 			{ status: 500 }

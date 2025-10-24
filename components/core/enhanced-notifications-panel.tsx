@@ -7,6 +7,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@clerk/nextjs';
+import { useEffect } from 'react';
 import { Bell, Check, CheckCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -101,13 +102,18 @@ export function EnhancedNotificationsPanel() {
 						queryClient.invalidateQueries({ queryKey: ['notifications'] });
 
 						// Show toast for new notification
-						toast.info(data.data.title, {
+						const toastOptions: any = {
 							description: data.data.message,
-							action: data.data.actionUrl ? {
+						};
+
+						if (data.data.actionUrl) {
+							toastOptions.action = {
 								label: 'View',
 								onClick: () => window.location.href = data.data.actionUrl,
-							} : undefined,
-						});
+							};
+						}
+
+						toast.info(data.data.title, toastOptions);
 					}
 				} catch (error) {
 					console.error('Error parsing notification data:', error);
@@ -127,7 +133,7 @@ export function EnhancedNotificationsPanel() {
 				socket.close();
 			}
 		};
-	}, [user?.id, queryClient]);
+	}, [queryClient]);
 
 	const handleNotificationClick = (notification: Notification) => {
 		// Mark as read

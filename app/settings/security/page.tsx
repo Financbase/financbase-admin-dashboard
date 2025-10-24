@@ -3,7 +3,9 @@
  */
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Key, Smartphone, Activity } from 'lucide-react';
+import { Shield } from 'lucide-react';
+import { ApiKeyManager } from '@/components/settings/api-key-manager';
+import { SessionManager } from '@/components/settings/session-manager';
 
 export default function SecuritySettingsPage() {
 	return (
@@ -32,39 +34,9 @@ export default function SecuritySettingsPage() {
 				</CardContent>
 			</Card>
 
-			<Card>
-				<CardHeader>
-					<div className="flex items-center gap-2">
-						<Key className="h-5 w-5" />
-						<CardTitle>API Keys</CardTitle>
-					</div>
-					<CardDescription>
-						Manage API keys for programmatic access
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<p className="text-sm text-muted-foreground">
-						API key management coming soon.
-					</p>
-				</CardContent>
-			</Card>
+			<ApiKeyManager />
 
-			<Card>
-				<CardHeader>
-					<div className="flex items-center gap-2">
-						<Activity className="h-5 w-5" />
-						<CardTitle>Active Sessions</CardTitle>
-					</div>
-					<CardDescription>
-						View and manage your active sessions
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<p className="text-sm text-muted-foreground">
-						Session management coming soon.
-					</p>
-				</CardContent>
-			</Card>
+			<SessionManager />
 		</div>
 	);
 }

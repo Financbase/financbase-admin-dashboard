@@ -81,7 +81,7 @@ export class AdvancedTestDataManager {
         status: faker.helpers.arrayElement(['planning', 'active', 'on_hold', 'completed']),
         priority: faker.helpers.arrayElement(['low', 'medium', 'high', 'urgent']),
         budget: faker.finance.amount({ min: 5000, max: 100000, dec: 0 }),
-        currency: client.currency,
+        currency: client.currency || 'USD',
       });
       projects.push(project);
     }
@@ -91,10 +91,10 @@ export class AdvancedTestDataManager {
     for (let i = 0; i < transactionCount; i++) {
       const user = faker.helpers.arrayElement(users);
       const client = faker.helpers.arrayElement(clients.filter(c => c.userId === user.id));
-      const transaction = await TestDataFactory.createTestTransaction(user.id, client.id, {
+      const transaction = await TestDataFactory.createTestTransaction(user.id, {
         type: faker.helpers.arrayElement(['income', 'expense', 'transfer', 'payment']),
         amount: faker.finance.amount({ min: 100, max: 10000, dec: 2 }),
-        currency: client.currency,
+        currency: client.currency || 'USD',
         description: faker.finance.transactionDescription(),
         category: faker.helpers.arrayElement([
           'income', 'expense', 'transfer', 'refund', 'fee', 'tax', 'payroll', 'office', 'marketing', 'software'

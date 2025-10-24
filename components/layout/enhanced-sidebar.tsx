@@ -21,6 +21,7 @@ import {
 	DollarSign,
 	FileText,
 	Filter,
+	Globe,
 	HelpCircle,
 	Home,
 	Key,
@@ -38,6 +39,7 @@ import {
 	TrendingUp,
 	Users,
 	Wallet,
+	Workflow,
 	X,
 	Zap,
 } from "lucide-react";
@@ -105,6 +107,54 @@ const navigationItems = [
 		href: "/collaboration",
 		icon: MessageSquare,
 		badge: "New",
+	},
+	{
+		name: "Workflows",
+		href: "/workflows",
+		icon: Workflow,
+		badge: null,
+	},
+	{
+		name: "Webhooks",
+		href: "/webhooks",
+		icon: Link2,
+		badge: null,
+	},
+	{
+		name: "Integrations",
+		href: "/integrations",
+		icon: Filter,
+		badge: null,
+	},
+	{
+		name: "Monitoring",
+		href: "/monitoring",
+		icon: Activity,
+		badge: null,
+	},
+	{
+		name: "Marketplace",
+		href: "/marketplace",
+		icon: ShoppingCart,
+		badge: null,
+	},
+	{
+		name: "Help",
+		href: "/help-center",
+		icon: HelpCircle,
+		badge: null,
+	},
+	{
+		name: "Security",
+		href: "/security-dashboard",
+		icon: Shield,
+		badge: null,
+	},
+	{
+		name: "Performance",
+		href: "/performance",
+		icon: Zap,
+		badge: null,
 	},
 	{
 		name: "Settings",
@@ -327,6 +377,18 @@ export function EnhancedSidebar({
 								</li>
 							))}
 						</ul>
+					</div>
+
+					{/* Platform Features Section */}
+					<div>
+						<h3
+							className={cn(
+								"px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider",
+								collapsed && "hidden",
+							)}
+						>
+							Platform
+						</h3>
 					</div>
 
 					{/* Financial Intelligence Section */}

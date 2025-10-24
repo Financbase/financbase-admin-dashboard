@@ -3,6 +3,9 @@
 // User management
 export * from "./users.schema";
 
+// User Preferences System
+export * from "./preferences.schema";
+
 // Organization management
 export * from "./organizations.schema";
 
@@ -32,6 +35,7 @@ export * from "./lead-tasks.schema";
 
 // Analytics and reporting
 export * from "./analytics.schema";
+export * from "./reports.schema";
 
 // Real Estate
 export * from "./real-estate.schema";
@@ -59,6 +63,12 @@ export type {
 // Activity tracking
 export * from "./activities.schema";
 
+// Security & API Management
+export * from "./api-keys.schema";
+
+// Subscription & Billing System
+export * from "./billing.schema";
+
 // Workflows and automation
 export * from "./workflows.schema";
 
@@ -67,3 +77,24 @@ export * from "./reconciliation.schema";
 
 // Bill Pay Automation and Document Processing
 export * from "./bill-pay.schema";
+
+// Webhooks System
+export * from "./webhooks.schema";
+
+// Monitoring & Metrics System
+export * from "./metrics.schema";
+
+// Marketplace & Plugins System
+export * from "./plugins.schema";
+
+// Help & Documentation System
+export * from "./documentation.schema";
+
+// Advanced Features System
+export * from "./dashboard.schema";
+
+// Security & Compliance System
+export * from "./security.schema";
+
+// Integrations System
+export * from "./integrations.schema";

@@ -14,7 +14,7 @@ import { ReportService } from '@/lib/services/report-service';
  */
 export async function POST(
 	_req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -23,12 +23,15 @@ export async function POST(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(params.id);
+		const { id: idParam } = await params;
+		const id = parseInt(idParam);
 		const history = await ReportService.run(id, userId);
 
 		return NextResponse.json(history);
 	} catch (error) {
-		console.error('Error running report:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error running report:', error);
 		return NextResponse.json(
 			{ error: 'Failed to run report' },
 			{ status: 500 }

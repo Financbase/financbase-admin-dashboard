@@ -53,7 +53,8 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(polls);
 	} catch (error) {
-		console.error('Error fetching polls:', error);
+		// eslint-disable-next-line no-console
+    console.error('Error fetching polls:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -93,7 +94,8 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json(poll, { status: 201 });
 	} catch (error) {
-		console.error('Error creating poll:', error);
+		// eslint-disable-next-line no-console
+    console.error('Error creating poll:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

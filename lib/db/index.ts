@@ -58,6 +58,14 @@ const createDatabaseConnection = () => {
 // Export the unified database instance
 export const db = createDatabaseConnection();
 
+// Helper function to get database instance or throw error
+export function getDbOrThrow() {
+	if (!db) {
+		throw new Error('Database connection not initialized');
+	}
+	return db;
+}
+
 // Export connection info for health checks
 export const getConnectionInfo = () => ({
 	driver: getDatabaseDriver(),

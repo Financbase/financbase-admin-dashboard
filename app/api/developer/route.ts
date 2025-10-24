@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { sql } from '@/lib/neon';
+import { sql } from '@/lib/db';
 
 /**
  * GET /api/developer/api-keys
@@ -86,16 +86,17 @@ export async function POST(request: NextRequest) {
  * Delete an API key
  */
 export async function DELETE(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const keyId = params.id;
+		const keyId = id;
 
 		// Verify ownership
 		const keyResult = await sql.query(`
@@ -126,9 +127,9 @@ export async function DELETE(
  * POST /api/developer/api-keys/[id]/revoke
  * Revoke an API key
  */
-export async function revokeAPIKey(
+export async function DELETE(
 	request: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -136,7 +137,7 @@ export async function revokeAPIKey(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const keyId = params.id;
+		const keyId = id;
 
 		// Verify ownership
 		const keyResult = await sql.query(`

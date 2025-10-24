@@ -13,7 +13,15 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: ProvidersProps) {
 	return (
-		<ClerkProvider>
+		<ClerkProvider
+			publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+			appearance={{
+				baseTheme: undefined,
+				variables: {
+					colorPrimary: '#2563eb',
+				},
+			}}
+		>
 			<QueryClientProvider client={queryClient}>
 				<ThemeProvider
 					attribute="class"

@@ -106,6 +106,8 @@ export interface Role {
 	isSystem: boolean;
 	createdAt: Date;
 	updatedAt: Date;
+}
+
 export const WORKSPACE_PERMISSIONS = {
   WORKSPACES_VIEW: 'workspaces:view',
   WORKSPACES_CREATE: 'workspaces:create',

@@ -93,7 +93,7 @@ export const approvalStatusEnum = pgEnum("approval_status", [
 ]);
 
 // Vendors table
-export const vendors = pgTable("vendors", {
+export const vendors = pgTable("bill_pay_vendors", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: uuid("user_id").notNull().references(() => users.id),
 
@@ -125,6 +125,13 @@ export const vendors = pgTable("vendors", {
 	paymentTerms: text("payment_terms"), // "Net 30", "Due on Receipt", etc.
 	earlyPaymentDiscount: text("early_payment_discount"), // "2% 10 Net 30"
 
+	// Payment methods and approval settings
+	paymentMethods: jsonb("payment_methods").$defaultFn(() => []),
+	autoPay: boolean("auto_pay").notNull().default(false),
+	approvalRequired: boolean("approval_required").notNull().default(true),
+	approvalThreshold: numeric("approval_threshold", { precision: 12, scale: 2 }).notNull().default('1000'),
+	category: text("category").notNull().default('other'),
+
 	// Financial tracking
 	totalSpent: numeric("total_spent", { precision: 12, scale: 2 }).default("0"),
 	totalBills: integer("total_bills").default(0),
@@ -145,7 +152,7 @@ export const vendors = pgTable("vendors", {
 });
 
 // Bills/Invoices table
-export const bills = pgTable("bills", {
+export const bills = pgTable("bill_pay_bills", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: uuid("user_id").notNull().references(() => users.id),
 	vendorId: uuid("vendor_id").references(() => vendors.id),
@@ -209,7 +216,7 @@ export const bills = pgTable("bills", {
 });
 
 // Bill payments table
-export const billPayments = pgTable("bill_payments", {
+export const billPayments = pgTable("bill_pay_payments", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: uuid("user_id").notNull().references(() => users.id),
 	billId: uuid("bill_id").references(() => bills.id),
@@ -295,12 +302,13 @@ export const documentProcessing = pgTable("document_processing", {
 });
 
 // Approval workflows table
-export const approvalWorkflows = pgTable("approval_workflows", {
+export const approvalWorkflows = pgTable("bill_approval_workflows", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: uuid("user_id").notNull().references(() => users.id),
 
 	name: text("name").notNull(),
 	description: text("description"),
+	status: text("status").notNull().default('active'),
 	isActive: boolean("is_active").default(true),
 
 	// Workflow configuration
@@ -321,7 +329,7 @@ export const approvalWorkflows = pgTable("approval_workflows", {
 });
 
 // Bill approval requests table
-export const billApprovals = pgTable("bill_approvals", {
+export const billApprovals = pgTable("bill_pay_approvals", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	billId: uuid("bill_id").notNull().references(() => bills.id),
 	workflowId: uuid("workflow_id").references(() => approvalWorkflows.id),
@@ -329,6 +337,7 @@ export const billApprovals = pgTable("bill_approvals", {
 	// Request details
 	requestedBy: uuid("requested_by").notNull().references(() => users.id),
 	requestedAt: timestamp("requested_at", { withTimezone: true }).defaultNow(),
+	initiatedBy: text("initiated_by").notNull(),
 
 	// Current step in workflow
 	currentStep: integer("current_step").default(1),
@@ -353,7 +362,8 @@ export const billApprovals = pgTable("bill_approvals", {
 	dueDate: timestamp("due_date", { withTimezone: true }),
 	completedAt: timestamp("completed_at", { withTimezone: true }),
 
-	// Audit trail
+	// Steps and audit trail
+	steps: jsonb("steps").$defaultFn(() => []), // Array of approval steps
 	approvalHistory: jsonb("approval_history"), // Array of all approval actions
 
 	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

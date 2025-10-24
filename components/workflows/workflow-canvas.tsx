@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef } from 'react';
-import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, DragOverlay, closestCenter } from '@dnd-kit/core';
+import { useState, useCallback } from 'react';
+import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, closestCenter } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -169,14 +169,13 @@ export function WorkflowCanvas({
   isExecuting = false
 }: WorkflowCanvasProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   }, []);
 
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    setDragOverId(event.over?.id as string || null);
+  const handleDragOver = useCallback(() => {
+    // Handle drag over if needed
   }, []);
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
@@ -198,7 +197,6 @@ export function WorkflowCanvas({
     }
     
     setActiveId(null);
-    setDragOverId(null);
   }, [steps, onStepsChange]);
 
   const handleStepSelect = useCallback((step: WorkflowStep) => {
@@ -257,7 +255,7 @@ export function WorkflowCanvas({
           ) : (
             <SortableContext items={sortedSteps.map(step => step.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-2">
-                {sortedSteps.map((step, index) => (
+                {sortedSteps.map((step) => (
                   <SortableStep
                     key={step.id}
                     step={step}
@@ -272,14 +270,17 @@ export function WorkflowCanvas({
         </div>
 
         <DragOverlay>
-          {activeId ? (
-            <SortableStep
-              step={sortedSteps.find(step => step.id === activeId)!}
-              isSelected={false}
-              onSelect={() => {}}
-              onDelete={() => {}}
-            />
-          ) : null}
+          {activeId ? (() => {
+            const activeStep = sortedSteps.find(step => step.id === activeId);
+            return activeStep ? (
+              <SortableStep
+                step={activeStep}
+                isSelected={false}
+                onSelect={() => {}}
+                onDelete={() => {}}
+              />
+            ) : null;
+          })() : null}
         </DragOverlay>
       </DndContext>
 

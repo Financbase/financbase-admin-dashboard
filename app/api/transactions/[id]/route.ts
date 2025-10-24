@@ -14,14 +14,14 @@ const updateTransactionSchema = z.object({
 	referenceId: z.string().optional(),
 	referenceType: z.string().optional(),
 	accountId: z.string().optional(),
-	transactionDate: z.string().transform(str => new Date(str)).refine(d => !isNaN(d.getTime()), { message: 'Invalid date' }).optional(),
+	transactionDate: z.string().transform(str => new Date(str)).refine(d => !Number.Number.isNaN(d.getTime()), { message: 'Invalid date' }).optional(),
 	notes: z.string().optional(),
 	metadata: z.record(z.unknown()).optional(),
 });
 
 export async function GET(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -29,14 +29,16 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const transaction = await TransactionService.getById(params.id, userId);
+		const transaction = await TransactionService.getById(id, userId);
 		if (!transaction) {
 			return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
 		}
 
 		return NextResponse.json({ transaction });
 	} catch (error) {
-		console.error('Error fetching transaction:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching transaction:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch transaction' },
 			{ status: 500 }
@@ -45,8 +47,8 @@ export async function GET(
 }
 
 export async function PUT(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -58,7 +60,7 @@ export async function PUT(
 		const validatedData = updateTransactionSchema.parse(body);
 
 		const transaction = await TransactionService.update({
-			id: params.id,
+			id: id,
 			userId,
 			...validatedData,
 		});
@@ -67,12 +69,14 @@ export async function PUT(
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Validation error', details: error.errors },
+				{ error: 'Validation error', details: error.issues },
 				{ status: 400 }
 			);
 		}
 
-		console.error('Error updating transaction:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error updating transaction:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update transaction' },
 			{ status: 500 }
@@ -81,8 +85,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -90,11 +94,13 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		await TransactionService.delete(params.id, userId);
+		await TransactionService.delete(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error deleting transaction:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error deleting transaction:', error);
 		return NextResponse.json(
 			{ error: 'Failed to delete transaction' },
 			{ status: 500 }

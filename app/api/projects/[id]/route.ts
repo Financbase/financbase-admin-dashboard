@@ -24,16 +24,17 @@ const updateProjectSchema = z.object({
 });
 
 export async function GET(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const project = await FreelanceHubService.getProjectById(params.id, userId);
+		const project = await FreelanceHubService.getProjectById(id, userId);
 
 		if (!project) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 });
@@ -41,7 +42,9 @@ export async function GET(
 
 		return NextResponse.json({ project });
 	} catch (error) {
-		console.error('Error fetching project:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching project:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch project' },
 			{ status: 500 }
@@ -50,10 +53,11 @@ export async function GET(
 }
 
 export async function PUT(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -69,18 +73,20 @@ export async function PUT(
 			dueDate: validatedData.dueDate ? new Date(validatedData.dueDate) : undefined,
 		};
 
-		const project = await FreelanceHubService.updateProject(params.id, userId, processedData);
+		const project = await FreelanceHubService.updateProject(id, userId, processedData);
 
 		return NextResponse.json({ project });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Validation error', details: error.errors },
+				{ error: 'Validation error', details: error.issues },
 				{ status: 400 }
 			);
 		}
 
-		console.error('Error updating project:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error updating project:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update project' },
 			{ status: 500 }

@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
  * POST /api/marketplace/revenue/process-billing
  * Process subscription billing (admin only)
  */
-export async function processBilling(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
 	try {
 		const { userId } = await auth();
 		if (!userId) {

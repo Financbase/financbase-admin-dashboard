@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/services/notification-service';
 
 export async function POST(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -12,8 +12,8 @@ export async function POST(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const notificationId = parseInt(params.id);
-		if (isNaN(notificationId)) {
+		const notificationId = parseInt(id);
+		if (Number.Number.isNaN(notificationId)) {
 			return NextResponse.json({ error: 'Invalid notification ID' }, { status: 400 });
 		}
 
@@ -26,14 +26,16 @@ export async function POST(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error marking notification as read:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error marking notification as read:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
 
 export async function DELETE(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -41,8 +43,8 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const notificationId = parseInt(params.id);
-		if (isNaN(notificationId)) {
+		const notificationId = parseInt(id);
+		if (Number.Number.isNaN(notificationId)) {
 			return NextResponse.json({ error: 'Invalid notification ID' }, { status: 400 });
 		}
 
@@ -55,7 +57,9 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error deleting notification:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error deleting notification:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

@@ -49,9 +49,11 @@ export const propertyIncome = pgTable("property_income", {
 	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(),
 	userId: text("user_id").notNull(),
 	source: text("source").notNull(), // 'rent', 'parking', 'laundry', 'other'
+	incomeType: text("income_type").notNull(), // 'rent', 'late_fee', 'pet_fee', 'parking', 'laundry', 'other'
 	amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
 	description: text("description"),
 	date: timestamp("date").notNull(),
+	paymentStatus: text("payment_status").default("pending"), // 'pending', 'received', 'late', 'missed'
 	isRecurring: boolean("is_recurring").default(true),
 	recurringFrequency: text("recurring_frequency"), // 'monthly', 'weekly', etc.
 	tenantId: uuid("tenant_id").references(() => tenants.id),
@@ -77,6 +79,8 @@ export const propertyValuations = pgTable("property_valuations", {
 export const tenants = pgTable("tenants", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: text("user_id").notNull(),
+	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }),
+	unitId: uuid("unit_id").references(() => propertyUnits.id),
 	firstName: text("first_name").notNull(),
 	lastName: text("last_name").notNull(),
 	email: text("email"),
@@ -89,6 +93,7 @@ export const tenants = pgTable("tenants", {
 	creditScore: integer("credit_score"),
 	backgroundCheckStatus: text("background_check_status").default("pending"), // 'pending', 'approved', 'rejected'
 	backgroundCheckDate: timestamp("background_check_date"),
+	status: text("status").default("active"), // 'active', 'inactive', 'evicted', 'notice'
 	notes: text("notes"),
 	isActive: boolean("is_active").default(true),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -122,6 +127,8 @@ export const leases = pgTable("leases", {
 	userId: text("user_id").notNull(),
 	leaseStartDate: timestamp("lease_start_date").notNull(),
 	leaseEndDate: timestamp("lease_end_date").notNull(),
+	startDate: timestamp("start_date").notNull(), // Alias for leaseStartDate
+	endDate: timestamp("end_date").notNull(), // Alias for leaseEndDate
 	monthlyRent: decimal("monthly_rent", { precision: 8, scale: 2 }).notNull(),
 	securityDeposit: decimal("security_deposit", { precision: 8, scale: 2 }).notNull(),
 	depositPaid: boolean("deposit_paid").default(false),
@@ -129,6 +136,7 @@ export const leases = pgTable("leases", {
 	depositReturnDate: timestamp("deposit_return_date"),
 	leaseTerms: jsonb("lease_terms"), // additional terms and conditions
 	specialClauses: text("special_clauses"),
+	status: text("status").default("active"), // 'active', 'expired', 'terminated', 'pending'
 	isActive: boolean("is_active").default(true),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),

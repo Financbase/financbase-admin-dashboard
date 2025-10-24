@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@clerk/nextjs/server";
 import { ReconciliationService } from "@/lib/reconciliation/reconciliation-service";
 
 /**
@@ -8,16 +8,16 @@ import { ReconciliationService } from "@/lib/reconciliation/reconciliation-servi
  */
 export async function GET(request: NextRequest) {
 	try {
-		const session = await auth();
+		const { userId } = await auth();
 
-		if (!session?.user?.id) {
+		if (!userId) {
 			return NextResponse.json(
 				{ error: "Authentication required" },
 				{ status: 401 }
 			);
 		}
 
-		const dashboardData = await ReconciliationService.getDashboardData(session.user.id);
+		const dashboardData = await ReconciliationService.getDashboardData(userId);
 
 		return NextResponse.json({
 			success: true,

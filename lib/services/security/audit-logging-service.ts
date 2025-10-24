@@ -141,7 +141,6 @@ export interface SecurityAlert {
 
 // Data retention policy
 interface RetentionPolicy {
-  eventType: AuditEventType;
   retentionDays: number;
   archiveAfterDays?: number;
   complianceRequired: ComplianceFramework[];

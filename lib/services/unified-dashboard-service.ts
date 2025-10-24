@@ -13,7 +13,8 @@ import {
 	transactions, 
 	clients, 
 	invoices, 
-	expenses 
+	expenses,
+	expenseCategories 
 } from '@/lib/db/schemas';
 import { eq, and, desc, sql, gte, lte } from 'drizzle-orm';
 
@@ -238,22 +239,22 @@ export async function getUnifiedMetrics(userId: string): Promise<UnifiedMetrics>
 			id: invoice.id,
 			clientName: invoice.clientName || 'Unknown Client',
 			amount: Number(invoice.amount),
-			status: invoice.status,
-			createdAt: invoice.createdAt.toISOString(),
+			status: invoice.status || 'draft',
+			createdAt: invoice.createdAt?.toISOString() || new Date().toISOString(),
 		})),
 		recentTransactions: recentTransactions.map(transaction => ({
 			id: transaction.id,
 			description: transaction.description || 'No description',
 			amount: Number(transaction.amount),
 			type: transaction.type,
-			createdAt: transaction.createdAt.toISOString(),
+			createdAt: transaction.createdAt?.toISOString() || new Date().toISOString(),
 		})),
 		recentProjects: recentProjects.map(project => ({
 			id: project.id,
 			name: project.name,
 			status: project.status,
 			progress: Number(project.progress),
-			updatedAt: project.updatedAt.toISOString(),
+			updatedAt: project.updatedAt?.toISOString() || new Date().toISOString(),
 		})),
 		recentCampaigns: recentCampaigns.map(campaign => ({
 			id: campaign.id,
@@ -326,12 +327,13 @@ async function getRevenueChartData(userId: string) {
 async function getExpenseBreakdownData(userId: string) {
 	const expenseData = await db
 		.select({
-			category: expenses.category,
+			category: expenseCategories.name,
 			amount: sql<number>`sum(${expenses.amount}::numeric)`,
 		})
 		.from(expenses)
+		.innerJoin(expenseCategories, eq(expenses.categoryId, expenseCategories.id))
 		.where(eq(expenses.userId, userId))
-		.groupBy(expenses.category);
+		.groupBy(expenseCategories.name);
 
 	return expenseData.map(item => ({
 		category: item.category,

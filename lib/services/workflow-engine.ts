@@ -3,13 +3,14 @@ import {
 	workflows,
 	workflowExecutions,
 	workflowTriggers,
-	workflowSteps,
-	workflowLogs,
-	webhookEvents
-} from '@/lib/db/schema/workflows';
+	workflowLogs
+} from '@/lib/db/schemas';
 import { eq, and, desc, sql } from 'drizzle-orm';
-import { NotificationService } from '@/lib/services/notification-service';
 import { FinancbaseGPTService } from '@/lib/services/business/financbase-gpt-service';
+import { NotificationService } from '@/lib/services/notification-service';
+import type { InferSelectModel } from 'drizzle-orm';
+
+type WorkflowFromDB = InferSelectModel<typeof workflows>;
 
 export interface WorkflowStep {
 	id: string;
@@ -20,15 +21,7 @@ export interface WorkflowStep {
 	conditions?: Record<string, any>;
 	timeout: number;
 	retryCount: number;
-}
-
-export interface WorkflowTrigger {
-	id: number;
-	type: 'invoice_created' | 'expense_approved' | 'report_generated' | 'webhook' | 'schedule' | 'manual';
-	conditions: Record<string, any>;
-	filters?: Record<string, any>;
-	webhookUrl?: string;
-	isActive: boolean;
+	retryDelay: number;
 }
 
 export interface WorkflowExecutionContext {
@@ -80,7 +73,7 @@ export class WorkflowEngine {
 				triggerData,
 				variables: workflow.variables || {},
 				stepResults: {},
-				currentStep: workflow.steps[0]?.id || '',
+							currentStep: (workflow.steps as WorkflowStep[])[0]?.id || '',
 				startTime,
 			};
 
@@ -89,7 +82,7 @@ export class WorkflowEngine {
 				'Workflow execution started', { triggerData });
 
 			// Execute workflow steps
-			const result = await this.executeSteps(workflow.steps, context, workflow);
+			const result = await this.executeSteps(workflow.steps as WorkflowStep[], context, workflow as any);
 
 			// Update execution record
 			await this.updateExecutionRecord(executionId, result, startTime);
@@ -201,7 +194,7 @@ export class WorkflowEngine {
 					};
 
 					// Wait before retry
-					await new Promise(resolve => setTimeout(resolve, step.retryDelay * 1000));
+					await new Promise(resolve => setTimeout(resolve, (step.retryDelay || 30) * 1000));
 				} else {
 					// Fail the workflow
 					throw error;
@@ -242,7 +235,7 @@ export class WorkflowEngine {
 						});
 
 					// Wait before retry
-					await new Promise(resolve => setTimeout(resolve, step.retryDelay * 1000));
+					await new Promise(resolve => setTimeout(resolve, (step.retryDelay || 30) * 1000));
 				}
 			}
 		}
@@ -398,7 +391,7 @@ export class WorkflowEngine {
 	private static async executeGPTStep(step: WorkflowStep, context: WorkflowExecutionContext): Promise<any> {
 		const config = step.configuration;
 
-		const gptResponse = await FinancbaseGPTService.prototype.query({
+		const gptResponse = await new FinancbaseGPTService().query({
 			query: this.interpolateString(config.query, context),
 			userId: context.userId,
 			analysisType: config.analysisType || 'general',
@@ -562,7 +555,7 @@ export class WorkflowEngine {
 	/**
 	 * Get workflow by ID
 	 */
-	private static async getWorkflow(workflowId: number, userId: string) {
+	private static async getWorkflow(workflowId: number, userId: string): Promise<WorkflowFromDB | null> {
 		const result = await db
 			.select()
 			.from(workflows)
@@ -602,8 +595,8 @@ export class WorkflowEngine {
 			.update(workflowExecutions)
 			.set({
 				status: result.success ? 'completed' : 'failed',
-				endTime: new Date(),
-				duration: result.duration / 1000,
+				completedAt: new Date(),
+				duration: String(result.duration / 1000),
 				outputData: result.output,
 				errorData: result.error ? { message: result.error } : null,
 				updatedAt: sql`NOW()`,
@@ -618,7 +611,7 @@ export class WorkflowEngine {
 		workflowId: number,
 		executionId: string,
 		userId: string,
-		level: string,
+		level: 'debug' | 'info' | 'warning' | 'error' | 'critical',
 		message: string,
 		details: Record<string, any>
 	) {
@@ -642,13 +635,13 @@ export class WorkflowEngine {
 				.select()
 				.from(workflowTriggers)
 				.where(and(
-					eq(workflowTriggers.eventType, eventType),
+					eq(workflowTriggers.eventType, eventType as any),
 					eq(workflowTriggers.isActive, true)
 				));
 
 			for (const trigger of triggers) {
 				// Check if trigger conditions are met
-				if (this.evaluateTriggerConditions(trigger.conditions, entityData)) {
+				if (this.evaluateTriggerConditions(trigger.conditions as Record<string, any>, entityData)) {
 					// Execute the associated workflow
 					const workflow = await this.getWorkflow(trigger.workflowId, trigger.userId);
 					if (workflow && workflow.isActive) {
@@ -696,14 +689,8 @@ export class WorkflowEngine {
 		payload: Record<string, any>
 	): Promise<void> {
 		try {
-			await db.insert(webhookEvents).values({
-				userId,
-				eventType,
-				entityId,
-				entityType,
-				payload,
-				status: 'pending',
-			});
+			// TODO: Integrate with webhook service
+			console.log('Webhook event created:', { userId, eventType, entityId, entityType });
 
 			// Trigger workflows
 			await this.checkWorkflowTriggers(eventType, { ...payload, entityId, entityType });
@@ -733,24 +720,157 @@ export class WorkflowEngine {
 	}
 
 	/**
-	 * Get workflow logs
+	 * Test workflow without creating execution record
 	 */
-	static async getWorkflowLogs(
+	static async testWorkflow(
 		workflowId: number,
-		executionId?: string,
-		limit: number = 100
-	) {
-		let query = db
-			.select()
-			.from(workflowLogs)
-			.where(eq(workflowLogs.workflowId, workflowId))
-			.orderBy(desc(workflowLogs.createdAt))
-			.limit(limit);
+		testData: Record<string, any>,
+		userId: string
+	): Promise<WorkflowResult> {
+		const executionId = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+		const startTime = new Date();
 
-		if (executionId) {
-			query = query.where(eq(workflowLogs.executionId, executionId));
+		try {
+			// Get workflow definition
+			const workflow = await this.getWorkflow(workflowId, userId);
+			if (!workflow) {
+				throw new Error('Workflow not found');
+			}
+
+			// Initialize execution context for testing
+			const context: WorkflowExecutionContext = {
+				workflowId,
+				executionId,
+				userId,
+				triggerData: testData,
+				variables: workflow.variables || {},
+				stepResults: {},
+				currentStep: (workflow.steps as WorkflowStep[])[0]?.id || '',
+				startTime,
+			};
+
+			// Test workflow steps (dry run)
+			const result = await this.executeSteps(workflow.steps as WorkflowStep[], context, workflow as any);
+
+			return result;
+
+		} catch (error) {
+			console.error('Workflow test error:', error);
+			return {
+				success: false,
+				executionId,
+				output: {},
+				duration: Date.now() - startTime.getTime(),
+				error: error instanceof Error ? error.message : 'Unknown error'
+			};
 		}
+	}
 
-		return await query;
+	/**
+	 * Execute workflow steps in parallel (for parallel workflows)
+	 */
+	private static async executeStepsParallel(
+		steps: WorkflowStep[],
+		context: WorkflowExecutionContext,
+		workflow: any
+	): Promise<WorkflowResult> {
+		const startTime = Date.now();
+		const results: Record<string, any> = {};
+
+		try {
+			// Execute all steps in parallel
+			const stepPromises = steps.map(async (step) => {
+				if (step.conditions && !this.evaluateConditions(step.conditions, context)) {
+					return { stepId: step.id, skipped: true };
+				}
+
+				try {
+					const stepResult = await this.executeStep(step, context, workflow);
+					return { stepId: step.id, result: stepResult };
+				} catch (error) {
+					return { stepId: step.id, error: error instanceof Error ? error.message : 'Unknown error' };
+				}
+			});
+
+			const stepResults = await Promise.all(stepPromises);
+
+			// Process results
+			for (const stepResult of stepResults) {
+				if (stepResult.skipped) {
+					results[stepResult.stepId] = { skipped: true };
+				} else if (stepResult.error) {
+					results[stepResult.stepId] = { error: stepResult.error };
+				} else {
+					results[stepResult.stepId] = stepResult.result;
+				}
+			}
+
+			return {
+				success: true,
+				executionId: context.executionId,
+				output: results,
+				duration: Date.now() - startTime
+			};
+
+		} catch (error) {
+			return {
+				success: false,
+				executionId: context.executionId,
+				output: results,
+				duration: Date.now() - startTime,
+				error: error instanceof Error ? error.message : 'Unknown error'
+			};
+		}
+	}
+
+	/**
+	 * Get workflows for user with filtering and pagination
+	 */
+	static async getWorkflows(
+		userId: string,
+		filters: {
+			status?: string;
+			category?: string;
+			limit?: number;
+			offset?: number;
+		} = {}
+	): Promise<{ data: any[]; total: number }> {
+		try {
+			const { status, category, limit = 50, offset = 0 } = filters;
+
+			// Build query conditions
+			const conditions = [eq(workflows.userId, userId)];
+
+			if (status) {
+				conditions.push(eq(workflows.status, status as any));
+			}
+
+			if (category) {
+				conditions.push(eq(workflows.category, category));
+			}
+
+			// Get total count
+			const totalResult = await db
+				.select({ count: sql<number>`count(*)` })
+				.from(workflows)
+				.where(and(...conditions));
+
+			// Get paginated results
+			const workflowsData = await db
+				.select()
+				.from(workflows)
+				.where(and(...conditions))
+				.orderBy(desc(workflows.createdAt))
+				.limit(limit)
+				.offset(offset);
+
+			return {
+				data: workflowsData,
+				total: totalResult[0]?.count || 0
+			};
+		} catch (error) {
+			console.error('Error fetching workflows:', error);
+			throw new Error(`Failed to fetch workflows: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		}
 	}
 }

@@ -4,14 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
-import { auditLogger } from '@/lib/services/security/audit-logging-service';
+import { auditLogger, AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
 
 // GET /api/bills - Get user's bills with filtering
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -22,50 +22,17 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // This would query the database using Drizzle ORM
-    // For now, return mock data
-    const mockBills = [
-      {
-        id: 'bill_1',
-        vendorId: 'vendor_1',
-        amount: 1250.00,
-        currency: 'USD',
-        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-        issueDate: new Date(),
-        invoiceNumber: 'INV-2025-001',
-        description: 'Monthly software license',
-        category: 'software',
-        status: 'approved',
-        priority: 'medium',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 'bill_2',
-        vendorId: 'vendor_2',
-        amount: 450.00,
-        currency: 'USD',
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        issueDate: new Date(),
-        invoiceNumber: 'OFF-2025-023',
-        description: 'Office supplies and equipment',
-        category: 'office_supplies',
-        status: 'pending_approval',
-        priority: 'high',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
-
-    const filteredBills = mockBills.filter(bill => {
-      if (status && bill.status !== status) return false;
-      if (vendorId && bill.vendorId !== vendorId) return false;
-      return true;
+    // Query the database using Drizzle ORM
+    const bills = await billPayService.getBills(userId, {
+      status: status || undefined,
+      vendorId: vendorId || undefined,
+      limit,
+      offset
     });
 
     return NextResponse.json({
-      bills: filteredBills.slice(offset, offset + limit),
-      total: filteredBills.length,
+      bills: bills.data,
+      total: bills.total,
       limit,
       offset
     });
@@ -82,7 +49,7 @@ export async function GET(request: NextRequest) {
 // POST /api/bills - Create new bill
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -110,20 +77,19 @@ export async function POST(request: NextRequest) {
       invoiceNumber,
       description,
       category,
-      priority,
-      status: 'draft'
+      priority
     });
 
     await auditLogger.logEvent({
       userId,
-      eventType: 'bill_created',
+      eventType: AuditEventType.API_ACCESS,
       action: 'bill_management',
       entityType: 'bill',
       entityId: bill.id,
       description: `Bill created: ${description} for ${formatCurrency(amount)}`,
-      riskLevel: 'low',
+      riskLevel: RiskLevel.LOW,
       metadata: { category, priority, vendorId },
-      complianceFlags: ['soc2']
+      complianceFlags: [ComplianceFramework.SOC2]
     });
 
     return NextResponse.json({ bill }, { status: 201 });

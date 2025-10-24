@@ -28,19 +28,69 @@ describe('/api/clients', () => {
   describe('GET /api/clients', () => {
     it('should return paginated clients successfully', async () => {
       const { auth } = await import('@clerk/nextjs/server');
-      vi.mocked(auth).mockResolvedValue({ userId: 'user-123' });
+      vi.mocked(auth).mockResolvedValue({ 
+        userId: 'user-123',
+        sessionClaims: {},
+        sessionId: 'session-123',
+        actor: null,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+        orgPermissions: [],
+        has: vi.fn(),
+        protect: vi.fn(),
+        redirectToSignIn: vi.fn()
+      } as any);
 
       const { ClientService } = await import('@/lib/services/client-service');
       const mockClients = [
         {
           id: 'client-1',
+          userId: 'user-123',
           companyName: 'Test Company 1',
           email: 'test1@company.com',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          contactName: 'John Doe',
+          phone: '+1234567890',
+          address: '123 Main St',
+          city: 'New York',
+          state: 'NY',
+          zipCode: '10001',
+          country: 'US',
+          currency: 'USD',
+          timezone: 'America/New_York',
+          notes: 'Test client',
+          tags: ['test'],
+          contractorId: null,
+          taxId: 'TAX123456',
+          paymentTerms: 'Net 30',
+          metadata: {},
         },
         {
           id: 'client-2',
+          userId: 'user-123',
           companyName: 'Test Company 2',
           email: 'test2@company.com',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          contactName: 'Jane Smith',
+          phone: '+1234567891',
+          address: '456 Oak Ave',
+          city: 'Los Angeles',
+          state: 'CA',
+          zipCode: '90210',
+          country: 'US',
+          currency: 'USD',
+          timezone: 'America/Los_Angeles',
+          notes: 'Test client 2',
+          tags: ['test'],
+          contractorId: null,
+          taxId: 'TAX789012',
+          paymentTerms: 'Net 15',
+          metadata: {},
         },
       ];
 
@@ -62,7 +112,19 @@ describe('/api/clients', () => {
 
     it('should handle search parameters', async () => {
       const { auth } = await import('@clerk/nextjs/server');
-      vi.mocked(auth).mockResolvedValue({ userId: 'user-123' });
+      vi.mocked(auth).mockResolvedValue({ 
+        userId: 'user-123',
+        sessionClaims: {},
+        sessionId: 'session-123',
+        actor: null,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+        orgPermissions: [],
+        has: vi.fn(),
+        protect: vi.fn(),
+        redirectToSignIn: vi.fn()
+      } as any);
 
       const { ClientService } = await import('@/lib/services/client-service');
       vi.mocked(ClientService.getAll).mockResolvedValue([]);
@@ -81,7 +143,19 @@ describe('/api/clients', () => {
 
     it('should return 401 when user is not authenticated', async () => {
       const { auth } = await import('@clerk/nextjs/server');
-      vi.mocked(auth).mockResolvedValue({ userId: null });
+      vi.mocked(auth).mockResolvedValue({ 
+        userId: null,
+        sessionClaims: null,
+        sessionId: null,
+        actor: null,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+        orgPermissions: [],
+        has: vi.fn(),
+        protect: vi.fn(),
+        redirectToSignIn: vi.fn()
+      } as any);
 
       const request = new NextRequest('http://localhost:3000/api/clients');
       const response = await GET(request);
@@ -93,7 +167,19 @@ describe('/api/clients', () => {
 
     it('should handle service errors', async () => {
       const { auth } = await import('@clerk/nextjs/server');
-      vi.mocked(auth).mockResolvedValue({ userId: 'user-123' });
+      vi.mocked(auth).mockResolvedValue({ 
+        userId: 'user-123',
+        sessionClaims: {},
+        sessionId: 'session-123',
+        actor: null,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+        orgPermissions: [],
+        has: vi.fn(),
+        protect: vi.fn(),
+        redirectToSignIn: vi.fn()
+      } as any);
 
       const { ClientService } = await import('@/lib/services/client-service');
       vi.mocked(ClientService.getAll).mockRejectedValue(new Error('Database error'));
@@ -110,14 +196,44 @@ describe('/api/clients', () => {
   describe('POST /api/clients', () => {
     it('should create a new client successfully', async () => {
       const { auth } = await import('@clerk/nextjs/server');
-      vi.mocked(auth).mockResolvedValue({ userId: 'user-123' });
+      vi.mocked(auth).mockResolvedValue({ 
+        userId: 'user-123',
+        sessionClaims: {},
+        sessionId: 'session-123',
+        actor: null,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+        orgPermissions: [],
+        has: vi.fn(),
+        protect: vi.fn(),
+        redirectToSignIn: vi.fn()
+      } as any);
 
       const { ClientService } = await import('@/lib/services/client-service');
       const mockClient = {
         id: 'client-123',
+        userId: 'user-123',
         companyName: 'New Company',
         email: 'new@company.com',
+        isActive: true,
         createdAt: new Date(),
+        updatedAt: new Date(),
+        contactName: 'New Contact',
+        phone: '+1234567890',
+        address: '123 New St',
+        city: 'New York',
+        state: 'NY',
+        zipCode: '10001',
+        country: 'US',
+        currency: 'USD',
+        timezone: 'America/New_York',
+        notes: 'New client',
+        tags: ['new'],
+        contractorId: null,
+        taxId: 'TAX123456',
+        paymentTerms: 'Net 30',
+        metadata: {},
       };
 
       vi.mocked(ClientService.create).mockResolvedValue(mockClient);
@@ -160,7 +276,19 @@ describe('/api/clients', () => {
 
     it('should return 400 for invalid request data', async () => {
       const { auth } = await import('@clerk/nextjs/server');
-      vi.mocked(auth).mockResolvedValue({ userId: 'user-123' });
+      vi.mocked(auth).mockResolvedValue({ 
+        userId: 'user-123',
+        sessionClaims: {},
+        sessionId: 'session-123',
+        actor: null,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+        orgPermissions: [],
+        has: vi.fn(),
+        protect: vi.fn(),
+        redirectToSignIn: vi.fn()
+      } as any);
 
       const invalidRequestBody = {
         // Missing required fields
@@ -192,7 +320,19 @@ describe('/api/clients', () => {
 
     it('should return 401 when user is not authenticated', async () => {
       const { auth } = await import('@clerk/nextjs/server');
-      vi.mocked(auth).mockResolvedValue({ userId: null });
+      vi.mocked(auth).mockResolvedValue({ 
+        userId: null,
+        sessionClaims: null,
+        sessionId: null,
+        actor: null,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+        orgPermissions: [],
+        has: vi.fn(),
+        protect: vi.fn(),
+        redirectToSignIn: vi.fn()
+      } as any);
 
       const requestBody = {
         companyName: 'Test Company',
@@ -216,7 +356,19 @@ describe('/api/clients', () => {
 
     it('should handle service errors', async () => {
       const { auth } = await import('@clerk/nextjs/server');
-      vi.mocked(auth).mockResolvedValue({ userId: 'user-123' });
+      vi.mocked(auth).mockResolvedValue({ 
+        userId: 'user-123',
+        sessionClaims: {},
+        sessionId: 'session-123',
+        actor: null,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+        orgPermissions: [],
+        has: vi.fn(),
+        protect: vi.fn(),
+        redirectToSignIn: vi.fn()
+      } as any);
 
       const { ClientService } = await import('@/lib/services/client-service');
       vi.mocked(ClientService.create).mockRejectedValue(new Error('Database error'));

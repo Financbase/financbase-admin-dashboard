@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@clerk/nextjs/server";
 import { ReconciliationService } from "@/lib/reconciliation/reconciliation-service";
 import { db } from "@/lib/db";
 import { reconciliationRules } from "@/lib/db/schemas/reconciliation.schema";
@@ -11,9 +11,9 @@ import { eq, and } from "drizzle-orm";
  */
 export async function GET(request: NextRequest) {
 	try {
-		const session = await auth();
+		const { userId } = await auth();
 
-		if (!session?.user?.id) {
+		if (!userId) {
 			return NextResponse.json(
 				{ error: "Authentication required" },
 				{ status: 401 }
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 		const { searchParams } = new URL(request.url);
 		const accountId = searchParams.get("accountId");
 
-		const rules = await ReconciliationService.getActiveRules(session.user.id, accountId || undefined);
+		const rules = await ReconciliationService.getActiveRules(userId, accountId || undefined);
 
 		return NextResponse.json({
 			success: true,
@@ -45,9 +45,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
 	try {
-		const session = await auth();
+		const { userId } = await auth();
 
-		if (!session?.user?.id) {
+		if (!userId) {
 			return NextResponse.json(
 				{ error: "Authentication required" },
 				{ status: 401 }
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		const newRule = await ReconciliationService.createRule({
-			userId: session.user.id,
+			userId,
 			accountId,
 			name,
 			description,

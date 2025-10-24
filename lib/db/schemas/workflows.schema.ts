@@ -113,18 +113,7 @@ export const workflowTemplates = pgTable('workflow_templates', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-// Webhook events table (for webhook triggers)
-export const webhookEvents = pgTable('webhook_events', {
-  id: serial('id').primaryKey(),
-  userId: text('user_id').notNull(),
-  eventType: text('event_type').notNull(),
-  entityId: text('entity_id').notNull(),
-  entityType: text('entity_type').notNull(),
-  payload: jsonb('payload').notNull(),
-  status: text('status').notNull().default('pending'), // pending, processed, failed
-  processedAt: timestamp('processed_at'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+// Note: webhookEvents table moved to webhooks.schema.ts to avoid conflicts
 
 // Relations
 export const workflowsRelations = relations(workflows, ({ many }) => ({
@@ -198,9 +187,4 @@ export const workflowLogsIndexes = {
   createdAt: 'workflow_logs_created_at_idx',
 };
 
-export const webhookEventsIndexes = {
-  userId: 'webhook_events_user_id_idx',
-  eventType: 'webhook_events_event_type_idx',
-  status: 'webhook_events_status_idx',
-  createdAt: 'webhook_events_created_at_idx',
-};
+// Note: webhookEvents indexes moved to webhooks.schema.ts

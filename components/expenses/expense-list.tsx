@@ -56,7 +56,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { formatDistanceToNow } from 'date-fns';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface Expense {
 	id: number;
@@ -136,10 +136,17 @@ export function ExpenseList() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['expenses'] });
 			queryClient.invalidateQueries({ queryKey: ['expense-stats'] });
-			toast.success('Expense approved');
+			toast({
+				title: 'Success',
+				description: 'Expense approved',
+			});
 		},
 		onError: () => {
-			toast.error('Failed to approve expense');
+			toast({
+				title: 'Error',
+				description: 'Failed to approve expense',
+				variant: 'destructive',
+			});
 		},
 	});
 
@@ -161,10 +168,17 @@ export function ExpenseList() {
 			queryClient.invalidateQueries({ queryKey: ['expense-stats'] });
 			setRejectDialogOpen(false);
 			setRejectReason('');
-			toast.success('Expense rejected');
+			toast({
+				title: 'Success',
+				description: 'Expense rejected',
+			});
 		},
 		onError: () => {
-			toast.error('Failed to reject expense');
+			toast({
+				title: 'Error',
+				description: 'Failed to reject expense',
+				variant: 'destructive',
+			});
 		},
 	});
 
@@ -181,10 +195,17 @@ export function ExpenseList() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['expenses'] });
 			queryClient.invalidateQueries({ queryKey: ['expense-stats'] });
-			toast.success('Expense deleted');
+			toast({
+				title: 'Success',
+				description: 'Expense deleted',
+			});
 		},
 		onError: () => {
-			toast.error('Failed to delete expense');
+			toast({
+				title: 'Error',
+				description: 'Failed to delete expense',
+				variant: 'destructive',
+			});
 		},
 	});
 

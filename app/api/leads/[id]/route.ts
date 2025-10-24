@@ -44,8 +44,8 @@ const convertToClientSchema = z.object({
 });
 
 export async function GET(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -53,7 +53,7 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const lead = await LeadManagementService.getLeadById(params.id, userId);
+		const lead = await LeadManagementService.getLeadById(id, userId);
 
 		if (!lead) {
 			return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
@@ -61,7 +61,9 @@ export async function GET(
 
 		return NextResponse.json({ lead });
 	} catch (error) {
-		console.error('Error fetching lead:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching lead:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch lead' },
 			{ status: 500 }
@@ -70,8 +72,8 @@ export async function GET(
 }
 
 export async function PUT(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -86,7 +88,7 @@ export async function PUT(
 			// Update lead status
 			const validatedData = updateStatusSchema.parse(body);
 			const lead = await LeadManagementService.updateLeadStatus(
-				params.id,
+				id,
 				userId,
 				validatedData.status,
 				validatedData.notes
@@ -96,7 +98,7 @@ export async function PUT(
 			// Convert lead to client
 			const validatedData = convertToClientSchema.parse(body);
 			const result = await LeadManagementService.convertLeadToClient(
-				params.id,
+				id,
 				userId,
 				validatedData
 			);
@@ -111,18 +113,20 @@ export async function PUT(
 				expectedCloseDate: validatedData.expectedCloseDate ? new Date(validatedData.expectedCloseDate) : undefined,
 			};
 
-			const lead = await LeadManagementService.updateLead(params.id, userId, processedData);
+			const lead = await LeadManagementService.updateLead(id, userId, processedData);
 			return NextResponse.json({ lead });
 		}
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Validation error', details: error.errors },
+				{ error: 'Validation error', details: error.issues },
 				{ status: 400 }
 			);
 		}
 
-		console.error('Error updating lead:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error updating lead:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update lead' },
 			{ status: 500 }

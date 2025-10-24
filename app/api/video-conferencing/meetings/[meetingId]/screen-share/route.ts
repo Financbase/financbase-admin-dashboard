@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(screenShareSessions);
 	} catch (error) {
-		console.error('Error fetching screen share sessions:', error);
+		// eslint-disable-next-line no-console
+    console.error('Error fetching screen share sessions:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -70,7 +71,8 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json(session, { status: 201 });
 	} catch (error) {
-		console.error('Error starting screen share:', error);
+		// eslint-disable-next-line no-console
+    console.error('Error starting screen share:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -95,7 +97,8 @@ export async function DELETE(request: NextRequest) {
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error stopping screen share:', error);
+		// eslint-disable-next-line no-console
+    console.error('Error stopping screen share:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

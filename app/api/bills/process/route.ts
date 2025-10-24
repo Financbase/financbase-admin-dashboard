@@ -4,14 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
-import { auditLogger } from '@/lib/services/security/audit-logging-service';
+import { auditLogger, AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
 
 // POST /api/bills/process - Process uploaded document
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -50,12 +50,12 @@ export async function POST(request: NextRequest) {
     // Log document processing
     await auditLogger.logEvent({
       userId,
-      eventType: 'document_processed',
+      eventType: AuditEventType.AI_CATEGORIZATION,
       action: 'document_processing',
       entityType: 'bill',
       entityId: result.id,
       description: `Document processed: ${documentType} with ${Math.round(result.confidence * 100)}% confidence`,
-      riskLevel: 'low',
+      riskLevel: RiskLevel.LOW,
       metadata: {
         documentType,
         confidence: result.confidence,
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
         fileSize: file.size,
         processingTime: result.processingTime
       },
-      complianceFlags: ['soc2']
+      complianceFlags: [ComplianceFramework.SOC2]
     });
 
     return NextResponse.json({
@@ -77,13 +77,13 @@ export async function POST(request: NextRequest) {
 
     await auditLogger.logEvent({
       userId: 'unknown', // Will be set from auth if available
-      eventType: 'document_processing_failed',
+      eventType: AuditEventType.SECURITY_VIOLATION,
       action: 'document_processing',
       entityType: 'system',
       description: `Document processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      riskLevel: 'medium',
+      riskLevel: RiskLevel.MEDIUM,
       metadata: { error: error instanceof Error ? error.message : 'Unknown error' },
-      complianceFlags: ['soc2']
+      complianceFlags: [ComplianceFramework.SOC2]
     });
 
     return NextResponse.json(
@@ -94,9 +94,13 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/bills/process/status/[id] - Get processing status
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { userId } = getAuth(request);
+    const { id } = await params;
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -107,7 +111,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       status: 'completed',
       progress: 100,
       result: {
-        id: params.id,
+        id: id,
         confidence: 0.95,
         extractedData: {
           vendor: 'Sample Vendor',

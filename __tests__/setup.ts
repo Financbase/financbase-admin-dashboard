@@ -6,6 +6,10 @@
 import { vi } from 'vitest';
 import React from 'react';
 import '@testing-library/jest-dom';
+import dotenv from 'dotenv';
+
+// Load environment variables for tests
+dotenv.config({ path: '.env.local' });
 
 // Add React to global scope for JSX support
 global.React = React;
@@ -93,29 +97,29 @@ vi.mock('@tanstack/react-query', () => ({
   QueryClientProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-// Mock database
-vi.mock('@/lib/db', () => ({
-  db: {
-    insert: vi.fn(),
-    select: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-    query: {
-      clients: {
-        findFirst: vi.fn(),
-        findMany: vi.fn(),
-      },
-      leads: {
-        findFirst: vi.fn(),
-        findMany: vi.fn(),
-      },
-      transactions: {
-        findFirst: vi.fn(),
-        findMany: vi.fn(),
-      },
-    },
-  },
-}));
+// Mock database for unit tests, but allow real database for integration tests
+// vi.mock('@/lib/db', () => ({
+//   db: {
+//     insert: vi.fn(),
+//     select: vi.fn(),
+//     update: vi.fn(),
+//     delete: vi.fn(),
+//     query: {
+//       clients: {
+//         findFirst: vi.fn(),
+//         findMany: vi.fn(),
+//       },
+//       leads: {
+//         findFirst: vi.fn(),
+//         findMany: vi.fn(),
+//       },
+//       transactions: {
+//         findFirst: vi.fn(),
+//         findMany: vi.fn(),
+//       },
+//     },
+//   },
+// }));
 
 // Mock services
 vi.mock('@/lib/services/client-service', () => ({

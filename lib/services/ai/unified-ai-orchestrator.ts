@@ -589,20 +589,34 @@ Provide response in JSON format:
 
     return sources;
   }
+
+  /**
+   * Fallback categorization when AI providers fail
+   */
+  private fallbackCategorization(transactionData: TransactionData): CategorizationResult {
+    const startTime = Date.now();
+
+    return {
+      category: 'other',
       confidence: 0.5,
-      sources: ['system_fallback'],
-      timestamp: new Date(),
-      model: 'fallback',
-      provider: AIProvider.OPENAI
-    },
-    rules: [],
-    metadata: {
-      processingTime: Date.now() - startTime,
-      model: 'fallback',
-      provider: AIProvider.OPENAI,
-      version: '1.0'
-    }
-  };
+      explanation: {
+        reasoning: 'Fallback categorization due to AI provider failure',
+        evidence: ['Transaction description analysis', 'Amount pattern matching'],
+        confidence: 0.5,
+        sources: ['system_fallback'],
+        timestamp: new Date(),
+        model: 'fallback',
+        provider: AIProvider.OPENAI
+      },
+      rules: [],
+      metadata: {
+        processingTime: Date.now() - startTime,
+        model: 'fallback',
+        provider: AIProvider.OPENAI,
+        version: '1.0'
+      }
+    };
+  }
   private async retrieveExplanation(
     decisionId: string,
     decisionType: AICapability

@@ -32,8 +32,8 @@ const updateMetricsSchema = z.object({
 });
 
 export async function GET(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -41,7 +41,7 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const campaign = await AdboardService.getCampaignById(params.id, userId);
+		const campaign = await AdboardService.getCampaignById(id, userId);
 
 		if (!campaign) {
 			return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
@@ -49,7 +49,9 @@ export async function GET(
 
 		return NextResponse.json({ campaign });
 	} catch (error) {
-		console.error('Error fetching campaign:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching campaign:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch campaign' },
 			{ status: 500 }
@@ -58,8 +60,8 @@ export async function GET(
 }
 
 export async function PUT(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -73,7 +75,7 @@ export async function PUT(
 		if (action === 'update_metrics') {
 			// Update campaign metrics
 			const validatedData = updateMetricsSchema.parse(body);
-			const campaign = await AdboardService.updateCampaignMetrics(params.id, userId, validatedData);
+			const campaign = await AdboardService.updateCampaignMetrics(id, userId, validatedData);
 			return NextResponse.json({ campaign });
 		} else {
 			// Update campaign details
@@ -86,18 +88,20 @@ export async function PUT(
 				endDate: validatedData.endDate ? new Date(validatedData.endDate) : undefined,
 			};
 
-			const campaign = await AdboardService.updateCampaign(params.id, userId, processedData);
+			const campaign = await AdboardService.updateCampaign(id, userId, processedData);
 			return NextResponse.json({ campaign });
 		}
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Validation error', details: error.errors },
+				{ error: 'Validation error', details: error.issues },
 				{ status: 400 }
 			);
 		}
 
-		console.error('Error updating campaign:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error updating campaign:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update campaign' },
 			{ status: 500 }

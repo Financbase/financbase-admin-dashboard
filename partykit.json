@@ -1,5 +1,5 @@
 {
   "name": "financbase-partykit",
-  "main": "server.ts",
+  "main": "partykit/server.ts",
   "compatibilityDate": "2024-01-01"
 }

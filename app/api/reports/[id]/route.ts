@@ -14,7 +14,7 @@ import { ReportService } from '@/lib/services/report-service';
  */
 export async function GET(
 	_req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const { userId } = await auth();
@@ -23,7 +23,8 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(params.id);
+		const { id: idParam } = await params;
+		const id = parseInt(idParam);
 		const report = await ReportService.getById(id, userId);
 
 		if (!report) {
@@ -32,7 +33,9 @@ export async function GET(
 
 		return NextResponse.json(report);
 	} catch (error) {
-		console.error('Error fetching report:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error fetching report:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch report' },
 			{ status: 500 }
@@ -55,14 +58,16 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(params.id);
+		const id = parseInt(id);
 		const body = await req.json();
 
 		const report = await ReportService.update(id, userId, body);
 
 		return NextResponse.json(report);
 	} catch (error) {
-		console.error('Error updating report:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error updating report:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update report' },
 			{ status: 500 }
@@ -85,12 +90,14 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(params.id);
+		const id = parseInt(id);
 		await ReportService.delete(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error deleting report:', error);
+		 
+    // eslint-disable-next-line no-console
+    console.error('Error deleting report:', error);
 		return NextResponse.json(
 			{ error: 'Failed to delete report' },
 			{ status: 500 }

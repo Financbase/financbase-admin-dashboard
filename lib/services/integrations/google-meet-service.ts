@@ -426,93 +426,64 @@ export class GoogleMeetService {
 	static revokeAccess(): void {
 		this.accessToken = null;
 		this.refreshToken = null;
-interface GoogleWebhookPayload {
-	id: string;
-	kind: string;
-	etag?: string;
-	status: string;
-	htmlLink: string;
-	created: string;
-	updated: string;
-	summary: string;
-	description?: string;
-	location?: string;
-	start: {
-		dateTime: string;
-		timeZone: string;
-	};
-	end: {
-		dateTime: string;
-		timeZone: string;
-	};
-	organizer: {
-		email: string;
-		displayName?: string;
-	};
- * Google Meet Service
- */
-class GoogleMeetService {
-  // ... (rest of the class remains the same)
+	}
 
-  /**
-   * Make authenticated request to Google API
-   */
-  private static async makeRequest<T = Record<string, unknown>>(url: string, options: RequestInit = {}): Promise<T> {
-    if (!this.accessToken) {
-      throw new Error('Google access token not set. Please authenticate first.');
-    }
+	private static async makeRequest<T = Record<string, unknown>>(url: string, options: RequestInit = {}): Promise<T> {
+		if (!this.accessToken) {
+			throw new Error('Google access token not set. Please authenticate first.');
+		}
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
+		const response = await fetch(url, {
+			...options,
+			headers: {
+				Authorization: `Bearer ${this.accessToken}`,
+				'Content-Type': 'application/json',
+				...options.headers,
+			},
+		});
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorText}`);
-    }
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorText}`);
+		}
 
-    return response.json();
-  }
+		return response.json();
+	}
 
-  /**
-   * Handle Google Calendar webhook events
-   */
-  static async handleWebhookEvent(event: string, payload: GoogleWebhookPayload): Promise<void> {
-    switch (event) {
-      case 'calendar.events.created':
-        await this.handleEventCreated(payload);
-        break;
-      case 'calendar.events.updated':
-        await this.handleEventUpdated(payload);
-        break;
-      case 'calendar.events.deleted':
-        await this.handleEventDeleted(payload);
-        break;
-      default:
-        logger.info('Unhandled Google Calendar webhook event', { event });
-    }
-  }
+	/**
+	 * Handle Google Calendar webhook events
+	 */
+	static async handleWebhookEvent(event: string, payload: GoogleWebhookPayload): Promise<void> {
+		switch (event) {
+			case 'calendar.events.created':
+				await this.handleEventCreated(payload);
+				break;
+			case 'calendar.events.updated':
+				await this.handleEventUpdated(payload);
+				break;
+			case 'calendar.events.deleted':
+				await this.handleEventDeleted(payload);
+				break;
+			default:
+				logger.info('Unhandled Google Calendar webhook event', { event });
+		}
+	}
 
-  private static async handleEventCreated(payload: GoogleWebhookPayload): Promise<void> {
-    logger.info('Google Calendar event created', payload);
-    // Sync with Financbase meetings
-    // Send notifications
-  }
+	private static async handleEventCreated(payload: GoogleWebhookPayload): Promise<void> {
+		logger.info('Google Calendar event created', payload);
+		// Create meeting in Financbase
+		// Send notifications
+	}
 
-  private static async handleEventUpdated(payload: GoogleWebhookPayload): Promise<void> {
-    logger.info('Google Calendar event updated', payload);
-    // Update meeting in Financbase
-    // Resend notifications if needed
-  }
+	private static async handleEventUpdated(payload: GoogleWebhookPayload): Promise<void> {
+		logger.info('Google Calendar event updated', payload);
+		// Update meeting in Financbase
+		// Resend notifications if needed
+	}
 
-  private static async handleEventDeleted(payload: GoogleWebhookPayload): Promise<void> {
-    logger.info('Google Calendar event deleted', payload);
-    // Remove meeting from Financbase
-    // Send cancellation notifications
-  }
+	private static async handleEventDeleted(payload: GoogleWebhookPayload): Promise<void> {
+		logger.info('Google Calendar event deleted', payload);
+		// Remove meeting from Financbase
+		// Send cancellation notifications
+	}
 }

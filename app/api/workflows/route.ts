@@ -1,138 +1,83 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { WorkflowEngine } from '@/lib/services/workflow-engine';
+import { db } from '@/lib/db';
+import { workflows } from '@/lib/db/schemas';
+import { eq, desc, and, sql } from 'drizzle-orm';
+import { auth } from '@clerk/nextjs/server';
 
 export async function GET(request: NextRequest) {
-	try {
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-		// Mock workflows data
-		const workflows = [
-			{
-				id: 1,
-				name: 'Invoice Approval Process',
-				description: 'Automatically route invoices over $1000 for manager approval',
-				category: 'invoice',
-				type: 'sequential',
-				status: 'active',
-				isActive: true,
-				steps: [
-					{
-						id: 'check_amount',
-						name: 'Check Invoice Amount',
-						type: 'condition',
-						configuration: { threshold: 1000 }
-					},
-					{
-						id: 'send_approval',
-						name: 'Send for Approval',
-						type: 'notification',
-						configuration: {
-							title: 'Invoice Requires Approval',
-							message: 'Invoice {{invoiceNumber}} for ${{amount}} requires your approval'
-						}
-					},
-					{
-						id: 'log_approval',
-						name: 'Log Approval',
-						type: 'action',
-						configuration: { action: 'log_approval' }
-					}
-				],
-				triggers: [
-					{
-						id: 1,
-						type: 'invoice_created',
-						conditions: { amount: { operator: 'greater_than', value: 1000 } }
-					}
-				],
-				executionCount: 15,
-				successRate: 95.5,
-				lastExecutionAt: '2024-11-15T10:30:00Z',
-				createdAt: '2024-11-01T00:00:00Z',
-			},
-			{
-				id: 2,
-				name: 'Overdue Invoice Reminders',
-				description: 'Send automated reminders for overdue invoices',
-				category: 'invoice',
-				type: 'sequential',
-				status: 'active',
-				isActive: true,
-				steps: [
-					{
-						id: 'check_overdue',
-						name: 'Check Overdue Status',
-						type: 'condition',
-						configuration: { daysOverdue: { operator: 'greater_than', value: 0 } }
-					},
-					{
-						id: 'send_reminder',
-						name: 'Send Reminder Email',
-						type: 'email',
-						configuration: {
-							subject: 'Overdue Invoice Reminder - {{invoiceNumber}}',
-							template: 'overdue_reminder'
-						}
-					}
-				],
-				triggers: [
-					{
-						id: 2,
-						type: 'schedule',
-						conditions: { schedule: '0 9 * * 1' } // Every Monday at 9 AM
-					}
-				],
-				executionCount: 8,
-				successRate: 100,
-				lastExecutionAt: '2024-11-11T09:00:00Z',
-				createdAt: '2024-10-15T00:00:00Z',
-			},
-		];
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
 
-		return NextResponse.json(workflows);
-	} catch (error) {
-		console.error('Error fetching workflows:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-	}
+    let whereConditions = [eq(workflows.userId, userId)];
+
+    if (category) {
+      whereConditions.push(eq(workflows.category, category));
+    }
+
+    if (status) {
+      whereConditions.push(eq(workflows.status, status as any));
+    }
+
+    if (search) {
+      // Add search functionality using ILIKE
+      whereConditions.push(sql`${workflows.name} ILIKE ${`%${search}%`} OR ${workflows.description} ILIKE ${`%${search}%`}`);
+    }
+
+    const userWorkflows = await db
+      .select()
+      .from(workflows)
+      .where(and(...whereConditions))
+      .orderBy(desc(workflows.createdAt));
+
+    return NextResponse.json(userWorkflows);
+  } catch (error) {
+    console.error('Error fetching workflows:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
-	try {
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-		const body = await request.json();
-		const { name, description, category, type, steps, triggers } = body;
+    const body = await request.json();
+    const { name, description, category, type, steps, triggers, variables, settings } = body;
 
-		if (!name || !category || !type) {
-			return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-		}
+    if (!name || !category) {
+      return NextResponse.json({ error: 'Name and category are required' }, { status: 400 });
+    }
 
-		// Mock new workflow creation
-		const newWorkflow = {
-			id: Date.now(),
-			name,
-			description: description || '',
-			category,
-			type,
-			status: 'draft',
-			isActive: false,
-			steps: steps || [],
-			triggers: triggers || [],
-			executionCount: 0,
-			successRate: 0,
-			createdAt: new Date().toISOString(),
-		};
+    const newWorkflow = await db.insert(workflows).values({
+      userId,
+      name,
+      description,
+      category,
+      type: type || 'sequential',
+      status: 'draft',
+      isActive: false,
+      steps: steps || [],
+      triggers: triggers || [],
+      variables: variables || {},
+      settings: settings || {},
+      executionCount: 0,
+      successCount: 0,
+      failureCount: 0,
+    }).returning();
 
-		return NextResponse.json(newWorkflow, { status: 201 });
-	} catch (error) {
-		console.error('Error creating workflow:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-	}
+    return NextResponse.json(newWorkflow[0], { status: 201 });
+  } catch (error) {
+    console.error('Error creating workflow:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

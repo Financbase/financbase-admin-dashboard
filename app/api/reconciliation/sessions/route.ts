@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@clerk/nextjs/server";
 import { ReconciliationService } from "@/lib/reconciliation/reconciliation-service";
 import { AIMatchingEngine } from "@/lib/reconciliation/ai-matching-engine";
 import { db } from "@/lib/db";
 import { reconciliationSessions, reconciliationMatches } from "@/lib/db/schemas/reconciliation.schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 /**
  * GET /api/reconciliation/sessions
@@ -12,9 +12,9 @@ import { eq } from "drizzle-orm";
  */
 export async function GET(request: NextRequest) {
 	try {
-		const session = await auth();
+		const { userId } = await auth();
 
-		if (!session?.user?.id) {
+		if (!userId) {
 			return NextResponse.json(
 				{ error: "Authentication required" },
 				{ status: 401 }
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 		const sessions = await db
 			.select()
 			.from(reconciliationSessions)
-			.where(eq(reconciliationSessions.userId, session.user.id))
+			.where(eq(reconciliationSessions.userId, userId))
 			.orderBy(desc(reconciliationSessions.createdAt));
 
 		return NextResponse.json({
@@ -47,9 +47,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
 	try {
-		const session = await auth();
+		const { userId } = await auth();
 
-		if (!session?.user?.id) {
+		if (!userId) {
 			return NextResponse.json(
 				{ error: "Authentication required" },
 				{ status: 401 }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		const newSession = await ReconciliationService.createReconciliationSession({
-			userId: session.user.id,
+			userId,
 			accountId,
 			name,
 			description,
