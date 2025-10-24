@@ -6,7 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
-import { auditLogger, AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
+import { auditLogger } from '@/lib/services/security/audit-logging-service';
+import type { AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
 
 // POST /api/bills/process - Process uploaded document
 export async function POST(request: NextRequest) {
@@ -19,9 +20,6 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const documentType = formData.get('documentType') as string || 'auto';
-    const vendorId = formData.get('vendorId') as string;
-    const category = formData.get('category') as string;
-    const priority = formData.get('priority') as string || 'medium';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -45,7 +43,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Process document with AI
-    const result = await billPayService.processDocument(userId, file, documentType as any);
+    const result = await billPayService.processDocument(
+      userId,
+      file,
+      documentType as 'invoice' | 'receipt' | 'bill' | 'statement'
+    );
 
     // Log document processing
     await auditLogger.logEvent({
@@ -95,7 +97,7 @@ export async function POST(request: NextRequest) {
 
 // GET /api/bills/process/status/[id] - Get processing status
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

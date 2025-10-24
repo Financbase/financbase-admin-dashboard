@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
  * GET /api/search/suggestions
  * Get search suggestions/autocomplete
  */
-export async function GET_SUGGESTIONS(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
 	try {
 		const { searchParams } = new URL(request.url);
 		const query = searchParams.get('q') || '';

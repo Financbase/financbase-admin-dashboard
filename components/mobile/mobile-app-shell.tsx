@@ -5,15 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Menu, Download, X, Smartphone } from 'lucide-react';
-import { useState } from 'react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the mobile navigation component to prevent SSR hydration issues
+const MobileNavigationContent = dynamic(() => Promise.resolve(MobileNavigation), {
+	ssr: false,
+	loading: () => <div className="min-h-screen bg-background">{/* Loading placeholder */}</div>
+});
 
 interface MobileNavigationProps {
 	children: React.ReactNode;
 }
 
-export function MobileNavigation({ children }: MobileNavigationProps) {
+function MobileNavigation({ children }: MobileNavigationProps) {
 	const { isMobileOrTablet, screenSize, orientation } = useDeviceInfo();
-	const { isOpen, setIsOpen, toggle, close } = useMobileNavigation();
+	const { isOpen, setIsOpen } = useMobileNavigation();
 	const { showInstallPrompt, installApp, dismissPrompt } = useAppInstallPrompt();
 
 	if (!isMobileOrTablet) {
@@ -100,7 +106,7 @@ export function MobileAppShell({ children }: { children: React.ReactNode }) {
 	const { isMobileOrTablet } = useDeviceInfo();
 
 	if (isMobileOrTablet) {
-		return <MobileNavigation>{children}</MobileNavigation>;
+		return <MobileNavigationContent>{children}</MobileNavigationContent>;
 	}
 
 	return <>{children}</>;

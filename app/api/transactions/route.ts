@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 		}
 
 		const { searchParams } = new URL(request.url);
-		const type = searchParams.get('type') as 'income' | 'expense' | 'transfer' | 'payment' | null;
+		const type = searchParams.get('type') as 'income' | 'expense' | 'transfer' | 'payment' | undefined;
 		const status = searchParams.get('status') || undefined;
 		const category = searchParams.get('category') || undefined;
 		const startDateParam = searchParams.get('startDate');

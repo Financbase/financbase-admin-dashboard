@@ -1,126 +1,143 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
-import { type NextRequest, NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
 
-const isProtectedRoute = (request: NextRequest) => {
-  const pathname = request.nextUrl.pathname;
+// Create next-intl middleware for locale handling
+const intlMiddleware = createMiddleware({
+  locales: ['en', 'es', 'fr', 'de'],
+  defaultLocale: 'en',
+  localeDetection: false,
+  localePrefix: 'never'
+});
 
-  // Protect dashboard routes
-  if (pathname.startsWith("/dashboard")) {
-    return true;
-  }
+// Create Clerk route matcher for protected routes
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/api/accounts(.*)',
+  '/api/ai(.*)',
+  '/api/analytics(.*)',
+  '/api/approval-workflows(.*)',
+  '/api/bills(.*)',
+  '/api/byok(.*)',
+  '/api/campaigns(.*)',
+  '/api/clients(.*)',
+  '/api/contact(.*)',
+  '/api/dashboard(.*)',
+  '/api/dashboards(.*)',
+  '/api/developer(.*)',
+  '/api/email(.*)',
+  '/api/expenses(.*)',
+  '/api/financial-intelligence(.*)',
+  '/api/help(.*)',
+  '/api/integrations(.*)',
+  '/api/investor-portal(.*)',
+  '/api/invoices(.*)',
+  '/api/leads(.*)',
+  '/api/marketplace(.*)',
+  '/api/monitoring(.*)',
+  '/api/notifications(.*)',
+  '/api/onboarding(.*)',
+  '/api/payment-methods(.*)',
+  '/api/payments(.*)',
+  '/api/performance(.*)',
+  '/api/projects(.*)',
+  '/api/reconciliation(.*)',
+  '/api/reports(.*)',
+  '/api/search(.*)',
+  '/api/security(.*)',
+  '/api/settings(.*)',
+  '/api/time-entries(.*)',
+  '/api/transactions(.*)',
+  '/api/unified-dashboard(.*)',
+  '/api/uploadthing(.*)',
+  '/api/vendors(.*)',
+  '/api/video-conferencing(.*)',
+  '/api/webhooks(.*)',
+  '/api/workflows(.*)',
+]);
 
-  // Protect API routes except public endpoints
-  if (pathname.startsWith("/api/")) {
-    // Allow public access to health check for monitoring
-    if (pathname === "/api/health") {
-      return false;
-    }
-
-    // Allow test routes for development/testing
-    if (pathname.startsWith("/api/test-")) {
-      return false;
-    }
-
-    // Protect all other API routes (including transactions)
-    return true;
-  }
-
-  return false;
-};
+// Routes that are always allowed (public or auth-related)
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/auth(.*)',
+  '/onboarding(.*)',
+  '/api/health(.*)',
+  '/api/test(.*)',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/sign-out(.*)',
+]);
 
 export default clerkMiddleware(async (auth, request) => {
+  // Temporarily disable next-intl middleware to fix routing
+  // const intlResponse = intlMiddleware(request as any);
+  // if (intlResponse) {
+  //   return intlResponse;
+  // }
+
   // Test mode bypass - allow access when TEST_MODE is enabled
   if (process.env.TEST_MODE === 'true' || process.env.NODE_ENV === 'test') {
     console.log('🧪 Test mode enabled - bypassing authentication for:', request.nextUrl.pathname);
     return NextResponse.next();
   }
 
-  // Development mode bypass for auth pages
-  if (process.env.NODE_ENV === 'development' && 
-      (request.nextUrl.pathname.startsWith('/auth/') || 
-       request.nextUrl.pathname === '/')) {
+  // Development mode bypass for auth pages and public API routes
+  if (process.env.NODE_ENV === 'development' &&
+      (request.nextUrl.pathname.startsWith('/auth/') ||
+       request.nextUrl.pathname === '/' ||
+       request.nextUrl.pathname.startsWith('/api/health') ||
+       request.nextUrl.pathname.startsWith('/api/test'))) {
     return NextResponse.next();
   }
 
-  if (isProtectedRoute(request)) {
-    const { userId } = await auth();
+  // Skip authentication for health and test API routes
+  if (request.nextUrl.pathname.startsWith('/api/health') ||
+      request.nextUrl.pathname.startsWith('/api/test-')) {
+    return NextResponse.next();
+  }
 
-    // For API routes, return explicit 401 JSON instead of redirect
-    if (request.nextUrl.pathname.startsWith("/api/")) {
-      if (!userId) {
-        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  // Allow public routes
+  if (isPublicRoute(request)) {
+    return NextResponse.next();
+  }
+
+  // Protect routes that require authentication
+  if (isProtectedRoute(request)) {
+    const { userId } = await auth.protect();
+    
+    // Check if user needs onboarding
+    if (userId && request.nextUrl.pathname.startsWith('/dashboard')) {
+      try {
+        // Check onboarding status
+        const response = await fetch(`${request.nextUrl.origin}/api/onboarding`, {
+          headers: {
+            'Authorization': `Bearer ${await auth.getToken()}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // If no onboarding exists or it's not completed, redirect to onboarding
+          if (!data.onboarding || data.onboarding.userOnboarding.status !== 'completed') {
+            return NextResponse.redirect(new URL('/onboarding', request.url));
+          }
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        // Continue to dashboard if check fails
       }
-    } else {
-      // For non-API routes, use Clerk's default protection
-      await auth.protect();
     }
   }
 
-  // Simple CORS headers for performance
-  const response = NextResponse.next();
-
-  // Comprehensive security headers
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("X-XSS-Protection", "1; mode=block");
-  response.headers.set("Referrer-Policy", "origin-when-cross-origin");
-
-  // Content Security Policy - comprehensive for all services
-  const cspValue = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' *.clerk.accounts.dev *.clerk.dev *.sentry.io *.posthog.com js.stripe.com *.uploadthing.com *.algolia.net *.algolianet.com",
-    "worker-src 'self' blob: *.clerk.accounts.dev *.clerk.dev",
-    "style-src 'self' 'unsafe-inline' fonts.googleapis.com *.uploadthing.com",
-    "img-src 'self' data: https: blob: *.clerk.accounts.dev *.clerk.dev *.uploadthing.com *.algolia.net *.algolianet.com *.stripe.com *.posthog.com",
-    "font-src 'self' fonts.gstatic.com fonts.googleapis.com",
-    "connect-src 'self' *.clerk.accounts.dev *.clerk.dev *.sentry.io *.posthog.com api.openai.com api.resend.com *.algolia.net *.algolianet.com *.uploadthing.com api.stripe.com *.anthropic.com *.google.com *.partykit.dev wss: https:",
-    "frame-src 'self' *.clerk.accounts.dev *.clerk.dev js.stripe.com *.uploadthing.com",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
-    "block-all-mixed-content",
-    "upgrade-insecure-requests"
-  ].join("; ");
-
-  response.headers.set("Content-Security-Policy", cspValue);
-
-  // Strict Transport Security - only set if HTTPS
-  if (request.headers.get("x-forwarded-proto") === "https" || request.nextUrl.protocol === "https:") {
-    response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-  }
-
-  // Permissions Policy
-  const permissionsPolicy = [
-    "camera=()",
-    "microphone=()",
-    "geolocation=()",
-    "interest-cohort=()",
-    "payment=(self)",
-    "usb=()"
-  ].join(", ");
-
-  response.headers.set("Permissions-Policy", permissionsPolicy);
-
-  // Remove server information disclosure
-  response.headers.set("X-Powered-By", "");
-
-  // Security headers for file downloads
-  if (request.nextUrl.pathname.includes("/api/")) {
-    response.headers.set("X-Download-Options", "noopen");
-  }
-
-  return response;
+  return NextResponse.next();
 });
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!_next/static|_next/image|favicon.ico).*)"
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
 };

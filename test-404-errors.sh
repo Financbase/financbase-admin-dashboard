@@ -166,6 +166,8 @@ additional_routes=(
     "/workflows:Workflows"
     "/integrations:Integrations"
     "/webhooks:Webhooks"
+    "/profile:Profile (redirects to settings/profile)"
+    "/security-dashboard:Security Dashboard"
 )
 
 for route_info in "${additional_routes[@]}"; do

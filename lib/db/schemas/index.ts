@@ -69,6 +69,9 @@ export * from "./api-keys.schema";
 // Subscription & Billing System
 export * from "./billing.schema";
 
+// Notifications System
+export * from "../schema/notifications";
+
 // Workflows and automation
 export * from "./workflows.schema";
 
@@ -95,6 +98,9 @@ export * from "./dashboard.schema";
 
 // Security & Compliance System
 export * from "./security.schema";
+
+// Onboarding System
+export * from "./onboarding.schema";
 
 // Integrations System
 export * from "./integrations.schema";

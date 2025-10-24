@@ -1,10 +1,9 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+// import { NextIntlClientProvider } from 'next-intl'
+// import { getMessages } from 'next-intl/server'
 import { Providers } from './providers'
 import { MobileAppShell } from '@/components/mobile/mobile-app-shell'
-import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
-import { locales } from '@/i18n'
 import { Toaster } from '@/components/ui/toaster'
 import './globals.css'
 
@@ -22,10 +21,6 @@ export const metadata: Metadata = {
 	metadataBase: new URL('https://financbase.com'),
 	alternates: {
 		canonical: '/',
-		languages: {
-			'en-US': '/',
-			...Object.fromEntries(locales.map(locale => [locale, `/${locale}`]))
-		}
 	},
 	openGraph: {
 		type: 'website',
@@ -70,12 +65,6 @@ export const metadata: Metadata = {
 		address: false,
 		telephone: false,
 	},
-	viewport: {
-		width: 'device-width',
-		initialScale: 1,
-		maximumScale: 5,
-		userScalable: true,
-	},
 	robots: {
 		index: true,
 		follow: true,
@@ -89,23 +78,13 @@ export const metadata: Metadata = {
 	},
 }
 
-export default async function RootLayout({
+export default function RootLayout({
 	children,
-	params: { locale }
 }: {
 	children: React.ReactNode
-	params: { locale: string }
 }) {
-	// Ensure that the incoming `locale` parameter is valid
-	if (!locales.includes(locale as typeof locales[number])) {
-		locale = 'en';
-	}
-
-	// Providing all messages to the client side
-	const messages = await getMessages();
-
 	return (
-		<html lang={locale} suppressHydrationWarning>
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<link rel="preconnect" href="https://fonts.googleapis.com" />
 				<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -118,15 +97,20 @@ export default async function RootLayout({
 				<meta name="msapplication-config" content="/browserconfig.xml" />
 			</head>
 			<body className={inter.className}>
-				<NextIntlClientProvider messages={messages}>
+				<Providers>
 					<MobileAppShell>
-						<Providers>
-							{children}
-							<Toaster />
-						</Providers>
+						{children}
+						<Toaster />
 					</MobileAppShell>
-				</NextIntlClientProvider>
+				</Providers>
 			</body>
 		</html>
 	)
+}
+
+export const viewport: Viewport = {
+	width: 'device-width',
+	initialScale: 1,
+	maximumScale: 5,
+	userScalable: true,
 }

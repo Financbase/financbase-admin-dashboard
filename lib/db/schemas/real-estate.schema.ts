@@ -158,6 +158,9 @@ export const propertyROI = pgTable("property_roi", {
 	capRate: decimal("cap_rate", { precision: 6, scale: 4 }).notNull(),
 	cashOnCashReturn: decimal("cash_on_cash_return", { precision: 6, scale: 4 }).notNull(),
 	appreciation: decimal("appreciation", { precision: 10, scale: 2 }).notNull(),
+	// Missing properties that services are trying to access
+	occupancyRate: decimal("occupancy_rate", { precision: 5, scale: 2 }),
+	totalReturn: decimal("total_return", { precision: 15, scale: 2 }),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

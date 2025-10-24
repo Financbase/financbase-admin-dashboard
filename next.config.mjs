@@ -1,3 +1,7 @@
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./i18n.ts');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	reactStrictMode: true,
@@ -31,7 +35,7 @@ const nextConfig = {
 	},
 
 	// Redirects for backward compatibility
-	async redirects() {
+	redirects: async () => {
 		return [
 			{
 				source: '/auth/signin',
@@ -62,4 +66,4 @@ const nextConfig = {
 	output: 'standalone',
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

@@ -1,7 +1,13 @@
 import Link from 'next/link'
 import { FinancbaseLogo } from '@/components/ui/financbase-logo'
 import { Button } from '@/components/ui/button'
-import Hero from '@/components/home/hero'
+import PremiumHero from '@/components/home/premium-hero'
+import PremiumSocialProof from '@/components/home/premium-social-proof'
+import PremiumUSPs from '@/components/home/premium-usps'
+import PremiumInteractiveDemo from '@/components/home/premium-interactive-demo'
+import PersonaShowcase from '@/components/home/persona-showcase'
+import PricingPreview from '@/components/home/pricing-preview'
+import FAQ from '@/components/home/faq'
 
 export default function Home() {
 	return (
@@ -52,24 +58,30 @@ export default function Home() {
 
       {/* Main Content */}
       <main>
-        <Hero />
+        <PremiumHero />
+        <PremiumSocialProof />
+        <PremiumUSPs />
+        <PremiumInteractiveDemo />
+        <PersonaShowcase />
+        <PricingPreview />
+        <FAQ />
 
-        {/* Simple CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+        {/* Final CTA Section */}
+        <section className="py-20 bg-gradient-to-br from-primary to-primary/80">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Ready to Transform Your Financial Operations?
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-white/90 mb-8">
               Join thousands of businesses already using Financbase to make smarter financial decisions.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="px-8 py-4 text-lg">
+              <Button asChild size="lg" className="px-8 py-4 text-lg bg-white text-primary hover:bg-gray-100">
                 <Link href="/auth/sign-up">
                   Start Free Trial
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="px-8 py-4 text-lg">
+              <Button asChild variant="outline" size="lg" className="px-8 py-4 text-lg border-white text-white hover:bg-white hover:text-primary">
                 <Link href="/about">
                   Learn More
                 </Link>
@@ -83,10 +95,10 @@ export default function Home() {
       <footer className="bg-gray-900 text-gray-300 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <FinancbaseLogo size="md" className="text-blue-400" />
-              </div>
+                  <div>
+                    <div className="flex items-center space-x-2 mb-4">
+                      <FinancbaseLogo size="md" variant="white" />
+                    </div>
               <p className="text-sm">AI-powered financial intelligence for modern businesses.</p>
             </div>
             <div>

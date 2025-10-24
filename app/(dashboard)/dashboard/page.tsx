@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
 
 interface DashboardOverview {
 	revenue: {
@@ -140,6 +141,9 @@ export default function DashboardPage() {
 
 	return (
 		<div className="flex-1 space-y-4 p-4 md:p-6 lg:p-8">
+			{/* Onboarding Checklist */}
+			<OnboardingChecklist />
+			
 			<div className="flex items-center justify-between space-y-2">
 				<h2 className="text-3xl font-bold tracking-tight">
 					Financial Dashboard

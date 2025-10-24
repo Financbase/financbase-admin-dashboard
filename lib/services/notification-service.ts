@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { notifications, notificationPreferences } from '@/lib/db/schema/notifications';
+import { notifications, notificationPreferences } from '@/lib/db/schemas/index';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { sendNotificationEmail } from './email-templates';
 

@@ -4,6 +4,10 @@ import { neon } from '@neondatabase/serverless';
 import { drizzle as drizzleNode } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from './schemas/index';
+import * as legacySchema from './schema/index';
+
+// Merge both schemas to ensure all tables are available
+const mergedSchema = { ...schema, ...legacySchema };
 
 // Determine which driver to use based on environment and URL
 const getDatabaseDriver = () => {
@@ -35,7 +39,7 @@ const createDatabaseConnection = () => {
 	if (driver === 'neon') {
 		// Use Neon serverless driver for production/serverless environments
 		const sql = neon(databaseUrl);
-		return drizzle(sql, { schema });
+		return drizzle(sql, { schema: mergedSchema });
 	} else {
 		// Use pg.Pool for local development and traditional PostgreSQL
 		const pool = new Pool({
@@ -51,7 +55,7 @@ const createDatabaseConnection = () => {
 			console.error('Unexpected error on idle client', err);
 		});
 
-		return drizzleNode(pool, { schema });
+		return drizzleNode(pool, { schema: mergedSchema });
 	}
 };
 

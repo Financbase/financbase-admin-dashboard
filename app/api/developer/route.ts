@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 		}
 
 		// Get API keys with usage statistics
-		const result = await sql.query(`
+		const result = await sql`
 			SELECT
 				ak.*,
 				COALESCE(usage.monthly_requests, 0) as monthly_usage,
@@ -24,12 +24,12 @@ export async function GET(request: NextRequest) {
 			FROM developer.api_keys ak
 			LEFT JOIN developer.api_usage usage ON ak.id = usage.api_key_id
 				AND usage.created_at >= DATE_TRUNC('month', CURRENT_DATE)
-			WHERE ak.user_id = $1 AND ak.status != 'deleted'
+			WHERE ak.user_id = ${userId} AND ak.status != 'deleted'
 			GROUP BY ak.id, usage.monthly_requests, ak.monthly_limit
 			ORDER BY ak.created_at DESC
-		`, [userId]);
+		`;
 
-		return NextResponse.json(result.rows);
+		return NextResponse.json(result);
 	} catch (error) {
 		console.error('Error fetching API keys:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -59,11 +59,11 @@ export async function POST(request: NextRequest) {
 		const keyId = generateRandomString(16);
 
 		// Store API key
-		await sql.query(`
+		await sql`
 			INSERT INTO developer.api_keys
 			(id, user_id, name, key, permissions, monthly_limit, status, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-		`, [keyId, userId, name, apiKey, JSON.stringify(permissions), monthlyLimit, 'active']);
+			VALUES (${keyId}, ${userId}, ${name}, ${apiKey}, ${JSON.stringify(permissions)}, ${monthlyLimit}, ${'active'}, NOW(), NOW())
+		`;
 
 		return NextResponse.json({
 			id: keyId,
@@ -82,93 +82,10 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * DELETE /api/developer/api-keys/[id]
- * Delete an API key
- */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-	try {
-		const { id } = await params;
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
-
-		const keyId = id;
-
-		// Verify ownership
-		const keyResult = await sql.query(`
-			SELECT * FROM developer.api_keys
-			WHERE id = $1 AND user_id = $2 AND status != 'deleted'
-		`, [keyId, userId]);
-
-		if (keyResult.rows.length === 0) {
-			return NextResponse.json({ error: 'API key not found' }, { status: 404 });
-		}
-
-		// Soft delete
-		await sql.query(`
-			UPDATE developer.api_keys
-			SET status = 'deleted', updated_at = NOW()
-			WHERE id = $1
-		`, [keyId]);
-
-		return NextResponse.json({ message: 'API key deleted successfully' });
-
-	} catch (error) {
-		console.error('Error deleting API key:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-	}
-}
-
-/**
- * POST /api/developer/api-keys/[id]/revoke
- * Revoke an API key
- */
-export async function DELETE(
-	request: NextRequest,
-	{ params }: { params: Promise<{ id: string }> }
-) {
-	try {
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
-
-		const keyId = id;
-
-		// Verify ownership
-		const keyResult = await sql.query(`
-			SELECT * FROM developer.api_keys
-			WHERE id = $1 AND user_id = $2 AND status = 'active'
-		`, [keyId, userId]);
-
-		if (keyResult.rows.length === 0) {
-			return NextResponse.json({ error: 'API key not found or already revoked' }, { status: 404 });
-		}
-
-		// Revoke key
-		await sql.query(`
-			UPDATE developer.api_keys
-			SET status = 'revoked', updated_at = NOW()
-			WHERE id = $1
-		`, [keyId]);
-
-		return NextResponse.json({ message: 'API key revoked successfully' });
-
-	} catch (error) {
-		console.error('Error revoking API key:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-	}
-}
-
-/**
  * GET /api/developer/usage
  * Get API usage statistics
  */
-export async function getUsage(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
 	try {
 		const { userId } = await auth();
 		if (!userId) {
@@ -179,7 +96,7 @@ export async function getUsage(request: NextRequest) {
 		const days = parseInt(searchParams.get('days') || '30');
 
 		// Get usage data for the last N days
-		const result = await sql.query(`
+		const result = await sql`
 			SELECT
 				DATE(usage.created_at) as date,
 				COUNT(*) as requests,
@@ -187,13 +104,13 @@ export async function getUsage(request: NextRequest) {
 				AVG(EXTRACT(EPOCH FROM (usage.completed_at - usage.created_at)) * 1000) as avg_response_time
 			FROM developer.api_usage usage
 			JOIN developer.api_keys ak ON usage.api_key_id = ak.id
-			WHERE ak.user_id = $1
+			WHERE ak.user_id = ${userId}
 				AND usage.created_at >= CURRENT_DATE - INTERVAL '${days} days'
 			GROUP BY DATE(usage.created_at)
 			ORDER BY date DESC
-		`, [userId]);
+		`;
 
-		return NextResponse.json(result.rows);
+		return NextResponse.json(result);
 
 	} catch (error) {
 		console.error('Error fetching usage data:', error);
@@ -205,7 +122,7 @@ export async function getUsage(request: NextRequest) {
  * POST /api/developer/usage
  * Record API usage (called by API middleware)
  */
-export async function recordUsage(request: NextRequest) {
+export async function PUT(request: NextRequest) {
 	try {
 		const body = await request.json();
 		const { apiKey, endpoint, method, statusCode, responseTime, error } = body;
@@ -215,32 +132,32 @@ export async function recordUsage(request: NextRequest) {
 		}
 
 		// Find API key
-		const keyResult = await sql.query(`
+		const keyResult = await sql`
 			SELECT id, user_id FROM developer.api_keys
-			WHERE key = $1 AND status = 'active'
-		`, [apiKey]);
+			WHERE key = ${apiKey} AND status = 'active'
+		`;
 
-		if (keyResult.rows.length === 0) {
+		if (keyResult.length === 0) {
 			return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
 		}
 
-		const keyId = keyResult.rows[0].id;
+		const keyId = keyResult[0].id;
 
 		// Record usage
-		await sql.query(`
+		await sql`
 			INSERT INTO developer.api_usage
 			(api_key_id, endpoint, method, status_code, response_time, error, created_at, completed_at)
-			VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-		`, [keyId, endpoint, method, statusCode, responseTime, error || null]);
+			VALUES (${keyId}, ${endpoint}, ${method}, ${statusCode}, ${responseTime}, ${error || null}, NOW(), NOW())
+		`;
 
 		// Check rate limits (simplified)
 		const today = new Date().toISOString().split('T')[0];
-		const dailyUsage = await sql.query(`
+		const dailyUsage = await sql`
 			SELECT COUNT(*) as count FROM developer.api_usage
-			WHERE api_key_id = $1 AND DATE(created_at) = $2
-		`, [keyId, today]);
+			WHERE api_key_id = ${keyId} AND DATE(created_at) = ${today}
+		`;
 
-		if (parseInt(dailyUsage.rows[0].count) > 1000) { // Example daily limit
+		if (parseInt(dailyUsage[0].count) > 1000) { // Example daily limit
 			return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
 		}
 

@@ -50,7 +50,7 @@ describe('/api/workflows', () => {
       mockDb.select.mockReturnValue({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue(mockWorkflows),
+            orderBy: jest.fn().mockReturnValue(mockWorkflows),
           }),
         }),
       })

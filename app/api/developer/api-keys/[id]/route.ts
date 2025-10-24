@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { sql } from '@/lib/neon';
+import { sql } from '@/lib/db';
 
 /**
  * GET /api/developer/api-keys/[id]
@@ -11,6 +11,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -53,9 +54,10 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await routeParams;
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -83,35 +85,35 @@ export async function PATCH(
 		if (name !== undefined) {
 			paramCount++;
 			updates.push(`name = $${paramCount}`);
-			push(name);
+			params.push(name);
 		}
 
 		if (permissions !== undefined) {
 			paramCount++;
 			updates.push(`permissions = $${paramCount}`);
-			push(JSON.stringify(permissions));
+			params.push(JSON.stringify(permissions));
 		}
 
 		if (monthlyLimit !== undefined) {
 			paramCount++;
 			updates.push(`monthly_limit = $${paramCount}`);
-			push(monthlyLimit);
+			params.push(monthlyLimit);
 		}
 
 		if (status !== undefined) {
 			paramCount++;
 			updates.push(`status = $${paramCount}`);
-			push(status);
+			params.push(status);
 		}
 
 		if (updates.length > 0) {
 			// Always update updated_at
 			paramCount++;
 			updates.push(`updated_at = $${paramCount}`);
-			push(new Date());
+			params.push(new Date());
 
 			// Add key ID
-			push(keyId);
+			params.push(keyId);
 
 			await sql.query(`
 				UPDATE developer.api_keys
@@ -138,7 +140,7 @@ export async function PATCH(
 		return NextResponse.json(updatedResult.rows[0]);
 
 	} catch (error) {
-		 
+
     // eslint-disable-next-line no-console
     console.error('Error updating API key:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -181,9 +183,51 @@ export async function DELETE(
 		return NextResponse.json({ message: 'API key deleted successfully' });
 
 	} catch (error) {
-		 
+
     // eslint-disable-next-line no-console
     console.error('Error deleting API key:', error);
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+	}
+}
+
+/**
+ * POST /api/developer/api-keys/[id]/revoke
+ * Revoke an API key
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+	try {
+		const { id } = await params;
+		const { userId } = await auth();
+		if (!userId) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
+
+		const keyId = id;
+
+		// Verify ownership
+		const keyResult = await sql.query(`
+			SELECT * FROM developer.api_keys
+			WHERE id = $1 AND user_id = $2 AND status = 'active'
+		`, [keyId, userId]);
+
+		if (keyResult.rows.length === 0) {
+			return NextResponse.json({ error: 'API key not found or already revoked' }, { status: 404 });
+		}
+
+		// Revoke key
+		await sql.query(`
+			UPDATE developer.api_keys
+			SET status = 'revoked', updated_at = NOW()
+			WHERE id = $1
+		`, [keyId]);
+
+		return NextResponse.json({ message: 'API key revoked successfully' });
+
+	} catch (error) {
+		console.error('Error revoking API key:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

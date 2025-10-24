@@ -53,6 +53,7 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		const lead = await LeadManagementService.getLeadById(id, userId);
 
 		if (!lead) {
@@ -81,6 +82,7 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		const body = await request.json();
 		const action = body.action;
 

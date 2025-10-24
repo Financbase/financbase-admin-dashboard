@@ -8,26 +8,20 @@ import { motion } from "framer-motion";
 import {
 	Activity,
 	BarChart3,
-	Bell,
-	BookOpen,
 	Bot,
 	Brain,
 	Briefcase,
 	Building2,
-	Calendar,
 	ChevronDown,
 	ChevronRight,
 	CreditCard,
 	DollarSign,
 	FileText,
 	Filter,
-	Globe,
 	HelpCircle,
 	Home,
-	Key,
 	LayoutDashboard,
 	Link2,
-	LogOut,
 	Megaphone,
 	Menu,
 	MessageSquare,
@@ -45,7 +39,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface EnhancedSidebarProps {
 	collapsed?: boolean;
@@ -511,13 +505,13 @@ export function EnhancedSidebar({
 					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
 						{user?.name?.charAt(0) || "U"}
 					</div>
-					{!collapsed && (
+					{!collapsed && user && (
 						<div className="flex-1 min-w-0">
-							<p className="text-sm font-medium truncate">{user?.name || "User"}</p>
+							<p className="text-sm font-medium truncate">{user.name}</p>
 							<p className="text-xs text-muted-foreground truncate">
-								{user?.email || "user@example.com"}
+								{user.email}
 							</p>
-							{user?.role && (
+							{user.role && (
 								<Badge variant="secondary" className="text-xs mt-1">
 									{user.role}
 								</Badge>

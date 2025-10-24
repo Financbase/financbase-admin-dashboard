@@ -5,18 +5,21 @@ A comprehensive financial management platform with advanced automation, integrat
 ## 🚀 Features
 
 ### Core Business Modules
+
 - **Freelancer Hub**: Project management, time tracking, client management
 - **Real Estate Platform**: Property management, rental income tracking, ROI analysis
 - **Financial Management**: Invoicing, expense tracking, payment processing
 - **Analytics & Reporting**: Advanced dashboards, custom reports, business intelligence
 
 ### Tier 3: Platform Features
+
 - **Workflows & Automations**: Visual drag-and-drop workflow builder with triggers, actions, and conditions
 - **Webhooks System**: Event-driven architecture with retry logic and delivery tracking
 - **Integrations**: OAuth-based connections to Stripe, Slack, QuickBooks, Xero, Google, Microsoft
 - **Monitoring**: Real-time system health, performance metrics, alerting, and error tracking
 
 ### Tier 4: Supporting Features
+
 - **Marketplace & Plugins**: Extensible plugin system with marketplace and SDK
 - **Help & Documentation**: Comprehensive help center with search, video tutorials, and support tickets
 - **Advanced Features**: Custom dashboard builder, advanced reporting, data import/export
@@ -38,22 +41,26 @@ A comprehensive financial management platform with advanced automation, integrat
 ## 📦 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-org/financbase-admin-dashboard.git
    cd financbase-admin-dashboard
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    ```
-   
+
    Fill in the required environment variables:
+
    ```env
    # Database
    DATABASE_URL="postgresql://username:password@host:port/database"
@@ -76,12 +83,14 @@ A comprehensive financial management platform with advanced automation, integrat
    ```
 
 4. **Set up the database**
+
    ```bash
    npm run db:generate
    npm run db:push
    ```
 
 5. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -89,26 +98,31 @@ A comprehensive financial management platform with advanced automation, integrat
 ## 🧪 Testing
 
 ### Unit Tests
+
 ```bash
 npm run test:unit
 ```
 
 ### Integration Tests
+
 ```bash
 npm run test:integration
 ```
 
 ### E2E Tests
+
 ```bash
 npm run test:e2e
 ```
 
 ### Performance Tests
+
 ```bash
 npm run test:performance
 ```
 
 ### All Tests with Coverage
+
 ```bash
 npm run test:coverage
 ```
@@ -116,12 +130,14 @@ npm run test:coverage
 ## 🚀 Deployment
 
 ### Production Build
+
 ```bash
 npm run build
 npm start
 ```
 
 ### Environment Setup
+
 1. Set up production database (Neon PostgreSQL)
 2. Configure environment variables
 3. Set up Redis for caching
@@ -129,7 +145,9 @@ npm start
 5. Set up integration API keys
 
 ### CI/CD Pipeline
+
 The project includes GitHub Actions workflows for:
+
 - Automated testing (unit, integration, E2E, performance)
 - Code coverage reporting
 - Security scanning
@@ -138,6 +156,7 @@ The project includes GitHub Actions workflows for:
 ## 📚 API Documentation
 
 ### Workflows API
+
 - `GET /api/workflows` - List workflows
 - `POST /api/workflows` - Create workflow
 - `GET /api/workflows/[id]` - Get workflow
@@ -147,6 +166,7 @@ The project includes GitHub Actions workflows for:
 - `POST /api/workflows/[id]/test` - Test workflow
 
 ### Webhooks API
+
 - `GET /api/webhooks` - List webhooks
 - `POST /api/webhooks` - Create webhook
 - `GET /api/webhooks/[id]` - Get webhook
@@ -155,6 +175,7 @@ The project includes GitHub Actions workflows for:
 - `POST /api/webhooks/[id]/test` - Test webhook
 
 ### Integrations API
+
 - `GET /api/integrations` - List available integrations
 - `GET /api/integrations/connections` - List user connections
 - `POST /api/integrations/connections` - Create connection
@@ -163,12 +184,14 @@ The project includes GitHub Actions workflows for:
 ## 🔧 Development
 
 ### Code Style
+
 - ESLint for linting
 - Prettier for formatting
 - Husky for git hooks
 - Lint-staged for pre-commit checks
 
 ### Database Migrations
+
 ```bash
 # Generate migration
 npm run db:generate
@@ -181,6 +204,7 @@ npm run db:studio
 ```
 
 ### Performance Monitoring
+
 - Real-time performance metrics
 - Database query optimization
 - Cache hit rate monitoring
@@ -189,12 +213,14 @@ npm run db:studio
 ## 📈 Performance Metrics
 
 ### Target Performance
+
 - API response time: < 200ms (95th percentile)
 - Error rate: < 0.1%
 - Uptime: > 99.9%
 - Test coverage: > 80%
 
 ### Monitoring
+
 - System health dashboard
 - Performance metrics
 - Error tracking
@@ -203,17 +229,20 @@ npm run db:studio
 ## 🔒 Security
 
 ### Authentication
+
 - Multi-factor authentication (MFA)
 - Session management
 - Password policies
 
 ### Compliance
+
 - GDPR compliance
 - SOC2 compliance
 - Audit logging
 - Data retention policies
 
 ### Security Features
+
 - OAuth 2.0 integration
 - HMAC signature verification
 - Rate limiting
@@ -222,12 +251,14 @@ npm run db:studio
 ## 🌍 Internationalization
 
 ### Supported Languages
+
 - English (en)
 - Spanish (es)
 - French (fr)
 - German (de)
 
 ### Features
+
 - Dynamic language switching
 - Currency formatting
 - Date/time formatting
@@ -236,12 +267,14 @@ npm run db:studio
 ## 📊 Analytics
 
 ### Business Metrics
+
 - Revenue tracking
 - Expense analysis
 - Profit margins
 - Growth metrics
 
 ### System Metrics
+
 - Performance monitoring
 - Error rates
 - User engagement
@@ -269,18 +302,21 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🗺️ Roadmap
 
 ### v2.1 (Q2 2024)
+
 - Advanced workflow templates
 - Enhanced integration marketplace
 - Mobile app support
 - Advanced analytics
 
 ### v2.2 (Q3 2024)
+
 - AI-powered insights
 - Advanced automation
 - Custom field support
 - Enhanced reporting
 
 ### v3.0 (Q4 2024)
+
 - Multi-tenant architecture
 - Advanced security features
 - Enterprise integrations
