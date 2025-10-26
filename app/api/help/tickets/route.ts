@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       offset
     );
 
-    return NextResponse.json(tickets);
+    return NextResponse.json({ tickets });
   } catch (error) {
     console.error('Error fetching support tickets:', error);
     return NextResponse.json({ 

@@ -1,17 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
-  BarChart3, 
-  Users, 
-  DollarSign, 
-  TrendingUp,
   Workflow,
   Webhook,
-  Integration,
+  Plug,
   Monitor,
   Store,
   HelpCircle,
@@ -23,7 +19,7 @@ import {
 } from 'lucide-react'
 
 export default function TestPage() {
-  const [testResults, setTestResults] = useState<any[]>([])
+  const [testResults, setTestResults] = useState<Array<{endpoint: string, status: string | number, success: boolean, statusText?: string, error?: string}>>([])
   const [isLoading, setIsLoading] = useState(false)
 
   const testFeatures = [
@@ -43,7 +39,7 @@ export default function TestPage() {
     },
     {
       name: 'Integrations',
-      icon: Integration,
+      icon: Plug,
       status: 'completed',
       description: 'OAuth flows for Stripe, Slack, QuickBooks, Xero',
       color: 'bg-purple-500'
@@ -155,10 +151,10 @@ export default function TestPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {testFeatures.map((feature, index) => {
+          {testFeatures.map((feature) => {
             const Icon = feature.icon
             return (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card key={feature.name} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded-lg ${feature.color}`}>
@@ -204,8 +200,8 @@ export default function TestPage() {
             {testResults.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-semibold">Test Results:</h4>
-                {testResults.map((result, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                {testResults.map((result) => (
+                  <div key={result.endpoint} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <span className="font-mono text-sm">{result.endpoint}</span>
                     <Badge 
                       variant={result.success ? "default" : "destructive"}

@@ -7,7 +7,8 @@ import {
   supportTickets,
   supportTicketMessages,
   videoTutorials,
-  faqItems
+  faqItems,
+  users
 } from '@/lib/db/schemas';
 import { eq, and, like, desc, asc, sql, or, inArray } from 'drizzle-orm';
 

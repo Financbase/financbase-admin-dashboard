@@ -1,13 +1,33 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
-// import { NextIntlClientProvider } from 'next-intl'
-// import { getMessages } from 'next-intl/server'
-import { Providers } from './providers'
-import { MobileAppShell } from '@/components/mobile/mobile-app-shell'
-import { Toaster } from '@/components/ui/toaster'
+import { ClientLayout } from './client-layout'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+	subsets: ['latin'],
+	display: 'swap',
+	variable: '--font-inter'
+})
+
+export default function RootLayout({
+	children,
+}: {
+	children: React.ReactNode
+}) {
+	return (
+		<html lang="en" className={inter.variable}>
+			<head>
+				<link rel="preconnect" href="https://fonts.googleapis.com" />
+				<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+			</head>
+			<body className={`${inter.className} font-sans`}>
+				<ClientLayout>
+					{children}
+				</ClientLayout>
+			</body>
+		</html>
+	)
+}
 
 export const metadata: Metadata = {
 	title: {
@@ -18,14 +38,24 @@ export const metadata: Metadata = {
 	keywords: ['financial management', 'accounting', 'invoices', 'expenses', 'reports', 'AI automation', 'business intelligence'],
 	authors: [{ name: 'Financbase Team' }],
 	creator: 'Financbase',
-	metadataBase: new URL('https://financbase.com'),
+	metadataBase: new URL('http://localhost:3000'),
 	alternates: {
 		canonical: '/',
+	},
+	manifest: '/manifest.json',
+	icons: {
+		icon: [
+			{ url: '/financbase-logo-192x192.png', sizes: '192x192', type: 'image/png' },
+			{ url: '/financbase-logo-512x512.png', sizes: '512x512', type: 'image/png' }
+		],
+		apple: [
+			{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
+		],
 	},
 	openGraph: {
 		type: 'website',
 		locale: 'en_US',
-		url: 'https://financbase.com',
+		url: 'http://localhost:3000',
 		title: 'Financbase Admin Dashboard',
 		description: 'Professional financial management platform with AI automation',
 		siteName: 'Financbase',
@@ -45,26 +75,6 @@ export const metadata: Metadata = {
 		images: ['/twitter-image.png'],
 		creator: '@financbase',
 	},
-	manifest: '/manifest.json',
-	icons: {
-		icon: [
-			{ url: '/financbase-logo-192x192.png', sizes: '192x192', type: 'image/png' },
-			{ url: '/financbase-logo-512x512.png', sizes: '512x512', type: 'image/png' }
-		],
-		apple: [
-			{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
-		],
-	},
-	appleWebApp: {
-		capable: true,
-		statusBarStyle: 'default',
-		title: 'Financbase',
-	},
-	formatDetection: {
-		email: false,
-		address: false,
-		telephone: false,
-	},
 	robots: {
 		index: true,
 		follow: true,
@@ -78,39 +88,10 @@ export const metadata: Metadata = {
 	},
 }
 
-export default function RootLayout({
-	children,
-}: {
-	children: React.ReactNode
-}) {
-	return (
-		<html lang="en" suppressHydrationWarning>
-			<head>
-				<link rel="preconnect" href="https://fonts.googleapis.com" />
-				<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-				<meta name="theme-color" content="#667eea" />
-				<meta name="mobile-web-app-capable" content="yes" />
-				<meta name="apple-mobile-web-app-capable" content="yes" />
-				<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-				<meta name="apple-mobile-web-app-title" content="Financbase" />
-				<meta name="msapplication-TileColor" content="#667eea" />
-				<meta name="msapplication-config" content="/browserconfig.xml" />
-			</head>
-			<body className={inter.className}>
-				<Providers>
-					<MobileAppShell>
-						{children}
-						<Toaster />
-					</MobileAppShell>
-				</Providers>
-			</body>
-		</html>
-	)
-}
-
 export const viewport: Viewport = {
 	width: 'device-width',
 	initialScale: 1,
 	maximumScale: 5,
 	userScalable: true,
+	themeColor: '#667eea',
 }

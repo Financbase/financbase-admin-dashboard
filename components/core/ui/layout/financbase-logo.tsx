@@ -5,7 +5,7 @@ import React from "react";
 interface FinancbaseLogoProps {
 	className?: string;
 	size?: "sm" | "md" | "lg";
-	variant?: "full" | "symbol";
+	variant?: "full" | "symbol" | "white";
 }
 
 export function FinancbaseLogo({
@@ -19,13 +19,19 @@ export function FinancbaseLogo({
 		lg: "h-12 w-auto",
 	};
 
-	const logoSrc =
-		variant === "symbol" ? "/financbasesymbol.png" : "/financbase-logo.png";
+	const getLogoSrc = () => {
+		if (variant === "symbol") {
+			return "/financbasesymbol.png";
+		} else if (variant === "white") {
+			return "/financbase-logo-white.png";
+		}
+		return "/financbase-logo.png";
+	};
 
 	return (
 		<div className="relative inline-block">
 			<img
-				src={logoSrc}
+				src={getLogoSrc()}
 				alt="Financbase Logo"
 				className={`${sizeClasses[size]} ${className} no-filter`}
 				style={{

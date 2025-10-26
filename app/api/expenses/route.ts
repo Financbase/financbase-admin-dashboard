@@ -1,107 +1,101 @@
-/**
- * Expenses API Route
- * Handles expense CRUD operations
- */
-
-import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { ExpenseService } from '@/lib/services/expense-service';
+import { auth } from '@clerk/nextjs/server';
+import { db } from '@/lib/db';
+import { expenses } from '@/lib/db/schemas/expenses.schema';
+import { createExpenseSchema } from '@/lib/validation-schemas';
+import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { eq, count, and, gte, lte, like } from 'drizzle-orm';
 
-/**
- * GET /api/expenses
- * Fetch all expenses for the authenticated user
- */
 export async function GET(req: NextRequest) {
-	try {
-		const { userId } = await auth();
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return ApiErrorHandler.unauthorized();
+    }
 
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const offset = (page - 1) * limit;
+    const status = searchParams.get('status');
+    const category = searchParams.get('category');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
 
-		// Parse query parameters
-		const searchParams = req.nextUrl.searchParams;
-		const status = searchParams.get('status') || undefined;
-		const category = searchParams.get('category') || undefined;
-		const billable = searchParams.get('billable') === 'true' ? true : 
-		                 searchParams.get('billable') === 'false' ? false : undefined;
-		const limitStr = searchParams.get('limit');
-		const limit = limitStr ? parseInt(limitStr) : 50;
-		const offsetStr = searchParams.get('offset');
-		const offset = offsetStr ? parseInt(offsetStr) : 0;
+    // Build where conditions
+    const whereConditions = [eq(expenses.userId, userId)];
+    
+    if (status) {
+      whereConditions.push(eq(expenses.status, status as 'pending' | 'approved' | 'rejected'));
+    }
+    
+    if (category) {
+      whereConditions.push(like(expenses.category, `%${category}%`));
+    }
+    
+    if (startDate) {
+      whereConditions.push(gte(expenses.date, new Date(startDate)));
+    }
+    
+    if (endDate) {
+      whereConditions.push(lte(expenses.date, new Date(endDate)));
+    }
 
-		const startDateStr = searchParams.get('startDate');
-		const startDate = startDateStr ? new Date(startDateStr) : undefined;
-		const endDateStr = searchParams.get('endDate');
-		const endDate = endDateStr ? new Date(endDateStr) : undefined;
+    // Fetch expenses for the authenticated user
+    const userExpenses = await db
+      .select()
+      .from(expenses)
+      .where(and(...whereConditions))
+      .limit(limit)
+      .offset(offset);
 
-		const expenses = await ExpenseService.getAll(userId, {
-			status,
-			category,
-			billable,
-			startDate,
-			endDate,
-			limit,
-			offset,
-		});
+    const totalCount = await db
+      .select({ count: count() })
+      .from(expenses)
+      .where(and(...whereConditions));
 
-		return NextResponse.json(expenses);
-	} catch (error) {
-		console.error('Error fetching expenses:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch expenses' },
-			{ status: 500 }
-		);
-	}
+    return NextResponse.json({
+      success: true,
+      data: userExpenses,
+      pagination: {
+        page,
+        limit,
+        total: totalCount[0]?.count || 0,
+        pages: Math.ceil((totalCount[0]?.count || 0) / limit)
+      }
+    });
+  } catch (error) {
+    return ApiErrorHandler.handle(error);
+  }
 }
 
-/**
- * POST /api/expenses
- * Create a new expense
- */
 export async function POST(req: NextRequest) {
-	try {
-		const { userId } = await auth();
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return ApiErrorHandler.unauthorized();
+    }
 
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+    const body = await req.json();
+    const validatedData = createExpenseSchema.parse({
+      ...body,
+      userId // Ensure userId comes from auth, not request body
+    });
 
-		const body = await req.json();
+    // Create the expense
+    const [newExpense] = await db
+      .insert(expenses)
+      .values(validatedData)
+      .returning();
 
-		// Validate required fields
-		if (!body.description || !body.amount || !body.date || !body.category) {
-			return NextResponse.json(
-				{ error: 'Missing required fields' },
-				{ status: 400 }
-			);
-		}
-
-		const expense = await ExpenseService.create({
-			userId,
-			description: body.description,
-			amount: parseFloat(body.amount),
-			date: new Date(body.date),
-			category: body.category,
-			vendor: body.vendor,
-			paymentMethod: body.paymentMethod,
-			receiptUrl: body.receiptUrl,
-			notes: body.notes,
-			taxDeductible: body.taxDeductible,
-			billable: body.billable,
-			projectId: body.projectId,
-			clientId: body.clientId,
-			currency: body.currency,
-		});
-
-		return NextResponse.json(expense, { status: 201 });
-	} catch (error) {
-		console.error('Error creating expense:', error);
-		return NextResponse.json(
-			{ error: 'Failed to create expense' },
-			{ status: 500 }
-		);
-	}
+    return NextResponse.json({
+      success: true,
+      message: 'Expense created successfully',
+      data: newExpense
+    }, { status: 201 });
+  } catch (error) {
+    return ApiErrorHandler.handle(error);
+  }
 }
 

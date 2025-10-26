@@ -177,16 +177,20 @@ export class AdvancedTestDataManager {
     return { user, client };
   }
 
-  static async validateDataIntegrity(data: any) {
+  static async validateDataIntegrity(data: {
+    users?: Array<{id: string}>;
+    clients?: Array<{id: string; userId: string}>;
+    projects?: Array<{id: string; clientId: string; userId: string}>;
+  }) {
     console.log('🔍 Validating data integrity');
 
     // Validate foreign key relationships
     const validations = [];
 
     // Check that all clients have valid users
-    if (data.clients) {
+    if (data.clients && data.users) {
       for (const client of data.clients) {
-        const userExists = data.users.some((u: any) => u.id === client.userId);
+        const userExists = data.users.some((u) => u.id === client.userId);
         validations.push({
           type: 'foreign_key',
           table: 'clients',
@@ -198,10 +202,10 @@ export class AdvancedTestDataManager {
     }
 
     // Check that all projects have valid clients and users
-    if (data.projects) {
+    if (data.projects && data.clients && data.users) {
       for (const project of data.projects) {
-        const clientExists = data.clients.some((c: any) => c.id === project.clientId);
-        const userExists = data.users.some((u: any) => u.id === project.userId);
+        const clientExists = data.clients.some((c) => c.id === project.clientId);
+        const userExists = data.users.some((u) => u.id === project.userId);
         validations.push({
           type: 'foreign_key',
           table: 'projects',
@@ -231,7 +235,14 @@ export class AdvancedTestDataManager {
     return validations;
   }
 
-  static async generatePerformanceReport(data: any) {
+  static async generatePerformanceReport(data: {
+    users?: Array<{id: string; email?: string}>;
+    clients?: Array<{id: string; userId: string; currency: string}>;
+    projects?: Array<{id: string}>;
+    transactions?: Array<{id: string}>;
+    leads?: Array<{id: string}>;
+    campaigns?: Array<{id: string}>;
+  }) {
     console.log('📊 Generating performance test report');
 
     const report = {
@@ -251,8 +262,8 @@ export class AdvancedTestDataManager {
         leadsPerUser: data.leads?.length / data.users?.length || 0,
       },
       dataQuality: {
-        hasRealisticEmails: data.users?.every((u: any) => u.email?.includes('@')) || false,
-        hasVariedCurrencies: new Set(data.clients?.map((c: any) => c.currency)).size > 1,
+        hasRealisticEmails: data.users?.every((u) => u.email?.includes('@')) || false,
+        hasVariedCurrencies: new Set(data.clients?.map((c) => c.currency)).size > 1,
         hasDateSpread: true, // Assume dates are spread in seeding
       },
     };

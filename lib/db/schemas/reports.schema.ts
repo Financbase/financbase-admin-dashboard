@@ -1,5 +1,4 @@
 import { pgTable, text, integer, timestamp, boolean, uuid, jsonb } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import type { webhookEvents as WorkflowWebhookEvents } from "./webhooks.schema";
 
 // Reports table

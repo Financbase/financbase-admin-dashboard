@@ -1,13 +1,12 @@
-"use client";
-
-import { AnimatePresence, motion } from "framer-motion";
-import type React from "react";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import { motion } from "framer-motion";
 import { EnhancedSidebar } from "./enhanced-sidebar";
 import { EnhancedTopNav } from "./enhanced-top-nav";
+import { cn } from "@/lib/utils";
 
 interface EnhancedLayoutProps {
-	children: React.ReactNode;
+	children: ReactNode;
 	user?: {
 		name: string;
 		email: string;
@@ -22,8 +21,8 @@ export function EnhancedLayout({
 	user,
 	notifications = 0,
 }: EnhancedLayoutProps) {
-	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
 	// Handle mobile menu
 	const toggleMobileMenu = () => {
@@ -75,7 +74,7 @@ export function EnhancedLayout({
 			</motion.div>
 
 			{/* Desktop Sidebar */}
-			<div className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
+			<div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
 				<EnhancedSidebar
 					collapsed={sidebarCollapsed}
 					onToggleCollapse={toggleSidebarCollapse}
@@ -83,20 +82,20 @@ export function EnhancedLayout({
 				/>
 			</div>
 
+			{/* Top Navigation */}
+			<EnhancedTopNav
+				onMenuClick={toggleMobileMenu}
+				user={user}
+				notifications={notifications}
+			/>
+
 			{/* Main Content */}
 			<div
 				className={cn(
-					"flex flex-col min-h-screen transition-all duration-300",
+					"flex flex-col min-h-screen transition-all duration-300 pt-16",
 					sidebarCollapsed ? "lg:ml-16" : "lg:ml-64",
 				)}
 			>
-				{/* Top Navigation */}
-				<EnhancedTopNav
-					onMenuClick={toggleMobileMenu}
-					user={user}
-					notifications={notifications}
-				/>
-
 				{/* Page Content */}
 				<main className="flex-1">
 					<motion.div
@@ -111,9 +110,4 @@ export function EnhancedLayout({
 			</div>
 		</div>
 	);
-}
-
-// Helper function for conditional classes
-function cn(...classes: (string | undefined | null | false)[]): string {
-	return classes.filter(Boolean).join(" ");
 }

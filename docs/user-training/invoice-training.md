@@ -9,6 +9,7 @@
 ## 🎯 What You'll Learn
 
 By the end of this guide, you'll be able to:
+
 - Create professional invoices with line items
 - Manage client information and relationships
 - Track invoice status and payments
@@ -31,6 +32,7 @@ Create Invoice → Send to Client → Track Status → Receive Payment → Recor
 ```
 
 **Invoice States:**
+
 - **Draft**: Being created, not sent
 - **Sent**: Delivered to client
 - **Viewed**: Client has opened the invoice
@@ -43,6 +45,7 @@ Create Invoice → Send to Client → Track Status → Receive Payment → Recor
 ### 1.2 Key Features
 
 **Core Capabilities:**
+
 - **Professional Templates**: Multiple invoice designs
 - **Line Item Management**: Detailed product/service breakdown
 - **Client Management**: Customer database integration
@@ -59,12 +62,14 @@ Create Invoice → Send to Client → Track Status → Receive Payment → Recor
 ### 2.1 Invoice Creation Process
 
 **Step 1: Access Invoice Creation**
+
 1. **Click** "Invoices" in the sidebar
 2. **Click** the "+ New Invoice" button
 3. **Or use** the floating action button (FAB)
 4. **Or use** keyboard shortcut: Ctrl + N
 
 **Step 2: Basic Information**
+
 ```
 Invoice Details:
 ┌─────────────────────────────────────────┐
@@ -79,6 +84,7 @@ Invoice Details:
 ```
 
 **Step 3: Client Selection**
+
 - **Existing Client**: Select from dropdown
 - **New Client**: Click "Add New Client"
 - **Client Details**: Name, email, address, phone
@@ -86,6 +92,7 @@ Invoice Details:
 ### 2.2 Adding Line Items
 
 **Line Item Structure:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Description        │ Qty │ Rate    │ Amount  │ Tax   │ Total │
@@ -101,6 +108,7 @@ Invoice Details:
 ```
 
 **How to add line items:**
+
 1. **Click** "Add Line Item"
 2. **Enter** description
 3. **Set** quantity and rate
@@ -111,12 +119,14 @@ Invoice Details:
 ### 2.3 Invoice Customization
 
 **Template Options:**
+
 - **Professional**: Clean, business-focused design
 - **Modern**: Contemporary styling with colors
 - **Minimal**: Simple, text-focused layout
 - **Custom**: Upload your own template
 
 **Customization Options:**
+
 - **Logo**: Upload company logo
 - **Colors**: Brand color scheme
 - **Fonts**: Typography selection
@@ -131,6 +141,7 @@ Invoice Details:
 ### 3.1 Client Database
 
 **Client Information Fields:**
+
 ```
 ┌─────────────────────────────────────────┐
 │ Company Name: Acme Corp                 │
@@ -147,6 +158,7 @@ Invoice Details:
 ```
 
 **How to add a new client:**
+
 1. **Click** "Clients" in the sidebar
 2. **Click** "Add New Client"
 3. **Fill in** required information
@@ -156,6 +168,7 @@ Invoice Details:
 ### 3.2 Client Categories
 
 **Client Types:**
+
 - **Individual**: Personal clients
 - **Business**: Corporate clients
 - **Non-profit**: Charitable organizations
@@ -163,6 +176,7 @@ Invoice Details:
 - **International**: Foreign clients
 
 **Benefits of categorization:**
+
 - **Targeted communication**: Role-specific messaging
 - **Custom pricing**: Different rates per category
 - **Compliance**: Tax and legal requirements
@@ -171,6 +185,7 @@ Invoice Details:
 ### 3.3 Client Communication
 
 **Communication Features:**
+
 - **Email templates**: Pre-written messages
 - **Bulk communication**: Send to multiple clients
 - **Follow-up sequences**: Automated reminder series
@@ -184,6 +199,7 @@ Invoice Details:
 ### 4.1 Email Delivery
 
 **Sending Process:**
+
 1. **Review** invoice details
 2. **Click** "Send Invoice"
 3. **Choose** email template
@@ -192,6 +208,7 @@ Invoice Details:
 6. **Send** invoice
 
 **Email Templates:**
+
 - **Standard**: Professional, formal tone
 - **Friendly**: Casual, relationship-focused
 - **Urgent**: Payment reminder style
@@ -200,12 +217,14 @@ Invoice Details:
 ### 4.2 Delivery Options
 
 **Delivery Methods:**
+
 - **Email only**: PDF attachment
 - **Email + Link**: Online invoice portal
 - **Print**: Physical mail option
 - **Portal**: Client self-service access
 
 **Client Portal Features:**
+
 - **View invoices**: Online invoice viewing
 - **Make payments**: Integrated payment processing
 - **Download PDFs**: Save invoice copies
@@ -215,6 +234,7 @@ Invoice Details:
 ### 4.3 Follow-up Automation
 
 **Automated Reminders:**
+
 - **7 days**: Gentle reminder
 - **14 days**: Payment due soon
 - **30 days**: Overdue notice
@@ -222,6 +242,7 @@ Invoice Details:
 - **60 days**: Collection notice
 
 **Customization Options:**
+
 - **Message content**: Personalized reminders
 - **Timing**: Custom reminder schedules
 - **Escalation**: Different approaches per stage
@@ -234,9 +255,11 @@ Invoice Details:
 ### 5.1 Payment Recording
 
 **Recording a Payment:**
+
 1. **Open** the invoice
 2. **Click** "Record Payment"
 3. **Enter** payment details:
+
    ```
    Payment Amount: $4,882.50
    Payment Date: [Today's date]
@@ -244,9 +267,11 @@ Invoice Details:
    Reference: Txn-123456
    Notes: [Optional]
    ```
+
 4. **Save** payment record
 
 **Payment Methods:**
+
 - **Bank Transfer**: ACH, wire transfers
 - **Credit Card**: Visa, MasterCard, Amex
 - **Check**: Physical check payments
@@ -256,6 +281,7 @@ Invoice Details:
 ### 5.2 Partial Payments
 
 **Handling Partial Payments:**
+
 - **Record amount received**: Enter actual payment
 - **Update invoice status**: Mark as partially paid
 - **Track remaining balance**: Show outstanding amount
@@ -263,6 +289,7 @@ Invoice Details:
 - **Follow up**: Remind about remaining balance
 
 **Partial Payment Scenarios:**
+
 - **Installment plans**: Regular payment schedule
 - **Deposits**: Upfront payment for services
 - **Milestone payments**: Project-based payments
@@ -271,6 +298,7 @@ Invoice Details:
 ### 5.3 Payment Reconciliation
 
 **Reconciliation Process:**
+
 1. **Match payments** to invoices
 2. **Verify amounts** and dates
 3. **Update invoice status** to paid
@@ -278,6 +306,7 @@ Invoice Details:
 5. **Update accounting records**
 
 **Reconciliation Tools:**
+
 - **Bank import**: Automatic payment matching
 - **Bulk processing**: Handle multiple payments
 - **Exception handling**: Unmatched payments
@@ -290,6 +319,7 @@ Invoice Details:
 ### 6.1 Invoice Dashboard
 
 **Key Metrics:**
+
 ```
 ┌─────────────────┬─────────────────┬─────────────────┐
 │ Total Invoices  │ Outstanding     │ Overdue         │
@@ -299,6 +329,7 @@ Invoice Details:
 ```
 
 **Analytics Available:**
+
 - **Revenue by month**: Monthly invoice totals
 - **Client analysis**: Top clients by revenue
 - **Payment trends**: Average payment time
@@ -308,6 +339,7 @@ Invoice Details:
 ### 6.2 Revenue Reports
 
 **Revenue Analysis:**
+
 - **Monthly revenue**: Month-over-month comparison
 - **Client revenue**: Revenue by client
 - **Service revenue**: Revenue by service type
@@ -315,6 +347,7 @@ Invoice Details:
 - **Growth trends**: Revenue growth over time
 
 **Report Generation:**
+
 1. **Select** report type
 2. **Choose** date range
 3. **Apply** filters (client, service, status)
@@ -324,6 +357,7 @@ Invoice Details:
 ### 6.3 Aging Reports
 
 **Aging Analysis:**
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ Current (0-30 days)    │ $25,000 │ 55% of outstanding │
@@ -334,6 +368,7 @@ Invoice Details:
 ```
 
 **Aging Benefits:**
+
 - **Identify** slow-paying clients
 - **Prioritize** collection efforts
 - **Assess** credit risk
@@ -346,6 +381,7 @@ Invoice Details:
 ### 7.1 Automated Workflows
 
 **Workflow Triggers:**
+
 - **Invoice created**: Automatic client notification
 - **Invoice viewed**: Track client engagement
 - **Payment received**: Update status and send receipt
@@ -353,6 +389,7 @@ Invoice Details:
 - **Payment late**: Escalation to management
 
 **Workflow Actions:**
+
 - **Send emails**: Automated notifications
 - **Update status**: Change invoice state
 - **Create tasks**: Follow-up reminders
@@ -362,6 +399,7 @@ Invoice Details:
 ### 7.2 Approval Workflows
 
 **Approval Process:**
+
 1. **Invoice created** by team member
 2. **Sent for approval** to manager
 3. **Manager reviews** and approves/rejects
@@ -369,6 +407,7 @@ Invoice Details:
 5. **If rejected**: Returned with feedback
 
 **Approval Levels:**
+
 - **Amount-based**: Different approvers for different amounts
 - **Client-based**: Specific approvers for specific clients
 - **Department-based**: Role-based approvals
@@ -377,6 +416,7 @@ Invoice Details:
 ### 7.3 Integration Workflows
 
 **System Integrations:**
+
 - **Accounting software**: QuickBooks, Xero, Sage
 - **Payment processors**: Stripe, PayPal, Square
 - **CRM systems**: Salesforce, HubSpot, Pipedrive
@@ -390,6 +430,7 @@ Invoice Details:
 ### 8.1 Invoice Creation
 
 **Best Practices:**
+
 - **Clear descriptions**: Detailed line item descriptions
 - **Consistent numbering**: Sequential invoice numbers
 - **Professional appearance**: Use templates and branding
@@ -397,6 +438,7 @@ Invoice Details:
 - **Complete information**: All required fields filled
 
 **Common Mistakes to Avoid:**
+
 - **Vague descriptions**: "Services rendered" vs. "Web development - 40 hours"
 - **Missing information**: Incomplete client details
 - **Calculation errors**: Wrong totals or tax amounts
@@ -406,6 +448,7 @@ Invoice Details:
 ### 8.2 Payment Follow-up
 
 **Follow-up Strategy:**
+
 - **Send promptly**: Invoice within 24 hours of service
 - **Follow up consistently**: Regular reminder schedule
 - **Be professional**: Maintain good client relationships
@@ -413,6 +456,7 @@ Invoice Details:
 - **Document everything**: Keep records of all communications
 
 **Communication Tips:**
+
 - **Be polite but firm**: Professional tone
 - **Provide options**: Multiple payment methods
 - **Explain consequences**: Late payment policies
@@ -422,6 +466,7 @@ Invoice Details:
 ### 8.3 Record Keeping
 
 **Documentation Requirements:**
+
 - **Invoice copies**: Keep all sent invoices
 - **Payment records**: Track all received payments
 - **Communication logs**: Record all client interactions
@@ -429,6 +474,7 @@ Invoice Details:
 - **Audit trail**: Complete transaction history
 
 **Storage and Organization:**
+
 - **Digital filing**: Cloud-based storage
 - **Naming conventions**: Consistent file naming
 - **Backup systems**: Regular data backups
@@ -443,6 +489,7 @@ Invoice Details:
 
 **Issue: Invoice not sending**
 **Solutions:**
+
 - Check email address format
 - Verify client email is correct
 - Check spam/junk folders
@@ -451,6 +498,7 @@ Invoice Details:
 
 **Issue: Payment not recording**
 **Solutions:**
+
 - Verify payment amount matches invoice
 - Check payment date is correct
 - Ensure payment method is selected
@@ -459,6 +507,7 @@ Invoice Details:
 
 **Issue: Client can't access invoice**
 **Solutions:**
+
 - Check invoice link is correct
 - Verify client has internet access
 - Try sending different format (PDF vs. portal)
@@ -469,6 +518,7 @@ Invoice Details:
 
 **Issue: Missing invoice data**
 **Solutions:**
+
 - Check date range filters
 - Verify user permissions
 - Refresh data connection
@@ -477,6 +527,7 @@ Invoice Details:
 
 **Issue: Incorrect calculations**
 **Solutions:**
+
 - Review tax rate settings
 - Check line item amounts
 - Verify currency conversion
@@ -488,6 +539,7 @@ Invoice Details:
 ## 🎓 Practice Exercises
 
 ### Exercise 1: Create Your First Invoice
+
 1. **Create** a new invoice for a sample client
 2. **Add** 3 line items with different services
 3. **Apply** appropriate tax rates
@@ -495,6 +547,7 @@ Invoice Details:
 5. **Save** as draft and review
 
 ### Exercise 2: Client Management
+
 1. **Add** 5 new clients with complete information
 2. **Categorize** clients by type
 3. **Set** different payment terms for each
@@ -502,6 +555,7 @@ Invoice Details:
 5. **Test** email delivery to yourself
 
 ### Exercise 3: Payment Processing
+
 1. **Create** an invoice and mark as sent
 2. **Record** a partial payment
 3. **Generate** a payment receipt
@@ -536,7 +590,7 @@ Invoice Details:
 
 ---
 
-## 🎉 Congratulations!
+## 🎉 Congratulations
 
 You've mastered invoice management in Financbase! You now understand:
 
@@ -547,6 +601,7 @@ You've mastered invoice management in Financbase! You now understand:
 ✅ How to set up automated workflows  
 
 **Next steps:**
+
 - **For expense management**: [Expense Training](./expense-training.md)
 - **For reporting**: [Reports Training](./reports-training.md)
 - **For AI assistance**: [AI Assistant Guide](./ai-assistant-training.md)

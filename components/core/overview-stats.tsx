@@ -3,17 +3,13 @@
 import * as React from "react";
 import { useDashboardDateRange } from "@/contexts/dashboard-context";
 import { useDashboardStats } from "@/hooks/use-dashboard-data-optimized";
-import { formatPercentage } from "@/lib/format-utils";
 import {
 	DollarSign,
-	Key,
-	LayoutDashboard,
 	Package,
 	ShoppingCart,
 	TrendingDown,
 	TrendingUp,
 	Users,
-	XCircle,
 } from "lucide-react";
 import EmptyState from "./empty-state";
 import DashboardErrorBoundary from "./error-boundary";
@@ -38,7 +34,7 @@ export default function OverviewStats() {
 			>
 				{[...new Array(4)].map((_, i) => (
 					<div
-						key={`loading-stat-${i}`}
+						key={`loading-stat-${i}-${Date.now()}`}
 						className="bg-white dark:bg-[#0F0F12] rounded-lg sm:rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23]"
 						data-testid="stat-card"
 					>
@@ -102,29 +98,29 @@ export default function OverviewStats() {
 		{
 			title: "Total Revenue",
 			value: stats.revenue.value,
-			change: formatPercentage(stats.revenue.change),
+			change: stats.revenue.change.toString(),
 			changeType: stats.revenue.changeType,
 			icon: <DollarSign className="h-4 w-4" />,
 		},
 		{
-			title: "Orders",
-			value: stats.orders.value,
-			change: formatPercentage(stats.orders.change),
-			changeType: stats.orders.changeType,
-			icon: <ShoppingCart className="h-4 w-4" />,
-		},
-		{
-			title: "Customers",
+			title: "Active Clients",
 			value: stats.customers.value,
-			change: formatPercentage(stats.customers.change),
+			change: stats.customers.change.toString(),
 			changeType: stats.customers.changeType,
 			icon: <Users className="h-4 w-4" />,
 		},
 		{
-			title: "Products",
+			title: "Monthly Expenses",
 			value: stats.products.value,
-			change: formatPercentage(stats.products.change),
+			change: stats.products.change.toString(),
 			changeType: stats.products.changeType,
+			icon: <ShoppingCart className="h-4 w-4" />,
+		},
+		{
+			title: "Invoices",
+			value: stats.orders.value,
+			change: stats.orders.change.toString(),
+			changeType: stats.orders.changeType,
 			icon: <Package className="h-4 w-4" />,
 		},
 	];

@@ -2,19 +2,18 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	uuid,
 	jsonb,
-	boolean as pgBoolean,
+	decimal,
+	serial,
 } from "drizzle-orm/pg-core";
-import { users } from "./users.schema";
 
-export const clients = pgTable("clients", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	userId: uuid("user_id").notNull().references(() => users.id),
-	companyName: text("company_name").notNull(),
-	contactName: text("contact_name"),
+export const clients = pgTable("financbase_clients", {
+	id: serial("id").primaryKey(),
+	userId: text("user_id").notNull(),
+	name: text("name").notNull(),
 	email: text("email").notNull(),
 	phone: text("phone"),
+	company: text("company"),
 	address: text("address"),
 	city: text("city"),
 	state: text("state"),
@@ -22,13 +21,15 @@ export const clients = pgTable("clients", {
 	country: text("country").default("US"),
 	taxId: text("tax_id"),
 	currency: text("currency").default("USD"),
-	paymentTerms: text("payment_terms").default("net30"),
-	isActive: pgBoolean("is_active").default(true),
+	paymentTerms: text("payment_terms"),
+	status: text("status", { enum: ["active", "inactive", "suspended"] }).notNull().default("active"),
+	totalInvoiced: decimal("total_invoiced", { precision: 12, scale: 2 }).default("0"),
+	totalPaid: decimal("total_paid", { precision: 12, scale: 2 }).default("0"),
+	outstandingBalance: decimal("outstanding_balance", { precision: 12, scale: 2 }).default("0"),
 	notes: text("notes"),
-	metadata: jsonb("metadata"),
-	contractorId: uuid("contractor_id"),
-	createdAt: timestamp("created_at").defaultNow(),
-	updatedAt: timestamp("updated_at").defaultNow(),
+	tags: jsonb("tags"),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export type Client = typeof clients.$inferSelect;

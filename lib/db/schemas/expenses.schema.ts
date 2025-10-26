@@ -3,34 +3,51 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	date,
-	uuid,
+	integer,
 	boolean,
+	jsonb,
+	serial,
 } from "drizzle-orm/pg-core";
-import { users } from "./users.schema";
 
 export const expenseCategories = pgTable("expense_categories", {
-	id: uuid("id").primaryKey().defaultRandom(),
+	id: serial("id").primaryKey(),
 	name: text("name").notNull(),
 	description: text("description"),
 	color: text("color"), // Hex color code for UI
-	createdBy: uuid("created_by").references(() => users.id),
+	createdBy: text("created_by"), // References user_id as text
 	createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const expenses = pgTable("expenses", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	userId: uuid("user_id").references(() => users.id),
-	categoryId: uuid("category_id").references(() => expenseCategories.id),
+export const expenses = pgTable("financbase_expenses", {
+	id: serial("id").primaryKey(),
+	userId: text("user_id").notNull(),
+	description: text("description").notNull(),
 	amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-	description: text("description"),
-	expenseDate: date("expense_date").notNull(), // Proper date type
+	currency: text("currency").notNull().default("USD"),
+	date: timestamp("date").notNull(),
+	category: text("category").notNull(),
+	vendor: text("vendor"),
 	paymentMethod: text("payment_method"),
-	tags: text("tags"), // Array type in DB, using text for now
 	receiptUrl: text("receipt_url"),
+	receiptFileName: text("receipt_file_name"),
+	status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+	approvedBy: text("approved_by"),
+	approvedAt: timestamp("approved_at"),
+	rejectedReason: text("rejected_reason"),
+	taxDeductible: boolean("tax_deductible").default(true),
+	taxAmount: decimal("tax_amount", { precision: 10, scale: 2 }).default("0"),
+	projectId: integer("project_id"),
+	clientId: integer("client_id"),
+	billable: boolean("billable").default(false),
 	isRecurring: boolean("is_recurring").default(false),
 	recurringFrequency: text("recurring_frequency"),
-	createdAt: timestamp("created_at").defaultNow(),
-	updatedAt: timestamp("updated_at").defaultNow(),
-	contractorId: uuid("contractor_id"),
+	recurringEndDate: timestamp("recurring_end_date"),
+	parentExpenseId: integer("parent_expense_id"),
+	mileage: decimal("mileage", { precision: 10, scale: 2 }),
+	mileageRate: decimal("mileage_rate", { precision: 10, scale: 2 }),
+	notes: text("notes"),
+	tags: jsonb("tags"),
+	metadata: jsonb("metadata"),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

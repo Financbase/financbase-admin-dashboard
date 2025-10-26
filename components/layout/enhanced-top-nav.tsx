@@ -10,9 +10,11 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/core/ui/navigation/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { FinancbaseLogo } from "@/components/ui/financbase-logo";
 import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { AnimatedNavbar, navbarItems } from "@/components/ui/animated-navbar";
 import {
 	Sheet,
 	SheetContent,
@@ -24,28 +26,21 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import {
 	Activity,
-	BarChart3,
 	Bell,
 	BookOpen,
-	DollarSign,
 	FileText,
 	HelpCircle,
 	LogOut,
 	Menu,
 	MessageSquare,
-	Monitor,
-	Moon,
 	Search,
 	Settings,
 	Shield,
-	Sun,
-	TrendingUp,
 	User,
 	X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 
 interface EnhancedTopNavProps {
@@ -65,9 +60,6 @@ export function EnhancedTopNav({
 	notifications = 0,
 }: EnhancedTopNavProps) {
 	const [isScrolled, setIsScrolled] = useState(false);
-	const [isSearchOpen, setIsSearchOpen] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
-	const { setTheme } = useTheme();
 
 	const pathname = usePathname();
 
@@ -80,24 +72,12 @@ export function EnhancedTopNav({
 		return () => window.removeEventListener("scroll", handleScroll);
 	}, []);
 
-	// Quick actions for search
-	const quickActions = [
-		{ name: "Financial Dashboard", href: "/dashboard", icon: BarChart3 },
-		{ name: "Analytics", href: "/analytics", icon: TrendingUp },
-		{ name: "Transactions", href: "/transactions", icon: DollarSign },
-		{ name: "Settings", href: "/settings", icon: Settings },
-	];
-
-	const filteredActions = quickActions.filter((action) =>
-		action.name.toLowerCase().includes(searchQuery.toLowerCase()),
-	);
-
 	return (
 		<motion.header
 			initial={{ y: -100 }}
 			animate={{ y: 0 }}
 			transition={{ duration: 0.3 }}
-			className={`sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
+			className={`sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
 				isScrolled ? "shadow-sm" : ""
 			}`}
 		>
@@ -122,51 +102,9 @@ export function EnhancedTopNav({
 					</Link>
 					</div>
 
-					{/* Center Section - Search */}
-					<div className="flex-1 max-w-md mx-4 hidden md:block">
-						<div className="relative">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-							<Input
-								placeholder="Search financial data, reports, or actions..."
-								className="pl-10 pr-4 bg-muted/50 border-0 focus:bg-background transition-colors"
-								onFocus={() => setIsSearchOpen(true)}
-								onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
-								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
-							/>
-						</div>
-
-						{/* Search Results Dropdown */}
-						<AnimatePresence>
-							{isSearchOpen && (
-								<motion.div
-									initial={{ opacity: 0, y: -10 }}
-									animate={{ opacity: 1, y: 0 }}
-									exit={{ opacity: 0, y: -10 }}
-									className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg z-50"
-								>
-									<div className="p-2">
-										{filteredActions.length > 0 ? (
-											filteredActions.map((action) => (
-												<Link
-													key={action.name}
-													href={action.href}
-													className="flex items-center gap-3 p-2 rounded-md hover:bg-muted transition-colors"
-												>
-													<action.icon className="h-4 w-4 text-muted-foreground" />
-													<span className="text-sm">{action.name}</span>
-												</Link>
-											))
-										) : (
-											<div className="p-4 text-center text-muted-foreground">
-												<Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-												<p className="text-sm">No results found</p>
-											</div>
-										)}
-									</div>
-								</motion.div>
-							)}
-						</AnimatePresence>
+					{/* Center Section - Animated Navbar */}
+					<div className="flex-1 flex justify-center">
+						<AnimatedNavbar items={navbarItems} />
 					</div>
 
 					{/* Right Section - Actions & User Menu */}
@@ -253,30 +191,10 @@ export function EnhancedTopNav({
 							</DropdownMenuContent>
 						</DropdownMenu>
 
-						{/* Theme Toggle */}
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" size="icon">
-									<Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-									<Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-									<span className="sr-only">Toggle theme</span>
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuItem onClick={() => setTheme("light")}>
-									<Sun className="mr-2 h-4 w-4" />
-									Light
-								</DropdownMenuItem>
-								<DropdownMenuItem onClick={() => setTheme("dark")}>
-									<Moon className="mr-2 h-4 w-4" />
-									Dark
-								</DropdownMenuItem>
-								<DropdownMenuItem onClick={() => setTheme("system")}>
-									<Monitor className="mr-2 h-4 w-4" />
-									System
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						{/* Theme Toggle - Make it more prominent */}
+						<div className="flex items-center">
+							<ThemeToggle />
+						</div>
 
 						{/* Help */}
 						<DropdownMenu>

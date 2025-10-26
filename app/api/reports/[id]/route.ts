@@ -24,7 +24,7 @@ export async function GET(
 		}
 
 		const { id: idParam } = await params;
-		const id = parseInt(idParam);
+		const id = parseInt(idParam, 10);
 		const report = await ReportService.getById(id, userId);
 
 		if (!report) {
@@ -48,7 +48,7 @@ export async function GET(
  * Update a report
  */
 export async function PUT(
-	req: NextRequest,
+	_req: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
 	try {
@@ -58,8 +58,9 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(id);
-		const body = await req.json();
+		const { id: idParam } = await params;
+		const id = parseInt(idParam, 10);
+		const body = await _req.json();
 
 		const report = await ReportService.update(id, userId, body);
 
@@ -90,7 +91,8 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(id);
+		const { id: idParam } = await params;
+		const id = parseInt(idParam, 10);
 		await ReportService.delete(id, userId);
 
 		return NextResponse.json({ success: true });

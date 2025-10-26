@@ -3,13 +3,12 @@
  * Handles update, delete, and regenerate operations for specific API keys
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { userApiKeys } from '@/lib/db/schemas';
-import { eq } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
-import crypto from 'crypto';
 
 // PUT /api/settings/security/api-keys/[id]
 // Update an existing API key
@@ -24,7 +23,7 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const { id } = await params;
+		const { id: idParam } = await params;
 		const body = await request.json();
 		const { name, description, status, scopes, expiresAt, rateLimitPerMinute, rateLimitPerHour } = body;
 
@@ -32,7 +31,7 @@ export async function PUT(
 		const existingKey = await db
 			.select()
 			.from(userApiKeys)
-			.where(eq(userApiKeys.id, params.id))
+			.where(eq(userApiKeys.id, idParam))
 			.limit(1);
 
 		if (!existingKey.length || existingKey[0].userId !== userId) {
@@ -52,7 +51,7 @@ export async function PUT(
 				...(rateLimitPerHour && { rateLimitPerHour }),
 				updatedAt: new Date(),
 			})
-			.where(eq(userApiKeys.id, params.id))
+			.where(eq(userApiKeys.id, idParam))
 			.returning({
 				id: userApiKeys.id,
 				name: userApiKeys.name,
@@ -82,7 +81,7 @@ export async function PUT(
 // DELETE /api/settings/security/api-keys/[id]
 // Delete an API key
 export async function DELETE(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
 	try {
@@ -92,11 +91,13 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id: idParam } = await params;
+
 		// Check if user owns this API key
 		const existingKey = await db
 			.select()
 			.from(userApiKeys)
-			.where(eq(userApiKeys.id, params.id))
+			.where(eq(userApiKeys.id, idParam))
 			.limit(1);
 
 		if (!existingKey.length || existingKey[0].userId !== userId) {
@@ -110,7 +111,7 @@ export async function DELETE(
 				status: 'revoked',
 				updatedAt: new Date(),
 			})
-			.where(eq(userApiKeys.id, params.id));
+			.where(eq(userApiKeys.id, idParam));
 
 		return NextResponse.json({ message: 'API key revoked successfully' });
 	} catch (error) {

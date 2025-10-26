@@ -2,6 +2,7 @@
 
 import { PublicFooter } from "@/components/layout/public-footer";
 import { FinancbaseLogo } from "@/components/core/ui/layout/financbase-logo";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -32,14 +33,19 @@ export default function PublicLayout({
 							<Link href="/contact" className="text-gray-500 hover:text-gray-900">Contact</Link>
 						</nav>
 
-						{/* Mobile menu button */}
-						<button
-							type="button"
-							className="md:hidden p-2"
-							onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-						>
-							{isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-						</button>
+						{/* Right side - Theme Toggle and Mobile Menu */}
+						<div className="flex items-center space-x-4">
+							<ThemeToggle />
+							
+							{/* Mobile menu button */}
+							<button
+								type="button"
+								className="md:hidden p-2"
+								onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+							>
+								{isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+							</button>
+						</div>
 					</div>
 
 					{/* Mobile Navigation */}

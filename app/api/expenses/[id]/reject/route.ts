@@ -13,7 +13,7 @@ import { ExpenseService } from '@/lib/services/expense-service';
  * Reject an expense
  */
 export async function POST(
-	req: NextRequest,
+	_req: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
@@ -24,8 +24,8 @@ export async function POST(
 		}
 
 		const { id: idParam } = await params;
-		const id = parseInt(idParam);
-		const body = await req.json();
+		const id = parseInt(idParam, 10);
+		const body = await _req.json();
 		const reason = body.reason;
 
 		// Get the expense to find the owner

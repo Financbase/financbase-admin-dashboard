@@ -8,7 +8,7 @@ import {
 	FileText,
 	Filter,
 } from "lucide-react";
-import { db } from "../db/connection";
+import { db } from "../../db/index";
 import {
 	type Lease,
 	type NewPropertyIncome,

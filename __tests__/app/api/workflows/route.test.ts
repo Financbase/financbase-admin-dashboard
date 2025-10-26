@@ -19,11 +19,21 @@ jest.mock('@clerk/nextjs/server', () => ({
 }))
 
 describe('/api/workflows', () => {
-  let mockDb: any
+  let mockDb: {
+    select: jest.MockedFunction<any>;
+    insert: jest.MockedFunction<any>;
+    update: jest.MockedFunction<any>;
+    delete: jest.MockedFunction<any>;
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockDb = db as any
+    mockDb = db as {
+      select: jest.MockedFunction<any>;
+      insert: jest.MockedFunction<any>;
+      update: jest.MockedFunction<any>;
+      delete: jest.MockedFunction<any>;
+    }
   })
 
   describe('GET /api/workflows', () => {

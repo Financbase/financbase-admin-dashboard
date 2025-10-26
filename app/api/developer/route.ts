@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { sql } from '@/lib/db';
 
@@ -6,7 +7,7 @@ import { sql } from '@/lib/db';
  * GET /api/developer/api-keys
  * Get all API keys for the current user
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
 	try {
 		const { userId } = await auth();
 		if (!userId) {
@@ -93,7 +94,7 @@ export async function PATCH(request: NextRequest) {
 		}
 
 		const { searchParams } = new URL(request.url);
-		const days = parseInt(searchParams.get('days') || '30');
+		const days = parseInt(searchParams.get('days') || '30', 10);
 
 		// Get usage data for the last N days
 		const result = await sql`
@@ -157,7 +158,7 @@ export async function PUT(request: NextRequest) {
 			WHERE api_key_id = ${keyId} AND DATE(created_at) = ${today}
 		`;
 
-		if (parseInt(dailyUsage[0].count) > 1000) { // Example daily limit
+		if (parseInt(dailyUsage[0].count, 10) > 1000) { // Example daily limit
 			return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
 		}
 

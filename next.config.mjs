@@ -1,18 +1,29 @@
-import createNextIntlPlugin from 'next-intl/plugin';
-
-const withNextIntl = createNextIntlPlugin('./i18n.ts');
-
 /** @type {import('next').NextConfig} */
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const nextConfig = {
 	reactStrictMode: true,
 	typescript: {
-		ignoreBuildErrors: true,
+		ignoreBuildErrors: false,
+	},
+	// Disable OpenTelemetry to prevent API compatibility issues
+	env: {
+		OTEL_SDK_DISABLED: 'true',
+		NEXT_OTEL_VERBOSE: '0',
+		NEXT_TELEMETRY_DISABLED: '1',
+		OTEL_TRACES_EXPORTER: 'none',
+		OTEL_METRICS_EXPORTER: 'none',
+		OTEL_LOGS_EXPORTER: 'none',
 	},
 	experimental: {
-		serverActions: {
-			allowedOrigins: ['localhost:3010', '127.0.0.1:3010'],
-		},
+		// Server actions are enabled by default in Next.js 16
 		optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
+		// Disable experimental features that might cause module resolution issues
+		optimizeCss: false,
 	},
 
 	// Image optimization
@@ -26,6 +37,14 @@ const nextConfig = {
 			{
 				protocol: 'https',
 				hostname: 'images.unsplash.com',
+			},
+			{
+				protocol: 'https',
+				hostname: 'fonts.googleapis.com',
+			},
+			{
+				protocol: 'https',
+				hostname: 'fonts.gstatic.com',
 			},
 		],
 		deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -50,20 +69,16 @@ const nextConfig = {
 		];
 	},
 
-	// Disable Jest during build to prevent worker issues
-	webpack: (config, { dev, isServer }) => {
-		if (!dev) {
-			// Disable Jest integration during production build
-			config.resolve.fallback = {
-				...config.resolve.fallback,
-				fs: false,
-			};
-		}
-		return config;
+	// Turbopack configuration (Next.js 16 default)
+	turbopack: {
+		// Enable experimental features for better development experience
 	},
 
-	// Output configuration for Docker
-	output: 'standalone',
+	// Development mode configuration
+	output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+
+	// Enable static asset optimization
+	assetPrefix: undefined,
 };
 
-export default withNextIntl(nextConfig);
+export default nextConfig;

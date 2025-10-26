@@ -25,7 +25,7 @@
 			"purpose": "any"
 		},
 		{
-			"src": "/financbase-logo-128x128.png",
+			"src": "/financbase-logo-128.png",
 			"sizes": "128x128",
 			"type": "image/png",
 			"purpose": "any"
@@ -61,22 +61,6 @@
 			"purpose": "any maskable"
 		}
 	],
-	"screenshots": [
-		{
-			"src": "/screenshots/desktop-dashboard.png",
-			"sizes": "1280x720",
-			"type": "image/png",
-			"form_factor": "wide",
-			"label": "Dashboard Overview"
-		},
-		{
-			"src": "/screenshots/mobile-dashboard.png",
-			"sizes": "375x667",
-			"type": "image/png",
-			"form_factor": "narrow",
-			"label": "Mobile Dashboard"
-		}
-	],
 	"shortcuts": [
 		{
 			"name": "Analytics",
@@ -85,74 +69,36 @@
 			"url": "/analytics",
 			"icons": [
 				{
-					"src": "/icons/analytics-96x96.png",
+					"src": "/shortcut-analytics.png",
 					"sizes": "96x96"
 				}
 			]
 		},
 		{
-			"name": "Orders",
-			"short_name": "Orders",
-			"description": "Manage orders and transactions",
-			"url": "/orders",
+			"name": "Dashboard",
+			"short_name": "Dashboard",
+			"description": "View main dashboard",
+			"url": "/dashboard",
 			"icons": [
 				{
-					"src": "/icons/orders-96x96.png",
+					"src": "/shortcut-dashboard.png",
 					"sizes": "96x96"
 				}
 			]
 		},
 		{
-			"name": "Products",
-			"short_name": "Products",
-			"description": "Manage product catalog",
-			"url": "/products",
+			"name": "Content",
+			"short_name": "Content",
+			"description": "Manage content and pages",
+			"url": "/content",
 			"icons": [
 				{
-					"src": "/icons/products-96x96.png",
-					"sizes": "96x96"
-				}
-			]
-		},
-		{
-			"name": "Reports",
-			"short_name": "Reports",
-			"description": "Generate and view reports",
-			"url": "/reports",
-			"icons": [
-				{
-					"src": "/icons/reports-96x96.png",
+					"src": "/shortcut-content.png",
 					"sizes": "96x96"
 				}
 			]
 		}
 	],
 	"related_applications": [],
-	"prefer_related_applications": false,
-	"edge_side_panel": {
-		"preferred_width": 400
-	},
-	"launch_handler": {
-		"client_mode": "focus-existing"
-	},
-	"handle_links": "preferred",
-	"capture_links": "new-client",
-	"file_handlers": [
-		{
-			"action": "/upload",
-			"accept": {
-				"text/csv": [".csv"],
-				"application/vnd.ms-excel": [".xls"],
-				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
-					".xlsx"
-				]
-			}
-		}
-	],
-	"protocol_handlers": [
-		{
-			"protocol": "web+financbase",
-			"url": "/?action=%s"
-		}
-	]
+	"prefer_related_applications": false
 }

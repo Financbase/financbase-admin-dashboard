@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { isAdmin } from '@/lib/auth/financbase-rbac';
 import { RevenueSharingService } from '@/lib/services/integration/revenue-sharing.service';
 
 /**
@@ -17,25 +19,33 @@ export async function GET(request: NextRequest) {
 		const type = searchParams.get('type'); // 'overview', 'developer', 'plugin'
 
 		switch (type) {
-			case 'developer':
+			case 'developer': {
 				const developerEarnings = await RevenueSharingService.getDeveloperEarnings(userId);
 				return NextResponse.json(developerEarnings);
+			}
 
-			case 'plugin':
+			case 'plugin': {
 				const pluginId = searchParams.get('pluginId');
 				if (!pluginId) {
 					return NextResponse.json({ error: 'Plugin ID required' }, { status: 400 });
 				}
 				const pluginAnalytics = await RevenueSharingService.getPluginAnalytics(pluginId);
 				return NextResponse.json(pluginAnalytics);
+			}
 
-			case 'overview':
-			default:
+			case 'overview': {
 				const stats = await RevenueSharingService.getMarketplaceStats();
 				const topPlugins = await RevenueSharingService.getTopPlugins(5, 'month');
 				return NextResponse.json({ stats, topPlugins });
+			}
+
+			default: {
+				const stats = await RevenueSharingService.getMarketplaceStats();
+				const topPlugins = await RevenueSharingService.getTopPlugins(5, 'month');
+				return NextResponse.json({ stats, topPlugins });
+			}
 		}
-	} catch (error) {
+	} catch (error: unknown) {
 		console.error('Error fetching revenue data:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
@@ -52,10 +62,11 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		// TODO: Add admin role check
-		// if (!isAdmin(userId)) {
-		//   return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-		// }
+		// Check admin role
+		const adminStatus = await isAdmin();
+		if (!adminStatus) {
+			return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+		}
 
 		const body = await request.json();
 		const { developerId, period } = body;
@@ -70,25 +81,26 @@ export async function POST(request: NextRequest) {
 
 	} catch (error) {
 		console.error('Error processing payouts:', error);
-		return NextResponse.json({ error: error.message }, { status: 500 });
+		return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
 	}
 }
 
 /**
- * POST /api/marketplace/revenue/process-billing
+ * PATCH /api/marketplace/revenue/process-billing
  * Process subscription billing (admin only)
  */
-export async function PATCH(request: NextRequest) {
+export async function PATCH(_request: NextRequest) {
 	try {
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		// TODO: Add admin role check
-		// if (!isAdmin(userId)) {
-		//   return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-		// }
+		// Check admin role
+		const adminStatus = await isAdmin();
+		if (!adminStatus) {
+			return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+		}
 
 		const processedCount = await RevenueSharingService.processSubscriptionBilling();
 
@@ -97,8 +109,8 @@ export async function PATCH(request: NextRequest) {
 			processedCount
 		});
 
-	} catch (error) {
+	} catch (error: unknown) {
 		console.error('Error processing billing:', error);
-		return NextResponse.json({ error: error.message }, { status: 500 });
+		return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
 	}
 }
