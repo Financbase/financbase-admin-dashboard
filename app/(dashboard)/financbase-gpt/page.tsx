@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bot, Sparkles, Brain, TrendingUp, Shield, Zap } from "lucide-react";

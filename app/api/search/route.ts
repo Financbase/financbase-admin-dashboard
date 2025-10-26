@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { AlgoliaSearchService, SEARCH_INDICES } from '@/lib/search/algolia-service';
 
 /**
@@ -10,8 +11,8 @@ export async function GET(request: NextRequest) {
 		const { searchParams } = new URL(request.url);
 		const query = searchParams.get('q') || '';
 		const index = searchParams.get('index') || 'all';
-		const page = parseInt(searchParams.get('page') || '0');
-		const hitsPerPage = parseInt(searchParams.get('hitsPerPage') || '20');
+		const page = parseInt(searchParams.get('page') || '0', 10);
+		const hitsPerPage = parseInt(searchParams.get('hitsPerPage') || '20', 10);
 
 		if (!query.trim()) {
 			return NextResponse.json({
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 
 		const searchService = new AlgoliaSearchService();
 
-		let results;
+		let results: unknown[];
 		if (index === 'all') {
 			results = await searchService.searchAll(query, { page, hitsPerPage });
 		} else {

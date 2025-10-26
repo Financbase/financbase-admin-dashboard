@@ -24,7 +24,7 @@ export async function POST(
 		}
 
 		const { id: idParam } = await params;
-		const id = parseInt(idParam);
+		const id = parseInt(idParam, 10);
 		const history = await ReportService.run(id, userId);
 
 		return NextResponse.json(history);

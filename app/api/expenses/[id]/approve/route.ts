@@ -24,7 +24,7 @@ export async function POST(
 		}
 
 		const { id: idParam } = await params;
-		const id = parseInt(idParam);
+		const id = parseInt(idParam, 10);
 		
 		// Get the expense to find the owner
 		const expense = await ExpenseService.getById(id, userId);

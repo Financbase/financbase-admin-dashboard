@@ -1,84 +1,96 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { ClientService } from '@/lib/services/client-service';
-import { z } from 'zod';
+import { db } from '@/lib/db';
+import { clients } from '@/lib/db/schemas/clients.schema';
+import { createClientSchema } from '@/lib/validation-schemas';
+import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { eq, count, and, like, or } from 'drizzle-orm';
 
-const createClientSchema = z.object({
-	companyName: z.string().min(1, 'Company name is required'),
-	contactName: z.string().optional(),
-	email: z.string().email('Invalid email address'),
-	phone: z.string().optional(),
-	address: z.string().optional(),
-	city: z.string().optional(),
-	state: z.string().optional(),
-	zipCode: z.string().optional(),
-	country: z.string().default('US'),
-	taxId: z.string().optional(),
-	currency: z.string().default('USD'),
-	paymentTerms: z.string().default('net30'),
-	notes: z.string().optional(),
-	metadata: z.record(z.string(), z.unknown()).optional(),
-});
+export async function GET(req: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return ApiErrorHandler.unauthorized();
+    }
 
-export async function GET(request: NextRequest) {
-	try {
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const offset = (page - 1) * limit;
+    const search = searchParams.get('search');
+    const status = searchParams.get('status');
 
-		const { searchParams } = new URL(request.url);
-		const search = searchParams.get('search') || undefined;
-		const isActive = searchParams.get('isActive');
-		const limit = parseInt(searchParams.get('limit') || '50');
-		const offset = parseInt(searchParams.get('offset') || '0');
+    // Build where conditions
+    const whereConditions = [eq(clients.userId, userId)];
+    
+    if (status) {
+      whereConditions.push(eq(clients.status, status as 'active' | 'inactive' | 'suspended'));
+    }
+    
+    if (search) {
+      whereConditions.push(
+        or(
+          like(clients.name, `%${search}%`),
+          like(clients.email, `%${search}%`),
+          like(clients.company, `%${search}%`)
+        )
+      );
+    }
 
-		const clients = await ClientService.getAll(userId, {
-			search,
-			isActive: isActive ? isActive === 'true' : undefined,
-			limit,
-			offset,
-		});
+    // Fetch clients for the authenticated user
+    const userClients = await db
+      .select()
+      .from(clients)
+      .where(and(...whereConditions))
+      .limit(limit)
+      .offset(offset);
 
-		return NextResponse.json({ clients });
-	} catch (error) {
-		console.error('Error fetching clients:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch clients' },
-			{ status: 500 }
-		);
-	}
+    const totalCount = await db
+      .select({ count: count() })
+      .from(clients)
+      .where(and(...whereConditions));
+
+    return NextResponse.json({
+      success: true,
+      data: userClients,
+      pagination: {
+        page,
+        limit,
+        total: totalCount[0]?.count || 0,
+        pages: Math.ceil((totalCount[0]?.count || 0) / limit)
+      }
+    });
+  } catch (error) {
+    return ApiErrorHandler.handle(error);
+  }
 }
 
-export async function POST(request: NextRequest) {
-	try {
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+export async function POST(req: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return ApiErrorHandler.unauthorized();
+    }
 
-		const body = await request.json();
-		const validatedData = createClientSchema.parse(body);
+    const body = await req.json();
+    const validatedData = createClientSchema.parse({
+      ...body,
+      userId // Ensure userId comes from auth, not request body
+    });
 
-		const client = await ClientService.create({
-			...validatedData,
-			userId,
-		});
+    // Create the client
+    const [newClient] = await db
+      .insert(clients)
+      .values(validatedData)
+      .returning();
 
-		return NextResponse.json({ client }, { status: 201 });
-	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error('Error creating client:', error);
-		return NextResponse.json(
-			{ error: 'Failed to create client' },
-			{ status: 500 }
-		);
-	}
+    return NextResponse.json({
+      success: true,
+      message: 'Client created successfully',
+      data: newClient
+    }, { status: 201 });
+  } catch (error) {
+    return ApiErrorHandler.handle(error);
+  }
 }

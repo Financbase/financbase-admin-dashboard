@@ -24,7 +24,7 @@ export async function GET(
 		}
 
 		const { id: idParam } = await params;
-		const id = parseInt(idParam);
+		const id = parseInt(idParam, 10);
 		const expense = await ExpenseService.getById(id, userId);
 
 		if (!expense) {
@@ -48,7 +48,7 @@ export async function GET(
  * Update an expense
  */
 export async function PUT(
-	req: NextRequest,
+	_req: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
 	try {
@@ -58,8 +58,9 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(id);
-		const body = await req.json();
+		const { id: idParam } = await params;
+		const id = parseInt(idParam, 10);
+		const body = await _req.json();
 
 		const expense = await ExpenseService.update({
 			id,
@@ -96,7 +97,8 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const id = parseInt(id);
+		const { id: idParam } = await params;
+		const id = parseInt(idParam, 10);
 		await ExpenseService.delete(id, userId);
 
 		return NextResponse.json({ success: true });

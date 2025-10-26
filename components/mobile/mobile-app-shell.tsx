@@ -1,17 +1,134 @@
 'use client';
 
-import { useDeviceInfo, useMobileNavigation, useAppInstallPrompt } from '@/hooks/use-mobile-app';
+import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import { isMobile, isTablet, isDesktop } from 'react-device-detect';
+import { useMediaQuery } from 'react-responsive';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Menu, Download, X, Smartphone } from 'lucide-react';
-import dynamic from 'next/dynamic';
 
-// Dynamically import the mobile navigation component to prevent SSR hydration issues
-const MobileNavigationContent = dynamic(() => Promise.resolve(MobileNavigation), {
-	ssr: false,
-	loading: () => <div className="min-h-screen bg-background">{/* Loading placeholder */}</div>
-});
+interface DeviceInfo {
+	isMobile: boolean;
+	isTablet: boolean;
+	isDesktop: boolean;
+	isMobileOrTablet: boolean;
+	screenSize: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+	orientation: 'portrait' | 'landscape';
+}
+
+function useDeviceInfo(): DeviceInfo {
+	const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
+
+	// Responsive breakpoints
+	const isXs = useMediaQuery({ maxWidth: 575 });
+	const isSm = useMediaQuery({ minWidth: 576, maxWidth: 767 });
+	const isMd = useMediaQuery({ minWidth: 768, maxWidth: 991 });
+	const isLg = useMediaQuery({ minWidth: 992, maxWidth: 1199 });
+	const isXl = useMediaQuery({ minWidth: 1200, maxWidth: 1399 });
+	const is2Xl = useMediaQuery({ minWidth: 1400 });
+
+	// Determine screen size
+	let screenSize: DeviceInfo['screenSize'] = 'xs';
+	if (is2Xl) screenSize = '2xl';
+	else if (isXl) screenSize = 'xl';
+	else if (isLg) screenSize = 'lg';
+	else if (isMd) screenSize = 'md';
+	else if (isSm) screenSize = 'sm';
+
+	// Handle orientation changes
+	useEffect(() => {
+		const handleOrientationChange = () => {
+			setOrientation(window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
+		};
+
+		handleOrientationChange();
+		window.addEventListener('resize', handleOrientationChange);
+		window.addEventListener('orientationchange', handleOrientationChange);
+
+		return () => {
+			window.removeEventListener('resize', handleOrientationChange);
+			window.removeEventListener('orientationchange', handleOrientationChange);
+		};
+	}, []);
+
+	return {
+		isMobile: isMobile || isXs,
+		isTablet: isTablet || isSm || isMd,
+		isDesktop: isDesktop || isLg || isXl || is2Xl,
+		isMobileOrTablet: (isMobile || isTablet || isXs || isSm || isMd),
+		screenSize,
+		orientation,
+	};
+}
+
+function useMobileNavigation() {
+	const { isMobileOrTablet } = useDeviceInfo();
+	const [isOpen, setIsOpen] = useState(false);
+
+	useEffect(() => {
+		if (!isMobileOrTablet) {
+			setIsOpen(false);
+		}
+	}, [isMobileOrTablet]);
+
+	return {
+		isOpen,
+		setIsOpen,
+		toggle: () => setIsOpen(!isOpen),
+		close: () => setIsOpen(false),
+		open: () => setIsOpen(true),
+	};
+}
+
+function useAppInstallPrompt() {
+	const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
+	const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+
+	useEffect(() => {
+		const handleBeforeInstallPrompt = (e: Event) => {
+			e.preventDefault();
+			setDeferredPrompt(e);
+			setShowInstallPrompt(true);
+		};
+
+		const handleAppInstalled = () => {
+			setDeferredPrompt(null);
+			setShowInstallPrompt(false);
+		};
+
+		window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+		window.addEventListener('appinstalled', handleAppInstalled);
+
+		return () => {
+			window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+			window.removeEventListener('appinstalled', handleAppInstalled);
+		};
+	}, []);
+
+	const installApp = async () => {
+		if (!deferredPrompt) return;
+
+		(deferredPrompt as any).prompt();
+		const { outcome } = await (deferredPrompt as any).userChoice;
+
+		if (outcome === 'accepted') {
+			setDeferredPrompt(null);
+			setShowInstallPrompt(false);
+		}
+	};
+
+	return {
+		showInstallPrompt,
+		installApp,
+		dismissPrompt: () => {
+			setShowInstallPrompt(false);
+			setDeferredPrompt(null);
+		},
+	};
+}
 
 interface MobileNavigationProps {
 	children: React.ReactNode;
@@ -21,8 +138,10 @@ function MobileNavigation({ children }: MobileNavigationProps) {
 	const { isMobileOrTablet, screenSize, orientation } = useDeviceInfo();
 	const { isOpen, setIsOpen } = useMobileNavigation();
 	const { showInstallPrompt, installApp, dismissPrompt } = useAppInstallPrompt();
+	const pathname = usePathname();
 
-	if (!isMobileOrTablet) {
+	// Don't render mobile shell for dashboard pages - they have their own layout
+	if (!isMobileOrTablet || pathname.startsWith('/dashboard')) {
 		return <>{children}</>;
 	}
 
@@ -102,12 +221,28 @@ function MobileNavigation({ children }: MobileNavigationProps) {
 	);
 }
 
-export function MobileAppShell({ children }: { children: React.ReactNode }) {
-	const { isMobileOrTablet } = useDeviceInfo();
+// Dynamic import for the entire MobileNavigation component to prevent SSR
+const DynamicMobileNavigation = dynamic(() => Promise.resolve(MobileNavigation), {
+	ssr: false,
+	loading: () => <div className="min-h-screen bg-background">{/* Loading placeholder */}</div>
+});
 
-	if (isMobileOrTablet) {
-		return <MobileNavigationContent>{children}</MobileNavigationContent>;
+export function MobileAppShell({ children }: { children: React.ReactNode }) {
+	// Check if children contain layout components that provide their own navigation
+	const childrenArray = React.Children.toArray(children);
+	const hasLayoutNavigation = childrenArray.some((child) => {
+		if (React.isValidElement(child)) {
+			const componentName = (child.type as any)?.name || child.type?.toString() || '';
+			return componentName.includes('EnhancedLayout') || componentName.includes('enhanced-layout');
+		}
+		return false;
+	});
+
+	// If children have their own layout, just pass them through
+	if (hasLayoutNavigation) {
+		return <>{children}</>;
 	}
 
-	return <>{children}</>;
+	// For other cases, use dynamic mobile navigation
+	return <DynamicMobileNavigation>{children}</DynamicMobileNavigation>;
 }

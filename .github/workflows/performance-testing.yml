@@ -1,0 +1,146 @@
+name: Performance Testing
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+  schedule:
+    # Run performance tests weekly
+    - cron: '0 2 * * 0'
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8'
+
+jobs:
+  load-testing:
+    name: Load Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup database
+        run: |
+          pnpm db:generate
+          pnpm db:push
+
+      - name: Install K6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Start application
+        run: pnpm start &
+        env:
+          CI: true
+
+      - name: Wait for application to be ready
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 1; done'
+
+      - name: Run API load tests
+        run: |
+          echo "Running API load tests..."
+          k6 run performance-tests/api-load-test.js --out json=performance-tests/reports/api-load-results.json
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: Run dashboard load tests
+        run: |
+          echo "Running dashboard load tests..."
+          k6 run performance-tests/dashboard-load-test.js --out json=performance-tests/reports/dashboard-load-results.json
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: Run form load tests
+        run: |
+          echo "Running form load tests..."
+          k6 run performance-tests/form-load-test.js --out json=performance-tests/reports/form-load-results.json
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: Upload performance reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: performance-reports
+          path: performance-tests/reports/
+          retention-days: 30
+
+      - name: Performance test summary
+        run: |
+          echo "📊 Performance Test Results:"
+          echo "API Load Test: $(cat performance-tests/reports/api-load-results.json | jq -r '.metrics.http_req_duration.values.avg // "N/A"')ms average"
+          echo "Dashboard Load Test: $(cat performance-tests/reports/dashboard-load-results.json | jq -r '.metrics.http_req_duration.values.avg // "N/A"')ms average"
+          echo "Form Load Test: $(cat performance-tests/reports/form-load-results.json | jq -r '.metrics.http_req_duration.values.avg // "N/A"')ms average"
+
+  lighthouse-testing:
+    name: Lighthouse Performance Testing
+    runs-on: ubuntu-latest
+    needs: load-testing
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Start application
+        run: pnpm start &
+        env:
+          CI: true
+
+      - name: Wait for application
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 1; done'
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun --upload.target=temporary-public-storage
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 30

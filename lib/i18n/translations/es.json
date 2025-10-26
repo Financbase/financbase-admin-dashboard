@@ -1,0 +1,44 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar"
+  },
+  "navigation": {
+    "dashboard": "Panel de Control",
+    "transactions": "Transacciones",
+    "invoices": "Facturas",
+    "expenses": "Gastos",
+    "reports": "Informes",
+    "settings": "Configuración",
+    "workflows": "Flujos de Trabajo",
+    "webhooks": "Webhooks",
+    "integrations": "Integraciones",
+    "monitoring": "Monitoreo",
+    "marketplace": "Mercado",
+    "help": "Ayuda"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "overview": "Resumen",
+    "recentActivity": "Actividad Reciente",
+    "quickActions": "Acciones Rápidas"
+  },
+  "auth": {
+    "signIn": "Iniciar Sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar Sesión",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?"
+  }
+}

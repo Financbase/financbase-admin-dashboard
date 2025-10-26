@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccountBalances } from "@/hooks/use-dashboard-data";
+import { useAccountBalances } from "@/hooks/use-dashboard-data-optimized";
 import { cn } from "@/lib/utils";
 import {
 	ArrowDownLeft,

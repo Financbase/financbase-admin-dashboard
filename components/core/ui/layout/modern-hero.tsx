@@ -1077,7 +1077,7 @@ const FinancbaseLandingPage = () => {
 						<div className="grid grid-cols-1 md:grid-cols-4 gap-8">
 							<div>
 								<img
-									src="/financbase-logo.png"
+									src="/financbase-logo-white.png"
 									alt="Financbase Logo"
 									className="h-8 w-auto mb-4 no-filter"
 									style={{ filter: "none", WebkitFilter: "none" }}

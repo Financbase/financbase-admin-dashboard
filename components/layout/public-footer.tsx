@@ -59,7 +59,7 @@ export function PublicFooter() {
 					<div className="lg:col-span-1">
 						<div className="mb-4">
 							<Link href="/" className="inline-block">
-								<FinancbaseLogo size="md" />
+								<FinancbaseLogo size="md" variant="white" />
 							</Link>
 						</div>
 						<p className="text-sm text-muted-foreground mb-4">

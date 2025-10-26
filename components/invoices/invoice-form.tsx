@@ -5,9 +5,8 @@
  * Create and edit invoices with line items
  */
 
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +28,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { toast } from '@/hooks/use-toast';
+import { useFormSubmission } from '@/hooks/use-form-submission';
 import { nanoid } from 'nanoid';
 
 interface LineItem {
@@ -63,7 +62,16 @@ interface InvoiceFormProps {
 
 export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormProps) {
 	const router = useRouter();
-	const queryClient = useQueryClient();
+	const clientNameId = useId();
+	const clientEmailId = useId();
+	const clientPhoneId = useId();
+	const clientAddressId = useId();
+	const issueDateId = useId();
+	const dueDateId = useId();
+	const taxRateId = useId();
+	const discountId = useId();
+	const notesId = useId();
+	const termsId = useId();
 
 	const [formData, setFormData] = useState<InvoiceFormData>({
 		clientName: initialData?.clientName || '',
@@ -93,9 +101,9 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 	const taxAmount = (subtotal - formData.discountAmount) * (formData.taxRate / 100);
 	const total = subtotal - formData.discountAmount + taxAmount;
 
-	// Create/Update mutation
-	const saveMutation = useMutation({
-		mutationFn: async (data: InvoiceFormData) => {
+	// Form submission hook
+	const { submit, isLoading, error } = useFormSubmission(
+		async (data: InvoiceFormData) => {
 			const url = invoiceId ? `/api/invoices/${invoiceId}` : '/api/invoices';
 			const method = invoiceId ? 'PUT' : 'POST';
 
@@ -115,22 +123,14 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 
 			return response.json();
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['invoices'] });
-			toast({
-				title: 'Success',
-				description: invoiceId ? 'Invoice updated' : 'Invoice created',
-			});
-			router.push('/invoices');
-		},
-		onError: (error: Error) => {
-			toast({
-				title: 'Error',
-				description: error.message || 'Failed to save invoice',
-				variant: 'destructive',
-			});
-		},
-	});
+		{
+			onSuccess: () => {
+				router.push('/invoices');
+			},
+			successMessage: invoiceId ? 'Invoice updated successfully' : 'Invoice created successfully',
+			errorMessage: 'Failed to save invoice',
+		}
+	);
 
 	const handleAddItem = () => {
 		setFormData({
@@ -172,33 +172,46 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 		});
 	};
 
-	const handleSubmit = (e: React.FormEvent, action: 'save' | 'send' = 'save') => {
+	const handleSubmit = async (e: React.FormEvent, action: 'save' | 'send' = 'save') => {
 		e.preventDefault();
 
 		// Validation
 		if (!formData.clientName || !formData.clientEmail) {
-			toast({
-				title: 'Error',
-				description: 'Client name and email are required',
-				variant: 'destructive',
-			});
+			toast.error('Validation Error', 'Client name and email are required');
 			return;
 		}
 
 		if (formData.items.length === 0 || formData.items.every(item => !item.description)) {
-			toast({
-				title: 'Error',
-				description: 'At least one line item is required',
-				variant: 'destructive',
-			});
+			toast.error('Validation Error', 'At least one line item is required');
 			return;
 		}
 
-		saveMutation.mutate(formData);
+		// Prepare data for API
+		const apiData = {
+			...formData,
+			status: action === 'send' ? 'sent' : 'draft',
+			subtotal: subtotal,
+			taxAmount: taxAmount,
+			total: total,
+		};
+
+		try {
+			await submit(apiData);
+		} catch {
+			// Error handling is done in the hook
+		}
 	};
 
 	return (
-		<form onSubmit={(e) => handleSubmit(e, 'save')} className="space-y-6">
+		<div className="space-y-6">
+			{error && (
+				<Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+					<CardContent className="pt-6">
+						<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+					</CardContent>
+				</Card>
+			)}
+			<form onSubmit={(e) => handleSubmit(e, 'save')} className="space-y-6">
 			{/* Client Information */}
 			<Card>
 				<CardHeader>
@@ -208,18 +221,18 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 				<CardContent className="space-y-4">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="clientName">Client Name *</Label>
+							<Label htmlFor={clientNameId}>Client Name *</Label>
 							<Input
-								id="clientName"
+								id={clientNameId}
 								value={formData.clientName}
 								onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
 								required
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="clientEmail">Client Email *</Label>
+							<Label htmlFor={clientEmailId}>Client Email *</Label>
 							<Input
-								id="clientEmail"
+								id={clientEmailId}
 								type="email"
 								value={formData.clientEmail}
 								onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
@@ -227,17 +240,17 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="clientPhone">Phone</Label>
+							<Label htmlFor={clientPhoneId}>Phone</Label>
 							<Input
-								id="clientPhone"
+								id={clientPhoneId}
 								value={formData.clientPhone}
 								onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="clientAddress">Address</Label>
+							<Label htmlFor={clientAddressId}>Address</Label>
 							<Input
-								id="clientAddress"
+								id={clientAddressId}
 								value={formData.clientAddress}
 								onChange={(e) => setFormData({ ...formData, clientAddress: e.target.value })}
 							/>
@@ -254,9 +267,9 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 				<CardContent className="space-y-4">
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="issueDate">Issue Date</Label>
+							<Label htmlFor={issueDateId}>Issue Date</Label>
 							<Input
-								id="issueDate"
+								id={issueDateId}
 								type="date"
 								value={formData.issueDate}
 								onChange={(e) => setFormData({ ...formData, issueDate: e.target.value })}
@@ -264,9 +277,9 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="dueDate">Due Date</Label>
+							<Label htmlFor={dueDateId}>Due Date</Label>
 							<Input
-								id="dueDate"
+								id={dueDateId}
 								type="date"
 								value={formData.dueDate}
 								onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
@@ -376,9 +389,9 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 				<CardContent className="space-y-4">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="taxRate">Tax Rate (%)</Label>
+							<Label htmlFor={taxRateId}>Tax Rate (%)</Label>
 							<Input
-								id="taxRate"
+								id={taxRateId}
 								type="number"
 								min="0"
 								max="100"
@@ -388,9 +401,9 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="discount">Discount Amount</Label>
+							<Label htmlFor={discountId}>Discount Amount</Label>
 							<Input
-								id="discount"
+								id={discountId}
 								type="number"
 								min="0"
 								step="0.01"
@@ -435,9 +448,9 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="space-y-2">
-						<Label htmlFor="notes">Notes</Label>
+						<Label htmlFor={notesId}>Notes</Label>
 						<Textarea
-							id="notes"
+							id={notesId}
 							value={formData.notes}
 							onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
 							placeholder="Any additional notes for the client"
@@ -445,9 +458,9 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 						/>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="terms">Terms & Conditions</Label>
+						<Label htmlFor={termsId}>Terms & Conditions</Label>
 						<Textarea
-							id="terms"
+							id={termsId}
 							value={formData.terms}
 							onChange={(e) => setFormData({ ...formData, terms: e.target.value })}
 							placeholder="Payment terms and conditions"
@@ -472,23 +485,24 @@ export function InvoiceForm({ initialData, invoiceId, onCancel }: InvoiceFormPro
 						<Button
 							type="submit"
 							variant="outline"
-							disabled={saveMutation.isPending}
+							disabled={isLoading}
 						>
 							<Save className="h-4 w-4 mr-2" />
-							Save as Draft
+							{isLoading ? 'Saving...' : 'Save as Draft'}
 						</Button>
 						<Button
 							type="button"
 							onClick={(e) => handleSubmit(e, 'send')}
-							disabled={saveMutation.isPending}
+							disabled={isLoading}
 						>
 							<Send className="h-4 w-4 mr-2" />
-							Save & Send
+							{isLoading ? 'Sending...' : 'Save & Send'}
 						</Button>
 					</div>
 				</CardFooter>
 			</Card>
 		</form>
+		</div>
 	);
 }
 

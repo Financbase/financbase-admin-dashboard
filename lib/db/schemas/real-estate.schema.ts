@@ -1,5 +1,4 @@
 import { pgTable, text, integer, decimal, timestamp, boolean, uuid, jsonb } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Properties table
@@ -21,6 +20,7 @@ export const properties = pgTable("properties", {
 	bathrooms: decimal("bathrooms", { precision: 3, scale: 1 }),
 	parkingSpaces: integer("parking_spaces").default(0),
 	description: text("description"),
+	status: text("status").default("active"), // 'active', 'inactive', 'sold', 'maintenance'
 	isActive: boolean("is_active").default(true),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -35,6 +35,7 @@ export const propertyExpenses = pgTable("property_expenses", {
 	amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
 	description: text("description"),
 	date: timestamp("date").notNull(),
+	expenseDate: timestamp("expense_date").notNull(), // Alias for date
 	isRecurring: boolean("is_recurring").default(false),
 	recurringFrequency: text("recurring_frequency"), // 'monthly', 'quarterly', 'yearly'
 	vendor: text("vendor"),
@@ -53,6 +54,7 @@ export const propertyIncome = pgTable("property_income", {
 	amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
 	description: text("description"),
 	date: timestamp("date").notNull(),
+	incomeDate: timestamp("income_date").notNull(), // Alias for date
 	paymentStatus: text("payment_status").default("pending"), // 'pending', 'received', 'late', 'missed'
 	isRecurring: boolean("is_recurring").default(true),
 	recurringFrequency: text("recurring_frequency"), // 'monthly', 'weekly', etc.
@@ -217,30 +219,201 @@ export type NewPropertyROI = typeof propertyROI.$inferInsert;
 export type MaintenanceRequest = typeof maintenanceRequests.$inferSelect;
 export type NewMaintenanceRequest = typeof maintenanceRequests.$inferInsert;
 
-// Zod schemas for validation
-export const propertySchema = createSelectSchema(properties);
-export const newPropertySchema = createInsertSchema(properties);
+// Zod schemas for validation using manual definitions
+export const propertySchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	name: z.string(),
+	address: z.string(),
+	city: z.string(),
+	state: z.string(),
+	zipCode: z.string(),
+	country: z.string().default("US"),
+	propertyType: z.string(),
+	purchasePrice: z.number(),
+	currentValue: z.number().optional(),
+	squareFootage: z.number().optional(),
+	yearBuilt: z.number().optional(),
+	bedrooms: z.number().optional(),
+	bathrooms: z.number().optional(),
+	parkingSpaces: z.number().default(0),
+	description: z.string().optional(),
+	status: z.string().default("active"),
+	isActive: z.boolean().default(true),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-export const propertyExpenseSchema = createSelectSchema(propertyExpenses);
-export const newPropertyExpenseSchema = createInsertSchema(propertyExpenses);
+export const newPropertySchema = propertySchema.omit({ id: true, createdAt: true, updatedAt: true });
 
-export const propertyIncomeSchema = createSelectSchema(propertyIncome);
-export const newPropertyIncomeSchema = createInsertSchema(propertyIncome);
+export const propertyExpenseSchema = z.object({
+	id: z.string().uuid(),
+	propertyId: z.string().uuid(),
+	userId: z.string(),
+	category: z.string(),
+	amount: z.number(),
+	description: z.string().optional(),
+	date: z.date(),
+	expenseDate: z.date(),
+	isRecurring: z.boolean().default(false),
+	recurringFrequency: z.string().optional(),
+	vendor: z.string().optional(),
+	receiptUrl: z.string().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-export const propertyValuationSchema = createSelectSchema(propertyValuations);
-export const newPropertyValuationSchema = createInsertSchema(propertyValuations);
+export const newPropertyExpenseSchema = propertyExpenseSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
-export const tenantSchema = createSelectSchema(tenants);
-export const newTenantSchema = createInsertSchema(tenants);
+export const propertyIncomeSchema = z.object({
+	id: z.string().uuid(),
+	propertyId: z.string().uuid(),
+	userId: z.string(),
+	source: z.string(),
+	incomeType: z.string(),
+	amount: z.number(),
+	description: z.string().optional(),
+	date: z.date(),
+	incomeDate: z.date(),
+	paymentStatus: z.string().default("pending"),
+	isRecurring: z.boolean().default(true),
+	recurringFrequency: z.string().optional(),
+	tenantId: z.string().uuid().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-export const propertyUnitSchema = createSelectSchema(propertyUnits);
-export const newPropertyUnitSchema = createInsertSchema(propertyUnits);
+export const newPropertyIncomeSchema = propertyIncomeSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
-export const leaseSchema = createSelectSchema(leases);
-export const newLeaseSchema = createInsertSchema(leases);
+export const propertyValuationSchema = z.object({
+	id: z.string().uuid(),
+	propertyId: z.string().uuid(),
+	userId: z.string(),
+	valuationDate: z.date(),
+	estimatedValue: z.number(),
+	appraisalValue: z.number().optional(),
+	source: z.string(),
+	notes: z.string().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-export const propertyROISchema = createSelectSchema(propertyROI);
-export const newPropertyROISchema = createInsertSchema(propertyROI);
+export const newPropertyValuationSchema = propertyValuationSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
-export const maintenanceRequestSchema = createSelectSchema(maintenanceRequests);
-export const newMaintenanceRequestSchema = createInsertSchema(maintenanceRequests);
+export const tenantSchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	propertyId: z.string().uuid().optional(),
+	unitId: z.string().uuid().optional(),
+	firstName: z.string(),
+	lastName: z.string(),
+	email: z.string().optional(),
+	phone: z.string().optional(),
+	dateOfBirth: z.date().optional(),
+	ssn: z.string().optional(),
+	emergencyContact: z.any().optional(),
+	currentAddress: z.string().optional(),
+	employmentInfo: z.any().optional(),
+	creditScore: z.number().optional(),
+	backgroundCheckStatus: z.string().default("pending"),
+	backgroundCheckDate: z.date().optional(),
+	status: z.string().default("active"),
+	notes: z.string().optional(),
+	isActive: z.boolean().default(true),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newTenantSchema = tenantSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const propertyUnitSchema = z.object({
+	id: z.string().uuid(),
+	propertyId: z.string().uuid(),
+	userId: z.string(),
+	unitNumber: z.string(),
+	bedrooms: z.number(),
+	bathrooms: z.number(),
+	squareFootage: z.number().optional(),
+	monthlyRent: z.number().optional(),
+	isOccupied: z.boolean().default(false),
+	tenantId: z.string().uuid().optional(),
+	leaseStartDate: z.date().optional(),
+	leaseEndDate: z.date().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newPropertyUnitSchema = propertyUnitSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const leaseSchema = z.object({
+	id: z.string().uuid(),
+	propertyId: z.string().uuid(),
+	unitId: z.string().uuid().optional(),
+	tenantId: z.string().uuid(),
+	userId: z.string(),
+	leaseStartDate: z.date(),
+	leaseEndDate: z.date(),
+	startDate: z.date(),
+	endDate: z.date(),
+	monthlyRent: z.number(),
+	securityDeposit: z.number(),
+	depositPaid: z.boolean().default(false),
+	depositReturned: z.boolean().default(false),
+	depositReturnDate: z.date().optional(),
+	leaseTerms: z.any().optional(),
+	specialClauses: z.string().optional(),
+	status: z.string().default("active"),
+	isActive: z.boolean().default(true),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newLeaseSchema = leaseSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const propertyROISchema = z.object({
+	id: z.string().uuid(),
+	propertyId: z.string().uuid(),
+	userId: z.string(),
+	calculationDate: z.date().default(new Date()),
+	totalInvestment: z.number(),
+	currentValue: z.number(),
+	totalIncome: z.number(),
+	totalExpenses: z.number(),
+	netIncome: z.number(),
+	roi: z.number(),
+	cashFlow: z.number(),
+	capRate: z.number(),
+	cashOnCashReturn: z.number(),
+	appreciation: z.number(),
+	occupancyRate: z.number().optional(),
+	totalReturn: z.number().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newPropertyROISchema = propertyROISchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const maintenanceRequestSchema = z.object({
+	id: z.string().uuid(),
+	propertyId: z.string().uuid(),
+	unitId: z.string().uuid().optional(),
+	tenantId: z.string().uuid().optional(),
+	userId: z.string(),
+	title: z.string(),
+	description: z.string(),
+	category: z.string(),
+	priority: z.string(),
+	status: z.string().default("pending"),
+	reportedDate: z.date().default(new Date()),
+	scheduledDate: z.date().optional(),
+	completedDate: z.date().optional(),
+	assignedTo: z.string().optional(),
+	estimatedCost: z.number().optional(),
+	actualCost: z.number().optional(),
+	notes: z.string().optional(),
+	photos: z.any().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newMaintenanceRequestSchema = maintenanceRequestSchema.omit({ id: true, createdAt: true, updatedAt: true });

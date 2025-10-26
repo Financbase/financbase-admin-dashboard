@@ -1,5 +1,4 @@
 import { pgTable, text, integer, decimal, timestamp, boolean, uuid, jsonb } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Import base real estate tables
@@ -77,6 +76,7 @@ export const serviceRequests = pgTable("service_requests", {
 	priority: text("priority").default("medium"), // 'low', 'medium', 'high', 'emergency'
 	status: text("status").default("pending"), // 'pending', 'assigned', 'in_progress', 'completed', 'cancelled'
 	requestedDate: timestamp("requested_date").defaultNow().notNull(),
+	requestDate: timestamp("request_date").defaultNow().notNull(), // Alias for requestedDate
 	scheduledDate: timestamp("scheduled_date"),
 	completedDate: timestamp("completed_date"),
 	estimatedCost: decimal("estimated_cost", { precision: 8, scale: 2 }),
@@ -112,6 +112,7 @@ export const tenantApplications = pgTable("tenant_applications", {
 	desiredMoveInDate: timestamp("desired_move_in_date"),
 	leaseTerm: integer("lease_term"), // months
 	monthlyIncome: decimal("monthly_income", { precision: 10, scale: 2 }),
+	rentalAmount: decimal("rental_amount", { precision: 8, scale: 2 }), // Expected monthly rent
 	applicationFee: decimal("application_fee", { precision: 6, scale: 2 }),
 	status: text("status").default("pending"), // 'pending', 'under_review', 'approved', 'rejected', 'withdrawn'
 	decisionDate: timestamp("decision_date"),
@@ -194,11 +195,13 @@ export const propertyListings = pgTable("property_listings", {
 	userId: text("user_id").notNull(),
 	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }),
 	professionalId: uuid("professional_id").references(() => realEstateProfessionals.id, { onDelete: "set null" }),
+	realtorId: uuid("realtor_id").references(() => realEstateProfessionals.id, { onDelete: "set null" }), // Alias for professionalId
 	listingType: text("listing_type").notNull(), // 'sale', 'rent', 'lease'
 	listingPrice: decimal("listing_price", { precision: 15, scale: 2 }).notNull(),
 	listingDate: timestamp("listing_date").defaultNow().notNull(),
 	expirationDate: timestamp("expiration_date"),
 	status: text("status").default("active"), // 'active', 'pending', 'sold', 'rented', 'expired', 'withdrawn'
+	daysOnMarket: integer("days_on_market").default(0),
 	mlsNumber: text("mls_number"),
 	virtualTourUrl: text("virtual_tour_url"),
 	listingPhotos: jsonb("listing_photos"), // array of photo URLs
@@ -239,30 +242,221 @@ export type NewRealEstateProfessional = typeof realEstateProfessionals.$inferIns
 export type PropertyListing = typeof propertyListings.$inferSelect;
 export type NewPropertyListing = typeof propertyListings.$inferInsert;
 
-// Zod schemas for validation
-export const contractorSchema = createSelectSchema(contractors);
-export const newContractorSchema = createInsertSchema(contractors);
+// Zod schemas for validation using manual definitions
+export const contractorSchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	firstName: z.string(),
+	lastName: z.string(),
+	companyName: z.string().optional(),
+	email: z.string(),
+	phone: z.string(),
+	licenseNumber: z.string().optional(),
+	specialties: z.any().optional(),
+	serviceAreas: z.any().optional(),
+	rating: z.number().optional(),
+	reviewCount: z.number().default(0),
+	isActive: z.boolean().default(true),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-export const projectSchema = createSelectSchema(projects);
-export const newProjectSchema = createInsertSchema(projects);
+export const newContractorSchema = contractorSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
-export const projectTaskSchema = createSelectSchema(projectTasks);
-export const newProjectTaskSchema = createInsertSchema(projectTasks);
+export const projectSchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	propertyId: z.string().uuid().optional(),
+	contractorId: z.string().uuid().optional(),
+	title: z.string(),
+	description: z.string().optional(),
+	category: z.string(),
+	status: z.string().default("pending"),
+	priority: z.string().default("medium"),
+	estimatedCost: z.number().optional(),
+	actualCost: z.number().optional(),
+	startDate: z.date().optional(),
+	endDate: z.date().optional(),
+	completionDate: z.date().optional(),
+	notes: z.string().optional(),
+	photos: z.any().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-export const serviceRequestSchema = createSelectSchema(serviceRequests);
-export const newServiceRequestSchema = createInsertSchema(serviceRequests);
+export const newProjectSchema = projectSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
-export const tenantApplicationSchema = createSelectSchema(tenantApplications);
-export const newTenantApplicationSchema = createInsertSchema(tenantApplications);
+export const projectTaskSchema = z.object({
+	id: z.string().uuid(),
+	projectId: z.string().uuid(),
+	userId: z.string(),
+	title: z.string(),
+	description: z.string().optional(),
+	status: z.string().default("pending"),
+	assignedTo: z.string().optional(),
+	estimatedHours: z.number().optional(),
+	actualHours: z.number().optional(),
+	dueDate: z.date().optional(),
+	completedDate: z.date().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-export const lenderSchema = createSelectSchema(lenders);
-export const newLenderSchema = createInsertSchema(lenders);
+export const newProjectTaskSchema = projectTaskSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
-export const loanApplicationSchema = createSelectSchema(loanApplications);
-export const newLoanApplicationSchema = createInsertSchema(loanApplications);
+export const serviceRequestSchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	propertyId: z.string().uuid().optional(),
+	tenantId: z.string().uuid().optional(),
+	contractorId: z.string().uuid().optional(),
+	title: z.string(),
+	description: z.string(),
+	category: z.string(),
+	priority: z.string().default("medium"),
+	status: z.string().default("pending"),
+	requestedDate: z.date().default(new Date()),
+	requestDate: z.date().default(new Date()),
+	scheduledDate: z.date().optional(),
+	completedDate: z.date().optional(),
+	estimatedCost: z.number().optional(),
+	actualCost: z.number().optional(),
+	notes: z.string().optional(),
+	photos: z.any().optional(),
+	rating: z.number().optional(),
+	review: z.string().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-export const realEstateProfessionalSchema = createSelectSchema(realEstateProfessionals);
-export const newRealEstateProfessionalSchema = createInsertSchema(realEstateProfessionals);
+export const newServiceRequestSchema = serviceRequestSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
-export const propertyListingSchema = createSelectSchema(propertyListings);
-export const newPropertyListingSchema = createInsertSchema(propertyListings);
+export const tenantApplicationSchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	propertyId: z.string().uuid(),
+	unitId: z.string().uuid().optional(),
+	tenantId: z.string().uuid().optional(),
+	applicantId: z.string().uuid().optional(),
+	firstName: z.string(),
+	lastName: z.string(),
+	email: z.string(),
+	phone: z.string(),
+	dateOfBirth: z.date().optional(),
+	ssn: z.string().optional(),
+	currentAddress: z.string().optional(),
+	employmentInfo: z.any().optional(),
+	incomeVerification: z.any().optional(),
+	creditReport: z.any().optional(),
+	backgroundCheck: z.any().optional(),
+	references: z.any().optional(),
+	desiredMoveInDate: z.date().optional(),
+	leaseTerm: z.number().optional(),
+	monthlyIncome: z.number().optional(),
+	rentalAmount: z.number().optional(),
+	applicationFee: z.number().optional(),
+	status: z.string().default("pending"),
+	decisionDate: z.date().optional(),
+	notes: z.string().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newTenantApplicationSchema = tenantApplicationSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const lenderSchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	name: z.string(),
+	companyName: z.string().optional(),
+	email: z.string(),
+	phone: z.string().optional(),
+	website: z.string().optional(),
+	specialties: z.any().optional(),
+	serviceAreas: z.any().optional(),
+	rating: z.number().optional(),
+	reviewCount: z.number().default(0),
+	licenseNumber: z.string().optional(),
+	nmlsId: z.string().optional(),
+	isActive: z.boolean().default(true),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newLenderSchema = lenderSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const loanApplicationSchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	propertyId: z.string().uuid().optional(),
+	lenderId: z.string().uuid().optional(),
+	loanType: z.string(),
+	loanAmount: z.number(),
+	downPayment: z.number().optional(),
+	interestRate: z.number().optional(),
+	loanTerm: z.number(),
+	propertyValue: z.number().optional(),
+	lTV: z.number().optional(),
+	dti: z.number().optional(),
+	creditScore: z.number().optional(),
+	applicationDate: z.date().default(new Date()),
+	status: z.string().default("pending"),
+	approvalDate: z.date().optional(),
+	fundingDate: z.date().optional(),
+	closingDate: z.date().optional(),
+	notes: z.string().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newLoanApplicationSchema = loanApplicationSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const realEstateProfessionalSchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	firstName: z.string(),
+	lastName: z.string(),
+	companyName: z.string().optional(),
+	email: z.string(),
+	phone: z.string(),
+	licenseNumber: z.string(),
+	licenseType: z.string(),
+	specialties: z.any().optional(),
+	serviceAreas: z.any().optional(),
+	yearsExperience: z.number().optional(),
+	rating: z.number().optional(),
+	reviewCount: z.number().default(0),
+	website: z.string().optional(),
+	bio: z.string().optional(),
+	isActive: z.boolean().default(true),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newRealEstateProfessionalSchema = realEstateProfessionalSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const propertyListingSchema = z.object({
+	id: z.string().uuid(),
+	userId: z.string(),
+	propertyId: z.string().uuid().optional(),
+	professionalId: z.string().uuid().optional(),
+	realtorId: z.string().uuid().optional(),
+	listingType: z.string(),
+	listingPrice: z.number(),
+	listingDate: z.date().default(new Date()),
+	expirationDate: z.date().optional(),
+	status: z.string().default("active"),
+	daysOnMarket: z.number().default(0),
+	mlsNumber: z.string().optional(),
+	virtualTourUrl: z.string().optional(),
+	listingPhotos: z.any().optional(),
+	listingDescription: z.string().optional(),
+	commission: z.number().optional(),
+	commissionType: z.string().optional(),
+	showingInstructions: z.string().optional(),
+	notes: z.string().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
+export const newPropertyListingSchema = propertyListingSchema.omit({ id: true, createdAt: true, updatedAt: true });

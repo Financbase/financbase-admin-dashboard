@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { FinancbaseLogo } from '@/components/ui/financbase-logo'
 import { Button } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { Header } from '@/components/header'
 import PremiumHero from '@/components/home/premium-hero'
 import PremiumSocialProof from '@/components/home/premium-social-proof'
 import PremiumUSPs from '@/components/home/premium-usps'
@@ -12,49 +14,8 @@ import FAQ from '@/components/home/faq'
 export default function Home() {
 	return (
     <div className="min-h-screen">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <Link href="/" className="flex items-center space-x-2">
-                <FinancbaseLogo size="md" />
-              </Link>
-            </div>
-            <div className="hidden md:flex items-center space-x-6">
-              <Link href="/about" className="text-gray-600 hover:text-gray-900 transition-colors">
-                About
-              </Link>
-              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Pricing
-              </Link>
-              <Link href="/contact" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Contact
-              </Link>
-              <Link href="/docs" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Docs
-              </Link>
-              <Link href="/blog" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Blog
-              </Link>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Link
-                href="/auth/sign-in"
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/auth/sign-up"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* New Header Component */}
+      <Header />
 
       {/* Main Content */}
       <main>
@@ -95,10 +56,10 @@ export default function Home() {
       <footer className="bg-gray-900 text-gray-300 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
-                  <div>
-                    <div className="flex items-center space-x-2 mb-4">
-                      <FinancbaseLogo size="md" variant="white" />
-                    </div>
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <FinancbaseLogo size="md" variant="white" />
+              </div>
               <p className="text-sm">AI-powered financial intelligence for modern businesses.</p>
             </div>
             <div>

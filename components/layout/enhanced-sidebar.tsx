@@ -1,45 +1,42 @@
-"use client";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import { FinancbaseLogo } from "@/components/ui/financbase-logo";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import {
-	Activity,
+	LayoutDashboard,
+	CreditCard,
 	BarChart3,
+	FileText,
+	Receipt,
+	DollarSign,
+	ImageIcon,
+	Settings,
+	Film,
+	Activity,
+	ChevronLeft,
+	User,
+	Users,
+	Building2,
+	ShoppingBag,
 	Bot,
 	Brain,
-	Briefcase,
-	Building2,
-	ChevronDown,
-	ChevronRight,
-	CreditCard,
-	DollarSign,
-	FileText,
-	Filter,
-	HelpCircle,
-	Home,
-	LayoutDashboard,
-	Link2,
-	Megaphone,
-	Menu,
-	MessageSquare,
-	PieChart,
-	Settings,
-	Shield,
-	ShoppingCart,
-	Target,
-	TrendingUp,
-	Users,
-	Wallet,
 	Workflow,
-	X,
+	Store,
+	Shield,
+	TrendingUp,
+	Target,
+	Calendar,
+	HelpCircle,
+	Monitor,
 	Zap,
+	Database,
+	Network,
+	Briefcase,
+	Home,
+	LineChart
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
 
 interface EnhancedSidebarProps {
 	collapsed?: boolean;
@@ -53,229 +50,13 @@ interface EnhancedSidebarProps {
 	};
 }
 
-const navigationItems = [
-	{
-		name: "Dashboard",
-		href: "/dashboard",
-		icon: LayoutDashboard,
-		badge: null,
-	},
-	{
-		name: "Unified",
-		href: "/unified",
-		icon: TrendingUp,
-		badge: "New",
-	},
-	{
-		name: "Transactions",
-		href: "/transactions",
-		icon: CreditCard,
-		badge: null,
-	},
-	{
-		name: "Analytics",
-		href: "/analytics",
-		icon: BarChart3,
-		badge: null,
-	},
-	{
-		name: "Accounts",
-		href: "/accounts",
-		icon: Users,
-		badge: null,
-	},
-	{
-		name: "Payments",
-		href: "/payments",
-		icon: DollarSign,
-		badge: null,
-	},
-	{
-		name: "Reports",
-		href: "/reports",
-		icon: FileText,
-		badge: null,
-	},
-	{
-		name: "Collaboration",
-		href: "/collaboration",
-		icon: MessageSquare,
-		badge: "New",
-	},
-	{
-		name: "Workflows",
-		href: "/workflows",
-		icon: Workflow,
-		badge: null,
-	},
-	{
-		name: "Webhooks",
-		href: "/webhooks",
-		icon: Link2,
-		badge: null,
-	},
-	{
-		name: "Integrations",
-		href: "/integrations",
-		icon: Filter,
-		badge: null,
-	},
-	{
-		name: "Monitoring",
-		href: "/monitoring",
-		icon: Activity,
-		badge: null,
-	},
-	{
-		name: "Marketplace",
-		href: "/marketplace",
-		icon: ShoppingCart,
-		badge: null,
-	},
-	{
-		name: "Help",
-		href: "/help-center",
-		icon: HelpCircle,
-		badge: null,
-	},
-	{
-		name: "Security",
-		href: "/security-dashboard",
-		icon: Shield,
-		badge: null,
-	},
-	{
-		name: "Performance",
-		href: "/performance",
-		icon: Zap,
-		badge: null,
-	},
-	{
-		name: "Settings",
-		href: "/settings",
-		icon: Settings,
-		badge: null,
-	},
-	{
-		name: "Admin",
-		href: "/admin/rbac",
-		icon: Shield,
-		badge: null,
-		adminOnly: true,
-	},
-];
-
-const moduleItems = [
-	{
-		name: "Freelance",
-		href: "/freelance",
-		icon: Briefcase,
-		description: "Project management & billing",
-		color: "text-blue-600",
-	},
-	{
-		name: "Real Estate",
-		href: "/real-estate",
-		icon: Home,
-		description: "Property & rental income",
-		color: "text-green-600",
-	},
-	{
-		name: "Adboard",
-		href: "/adboard",
-		icon: Megaphone,
-		description: "Campaign management",
-		color: "text-purple-600",
-	},
-];
-
-const financialIntelligenceItems = [
-	{
-		name: "Financial Intelligence",
-		icon: Zap,
-		children: [
-			{ name: "Overview", href: "/financial-intelligence", icon: PieChart },
-			{
-				name: "Predictions",
-				href: "/financial-intelligence/predictions",
-				icon: Target,
-			},
-			{
-				name: "Recommendations",
-				href: "/financial-intelligence/recommendations",
-				icon: Activity,
-			},
-			{
-				name: "Health Score",
-				href: "/financial-intelligence/health",
-				icon: Wallet,
-			},
-		],
-	},
-	{
-		name: "AI Assistant",
-		icon: Brain,
-		children: [
-			{ name: "Assistant", href: "/ai-assistant", icon: MessageSquare },
-			{
-				name: "FinancbaseGPT",
-				href: "/financbase-gpt",
-				icon: Bot,
-				badge: "New",
-			},
-		],
-	},
-	{
-		name: "Market Analysis",
-		icon: Building2,
-		children: [
-			{
-				name: "Startup Metrics",
-				href: "/financial-intelligence/startup",
-				icon: TrendingUp,
-			},
-			{
-				name: "Agency Metrics",
-				href: "/financial-intelligence/agency",
-				icon: Users,
-			},
-			{
-				name: "E-commerce Metrics",
-				href: "/financial-intelligence/ecommerce",
-				icon: ShoppingCart,
-			},
-		],
-	},
-];
-
 export function EnhancedSidebar({
 	collapsed = false,
 	onToggleCollapse,
 	onClose,
 	user,
 }: EnhancedSidebarProps) {
-	const [expandedSections, setExpandedSections] = useState<string[]>([
-		"Financial Intelligence",
-	]);
 	const pathname = usePathname();
-
-	// Check if user is admin (simplified for now - would use proper auth check)
-	const isAdmin = true; // This should use proper auth check
-
-	const toggleSection = (sectionName: string) => {
-		setExpandedSections((prev) =>
-			prev.includes(sectionName)
-				? prev.filter((s) => s !== sectionName)
-				: [...prev, sectionName],
-		);
-	};
-
-	const isActive = (href: string) => pathname === href;
-
-	// Filter navigation items based on admin status
-	const visibleNavItems = navigationItems.filter(item =>
-		!item.adminOnly || (item.adminOnly && isAdmin)
-	);
 
 	return (
 		<motion.div
@@ -283,12 +64,13 @@ export function EnhancedSidebar({
 			animate={{ x: 0 }}
 			transition={{ duration: 0.3 }}
 			className={cn(
-				"flex h-full flex-col bg-background border-r transition-all duration-300",
+				"flex h-full flex-col transition-all duration-300",
+				"bg-[var(--sidebar)] border-r border-[var(--sidebar-border)]",
 				collapsed ? "w-16" : "w-64",
 			)}
 		>
 			{/* Header */}
-			<div className="flex h-16 items-center justify-between px-4 border-b">
+			<div className="flex h-16 items-center justify-between px-4 border-b border-[var(--sidebar-border)]">
 				{!collapsed && (
 					<Link href="/dashboard" className="flex items-center gap-2">
 						<FinancbaseLogo size="sm" />
@@ -299,29 +81,14 @@ export function EnhancedSidebar({
 						<FinancbaseLogo size="sm" />
 					</Link>
 				)}
-
-				<div className="flex items-center gap-2">
-					{onToggleCollapse && (
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={onToggleCollapse}
-							className="hidden lg:flex"
-						>
-							<Menu className="h-4 w-4" />
-						</Button>
-					)}
-					{onClose && (
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={onClose}
-							className="lg:hidden"
-						>
-							<X className="h-4 w-4" />
-						</Button>
-					)}
-				</div>
+				{onToggleCollapse && (
+					<button
+						onClick={onToggleCollapse}
+						className="p-1.5 rounded-md hover:bg-[var(--sidebar-accent)] transition-colors"
+					>
+						<ChevronLeft className={cn("h-4 w-4 text-[var(--sidebar-foreground)]", collapsed && "rotate-180")} />
+					</button>
+				)}
 			</div>
 
 			{/* Navigation */}
@@ -329,193 +96,518 @@ export function EnhancedSidebar({
 				<div className="px-4 space-y-6">
 					{/* Main Navigation */}
 					<div>
-						<h3
-							className={cn(
-								"px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider",
-								collapsed && "hidden",
-							)}
-						>
+						<h3 className={cn(
+							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
+							"text-[var(--sidebar-foreground)] opacity-60",
+							collapsed && "hidden",
+						)}>
 							Main
 						</h3>
-						<ul className="mt-2 space-y-1">
-							{visibleNavItems.map((item) => (
-								<li key={item.name}>
-									<Link
-										href={item.href}
-										className={cn(
-											"group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-											isActive(item.href)
-												? "bg-primary text-primary-foreground shadow-sm"
-												: "text-muted-foreground hover:bg-muted hover:text-foreground",
-										)}
-									>
-										<item.icon
-											className={cn(
-												"h-5 w-5 shrink-0",
-												isActive(item.href)
-													? "text-primary-foreground"
-													: "text-muted-foreground group-hover:text-foreground",
-											)}
-										/>
-										{!collapsed && (
-											<>
-												<span className="flex-1">{item.name}</span>
-												{item.badge && (
-													<Badge variant="secondary" className="text-xs">
-														{item.badge}
-													</Badge>
-												)}
-											</>
-										)}
-									</Link>
-								</li>
-							))}
+						<ul className="space-y-1">
+							<li>
+								<Link
+									href="/dashboard"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/dashboard"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<LayoutDashboard className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Dashboard</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/transactions"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/transactions"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<CreditCard className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Transactions</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/analytics"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/analytics"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<BarChart3 className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Analytics</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/reports"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/reports"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<FileText className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Reports</span>}
+								</Link>
+							</li>
 						</ul>
 					</div>
 
-					{/* Platform Features Section */}
+					{/* Financial Management */}
 					<div>
-						<h3
-							className={cn(
-								"px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider",
-								collapsed && "hidden",
-							)}
-						>
-							Platform
+						<h3 className={cn(
+							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
+							"text-[var(--sidebar-foreground)] opacity-60",
+							collapsed && "hidden",
+						)}>
+							Financial
 						</h3>
-					</div>
-
-					{/* Financial Intelligence Section */}
-					<div>
-						<h3
-							className={cn(
-								"px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider",
-								collapsed && "hidden",
-							)}
-						>
-							Intelligence
-						</h3>
-						<div className="mt-2 space-y-1">
-							{financialIntelligenceItems.map((section) => (
-								<div key={section.name}>
-									<button
-										type="button"
-										onClick={() => toggleSection(section.name)}
-										className={cn(
-											"group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200",
-											collapsed && "justify-center",
-										)}
-									>
-										<section.icon className="h-5 w-5 shrink-0" />
-										{!collapsed && (
-											<>
-												<span className="flex-1 text-left">{section.name}</span>
-												{expandedSections.includes(section.name) ? (
-													<ChevronDown className="h-4 w-4" />
-												) : (
-													<ChevronRight className="h-4 w-4" />
-												)}
-											</>
-										)}
-									</button>
-
-									{!collapsed && expandedSections.includes(section.name) && (
-										<motion.div
-											initial={{ opacity: 0, height: 0 }}
-											animate={{ opacity: 1, height: "auto" }}
-											exit={{ opacity: 0, height: 0 }}
-											className="ml-6 space-y-1 mt-1"
-										>
-											{section.children.map((child) => (
-												<Link
-													key={child.name}
-													href={child.href}
-													className={cn(
-														"group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200",
-														isActive(child.href)
-															? "bg-primary/10 text-primary"
-															: "text-muted-foreground hover:bg-muted hover:text-foreground",
-													)}
-												>
-													<child.icon className="h-4 w-4 shrink-0" />
-													<span>{child.name}</span>
-												</Link>
-											))}
-										</motion.div>
+						<ul className="space-y-1">
+							<li>
+								<Link
+									href="/invoices"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/invoices"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
 									)}
-								</div>
-							))}
-						</div>
+								>
+									<Receipt className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Invoices</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/expenses"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/expenses"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<DollarSign className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Expenses</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/bill-pay"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/bill-pay"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<FileText className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Bill Pay</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/accounts"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/accounts"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Building2 className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Accounts</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/financial-intelligence"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/financial-intelligence"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Brain className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Financial Intelligence</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/financial-intelligence/agency"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/financial-intelligence/agency"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Building2 className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Agency Intelligence</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/financial-intelligence/ecommerce"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/financial-intelligence/ecommerce"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<ShoppingBag className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">E-commerce Intelligence</span>}
+								</Link>
+							</li>
+						</ul>
 					</div>
 
-					{/* Modules Section */}
+					{/* Business Management */}
 					<div>
-						<h3
-							className={cn(
-								"px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider",
-								collapsed && "hidden",
-							)}
-						>
-							Modules
+						<h3 className={cn(
+							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
+							"text-[var(--sidebar-foreground)] opacity-60",
+							collapsed && "hidden",
+						)}>
+							Business
 						</h3>
-						<ul className="mt-2 space-y-1">
-							{moduleItems.map((item) => (
-								<li key={item.name}>
-									<Link
-										href={item.href}
-										className={cn(
-											"group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-											isActive(item.href)
-												? "bg-primary text-primary-foreground shadow-sm"
-												: "text-muted-foreground hover:bg-muted hover:text-foreground",
-										)}
-									>
-										<item.icon
-											className={cn(
-												"h-5 w-5 shrink-0",
-												isActive(item.href)
-													? "text-primary-foreground"
-													: item.color,
-											)}
-										/>
-										{!collapsed && (
-											<div className="flex-1">
-												<span>{item.name}</span>
-												<p className="text-xs text-muted-foreground">
-													{item.description}
-												</p>
-											</div>
-										)}
-									</Link>
-								</li>
-							))}
+						<ul className="space-y-1">
+							<li>
+								<Link
+									href="/clients"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/clients"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Users className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Clients</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/marketplace"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/marketplace"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Store className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Marketplace</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/workflows"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/workflows"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Workflow className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Workflows</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/leads"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/leads"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Target className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Leads</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/adboard"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/adboard"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Briefcase className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Adboard</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/real-estate"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/real-estate"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Home className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Real Estate</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/freelance"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/freelance"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<User className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Freelance</span>}
+								</Link>
+							</li>
+						</ul>
+					</div>
+
+					{/* AI & Intelligence */}
+					<div>
+						<h3 className={cn(
+							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
+							"text-[var(--sidebar-foreground)] opacity-60",
+							collapsed && "hidden",
+						)}>
+							AI & Intelligence
+						</h3>
+						<ul className="space-y-1">
+							<li>
+								<Link
+									href="/ai-assistant"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/ai-assistant"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Bot className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">AI Assistant</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/financbase-gpt"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/financbase-gpt"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Zap className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Financbase GPT</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/performance"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/performance"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<TrendingUp className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Performance</span>}
+								</Link>
+							</li>
+						</ul>
+					</div>
+
+					{/* Collaboration */}
+					<div>
+						<h3 className={cn(
+							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
+							"text-[var(--sidebar-foreground)] opacity-60",
+							collapsed && "hidden",
+						)}>
+							Collaboration
+						</h3>
+						<ul className="space-y-1">
+							<li>
+								<Link
+									href="/collaboration"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/collaboration"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Network className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Collaboration</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/security-dashboard"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/security-dashboard"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Shield className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Security</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/monitoring"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/monitoring"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Monitor className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Monitoring</span>}
+								</Link>
+							</li>
+						</ul>
+					</div>
+
+					{/* Tools & Media */}
+					<div>
+						<h3 className={cn(
+							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
+							"text-[var(--sidebar-foreground)] opacity-60",
+							collapsed && "hidden",
+						)}>
+							Tools & Media
+						</h3>
+						<ul className="space-y-1">
+							<li>
+								<Link
+									href="/gallery"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/gallery"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<ImageIcon className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Image Gallery</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/editor"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/editor"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Settings className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Image Editor</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/video"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/video"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Film className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Video Upload</span>}
+								</Link>
+							</li>
+							<li>
+								<Link
+									href="/integrations"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/integrations"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<Database className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Integrations</span>}
+								</Link>
+							</li>
+						</ul>
+					</div>
+
+					{/* Support & Help */}
+					<div>
+						<h3 className={cn(
+							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
+							"text-[var(--sidebar-foreground)] opacity-60",
+							collapsed && "hidden",
+						)}>
+							Support
+						</h3>
+						<ul className="space-y-1">
+							<li>
+								<Link
+									href="/help-center"
+									className={cn(
+										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+										pathname === "/help-center"
+											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+									)}
+								>
+									<HelpCircle className="h-4 w-4 flex-shrink-0" />
+									{!collapsed && <span className="flex-1">Help Center</span>}
+								</Link>
+							</li>
 						</ul>
 					</div>
 				</div>
 			</nav>
 
 			{/* Footer */}
-			<div className="border-t p-4">
-				<div
-					className={cn(
-						"flex items-center gap-3",
-						collapsed && "justify-center",
-					)}
-				>
-					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+			<div className="border-t border-[var(--sidebar-border)] p-4">
+				<div className={cn(
+					"flex items-center gap-3",
+					collapsed && "justify-center",
+				)}>
+					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] text-sm font-medium">
 						{user?.name?.charAt(0) || "U"}
 					</div>
 					{!collapsed && user && (
 						<div className="flex-1 min-w-0">
-							<p className="text-sm font-medium truncate">{user.name}</p>
-							<p className="text-xs text-muted-foreground truncate">
+							<p className="text-sm font-medium text-[var(--sidebar-foreground)] truncate">{user.name}</p>
+							<p className="text-xs text-[var(--sidebar-foreground)] opacity-60 truncate">
 								{user.email}
 							</p>
-							{user.role && (
-								<Badge variant="secondary" className="text-xs mt-1">
-									{user.role}
-								</Badge>
-							)}
 						</div>
 					)}
 				</div>

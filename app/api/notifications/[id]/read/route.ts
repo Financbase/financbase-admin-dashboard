@@ -4,11 +4,12 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/services/notification-service';
 
 export async function POST(
-	req: NextRequest,
+	_req: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
@@ -22,9 +23,9 @@ export async function POST(
 		}
 
 		const { id: idParam } = await params;
-		const notificationId = parseInt(idParam);
+		const notificationId = parseInt(idParam, 10);
 
-		if (Number.Number.isNaN(notificationId)) {
+		if (Number.isNaN(notificationId)) {
 			return NextResponse.json(
 				{ error: 'Invalid notification ID' },
 				{ status: 400 }

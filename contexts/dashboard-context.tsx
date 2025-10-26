@@ -34,3 +34,11 @@ export function useDashboardDateRange() {
 	}
 	return context;
 }
+
+export function useDashboard() {
+	const context = React.useContext(DashboardContext);
+	if (context === undefined) {
+		throw new Error('useDashboard must be used within a DashboardProvider');
+	}
+	return context;
+}

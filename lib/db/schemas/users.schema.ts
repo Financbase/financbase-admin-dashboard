@@ -3,17 +3,21 @@ import {
 	text,
 	timestamp,
 	uuid,
-	boolean as pgBoolean,
+	boolean,
 } from "drizzle-orm/pg-core";
 
-export const users = pgTable("users", {
+export const users = pgTable("financbase.users", {
 	id: uuid("id").primaryKey().defaultRandom(),
+	clerkId: text("clerk_id").notNull().unique(),
 	email: text("email").notNull().unique(),
-	name: text("name"),
-	avatar: text("avatar"),
-	role: text("role", { enum: ["admin", "user", "viewer"] }).default("user"),
-	isActive: pgBoolean("is_active").default(true),
-	lastLogin: timestamp("last_login"),
-	createdAt: timestamp("created_at").defaultNow(),
-	updatedAt: timestamp("updated_at").defaultNow(),
+	firstName: text("first_name"),
+	lastName: text("last_name"),
+	role: text("role", { enum: ["admin", "user", "viewer"] }).notNull().default("user"),
+	isActive: boolean("is_active").notNull().default(true),
+	organizationId: uuid("organization_id").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;

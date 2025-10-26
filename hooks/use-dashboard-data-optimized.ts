@@ -25,12 +25,12 @@ export function useDashboardStats() {
 		const fetchStats = async () => {
 			try {
 				setLoading(true);
-				// Mock data - in real app this would be an API call
+				// Mock data that matches what the OverviewStats component expects
 				const mockData: DashboardStats = {
-					revenue: { value: '$45,231.89', change: 20.1, changeType: 'increase' },
-					orders: { value: '2,350', change: 15.3, changeType: 'increase' },
-					customers: { value: '1,234', change: -5.2, changeType: 'decrease' },
-					products: { value: '89', change: 8.7, changeType: 'increase' },
+					revenue: { value: '$45,231.89', change: 12.5, changeType: 'increase' },
+					orders: { value: '8', change: 3, changeType: 'increase' }, // Invoices
+					customers: { value: '12', change: 2, changeType: 'increase' }, // Active Clients
+					products: { value: '$2,350.00', change: -5.2, changeType: 'decrease' }, // Monthly Expenses
 				};
 
 				setTimeout(() => {
