@@ -74,6 +74,41 @@ const nextConfig = {
 		// Enable experimental features for better development experience
 	},
 
+	// Security Headers
+	headers: async () => {
+		return [
+			{
+				source: '/(.*)',
+				headers: [
+					{
+						key: 'X-Frame-Options',
+						value: 'DENY',
+					},
+					{
+						key: 'X-Content-Type-Options',
+						value: 'nosniff',
+					},
+					{
+						key: 'Referrer-Policy',
+						value: 'strict-origin-when-cross-origin',
+					},
+					{
+						key: 'Permissions-Policy',
+						value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+					},
+					{
+						key: 'Strict-Transport-Security',
+						value: 'max-age=31536000; includeSubDomains',
+					},
+					{
+						key: 'Content-Security-Policy',
+						value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.financbase.com https://js.clerk.com https://clerk.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.financbase.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.financbase.com wss://ws.financbase.com https://clerk.com; frame-src https://clerk.com https://js.clerk.com;",
+					},
+				],
+			},
+		];
+	},
+
 	// Development mode configuration
 	output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
 
