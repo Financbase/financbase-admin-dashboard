@@ -1,0 +1,19 @@
+# Git LFS configuration for large binary files
+# Track Node.js binaries and installers
+node-installer.pkg filter=lfs diff=lfs merge=lfs -text
+node.tar.gz filter=lfs diff=lfs merge=lfs -text
+node-v20.11.0-darwin-x64/** filter=lfs diff=lfs merge=lfs -text
+# Track native binary modules
+*.node filter=lfs diff=lfs merge=lfs -text
+**/node_modules/**/.node filter=lfs diff=lfs merge=lfs -text
+# Track other large binary files
+*.pkg filter=lfs diff=lfs merge=lfs -text
+*.tar.gz filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+# Documentation and source files (keep in regular git)
+*.md filter= -text
+*.json filter= -text
+*.js filter= -text
+*.ts filter= -text
+*.tsx filter= -text
+*.css filter= -text

@@ -1,5 +1,3 @@
-#if defined(OPENSSL_NO_ASM)
-# include "./dso_conf_no-asm.h"
-#else
-# include "./dso_conf_asm.h"
-#endif
+version https://git-lfs.github.com/spec/v1
+oid sha256:6ae79a40205839e8a5435d5b5e1c01c005d6c433af1a5cf9e12a92c1b714fbc2
+size 102
