@@ -149,7 +149,7 @@ jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
-    needs: lint-and-typecheck
+    needs: comprehensive-testing
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -206,7 +206,7 @@ jobs:
   build:
     name: Build Application
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, test]
+    needs: [comprehensive-testing, test]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
