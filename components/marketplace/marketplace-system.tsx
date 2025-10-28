@@ -9,23 +9,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { 
-  Search, 
-  Filter, 
-  Grid, 
-  List, 
-  Star, 
-  Download, 
+import {
+  Search,
+  Grid,
+  List,
+  Star,
+  Download,
   Zap,
   BarChart3,
   Plug,
   Shield,
   Code,
-  Palette,
   TrendingUp,
   Clock,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Building2,
+  Users,
+  CreditCard,
+  FileText,
+  Bot,
+  Network,
+  Briefcase,
+  Home,
+  Calculator,
+  Globe,
+  Database,
+  Eye,
+  Target,
+  MessageSquare,
+  Settings,
+  Plus,
+  Award,
+  Activity,
+  Store,
 } from 'lucide-react';
 import { PluginCard } from './plugin-card';
 import { PluginDetails } from './plugin-details';
@@ -98,13 +115,23 @@ export function MarketplaceSystem() {
     },
   });
 
+  // Enhanced categories including the 13 integrations
   const categories = [
-    { value: 'all', label: 'All Categories', icon: Grid },
-    { value: 'productivity', label: 'Productivity', icon: Zap },
-    { value: 'reporting', label: 'Reporting', icon: BarChart3 },
-    { value: 'integration', label: 'Integration', icon: Plug },
-    { value: 'automation', label: 'Automation', icon: Code },
-    { value: 'security', label: 'Security', icon: Shield },
+    { value: 'all', label: 'All Categories', icon: Grid, count: plugins.length },
+    { value: 'accounting', label: 'Accounting & Finance', icon: Calculator, count: 15 },
+    { value: 'banking', label: 'Banking & Payments', icon: CreditCard, count: 12 },
+    { value: 'hr-payroll', label: 'HR & Payroll', icon: Users, count: 8 },
+    { value: 'productivity', label: 'Productivity', icon: Zap, count: 25 },
+    { value: 'reporting', label: 'Reporting & Analytics', icon: BarChart3, count: 18 },
+    { value: 'integration', label: 'Third-party Integrations', icon: Plug, count: 13 },
+    { value: 'automation', label: 'Workflow Automation', icon: Code, count: 20 },
+    { value: 'security', label: 'Security & Compliance', icon: Shield, count: 10 },
+    { value: 'ai-ml', label: 'AI & Machine Learning', icon: Bot, count: 14 },
+    { value: 'communication', label: 'Communication', icon: MessageSquare, count: 9 },
+    { value: 'document', label: 'Document Management', icon: FileText, count: 16 },
+    { value: 'ecommerce', label: 'E-commerce', icon: Briefcase, count: 7 },
+    { value: 'real-estate', label: 'Real Estate', icon: Home, count: 6 },
+    { value: 'freelance', label: 'Freelance Tools', icon: Target, count: 11 },
   ];
 
   const sortOptions = [
@@ -113,6 +140,8 @@ export function MarketplaceSystem() {
     { value: 'rating', label: 'Highest Rated' },
     { value: 'downloads', label: 'Most Downloaded' },
     { value: 'name', label: 'Name A-Z' },
+    { value: 'price-low', label: 'Price: Low to High' },
+    { value: 'price-high', label: 'Price: High to Low' },
   ];
 
   const filteredPlugins = plugins.filter((plugin: Plugin) => {
@@ -162,30 +191,115 @@ export function MarketplaceSystem() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Plugin Marketplace</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Store className="h-6 w-6" />
+            Plugin Marketplace & Integration Hub
+          </h2>
           <p className="text-muted-foreground">
-            Discover and install plugins to extend your Financbase experience
+            Discover, install, and manage plugins and integrations to extend Financbase
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Plus className="mr-2 h-4 w-4" />
+            Submit Plugin
+          </Button>
+          <Button variant="outline" size="sm">
+            <Settings className="mr-2 h-4 w-4" />
+            My Account
+          </Button>
+        </div>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Download className="h-4 w-4 text-blue-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Total Plugins</p>
+                <p className="text-xl font-bold">{plugins.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Installed</p>
+                <p className="text-xl font-bold">{installedPlugins.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Star className="h-4 w-4 text-yellow-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Avg Rating</p>
+                <p className="text-xl font-bold">4.7</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-purple-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Downloads Today</p>
+                <p className="text-xl font-bold">247</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="browse">Browse Plugins</TabsTrigger>
+          <TabsTrigger value="integrations">Partner Integrations</TabsTrigger>
           <TabsTrigger value="installed">Installed ({installedPlugins.length})</TabsTrigger>
-          <TabsTrigger value="my-plugins">My Plugins</TabsTrigger>
+          <TabsTrigger value="my-plugins">Developer Portal</TabsTrigger>
         </TabsList>
 
         {/* Browse Plugins */}
         <TabsContent value="browse" className="space-y-4">
+          {/* Featured Categories */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {categories.slice(1, 7).map((category) => (
+              <Card
+                key={category.value}
+                className={cn(
+                  "cursor-pointer hover:shadow-md transition-shadow",
+                  selectedCategory === category.value && "ring-2 ring-primary"
+                )}
+                onClick={() => setSelectedCategory(category.value)}
+              >
+                <CardContent className="p-4 text-center">
+                  <category.icon className="h-6 w-6 mx-auto mb-2 text-primary" />
+                  <p className="text-sm font-medium">{category.label}</p>
+                  <p className="text-xs text-muted-foreground">{category.count} plugins</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
           {/* Filters */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search plugins..."
+                  placeholder="Search plugins, integrations, tools..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -193,7 +307,7 @@ export function MarketplaceSystem() {
               </div>
             </div>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-64">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -202,6 +316,9 @@ export function MarketplaceSystem() {
                     <div className="flex items-center gap-2">
                       <category.icon className="h-4 w-4" />
                       {category.label}
+                      <Badge variant="secondary" className="ml-auto">
+                        {category.count}
+                      </Badge>
                     </div>
                   </SelectItem>
                 ))}
@@ -257,8 +374,8 @@ export function MarketplaceSystem() {
           ) : (
             <div className={cn(
               "grid gap-4",
-              selectedView === 'grid' 
-                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+              selectedView === 'grid'
+                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                 : "grid-cols-1"
             )}>
               {filteredPlugins.map((plugin: Plugin) => (
@@ -273,6 +390,142 @@ export function MarketplaceSystem() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Partner Integrations */}
+        <TabsContent value="integrations" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Network className="h-5 w-5" />
+                Partner Integrations
+              </CardTitle>
+              <CardDescription>
+                Connect with 13+ enterprise services and platforms
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {/* Banking & Payments */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+                    Banking & Payments
+                  </h4>
+                  {[
+                    { name: 'Stripe', status: 'Connected', icon: CreditCard, color: 'text-purple-600' },
+                    { name: 'PayPal', status: 'Available', icon: Globe, color: 'text-blue-600' },
+                    { name: 'Square', status: 'Available', icon: Calculator, color: 'text-gray-600' },
+                    { name: 'Wise', status: 'Available', icon: TrendingUp, color: 'text-green-600' },
+                  ].map((integration) => (
+                    <div key={integration.name} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <integration.icon className={`h-5 w-5 ${integration.color}`} />
+                        <div>
+                          <p className="font-medium text-sm">{integration.name}</p>
+                          <p className="text-xs text-muted-foreground">Payment processing</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={integration.status === 'Connected' ? 'default' : 'outline'}>
+                          {integration.status}
+                        </Badge>
+                        {integration.status === 'Connected' ? (
+                          <Button size="sm" variant="outline">
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button size="sm">
+                            Connect
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Accounting & Finance */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+                    Accounting & Finance
+                  </h4>
+                  {[
+                    { name: 'QuickBooks', status: 'Error', icon: Calculator, color: 'text-green-600' },
+                    { name: 'Xero', status: 'Available', icon: FileText, color: 'text-gray-600' },
+                    { name: 'FreshBooks', status: 'Available', icon: FileText, color: 'text-orange-600' },
+                    { name: 'NetSuite', status: 'Available', icon: Database, color: 'text-blue-600' },
+                  ].map((integration) => (
+                    <div key={integration.name} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <integration.icon className={`h-5 w-5 ${integration.color}`} />
+                        <div>
+                          <p className="font-medium text-sm">{integration.name}</p>
+                          <p className="text-xs text-muted-foreground">Accounting software</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={
+                          integration.status === 'Connected' ? 'default' :
+                          integration.status === 'Error' ? 'destructive' : 'outline'
+                        }>
+                          {integration.status}
+                        </Badge>
+                        {integration.status === 'Error' ? (
+                          <Button size="sm" variant="outline">
+                            <AlertTriangle className="h-4 w-4" />
+                          </Button>
+                        ) : integration.status === 'Connected' ? (
+                          <Button size="sm" variant="outline">
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button size="sm">
+                            Connect
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* HR & Operations */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+                    HR & Operations
+                  </h4>
+                  {[
+                    { name: 'Gusto', status: 'Connected', icon: Users, color: 'text-blue-600' },
+                    { name: 'BambooHR', status: 'Available', icon: Users, color: 'text-green-600' },
+                    { name: 'ADP', status: 'Available', icon: Building2, color: 'text-purple-600' },
+                    { name: 'Slack', status: 'Available', icon: MessageSquare, color: 'text-purple-600' },
+                  ].map((integration) => (
+                    <div key={integration.name} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <integration.icon className={`h-5 w-5 ${integration.color}`} />
+                        <div>
+                          <p className="font-medium text-sm">{integration.name}</p>
+                          <p className="text-xs text-muted-foreground">HR & communication</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={integration.status === 'Connected' ? 'default' : 'outline'}>
+                          {integration.status}
+                        </Badge>
+                        {integration.status === 'Connected' ? (
+                          <Button size="sm" variant="outline">
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button size="sm">
+                            Connect
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Installed Plugins */}
@@ -290,6 +543,9 @@ export function MarketplaceSystem() {
                   <p className="text-sm text-muted-foreground mt-2">
                     Browse the marketplace to find plugins that can help you
                   </p>
+                  <Button className="mt-4" onClick={() => setActiveTab('browse')}>
+                    Browse Marketplace
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -302,11 +558,9 @@ export function MarketplaceSystem() {
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white">
                           {installedPlugin.plugin.icon ? (
-                            <img 
-                              src={installedPlugin.plugin.icon} 
-                              alt={installedPlugin.plugin.name} 
-                              className="w-8 h-8" 
-                            />
+                            <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                              <Plug className="h-4 w-4 text-gray-600" />
+                            </div>
                           ) : (
                             <Plug className="h-6 w-6" />
                           )}
@@ -332,11 +586,14 @@ export function MarketplaceSystem() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(installedPlugin.plugin)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button variant="outline" size="sm">
                           <Settings className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleUninstall(installedPlugin.plugin.id)}
                         >
@@ -351,22 +608,80 @@ export function MarketplaceSystem() {
           )}
         </TabsContent>
 
-        {/* My Plugins */}
+        {/* Developer Portal */}
         <TabsContent value="my-plugins" className="space-y-4">
-          <Card>
-            <CardContent className="flex items-center justify-center py-8">
-              <div className="text-center">
-                <Code className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Plugin Development</p>
-                <p className="text-sm text-muted-foreground mt-2">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Code className="h-5 w-5" />
+                  Plugin Development
+                </CardTitle>
+                <CardDescription>
                   Create and publish your own plugins to the marketplace
-                </p>
-                <Button className="mt-4">
-                  Create Plugin
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Development Tools</h4>
+                  <div className="grid gap-2">
+                    <Button variant="outline" className="justify-start">
+                      <Code className="mr-2 h-4 w-4" />
+                      Plugin SDK Documentation
+                    </Button>
+                    <Button variant="outline" className="justify-start">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Development Environment
+                    </Button>
+                    <Button variant="outline" className="justify-start">
+                      <Activity className="mr-2 h-4 w-4" />
+                      Testing Framework
+                    </Button>
+                  </div>
+                </div>
+                <Button className="w-full">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create New Plugin
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Developer Stats
+                </CardTitle>
+                <CardDescription>
+                  Your development activity and earnings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">12</p>
+                    <p className="text-sm text-muted-foreground">Published Plugins</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">2.4K</p>
+                    <p className="text-sm text-muted-foreground">Total Downloads</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">4.8</p>
+                    <p className="text-sm text-muted-foreground">Avg Rating</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">$1,247</p>
+                    <p className="text-sm text-muted-foreground">Total Earnings</p>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  View Analytics
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

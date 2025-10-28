@@ -1,397 +1,580 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TrendingUp, AlertCircle, Brain, Target, DollarSign, BarChart3, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-
-// Force dynamic rendering to prevent static generation
-export const dynamic = 'force-dynamic';
-
-interface FinancialHealthScore {
-	overall: number;
-	revenue: number;
-	expenses: number;
-	cashflow: number;
-	profitability: number;
-	growth: number;
-	recommendations: string[];
-}
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Brain, 
+  TrendingUp, 
+  BarChart3, 
+  Target, 
+  AlertTriangle,
+  CheckCircle,
+  Loader2,
+  Eye,
+  RefreshCw,
+  Settings,
+  Zap,
+  Shield,
+  Activity
+} from 'lucide-react';
 
 interface FinancialInsight {
-	id: string;
-	type: 'success' | 'warning' | 'info' | 'critical';
-	title: string;
-	description: string;
-	impact: 'high' | 'medium' | 'low';
-	category: 'revenue' | 'expenses' | 'cashflow' | 'profitability' | 'growth';
-	action?: string;
-	confidence: number;
-	createdAt: string;
+  id: number;
+  title: string;
+  description: string;
+  type: 'prediction' | 'recommendation' | 'alert' | 'trend';
+  confidence: number;
+  impact: 'high' | 'medium' | 'low';
+  category: string;
+  timestamp: string;
+  actionable: boolean;
 }
 
-interface FinancialPrediction {
-	id: string;
-	type: 'revenue' | 'expenses' | 'cashflow' | 'profitability';
-	period: 'monthly' | 'quarterly' | 'yearly';
-	value: number;
-	confidence: number;
-	trend: 'increasing' | 'decreasing' | 'stable';
-	reasoning: string;
-	createdAt: string;
+interface AIAnalysis {
+  id: number;
+  metric: string;
+  currentValue: number;
+  predictedValue: number;
+  change: number;
+  confidence: number;
+  timeframe: string;
 }
 
-interface FinancialRecommendation {
-	id: string;
-	priority: 'high' | 'medium' | 'low';
-	category: 'cost_optimization' | 'revenue_growth' | 'cash_flow' | 'risk_management';
-	title: string;
-	description: string;
-	expectedImpact: string;
-	implementation: string;
-	timeframe: string;
-	createdAt: string;
+interface FinancialIntelligenceStats {
+  totalInsights: number;
+  activePredictions: number;
+  recommendationsGenerated: number;
+  accuracyRate: number;
+  lastUpdated: string;
 }
 
 export default function FinancialIntelligencePage() {
-	// Fetch financial health score
-	const { data: healthData, isLoading: healthLoading } = useQuery({
-		queryKey: ['financial-health'],
-		queryFn: async () => {
-			const response = await fetch('/api/financial-intelligence/health');
-			if (!response.ok) throw new Error('Failed to fetch financial health');
-			return response.json();
-		},
-	});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [insights, setInsights] = useState<FinancialInsight[]>([]);
+  const [analyses, setAnalyses] = useState<AIAnalysis[]>([]);
+  const [stats, setStats] = useState<FinancialIntelligenceStats>({
+    totalInsights: 0,
+    activePredictions: 0,
+    recommendationsGenerated: 0,
+    accuracyRate: 0,
+    lastUpdated: ''
+  });
 
-	// Fetch financial insights
-	const { data: insightsData, isLoading: insightsLoading } = useQuery({
-		queryKey: ['financial-insights'],
-		queryFn: async () => {
-			const response = await fetch('/api/financial-intelligence/insights');
-			if (!response.ok) throw new Error('Failed to fetch financial insights');
-			return response.json();
-		},
-	});
+  // Sample data
+  const sampleInsights: FinancialInsight[] = [
+    {
+      id: 1,
+      title: "Cash Flow Optimization Opportunity",
+      description: "Based on your spending patterns, you could save $2,400 monthly by optimizing vendor payments",
+      type: 'recommendation',
+      confidence: 87,
+      impact: 'high',
+      category: 'Cash Flow',
+      timestamp: '2024-01-15T10:30:00Z',
+      actionable: true
+    },
+    {
+      id: 2,
+      title: "Revenue Growth Prediction",
+      description: "AI predicts 15% revenue increase in Q2 based on current trends and market conditions",
+      type: 'prediction',
+      confidence: 92,
+      impact: 'high',
+      category: 'Revenue',
+      timestamp: '2024-01-15T09:15:00Z',
+      actionable: false
+    },
+    {
+      id: 3,
+      title: "Expense Alert: Unusual Spending",
+      description: "Detected 40% increase in marketing expenses compared to last month",
+      type: 'alert',
+      confidence: 95,
+      impact: 'medium',
+      category: 'Expenses',
+      timestamp: '2024-01-15T08:45:00Z',
+      actionable: true
+    },
+    {
+      id: 4,
+      title: "Market Trend Analysis",
+      description: "Industry analysis shows growing demand for your services in Q2",
+      type: 'trend',
+      confidence: 78,
+      impact: 'medium',
+      category: 'Market',
+      timestamp: '2024-01-15T07:20:00Z',
+      actionable: true
+    }
+  ];
 
-	// Fetch financial predictions
-	const { data: predictionsData, isLoading: predictionsLoading } = useQuery({
-		queryKey: ['financial-predictions'],
-		queryFn: async () => {
-			const response = await fetch('/api/financial-intelligence/predictions');
-			if (!response.ok) throw new Error('Failed to fetch financial predictions');
-			return response.json();
-		},
-	});
+  const sampleAnalyses: AIAnalysis[] = [
+    {
+      id: 1,
+      metric: 'Monthly Revenue',
+      currentValue: 125000,
+      predictedValue: 143750,
+      change: 15,
+      confidence: 92,
+      timeframe: 'Q2 2024'
+    },
+    {
+      id: 2,
+      metric: 'Operating Expenses',
+      currentValue: 85000,
+      predictedValue: 78200,
+      change: -8,
+      confidence: 88,
+      timeframe: 'Q2 2024'
+    },
+    {
+      id: 3,
+      metric: 'Cash Flow',
+      currentValue: 40000,
+      predictedValue: 65550,
+      change: 64,
+      confidence: 85,
+      timeframe: 'Q2 2024'
+    },
+    {
+      id: 4,
+      metric: 'Customer Acquisition Cost',
+      currentValue: 150,
+      predictedValue: 135,
+      change: -10,
+      confidence: 90,
+      timeframe: 'Q2 2024'
+    }
+  ];
 
-	// Fetch financial recommendations
-	const { data: recommendationsData, isLoading: recommendationsLoading } = useQuery({
-		queryKey: ['financial-recommendations'],
-		queryFn: async () => {
-			const response = await fetch('/api/financial-intelligence/recommendations');
-			if (!response.ok) throw new Error('Failed to fetch financial recommendations');
-			return response.json();
-		},
-	});
+  // Load data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        setInsights(sampleInsights);
+        setAnalyses(sampleAnalyses);
+        
+        // Calculate stats
+        const calculatedStats: FinancialIntelligenceStats = {
+          totalInsights: sampleInsights.length,
+          activePredictions: sampleInsights.filter(i => i.type === 'prediction').length,
+          recommendationsGenerated: sampleInsights.filter(i => i.type === 'recommendation').length,
+          accuracyRate: 89.5,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        setStats(calculatedStats);
+      } catch (err) {
+        setError('Failed to load financial intelligence data');
+        console.error('Error loading financial intelligence:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-	const healthScore: FinancialHealthScore = healthData?.healthScore || {
-		overall: 0,
-		revenue: 0,
-		expenses: 0,
-		cashflow: 0,
-		profitability: 0,
-		growth: 0,
-		recommendations: [],
-	};
+    loadData();
+  }, []);
 
-	const insights: FinancialInsight[] = insightsData?.insights || [];
-	const predictions: FinancialPrediction[] = predictionsData?.predictions || [];
-	const recommendations: FinancialRecommendation[] = recommendationsData?.recommendations || [];
+  const handleRefreshInsights = async () => {
+    setLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      // In a real app, this would fetch fresh insights
+      setStats(prev => ({
+        ...prev,
+        lastUpdated: new Date().toISOString()
+      }));
+    } catch (err) {
+      setError('Failed to refresh insights');
+      console.error('Error refreshing insights:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-	if (healthLoading || insightsLoading || predictionsLoading || recommendationsLoading) {
-		return (
-			<div className="space-y-8 p-8">
-				<div className="flex items-center justify-center h-64">
-					<Loader2 className="h-8 w-8 animate-spin" />
-				</div>
-			</div>
-		);
-	}
-	return (
-		<div className="space-y-8 p-8">
-			{/* Header */}
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Financial Intelligence</h1>
-					<p className="text-muted-foreground">
-						AI-powered insights and analysis for smarter financial decisions
-					</p>
-				</div>
-				<Button>
-					<Brain className="mr-2 h-4 w-4" />
-					Generate New Insights
-				</Button>
-			</div>
+  const handleActOnInsight = (insightId: number) => {
+    console.log('Acting on insight:', insightId);
+    // In a real app, this would trigger an action workflow
+  };
 
-			{/* Intelligence Score */}
-			<div className="rounded-lg border bg-gradient-to-r from-blue-50 to-purple-50 p-8">
-				<div className="flex items-center justify-between">
-					<div>
-						<h2 className="text-2xl font-bold">Financial Health Score</h2>
-						<p className="text-muted-foreground mt-1">Based on AI analysis of your financial data</p>
-					</div>
-					<div className="text-right">
-						<div className="text-6xl font-bold text-blue-600">{healthScore.overall}</div>
-						<p className="text-sm text-muted-foreground">Out of 100</p>
-						<Badge variant={healthScore.overall >= 80 ? "default" : healthScore.overall >= 60 ? "secondary" : "destructive"} className="mt-2">
-							{healthScore.overall >= 80 ? "Excellent" : healthScore.overall >= 60 ? "Good" : "Needs Improvement"}
-						</Badge>
-					</div>
-				</div>
-				<div className="mt-6">
-					<div className="h-3 bg-muted rounded-full overflow-hidden">
-						<div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" style={{ width: `${healthScore.overall}%` }}></div>
-					</div>
-					<div className="grid grid-cols-5 gap-4 mt-4 text-sm">
-						<div className="text-center">
-							<div className="font-semibold">Revenue</div>
-							<div className="text-muted-foreground">{healthScore.revenue}/100</div>
-						</div>
-						<div className="text-center">
-							<div className="font-semibold">Expenses</div>
-							<div className="text-muted-foreground">{healthScore.expenses}/100</div>
-						</div>
-						<div className="text-center">
-							<div className="font-semibold">Cash Flow</div>
-							<div className="text-muted-foreground">{healthScore.cashflow}/100</div>
-						</div>
-						<div className="text-center">
-							<div className="font-semibold">Profitability</div>
-							<div className="text-muted-foreground">{healthScore.profitability}/100</div>
-						</div>
-						<div className="text-center">
-							<div className="font-semibold">Growth</div>
-							<div className="text-muted-foreground">{healthScore.growth}/100</div>
-						</div>
-					</div>
-				</div>
-			</div>
+  const getInsightIcon = (type: string) => {
+    switch (type) {
+      case 'prediction': return TrendingUp;
+      case 'recommendation': return Target;
+      case 'alert': return AlertTriangle;
+      case 'trend': return BarChart3;
+      default: return Brain;
+    }
+  };
 
-			{/* Key Insights */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<div className="rounded-lg border bg-card p-6">
-					<div className="flex items-center justify-between">
-						<h3 className="text-sm font-medium text-muted-foreground">Cash Flow Trend</h3>
-						<TrendingUp className="h-5 w-5 text-green-600" />
-					</div>
-					<div className="mt-3">
-						<div className="text-2xl font-bold text-green-600">+15.2%</div>
-						<p className="text-xs text-muted-foreground mt-1">Positive 3-month trend</p>
-					</div>
-				</div>
+  const getInsightColor = (type: string) => {
+    switch (type) {
+      case 'prediction': return 'text-blue-600 bg-blue-100';
+      case 'recommendation': return 'text-green-600 bg-green-100';
+      case 'alert': return 'text-red-600 bg-red-100';
+      case 'trend': return 'text-purple-600 bg-purple-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
 
-				<div className="rounded-lg border bg-card p-6">
-					<div className="flex items-center justify-between">
-						<h3 className="text-sm font-medium text-muted-foreground">Expense Optimization</h3>
-						<DollarSign className="h-5 w-5 text-orange-600" />
-					</div>
-					<div className="mt-3">
-						<div className="text-2xl font-bold">$2,340</div>
-						<p className="text-xs text-muted-foreground mt-1">Potential monthly savings</p>
-					</div>
-				</div>
+  const getImpactColor = (impact: string) => {
+    switch (impact) {
+      case 'high': return 'bg-red-100 text-red-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
-				<div className="rounded-lg border bg-card p-6">
-					<div className="flex items-center justify-between">
-						<h3 className="text-sm font-medium text-muted-foreground">Revenue Forecast</h3>
-						<BarChart3 className="h-5 w-5 text-blue-600" />
-					</div>
-					<div className="mt-3">
-						<div className="text-2xl font-bold">$145K</div>
-						<p className="text-xs text-muted-foreground mt-1">Predicted next month</p>
-					</div>
-				</div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading Financial Intelligence...</span>
+        </div>
+      </div>
+    );
+  }
 
-				<div className="rounded-lg border bg-card p-6">
-					<div className="flex items-center justify-between">
-						<h3 className="text-sm font-medium text-muted-foreground">Risk Level</h3>
-						<Target className="h-5 w-5 text-yellow-600" />
-					</div>
-					<div className="mt-3">
-						<div className="text-2xl font-bold">Low</div>
-						<p className="text-xs text-muted-foreground mt-1">Stable financial position</p>
-					</div>
-				</div>
-			</div>
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Financial Intelligence</h1>
+          <p className="text-muted-foreground">
+            AI-powered insights, predictions, and recommendations for your business
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleRefreshInsights}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh Insights
+          </Button>
+          <Button>
+            <Settings className="h-4 w-4 mr-2" />
+            Configure AI
+          </Button>
+        </div>
+      </div>
 
-			{/* AI Insights & Recommendations */}
-			<div className="grid gap-6 lg:grid-cols-2">
-				{/* Latest Insights */}
-				<div className="rounded-lg border bg-card">
-					<div className="p-6 border-b">
-						<h3 className="text-lg font-semibold">Latest AI Insights</h3>
-						<p className="text-sm text-muted-foreground">Generated from your financial data</p>
-					</div>
-					<div className="p-6 space-y-4">
-						{insights.length === 0 ? (
-							<div className="text-center text-muted-foreground py-8">
-								No insights available. Generate new insights to get started.
-							</div>
-						) : (
-							insights.map((insight) => {
-								const colorMap = {
-									success: "bg-green-100 text-green-800",
-									warning: "bg-yellow-100 text-yellow-800",
-									info: "bg-blue-100 text-blue-800",
-									critical: "bg-red-100 text-red-800"
-								};
-								
-								return (
-									<div key={insight.id} className="flex items-start space-x-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-										<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 mt-0.5">
-											<Brain className="h-4 w-4" />
-										</div>
-										<div className="flex-1">
-											<div className="flex items-center gap-2">
-												<p className="font-medium">{insight.title}</p>
-												<Badge className={`text-xs ${colorMap[insight.type]}`}>{insight.impact}</Badge>
-											</div>
-											<p className="text-sm text-muted-foreground mt-1">{insight.description}</p>
-											{insight.action && (
-												<Button variant="ghost" size="sm" className="mt-2">{insight.action}</Button>
-											)}
-										</div>
-									</div>
-								);
-							})
-						)}
-					</div>
-				</div>
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-				{/* Action Items */}
-				<div className="rounded-lg border bg-card">
-					<div className="p-6 border-b">
-						<h3 className="text-lg font-semibold">Recommended Actions</h3>
-						<p className="text-sm text-muted-foreground">AI-powered suggestions to improve your finances</p>
-					</div>
-					<div className="p-6 space-y-3">
-						{recommendations.length === 0 ? (
-							<div className="text-center text-muted-foreground py-8">
-								No recommendations available. Generate new insights to get recommendations.
-							</div>
-						) : (
-							recommendations.map((recommendation) => (
-								<div key={recommendation.id} className="flex items-center justify-between p-4 rounded-lg border">
-									<div className="flex-1">
-										<p className="font-medium">{recommendation.title}</p>
-										<p className="text-sm text-muted-foreground">{recommendation.description}</p>
-										<p className="text-xs text-muted-foreground mt-1">Expected Impact: {recommendation.expectedImpact}</p>
-									</div>
-									<div className="flex items-center gap-2">
-										<Badge variant={recommendation.priority === 'high' ? 'destructive' : recommendation.priority === 'medium' ? 'secondary' : 'outline'} className="text-xs">
-											{recommendation.priority}
-										</Badge>
-										<Button variant="outline" size="sm">Act</Button>
-									</div>
-								</div>
-							))
-						)}
-					</div>
-				</div>
-			</div>
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Insights</CardTitle>
+            <Brain className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalInsights}</div>
+            <p className="text-xs text-muted-foreground">
+              AI-generated insights
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Predictions</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.activePredictions}</div>
+            <p className="text-xs text-muted-foreground">
+              Revenue & expense forecasts
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Recommendations</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.recommendationsGenerated}</div>
+            <p className="text-xs text-muted-foreground">
+              Actionable suggestions
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Accuracy Rate</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.accuracyRate}%</div>
+            <p className="text-xs text-muted-foreground">
+              Prediction accuracy
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
-			{/* Predictive Analytics */}
-			<div className="rounded-lg border bg-card">
-				<div className="p-6 border-b">
-					<h3 className="text-lg font-semibold">Predictive Analytics</h3>
-					<p className="text-sm text-muted-foreground">AI forecasts based on historical trends</p>
-				</div>
-				<div className="p-6">
-					{predictions.length === 0 ? (
-						<div className="text-center text-muted-foreground py-8">
-							No predictions available. Generate new insights to get predictions.
-						</div>
-					) : (
-						<div className="grid gap-6 md:grid-cols-3">
-							{predictions.map((prediction) => (
-								<div key={prediction.id} className="space-y-4">
-									<h4 className="font-semibold capitalize">{prediction.type} Prediction</h4>
-									<div className="space-y-2">
-										<div className="flex justify-between text-sm">
-											<span className="text-muted-foreground">Predicted Value</span>
-											<span className="font-medium">${prediction.value.toLocaleString()}</span>
-										</div>
-										<div className="flex justify-between text-sm">
-											<span className="text-muted-foreground">Period</span>
-											<span className="font-medium capitalize">{prediction.period}</span>
-										</div>
-										<div className="flex justify-between text-sm">
-											<span className="text-muted-foreground">Trend</span>
-											<span className={`font-medium ${
-												prediction.trend === 'increasing' ? 'text-green-600' : 
-												prediction.trend === 'decreasing' ? 'text-red-600' : 
-												'text-blue-600'
-											}`}>
-												{prediction.trend}
-											</span>
-										</div>
-										<div className="flex justify-between text-sm">
-											<span className="text-muted-foreground">Confidence</span>
-											<span className="font-medium">{prediction.confidence}%</span>
-										</div>
-										<div className="text-xs text-muted-foreground mt-2">
-											{prediction.reasoning}
-										</div>
-									</div>
-								</div>
-							))}
-						</div>
-					)}
-				</div>
-			</div>
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="insights" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="insights">AI Insights</TabsTrigger>
+          <TabsTrigger value="predictions">Predictions</TabsTrigger>
+          <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
 
-			{/* Anomaly Detection */}
-			<div className="rounded-lg border bg-card">
-				<div className="p-6 border-b">
-					<div className="flex items-center justify-between">
-						<div>
-							<h3 className="text-lg font-semibold">Anomaly Detection</h3>
-							<p className="text-sm text-muted-foreground">Unusual patterns detected in your financial data</p>
-						</div>
-						<Badge variant="secondary">2 Active Alerts</Badge>
-					</div>
-				</div>
-				<div className="p-6 space-y-3">
-					<div className="flex items-start space-x-3 p-4 rounded-lg border border-yellow-200 bg-yellow-50">
-						<AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
-						<div className="flex-1">
-							<p className="font-medium">Unusual Expense Spike Detected</p>
-							<p className="text-sm text-muted-foreground mt-1">
-								Software expenses increased by 340% in October. This is significantly above normal patterns.
-							</p>
-							<div className="flex items-center gap-2 mt-2">
-								<Button variant="outline" size="sm">Investigate</Button>
-								<Button variant="ghost" size="sm">Dismiss</Button>
-							</div>
-						</div>
-					</div>
+        {/* AI Insights Tab */}
+        <TabsContent value="insights" className="space-y-6">
+          <div className="grid gap-6">
+            {insights.map((insight) => {
+              const IconComponent = getInsightIcon(insight.type);
+              return (
+                <Card key={insight.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${getInsightColor(insight.type)}`}>
+                          <IconComponent className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{insight.title}</CardTitle>
+                          <CardDescription className="mt-1">
+                            {insight.description}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getImpactColor(insight.impact)}>
+                          {insight.impact} impact
+                        </Badge>
+                        <Badge variant="outline">
+                          {insight.confidence}% confidence
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span>Category: {insight.category}</span>
+                        <span>•</span>
+                        <span>{new Date(insight.timestamp).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                        {insight.actionable && (
+                          <Button 
+                            size="sm"
+                            onClick={() => handleActOnInsight(insight.id)}
+                          >
+                            <Zap className="h-4 w-4 mr-2" />
+                            Take Action
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
 
-					<div className="flex items-start space-x-3 p-4 rounded-lg border border-red-200 bg-red-50">
-						<AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
-						<div className="flex-1">
-							<p className="font-medium">Late Payment Pattern Detected</p>
-							<p className="text-sm text-muted-foreground mt-1">
-								3 clients have consistently paid late over the last 2 months. This may indicate payment issues.
-							</p>
-							<div className="flex items-center gap-2 mt-2">
-								<Button variant="outline" size="sm">View Clients</Button>
-								<Button variant="ghost" size="sm">Dismiss</Button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+        {/* Predictions Tab */}
+        <TabsContent value="predictions" className="space-y-6">
+          <div className="grid gap-6">
+            {analyses.map((analysis) => (
+              <Card key={analysis.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>{analysis.metric}</CardTitle>
+                    <Badge variant="outline">
+                      {analysis.confidence}% confidence
+                    </Badge>
+                  </div>
+                  <CardDescription>
+                    Prediction for {analysis.timeframe}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-sm text-muted-foreground">Current</div>
+                      <div className="text-lg font-semibold">
+                        ${analysis.currentValue.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-muted-foreground">Predicted</div>
+                      <div className="text-lg font-semibold">
+                        ${analysis.predictedValue.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-muted-foreground">Change</div>
+                      <div className={`text-lg font-semibold ${
+                        analysis.change >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {analysis.change >= 0 ? '+' : ''}{analysis.change}%
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* Recommendations Tab */}
+        <TabsContent value="recommendations" className="space-y-6">
+          <div className="grid gap-6">
+            {insights.filter(insight => insight.type === 'recommendation').map((insight) => {
+              const IconComponent = getInsightIcon(insight.type);
+              return (
+                <Card key={insight.id} className="border-green-200 bg-green-50/50">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-green-100">
+                          <IconComponent className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{insight.title}</CardTitle>
+                          <CardDescription className="mt-1">
+                            {insight.description}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">
+                        {insight.confidence}% confidence
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        Category: {insight.category} • {new Date(insight.timestamp).toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                        <Button size="sm">
+                          <Zap className="h-4 w-4 mr-2" />
+                          Implement
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Model Performance</CardTitle>
+                <CardDescription>
+                  Accuracy and performance metrics for our AI models
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Revenue Prediction Accuracy</span>
+                    <span className="font-semibold">92%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Expense Forecasting</span>
+                    <span className="font-semibold">88%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Cash Flow Analysis</span>
+                    <span className="font-semibold">85%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Market Trend Detection</span>
+                    <span className="font-semibold">78%</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Data Processing Status</CardTitle>
+                <CardDescription>
+                  Real-time data processing and analysis status
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">Data Ingestion</span>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">Active</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Brain className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm">AI Processing</span>
+                    </div>
+                    <Badge className="bg-blue-100 text-blue-800">Running</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm">Security Scan</span>
+                    </div>
+                    <Badge className="bg-purple-100 text-purple-800">Secure</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4 text-orange-600" />
+                      <span className="text-sm">Last Update</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date().toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 }
-

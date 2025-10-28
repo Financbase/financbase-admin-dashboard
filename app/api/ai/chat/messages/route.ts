@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, headers } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AIAssistantService } from '@/lib/services/ai/ai-assistant-service';
 import { z } from 'zod';

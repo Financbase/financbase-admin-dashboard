@@ -315,14 +315,7 @@ export default function WorkflowsPage() {
 
         {/* Workflow Builder */}
         <TabsContent value="builder" className="space-y-4">
-          <WorkflowBuilder 
-            workflow={selectedWorkflow}
-            onWorkflowSave={(workflow) => {
-              console.log('Workflow saved:', workflow);
-              refetch();
-              setActiveTab('workflows');
-            }}
-          />
+          <WorkflowBuilder />
         </TabsContent>
 
         {/* Templates */}

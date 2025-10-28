@@ -22,6 +22,7 @@ export * from "./payments.schema";
 export * from "./projects.schema";
 export * from "./time-entries.schema";
 export * from "./tasks.schema";
+export * from "./freelancers.schema";
 
 // Adboard
 export * from "./campaigns.schema";
@@ -70,7 +71,7 @@ export * from "./api-keys.schema";
 export * from "./billing.schema";
 
 // Notifications System
-export * from "../schema/notifications";
+export * from "./notifications.schema";
 
 // Workflows and automation
 export * from "./workflows.schema";
@@ -104,3 +105,6 @@ export * from "./onboarding.schema";
 
 // Integrations System
 export * from "./integrations.schema";
+
+// AI Assistant System
+export * from "./ai-conversations.schema";

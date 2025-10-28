@@ -17,12 +17,12 @@ export default function FAQ() {
     {
       id: "data-security",
       question: "Is my financial data secure with Financbase?",
-      answer: "Absolutely. We use bank-level security with 256-bit SSL encryption, SOC 2 Type II compliance, and GDPR compliance. Your data is encrypted both in transit and at rest, with multi-factor authentication and role-based access controls."
+      answer: "Absolutely. We use industry-standard security with 256-bit SSL encryption and privacy-focused design. Your data is encrypted both in transit and at rest, with multi-factor authentication and role-based access controls."
     },
     {
       id: "integrations",
       question: "Can I integrate Financbase with my existing accounting software?",
-      answer: "Yes! Financbase integrates seamlessly with QuickBooks, Xero, Stripe, PayPal, and over 100+ other financial tools. We also provide API access for custom integrations."
+      answer: "Yes! Financbase is API-ready for future integrations with popular accounting tools like QuickBooks, Xero, Stripe, and PayPal. Our integration framework is in place and we provide API access for custom integrations."
     },
     {
       id: "free-trial",

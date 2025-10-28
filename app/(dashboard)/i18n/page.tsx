@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LanguageSelector } from '@/components/i18n/language-selector';
 import { CurrencySelector } from '@/components/i18n/currency-selector';
 import { TimezoneSelector } from '@/components/i18n/timezone-selector';
-import { I18nFormatters } from '@/lib/i18n/formatters';
+import { formatters } from '@/lib/i18n/formatters';
 import { cn } from '@/lib/utils';
 import { Globe, DollarSign, Clock, Settings, Save, RefreshCw } from 'lucide-react';
 
@@ -36,41 +36,23 @@ export default function I18nPage() {
   };
 
   const formatCurrency = (amount: number) => {
-    return I18nFormatters.formatCurrency({
-      locale: currentLanguage as any,
-      currency: currentCurrency,
-      amount,
-      showSymbol: true,
-      showCode: false,
-      precision: 2,
-    });
+    return formatters.currency(amount, currentCurrency, currentLanguage);
   };
 
   const formatDate = (date: Date) => {
-    return I18nFormatters.formatDate({
-      locale: currentLanguage as any,
-      date,
-      format: 'medium',
-      timezone: currentTimezone,
-      showTime: true,
-    });
+    return formatters.dateTime(date, currentLanguage);
   };
 
   const formatNumber = (value: number) => {
-    return I18nFormatters.formatNumber({
-      locale: currentLanguage as any,
-      value,
-      type: 'decimal',
-      precision: 2,
-    });
+    return formatters.number(value, currentLanguage);
   };
 
   const formatPercentage = (value: number) => {
-    return I18nFormatters.formatPercentage(currentLanguage as any, value, 1);
+    return formatters.percent(value, currentLanguage);
   };
 
   const formatRelativeTime = (date: Date) => {
-    return I18nFormatters.formatRelativeTime(currentLanguage as any, date);
+    return formatters.date(date, currentLanguage);
   };
 
   return (
@@ -255,15 +237,15 @@ export default function I18nPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Small File:</span>
-                      <span className="font-mono">{I18nFormatters.formatFileSize(currentLanguage as any, 1024)}</span>
+                      <span className="font-mono">{formatNumber(1024)} bytes</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Large File:</span>
-                      <span className="font-mono">{I18nFormatters.formatFileSize(currentLanguage as any, 1024 * 1024 * 1024)}</span>
+                      <span className="font-mono">{formatNumber(1024 * 1024 * 1024)} bytes</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Very Large File:</span>
-                      <span className="font-mono">{I18nFormatters.formatFileSize(currentLanguage as any, 1024 * 1024 * 1024 * 1024)}</span>
+                      <span className="font-mono">{formatNumber(1024 * 1024 * 1024 * 1024)} bytes</span>
                     </div>
                   </div>
                 </div>

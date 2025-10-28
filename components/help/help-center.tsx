@@ -46,12 +46,19 @@ export function HelpCenter({ onViewArticle, onCreateTicket }: HelpCenterProps) {
   const [activeTab, setActiveTab] = useState('search');
 
   // Fetch categories
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
     queryKey: ['helpCategories'],
     queryFn: async () => {
       const response = await fetch('/api/help/categories');
-      return response.json();
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      const data = await response.json();
+      // Ensure we return an array even if the API returns an error object
+      return Array.isArray(data) ? data : [];
     },
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Fetch featured articles
@@ -183,6 +190,19 @@ export function HelpCenter({ onViewArticle, onCreateTicket }: HelpCenterProps) {
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
+          ) : categoriesError ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-2">Unable to load categories</p>
+                <p className="text-sm text-muted-foreground">Please try again later</p>
+              </div>
+            </div>
+          ) : !Array.isArray(categories) || categories.length === 0 ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <p className="text-muted-foreground">No categories available</p>
+              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {categories.map((category: any) => (
@@ -195,14 +215,14 @@ export function HelpCenter({ onViewArticle, onCreateTicket }: HelpCenterProps) {
                     <div className="flex items-center gap-3">
                       <div 
                         className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
-                        style={{ backgroundColor: category.color }}
+                        style={{ backgroundColor: category.color || '#6b7280' }}
                       >
                         <BookOpen className="h-5 w-5" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium">{category.name}</h3>
+                        <h3 className="font-medium">{category.name || 'Unnamed Category'}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {category.articleCount} articles
+                          {category.articleCount || 0} articles
                         </p>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />

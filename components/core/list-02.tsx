@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccountBalances } from "@/hooks/use-dashboard-data-optimized";
+import { useRecentOrders } from "@/hooks/use-dashboard-data-optimized";
 import { formatRelativeTime } from "@/lib/format-utils";
 import { cn } from "@/lib/utils";
 import {
@@ -54,7 +54,7 @@ const getTransactionIcon = (category: string): LucideIcon => {
 };
 
 export default function List02({ className }: List02Props) {
-	const { data: financialData, loading, error } = useAccountBalances();
+	const { data: transactions, loading, error } = useRecentOrders(5);
 
 	if (loading) {
 		return (
@@ -108,7 +108,7 @@ export default function List02({ className }: List02Props) {
 		);
 	}
 
-	if (!financialData?.transactions || financialData.transactions.length === 0) {
+	if (!transactions || transactions.length === 0) {
 		return (
 			<div
 				className={cn(
@@ -133,18 +133,17 @@ export default function List02({ className }: List02Props) {
 		}).format(Math.abs(amount));
 	};
 
-	const transactions: Transaction[] = financialData.transactions.map(
-		(transaction) => ({
-			id: transaction.id,
-			title: transaction.description,
-			amount: transaction.amount,
-			type: transaction.amount > 0 ? "incoming" : "outgoing",
-			category: transaction.category,
-			icon: getTransactionIcon(transaction.category),
-			timestamp: formatRelativeTime(new Date(transaction.createdAt)),
-			status: transaction.status as "completed" | "pending" | "failed",
-		}),
-	);
+	const transformedTransactions: Transaction[] = transactions.map((transaction) => ({
+		id: transaction.id,
+		title: `Invoice ${transaction.id}`,
+		amount: transaction.amount,
+		type: transaction.status === 'completed' ? "incoming" : "outgoing",
+		category: transaction.status,
+		icon: getTransactionIcon(transaction.status),
+		timestamp: transaction.date,
+		status: transaction.status as "completed" | "pending" | "failed",
+	}));
+
 	return (
 		<DashboardErrorBoundary>
 			<div
@@ -161,7 +160,7 @@ export default function List02({ className }: List02Props) {
 						<h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
 							Recent Activity
 							<span className="text-xs font-normal text-zinc-600 dark:text-zinc-400 ml-1">
-								({transactions.length})
+								({transformedTransactions.length})
 							</span>
 						</h2>
 						<span className="text-xs text-zinc-600 dark:text-zinc-400">
@@ -170,7 +169,7 @@ export default function List02({ className }: List02Props) {
 					</div>
 
 					<div className="space-y-1">
-						{transactions.map((transaction) => (
+						{transformedTransactions.map((transaction) => (
 							<div
 								key={transaction.id}
 								className={cn(

@@ -50,8 +50,15 @@ export function VideoTutorials({ onViewVideo }: VideoTutorialsProps) {
     queryKey: ['helpCategories'],
     queryFn: async () => {
       const response = await fetch('/api/help/categories');
-      return response.json();
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      const data = await response.json();
+      // Ensure we return an array even if the API returns an error object
+      return Array.isArray(data) ? data : [];
     },
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const getDifficultyColor = (difficulty: string) => {
@@ -111,9 +118,9 @@ export function VideoTutorials({ onViewVideo }: VideoTutorialsProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((category: any) => (
+            {Array.isArray(categories) && categories.map((category: any) => (
               <SelectItem key={category.id} value={category.slug}>
-                {category.name}
+                {category.name || 'Unnamed Category'}
               </SelectItem>
             ))}
           </SelectContent>

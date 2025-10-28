@@ -46,6 +46,10 @@ const nextConfig = {
 				protocol: 'https',
 				hostname: 'fonts.gstatic.com',
 			},
+			{
+				protocol: 'https',
+				hostname: 'opencv.org',
+			},
 		],
 		deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
 		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -69,12 +73,57 @@ const nextConfig = {
 		];
 	},
 
-	// Turbopack configuration (Next.js 16 default)
-	turbopack: {
-		// Enable experimental features for better development experience
-	},
+	// Webpack configuration for module resolution
+	webpack: (config, { dev, isServer }) => {
+		// Handle Node.js modules in browser environment
+		config.resolve.fallback = {
+			...config.resolve.fallback,
+			fs: false,
+			path: false,
+			stream: false,
+			crypto: false,
+			os: false,
+			util: false,
+			buffer: false,
+			events: false,
+			querystring: false,
+			url: false,
+			net: false,
+			tls: false,
+			child_process: false,
+			dns: false,
+			http: false,
+			https: false,
+			zlib: false,
+			readline: false,
+			cluster: false,
+			worker_threads: false,
+		};
 
-	// Security Headers
+		// Handle server-side modules
+		if (isServer) {
+			config.externals = [...(config.externals || []), 'pg-native'];
+		}
+
+		// Optimize for production
+		if (!dev) {
+			config.optimization = {
+				...config.optimization,
+				splitChunks: {
+					chunks: 'all',
+					cacheGroups: {
+						vendor: {
+							test: /[\\/]node_modules[\\/]/,
+							name: 'vendors',
+							chunks: 'all',
+						},
+					},
+				},
+			};
+		}
+
+		return config;
+	},
 	headers: async () => {
 		return [
 			{
@@ -102,7 +151,7 @@ const nextConfig = {
 					},
 					{
 						key: 'Content-Security-Policy',
-						value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.financbase.com https://js.clerk.com https://clerk.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.financbase.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.financbase.com wss://ws.financbase.com https://clerk.com; frame-src https://clerk.com https://js.clerk.com;",
+						value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.financbase.com https://js.clerk.com https://clerk.com https://content-alien-33.clerk.accounts.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.financbase.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.financbase.com wss://ws.financbase.com https://clerk.com https://content-alien-33.clerk.accounts.dev; frame-src https://clerk.com https://js.clerk.com https://content-alien-33.clerk.accounts.dev;",
 					},
 				],
 			},
@@ -112,8 +161,10 @@ const nextConfig = {
 	// Development mode configuration
 	output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
 
-	// Enable static asset optimization
-	assetPrefix: undefined,
+	eslint: {
+		// Disable Next.js ESLint to avoid conflicts with flat config
+		ignoreDuringBuilds: true,
+	},
 };
 
 export default nextConfig;

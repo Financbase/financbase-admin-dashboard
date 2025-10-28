@@ -85,7 +85,15 @@ export default function Pricing() {
   ]
 
   return (
-    <div className="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
+    <div 
+      className="py-24"
+      style={{
+        background: `linear-gradient(to bottom right, oklch(0.98 0.01 271.13), oklch(0.95 0.05 271.13))`,
+        '--brand-primary': 'oklch(0.388 0.1423 271.13)',
+        '--brand-primary-light': 'oklch(0.45 0.1423 271.13)',
+        '--brand-primary-dark': 'oklch(0.32 0.1423 271.13)',
+      } as React.CSSProperties}
+    >
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <motion.div
@@ -100,7 +108,12 @@ export default function Pricing() {
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Simple, Transparent
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span 
+              className="bg-clip-text text-transparent"
+              style={{
+                background: `linear-gradient(to right, var(--brand-primary), var(--brand-primary-light))`,
+              }}
+            >
               {" "}Pricing
             </span>
           </h2>
@@ -122,17 +135,25 @@ export default function Pricing() {
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1">
+                  <Badge 
+                    className="text-white px-4 py-1"
+                    style={{
+                      background: `linear-gradient(to right, var(--brand-primary), var(--brand-primary-light))`,
+                    }}
+                  >
                     <Star className="h-3 w-3 mr-1" />
                     {plan.badge}
                   </Badge>
                 </div>
               )}
 
-              <Card className={`h-full transition-all duration-300 hover:shadow-xl border-0 bg-white/70 backdrop-blur-sm ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}>
+              <Card 
+                className={`h-full transition-all duration-300 hover:shadow-xl border-0 bg-white/70 backdrop-blur-sm ${plan.popular ? 'ring-2' : ''}`}
+                style={plan.popular ? { ringColor: 'var(--brand-primary)' } : {}}
+              >
                 <CardHeader className="text-center pb-8">
                   <div className="flex items-center justify-center mb-4">
-                    {plan.popular && <Zap className="h-6 w-6 text-blue-600 mr-2" />}
+                    {plan.popular && <Zap className="h-6 w-6 mr-2" style={{ color: 'var(--brand-primary)' }} />}
                     <h3 className="text-2xl font-bold text-gray-900">
                       {plan.name}
                     </h3>
@@ -213,11 +234,16 @@ export default function Pricing() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+          <div 
+            className="rounded-2xl p-8 text-white"
+            style={{
+              background: `linear-gradient(to right, var(--brand-primary), var(--brand-primary-dark))`,
+            }}
+          >
             <h3 className="text-2xl font-bold mb-4">
               Need a Custom Solution?
             </h3>
-            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+            <p className="mb-6 max-w-2xl mx-auto" style={{ color: 'oklch(0.9 0.05 271.13)' }}>
               We work with enterprise clients to create custom financial intelligence solutions
               tailored to your specific needs and requirements.
             </p>

@@ -548,7 +548,7 @@ export function ImageEditor({
 						size="sm"
 						onClick={() => setActiveTool(activeTool === 'adjust' ? null : 'adjust')}
 					>
-						<Brightness className="h-4 w-4" />
+						<Sun className="h-4 w-4" />
 					</Button>
 				</div>
 
@@ -575,7 +575,7 @@ export function ImageEditor({
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 border rounded-lg">
 						<div className="space-y-2">
 							<label className="text-sm font-medium flex items-center gap-2">
-								<Brightness className="h-4 w-4" />
+								<Sun className="h-4 w-4" />
 								Brightness
 							</label>
 							<Slider
@@ -591,7 +591,7 @@ export function ImageEditor({
 
 						<div className="space-y-2">
 							<label className="text-sm font-medium flex items-center gap-2">
-								<Contrast className="h-4 w-4" />
+								<Monitor className="h-4 w-4" />
 								Contrast
 							</label>
 							<Slider
@@ -620,7 +620,7 @@ export function ImageEditor({
 
 						<div className="space-y-2">
 							<label className="text-sm font-medium flex items-center gap-2">
-								<Blur className="h-4 w-4" />
+								<Focus className="h-4 w-4" />
 								Blur
 							</label>
 							<Slider

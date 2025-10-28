@@ -42,8 +42,15 @@ export function FAQSection() {
     queryKey: ['helpCategories'],
     queryFn: async () => {
       const response = await fetch('/api/help/categories');
-      return response.json();
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      const data = await response.json();
+      // Ensure we return an array even if the API returns an error object
+      return Array.isArray(data) ? data : [];
     },
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const toggleExpanded = (itemId: number) => {
@@ -115,9 +122,9 @@ export function FAQSection() {
             className="px-3 py-2 border rounded-md"
           >
             <option value="all">All Categories</option>
-            {categories.map((category: any) => (
+            {Array.isArray(categories) && categories.map((category: any) => (
               <option key={category.id} value={category.slug}>
-                {category.name}
+                {category.name || 'Unnamed Category'}
               </option>
             ))}
           </select>

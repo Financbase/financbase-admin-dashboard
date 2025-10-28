@@ -19,3 +19,14 @@ export const supportedLocales = [
   { code: 'ko', name: '한국어', flag: '🇰🇷' },
   { code: 'zh', name: '中文', flag: '🇨🇳' }
 ];
+
+// Export the arrays separately for easier imports
+export const locales = i18nConfig.locales;
+export const localeNames = supportedLocales.reduce((acc, locale) => {
+  acc[locale.code] = locale.name;
+  return acc;
+}, {} as Record<string, string>);
+export const localeFlags = supportedLocales.reduce((acc, locale) => {
+  acc[locale.code] = locale.flag;
+  return acc;
+}, {} as Record<string, string>);

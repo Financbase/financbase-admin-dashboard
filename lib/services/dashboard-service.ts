@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import { clients } from '@/lib/db/schemas/clients.schema';
 import { invoices } from '@/lib/db/schemas/invoices.schema';
 import { expenses } from '@/lib/db/schemas/expenses.schema';
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, desc, sql, and, gte, lte } from 'drizzle-orm';
 
 interface DashboardOverview {
 	revenue: {
@@ -56,6 +56,28 @@ interface AIInsight {
 	action?: string;
 }
 
+interface ChartDataset {
+	label: string;
+	data: number[];
+	borderColor: string;
+	backgroundColor: string;
+	fill?: boolean;
+}
+
+interface ChartData {
+	labels: string[];
+	datasets: ChartDataset[];
+}
+
+interface ChartDataParams {
+	type: 'sales' | 'revenue' | 'expenses';
+	dateRange: {
+		start: Date;
+		end: Date;
+	};
+	timeRange: 'day' | 'week' | 'month';
+}
+
 /**
  * Get dashboard overview metrics
  */
@@ -79,7 +101,7 @@ export async function getDashboardOverview(userId: string): Promise<DashboardOve
 	const [clientData] = await db
 		.select({
 			total: sql<number>`count(*)`,
-			active: sql<number>`count(case when ${clients.isActive} = true then 1 end)`,
+			active: sql<number>`count(case when ${clients.isActive} then 1 end)`,
 			newThisMonth: sql<number>`count(case when ${clients.createdAt} >= ${startOfMonth} then 1 end)`,
 		})
 		.from(clients)
@@ -277,9 +299,123 @@ export async function getAIInsights(userId: string): Promise<AIInsight[]> {
 	return insights;
 }
 
+/**
+ * Get chart data for dashboard charts
+ */
+export async function getChartData(userId: string, params: ChartDataParams): Promise<ChartData> {
+	const { type, dateRange, timeRange } = params;
+	const { start, end } = dateRange;
+
+	// Generate date labels based on time range
+	const labels: string[] = [];
+	const dataPoints: number[] = [];
+	
+	// Create date intervals
+	const intervals: Date[] = [];
+	const current = new Date(start);
+	
+	while (current <= end) {
+		intervals.push(new Date(current));
+		
+		switch (timeRange) {
+			case 'day':
+				current.setDate(current.getDate() + 1);
+				break;
+			case 'week':
+				current.setDate(current.getDate() + 7);
+				break;
+			case 'month':
+				current.setMonth(current.getMonth() + 1);
+				break;
+		}
+	}
+
+	// Generate labels
+	for (let i = 0; i < intervals.length - 1; i++) {
+		const intervalStart = intervals[i];
+		
+		switch (timeRange) {
+			case 'day':
+				labels.push(intervalStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+				break;
+			case 'week':
+				labels.push(`Week of ${intervalStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
+				break;
+			case 'month':
+				labels.push(intervalStart.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
+				break;
+		}
+	}
+
+	// Query data based on type
+	if (type === 'sales' || type === 'revenue') {
+		// Get invoice data grouped by time intervals
+		for (let i = 0; i < intervals.length - 1; i++) {
+			const intervalStart = intervals[i];
+			const intervalEnd = intervals[i + 1];
+			
+			const [result] = await db
+				.select({
+					total: sql<number>`sum(case when ${invoices.status} = 'paid' then ${invoices.total}::numeric else 0 end)`,
+					count: sql<number>`count(case when ${invoices.status} = 'paid' then 1 end)`,
+				})
+				.from(invoices)
+				.where(
+					and(
+						eq(invoices.userId, userId),
+						gte(invoices.paidDate, intervalStart),
+						lte(invoices.paidDate, intervalEnd)
+					)
+				);
+
+			if (type === 'sales') {
+				dataPoints.push(Number(result?.count || 0));
+			} else {
+				dataPoints.push(Number(result?.total || 0));
+			}
+		}
+	} else if (type === 'expenses') {
+		// Get expense data grouped by time intervals
+		for (let i = 0; i < intervals.length - 1; i++) {
+			const intervalStart = intervals[i];
+			const intervalEnd = intervals[i + 1];
+			
+			const [result] = await db
+				.select({
+					total: sql<number>`sum(${expenses.amount}::numeric)`,
+				})
+				.from(expenses)
+				.where(
+					and(
+						eq(expenses.userId, userId),
+						gte(expenses.expenseDate, intervalStart),
+						lte(expenses.expenseDate, intervalEnd)
+					)
+				);
+
+			dataPoints.push(Number(result?.total || 0));
+		}
+	}
+
+	// Create chart dataset
+	const dataset: ChartDataset = {
+		label: type === 'sales' ? 'Sales Count' : type === 'revenue' ? 'Revenue' : 'Expenses',
+		data: dataPoints,
+		borderColor: type === 'sales' ? 'rgb(59, 130, 246)' : type === 'revenue' ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)',
+		backgroundColor: type === 'sales' ? 'rgba(59, 130, 246, 0.1)' : type === 'revenue' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+		fill: true,
+	};
+
+	return {
+		labels,
+		datasets: [dataset],
+	};
+}
+
 // Export all dashboard service functions
 export const DashboardService = {
 	getOverview: getDashboardOverview,
 	getRecentActivity: getRecentActivity,
 	getAIInsights: getAIInsights,
+	getChartData: getChartData,
 };

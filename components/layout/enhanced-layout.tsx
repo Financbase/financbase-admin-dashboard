@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { EnhancedSidebar } from "./enhanced-sidebar";
 import { EnhancedTopNav } from "./enhanced-top-nav";
 import { cn } from "@/lib/utils";
+import { useMobileNavigation } from "@/hooks/use-mobile-touch";
 
 interface EnhancedLayoutProps {
 	children: ReactNode;
@@ -16,22 +17,47 @@ interface EnhancedLayoutProps {
 	notifications?: number;
 }
 
-export function EnhancedLayout({
+export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 	children,
 	user,
 	notifications = 0,
-}: EnhancedLayoutProps) {
+}) => {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+	
+	// Enhanced mobile navigation with touch support
+	const { 
+		isMobile, 
+		touchSupported, 
+		isOpen: mobileNavOpen, 
+		toggleMenu, 
+		closeMenu, 
+		touchHandlers 
+	} = useMobileNavigation();
 
-	// Handle mobile menu
-	const toggleMobileMenu = () => {
-		setMobileMenuOpen(!mobileMenuOpen);
-	};
+	// Use mobile navigation state if on mobile
+	const isMenuOpen = isMobile && touchSupported ? mobileNavOpen : mobileMenuOpen;
 
-	const toggleSidebarCollapse = () => {
-		setSidebarCollapsed(!sidebarCollapsed);
-	};
+	// Memoize event handlers
+	const toggleMobileMenu = useCallback(() => {
+		if (isMobile && touchSupported) {
+			toggleMenu();
+		} else {
+			setMobileMenuOpen(prev => !prev);
+		}
+	}, [isMobile, touchSupported, toggleMenu]);
+
+	const toggleSidebarCollapse = useCallback(() => {
+		setSidebarCollapsed(prev => !prev);
+	}, []);
+
+	const closeMobileMenu = useCallback(() => {
+		if (isMobile && touchSupported) {
+			closeMenu();
+		} else {
+			setMobileMenuOpen(false);
+		}
+	}, [isMobile, touchSupported, closeMenu]);
 
 	// Close mobile menu on route change
 	useEffect(() => {
@@ -53,24 +79,27 @@ export function EnhancedLayout({
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Mobile Overlay */}
-			{mobileMenuOpen && (
+			{isMenuOpen && (
 				<motion.div
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					exit={{ opacity: 0 }}
 					className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-					onClick={() => setMobileMenuOpen(false)}
+					onClick={closeMobileMenu}
 				/>
 			)}
 
 			{/* Mobile Sidebar */}
 			<motion.div
 				initial={{ x: -300 }}
-				animate={{ x: mobileMenuOpen ? 0 : -300 }}
+				animate={{ x: isMenuOpen ? 0 : -300 }}
 				transition={{ duration: 0.3, ease: "easeInOut" }}
 				className="fixed inset-y-0 left-0 z-50 w-64 lg:hidden"
+				onTouchStart={touchHandlers?.onTouchStart}
+				onTouchMove={touchHandlers?.onTouchMove}
+				onTouchEnd={touchHandlers?.onTouchEnd}
 			>
-				<EnhancedSidebar onClose={() => setMobileMenuOpen(false)} user={user} />
+				<EnhancedSidebar onClose={closeMobileMenu} user={user} />
 			</motion.div>
 
 			{/* Desktop Sidebar */}
@@ -110,4 +139,6 @@ export function EnhancedLayout({
 			</div>
 		</div>
 	);
-}
+});
+
+EnhancedLayout.displayName = 'EnhancedLayout';

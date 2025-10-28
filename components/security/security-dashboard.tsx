@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,15 +14,12 @@ import {
   AlertTriangle, 
   CheckCircle, 
   XCircle, 
-  Eye, 
   Lock, 
   Users, 
   Activity,
-  FileText,
   Download,
   Settings,
   Bell,
-  Clock,
   TrendingUp,
   TrendingDown
 } from 'lucide-react';
@@ -30,6 +27,21 @@ import { AuditLogViewer } from './audit-log-viewer';
 import { SecurityEventsList } from './security-events-list';
 import { ComplianceReports } from './compliance-reports';
 import { MFASettings } from './mfa-settings';
+
+interface SecurityEvent {
+  id: string | number;
+  eventType: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  timestamp: string | Date;
+  isResolved: boolean;
+  userId?: string;
+  userEmail?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  resource?: string;
+  details?: Record<string, unknown>;
+}
 
 export function SecurityDashboard() {
   const [selectedTab, setSelectedTab] = useState('overview');
@@ -48,7 +60,9 @@ export function SecurityDashboard() {
     queryKey: ['security-events'],
     queryFn: async () => {
       const response = await fetch('/api/security/events');
-      return response.json();
+      const data = await response.json();
+      // Ensure we always return an array
+      return Array.isArray(data) ? data : [];
     },
   });
 
@@ -182,12 +196,12 @@ export function SecurityDashboard() {
       </Card>
 
       {/* Security Alerts */}
-      {securityEvents?.filter((event: any) => event.severity === 'high' || event.severity === 'critical').length > 0 && (
+      {Array.isArray(securityEvents) && securityEvents.filter((event: SecurityEvent) => event.severity === 'high' || event.severity === 'critical').length > 0 && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertTitle>Security Alerts</AlertTitle>
           <AlertDescription>
-            {securityEvents.filter((event: any) => event.severity === 'high' || event.severity === 'critical').length} high-priority security events require attention.
+            {Array.isArray(securityEvents) ? securityEvents.filter((event: SecurityEvent) => event.severity === 'high' || event.severity === 'critical').length : 0} high-priority security events require attention.
           </AlertDescription>
         </Alert>
       )}
@@ -275,7 +289,7 @@ export function SecurityDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {securityEvents?.slice(0, 5).map((event: any) => (
+                {Array.isArray(securityEvents) && securityEvents.slice(0, 5).map((event: SecurityEvent) => (
                   <div key={event.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className={cn(

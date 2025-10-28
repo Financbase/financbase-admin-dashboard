@@ -9,35 +9,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ContentPageTemplate } from "@/components/layout/public-templates";
 import {
 	ArrowLeft,
-	ArrowRight,
 	ArrowUp,
 	BookOpen,
-	Calendar,
-	Clock,
-	Eye,
 	FileText,
-	Filter,
-	Headphones,
-	Home,
-	Key,
-	LayoutDashboard,
-	Link2,
-	Lock,
 	Mail,
-	Phone,
-	RefreshCw,
 	Shield,
-	Users,
 } from "lucide-react";
-import type { Metadata } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function PrivacyPage() {
-	const [activeSection, setActiveSection] = useState<string>("");
 	const [isVisible, setIsVisible] = useState(false);
 
 	useEffect(() => {
@@ -65,11 +49,11 @@ export default function PrivacyPage() {
 		{
 			id: "information-collection",
 			title: "Information We Collect",
-			icon: Eye,
+			icon: Shield,
 		},
-		{ id: "information-use", title: "How We Use Information", icon: Users },
+		{ id: "information-use", title: "How We Use Information", icon: BookOpen },
 		{ id: "information-sharing", title: "Information Sharing", icon: Shield },
-		{ id: "data-security", title: "Data Security", icon: Lock },
+		{ id: "data-security", title: "Data Security", icon: Shield },
 		{ id: "your-rights", title: "Your Rights", icon: BookOpen },
 		{ id: "contact", title: "Contact Us", icon: Mail },
 	];
@@ -182,187 +166,138 @@ export default function PrivacyPage() {
 	];
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-			{/* Hero Section */}
-			<div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-				<div className="container mx-auto px-4 py-16">
-					<div className="max-w-4xl mx-auto text-center">
-						<div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary mb-6">
-							<Shield className="h-4 w-4" />
-							Privacy & Security
-						</div>
-						<h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl mb-6">
-							Privacy Policy
-						</h1>
-						<p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-							Your privacy matters to us. Learn how we collect, use, and protect
-							your personal information.
-						</p>
-						<div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-							<div className="flex items-center gap-2">
-								<Calendar className="h-4 w-4" />
-								Last updated:{" "}
-								{new Date().toLocaleDateString("en-US", {
-									month: "long",
-									day: "numeric",
-									year: "numeric",
-								})}
-							</div>
-							<Separator orientation="vertical" className="h-4" />
-							<div className="flex items-center gap-2">
-								<FileText className="h-4 w-4" />
-								12 sections
-							</div>
-						</div>
-					</div>
+		<ContentPageTemplate
+			title="Privacy Policy"
+			description="Your privacy matters to us. Learn how we collect, use, and protect your personal information."
+			breadcrumbs={[
+				{ label: "Home", href: "/" },
+				{ label: "Privacy Policy" },
+			]}
+		>
+			<div className="grid gap-8 lg:grid-cols-4">
+				{/* Table of Contents */}
+				<div className="lg:col-span-1">
+					<Card className="sticky top-24">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<BookOpen className="h-5 w-5" />
+								Table of Contents
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-2">
+							{sections.map((section) => {
+								const Icon = section.icon;
+								return (
+									<Button
+										key={section.id}
+										variant="ghost"
+										className="w-full justify-start h-auto p-3"
+										onClick={() => {
+											document.getElementById(section.id)?.scrollIntoView({
+												behavior: "smooth",
+											});
+										}}
+									>
+										<Icon className="h-4 w-4 mr-3 flex-shrink-0" />
+										<span className="text-left text-sm">
+											{section.title}
+										</span>
+									</Button>
+								);
+							})}
+						</CardContent>
+					</Card>
 				</div>
-			</div>
 
-			{/* Navigation Breadcrumb */}
-			<div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-				<div className="container mx-auto px-4 py-4">
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
-						<Link
-							href="/"
-							className="flex items-center gap-1 hover:text-primary transition-colors"
-						>
-							<Home className="h-4 w-4" />
-							Home
-						</Link>
-						<span>/</span>
-						<span className="text-foreground font-medium">Privacy Policy</span>
-					</div>
-				</div>
-			</div>
-
-			<div className="container mx-auto px-4 py-16">
-				<div className="max-w-6xl mx-auto">
-					<div className="grid gap-8 lg:grid-cols-4">
-						{/* Table of Contents */}
-						<div className="lg:col-span-1">
-							<Card className="sticky top-24">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<BookOpen className="h-5 w-5" />
-										Table of Contents
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="space-y-2">
-									{sections.map((section) => {
-										const Icon = section.icon;
-										return (
-											<Button
-												key={section.id}
-												variant="ghost"
-												className="w-full justify-start h-auto p-3"
-												onClick={() => {
-													document.getElementById(section.id)?.scrollIntoView({
-														behavior: "smooth",
-													});
-												}}
-											>
-												<Icon className="h-4 w-4 mr-3 flex-shrink-0" />
-												<span className="text-left text-sm">
-													{section.title}
-												</span>
-											</Button>
-										);
-									})}
-								</CardContent>
-							</Card>
-						</div>
-
-						{/* Main Content */}
-						<div className="lg:col-span-3">
-							<Card>
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Shield className="h-6 w-6 text-primary" />
-										Privacy Policy Details
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<Accordion type="single" collapsible className="w-full">
-										{accordionItems.map((item, index) => (
-											<AccordionItem
-												key={item.value}
-												value={item.value}
-												id={item.value}
-											>
-												<AccordionTrigger className="text-left hover:no-underline">
-													<div className="flex items-center gap-3">
-														<Badge variant="outline" className="flex-shrink-0">
-															{index + 1}
-														</Badge>
-														<span className="font-semibold">{item.title}</span>
-													</div>
-												</AccordionTrigger>
-												<AccordionContent className="space-y-4">
-													<p className="text-muted-foreground leading-relaxed">
-														{item.content}
+				{/* Main Content */}
+				<div className="lg:col-span-3">
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<Shield className="h-6 w-6 text-primary" />
+								Privacy Policy Details
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<Accordion type="single" collapsible className="w-full">
+								{accordionItems.map((item, index) => (
+									<AccordionItem
+										key={item.value}
+										value={item.value}
+										id={item.value}
+									>
+										<AccordionTrigger className="text-left hover:no-underline">
+											<div className="flex items-center gap-3">
+												<Badge variant="outline" className="flex-shrink-0">
+													{index + 1}
+												</Badge>
+												<span className="font-semibold">{item.title}</span>
+											</div>
+										</AccordionTrigger>
+										<AccordionContent className="space-y-4">
+											<p className="text-muted-foreground leading-relaxed">
+												{item.content}
+											</p>
+											{item.list && (
+												<ul className="space-y-2 ml-4">
+													{item.list.map((listItem, listIndex) => (
+														<li
+															key={`${item.value}-${listIndex}`}
+															className="flex items-start gap-2"
+														>
+															<div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+															<span className="text-muted-foreground text-sm">
+																{listItem}
+															</span>
+														</li>
+													))}
+												</ul>
+											)}
+											{item.note && (
+												<div className="p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
+													<p className="text-sm font-medium text-foreground">
+														{item.note}
 													</p>
-													{item.list && (
-														<ul className="space-y-2 ml-4">
-															{item.list.map((listItem, listIndex) => (
-																<li
-																	key={`${item.value}-${listIndex}`}
-																	className="flex items-start gap-2"
-																>
-																	<div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-																	<span className="text-muted-foreground text-sm">
-																		{listItem}
-																	</span>
-																</li>
-															))}
-														</ul>
-													)}
-													{item.note && (
-														<div className="p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
-															<p className="text-sm font-medium text-foreground">
-																{item.note}
-															</p>
-														</div>
-													)}
-												</AccordionContent>
-											</AccordionItem>
-										))}
-									</Accordion>
-								</CardContent>
-							</Card>
+												</div>
+											)}
+										</AccordionContent>
+									</AccordionItem>
+								))}
+							</Accordion>
+						</CardContent>
+					</Card>
 
-							{/* Contact Section */}
-							<Card className="mt-8">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Mail className="h-5 w-5 text-primary" />
-										Questions About This Policy?
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="text-muted-foreground mb-4">
-										If you have any questions about this Privacy Policy or our
-										data practices, please don't hesitate to contact us.
-									</p>
-									<div className="flex flex-col sm:flex-row gap-3">
-										<Button className="flex-1">
-											<Mail className="h-4 w-4 mr-2" />
-											Contact Privacy Team
-										</Button>
-										<Button variant="outline" className="flex-1">
-											<FileText className="h-4 w-4 mr-2" />
-											Download PDF
-										</Button>
-										<Button variant="ghost" asChild className="flex-1">
-											<Link href="/">
-												<ArrowLeft className="h-4 w-4 mr-2" />
-												Back to Home
-											</Link>
-										</Button>
-									</div>
-								</CardContent>
-							</Card>
-						</div>
-					</div>
+					{/* Contact Section */}
+					<Card className="mt-8">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<Mail className="h-5 w-5 text-primary" />
+								Questions About This Policy?
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<p className="text-muted-foreground mb-4">
+								If you have any questions about this Privacy Policy or our
+								data practices, please don't hesitate to contact us.
+							</p>
+							<div className="flex flex-col sm:flex-row gap-3">
+								<Button className="flex-1">
+									<Mail className="h-4 w-4 mr-2" />
+									Contact Privacy Team
+								</Button>
+								<Button variant="outline" className="flex-1">
+									<FileText className="h-4 w-4 mr-2" />
+									Download PDF
+								</Button>
+								<Button variant="ghost" asChild className="flex-1">
+									<Link href="/">
+										<ArrowLeft className="h-4 w-4 mr-2" />
+										Back to Home
+									</Link>
+								</Button>
+							</div>
+						</CardContent>
+					</Card>
 				</div>
 			</div>
 
@@ -376,6 +311,6 @@ export default function PrivacyPage() {
 					<ArrowUp className="h-4 w-4" />
 				</Button>
 			)}
-		</div>
+		</ContentPageTemplate>
 	);
 }

@@ -1,92 +1,329 @@
 "use client";
 
-// Removed unused imports
-
-import { SupportWidget } from "@/components/shared/support-widget";
-import { memo } from "react";
-import ActivityFeed from "./activity-feed";
-import CustomerAnalytics from "./customer-analytics";
-import FinancialWidgets from "./financial-widgets";
+import React, { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  DollarSign, 
+  Users, 
+  ShoppingCart, 
+  CreditCard,
+  BarChart3,
+  PieChart,
+  Activity,
+  ArrowUpRight,
+  ArrowDownRight,
+  Plus,
+  Eye,
+  MoreHorizontal,
+  Calendar,
+  Clock,
+  Star,
+  Target,
+  Zap,
+  Brain,
+  Lightbulb,
+  TrendingUp as TrendingUpIcon,
+  BarChart3 as BarChart3Icon,
+  Wallet,
+  Receipt,
+  FileText,
+  PieChart as PieChartIcon,
+  LineChart,
+  BarChart,
+  TrendingUp as TrendingUpChart,
+  DollarSign as DollarSignIcon,
+  Users as UsersIcon,
+  ShoppingCart as ShoppingCartIcon,
+  CreditCard as CreditCardIcon,
+  Activity as ActivityIcon,
+  Calendar as CalendarIcon,
+  Clock as ClockIcon,
+  Star as StarIcon,
+  Target as TargetIcon,
+  Zap as ZapIcon,
+  Brain as BrainIcon,
+  Lightbulb as LightbulbIcon,
+  Eye as EyeIcon,
+  Plus as PlusIcon,
+  MoreHorizontal as MoreHorizontalIcon,
+  ArrowUpRight as ArrowUpRightIcon,
+  ArrowDownRight as ArrowDownRightIcon
+} from "lucide-react";
 import OverviewStats from "./overview-stats";
+import { SalesChart, RevenueChart } from "./sales-chart";
 import RecentOrders from "./recent-orders";
-import { RevenueChart, SalesChart } from "./sales-chart";
 import TopProducts from "./top-products";
-import QuickActions from "./quick-actions";
-import AIInsights from "./ai-insights";
+import CustomerAnalytics from "./customer-analytics";
+import { SupportWidget } from "./support-widget";
+import ActivityFeed from "./activity-feed";
+import FinancialWidgets from "./financial-widgets";
+import { DashboardSearch } from "./dashboard-search";
+import { useCounter, useLocalStorage } from "@/hooks";
 
-const DashboardContent = memo(function DashboardContent() {
+export default function DashboardContent() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [dashboardPreferences, setDashboardPreferences] = useLocalStorage('dashboard-preferences', {
+    showQuickActions: true,
+    showAIInsights: true,
+    showSupportTickets: true
+  })
+  const { count: refreshCount, increment: refreshDashboard } = useCounter(0)
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    // Here you would typically filter your dashboard data based on the search query
+    console.log('Searching for:', query)
+  }
+
 	return (
-		<div className="space-y-4 sm:space-y-6 w-full min-w-0" data-testid="dashboard-content">
-			{/* Dashboard Header */}
-			<div className="mb-6 sm:mb-8" data-testid="dashboard-header">
-				<h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-					Financial Dashboard
-				</h2>
-				<p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-					AI-powered financial insights and analytics
-				</p>
-			</div>
-
-			{/* Quick Actions */}
-			<div data-testid="quick-actions">
-				<QuickActions />
-			</div>
-
-			{/* Overview Stats */}
-			<div data-testid="overview-stats">
-				<OverviewStats />
-			</div>
-
-			{/* Charts Row - Stack on mobile, side by side on desktop */}
-			<div className="grid gap-4 sm:gap-6 grid-cols-1 xl:grid-cols-2" data-testid="charts-section">
-				<div className="w-full min-w-0" data-testid="sales-chart">
-					<SalesChart />
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Financial Dashboard</h1>
+          <p className="text-muted-foreground">
+            AI-powered insights and comprehensive financial overview
+          </p>
 				</div>
-				<div className="w-full min-w-0" data-testid="revenue-chart">
-					<RevenueChart />
+        <div className="flex items-center space-x-2">
+          <Button>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Create Invoice
+          </Button>
+          <Button variant="outline">
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Reports
+          </Button>
 				</div>
 			</div>
 
-			{/* Main Content Grid - Stack on mobile, responsive grid on larger screens */}
-			<div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3" data-testid="main-content-grid">
-				{/* Left Column - Full width on mobile, 2/3 width on desktop */}
-				<div className="lg:col-span-2 space-y-4 sm:space-y-6 w-full min-w-0" data-testid="left-column">
-					<div data-testid="recent-orders">
-						<RecentOrders />
-					</div>
-					<div data-testid="top-products">
-						<TopProducts />
-					</div>
-				</div>
+      {/* Search Bar */}
+      <div className="max-w-md">
+        <DashboardSearch 
+          onSearch={handleSearch}
+          placeholder="Search transactions, clients, or reports..."
+        />
+      </div>
 
-				{/* Right Column - Full width on mobile, 1/3 width on desktop */}
-				<div className="space-y-4 sm:space-y-6 w-full min-w-0" data-testid="right-column">
-					<div data-testid="ai-insights">
-						<AIInsights />
-					</div>
-					<div data-testid="customer-analytics">
-						<CustomerAnalytics />
-					</div>
-					<div data-testid="support-widget">
-						<SupportWidget component="dashboard" maxDisplay={3} />
-					</div>
-					<div data-testid="activity-feed">
-						<ActivityFeed />
-					</div>
+      {/* Bento Grid Layout */}
+      <BentoGrid className="max-w-7xl mx-auto">
+        {/* Financial Overview - Large */}
+        <BentoGridItem
+          title="Financial Overview"
+          description="Your business performance at a glance"
+          header={
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <DollarSignIcon className="h-5 w-5 text-green-500" />
+                <span className="text-sm font-medium">Portfolio Value</span>
+              </div>
+              <Badge variant="secondary" className="text-green-600">
+                +8.5%
+              </Badge>
+            </div>
+          }
+          className="md:col-span-2 md:row-span-2"
+        >
+          <OverviewStats />
+        </BentoGridItem>
+
+        {/* Quick Actions */}
+        {dashboardPreferences.showQuickActions && (
+          <BentoGridItem
+            title="Quick Actions"
+            description="Common tasks and shortcuts"
+            header={
+              <div className="flex items-center space-x-2">
+                <ZapIcon className="h-5 w-5 text-blue-500" />
+                <span className="text-sm font-medium">Actions</span>
+              </div>
+            }
+            className="md:col-span-1"
+          >
+            <div className="space-y-2">
+              <Button className="w-full justify-start" variant="outline" size="sm">
+                <PlusIcon className="mr-2 h-4 w-4" />
+                Add Expense
+              </Button>
+              <Button className="w-full justify-start" variant="outline" size="sm">
+                <UsersIcon className="mr-2 h-4 w-4" />
+                Add Client
+              </Button>
+              <Button className="w-full justify-start" variant="outline" size="sm">
+                <Receipt className="mr-2 h-4 w-4" />
+                Create Invoice
+              </Button>
+            </div>
+          </BentoGridItem>
+        )}
+
+        {/* AI Insights */}
+        <BentoGridItem
+          title="AI Insights"
+          description="Smart recommendations and trends"
+          header={
+            <div className="flex items-center space-x-2">
+              <BrainIcon className="h-5 w-5 text-purple-500" />
+              <span className="text-sm font-medium">AI Analysis</span>
+            </div>
+          }
+          className="md:col-span-1"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <LightbulbIcon className="h-4 w-4 text-yellow-500" />
+              <span className="text-sm">Revenue up 12% this month</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <TargetIcon className="h-4 w-4 text-green-500" />
+              <span className="text-sm">On track for Q4 goals</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <TrendingUpIcon className="h-4 w-4 text-blue-500" />
+              <span className="text-sm">Customer satisfaction: 94%</span>
+            </div>
+          </div>
+        </BentoGridItem>
+
+        {/* Sales Performance */}
+        <BentoGridItem
+          title="Sales Performance"
+          description="Monthly sales trends and analysis"
+          header={
+            <div className="flex items-center space-x-2">
+              <BarChart3 className="h-5 w-5 text-blue-500" />
+              <span className="text-sm font-medium">Sales Chart</span>
+            </div>
+          }
+          className="md:col-span-2"
+        >
+          <SalesChart />
+        </BentoGridItem>
+
+        {/* Top Products */}
+        <BentoGridItem
+          title="Top Products"
+          description="Best performing products and services"
+          header={
+            <div className="flex items-center space-x-2">
+              <StarIcon className="h-5 w-5 text-yellow-500" />
+              <span className="text-sm font-medium">Top Performers</span>
+            </div>
+          }
+          className="md:col-span-1"
+        >
+					<TopProducts />
+        </BentoGridItem>
+
+        {/* Revenue Analysis */}
+        <BentoGridItem
+          title="Revenue Analysis"
+          description="Revenue breakdown by category"
+          header={
+            <div className="flex items-center space-x-2">
+              <PieChart className="h-5 w-5 text-green-500" />
+              <span className="text-sm font-medium">Revenue Chart</span>
+				</div>
+          }
+          className="md:col-span-2"
+        >
+          <RevenueChart />
+        </BentoGridItem>
+
+        {/* Customer Analytics */}
+        <BentoGridItem
+          title="Customer Analytics"
+          description="Customer insights and demographics"
+          header={
+            <div className="flex items-center space-x-2">
+              <Users className="h-5 w-5 text-indigo-500" />
+              <span className="text-sm font-medium">Customer Data</span>
+            </div>
+          }
+          className="md:col-span-1"
+        >
+					<CustomerAnalytics />
+        </BentoGridItem>
+
+        {/* Recent Activity */}
+        <BentoGridItem
+          title="Recent Activity"
+          description="Latest updates and notifications"
+          header={
+            <div className="flex items-center space-x-2">
+              <Activity className="h-5 w-5 text-orange-500" />
+              <span className="text-sm font-medium">Activity Feed</span>
+            </div>
+          }
+          className="md:col-span-1"
+        >
+					<ActivityFeed />
+        </BentoGridItem>
+
+        {/* Support Tickets */}
+        <BentoGridItem
+          title="Support Tickets"
+          description="Customer support and help desk"
+          header={
+            <div className="flex items-center space-x-2">
+              <FileText className="h-5 w-5 text-red-500" />
+              <span className="text-sm font-medium">Support</span>
+            </div>
+          }
+          className="md:col-span-1"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Open Tickets</span>
+              <Badge variant="destructive">3</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Resolved Today</span>
+              <Badge variant="secondary">7</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Avg Response Time</span>
+              <Badge variant="outline">2.4h</Badge>
 				</div>
 			</div>
+        </BentoGridItem>
 
-			{/* Financial Overview Section */}
-			<div className="mt-6 sm:mt-8" data-testid="financial-overview">
-				<h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 px-1">
-					Financial Overview
-				</h2>
-				<div data-testid="financial-widgets">
-					<FinancialWidgets />
-				</div>
-			</div>
+        {/* Recent Orders - Full Width */}
+        <BentoGridItem
+          title="Recent Orders"
+          description="Latest customer orders and transactions"
+          header={
+            <div className="flex items-center space-x-2">
+              <ShoppingCart className="h-5 w-5 text-green-500" />
+              <span className="text-sm font-medium">Order History</span>
+            </div>
+          }
+          className="md:col-span-3"
+        >
+          <RecentOrders />
+        </BentoGridItem>
+
+        {/* Financial Widgets - Full Width */}
+        <BentoGridItem
+          title="Financial Widgets"
+          description="Additional financial metrics and tools"
+          header={
+            <div className="flex items-center space-x-2">
+              <Wallet className="h-5 w-5 text-blue-500" />
+              <span className="text-sm font-medium">Financial Tools</span>
+            </div>
+          }
+          className="md:col-span-3"
+        >
+				<FinancialWidgets />
+        </BentoGridItem>
+      </BentoGrid>
 		</div>
 	);
-});
-
-export default DashboardContent;
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -14,7 +14,6 @@ import {
 	ImageIcon,
 	Settings,
 	Film,
-	Activity,
 	ChevronLeft,
 	User,
 	Users,
@@ -27,16 +26,33 @@ import {
 	Shield,
 	TrendingUp,
 	Target,
-	Calendar,
 	HelpCircle,
 	Monitor,
 	Zap,
-	Database,
 	Network,
 	Briefcase,
 	Home,
-	LineChart
+	X,
+	Search,
+	Plug,
+	Code,
+	Package,
+	Globe,
+	UserCog,
+	Megaphone,
+	Webhook,
+	AlertTriangle,
+	Puzzle,
+	BookOpen,
+	Clock,
 } from "lucide-react";
+
+interface NavigationItem {
+	href: string;
+	icon: React.ComponentType<{ className?: string }>;
+	label: string;
+	section: string;
+}
 
 interface EnhancedSidebarProps {
 	collapsed?: boolean;
@@ -50,13 +66,151 @@ interface EnhancedSidebarProps {
 	};
 }
 
-export function EnhancedSidebar({
+// Memoized navigation item component
+const NavigationItem = React.memo<{
+	item: NavigationItem;
+	pathname: string;
+	collapsed: boolean;
+}>(({ item, pathname, collapsed }) => {
+	const isActive = pathname === item.href;
+	
+	return (
+		<li>
+			<Link
+				href={item.href}
+				className={cn(
+					"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+					isActive
+						? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
+						: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+				)}
+			>
+				<item.icon className="h-4 w-4 flex-shrink-0" />
+				{!collapsed && <span className="flex-1">{item.label}</span>}
+			</Link>
+		</li>
+	);
+});
+
+NavigationItem.displayName = 'NavigationItem';
+
+// Navigation data
+const navigationData: NavigationItem[] = [
+	// Main
+	{ href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", section: "main" },
+	{ href: "/search", icon: Search, label: "Search Hub", section: "main" },
+	{ href: "/transactions", icon: CreditCard, label: "Transactions", section: "main" },
+	{ href: "/analytics", icon: BarChart3, label: "Analytics", section: "main" },
+	{ href: "/reports", icon: FileText, label: "Reports", section: "main" },
+	
+	// Financial Management
+	{ href: "/invoices", icon: Receipt, label: "Invoices", section: "financial" },
+	{ href: "/expenses", icon: DollarSign, label: "Expenses", section: "financial" },
+	{ href: "/bill-pay", icon: FileText, label: "Bill Pay", section: "financial" },
+	{ href: "/accounts", icon: Building2, label: "Accounts", section: "financial" },
+	{ href: "/financial-intelligence", icon: Brain, label: "Financial Intelligence", section: "financial" },
+	{ href: "/financial-intelligence/agency", icon: Building2, label: "Agency Intelligence", section: "financial" },
+	{ href: "/financial-intelligence/ecommerce", icon: ShoppingBag, label: "E-commerce Intelligence", section: "financial" },
+	
+	// Business Services
+	{ href: "/clients", icon: Users, label: "Clients", section: "business" },
+	{ href: "/marketplace", icon: Store, label: "Marketplace", section: "business" },
+	{ href: "/workflows", icon: Workflow, label: "Workflows", section: "business" },
+	{ href: "/leads", icon: Target, label: "Leads", section: "business" },
+	{ href: "/adboard", icon: Briefcase, label: "Adboard", section: "business" },
+	{ href: "/real-estate", icon: Home, label: "Real Estate", section: "business" },
+	{ href: "/freelance", icon: User, label: "Freelance", section: "business" },
+	
+	// Marketing & Advertising
+	{ href: "/marketing", icon: Megaphone, label: "Marketing Hub", section: "marketing" },
+	{ href: "/marketing/campaigns", icon: Target, label: "Campaigns", section: "marketing" },
+	{ href: "/marketing/analytics", icon: BarChart3, label: "Marketing Analytics", section: "marketing" },
+	{ href: "/marketing/leads", icon: Users, label: "Lead Management", section: "marketing" },
+	{ href: "/marketing/automation", icon: Zap, label: "Marketing Automation", section: "marketing" },
+	
+	// HR & People Management
+	{ href: "/hr", icon: UserCog, label: "HR Management", section: "hr" },
+	{ href: "/hr/employees", icon: Users, label: "Employees", section: "hr" },
+	{ href: "/hr/contractors", icon: User, label: "Contractors", section: "hr" },
+	{ href: "/hr/time-tracking", icon: Clock, label: "Time Tracking", section: "hr" },
+	{ href: "/hr/payroll", icon: DollarSign, label: "Payroll", section: "hr" },
+	
+	// AI & Intelligence
+	{ href: "/ai-assistant", icon: Bot, label: "AI Assistant", section: "ai" },
+	{ href: "/financbase-gpt", icon: Zap, label: "Financbase GPT", section: "ai" },
+	{ href: "/performance", icon: TrendingUp, label: "Performance", section: "ai" },
+	
+	// Platform Services
+	{ href: "/platform", icon: Puzzle, label: "Platform Hub", section: "platform" },
+	{ href: "/workflows", icon: Workflow, label: "Workflows", section: "platform" },
+	{ href: "/webhooks", icon: Webhook, label: "Webhooks", section: "platform" },
+	{ href: "/monitoring", icon: Monitor, label: "System Monitoring", section: "platform" },
+	{ href: "/alerts", icon: AlertTriangle, label: "Alerts & Notifications", section: "platform" },
+	
+	// Integration & Development
+	{ href: "/integrations", icon: Plug, label: "Integrations", section: "integration" },
+	{ href: "/integrations/marketplace", icon: Package, label: "Plugin Marketplace", section: "integration" },
+	{ href: "/developer", icon: Code, label: "Developer Portal", section: "integration" },
+	{ href: "/api", icon: Globe, label: "API Hub", section: "integration" },
+	
+	// Collaboration
+	{ href: "/collaboration", icon: Network, label: "Collaboration", section: "collaboration" },
+	{ href: "/security-dashboard", icon: Shield, label: "Security", section: "collaboration" },
+	{ href: "/compliance", icon: Shield, label: "Compliance", section: "collaboration" },
+	
+	// Tools & Media
+	{ href: "/gallery", icon: ImageIcon, label: "Image Gallery", section: "tools" },
+	{ href: "/editor", icon: Settings, label: "Image Editor", section: "tools" },
+	{ href: "/video", icon: Film, label: "Video Upload", section: "tools" },
+	{ href: "/content", icon: FileText, label: "Content Manager", section: "tools" },
+	
+	// Support
+	{ href: "/help-center", icon: HelpCircle, label: "Help Center", section: "support" },
+	{ href: "/docs", icon: BookOpen, label: "Documentation", section: "support" },
+];
+
+const sectionLabels = {
+	main: "Main",
+	financial: "Financial Management",
+	business: "Business Services",
+	marketing: "Marketing & Advertising",
+	hr: "HR & People Management",
+	ai: "AI & Intelligence",
+	platform: "Platform Services",
+	integration: "Integration & Development",
+	collaboration: "Collaboration",
+	tools: "Tools & Media",
+	support: "Support",
+};
+
+export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 	collapsed = false,
 	onToggleCollapse,
 	onClose,
 	user,
-}: EnhancedSidebarProps) {
+}) => {
 	const pathname = usePathname();
+
+	// Memoize grouped navigation items
+	const groupedNavigation = useMemo(() => {
+		const groups: Record<string, NavigationItem[]> = {};
+		navigationData.forEach(item => {
+			if (!groups[item.section]) {
+				groups[item.section] = [];
+			}
+			groups[item.section].push(item);
+		});
+		return groups;
+	}, []);
+
+	// Memoize event handlers
+	const handleToggleCollapse = useCallback(() => {
+		onToggleCollapse?.();
+	}, [onToggleCollapse]);
+
+	const handleClose = useCallback(() => {
+		onClose?.();
+	}, [onClose]);
 
 	return (
 		<motion.div
@@ -81,515 +235,52 @@ export function EnhancedSidebar({
 						<FinancbaseLogo size="sm" />
 					</Link>
 				)}
-				{onToggleCollapse && (
-					<button
-						onClick={onToggleCollapse}
-						className="p-1.5 rounded-md hover:bg-[var(--sidebar-accent)] transition-colors"
-					>
-						<ChevronLeft className={cn("h-4 w-4 text-[var(--sidebar-foreground)]", collapsed && "rotate-180")} />
-					</button>
-				)}
+				<div className="flex items-center gap-2">
+					{onToggleCollapse && (
+						<button
+							type="button"
+							onClick={handleToggleCollapse}
+							className="p-1.5 rounded-md hover:bg-[var(--sidebar-accent)] transition-colors"
+						>
+							<ChevronLeft className={cn("h-4 w-4 text-[var(--sidebar-foreground)]", collapsed && "rotate-180")} />
+						</button>
+					)}
+					{onClose && (
+						<button
+							type="button"
+							onClick={handleClose}
+							className="p-1.5 rounded-md hover:bg-[var(--sidebar-accent)] transition-colors lg:hidden"
+						>
+							<X className="h-4 w-4 text-[var(--sidebar-foreground)]" />
+						</button>
+					)}
+				</div>
 			</div>
 
 			{/* Navigation */}
 			<nav className="flex-1 overflow-y-auto py-4">
 				<div className="px-4 space-y-6">
-					{/* Main Navigation */}
-					<div>
+					{Object.entries(groupedNavigation).map(([section, items]) => (
+						<div key={section}>
 						<h3 className={cn(
 							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
 							"text-[var(--sidebar-foreground)] opacity-60",
 							collapsed && "hidden",
 						)}>
-							Main
+								{sectionLabels[section as keyof typeof sectionLabels]}
 						</h3>
 						<ul className="space-y-1">
-							<li>
-								<Link
-									href="/dashboard"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/dashboard"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<LayoutDashboard className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Dashboard</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/transactions"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/transactions"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<CreditCard className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Transactions</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/analytics"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/analytics"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<BarChart3 className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Analytics</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/reports"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/reports"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<FileText className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Reports</span>}
-								</Link>
-							</li>
+								{items.map((item) => (
+									<NavigationItem
+										key={item.href}
+										item={item}
+										pathname={pathname}
+										collapsed={collapsed}
+									/>
+								))}
 						</ul>
 					</div>
-
-					{/* Financial Management */}
-					<div>
-						<h3 className={cn(
-							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
-							"text-[var(--sidebar-foreground)] opacity-60",
-							collapsed && "hidden",
-						)}>
-							Financial
-						</h3>
-						<ul className="space-y-1">
-							<li>
-								<Link
-									href="/invoices"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/invoices"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Receipt className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Invoices</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/expenses"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/expenses"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<DollarSign className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Expenses</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/bill-pay"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/bill-pay"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<FileText className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Bill Pay</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/accounts"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/accounts"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Building2 className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Accounts</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/financial-intelligence"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/financial-intelligence"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Brain className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Financial Intelligence</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/financial-intelligence/agency"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/financial-intelligence/agency"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Building2 className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Agency Intelligence</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/financial-intelligence/ecommerce"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/financial-intelligence/ecommerce"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<ShoppingBag className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">E-commerce Intelligence</span>}
-								</Link>
-							</li>
-						</ul>
-					</div>
-
-					{/* Business Management */}
-					<div>
-						<h3 className={cn(
-							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
-							"text-[var(--sidebar-foreground)] opacity-60",
-							collapsed && "hidden",
-						)}>
-							Business
-						</h3>
-						<ul className="space-y-1">
-							<li>
-								<Link
-									href="/clients"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/clients"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Users className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Clients</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/marketplace"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/marketplace"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Store className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Marketplace</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/workflows"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/workflows"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Workflow className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Workflows</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/leads"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/leads"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Target className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Leads</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/adboard"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/adboard"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Briefcase className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Adboard</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/real-estate"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/real-estate"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Home className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Real Estate</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/freelance"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/freelance"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<User className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Freelance</span>}
-								</Link>
-							</li>
-						</ul>
-					</div>
-
-					{/* AI & Intelligence */}
-					<div>
-						<h3 className={cn(
-							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
-							"text-[var(--sidebar-foreground)] opacity-60",
-							collapsed && "hidden",
-						)}>
-							AI & Intelligence
-						</h3>
-						<ul className="space-y-1">
-							<li>
-								<Link
-									href="/ai-assistant"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/ai-assistant"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Bot className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">AI Assistant</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/financbase-gpt"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/financbase-gpt"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Zap className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Financbase GPT</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/performance"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/performance"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<TrendingUp className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Performance</span>}
-								</Link>
-							</li>
-						</ul>
-					</div>
-
-					{/* Collaboration */}
-					<div>
-						<h3 className={cn(
-							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
-							"text-[var(--sidebar-foreground)] opacity-60",
-							collapsed && "hidden",
-						)}>
-							Collaboration
-						</h3>
-						<ul className="space-y-1">
-							<li>
-								<Link
-									href="/collaboration"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/collaboration"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Network className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Collaboration</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/security-dashboard"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/security-dashboard"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Shield className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Security</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/monitoring"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/monitoring"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Monitor className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Monitoring</span>}
-								</Link>
-							</li>
-						</ul>
-					</div>
-
-					{/* Tools & Media */}
-					<div>
-						<h3 className={cn(
-							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
-							"text-[var(--sidebar-foreground)] opacity-60",
-							collapsed && "hidden",
-						)}>
-							Tools & Media
-						</h3>
-						<ul className="space-y-1">
-							<li>
-								<Link
-									href="/gallery"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/gallery"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<ImageIcon className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Image Gallery</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/editor"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/editor"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Settings className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Image Editor</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/video"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/video"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Film className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Video Upload</span>}
-								</Link>
-							</li>
-							<li>
-								<Link
-									href="/integrations"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/integrations"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<Database className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Integrations</span>}
-								</Link>
-							</li>
-						</ul>
-					</div>
-
-					{/* Support & Help */}
-					<div>
-						<h3 className={cn(
-							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
-							"text-[var(--sidebar-foreground)] opacity-60",
-							collapsed && "hidden",
-						)}>
-							Support
-						</h3>
-						<ul className="space-y-1">
-							<li>
-								<Link
-									href="/help-center"
-									className={cn(
-										"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-										pathname === "/help-center"
-											? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-											: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
-									)}
-								>
-									<HelpCircle className="h-4 w-4 flex-shrink-0" />
-									{!collapsed && <span className="flex-1">Help Center</span>}
-								</Link>
-							</li>
-						</ul>
-					</div>
+					))}
 				</div>
 			</nav>
 
@@ -614,4 +305,6 @@ export function EnhancedSidebar({
 			</div>
 		</motion.div>
 	);
-}
+});
+
+EnhancedSidebar.displayName = 'EnhancedSidebar';

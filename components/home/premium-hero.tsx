@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
   ArrowRight, 
-  Play, 
+  MessageSquare, 
   Sparkles, 
   TrendingUp, 
   Shield, 
@@ -124,9 +124,9 @@ export default function PremiumHero() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="px-8 py-4 text-lg border-2 hover:bg-slate-50 transition-all duration-300">
-                <Link href="/demo" className="flex items-center">
-                  <Play className="mr-2 h-5 w-5" />
-                  Watch Demo
+                <Link href="/contact" className="flex items-center">
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  Contact Sales
                 </Link>
               </Button>
             </div>

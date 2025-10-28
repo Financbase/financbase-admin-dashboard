@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, headers } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AIAssistantService } from '@/lib/services/ai/ai-assistant-service';
 
@@ -12,6 +12,7 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		const messages = await AIAssistantService.getConversationMessages(id, userId);
 
 		return NextResponse.json({ messages });
@@ -31,11 +32,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		await headers(); // Await headers before using auth
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		await AIAssistantService.deleteConversation(id, userId);
 
 		return NextResponse.json({ success: true });
