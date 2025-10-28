@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Star, Quote, TrendingUp, Users, Award, Shield } from "lucide-react"
+import { Star, Quote, Users, Award, Shield } from "lucide-react"
 import Image from "next/image"
 
 export default function PremiumSocialProof() {
@@ -26,9 +26,9 @@ export default function PremiumSocialProof() {
       role: "CFO",
       company: "TechFlow",
       avatar: "/avatars/sarah-johnson.jpg",
-      content: "Financbase transformed our financial operations. We've reduced manual work by 80% and improved accuracy to 99.7%. The AI insights are game-changing.",
+      content: "Financbase has transformed our financial operations. We've significantly reduced manual work and improved accuracy. The AI insights are game-changing.",
       rating: 5,
-      metric: "80% time saved"
+      metric: "Significant time saved"
     },
     {
       id: "michael-chen",
@@ -36,9 +36,9 @@ export default function PremiumSocialProof() {
       role: "Finance Director",
       company: "GrowthCorp",
       avatar: "/avatars/michael-chen.jpg",
-      content: "The automation features are incredible. We process 3x more transactions with the same team. ROI was positive within the first month.",
+      content: "The automation features are impressive. We process more transactions efficiently with the same team. ROI was positive within the first month.",
       rating: 5,
-      metric: "3x efficiency gain"
+      metric: "Improved efficiency"
     },
     {
       id: "emily-rodriguez",
@@ -62,10 +62,9 @@ export default function PremiumSocialProof() {
   ]
 
   const stats = [
-    { id: "users", number: "10,000+", label: "Active Users", icon: <Users className="h-5 w-5" /> },
-    { id: "revenue", number: "$2.4B", label: "Processed Annually", icon: <TrendingUp className="h-5 w-5" /> },
-    { id: "rating", number: "4.9/5", label: "Customer Rating", icon: <Star className="h-5 w-5" /> },
-    { id: "uptime", number: "99.9%", label: "Uptime SLA", icon: <Shield className="h-5 w-5" /> }
+    { id: "users", number: "Growing", label: "Business Community", icon: <Users className="h-5 w-5" /> },
+    { id: "rating", number: "Highly", label: "Rated Platform", icon: <Star className="h-5 w-5" /> },
+    { id: "uptime", number: "Built for", label: "Reliability", icon: <Shield className="h-5 w-5" /> }
   ]
 
   return (
@@ -84,17 +83,17 @@ export default function PremiumSocialProof() {
             Trusted by Industry Leaders
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
-            Join thousands of businesses
-            <span className="block text-primary">transforming their finances</span>
+            See how businesses
+            <span className="block text-primary">are transforming their finances</span>
           </h2>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-            From startups to Fortune 500 companies, see how Financbase is revolutionizing financial operations
+            From startups to growing companies, see how Financbase is revolutionizing financial operations
           </p>
         </div>
 
         {/* Company Logos */}
         <div className={`mb-20 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <p className="text-center text-sm font-medium text-slate-500 mb-8">Trusted by leading companies</p>
+          <p className="text-center text-sm font-medium text-slate-500 mb-8">Representative clients and industry examples</p>
           <div className="flex flex-wrap justify-center items-center gap-12 opacity-60">
             {companies.map((company) => (
               <div 

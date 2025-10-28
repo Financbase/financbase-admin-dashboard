@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 	keywords: ['financial management', 'accounting', 'invoices', 'expenses', 'reports', 'AI automation', 'business intelligence'],
 	authors: [{ name: 'Financbase Team' }],
 	creator: 'Financbase',
-	metadataBase: new URL('http://localhost:3000'),
+	metadataBase: new URL(process.env.NODE_ENV === 'production' ? 'https://financbase.com' : `http://localhost:${process.env.PORT || 3000}`),
 	alternates: {
 		canonical: '/',
 	},
@@ -55,9 +55,9 @@ export const metadata: Metadata = {
 	openGraph: {
 		type: 'website',
 		locale: 'en_US',
-		url: 'http://localhost:3000',
-		title: 'Financbase Admin Dashboard',
-		description: 'Professional financial management platform with AI automation',
+		url: `http://localhost:${process.env.PORT || 3000}`,
+		title: '[Beta] Financbase Admin Dashboard',
+		description: '[Beta] Professional financial management platform with AI automation',
 		siteName: 'Financbase',
 		images: [
 			{
@@ -70,8 +70,8 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		card: 'summary_large_image',
-		title: 'Financbase Admin Dashboard',
-		description: 'Professional financial management platform with AI automation',
+		title: '[Beta] Financbase Admin Dashboard',
+		description: '[Beta] Professional financial management platform with AI automation',
 		images: ['/twitter-image.png'],
 		creator: '@financbase',
 	},

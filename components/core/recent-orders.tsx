@@ -1,13 +1,15 @@
 "use client";
 
-import { Clock, Key, LayoutDashboard, RefreshCw, XCircle } from "lucide-react";
+import { Clock, Key, LayoutDashboard, RefreshCw, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/core/ui/layout/user-avatar";
 import { useRecentOrders } from "@/hooks/use-dashboard-data-optimized";
 import { formatRelativeTime } from "@/lib/format-utils";
 import EmptyState, { EmptyStates } from "./empty-state";
 import DashboardErrorBoundary from "./error-boundary";
+import { useCounter, useLocalStorage } from "@/hooks";
 
 interface Order {
 	id: string;
@@ -37,7 +39,9 @@ const statusColors = {
 };
 
 export default function RecentOrders() {
-	const { data: orders, loading, error } = useRecentOrders(10);
+	const { count: currentPage, increment: nextPage, decrement: prevPage, reset: resetPage } = useCounter(1);
+	const [ordersPerPage, setOrdersPerPage] = useLocalStorage('orders-per-page', 10);
+	const { data: orders, loading, error } = useRecentOrders(ordersPerPage);
 
 	if (loading) {
 		return (
@@ -151,6 +155,43 @@ export default function RecentOrders() {
 							</div>
 						</div>
 					))}
+				</div>
+				
+				{/* Pagination Controls */}
+				<div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+					<div className="flex items-center space-x-2">
+						<span className="text-sm text-gray-500 dark:text-gray-400">
+							Page {currentPage}
+						</span>
+						<select
+							value={ordersPerPage}
+							onChange={(e) => setOrdersPerPage(Number(e.target.value))}
+							className="text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-800"
+						>
+							<option value={5}>5 per page</option>
+							<option value={10}>10 per page</option>
+							<option value={20}>20 per page</option>
+						</select>
+					</div>
+					<div className="flex items-center space-x-2">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={prevPage}
+							disabled={currentPage === 1}
+							className="h-8 w-8 p-0"
+						>
+							<ChevronLeft className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={nextPage}
+							className="h-8 w-8 p-0"
+						>
+							<ChevronRight className="h-4 w-4" />
+						</Button>
+					</div>
 				</div>
 			</div>
 		</DashboardErrorBoundary>

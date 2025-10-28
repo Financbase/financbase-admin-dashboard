@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { Bar, Line } from "react-chartjs-2";
 import EmptyState, { EmptyStates } from "./empty-state";
 import DashboardErrorBoundary from "./error-boundary";
+import { useWindowSize } from "@/hooks";
 
 chartJs.register(
 	CategoryScale,
@@ -129,31 +130,15 @@ const mobileChartOptions = {
 };
 
 export function SalesChart() {
-	const [isMobile, setIsMobile] = useState(false);
+	const { width } = useWindowSize();
+	const isMobile = width < 640;
 	const [timeRange, setTimeRange] = useState<"month" | "week" | "day">("month");
 	const { dateRange } = useDashboardDateRange();
 	const {
 		data: chartData,
 		loading,
 		error,
-	} = useChartData("sales", dateRange, timeRange);
-
-	useEffect(() => {
-		const checkMobile = () => {
-			if (typeof window !== "undefined") {
-				setIsMobile(window.innerWidth < 640);
-			}
-		};
-
-		checkMobile();
-
-		if (typeof window !== "undefined") {
-			window.addEventListener("resize", checkMobile);
-			return () => window.removeEventListener("resize", checkMobile);
-		}
-
-		return undefined;
-	}, []);
+	} = useChartData("sales", undefined, timeRange);
 
 	const handleTimeRangeChange = (value: string) => {
 		setTimeRange(value as "month" | "week" | "day");
@@ -161,13 +146,13 @@ export function SalesChart() {
 
 	if (loading) {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+			<div className="w-full h-full min-h-0">
 				<div className="animate-pulse">
 					<div className="flex justify-between mb-4">
 						<div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-32" />
 						<div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24" />
 					</div>
-					<div className="h-64 sm:h-80 bg-gray-200 dark:bg-gray-700 rounded" />
+					<div className="h-48 sm:h-64 bg-gray-200 dark:bg-gray-700 rounded" />
 				</div>
 			</div>
 		);
@@ -176,7 +161,7 @@ export function SalesChart() {
 	if (error) {
 		return (
 			<DashboardErrorBoundary>
-				<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+				<div className="w-full h-full min-h-0">
 					<EmptyState
 						title="Failed to load chart"
 						description="Unable to fetch sales data. Please try refreshing the page."
@@ -188,7 +173,7 @@ export function SalesChart() {
 
 	if (!chartData?.datasets[0].data.some((value) => value > 0)) {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+			<div className="w-full h-full min-h-0">
 				<EmptyState {...EmptyStates.charts} />
 			</div>
 		);
@@ -197,7 +182,7 @@ export function SalesChart() {
 	return (
 		<DashboardErrorBoundary>
 			<div
-				className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0"
+				className="w-full h-full min-h-0"
 				data-testid="sales-chart"
 			>
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
@@ -217,7 +202,7 @@ export function SalesChart() {
 					</select>
 				</div>
 				<div
-					className="h-64 sm:h-80 w-full"
+					className="h-48 sm:h-56 w-full min-w-0"
 					role="img"
 					aria-label={`Sales chart showing ${timeRange} data with ${chartData?.datasets[0]?.data?.length || 0} data points`}
 					data-testid="chart-container"
@@ -233,40 +218,24 @@ export function SalesChart() {
 }
 
 export function RevenueChart() {
-	const [isMobile, setIsMobile] = useState(false);
+	const { width } = useWindowSize();
+	const isMobile = width < 640;
 	const { dateRange } = useDashboardDateRange();
 	const {
 		data: chartData,
 		loading,
 		error,
-	} = useChartData("revenue", dateRange, "week");
-
-	useEffect(() => {
-		const checkMobile = () => {
-			if (typeof window !== "undefined") {
-				setIsMobile(window.innerWidth < 640);
-			}
-		};
-
-		checkMobile();
-
-		if (typeof window !== "undefined") {
-			window.addEventListener("resize", checkMobile);
-			return () => window.removeEventListener("resize", checkMobile);
-		}
-
-		return undefined;
-	}, []);
+	} = useChartData("revenue", undefined, "week");
 
 	if (loading) {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+			<div className="w-full h-full min-h-0">
 				<div className="animate-pulse">
 					<div className="flex justify-between mb-4">
 						<div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-32" />
 						<div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16" />
 					</div>
-					<div className="h-48 sm:h-64 bg-gray-200 dark:bg-gray-700 rounded" />
+					<div className="h-48 sm:h-56 bg-gray-200 dark:bg-gray-700 rounded" />
 				</div>
 			</div>
 		);
@@ -275,7 +244,7 @@ export function RevenueChart() {
 	if (error) {
 		return (
 			<DashboardErrorBoundary>
-				<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+				<div className="w-full h-full min-h-0">
 					<EmptyState
 						title="Failed to load chart"
 						description="Unable to fetch revenue data. Please try refreshing the page."
@@ -287,7 +256,7 @@ export function RevenueChart() {
 
 	if (!chartData?.datasets[0].data.some((value) => value > 0)) {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+			<div className="w-full h-full min-h-0">
 				<EmptyState {...EmptyStates.charts} />
 			</div>
 		);
@@ -295,7 +264,7 @@ export function RevenueChart() {
 
 	return (
 		<DashboardErrorBoundary>
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+			<div className="w-full h-full min-h-0">
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
 					<h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
 						Weekly Revenue
@@ -305,7 +274,7 @@ export function RevenueChart() {
 					</span>
 				</div>
 				<div
-					className="h-48 sm:h-64 w-full"
+					className="h-48 sm:h-56 w-full min-w-0"
 					role="img"
 					aria-label={`Revenue chart showing weekly data with ${chartData?.datasets[0]?.data?.length || 0} data points`}
 				>

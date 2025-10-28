@@ -24,7 +24,7 @@ interface StatCard {
 
 export default function OverviewStats() {
 	const { dateRange } = useDashboardDateRange();
-	const { data: stats, loading, error } = useDashboardStats(dateRange);
+	const { data: stats, loading, error } = useDashboardStats();
 
 	if (loading) {
 		return (

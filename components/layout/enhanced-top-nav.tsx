@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,9 +13,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FinancbaseLogo } from "@/components/ui/financbase-logo";
-import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AnimatedNavbar, navbarItems } from "@/components/ui/animated-navbar";
+import { SearchComponent } from "@/components/ui/search-component";
 import {
 	Sheet,
 	SheetContent,
@@ -23,7 +24,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
 	Activity,
 	Bell,
@@ -37,11 +38,9 @@ import {
 	Settings,
 	Shield,
 	User,
-	X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
 
 interface EnhancedTopNavProps {
 	onMenuClick?: () => void;
@@ -54,23 +53,73 @@ interface EnhancedTopNavProps {
 	notifications?: number;
 }
 
-export function EnhancedTopNav({
+// Memoized notification items
+const NotificationItems = React.memo<{ notifications: number }>(({ }) => {
+	const notificationData = useMemo(() => [
+		{
+			id: 1,
+			type: 'payment',
+			title: 'New Payment Received',
+			description: 'Payment of $2,500 received from Acme Corp',
+			time: '2m ago',
+			color: 'bg-blue-500',
+		},
+		{
+			id: 2,
+			type: 'overdue',
+			title: 'Invoice Overdue',
+			description: 'Invoice #INV-2024-001 is 5 days overdue',
+			time: '1h ago',
+			color: 'bg-green-500',
+		},
+		{
+			id: 3,
+			type: 'expense',
+			title: 'Expense Alert',
+			description: 'Monthly expenses exceeded budget by 15%',
+			time: '3h ago',
+			color: 'bg-orange-500',
+		},
+	], []);
+
+	return (
+		<div className="max-h-80 overflow-y-auto">
+			{notificationData.map((notification) => (
+				<DropdownMenuItem key={notification.id} className="flex flex-col items-start p-4">
+					<div className="flex items-center gap-2 w-full">
+						<div className={`w-2 h-2 ${notification.color} rounded-full`}></div>
+						<span className="text-sm font-medium">{notification.title}</span>
+						<span className="text-xs text-muted-foreground ml-auto">{notification.time}</span>
+					</div>
+					<p className="text-xs text-muted-foreground mt-1">
+						{notification.description}
+					</p>
+				</DropdownMenuItem>
+			))}
+		</div>
+	);
+});
+
+NotificationItems.displayName = 'NotificationItems';
+
+export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 	onMenuClick,
 	user,
 	notifications = 0,
-}: EnhancedTopNavProps) {
+}) => {
 	const [isScrolled, setIsScrolled] = useState(false);
-
 	const pathname = usePathname();
+
+	// Memoize scroll handler
+	const handleScroll = useCallback(() => {
+		setIsScrolled(window.scrollY > 10);
+	}, []);
 
 	// Handle scroll effect
 	useEffect(() => {
-		const handleScroll = () => {
-			setIsScrolled(window.scrollY > 10);
-		};
-		window.addEventListener("scroll", handleScroll);
+		window.addEventListener("scroll", handleScroll, { passive: true });
 		return () => window.removeEventListener("scroll", handleScroll);
-	}, []);
+	}, [handleScroll]);
 
 	return (
 		<motion.header
@@ -96,10 +145,10 @@ export function EnhancedTopNav({
 							<Menu className="h-5 w-5" />
 						</Button>
 
-					{/* Logo */}
-					<Link href="/dashboard" className="flex items-center gap-2">
-						<FinancbaseLogo size="sm" />
-					</Link>
+						{/* Logo */}
+						<Link href="/dashboard" className="flex items-center gap-2">
+							<FinancbaseLogo size="sm" />
+						</Link>
 					</div>
 
 					{/* Center Section - Animated Navbar */}
@@ -109,6 +158,11 @@ export function EnhancedTopNav({
 
 					{/* Right Section - Actions & User Menu */}
 					<div className="flex items-center gap-2">
+						{/* Desktop Search */}
+						<div className="hidden md:block w-80">
+							<SearchComponent placeholder="Search financial data..." />
+						</div>
+
 						{/* Mobile Search */}
 						<Sheet>
 							<SheetTrigger asChild>
@@ -116,7 +170,7 @@ export function EnhancedTopNav({
 									<Search className="h-5 w-5" />
 								</Button>
 							</SheetTrigger>
-							<SheetContent side="top" className="h-32">
+							<SheetContent side="top" className="h-96">
 								<SheetHeader>
 									<SheetTitle>Search</SheetTitle>
 									<SheetDescription>
@@ -124,12 +178,7 @@ export function EnhancedTopNav({
 									</SheetDescription>
 								</SheetHeader>
 								<div className="mt-4">
-									<Input
-										placeholder="Search..."
-										className="w-full"
-										value={searchQuery}
-										onChange={(e) => setSearchQuery(e.target.value)}
-									/>
+									<SearchComponent showShortcuts={false} />
 								</div>
 							</SheetContent>
 						</Sheet>
@@ -152,38 +201,7 @@ export function EnhancedTopNav({
 							<DropdownMenuContent align="end" className="w-80">
 								<DropdownMenuLabel>Notifications</DropdownMenuLabel>
 								<DropdownMenuSeparator />
-								<div className="max-h-80 overflow-y-auto">
-									<DropdownMenuItem className="flex flex-col items-start p-4">
-										<div className="flex items-center gap-2 w-full">
-											<div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-											<span className="text-sm font-medium">New Payment Received</span>
-											<span className="text-xs text-muted-foreground ml-auto">2m ago</span>
-										</div>
-										<p className="text-xs text-muted-foreground mt-1">
-											Payment of $2,500 received from Acme Corp
-										</p>
-									</DropdownMenuItem>
-									<DropdownMenuItem className="flex flex-col items-start p-4">
-										<div className="flex items-center gap-2 w-full">
-											<div className="w-2 h-2 bg-green-500 rounded-full"></div>
-											<span className="text-sm font-medium">Invoice Overdue</span>
-											<span className="text-xs text-muted-foreground ml-auto">1h ago</span>
-										</div>
-										<p className="text-xs text-muted-foreground mt-1">
-											Invoice #INV-2024-001 is 5 days overdue
-										</p>
-									</DropdownMenuItem>
-									<DropdownMenuItem className="flex flex-col items-start p-4">
-										<div className="flex items-center gap-2 w-full">
-											<div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-											<span className="text-sm font-medium">Expense Alert</span>
-											<span className="text-xs text-muted-foreground ml-auto">3h ago</span>
-										</div>
-										<p className="text-xs text-muted-foreground mt-1">
-											Monthly expenses exceeded budget by 15%
-										</p>
-									</DropdownMenuItem>
-								</div>
+								<NotificationItems notifications={notifications} />
 								<DropdownMenuSeparator />
 								<DropdownMenuItem className="text-center">
 									View All Notifications
@@ -321,4 +339,6 @@ export function EnhancedTopNav({
 			</div>
 		</motion.header>
 	);
-}
+});
+
+EnhancedTopNav.displayName = 'EnhancedTopNav';

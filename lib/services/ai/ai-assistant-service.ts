@@ -4,7 +4,11 @@
  */
 
 import { db } from '@/lib/db';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
+import { aiConversations, aiMessages } from '@/lib/db/schemas/ai-conversations.schema';
+import { invoices } from '@/lib/db/schemas/invoices.schema';
+import { expenses } from '@/lib/db/schemas/expenses.schema';
+import { clients } from '@/lib/db/schemas/clients.schema';
 
 interface ChatMessage {
 	id: string;
@@ -39,15 +43,12 @@ interface AIResponse {
  * Create a new conversation
  */
 export async function createConversation(userId: string, title?: string): Promise<Conversation> {
-	const conversation = await db.insert({
-		table: 'ai_conversations',
-		values: {
-			userId,
-			title: title || 'New Conversation',
-			lastMessageAt: new Date(),
-			messageCount: 0,
-			createdAt: new Date(),
-		}
+	const conversation = await db.insert(aiConversations).values({
+		userId,
+		title: title || 'New Conversation',
+		lastMessageAt: new Date(),
+		messageCount: 0,
+		createdAt: new Date(),
 	}).returning();
 
 	return {
@@ -64,9 +65,9 @@ export async function createConversation(userId: string, title?: string): Promis
  * Get user's conversations
  */
 export async function getConversations(userId: string, limit: number = 20): Promise<Conversation[]> {
-	const conversations = await db.query.ai_conversations.findMany({
-		where: eq('userId', userId),
-		orderBy: [desc('lastMessageAt')],
+	const conversations = await db.query.aiConversations.findMany({
+		where: eq(aiConversations.userId, userId),
+		orderBy: [desc(aiConversations.lastMessageAt)],
 		limit,
 	});
 
@@ -84,12 +85,12 @@ export async function getConversations(userId: string, limit: number = 20): Prom
  * Get conversation messages
  */
 export async function getConversationMessages(conversationId: string, userId: string): Promise<ChatMessage[]> {
-	const messages = await db.query.ai_messages.findMany({
+	const messages = await db.query.aiMessages.findMany({
 		where: and(
-			eq('conversationId', conversationId),
-			eq('userId', userId)
+			eq(aiMessages.conversationId, conversationId),
+			eq(aiMessages.userId, userId)
 		),
-		orderBy: [desc('createdAt')],
+		orderBy: [desc(aiMessages.createdAt)],
 	});
 
 	return messages.map(msg => ({
@@ -97,7 +98,14 @@ export async function getConversationMessages(conversationId: string, userId: st
 		conversationId: msg.conversationId,
 		role: msg.role as 'user' | 'assistant',
 		content: msg.content,
-		metadata: msg.metadata ? JSON.parse(msg.metadata) : undefined,
+		metadata: msg.metadata ? (typeof msg.metadata === 'string' ? 
+			(() => {
+				try {
+					return JSON.parse(msg.metadata as string);
+				} catch {
+					return undefined;
+				}
+			})() : msg.metadata) : undefined,
 		createdAt: msg.createdAt.toISOString(),
 	}));
 }
@@ -111,15 +119,12 @@ export async function sendMessage(
 	message: string
 ): Promise<{ userMessage: ChatMessage; aiResponse: ChatMessage }> {
 	// Save user message
-	const userMessage = await db.insert({
-		table: 'ai_messages',
-		values: {
-			conversationId,
-			userId,
-			role: 'user',
-			content: message,
-			createdAt: new Date(),
-		}
+	const userMessage = await db.insert(aiMessages).values({
+		conversationId,
+		userId,
+		role: 'user',
+		content: message,
+		createdAt: new Date(),
 	}).returning();
 
 	// Get conversation context
@@ -133,31 +138,25 @@ export async function sendMessage(
 	const aiResponse = await generateAIResponse(message, context, financialContext);
 
 	// Save AI response
-	const aiMessage = await db.insert({
-		table: 'ai_messages',
-		values: {
-			conversationId,
-			userId,
-			role: 'assistant',
-			content: aiResponse.message,
-			metadata: JSON.stringify({
-				suggestions: aiResponse.suggestions,
-				relatedData: aiResponse.relatedData,
-				confidence: aiResponse.confidence,
-			}),
-			createdAt: new Date(),
-		}
+	const aiMessage = await db.insert(aiMessages).values({
+		conversationId,
+		userId,
+		role: 'assistant',
+		content: aiResponse.message,
+		metadata: JSON.stringify({
+			suggestions: aiResponse.suggestions,
+			relatedData: aiResponse.relatedData,
+			confidence: aiResponse.confidence,
+		}),
+		createdAt: new Date(),
 	}).returning();
 
 	// Update conversation
-	await db.update({
-		table: 'ai_conversations',
-		set: {
-			lastMessageAt: new Date(),
-			messageCount: { increment: 2 },
-		},
-		where: eq('id', conversationId)
-	});
+	await db.update(aiConversations).set({
+		lastMessageAt: new Date(),
+		messageCount: sql`${aiConversations.messageCount} + 2`,
+		updatedAt: new Date(),
+	}).where(eq(aiConversations.id, conversationId));
 
 	return {
 		userMessage: {
@@ -172,7 +171,14 @@ export async function sendMessage(
 			conversationId: aiMessage[0].conversationId,
 			role: 'assistant',
 			content: aiMessage[0].content,
-			metadata: aiMessage[0].metadata ? JSON.parse(aiMessage[0].metadata) : undefined,
+			metadata: aiMessage[0].metadata ? (typeof aiMessage[0].metadata === 'string' ? 
+				(() => {
+					try {
+						return JSON.parse(aiMessage[0].metadata as string);
+					} catch {
+						return undefined;
+					}
+				})() : aiMessage[0].metadata) : undefined,
 			createdAt: aiMessage[0].createdAt.toISOString(),
 		},
 	};
@@ -184,48 +190,48 @@ export async function sendMessage(
 async function getUserFinancialContext(userId: string) {
 	// Get recent invoices
 	const recentInvoices = await db.query.invoices.findMany({
-		where: eq('userId', userId),
-		orderBy: [desc('createdAt')],
+		where: eq(invoices.userId, userId),
+		orderBy: [desc(invoices.createdAt)],
 		limit: 5,
 	});
 
 	// Get recent expenses
 	const recentExpenses = await db.query.expenses.findMany({
-		where: eq('userId', userId),
-		orderBy: [desc('createdAt')],
+		where: eq(expenses.userId, userId),
+		orderBy: [desc(expenses.createdAt)],
 		limit: 5,
 	});
 
 	// Get client count
 	const clientCount = await db.query.clients.findMany({
-		where: eq('userId', userId),
+		where: eq(clients.userId, userId),
 	});
 
 	// Get financial summary
 	const [revenueData] = await db
 		.select({
-			totalRevenue: sql<number>`sum(case when status = 'paid' then total::numeric else 0 end)`,
-			pendingAmount: sql<number>`sum(case when status in ('sent', 'viewed') then total::numeric else 0 end)`,
+			totalRevenue: sql<number>`sum(case when ${invoices.status} = 'paid' then ${invoices.total}::numeric else 0 end)`,
+			pendingAmount: sql<number>`sum(case when ${invoices.status} in ('sent', 'viewed') then ${invoices.total}::numeric else 0 end)`,
 		})
-		.from('invoices')
-		.where(eq('userId', userId));
+		.from(invoices)
+		.where(eq(invoices.userId, userId));
 
 	const [expenseData] = await db
 		.select({
-			totalExpenses: sql<number>`sum(amount::numeric)`,
+			totalExpenses: sql<number>`sum(${expenses.amount}::numeric)`,
 		})
-		.from('expenses')
-		.where(eq('userId', userId));
+		.from(expenses)
+		.where(eq(expenses.userId, userId));
 
 	return {
 		recentInvoices: recentInvoices.map(inv => ({
-			id: inv.id,
+			id: inv.id.toString(),
 			amount: Number(inv.total),
 			status: inv.status,
 			clientName: inv.clientName,
 		})),
 		recentExpenses: recentExpenses.map(exp => ({
-			id: exp.id,
+			id: exp.id.toString(),
 			amount: Number(exp.amount),
 			category: exp.category,
 			description: exp.description,
@@ -243,10 +249,20 @@ async function getUserFinancialContext(userId: string) {
 async function generateAIResponse(
 	message: string,
 	context: ChatMessage[],
-	financialContext: any
+	financialContext: {
+		recentInvoices: Array<{ id: string; amount: number; status: string; clientName: string }>;
+		recentExpenses: Array<{ id: string; amount: number; category: string; description: string }>;
+		clientCount: number;
+		totalRevenue: number;
+		pendingAmount: number;
+		totalExpenses: number;
+	}
 ): Promise<AIResponse> {
 	// Simple AI response logic (in production, this would connect to OpenAI/Anthropic)
 	const lowerMessage = message.toLowerCase();
+	
+	// Use context for more intelligent responses
+	const hasRecentMessages = context.length > 0;
 
 	// Financial analysis queries
 	if (lowerMessage.includes('revenue') || lowerMessage.includes('income')) {
@@ -358,17 +374,17 @@ async function generateAIResponse(
  * Delete a conversation
  */
 export async function deleteConversation(conversationId: string, userId: string): Promise<void> {
-	await db.delete('ai_messages').where(
+	await db.delete(aiMessages).where(
 		and(
-			eq('conversationId', conversationId),
-			eq('userId', userId)
+			eq(aiMessages.conversationId, conversationId),
+			eq(aiMessages.userId, userId)
 		)
 	);
 	
-	await db.delete('ai_conversations').where(
+	await db.delete(aiConversations).where(
 		and(
-			eq('id', conversationId),
-			eq('userId', userId)
+			eq(aiConversations.id, conversationId),
+			eq(aiConversations.userId, userId)
 		)
 	);
 }

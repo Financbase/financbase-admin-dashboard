@@ -67,16 +67,16 @@ export default function PremiumUSPs() {
       id: "enterprise-security",
       icon: <Shield className="h-8 w-8" />,
       title: "Enterprise Security",
-      description: "Bank-level security with SOC 2 compliance and advanced encryption protocols",
+      description: "Security-focused architecture with industry-standard encryption protocols",
       benefits: [
-        "SOC 2 Type II certified",
+        "Security-first design",
         "256-bit SSL encryption",
         "Multi-factor authentication",
         "Role-based access control"
       ],
       metrics: {
-        value: "99.9%",
-        label: "Uptime SLA",
+        value: "Built for",
+        label: "Reliability",
         change: "+0.1%"
       },
       color: "from-purple-500 to-purple-600"
@@ -214,11 +214,11 @@ export default function PremiumUSPs() {
         <div className={`text-center mt-16 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="inline-flex items-center gap-4 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full border border-slate-200 shadow-lg">
             <Lock className="h-5 w-5 text-primary" />
-            <span className="font-medium text-slate-900">SOC 2 Type II Certified</span>
+            <span className="font-medium text-slate-900">Security-First Architecture</span>
             <span className="text-slate-400">•</span>
             <span className="font-medium text-slate-900">256-bit SSL Encryption</span>
             <span className="text-slate-400">•</span>
-            <span className="font-medium text-slate-900">GDPR Compliant</span>
+            <span className="font-medium text-slate-900">Privacy-Focused Design</span>
           </div>
         </div>
       </div>

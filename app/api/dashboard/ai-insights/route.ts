@@ -1,11 +1,13 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { headers } from 'next/headers';
 import { ApiErrorHandler } from '@/lib/api-error-handler';
 import { aiInsightsResponseSchema } from '@/lib/validation-schemas';
 
 export async function GET() {
   try {
+    await headers(); // Await headers before using auth
     const { userId } = await auth();
     if (!userId) {
       return ApiErrorHandler.unauthorized();

@@ -1,200 +1,225 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+"use client";
+
+import { PublicPageTemplate } from "@/components/layout/public-templates";
+import { PublicSection, PublicCard, PublicGrid } from "@/components/layout/public-section";
+import { PublicForm, PublicFormField } from "@/components/layout/public-form";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
-import { useId } from "react";
+import { useState } from "react";
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  company: string;
+  message: string;
+}
 
 export default function ContactPage() {
-	const firstNameId = useId();
-	const lastNameId = useId();
-	const emailId = useId();
-	const companyId = useId();
-	const subjectId = useId();
-	const messageId = useId();
+  const [formData, setFormData] = useState<ContactFormData>({
+    name: "",
+    email: "",
+    company: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("");
+  const [errors, setErrors] = useState<Partial<ContactFormData>>({});
 
-	return (
-    <div className="min-h-screen bg-background">
-			{/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Get in Touch
-						</h1>
-          <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-            Have questions about Financbase? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-          </p>
-								</div>
-      </section>
+  const validateForm = (): boolean => {
+    const newErrors: Partial<ContactFormData> = {};
 
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    if (!formData.message.trim()) newErrors.message = "Message is required";
+    else if (formData.message.length < 10) {
+      newErrors.message = "Message must be at least 10 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    setSubmitMessage("");
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSubmitMessage("✅ Thank you! We've received your message and will respond within 24 hours.");
+        setFormData({
+          name: "",
+          email: "",
+          company: "",
+          message: "",
+        });
+      } else {
+        setSubmitMessage(`❌ ${result.error || 'Something went wrong. Please try again.'}`);
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      setSubmitMessage("❌ Something went wrong. Please try again or contact us directly.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const contactInfo = [
+    {
+      icon: <Mail className="h-6 w-6 text-blue-600" />,
+      title: "Email",
+      details: ["hello@financbase.com", "support@financbase.com"],
+    },
+    {
+      icon: <Phone className="h-6 w-6 text-blue-600" />,
+      title: "Phone",
+      details: ["+1 (555) 123-4567", "Mon-Fri 9AM-6PM PST"],
+    },
+    {
+      icon: <MapPin className="h-6 w-6 text-blue-600" />,
+      title: "Office",
+      details: ["123 Financial Street", "San Francisco, CA 94105", "United States"],
+    },
+    {
+      icon: <Clock className="h-6 w-6 text-blue-600" />,
+      title: "Business Hours",
+      details: ["Monday - Friday: 9:00 AM - 6:00 PM PST", "Saturday: 10:00 AM - 4:00 PM PST", "Sunday: Closed"],
+    },
+  ];
+
+  const faqItems = [
+    {
+      question: "How quickly can I get started?",
+      answer: "You can start using Financbase immediately after signing up. Our setup process takes less than 5 minutes.",
+    },
+    {
+      question: "Do you offer training?",
+      answer: "Yes, we provide comprehensive onboarding and training sessions for all new customers.",
+    },
+    {
+      question: "What's your response time?",
+      answer: "We typically respond to all inquiries within 24 hours during business days.",
+    },
+    {
+      question: "Can I schedule a demo?",
+      answer: "Absolutely! Contact us to schedule a personalized demo of our platform.",
+    },
+  ];
+
+  return (
+    <PublicPageTemplate
+      hero={{
+        title: "Get in Touch",
+        description: "Have questions about Financbase? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+      }}
+    >
       {/* Contact Form & Info */}
-      <section className="py-20">
-			<div className="max-w-6xl mx-auto px-6">
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-					{/* Contact Form */}
-            <div>
-              <h2 className="text-3xl font-bold mb-8">Send us a message</h2>
-              <Card>
-                <CardContent className="p-8">
-                  <form className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor={firstNameId}>First Name</Label>
-                        <Input id={firstNameId} placeholder="John" />
-                      </div>
-                      <div>
-                        <Label htmlFor={lastNameId}>Last Name</Label>
-                        <Input id={lastNameId} placeholder="Doe" />
-                      </div>
-                    </div>
-                    
+      <PublicSection>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Contact Form */}
+          <div>
+            <h2 className="text-3xl font-bold mb-8">Send us a message</h2>
+            <PublicCard>
+              {submitMessage && (
+                <div className={`mb-6 p-4 rounded-lg border ${
+                  submitMessage.includes('✅')
+                    ? 'bg-green-50 border-green-200 text-green-800'
+                    : 'bg-red-50 border-red-200 text-red-800'
+                }`}>
+                  {submitMessage}
+                </div>
+              )}
+
+              <PublicForm onSubmit={handleSubmit} isLoading={isSubmitting}>
+                <PublicFormField
+                  label="Full Name"
+                  name="name"
+                  placeholder="John Doe"
+                  required
+                  error={errors.name}
+                />
+                
+                <PublicFormField
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  placeholder="john@example.com"
+                  required
+                  error={errors.email}
+                />
+
+                <PublicFormField
+                  label="Company"
+                  name="company"
+                  placeholder="Your Company"
+                />
+
+                <PublicFormField
+                  label="Message"
+                  name="message"
+                  type="textarea"
+                  placeholder="Tell us more about your inquiry..."
+                  required
+                  error={errors.message}
+                />
+              </PublicForm>
+            </PublicCard>
+          </div>
+
+          {/* Contact Information */}
+          <div>
+            <h2 className="text-3xl font-bold mb-8">Contact Information</h2>
+            
+            <PublicGrid columns={1} gap="lg">
+              {contactInfo.map((info, infoIndex) => (
+                <PublicCard key={`contact-info-${info.title}`}>
+                  <div className="flex items-start space-x-4">
+                    <div className="mt-1">{info.icon}</div>
                     <div>
-                      <Label htmlFor={emailId}>Email</Label>
-                      <Input id={emailId} type="email" placeholder="john@example.com" />
-										</div>
-
-                    <div>
-                      <Label htmlFor={companyId}>Company</Label>
-                      <Input id={companyId} placeholder="Your Company" />
-										</div>
-                    
-                    <div>
-                      <Label htmlFor={subjectId}>Subject</Label>
-                      <Input id={subjectId} placeholder="How can we help?" />
-									</div>
-
-                    <div>
-                      <Label htmlFor={messageId}>Message</Label>
-                      <Textarea 
-                        id={messageId} 
-                        placeholder="Tell us more about your inquiry..."
-                        className="min-h-[120px]"
-										/>
-									</div>
-
-                    <Button className="w-full" size="lg">
-                      Send Message
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-									</div>
-
-            {/* Contact Information */}
-            <div>
-              <h2 className="text-3xl font-bold mb-8">Contact Information</h2>
-              
-              <div className="space-y-8">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Mail className="h-6 w-6 text-blue-600 mt-1" />
-                      <div>
-                        <h3 className="font-semibold mb-2">Email</h3>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          hello@financbase.com
+                      <h3 className="font-semibold mb-2">{info.title}</h3>
+                      {info.details.map((detail, detailIndex) => (
+                        <p key={`detail-${info.title}-${detailIndex}`} className="text-gray-600 dark:text-gray-400">
+                          {detail}
                         </p>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          support@financbase.com
-                        </p>
-                      </div>
+                      ))}
                     </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Phone className="h-6 w-6 text-blue-600 mt-1" />
-                      <div>
-                        <h3 className="font-semibold mb-2">Phone</h3>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          +1 (555) 123-4567
-                        </p>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          Mon-Fri 9AM-6PM PST
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <MapPin className="h-6 w-6 text-blue-600 mt-1" />
-                      <div>
-                        <h3 className="font-semibold mb-2">Office</h3>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          123 Financial Street<br />
-                          San Francisco, CA 94105<br />
-                          United States
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Clock className="h-6 w-6 text-blue-600 mt-1" />
-                      <div>
-                        <h3 className="font-semibold mb-2">Business Hours</h3>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          Monday - Friday: 9:00 AM - 6:00 PM PST<br />
-                          Saturday: 10:00 AM - 4:00 PM PST<br />
-                          Sunday: Closed
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-											</div>
-										</div>
-									</div>
-      </section>
+                  </div>
+                </PublicCard>
+              ))}
+            </PublicGrid>
+          </div>
+        </div>
+      </PublicSection>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Frequently Asked Questions
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-2">How quickly can I get started?</h3>
+      <PublicSection
+        title="Frequently Asked Questions"
+        background="muted"
+      >
+        <PublicGrid columns={2}>
+          {faqItems.map((item, itemIndex) => (
+            <PublicCard key={`faq-item-${item.question}`}>
+              <h3 className="text-lg font-semibold mb-2">{item.question}</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                You can start using Financbase immediately after signing up. Our setup process takes less than 5 minutes.
+                {item.answer}
               </p>
-						</div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Do you offer training?</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Yes, we provide comprehensive onboarding and training sessions for all new customers.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold mb-2">What's your response time?</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                We typically respond to all inquiries within 24 hours during business days.
-              </p>
-			</div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Can I schedule a demo?</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Absolutely! Contact us to schedule a personalized demo of our platform.
-              </p>
-					</div>
-			</div>
-        </div>
-      </section>
-		</div>
-	);
+            </PublicCard>
+          ))}
+        </PublicGrid>
+      </PublicSection>
+    </PublicPageTemplate>
+  );
 }

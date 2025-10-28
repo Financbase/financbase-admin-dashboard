@@ -7,23 +7,23 @@ export function TrustIndicators() {
   const indicators = [
     {
       icon: Shield,
-      label: "Bank-Level Security",
+      label: "Security-First Design",
       description: "256-bit encryption",
     },
     {
       icon: Lock,
-      label: "SOC 2 Compliant",
+      label: "Industry Standards",
       description: "Enterprise security",
     },
     {
       icon: CheckCircle,
-      label: "GDPR Ready",
-      description: "Privacy protected",
+      label: "Privacy-Focused",
+      description: "Data protection",
     },
     {
       icon: Users,
-      label: "10,000+ Users",
-      description: "Trusted worldwide",
+      label: "Growing Community",
+      description: "Trusted by businesses",
     },
   ];
 
