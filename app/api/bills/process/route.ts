@@ -6,8 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
-import { auditLogger } from '@/lib/services/security/audit-logging-service';
-import type { AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
+import { auditLogger, AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
 
 // POST /api/bills/process - Process uploaded document
 export async function POST(request: NextRequest) {

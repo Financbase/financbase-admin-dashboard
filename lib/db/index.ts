@@ -70,9 +70,9 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 	try {
 		if (!db) return false;
 		
-		// Simple health check query
-		await db.execute('SELECT 1');
-		return true;
+		// Simple health check query using raw SQL
+		const result = await db.execute(sql`SELECT 1 as health_check`);
+		return result.rows.length > 0;
 	} catch (error) {
 		console.error('Database health check failed:', error);
 		return false;

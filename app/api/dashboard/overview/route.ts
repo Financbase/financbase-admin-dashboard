@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { headers } from 'next/headers';
 import { DashboardService } from '@/lib/services/dashboard-service';
 
 export async function GET(request: Request) {
 	try {
-		await headers(); // Await headers before using auth
 		// TEMPORARILY DISABLED FOR TESTING
 		// const { userId } = await auth();
 		// if (!userId) {

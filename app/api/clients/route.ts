@@ -29,27 +29,29 @@ export async function GET(req: NextRequest) {
     }
     
     if (search) {
-      whereConditions.push(
-        or(
-          like(clients.name, `%${search}%`),
-          like(clients.email, `%${search}%`),
-          like(clients.company, `%${search}%`)
-        )
-      );
+      const searchConditions = [
+        like(clients.name, `%${search}%`),
+        like(clients.email, `%${search}%`),
+        clients.company ? like(clients.company, `%${search}%`) : undefined
+      ].filter(Boolean);
+      
+      if (searchConditions.length > 0) {
+        whereConditions.push(or(...searchConditions));
+      }
     }
 
     // Fetch clients for the authenticated user
     const userClients = await db
       .select()
       .from(clients)
-      .where(and(...whereConditions))
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
       .limit(limit)
       .offset(offset);
 
     const totalCount = await db
       .select({ count: count() })
       .from(clients)
-      .where(and(...whereConditions));
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
 
     return NextResponse.json({
       success: true,

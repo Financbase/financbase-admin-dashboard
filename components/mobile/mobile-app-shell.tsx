@@ -1,9 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { isMobile, isTablet, isDesktop } from 'react-device-detect';
-import { useMediaQuery } from 'react-responsive';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -21,44 +18,65 @@ interface DeviceInfo {
 
 function useDeviceInfo(): DeviceInfo {
 	const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
+	const [isClient, setIsClient] = useState(false);
 
-	// Responsive breakpoints
-	const isXs = useMediaQuery({ maxWidth: 575 });
-	const isSm = useMediaQuery({ minWidth: 576, maxWidth: 767 });
-	const isMd = useMediaQuery({ minWidth: 768, maxWidth: 991 });
-	const isLg = useMediaQuery({ minWidth: 992, maxWidth: 1199 });
-	const isXl = useMediaQuery({ minWidth: 1200, maxWidth: 1399 });
-	const is2Xl = useMediaQuery({ minWidth: 1400 });
+	// Simple responsive breakpoints using window.innerWidth
+	const [screenSize, setScreenSize] = useState<DeviceInfo['screenSize']>('xs');
 
-	// Determine screen size
-	let screenSize: DeviceInfo['screenSize'] = 'xs';
-	if (is2Xl) screenSize = '2xl';
-	else if (isXl) screenSize = 'xl';
-	else if (isLg) screenSize = 'lg';
-	else if (isMd) screenSize = 'md';
-	else if (isSm) screenSize = 'sm';
-
-	// Handle orientation changes
+	// Handle client-side detection
 	useEffect(() => {
-		const handleOrientationChange = () => {
-			setOrientation(window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
+		setIsClient(true);
+		
+		const handleResize = () => {
+			if (typeof window !== 'undefined') {
+				const width = window.innerWidth;
+				const height = window.innerHeight;
+				
+				// Determine screen size
+				if (width >= 1400) setScreenSize('2xl');
+				else if (width >= 1200) setScreenSize('xl');
+				else if (width >= 992) setScreenSize('lg');
+				else if (width >= 768) setScreenSize('md');
+				else if (width >= 576) setScreenSize('sm');
+				else setScreenSize('xs');
+				
+				// Determine orientation
+				setOrientation(height > width ? 'portrait' : 'landscape');
+			}
 		};
 
-		handleOrientationChange();
-		window.addEventListener('resize', handleOrientationChange);
-		window.addEventListener('orientationchange', handleOrientationChange);
+		handleResize();
+		window.addEventListener('resize', handleResize);
+		window.addEventListener('orientationchange', handleResize);
 
 		return () => {
-			window.removeEventListener('resize', handleOrientationChange);
-			window.removeEventListener('orientationchange', handleOrientationChange);
+			window.removeEventListener('resize', handleResize);
+			window.removeEventListener('orientationchange', handleResize);
 		};
 	}, []);
 
+	// Default to desktop during SSR
+	if (!isClient) {
+		return {
+			isMobile: false,
+			isTablet: false,
+			isDesktop: true,
+			isMobileOrTablet: false,
+			screenSize: 'lg',
+			orientation: 'landscape',
+		};
+	}
+
+	// Client-side detection
+	const isMobile = screenSize === 'xs' || screenSize === 'sm';
+	const isTablet = screenSize === 'md';
+	const isDesktop = screenSize === 'lg' || screenSize === 'xl' || screenSize === '2xl';
+
 	return {
-		isMobile: isMobile || isXs,
-		isTablet: isTablet || isSm || isMd,
-		isDesktop: isDesktop || isLg || isXl || is2Xl,
-		isMobileOrTablet: (isMobile || isTablet || isXs || isSm || isMd),
+		isMobile,
+		isTablet,
+		isDesktop,
+		isMobileOrTablet: isMobile || isTablet,
 		screenSize,
 		orientation,
 	};
@@ -221,28 +239,14 @@ function MobileNavigation({ children }: MobileNavigationProps) {
 	);
 }
 
-// Dynamic import for the entire MobileNavigation component to prevent SSR
-const DynamicMobileNavigation = dynamic(() => Promise.resolve(MobileNavigation), {
-	ssr: false,
-	loading: () => <div className="min-h-screen bg-background">{/* Loading placeholder */}</div>
-});
-
 export function MobileAppShell({ children }: { children: React.ReactNode }) {
-	// Check if children contain layout components that provide their own navigation
-	const childrenArray = React.Children.toArray(children);
-	const hasLayoutNavigation = childrenArray.some((child) => {
-		if (React.isValidElement(child)) {
-			const componentName = (child.type as any)?.name || child.type?.toString() || '';
-			return componentName.includes('EnhancedLayout') || componentName.includes('enhanced-layout');
-		}
-		return false;
-	});
-
-	// If children have their own layout, just pass them through
-	if (hasLayoutNavigation) {
+	const pathname = usePathname();
+	
+	// Don't render mobile shell for dashboard pages - they have their own layout
+	if (pathname.startsWith('/dashboard') || pathname.startsWith('/(dashboard)')) {
 		return <>{children}</>;
 	}
 
-	// For other cases, use dynamic mobile navigation
-	return <DynamicMobileNavigation>{children}</DynamicMobileNavigation>;
+	// For other cases, use mobile navigation
+	return <MobileNavigation>{children}</MobileNavigation>;
 }

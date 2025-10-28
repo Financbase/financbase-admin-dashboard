@@ -5,7 +5,6 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
-import { OpenAIStream, StreamingTextResponse } from 'ai';
 import OpenAI from 'openai';
 import { FinancbaseGPTService } from '@/lib/services/business/financbase-gpt-service';
 

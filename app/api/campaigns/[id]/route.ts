@@ -41,6 +41,7 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		const campaign = await AdboardService.getCampaignById(id, userId);
 
 		if (!campaign) {
@@ -69,6 +70,7 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		const body = await request.json();
 		const action = body.action;
 
