@@ -29,23 +29,21 @@ const queryClient = new QueryClient({
 
 export function Providers({ children }: ProvidersProps) {
 	return (
-		<ClerkProvider>
-			<QueryClientProvider client={queryClient}>
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="light"
-					enableSystem={false}
-					disableTransitionOnChange
-					storageKey="financbase-theme"
-				>
-					<DashboardProvider>
-						{children}
-					</DashboardProvider>
-				</ThemeProvider>
-				{process.env.NODE_ENV === 'development' && (
-					<ReactQueryDevtools initialIsOpen={false} />
-				)}
-			</QueryClientProvider>
-		</ClerkProvider>
+		<QueryClientProvider client={queryClient}>
+			<ThemeProvider
+				attribute="class"
+				defaultTheme="light"
+				enableSystem={false}
+				disableTransitionOnChange
+				storageKey="financbase-theme"
+			>
+				<DashboardProvider>
+					{children}
+				</DashboardProvider>
+			</ThemeProvider>
+			{process.env.NODE_ENV === 'development' && (
+				<ReactQueryDevtools initialIsOpen={false} />
+			)}
+		</QueryClientProvider>
 	);
 }

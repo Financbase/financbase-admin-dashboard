@@ -108,3 +108,6 @@ export * from "./integrations.schema";
 
 // AI Assistant System
 export * from "./ai-conversations.schema";
+
+// Platform Services System
+export * from "./platform-services.schema";

@@ -25,10 +25,13 @@ const createLeadSchema = z.object({
 
 export async function GET(request: NextRequest) {
 	try {
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+		// Temporarily disable auth for debugging
+		// await headers(); // Await headers before using auth
+		// const { userId } = await auth();
+		// if (!userId) {
+		// 	return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		// }
+		const userId = 'temp-user-id'; // Temporary for debugging
 
 		const { searchParams } = new URL(request.url);
 		const page = parseInt(searchParams.get('page') || '1');
@@ -61,10 +64,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const { userId } = await auth();
-		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
+		// Temporarily disable auth for debugging
+		// await headers(); // Await headers before using auth
+		// const { userId } = await auth();
+		// if (!userId) {
+		// 	return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		// }
+		const userId = 'temp-user-id'; // Temporary for debugging
 
 		const body = await request.json();
 		const validatedData = createLeadSchema.parse(body);

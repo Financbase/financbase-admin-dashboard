@@ -7,7 +7,6 @@ import { aiInsightsResponseSchema } from '@/lib/validation-schemas';
 
 export async function GET() {
   try {
-    await headers(); // Await headers before using auth
     const { userId } = await auth();
     if (!userId) {
       return ApiErrorHandler.unauthorized();

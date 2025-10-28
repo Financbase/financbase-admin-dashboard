@@ -16,7 +16,7 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const { keyId } = params;
+		const { keyId } = await params;
 		const body = await request.json();
 		const { isActive, keyName, keyType } = body;
 
@@ -60,7 +60,7 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const { keyId } = params;
+		const { keyId } = await params;
 		const byokService = new BYOKService();
 
 		await byokService.deleteUserApiKey(userId, parseInt(keyId));
