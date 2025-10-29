@@ -7,11 +7,11 @@ echo "🧪 Testing Tier 2 API Endpoints"
 echo "================================="
 echo ""
 
-BASE_URL="http://localhost:3010"
+BASE_URL="http://localhost:3000"
 
 # Test 1: Dashboard API
 echo "1. Testing Dashboard API..."
-curl -s -o /dev/null -w "Dashboard: %{http_code}\n" "$BASE_URL/dashboard" || echo "Dashboard: FAILED"
+curl -s -o /dev/null -w "Dashboard: %{http_code}\n" "$BASE_URL/api/dashboard/overview" || echo "Dashboard: FAILED"
 
 # Test 2: Financial API
 echo "2. Testing Financial API..."

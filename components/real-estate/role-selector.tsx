@@ -3,7 +3,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Building2,
   Home,
@@ -59,7 +58,7 @@ const roleOptions: RoleOption[] = [
     id: 'buyer',
     title: 'Home Buyer',
     description: 'Find your dream home and manage the buying process',
-    icon: <Heart className="h-8 w-8" />,
+    icon: <Home className="h-8 w-8" />,
     color: 'bg-purple-500',
     features: [
       'Property search & comparison',
@@ -73,64 +72,55 @@ const roleOptions: RoleOption[] = [
 
 interface RoleSelectorProps {
   onRoleSelect: (role: RealEstateRole) => void;
-  currentRole?: RealEstateRole | null;
+  currentRole: RealEstateRole;
 }
 
 export function RoleSelector({ onRoleSelect, currentRole }: RoleSelectorProps) {
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Welcome to Real Estate Platform</h1>
-        <p className="text-muted-foreground text-lg">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">
+          Welcome to Real Estate Platform
+        </h1>
+        <p className="text-xl text-muted-foreground">
           Choose your role to access personalized tools and insights
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3 w-full max-w-6xl">
         {roleOptions.map((option) => (
           <Card
             key={option.id}
-            className={`cursor-pointer transition-all hover:shadow-lg ${
+            className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 ${
               currentRole === option.id ? 'ring-2 ring-primary' : ''
             }`}
             onClick={() => onRoleSelect(option.id)}
           >
             <CardHeader className="text-center">
-              <div className={`${option.color} rounded-full w-16 h-16 flex items-center justify-center text-white mx-auto mb-4`}>
-                {option.icon}
+              <div className={`${option.color} rounded-full p-4 w-fit mx-auto mb-4`}>
+                <div className="text-white">
+                  {option.icon}
+                </div>
               </div>
               <CardTitle className="text-xl">{option.title}</CardTitle>
-              <p className="text-muted-foreground text-sm">
-                {option.description}
-              </p>
+              <p className="text-muted-foreground">{option.description}</p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <ul className="space-y-2">
                 {option.features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                    <span>{feature}</span>
-                  </div>
+                  <li key={index} className="flex items-center text-sm">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
+                    {feature}
+                  </li>
                 ))}
-              </div>
-              <Button 
-                className="w-full mt-4" 
-                variant={currentRole === option.id ? 'default' : 'outline'}
-              >
-                {currentRole === option.id ? 'Current Role' : 'Select Role'}
+              </ul>
+              <Button className="w-full mt-6" variant={currentRole === option.id ? 'default' : 'outline'}>
+                Select Role
               </Button>
             </CardContent>
           </Card>
         ))}
       </div>
-
-      {currentRole && (
-        <div className="text-center">
-          <Badge variant="secondary" className="text-sm">
-            Current Role: {roleOptions.find(r => r.id === currentRole)?.title}
-          </Badge>
-        </div>
-      )}
     </div>
   );
 }

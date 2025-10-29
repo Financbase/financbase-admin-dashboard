@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { EnhancedSidebar } from "./enhanced-sidebar";
 import { EnhancedTopNav } from "./enhanced-top-nav";
+import { DashboardFooter } from "./dashboard-footer";
 import { cn } from "@/lib/utils";
 import { useMobileNavigation } from "@/hooks/use-mobile-touch";
 

@@ -50,7 +50,7 @@ export default function Testimonials() {
   ]
 
   return (
-    <section className="py-24 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <section className="py-24 bg-gradient-to-br from-slate-50 via-[var(--brand-primary)]/5 to-[var(--brand-primary)]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-20">
@@ -60,7 +60,7 @@ export default function Testimonials() {
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Trusted by Finance Teams
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-light)]">
               Worldwide
             </span>
           </h2>
@@ -118,7 +118,7 @@ export default function Testimonials() {
                 <div className="flex items-center">
                   <Avatar className="h-12 w-12 mr-4 ring-2 ring-blue-100">
                     <AvatarImage src={testimonial.image} alt={testimonial.name} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
+                    <AvatarFallback className="bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary-dark)] text-white font-semibold">
                       {testimonial.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>

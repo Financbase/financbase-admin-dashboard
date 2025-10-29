@@ -1,6 +1,6 @@
 "use client";
 
-import { FinancbaseLogo } from "@/components/core/ui/layout/financbase-logo";
+import { FinancbaseLogo } from "@/components/ui/financbase-logo";
 import {
 	Github,
 	Linkedin,
@@ -59,7 +59,7 @@ export function PublicFooter() {
 					<div className="lg:col-span-1">
 						<div className="mb-4">
 							<Link href="/" className="inline-block">
-								<FinancbaseLogo size="md" variant="white" />
+								<FinancbaseLogo size="md" variant="default" />
 							</Link>
 						</div>
 						<p className="text-sm text-muted-foreground mb-4">

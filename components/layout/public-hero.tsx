@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 
 interface PublicHeroProps {
   title: string;
-  subtitle?: string;
-  description?: string;
+  subtitle?: ReactNode;
+  description?: string | ReactNode;
   primaryAction?: {
     text: string;
     href: string;
@@ -39,9 +39,9 @@ export function PublicHero({
   };
 
   const backgroundClasses = {
-    gradient: "bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800",
+    gradient: "bg-gradient-to-br from-[var(--brand-primary)] via-[var(--brand-primary-dark)] to-[var(--brand-primary-dark)]",
     solid: "bg-primary",
-    pattern: "bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden",
+    pattern: "bg-gradient-to-br from-[var(--brand-primary)] via-[var(--brand-primary-dark)] to-[var(--brand-primary-dark)] relative overflow-hidden",
   };
 
   return (
@@ -52,10 +52,10 @@ export function PublicHero({
       className
     )}>
       {background === "pattern" && (
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] pointer-events-none" />
       )}
       
-      <div className="max-w-6xl mx-auto px-6 relative">
+      <div className="max-w-6xl mx-auto px-6 relative z-10">
         <div className="text-center text-white">
           {subtitle && (
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/90 mb-6">
@@ -74,7 +74,7 @@ export function PublicHero({
           
           {description && (
             <p className={cn(
-              "text-blue-100 mb-8 max-w-3xl mx-auto",
+              "text-white/90 mb-8 max-w-3xl mx-auto",
               size === "sm" ? "text-lg" : "text-xl"
             )}>
               {description}
@@ -82,14 +82,14 @@ export function PublicHero({
           )}
           
           {(primaryAction || secondaryAction) && (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-20">
               {primaryAction && (
                 <Button
                   asChild
-                  size="lg"
-                  className="bg-white text-blue-600 hover:bg-gray-100"
+                  size="sm"
+                  className="bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-dark)] cursor-pointer relative z-30"
                 >
-                  <Link href={primaryAction.href}>
+                  <Link href={primaryAction.href} className="cursor-pointer">
                     {primaryAction.text}
                   </Link>
                 </Button>
@@ -97,10 +97,11 @@ export function PublicHero({
               {secondaryAction && (
                 <Button
                   asChild
-                  size="lg"
-                  className="border-white text-white hover:bg-white hover:text-blue-600"
+                  size="sm"
+                  variant="outline"
+                  className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white cursor-pointer relative z-30"
                 >
-                  <Link href={secondaryAction.href}>
+                  <Link href={secondaryAction.href} className="cursor-pointer">
                     {secondaryAction.text}
                   </Link>
                 </Button>

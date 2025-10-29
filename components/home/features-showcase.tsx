@@ -94,7 +94,7 @@ export default function FeaturesShowcase() {
             >
               <CardContent className="p-8">
                 <div className="flex items-center mb-6">
-                  <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl text-white mr-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="p-4 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary-dark)] rounded-xl text-white mr-4 group-hover:scale-110 transition-transform duration-300">
                     {feature.icon}
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">{feature.title}</h3>
@@ -157,7 +157,7 @@ export default function FeaturesShowcase() {
         </Card>
 
         {/* Security & Compliance */}
-        <Card className="mt-16 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 shadow-lg">
+        <Card className="mt-16 bg-gradient-to-r from-[var(--brand-primary)]/5 to-[var(--brand-primary)]/10 border-[var(--brand-primary)]/20 shadow-lg">
           <CardContent className="p-8">
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
@@ -182,7 +182,7 @@ export default function FeaturesShowcase() {
                 </div>
               </div>
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full mb-4 group hover:scale-110 transition-transform duration-300">
+                <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary-dark)] rounded-full mb-4 group hover:scale-110 transition-transform duration-300">
                   <Shield className="h-16 w-16 text-white" />
                 </div>
                 <p className="text-sm font-medium text-gray-600">

@@ -4,8 +4,11 @@
  */
 
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+	// Await headers before redirect (required in Next.js 15)
+	await headers();
 	redirect('/settings/profile');
 }
 

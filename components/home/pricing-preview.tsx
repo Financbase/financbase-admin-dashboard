@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle, Star, Zap, Shield, Users } from "lucide-react"
+import { CheckCircle, Star, Zap, Shield, Users, CheckCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -22,10 +22,8 @@ export default function PricingPreview() {
       yearlyPrice: 249,
       buttonText: "Get started",
       buttonVariant: "outline" as const,
-      features: [
-        "Up to 5 users",
-        "Basic financial tracking",
-        "Monthly reports",
+      includes: [
+        "Free includes:",
         "Email support",
         "Mobile app access",
         "Basic analytics",
@@ -43,10 +41,8 @@ export default function PricingPreview() {
       buttonText: "Get started",
       buttonVariant: "default" as const,
       popular: true,
-      features: [
-        "Up to 25 users",
-        "Advanced analytics",
-        "Real-time reporting",
+      includes: [
+        "Everything in Starter, plus:",
         "Priority support",
         "API access",
         "Custom integrations",
@@ -66,10 +62,8 @@ export default function PricingPreview() {
       yearlyPrice: 1599,
       buttonText: "Get started",
       buttonVariant: "outline" as const,
-      features: [
-        "Unlimited users",
-        "Advanced AI insights",
-        "Custom dashboards",
+      includes: [
+        "Everything in Professional, plus:",
         "Dedicated support",
         "White-label options",
         "API rate limits",
@@ -172,15 +166,18 @@ export default function PricingPreview() {
           <Badge variant="outline" className="mb-4">
             Pricing
           </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Simple, Transparent
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <span className="text-gray-900">Simple, </span>
             <span 
-              className="bg-clip-text text-transparent"
+              className="font-bold"
               style={{
                 background: `linear-gradient(to right, var(--brand-primary), var(--brand-primary-light))`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
               }}
             >
-              {" "}Pricing
+              Transparent Pricing
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
@@ -192,7 +189,7 @@ export default function PricingPreview() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20">
+        <div className="grid md:grid-cols-3 gap-4 py-6">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
@@ -217,58 +214,102 @@ export default function PricingPreview() {
               )}
 
               <Card 
-                className={`h-full transition-all duration-300 hover:shadow-xl border-0 bg-white/70 backdrop-blur-sm ${plan.popular ? 'ring-2' : ''}`}
-                style={plan.popular ? { ringColor: 'var(--brand-primary)' } : {}}
+                className={`h-full transition-all duration-300 hover:shadow-xl border border-neutral-200 bg-white ${plan.popular ? 'ring-2 bg-opacity-10' : ''}`}
+                style={plan.popular ? { 
+                  '--tw-ring-color': 'var(--brand-primary)',
+                  backgroundColor: 'oklch(0.95 0.05 271.13)',
+                } as React.CSSProperties : {}}
               >
-                <CardHeader className="text-center pb-8">
-                  <div className="flex items-center justify-center mb-4">
-                    {plan.popular && <Zap className="h-6 w-6 mr-2" style={{ color: 'var(--brand-primary)' }} />}
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      {plan.name}
+                <CardHeader className="text-left">
+                  <div className="flex justify-between">
+                    <h3 className="xl:text-3xl md:text-2xl text-3xl font-semibold text-gray-900 mb-2">
+                      {plan.name} Plan
                     </h3>
+                    {plan.popular && (
+                      <div className="">
+                        <span 
+                          className="text-white px-3 py-1 rounded-full text-sm font-medium"
+                          style={{ backgroundColor: 'var(--brand-primary)' }}
+                        >
+                          Popular
+                        </span>
+                      </div>
+                    )}
                   </div>
-
-                  <div className="mb-4">
-                    <div className="flex items-baseline justify-center">
-                      <span className="text-4xl font-bold text-gray-900">$</span>
-                      <NumberFlow
-                        value={isYearly ? plan.yearlyPrice : plan.price}
-                        className="text-4xl font-bold text-gray-900"
-                      />
-                      <span className="text-muted-foreground ml-1">/{isYearly ? "year" : "month"}</span>
-                    </div>
-                  </div>
-
-                  <p className="text-muted-foreground">
+                  <p className="xl:text-sm md:text-xs text-sm text-gray-600 mb-4">
                     {plan.description}
                   </p>
+                  <div className="flex items-baseline">
+                    <span className="text-4xl font-semibold text-gray-900">
+                      $
+                      <NumberFlow
+                        format={{
+                          currency: "USD",
+                        }}
+                        value={isYearly ? plan.yearlyPrice : plan.price}
+                        className="text-4xl font-semibold"
+                      />
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      /{isYearly ? "year" : "month"}
+                    </span>
+                  </div>
                 </CardHeader>
 
                 <CardContent className="pt-0">
-                  <div className="space-y-4 mb-8">
-                    {plan.features.map((feature, featureIndex) => (
-                      <div key={`${plan.id}-${feature}-${featureIndex}`} className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
                   <Button
                     asChild
-                    className={`w-full ${
+                    className={`w-full mb-6 p-4 text-xl rounded-xl ${
                       plan.popular
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                        ? "text-white shadow-lg border"
                         : plan.buttonVariant === "outline"
-                          ? "border-gray-300 text-gray-700 hover:bg-gray-50"
-                          : "bg-gray-900 hover:bg-gray-800 text-white"
+                          ? "bg-gradient-to-t from-neutral-900 to-neutral-600 shadow-lg shadow-neutral-900 border border-neutral-700 text-white"
+                          : ""
                     }`}
-                    size="lg"
+                    style={plan.popular ? {
+                      background: `linear-gradient(to bottom, var(--brand-primary-light), var(--brand-primary))`,
+                      borderColor: 'var(--brand-primary)',
+                      boxShadow: '0 10px 15px -3px var(--brand-primary)',
+                    } : {}}
                   >
                     <Link href={plan.name === "Enterprise" ? "/contact" : "/auth/sign-up"}>
                       {plan.buttonText}
                     </Link>
                   </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full mb-6 p-4 text-xl rounded-xl bg-white text-black border border-gray-200 shadow-lg shadow-gray-200 hover:bg-gray-50"
+                  >
+                    <Link href="/contact">
+                      Click to Sale
+                    </Link>
+                  </Button>
+
+                  <div className="space-y-3 pt-4 border-t border-neutral-200">
+                    <h2 className="text-xl font-semibold uppercase text-gray-900 mb-3">
+                      Features
+                    </h2>
+                    <h4 className="font-medium text-base text-gray-900 mb-3">
+                      {plan.includes[0]}
+                    </h4>
+                    <ul className="space-y-2 font-semibold">
+                      {plan.includes.slice(1).map((feature, featureIndex) => (
+                        <li key={`${plan.id}-${feature}-${featureIndex}`} className="flex items-center">
+                          <span 
+                            className="h-6 w-6 bg-white border rounded-full grid place-content-center mt-0.5 mr-3"
+                            style={{ borderColor: 'var(--brand-primary)' }}
+                          >
+                            <CheckCheck 
+                              className="h-4 w-4" 
+                              style={{ color: 'var(--brand-primary)' }}
+                            />
+                          </span>
+                          <span className="text-sm text-gray-600">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

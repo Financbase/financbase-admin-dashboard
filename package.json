@@ -76,6 +76,7 @@
     "cmdk": "^0.2.1",
     "date-fns": "^3.6.0",
     "date-fns-tz": "^3.2.0",
+    "dotted-map": "^2.2.3",
     "drizzle-kit": "^0.31.5",
     "drizzle-orm": "0.36.4",
     "drizzle-zod": "0.7.0",

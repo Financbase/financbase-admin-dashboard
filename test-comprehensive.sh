@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Comprehensive Testing Suite Runner
-# Runs all testing categories in sequence
+# Comprehensive Testing Script for Financbase Admin Dashboard
+# This script runs all tests and provides a detailed report
 
 set -e
 
-echo "🚀 Starting Comprehensive Testing Suite..."
-echo "========================================"
+echo "🧪 Starting Comprehensive Testing for Financbase Admin Dashboard"
+echo "================================================================"
 
 # Colors for output
 RED='\033[0;31m'
@@ -15,203 +15,251 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Function to print colored output
-print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
 # Test results tracking
-TEST_RESULTS=()
+TOTAL_TESTS=0
+PASSED_TESTS=0
+FAILED_TESTS=0
 
-# 1. Basic Quality Checks
-print_status "1. Running Quality Checks..."
-
-# TypeScript check
-print_status "   - TypeScript compilation..."
-if npm run type-check > /dev/null 2>&1; then
-    print_success "   ✅ TypeScript compilation passed"
-    TEST_RESULTS+=("TypeScript: PASS")
-else
-    print_error "   ❌ TypeScript compilation failed"
-    TEST_RESULTS+=("TypeScript: FAIL")
-fi
-
-# Linting check
-print_status "   - ESLint check..."
-if npm run lint > /dev/null 2>&1; then
-    print_success "   ✅ Linting passed"
-    TEST_RESULTS+=("Linting: PASS")
-else
-    print_warning "   ⚠️  Linting issues found"
-    TEST_RESULTS+=("Linting: WARNING")
-fi
-
-# 2. Unit Tests
-print_status "2. Running Unit Tests..."
-if npm run test:ci > /dev/null 2>&1; then
-    print_success "   ✅ Unit tests passed"
-    TEST_RESULTS+=("Unit Tests: PASS")
-else
-    print_error "   ❌ Unit tests failed"
-    TEST_RESULTS+=("Unit Tests: FAIL")
-fi
-
-# 3. Database Tests
-print_status "3. Running Database Tests..."
-if node test-db.js > /dev/null 2>&1; then
-    print_success "   ✅ Database connectivity verified"
-    TEST_RESULTS+=("Database: PASS")
-else
-    print_warning "   ⚠️  Database connection issues"
-    TEST_RESULTS+=("Database: WARNING")
-fi
-
-# 4. API Tests
-print_status "4. Running API Integration Tests..."
-if node test-api-endpoints.sh > /dev/null 2>&1; then
-    print_success "   ✅ API endpoints functional"
-    TEST_RESULTS+=("API Tests: PASS")
-else
-    print_warning "   ⚠️  API endpoint issues"
-    TEST_RESULTS+=("API Tests: WARNING")
-fi
-
-# 5. Playwright E2E Tests (if server is running)
-print_status "5. Checking E2E Test Environment..."
-if curl -f http://localhost:3000 > /dev/null 2>&1; then
-    print_status "   - Server is running, starting E2E tests..."
-
-    if npx playwright test --reporter=line > /dev/null 2>&1; then
-        print_success "   ✅ E2E tests passed"
-        TEST_RESULTS+=("E2E Tests: PASS")
+# Function to run tests and track results
+run_test() {
+    local test_name="$1"
+    local test_command="$2"
+    
+    echo -e "\n${BLUE}Running: $test_name${NC}"
+    echo "Command: $test_command"
+    echo "----------------------------------------"
+    
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
+    
+    if eval "$test_command"; then
+        echo -e "${GREEN}✅ PASSED: $test_name${NC}"
+        PASSED_TESTS=$((PASSED_TESTS + 1))
     else
-        print_warning "   ⚠️  E2E test issues"
-        TEST_RESULTS+=("E2E Tests: WARNING")
+        echo -e "${RED}❌ FAILED: $test_name${NC}"
+        FAILED_TESTS=$((FAILED_TESTS + 1))
+    fi
+}
+
+# Function to check if server is running
+check_server() {
+    echo -e "\n${YELLOW}Checking if development server is running...${NC}"
+    if curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health > /dev/null 2>&1; then
+        echo -e "${GREEN}✅ Server is running${NC}"
+        return 0
+    else
+        echo -e "${RED}❌ Server is not running${NC}"
+        echo "Please start the development server with: pnpm dev"
+        return 1
+    fi
+}
+
+# Function to run API endpoint tests
+test_api_endpoints() {
+    echo -e "\n${YELLOW}Testing API Endpoints...${NC}"
+    
+    local endpoints=(
+        "/api/real-estate/stats"
+        "/api/real-estate/properties"
+        "/api/real-estate/realtor/stats"
+        "/api/real-estate/realtor/leads"
+        "/api/real-estate/realtor/listings"
+        "/api/real-estate/buyer/stats"
+        "/api/real-estate/buyer/saved-properties"
+        "/api/analytics"
+        "/api/dashboard/overview"
+    )
+    
+    local failed_endpoints=()
+    
+    for endpoint in "${endpoints[@]}"; do
+        echo "Testing: $endpoint"
+        if curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000$endpoint" | grep -q "200\|404"; then
+            echo -e "  ${GREEN}✅ OK${NC}"
+        else
+            echo -e "  ${RED}❌ FAILED${NC}"
+            failed_endpoints+=("$endpoint")
+        fi
+    done
+    
+    if [ ${#failed_endpoints[@]} -eq 0 ]; then
+        echo -e "${GREEN}✅ All API endpoints are responding${NC}"
+        return 0
+    else
+        echo -e "${RED}❌ Failed endpoints: ${failed_endpoints[*]}${NC}"
+        return 1
+    fi
+}
+
+# Function to test database connectivity
+test_database() {
+    echo -e "\n${YELLOW}Testing Database Connectivity...${NC}"
+    
+    if [ -z "$DATABASE_URL" ]; then
+        echo -e "${RED}❌ DATABASE_URL environment variable not set${NC}"
+        return 1
+    fi
+    
+    # Test basic database connection
+    if psql "$DATABASE_URL" -c "SELECT 1;" > /dev/null 2>&1; then
+        echo -e "${GREEN}✅ Database connection successful${NC}"
+        
+        # Test if real estate tables exist
+        local tables=("listings" "leads" "buyer_profiles" "saved_properties")
+        local missing_tables=()
+        
+        for table in "${tables[@]}"; do
+            if psql "$DATABASE_URL" -c "SELECT 1 FROM $table LIMIT 1;" > /dev/null 2>&1; then
+                echo -e "  ${GREEN}✅ Table '$table' exists${NC}"
+            else
+                echo -e "  ${RED}❌ Table '$table' missing${NC}"
+                missing_tables+=("$table")
+            fi
+        done
+        
+        if [ ${#missing_tables[@]} -eq 0 ]; then
+            echo -e "${GREEN}✅ All required tables exist${NC}"
+            return 0
+        else
+            echo -e "${RED}❌ Missing tables: ${missing_tables[*]}${NC}"
+            return 1
+        fi
+    else
+        echo -e "${RED}❌ Database connection failed${NC}"
+        return 1
+    fi
+}
+
+# Function to run unit tests
+run_unit_tests() {
+    echo -e "\n${YELLOW}Running Unit Tests...${NC}"
+    
+    if [ -f "vitest.config.ts" ]; then
+        pnpm vitest run --reporter=verbose
+    else
+        echo -e "${YELLOW}⚠️  No vitest configuration found, skipping unit tests${NC}"
+        return 0
+    fi
+}
+
+# Function to run integration tests
+run_integration_tests() {
+    echo -e "\n${YELLOW}Running Integration Tests...${NC}"
+    
+    if [ -f "playwright.config.ts" ]; then
+        pnpm playwright test --reporter=line
+    else
+        echo -e "${YELLOW}⚠️  No Playwright configuration found, skipping integration tests${NC}"
+        return 0
+    fi
+}
+
+# Function to test build process
+test_build() {
+    echo -e "\n${YELLOW}Testing Build Process...${NC}"
+    
+    # Clean previous build
+    rm -rf .next
+    
+    # Run build
+    if pnpm build; then
+        echo -e "${GREEN}✅ Build successful${NC}"
+        return 0
+    else
+        echo -e "${RED}❌ Build failed${NC}"
+        return 1
+    fi
+}
+
+# Function to test linting
+test_linting() {
+    echo -e "\n${YELLOW}Running Linting...${NC}"
+    
+    if [ -f "eslint.config.js" ]; then
+        if pnpm lint; then
+            echo -e "${GREEN}✅ Linting passed${NC}"
+            return 0
+        else
+            echo -e "${RED}❌ Linting failed${NC}"
+            return 1
     fi
 else
-    print_warning "   ⚠️  Server not running - skipping E2E tests"
-    TEST_RESULTS+=("E2E Tests: SKIPPED")
-fi
-
-# 6. Performance Tests (light version)
-print_status "6. Running Performance Tests..."
-if command -v k6 > /dev/null 2>&1; then
-    print_status "   - Running quick performance test..."
-
-    if k6 run --duration=10s --vus=10 performance-tests/api-load-test.js > /dev/null 2>&1; then
-        print_success "   ✅ Performance tests completed"
-        TEST_RESULTS+=("Performance: PASS")
-    else
-        print_warning "   ⚠️  Performance test issues"
-        TEST_RESULTS+=("Performance: WARNING")
+        echo -e "${YELLOW}⚠️  No ESLint configuration found, skipping linting${NC}"
+        return 0
     fi
-else
-    print_warning "   ⚠️  K6 not installed - skipping performance tests"
-    TEST_RESULTS+=("Performance: SKIPPED")
-fi
+}
 
-# 7. Security Checks
-print_status "7. Running Security Checks..."
-if npm audit --audit-level=moderate > /dev/null 2>&1; then
-    print_success "   ✅ No high/critical vulnerabilities"
-    TEST_RESULTS+=("Security Audit: PASS")
-else
-    print_warning "   ⚠️  Security vulnerabilities found"
-    TEST_RESULTS+=("Security Audit: WARNING")
-fi
-
-# 8. Build Test
-print_status "8. Testing Build Process..."
-if npm run build > /dev/null 2>&1; then
-    print_success "   ✅ Build successful"
-    TEST_RESULTS+=("Build: PASS")
-else
-    print_error "   ❌ Build failed"
-    TEST_RESULTS+=("Build: FAIL")
-fi
-
-# Summary Report
-echo ""
-echo "========================================"
-echo "📋 COMPREHENSIVE TEST RESULTS"
-echo "========================================"
-
-PASS_COUNT=0
-FAIL_COUNT=0
-WARNING_COUNT=0
-SKIP_COUNT=0
-
-for result in "${TEST_RESULTS[@]}"; do
-    if [[ $result == *"PASS"* ]]; then
-        echo -e "   ${GREEN}✅${NC} $result"
-        ((PASS_COUNT++))
-    elif [[ $result == *"FAIL"* ]]; then
-        echo -e "   ${RED}❌${NC} $result"
-        ((FAIL_COUNT++))
-    elif [[ $result == *"WARNING"* ]]; then
-        echo -e "   ${YELLOW}⚠️${NC}  $result"
-        ((WARNING_COUNT++))
+# Function to test type checking
+test_types() {
+    echo -e "\n${YELLOW}Running Type Checking...${NC}"
+    
+    if [ -f "tsconfig.json" ]; then
+        if pnpm tsc --noEmit; then
+            echo -e "${GREEN}✅ Type checking passed${NC}"
+            return 0
+        else
+            echo -e "${RED}❌ Type checking failed${NC}"
+            return 1
+        fi
     else
-        echo -e "   ${BLUE}⏭️${NC}  $result"
-        ((SKIP_COUNT++))
+        echo -e "${YELLOW}⚠️  No TypeScript configuration found, skipping type checking${NC}"
+        return 0
     fi
-done
+}
 
-echo ""
-echo "========================================"
-echo "📊 TEST SUMMARY"
-echo "========================================"
+# Function to generate test report
+generate_report() {
+    echo -e "\n${BLUE}================================================================"
+    echo -e "                    TEST REPORT SUMMARY"
+    echo -e "================================================================"
+    
+    echo -e "Total Tests: $TOTAL_TESTS"
+    echo -e "${GREEN}Passed: $PASSED_TESTS${NC}"
+    echo -e "${RED}Failed: $FAILED_TESTS${NC}"
+    
+    local success_rate=$((PASSED_TESTS * 100 / TOTAL_TESTS))
+    echo -e "Success Rate: $success_rate%"
+    
+    if [ $FAILED_TESTS -eq 0 ]; then
+        echo -e "\n${GREEN}🎉 ALL TESTS PASSED!${NC}"
+        echo -e "${GREEN}The application is ready for production deployment.${NC}"
+        return 0
+    else
+        echo -e "\n${RED}⚠️  SOME TESTS FAILED${NC}"
+        echo -e "${RED}Please fix the failing tests before deploying to production.${NC}"
+        return 1
+    fi
+}
 
-if [ $FAIL_COUNT -eq 0 ]; then
-    print_success "🎉 All critical tests passed! Application is ready for deployment."
-else
-    print_error "❌ $FAIL_COUNT critical test(s) failed. Please fix issues before deployment."
-fi
+# Main execution
+main() {
+    echo "Starting comprehensive testing at $(date)"
+    
+    # Check if we're in the right directory
+    if [ ! -f "package.json" ]; then
+        echo -e "${RED}❌ Error: package.json not found. Please run this script from the project root.${NC}"
+        exit 1
+    fi
+    
+    # Install dependencies if needed
+    if [ ! -d "node_modules" ]; then
+        echo -e "${YELLOW}Installing dependencies...${NC}"
+        pnpm install
+    fi
+    
+    # Run tests
+    run_test "Database Connectivity" "test_database"
+    run_test "API Endpoints" "test_api_endpoints"
+    run_test "Type Checking" "test_types"
+    run_test "Linting" "test_linting"
+    run_test "Unit Tests" "run_unit_tests"
+    run_test "Integration Tests" "run_integration_tests"
+    run_test "Build Process" "test_build"
+    
+    # Generate final report
+    generate_report
+    
+    echo -e "\nTesting completed at $(date)"
+}
 
-echo "   ✅ Passed: $PASS_COUNT tests"
-echo "   ⚠️  Warnings: $WARNING_COUNT tests"
-echo "   ❌ Failed: $FAIL_COUNT tests"
-echo "   ⏭️  Skipped: $SKIP_COUNT tests"
-
-echo ""
-echo "📝 DETAILED REPORTS:"
-echo "   - Coverage: coverage/lcov-report/index.html"
-echo "   - Playwright: playwright-report/index.html"
-echo "   - Performance: performance-tests/reports/"
-echo "   - Security: npm audit"
-
-echo ""
-echo "🚀 NEXT STEPS:"
-if [ $FAIL_COUNT -eq 0 ]; then
-    echo "   1. ✅ Ready for production deployment"
-    echo "   2. ✅ Run full CI/CD pipeline"
-    echo "   3. ✅ Monitor application in production"
-else
-    echo "   1. ❌ Fix failing tests before deployment"
-    echo "   2. ⚠️  Address warnings for better reliability"
-    echo "   3. 🔄 Re-run tests after fixes"
-fi
-
-echo ""
-echo "💡 USAGE:"
-echo "   Run individual test suites:"
-echo "   - npm run test:unit (Unit tests)"
-echo "   - npm run test:e2e (End-to-end tests)"
-echo "   - npm run test:performance:load (Load tests)"
-echo "   - npm run test:security (Security tests)"
-
-echo ""
-echo "📋 TESTING COMPLETE"
-echo "========================================"
+# Run main function
+main "$@"

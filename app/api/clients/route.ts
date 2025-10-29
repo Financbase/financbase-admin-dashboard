@@ -33,10 +33,10 @@ export async function GET(req: NextRequest) {
         like(clients.name, `%${search}%`),
         like(clients.email, `%${search}%`),
         clients.company ? like(clients.company, `%${search}%`) : undefined
-      ].filter(Boolean);
+      ].filter((condition): condition is NonNullable<typeof condition> => condition !== undefined);
       
       if (searchConditions.length > 0) {
-        whereConditions.push(or(...searchConditions));
+        whereConditions.push(searchConditions.length === 1 ? searchConditions[0] : or(...searchConditions));
       }
     }
 

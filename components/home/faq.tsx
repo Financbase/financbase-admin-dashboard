@@ -52,7 +52,7 @@ export default function FAQ() {
   ]
 
   return (
-    <section className="py-24 bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
+    <section className="py-24 bg-gradient-to-br from-slate-50 via-gray-50 to-[var(--brand-primary)]/5">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-20">
@@ -62,7 +62,7 @@ export default function FAQ() {
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Frequently Asked
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-light)]">
               Questions
             </span>
           </h2>
@@ -91,10 +91,10 @@ export default function FAQ() {
 
         {/* Contact CTA */}
         <div className="text-center">
-          <Card className="max-w-2xl mx-auto bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <Card className="max-w-2xl mx-auto bg-gradient-to-r from-[var(--brand-primary)]/5 to-[var(--brand-primary)]/10 border-[var(--brand-primary)]/20">
             <CardContent className="p-8">
               <div className="mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full mb-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary-dark)] rounded-full mb-4">
                   <MessageCircle className="h-8 w-8 text-white" />
           </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
@@ -112,7 +112,7 @@ export default function FAQ() {
                   Contact Support
                 </Link>
               </Button>
-                <Button asChild size="lg" className="px-8 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+                <Button asChild size="lg" className="px-8 bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-dark)] hover:from-[var(--brand-primary-dark)] hover:to-[var(--brand-primary)] text-white">
                 <Link href="/docs">
                     <BookOpen className="h-4 w-4 mr-2" />
                     View Documentation

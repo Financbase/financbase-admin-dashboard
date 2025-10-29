@@ -25,8 +25,8 @@ export async function GET() {
 		const statsResult = await sql`
 			SELECT
 				COUNT(*) as total_properties,
-				COALESCE(SUM(current_value), 0) as total_value,
-				COALESCE(SUM(purchase_price), 0) as total_invested,
+				SUM(COALESCE(current_value, 0)) as total_value,
+				SUM(COALESCE(purchase_price, 0)) as total_invested,
 				COUNT(CASE WHEN status = 'active' THEN 1 END) as active_properties,
 				COUNT(CASE WHEN status = 'vacant' THEN 1 END) as vacant_properties,
 				COUNT(CASE WHEN status = 'maintenance' THEN 1 END) as maintenance_properties

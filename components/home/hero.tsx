@@ -48,13 +48,13 @@ export default function Hero() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-primary)]/5 via-white to-[var(--brand-primary)]/10" />
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
 
       {/* Floating Elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-blue-100 rounded-full opacity-20 animate-pulse" />
-      <div className="absolute top-40 right-20 w-16 h-16 bg-purple-100 rounded-full opacity-20 animate-pulse delay-1000" />
-      <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-green-100 rounded-full opacity-20 animate-pulse delay-500" />
+      <div className="absolute top-20 left-10 w-20 h-20 bg-[var(--brand-primary)]/10 rounded-full opacity-20 animate-pulse" />
+      <div className="absolute top-40 right-20 w-16 h-16 bg-[var(--brand-primary)]/15 rounded-full opacity-20 animate-pulse delay-1000" />
+      <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-[var(--brand-secondary)]/20 rounded-full opacity-20 animate-pulse delay-500" />
 
       <div className="relative z-10 container mx-auto px-4 py-20">
         {/* Badge */}
@@ -68,7 +68,7 @@ export default function Hero() {
         {/* Main Heading */}
         <div className="text-center max-w-5xl mx-auto mb-8">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[var(--brand-primary)] via-[var(--brand-primary-light)] to-[var(--brand-secondary)] bg-clip-text text-transparent">
               Transform Your
             </span>
             <br />
@@ -99,7 +99,7 @@ export default function Hero() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center p-4 bg-white/50 backdrop-blur-sm rounded-lg border">
-              <div className="flex items-center justify-center mb-2 text-blue-600">
+              <div className="flex items-center justify-center mb-2 text-[var(--brand-primary)]">
                 {stat.icon}
               </div>
               <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
@@ -119,8 +119,8 @@ export default function Hero() {
               key={feature.title}
               className="group p-6 bg-white/70 backdrop-blur-sm rounded-xl border hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="w-12 h-12 bg-blue-100 rounded-lg mb-4 group-hover:bg-blue-200 transition-colors flex items-center justify-center">
-                <div className="text-blue-600">
+              <div className="w-12 h-12 bg-[var(--brand-primary)]/10 rounded-lg mb-4 group-hover:bg-[var(--brand-primary)]/20 transition-colors flex items-center justify-center">
+                <div className="text-[var(--brand-primary)]">
                   {feature.icon}
                 </div>
               </div>
@@ -149,7 +149,7 @@ export default function Hero() {
             <span>SOC 2 Compliant</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-[var(--brand-secondary)]" />
             <span>99.9% Uptime</span>
           </div>
         </div>

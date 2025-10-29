@@ -72,7 +72,7 @@ export default function RealtorDashboard() {
       email: 'sarah.j@email.com',
       phone: '(555) 123-4567',
       status: 'new',
-      propertyInterest: '3BR Condo Downtown',
+      propertyInterest: '3BR Single Family',
       budget: 450000,
       lastContact: '2024-01-15',
       source: 'Website',
@@ -83,8 +83,8 @@ export default function RealtorDashboard() {
       email: 'mike.chen@email.com',
       phone: '(555) 987-6543',
       status: 'viewing',
-      propertyInterest: 'Family Home Suburbs',
-      budget: 650000,
+      propertyInterest: '2BR Condo',
+      budget: 320000,
       lastContact: '2024-01-14',
       source: 'Referral',
     },
@@ -94,8 +94,8 @@ export default function RealtorDashboard() {
       email: 'emily.r@email.com',
       phone: '(555) 456-7890',
       status: 'offer',
-      propertyInterest: 'Townhouse',
-      budget: 380000,
+      propertyInterest: '4BR Single Family',
+      budget: 550000,
       lastContact: '2024-01-13',
       source: 'Social Media',
     },
@@ -106,33 +106,31 @@ export default function RealtorDashboard() {
       id: '1',
       name: 'Modern Downtown Condo',
       address: '123 Main St',
-      city: 'Downtown',
-      state: 'CA',
-      zipCode: '90210',
-      propertyType: 'residential',
-      purchasePrice: 450000,
-      currentValue: 475000,
-      squareFootage: 1200,
+      city: 'Springfield',
+      state: 'IL',
+      zipCode: '62701',
+      price: 295000,
       bedrooms: 2,
       bathrooms: 2,
+      squareFootage: 1200,
+      propertyType: 'condo',
       status: 'active',
-      monthlyRent: 3200,
+      monthlyPayment: 1570,
     },
     {
       id: '2',
-      name: 'Family Suburban Home',
+      name: 'Charming Family Home',
       address: '456 Oak Ave',
-      city: 'Suburbia',
-      state: 'CA',
-      zipCode: '90211',
-      propertyType: 'residential',
-      purchasePrice: 650000,
-      currentValue: 680000,
-      squareFootage: 2500,
-      bedrooms: 4,
-      bathrooms: 3,
+      city: 'Springfield',
+      state: 'IL',
+      zipCode: '62702',
+      price: 365000,
+      bedrooms: 3,
+      bathrooms: 2,
+      squareFootage: 1800,
+      propertyType: 'single_family',
       status: 'active',
-      monthlyRent: 4200,
+      monthlyPayment: 1943,
     },
   ];
 
@@ -175,7 +173,7 @@ export default function RealtorDashboard() {
     },
   ];
 
-  const leadMetrics: MetricCardData[] = [
+  const activityMetrics: MetricCardData[] = [
     {
       title: 'New Leads',
       value: stats.newLeads,
@@ -201,12 +199,18 @@ export default function RealtorDashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800';
-      case 'contacted': return 'bg-yellow-100 text-yellow-800';
-      case 'viewing': return 'bg-purple-100 text-purple-800';
-      case 'offer': return 'bg-orange-100 text-orange-800';
-      case 'closed': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'new':
+        return 'bg-blue-100 text-blue-800';
+      case 'contacted':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'viewing':
+        return 'bg-purple-100 text-purple-800';
+      case 'offer':
+        return 'bg-orange-100 text-orange-800';
+      case 'closed':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -240,78 +244,12 @@ export default function RealtorDashboard() {
         ))}
       </div>
 
-      {/* Lead Metrics */}
+      {/* Activity Overview */}
       <div className="grid gap-4 md:grid-cols-3">
-        {leadMetrics.map((metric, index) => (
+        {activityMetrics.map((metric, index) => (
           <MetricCard key={index} metric={metric} variant="compact" />
         ))}
       </div>
-
-      {/* Lead Pipeline */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Lead Pipeline</CardTitle>
-            <Button variant="outline" size="sm">
-              View All Leads
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {leads.map((lead) => (
-              <div key={lead.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Users className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{lead.name}</h3>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        {lead.email}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        {lead.phone}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {lead.propertyInterest}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="text-sm font-medium">
-                      {lead.budget ? formatCurrency(lead.budget) : 'Budget TBD'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Source: {lead.source}
-                    </p>
-                  </div>
-                  <Badge className={getStatusColor(lead.status)}>
-                    {lead.status}
-                  </Badge>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm">
-                      <Phone className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Mail className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Active Listings */}
       <div className="space-y-4">
@@ -340,6 +278,49 @@ export default function RealtorDashboard() {
           ))}
         </div>
       </div>
+
+      {/* Lead Pipeline */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Lead Pipeline</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {leads.map((lead) => (
+              <div key={lead.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="font-semibold">{lead.name}</h3>
+                    <Badge className={getStatusColor(lead.status)}>
+                      {lead.status}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                    <div>
+                      <p>{lead.email}</p>
+                      <p>{lead.phone}</p>
+                    </div>
+                    <div>
+                      <p>Interest: {lead.propertyInterest}</p>
+                      <p>Budget: {lead.budget ? formatCurrency(lead.budget) : 'Not specified'}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <Phone className="h-4 w-4 mr-1" />
+                    Call
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Mail className="h-4 w-4 mr-1" />
+                    Email
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card>
