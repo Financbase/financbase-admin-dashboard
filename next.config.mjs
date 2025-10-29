@@ -105,23 +105,7 @@ const nextConfig = {
 			config.externals = [...(config.externals || []), 'pg-native'];
 		}
 
-		// Optimize for production
-		if (!dev) {
-			config.optimization = {
-				...config.optimization,
-				splitChunks: {
-					chunks: 'all',
-					cacheGroups: {
-						vendor: {
-							test: /[\\/]node_modules[\\/]/,
-							name: 'vendors',
-							chunks: 'all',
-						},
-					},
-				},
-			};
-		}
-
+		// Let Next.js handle chunk optimization - don't override
 		return config;
 	},
 	headers: async () => {

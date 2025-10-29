@@ -127,7 +127,7 @@ export function PublicCTA({
   className,
 }: PublicCTAProps) {
   const backgroundClasses = {
-    gradient: "bg-gradient-to-r from-blue-600 to-indigo-700",
+    gradient: "bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-dark)]",
     solid: "bg-primary",
     muted: "bg-muted/50",
   };
@@ -153,7 +153,7 @@ export function PublicCTA({
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100"
+                className="bg-white text-[var(--brand-primary)] hover:bg-gray-100"
               >
                 <a href={primaryAction.href}>
                   {primaryAction.text}
@@ -165,7 +165,7 @@ export function PublicCTA({
                 asChild
                 size="lg"
                 variant="outline"
-                className="border-white text-white hover:bg-white hover:text-blue-600"
+                className="border-white text-white hover:bg-white hover:text-[var(--brand-primary)]"
               >
                 <a href={secondaryAction.href}>
                   {secondaryAction.text}

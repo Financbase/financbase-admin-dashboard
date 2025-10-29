@@ -222,8 +222,8 @@ const FinancbaseLandingPage = () => {
 				{/* Financbase Platform Hero with Animated News Feed */}
 				<section className="relative mx-auto w-full max-w-[1180px] px-4 py-20 md:px-0">
 					{/* Modern gradient background */}
-					<div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl opacity-60" />
-					<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100 via-transparent to-transparent rounded-3xl" />
+					<div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-primary)]/5 via-[var(--brand-primary)]/10 to-[var(--brand-primary)]/15 rounded-3xl opacity-60" />
+					<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[var(--brand-primary)]/20 via-transparent to-transparent rounded-3xl" />
 
 					<div className="relative grid grid-cols-1 gap-12 lg:grid-cols-2">
 						{/* Hero Content */}
@@ -238,16 +238,16 @@ const FinancbaseLandingPage = () => {
 									initial={{ opacity: 0, scale: 0.9 }}
 									animate={{ opacity: 1, scale: 1 }}
 									transition={{ delay: 0.2, duration: 0.6 }}
-									className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6"
+									className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] rounded-full text-sm font-medium mb-6"
 								>
-									<div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse" />
+									<div className="h-2 w-2 bg-[var(--brand-primary)] rounded-full animate-pulse" />
 									AI-Powered Financial Intelligence
 								</motion.div>
 
 								<h1 className="text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight text-gray-900">
 									Where Finance Meets
 									<br />
-									<span className="text-blue-600">Function.</span>
+									<span className="text-[var(--brand-primary)]">Function.</span>
 								</h1>
 								<p className="mt-6 max-w-lg text-lg text-gray-600 leading-relaxed">
 									Join over a thousand businesses who choose{" "}
@@ -830,7 +830,7 @@ const FinancbaseLandingPage = () => {
 											type="button"
 											whileHover={{ scale: 1.05 }}
 											whileTap={{ scale: 0.95 }}
-											className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+											className="bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-dark)] text-white px-8 py-4 rounded-2xl font-semibold hover:from-[var(--brand-primary-dark)] hover:to-[var(--brand-primary)] transition-all duration-300 shadow-lg hover:shadow-xl"
 										>
 											Subscribe Now
 										</motion.button>
@@ -867,7 +867,7 @@ const FinancbaseLandingPage = () => {
 										whileTap={{ scale: 0.95 }}
 										className={`relative p-4 rounded-xl transition-all duration-300 ${
 											currentFeature === index
-												? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+												? "bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-dark)] text-white shadow-lg"
 												: "text-gray-600 hover:bg-white/60 hover:text-blue-600"
 										}`}
 									>
@@ -992,13 +992,13 @@ const FinancbaseLandingPage = () => {
 							transition={{ duration: 0.8 }}
 							className="text-center mb-16"
 						>
-							<div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 rounded-full text-sm font-medium mb-6">
+							<div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[var(--brand-primary)]/10 to-[var(--brand-primary)]/20 text-[var(--brand-primary)] rounded-full text-sm font-medium mb-6">
 								<Star className="h-4 w-4" />
 								Customer Stories
 							</div>
 							<h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
 								Trusted by Financial
-								<span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+								<span className="bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-light)] bg-clip-text text-transparent">
 									{" "}
 									Leaders
 								</span>
@@ -1026,7 +1026,7 @@ const FinancbaseLandingPage = () => {
 										<div className="flex items-center gap-4 mb-6">
 											<motion.div
 												whileHover={{ rotate: 5, scale: 1.1 }}
-												className="h-12 w-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
+												className="h-12 w-12 bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-dark)] rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
 											>
 												{testimonial.avatar}
 											</motion.div>
@@ -1081,7 +1081,7 @@ const FinancbaseLandingPage = () => {
 								<img
 									src="/financbase-logo-white.png"
 									alt="Financbase Logo"
-									className="h-8 w-auto mb-4 no-filter"
+									className="h-8 w-auto mb-4"
 									style={{ filter: "none", WebkitFilter: "none" }}
 								/>
 								<p className="text-gray-400 mb-4">

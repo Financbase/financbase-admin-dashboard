@@ -2,44 +2,30 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	AlertCircle,
-	ArrowLeft,
-	ArrowRight,
-	ArrowUp,
 	BookOpen,
-	Briefcase,
-	CheckCircle,
 	ChevronDown,
 	ChevronUp,
-	Clock,
-	Code,
 	CreditCard,
-	FileText,
-	Headphones,
 	HelpCircle,
-	Key,
-	Landmark,
-	LayoutDashboard,
-	Link2,
 	Mail,
 	MessageCircle,
 	Phone,
-	Puzzle,
 	Search,
 	Settings,
 	Shield,
-	Users,
 	Zap,
 	ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useId } from "react";
+import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
 
 interface ContactFormData {
 	name: string;
@@ -51,6 +37,13 @@ interface ContactFormData {
 }
 
 export default function SupportPage() {
+	const nameId = useId();
+	const emailId = useId();
+	const subjectId = useId();
+	const categoryId = useId();
+	const priorityId = useId();
+	const messageId = useId();
+	
 	const [searchQuery, setSearchQuery] = useState("");
 	const [openFaq, setOpenFaq] = useState<number | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,7 +97,7 @@ export default function SupportPage() {
 				category: "general",
 				message: "",
 			});
-		} catch (error) {
+		} catch {
 			setSubmitMessage("❌ Something went wrong. Please try again or contact us directly.");
 		} finally {
 			setIsSubmitting(false);
@@ -149,42 +142,42 @@ export default function SupportPage() {
 			title: "Getting Started",
 			description: "New to Financbase? Start here",
 			icon: BookOpen,
-			color: "bg-blue-500",
+			color: "bg-primary/10",
 			articles: 12,
 		},
 		{
 			title: "Account & Billing",
 			description: "Manage your account and payments",
 			icon: CreditCard,
-			color: "bg-green-500",
+			color: "bg-chart-2/10",
 			articles: 8,
 		},
 		{
 			title: "Security & Privacy",
 			description: "Keep your data safe and secure",
 			icon: Shield,
-			color: "bg-purple-500",
+			color: "bg-primary/5",
 			articles: 15,
 		},
 		{
 			title: "API & Integrations",
 			description: "Connect with your favorite tools",
 			icon: Settings,
-			color: "bg-orange-500",
+			color: "bg-chart-3/10",
 			articles: 20,
 		},
 		{
 			title: "Troubleshooting",
 			description: "Fix common issues and errors",
 			icon: AlertCircle,
-			color: "bg-red-500",
+			color: "bg-chart-5/10",
 			articles: 18,
 		},
 		{
 			title: "Advanced Features",
 			description: "Unlock the full potential",
 			icon: Zap,
-			color: "bg-indigo-500",
+			color: "bg-chart-4/10",
 			articles: 10,
 		},
 	];
@@ -216,45 +209,23 @@ export default function SupportPage() {
 		},
 	];
 
-	const popularArticles = [
-		{
-			title: "Setting up your first account",
-			href: "/support/account-setup",
-			views: "2.1k",
-		},
-		{
-			title: "Understanding your dashboard",
-			href: "/support/dashboard-guide",
-			views: "1.8k",
-		},
-		{
-			title: "API authentication guide",
-			href: "/support/api-auth",
-			views: "1.5k",
-		},
-		{
-			title: "Troubleshooting payment issues",
-			href: "/support/payment-troubleshooting",
-			views: "1.2k",
-		},
-	];
 
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Hero Section */}
 			<div className="border-b bg-gradient-to-br from-background via-background to-muted/20">
-				<div className="container mx-auto px-4 py-16">
+				<div className="container mx-auto px-4 py-8">
 					<div className="max-w-4xl mx-auto text-center">
-						<div className="flex items-center justify-center gap-2 mb-4">
+						<div className="flex items-center justify-center gap-2 mb-3">
 							<HelpCircle className="h-6 w-6 text-primary" />
 							<Badge variant="secondary" className="text-sm font-medium">
 								Help Center
 							</Badge>
 						</div>
-						<h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+						<h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
 							How can we help you today?
 						</h1>
-						<p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+						<p className="text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
 							Find answers to common questions, get help with your account, or
 							contact our support team.
 						</p>
@@ -274,10 +245,10 @@ export default function SupportPage() {
 				</div>
 			</div>
 
-			<div className="container mx-auto px-4 py-16">
+			<div className="container mx-auto px-4 py-8">
 				<div className="max-w-6xl mx-auto">
 					{/* Interactive Tabs Section */}
-					<Tabs defaultValue="categories" className="space-y-8">
+					<Tabs defaultValue="categories" className="space-y-4">
 						<TabsList className="grid w-full grid-cols-4">
 							<TabsTrigger value="categories">Browse Topics</TabsTrigger>
 							<TabsTrigger value="faq">FAQ</TabsTrigger>
@@ -286,44 +257,27 @@ export default function SupportPage() {
 						</TabsList>
 
 						{/* Categories Tab */}
-						<TabsContent value="categories" className="space-y-8">
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						<TabsContent value="categories" className="space-y-4">
+							<BentoGrid className="md:auto-rows-[20rem]">
 								{supportCategories.map((category) => (
-									<Link
-										key={`category-${category.title.toLowerCase().replace(/\s+/g, '-')}`}
-										href={`/support/category/${category.title.toLowerCase().replace(/\s+/g, "-")}`}
-									>
-										<Card className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
-											<CardContent className="p-6">
-												<div className="flex items-start gap-4">
-													<div
-														className={`p-3 rounded-lg ${category.color} text-white`}
-													>
-														<category.icon className="h-6 w-6" />
-													</div>
-													<div className="flex-1">
-														<h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
-															{category.title}
-														</h3>
-														<p className="text-muted-foreground mb-3">
-															{category.description}
-														</p>
-														<div className="flex items-center gap-2 text-sm text-muted-foreground">
-															<FileText className="h-4 w-4" />
-															<span>{category.articles} articles</span>
-														</div>
-													</div>
-													<ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-												</div>
-											</CardContent>
-										</Card>
-									</Link>
+									<BentoCard
+										key={`category-${category.title.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '').replace(/--+/g, '-')}`}
+										name={category.title}
+										description={`${category.description}. ${category.articles} articles available.`}
+										Icon={category.icon}
+										href={`/support/category/${category.title.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "").replace(/--+/g, "-")}`}
+										cta="Browse Articles"
+										className="md:col-span-1"
+										background={
+											<div className={`absolute inset-0 ${category.color} group-hover:opacity-15 transition-opacity`} />
+										}
+									/>
 								))}
-							</div>
+							</BentoGrid>
 						</TabsContent>
 
 						{/* FAQ Tab */}
-						<TabsContent value="faq" className="space-y-8">
+						<TabsContent value="faq" className="space-y-4">
 							<div className="space-y-4">
 								{faqItems.map((item) => (
 									<Card key={`faq-${item.question.toLowerCase().replace(/\s+/g, '-').slice(0, 50)}`} className="overflow-hidden">
@@ -354,7 +308,7 @@ export default function SupportPage() {
 						</TabsContent>
 
 						{/* Contact Form Tab */}
-						<TabsContent value="contact" className="space-y-8">
+						<TabsContent value="contact" className="space-y-4">
 							<div className="max-w-2xl mx-auto">
 								<h2 className="text-2xl font-semibold mb-6 text-center">
 									Send us a Message
@@ -376,11 +330,11 @@ export default function SupportPage() {
 								<form onSubmit={handleSubmit} className="space-y-6">
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 										<div>
-											<label htmlFor="name" className="block text-sm font-medium mb-2">
+											<label htmlFor={nameId} className="block text-sm font-medium mb-2">
 												Full Name *
 											</label>
 											<Input
-												id="name"
+												id={nameId}
 												type="text"
 												value={formData.name}
 												onChange={(e) => handleInputChange('name', e.target.value)}
@@ -392,11 +346,11 @@ export default function SupportPage() {
 											)}
 										</div>
 										<div>
-											<label htmlFor="email" className="block text-sm font-medium mb-2">
+											<label htmlFor={emailId} className="block text-sm font-medium mb-2">
 												Email Address *
 											</label>
 											<Input
-												id="email"
+												id={emailId}
 												type="email"
 												value={formData.email}
 												onChange={(e) => handleInputChange('email', e.target.value)}
@@ -411,11 +365,11 @@ export default function SupportPage() {
 
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 										<div>
-											<label htmlFor="subject" className="block text-sm font-medium mb-2">
+											<label htmlFor={subjectId} className="block text-sm font-medium mb-2">
 												Subject *
 											</label>
 											<Input
-												id="subject"
+												id={subjectId}
 												type="text"
 												value={formData.subject}
 												onChange={(e) => handleInputChange('subject', e.target.value)}
@@ -427,11 +381,11 @@ export default function SupportPage() {
 											)}
 										</div>
 										<div>
-											<label htmlFor="category" className="block text-sm font-medium mb-2">
+											<label htmlFor={categoryId} className="block text-sm font-medium mb-2">
 												Category
 											</label>
 											<Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-												<SelectTrigger>
+												<SelectTrigger id={categoryId}>
 													<SelectValue placeholder="Select a category" />
 												</SelectTrigger>
 												<SelectContent>
@@ -446,11 +400,11 @@ export default function SupportPage() {
 									</div>
 
 									<div>
-										<label htmlFor="priority" className="block text-sm font-medium mb-2">
+										<label htmlFor={priorityId} className="block text-sm font-medium mb-2">
 											Priority
 										</label>
 										<Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
-											<SelectTrigger className="w-full md:w-48">
+											<SelectTrigger id={priorityId} className="w-full md:w-48">
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
@@ -463,11 +417,11 @@ export default function SupportPage() {
 									</div>
 
 									<div>
-										<label htmlFor="message" className="block text-sm font-medium mb-2">
+										<label htmlFor={messageId} className="block text-sm font-medium mb-2">
 											Message *
 										</label>
 										<Textarea
-											id="message"
+											id={messageId}
 											value={formData.message}
 											onChange={(e) => handleInputChange('message', e.target.value)}
 											className={`min-h-32 ${formErrors.message ? 'border-red-500' : ''}`}
@@ -500,7 +454,7 @@ export default function SupportPage() {
 						</TabsContent>
 
 						{/* Support Options Tab */}
-						<TabsContent value="support" className="space-y-8">
+						<TabsContent value="support" className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 								{contactMethods.map((method) => (
 									<Card
@@ -547,13 +501,13 @@ export default function SupportPage() {
 					</Tabs>
 
 					{/* Still Need Help */}
-					<Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-						<CardContent className="p-8 text-center">
+					<Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 mt-8">
+						<CardContent className="p-6 text-center">
 							<div className="max-w-2xl mx-auto">
-								<h3 className="text-2xl font-semibold mb-4">
+								<h3 className="text-2xl font-semibold mb-3">
 									Still need help?
 								</h3>
-								<p className="text-muted-foreground mb-6">
+								<p className="text-muted-foreground mb-5">
 									Can't find the answer you're looking for? Our support team is
 									here to help you get back on track.
 								</p>

@@ -111,7 +111,7 @@ export function ContentPageTemplate({
                   ) : (
                     <span className="text-foreground font-medium">{crumb.label}</span>
                   )}
-                  {index < breadcrumbs.length - 1 && <span>/</span>}
+                  {crumbIndex < breadcrumbs.length - 1 && <span>/</span>}
                 </div>
               ))}
             </div>

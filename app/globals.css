@@ -61,6 +61,13 @@
   --shadow-2xl: 0px 1px 9px 1.5px hsl(231.5993 53.7486% 36.4689% / 0.28);
   --tracking-normal: 0em;
   --spacing: 0.3rem;
+  
+  /* Financbase Brand Colors */
+  --brand-primary: oklch(0.388 0.1423 271.13);
+  --brand-primary-light: oklch(0.45 0.1423 271.13);
+  --brand-primary-dark: oklch(0.32 0.1423 271.13);
+  --brand-secondary: oklch(0.6270 0.1940 149.2140);
+  --brand-accent: oklch(0.8790 0.1690 91.6050);
 }
 
 .dark {
@@ -114,6 +121,13 @@
   --shadow-lg: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.11), 0px 4px 6px 0.5px hsl(0 0% 0% / 0.11);
   --shadow-xl: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.11), 0px 8px 10px 0.5px hsl(0 0% 0% / 0.11);
   --shadow-2xl: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.28);
+  
+  /* Financbase Brand Colors - Dark Theme */
+  --brand-primary: oklch(0.388 0.1423 271.13);
+  --brand-primary-light: oklch(0.45 0.1423 271.13);
+  --brand-primary-dark: oklch(0.32 0.1423 271.13);
+  --brand-secondary: oklch(0.7920 0.2090 151.7110);
+  --brand-accent: oklch(0.8790 0.1690 91.6050);
 }
 
 @theme inline {

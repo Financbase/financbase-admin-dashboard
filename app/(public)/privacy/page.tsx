@@ -281,16 +281,20 @@ export default function PrivacyPage() {
 								data practices, please don't hesitate to contact us.
 							</p>
 							<div className="flex flex-col sm:flex-row gap-3">
-								<Button className="flex-1">
-									<Mail className="h-4 w-4 mr-2" />
-									Contact Privacy Team
+								<Button asChild className="flex-1">
+									<Link href="/contact">
+										<Mail className="h-4 w-4 mr-2" />
+										Contact Privacy Team
+									</Link>
 								</Button>
-								<Button variant="outline" className="flex-1">
-									<FileText className="h-4 w-4 mr-2" />
-									Download PDF
+								<Button variant="outline" asChild className="flex-1">
+									<Link href="/contact">
+										<FileText className="h-4 w-4 mr-2" />
+										Download PDF
+									</Link>
 								</Button>
 								<Button variant="ghost" asChild className="flex-1">
-									<Link href="/">
+									<Link href="/home">
 										<ArrowLeft className="h-4 w-4 mr-2" />
 										Back to Home
 									</Link>

@@ -266,13 +266,17 @@ export default function TermsPage() {
 								these terms.
 							</p>
 							<div className="flex flex-col sm:flex-row gap-3">
-								<Button variant="destructive" className="flex-1">
-									<Gavel className="h-4 w-4 mr-2" />
-									Review Legal Terms
+								<Button variant="destructive" asChild className="flex-1">
+									<Link href="/legal">
+										<Gavel className="h-4 w-4 mr-2" />
+										Review Legal Terms
+									</Link>
 								</Button>
-								<Button variant="outline" className="flex-1">
-									<FileText className="h-4 w-4 mr-2" />
-									Download PDF
+								<Button variant="outline" asChild className="flex-1">
+									<Link href="/contact">
+										<FileText className="h-4 w-4 mr-2" />
+										Download PDF
+									</Link>
 								</Button>
 							</div>
 						</CardContent>
@@ -292,16 +296,20 @@ export default function TermsPage() {
 								need legal clarification, please contact our legal team.
 							</p>
 							<div className="flex flex-col sm:flex-row gap-3">
-								<Button className="flex-1">
-									<Mail className="h-4 w-4 mr-2" />
-									Contact Legal Team
+								<Button asChild className="flex-1">
+									<Link href="/contact">
+										<Mail className="h-4 w-4 mr-2" />
+										Contact Legal Team
+									</Link>
 								</Button>
-								<Button variant="outline" className="flex-1">
-									<FileText className="h-4 w-4 mr-2" />
-									Download PDF
+								<Button variant="outline" asChild className="flex-1">
+									<Link href="/contact">
+										<FileText className="h-4 w-4 mr-2" />
+										Download PDF
+									</Link>
 								</Button>
 								<Button variant="ghost" asChild className="flex-1">
-									<Link href="/">
+									<Link href="/home">
 										<ArrowLeft className="h-4 w-4 mr-2" />
 										Back to Home
 									</Link>

@@ -1,58 +1,55 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { DashboardService } from '@/lib/services/dashboard-service';
+import { headers } from 'next/headers';
 
 export async function GET(request: Request) {
 	try {
-		// TEMPORARILY DISABLED FOR TESTING
-		// const { userId } = await auth();
-		// if (!userId) {
-		// 	return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		// }
-		const userId = '550e8400-e29b-41d4-a716-446655440001'; // Temporary for testing
-
-		const { searchParams } = new URL(request.url);
-		const chartType = searchParams.get('chartType') as 'sales' | 'revenue' | 'expenses' | null;
-		const timeRange = searchParams.get('timeRange') as 'day' | 'week' | 'month' | null;
-		
-		// Get overview data
-		const overview = await DashboardService.getOverview(userId);
-		
-		// Get chart data if requested
-		let chartData = null;
-		if (chartType && timeRange) {
-			const now = new Date();
-			const startDate = new Date();
-			
-			// Calculate date range based on timeRange
-			switch (timeRange) {
-				case 'day':
-					startDate.setDate(now.getDate() - 30); // Last 30 days
-					break;
-				case 'week':
-					startDate.setDate(now.getDate() - 84); // Last 12 weeks
-					break;
-				case 'month':
-					startDate.setMonth(now.getMonth() - 12); // Last 12 months
-					break;
-			}
-			
-			chartData = await DashboardService.getChartData(userId, {
-				type: chartType,
-				dateRange: { start: startDate, end: now },
-				timeRange,
-			});
+		await headers(); // Await headers before using auth
+		const { userId } = await auth();
+		if (!userId) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		return NextResponse.json({ 
+		// Mock data for testing
+		const overview = {
+			revenue: {
+				total: 125000,
+				thisMonth: 45000,
+				lastMonth: 38000,
+				growth: 18.4
+			},
+			clients: {
+				total: 25,
+				active: 22,
+				newThisMonth: 3
+			},
+			invoices: {
+				total: 45,
+				pending: 8,
+				overdue: 2,
+				totalAmount: 125000
+			},
+			expenses: {
+				total: 75000,
+				thisMonth: 28000,
+				lastMonth: 22000,
+				growth: 27.3
+			},
+			netIncome: {
+				thisMonth: 17000,
+				lastMonth: 16000,
+				growth: 6.25
+			}
+		};
+
+		return NextResponse.json({
+			message: 'Dashboard API with mock data works!',
 			overview,
-			...(chartData && { chartData })
+			userId,
+			timestamp: new Date().toISOString()
 		});
 	} catch (error) {
-		console.error('Error fetching dashboard overview:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch dashboard overview' },
-			{ status: 500 }
-		);
+		console.error('Dashboard API error:', error);
+		return NextResponse.json({ error: 'Failed to fetch dashboard overview', details: (error as Error).message }, { status: 500 });
 	}
 }

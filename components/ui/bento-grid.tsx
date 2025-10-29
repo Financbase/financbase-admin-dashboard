@@ -1,62 +1,86 @@
-"use client";
+import type { ReactNode } from "react";
+import { ArrowRightIcon } from "@radix-ui/react-icons";
+import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
-interface BentoGridProps {
+export const BentoGrid = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
   className?: string;
-  children?: React.ReactNode;
-}
-
-interface BentoGridItemProps {
-  className?: string;
-  title?: string | React.ReactNode;
-  description?: string | React.ReactNode;
-  header?: React.ReactNode;
-  icon?: React.ReactNode;
-  children?: React.ReactNode;
-}
-
-export function BentoGrid({ className, children }: BentoGridProps) {
+}) => {
   return (
     <div
       className={cn(
-        "grid md:auto-rows-[18rem] grid-cols-1 md:grid-cols-3 gap-4 max-w-7xl mx-auto",
-        className
+        "grid w-full auto-rows-[22rem] grid-cols-3 gap-4",
+        className,
       )}
     >
       {children}
     </div>
   );
-}
+};
 
-export function BentoGridItem({
+export const BentoCard = ({
+  name,
   className,
-  title,
+  background,
+  Icon,
   description,
-  header,
-  icon,
-  children,
-}: BentoGridItemProps) {
-  return (
-    <div
-      className={cn(
-        "row-span-1 rounded-xl group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none p-4 dark:bg-black dark:border-white/[0.2] bg-white border border-transparent justify-between flex flex-col space-y-4 overflow-hidden",
-        className
-      )}
-    >
-      {header}
-      <div className="group-hover/bento:translate-x-2 transition duration-200 flex-1 min-h-0">
-        {icon}
-        <div className="font-sans font-bold text-neutral-600 dark:text-neutral-200 mb-2 mt-2">
-          {title}
-        </div>
-        <div className="font-sans font-normal text-neutral-600 text-xs dark:text-neutral-300">
-          {description}
-        </div>
-        <div className="flex-1 min-h-0 overflow-hidden">
-          {children}
-        </div>
+  href,
+  cta,
+}: {
+  name: string;
+  className: string;
+  background: ReactNode;
+  Icon: React.ComponentType<{ className?: string }>;
+  description: string;
+  href: string;
+  cta: string;
+}) => (
+  <Link
+    href={href}
+    key={name}
+    className={cn(
+      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
+      // light styles
+      "bg-card border border-border [box-shadow:0_0_0_1px_hsl(var(--border)),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+      // dark styles
+      "transform-gpu dark:bg-card dark:border-border dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
+      "transition-all duration-300 hover:shadow-lg",
+      className,
+    )}
+  >
+    {/* Background layer */}
+    <div className="absolute inset-0 z-0">{background}</div>
+    
+    {/* Content layer */}
+    <div className="relative z-10 flex min-h-full flex-col justify-between p-6">
+      <div className="flex transform-gpu flex-col gap-1 transition-all duration-300 group-hover:-translate-y-10">
+        <Icon className="h-12 w-12 origin-left transform-gpu text-foreground transition-all duration-300 ease-in-out group-hover:scale-75" />
+        <h3 className="text-xl font-semibold text-foreground">
+          {name}
+        </h3>
+        <p className="max-w-lg text-muted-foreground">{description}</p>
+      </div>
+
+      {/* CTA Button - appears on hover */}
+      <div
+        className={cn(
+          "flex w-full translate-y-10 transform-gpu flex-row items-center justify-center opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100",
+        )}
+      >
+        <Button variant="ghost" size="sm" className="pointer-events-none">
+          {cta}
+          <ArrowRightIcon className="ml-2 h-4 w-4" />
+        </Button>
       </div>
     </div>
-  );
-}
+    
+    {/* Hover overlay */}
+    <div className="pointer-events-none absolute inset-0 z-[5] transform-gpu transition-all duration-300 group-hover:bg-primary/[.03] group-hover:dark:bg-primary/5" />
+  </Link>
+);

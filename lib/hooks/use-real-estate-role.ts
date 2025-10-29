@@ -2,37 +2,28 @@
 
 import { useState, useEffect } from 'react';
 
-export type RealEstateRole = 'investor' | 'realtor' | 'buyer';
-
-const STORAGE_KEY = 'real-estate-role';
+export type RealEstateRole = 'investor' | 'realtor' | 'buyer' | null;
 
 export function useRealEstateRole() {
-  const [role, setRole] = useState<RealEstateRole | null>(null);
+  const [role, setRole] = useState<RealEstateRole>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load role from localStorage on mount
-    const savedRole = localStorage.getItem(STORAGE_KEY) as RealEstateRole;
-    if (savedRole && ['investor', 'realtor', 'buyer'].includes(savedRole)) {
-      setRole(savedRole);
+    const storedRole = localStorage.getItem('realEstateRole') as RealEstateRole;
+    if (storedRole) {
+      setRole(storedRole);
     }
     setIsLoading(false);
   }, []);
 
   const updateRole = (newRole: RealEstateRole) => {
     setRole(newRole);
-    localStorage.setItem(STORAGE_KEY, newRole);
+    if (newRole) {
+      localStorage.setItem('realEstateRole', newRole);
+    } else {
+      localStorage.removeItem('realEstateRole');
+    }
   };
 
-  const clearRole = () => {
-    setRole(null);
-    localStorage.removeItem(STORAGE_KEY);
-  };
-
-  return {
-    role,
-    updateRole,
-    clearRole,
-    isLoading,
-  };
+  return { role, updateRole, isLoading };
 }
