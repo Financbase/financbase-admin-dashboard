@@ -50,14 +50,20 @@ export async function GET(
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return NextResponse.json(
+				{ error: 'Unauthorized', code: 'UNAUTHORIZED' },
+				{ status: 401 }
+			);
 		}
 
 		const { id } = await params;
 		const lead = await LeadManagementService.getLeadById(id, userId);
 
 		if (!lead) {
-			return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
+			return NextResponse.json(
+				{ error: 'Lead not found', code: 'NOT_FOUND' },
+				{ status: 404 }
+			);
 		}
 
 		return NextResponse.json({ lead });
@@ -79,7 +85,10 @@ export async function PUT(
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return NextResponse.json(
+				{ error: 'Unauthorized', code: 'UNAUTHORIZED' },
+				{ status: 401 }
+			);
 		}
 
 		const { id } = await params;
@@ -121,16 +130,78 @@ export async function PUT(
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
+				{
+					error: 'Validation error',
+					details: error.issues,
+					code: 'VALIDATION_ERROR',
+				},
 				{ status: 400 }
 			);
 		}
 
 		 
-    // eslint-disable-next-line no-console
-    console.error('Error updating lead:', error);
+		console.error('Error updating lead:', error);
 		return NextResponse.json(
-			{ error: 'Failed to update lead' },
+			{
+				error: 'Failed to update lead',
+				details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined,
+				code: 'DATABASE_ERROR',
+			},
+			{ status: 500 }
+		);
+	}
+}
+
+export async function DELETE(
+	request: NextRequest,
+	{ params }: { params: Promise<{ id: string }> }
+) {
+	try {
+		const { userId } = await auth();
+		if (!userId) {
+			return NextResponse.json(
+				{ error: 'Unauthorized', code: 'UNAUTHORIZED' },
+				{ status: 401 }
+			);
+		}
+
+		const { id } = await params;
+		const lead = await LeadManagementService.getLeadById(id, userId);
+
+		if (!lead) {
+			return NextResponse.json(
+				{ error: 'Lead not found', code: 'NOT_FOUND' },
+				{ status: 404 }
+			);
+		}
+
+		// For now, we'll update the lead to a deleted status rather than hard delete
+		// In production, you might want to implement soft delete with a deleted_at field
+		await LeadManagementService.updateLeadStatus(id, userId, 'closed_lost', 'Deleted by user');
+
+		return NextResponse.json({
+			message: 'Lead deleted successfully',
+			leadId: id,
+		});
+	} catch (error) {
+		console.error('Error deleting lead:', error);
+
+		if (error instanceof Error) {
+			return NextResponse.json(
+				{
+					error: 'Failed to delete lead',
+					details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+					code: 'DATABASE_ERROR',
+				},
+				{ status: 500 }
+			);
+		}
+
+		return NextResponse.json(
+			{
+				error: 'Failed to delete lead',
+				code: 'INTERNAL_ERROR',
+			},
 			{ status: 500 }
 		);
 	}

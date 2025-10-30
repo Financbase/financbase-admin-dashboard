@@ -2,17 +2,18 @@ import { pgTable, text, integer, decimal, timestamp, boolean, uuid, jsonb } from
 import { z } from "zod";
 
 // Properties table
+// Note: Database uses VARCHAR for properties.id, not UUID
 export const properties = pgTable("properties", {
-	id: uuid("id").primaryKey().defaultRandom(),
+	id: text("id").primaryKey(), // Database uses VARCHAR, not UUID
 	userId: text("user_id").notNull(),
-	name: text("name").notNull(),
-	address: text("address").notNull(),
-	city: text("city").notNull(),
-	state: text("state").notNull(),
-	zipCode: text("zip_code").notNull(),
+	name: text("name"),
+	address: text("address"),
+	city: text("city"),
+	state: text("state"),
+	zipCode: text("zip_code"),
 	country: text("country").default("US"),
-	propertyType: text("property_type").notNull(), // 'residential', 'commercial', 'mixed'
-	purchasePrice: decimal("purchase_price", { precision: 15, scale: 2 }).notNull(),
+	propertyType: text("property_type"), // 'residential', 'commercial', 'mixed'
+	purchasePrice: decimal("purchase_price", { precision: 15, scale: 2 }),
 	currentValue: decimal("current_value", { precision: 15, scale: 2 }),
 	squareFootage: integer("square_footage"),
 	yearBuilt: integer("year_built"),
@@ -22,14 +23,14 @@ export const properties = pgTable("properties", {
 	description: text("description"),
 	status: text("status").default("active"), // 'active', 'inactive', 'sold', 'maintenance'
 	isActive: boolean("is_active").default(true),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	createdAt: timestamp("created_at").defaultNow(),
+	updatedAt: timestamp("updated_at"),
 });
 
 // Property expenses table
 export const propertyExpenses = pgTable("property_expenses", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(),
+	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(), // VARCHAR reference
 	userId: text("user_id").notNull(),
 	category: text("category").notNull(), // 'maintenance', 'utilities', 'insurance', 'taxes', 'management', 'other'
 	amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
@@ -47,7 +48,7 @@ export const propertyExpenses = pgTable("property_expenses", {
 // Property income table
 export const propertyIncome = pgTable("property_income", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(),
+	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(), // VARCHAR reference
 	userId: text("user_id").notNull(),
 	source: text("source").notNull(), // 'rent', 'parking', 'laundry', 'other'
 	incomeType: text("income_type").notNull(), // 'rent', 'late_fee', 'pet_fee', 'parking', 'laundry', 'other'
@@ -66,7 +67,7 @@ export const propertyIncome = pgTable("property_income", {
 // Property valuations table
 export const propertyValuations = pgTable("property_valuations", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(),
+	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(), // VARCHAR reference
 	userId: text("user_id").notNull(),
 	valuationDate: timestamp("valuation_date").notNull(),
 	estimatedValue: decimal("estimated_value", { precision: 15, scale: 2 }).notNull(),
@@ -81,7 +82,7 @@ export const propertyValuations = pgTable("property_valuations", {
 export const tenants = pgTable("tenants", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: text("user_id").notNull(),
-	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }),
+	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }), // VARCHAR reference
 	unitId: uuid("unit_id").references(() => propertyUnits.id),
 	firstName: text("first_name").notNull(),
 	lastName: text("last_name").notNull(),
@@ -105,7 +106,7 @@ export const tenants = pgTable("tenants", {
 // Property units table
 export const propertyUnits = pgTable("property_units", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(),
+	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(), // VARCHAR reference
 	userId: text("user_id").notNull(),
 	unitNumber: text("unit_number").notNull(),
 	bedrooms: integer("bedrooms").notNull(),
@@ -123,7 +124,7 @@ export const propertyUnits = pgTable("property_units", {
 // Leases table
 export const leases = pgTable("leases", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(),
+	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(), // VARCHAR reference
 	unitId: uuid("unit_id").references(() => propertyUnits.id),
 	tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }).notNull(),
 	userId: text("user_id").notNull(),
@@ -147,7 +148,7 @@ export const leases = pgTable("leases", {
 // Property ROI table
 export const propertyROI = pgTable("property_roi", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(),
+	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(), // VARCHAR reference
 	userId: text("user_id").notNull(),
 	calculationDate: timestamp("calculation_date").defaultNow().notNull(),
 	totalInvestment: decimal("total_investment", { precision: 15, scale: 2 }).notNull(),
@@ -170,7 +171,7 @@ export const propertyROI = pgTable("property_roi", {
 // Maintenance requests table
 export const maintenanceRequests = pgTable("maintenance_requests", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(),
+	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(), // VARCHAR reference
 	unitId: uuid("unit_id").references(() => propertyUnits.id),
 	tenantId: uuid("tenant_id").references(() => tenants.id),
 	userId: text("user_id").notNull(),

@@ -1,26 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { z } from 'zod';
 
 // Simple database connection using neon directly
 async function getDbConnection() {
 	const { neon } = await import('@neondatabase/serverless');
-	return neon(process.env.DATABASE_URL!);
+	if (!process.env.DATABASE_URL) {
+		throw new Error('DATABASE_URL is not configured');
+	}
+	return neon(process.env.DATABASE_URL);
 }
+
+const queryParamsSchema = z.object({
+	limit: z.string().optional().transform((val) => {
+		const num = parseInt(val || '50', 10);
+		return Math.min(Math.max(num, 1), 100); // Clamp between 1 and 100
+	}),
+	offset: z.string().optional().transform((val) => {
+		const num = parseInt(val || '0', 10);
+		return Math.max(num, 0); // Ensure non-negative
+	}),
+});
 
 // GET /api/real-estate/properties - Get user's properties
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		// Temporarily disable auth for testing
 		// const { userId } = await auth();
 		// if (!userId) {
-		// 	return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		// 	return ApiErrorHandler.unauthorized('Authentication required');
 		// }
 		
 		const userId = 'test-user'; // Mock user ID for testing
 
 		const { searchParams } = new URL(request.url);
-		const limit = parseInt(searchParams.get('limit') || '50');
-		const offset = parseInt(searchParams.get('offset') || '0');
+		const params = queryParamsSchema.parse({
+			limit: searchParams.get('limit'),
+			offset: searchParams.get('offset'),
+		});
+		const limit = params.limit || 50;
+		const offset = params.offset || 0;
 
 		// Get database connection
 		const sql = await getDbConnection();
@@ -70,10 +91,10 @@ export async function GET(request: NextRequest) {
 		});
 
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return ApiErrorHandler.validationError(error, requestId);
+		}
 		console.error('Failed to fetch properties:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch properties' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.databaseError(error, requestId);
 	}
 }

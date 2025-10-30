@@ -84,3 +84,42 @@ export const BentoCard = ({
     <div className="pointer-events-none absolute inset-0 z-[5] transform-gpu transition-all duration-300 group-hover:bg-primary/[.03] group-hover:dark:bg-primary/5" />
   </Link>
 );
+
+export const BentoGridItem = ({
+  children,
+  className,
+  title,
+  description,
+  header,
+}: {
+  children: ReactNode;
+  className?: string;
+  title?: string;
+  description?: string;
+  header?: ReactNode;
+}) => {
+  return (
+    <div
+      className={cn(
+        "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
+        // light styles
+        "bg-card border border-border [box-shadow:0_0_0_1px_hsl(var(--border)),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+        // dark styles
+        "transform-gpu dark:bg-card dark:border-border dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
+        "transition-all duration-300 hover:shadow-lg",
+        className,
+      )}
+    >
+      {(title || description || header) && (
+        <div className="mb-4 px-6 pt-6">
+          {header}
+          {title && <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>}
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        </div>
+      )}
+      <div className="flex-1 p-6">
+        {children}
+      </div>
+    </div>
+  );
+};

@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, type ComponentType } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface NavbarMenuItem {
   name: string;
   href: string;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: ComponentType<{ className?: string }>;
   description?: string;
 }
 
@@ -20,8 +20,8 @@ export function AnimatedNavbar({ items, className }: AnimatedNavbarProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <div className={cn("relative flex items-center justify-center", className)}>
-      <div className="flex items-center space-x-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 p-1 shadow-lg">
+    <div className={cn("relative flex items-center justify-center w-full", className)}>
+      <div className="flex items-center space-x-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 p-1 shadow-lg overflow-hidden">
         {items.map((item, index) => (
           <motion.div
             key={item.name}
@@ -32,7 +32,7 @@ export function AnimatedNavbar({ items, className }: AnimatedNavbarProps) {
             <motion.a
               href={item.href}
               className={cn(
-                "relative flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                "relative flex items-center space-x-2 px-3 xl:px-4 py-2 rounded-full text-xs xl:text-sm font-medium transition-colors whitespace-nowrap",
                 "text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white",
                 "bg-transparent hover:bg-white/20 dark:hover:bg-white/10"
               )}

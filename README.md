@@ -293,6 +293,29 @@ npm run db:studio
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+- **[Documentation Index](docs/README.md)** - Complete documentation overview
+- **[Quick Start Guide](docs/guides/QUICK_START.md)** - Get up and running quickly
+- **[Developer Guide](docs/developer-guide/README.md)** - Development workflow and best practices
+- **[API Documentation](docs/api/README.md)** - Complete API reference
+- **[Testing Guide](docs/testing/README.md)** - Testing guides and reports
+- **[Deployment Guide](docs/deployment/README.md)** - Production deployment instructions
+- **[Configuration Guides](docs/configuration/README.md)** - Service configuration documentation
+- **[Security Guide](SECURITY.md)** - Security best practices
+
+### Documentation Categories
+
+- **[Status & Implementation](docs/status/README.md)** - Implementation progress and status reports
+- **[Testing](docs/testing/)** - Testing strategies, guides, and results
+- **[Deployment](docs/deployment/)** - Deployment guides and checklists
+- **[Configuration](docs/configuration/)** - Service configuration guides
+- **[Integrations](docs/integrations/)** - Third-party integration documentation
+- **[Issues & Fixes](docs/issues/)** - Historical issue tracking and resolutions
+- **[Guides](docs/guides/)** - Quick references and roadmaps
+
 ## 🆘 Support
 
 - Documentation: [docs.financbase.com](https://docs.financbase.com)

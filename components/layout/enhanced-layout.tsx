@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { EnhancedSidebar } from "./enhanced-sidebar";
 import { EnhancedTopNav } from "./enhanced-top-nav";
-import { DashboardFooter } from "./dashboard-footer";
 import { cn } from "@/lib/utils";
 import { useMobileNavigation } from "@/hooks/use-mobile-touch";
 
@@ -78,7 +77,7 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 	}, [mobileMenuOpen]);
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-background flex flex-col">
 			{/* Mobile Overlay */}
 			{isMenuOpen && (
 				<motion.div
@@ -113,26 +112,32 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 			</div>
 
 			{/* Top Navigation */}
-			<EnhancedTopNav
-				onMenuClick={toggleMobileMenu}
-				user={user}
-				notifications={notifications}
-			/>
+			<div className={cn(
+				"transition-all duration-300 w-full",
+				sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
+			)}>
+				<EnhancedTopNav
+					onMenuClick={toggleMobileMenu}
+					user={user}
+					notifications={notifications}
+				/>
+			</div>
 
 			{/* Main Content */}
 			<div
 				className={cn(
-					"flex flex-col min-h-screen transition-all duration-300 pt-16",
+					"flex flex-col transition-all duration-300 flex-1",
+					"pt-16",
 					sidebarCollapsed ? "lg:ml-16" : "lg:ml-64",
 				)}
 			>
 				{/* Page Content */}
-				<main className="flex-1">
+				<main className="flex-1 w-full overflow-x-hidden">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.3 }}
-						className="p-4 sm:p-6 lg:p-8"
+						className="w-full p-4 sm:p-6 lg:p-8"
 					>
 						{children}
 					</motion.div>
