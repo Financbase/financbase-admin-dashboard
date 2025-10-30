@@ -29,6 +29,9 @@ export * from "./campaigns.schema";
 export * from "./ad-groups.schema";
 export * from "./ads.schema";
 
+// Marketing Analytics
+export * from "./marketing-analytics.schema";
+
 // Lead Management
 export * from "./leads.schema";
 export * from "./lead-activities.schema";

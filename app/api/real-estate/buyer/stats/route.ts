@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // Simple database connection using neon directly
 async function getDbConnection() {
 	const { neon } = await import('@neondatabase/serverless');
-	return neon(process.env.DATABASE_URL!);
+	if (!process.env.DATABASE_URL) {
+		throw new Error('DATABASE_URL is not configured');
+	}
+	return neon(process.env.DATABASE_URL);
 }
 
 // GET /api/real-estate/buyer/stats - Get buyer statistics
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
 		// Temporarily disable auth for testing
 		// const { userId } = await auth();
@@ -62,9 +66,6 @@ export async function GET() {
 
 	} catch (error) {
 		console.error('Failed to fetch buyer stats:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch buyer statistics' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.databaseError(error, requestId);
 	}
 }

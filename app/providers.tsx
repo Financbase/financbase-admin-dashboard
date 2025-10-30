@@ -1,10 +1,16 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import dynamic from 'next/dynamic';
 import { ThemeProvider } from 'next-themes';
 import { ClerkProvider } from '@clerk/nextjs';
 import { DashboardProvider } from '@/contexts/dashboard-context';
+
+// Dynamically import ReactQueryDevtools to avoid SSR issues
+const ReactQueryDevtoolsDevelopment = dynamic(
+	() => import('@tanstack/react-query-devtools').then((d) => d.ReactQueryDevtools),
+	{ ssr: false }
+);
 
 interface ProvidersProps {
 	children: React.ReactNode;
@@ -29,21 +35,23 @@ const queryClient = new QueryClient({
 
 export function Providers({ children }: ProvidersProps) {
 	return (
-		<QueryClientProvider client={queryClient}>
-			<ThemeProvider
-				attribute="class"
-				defaultTheme="light"
-				enableSystem={false}
-				disableTransitionOnChange
-				storageKey="financbase-theme"
-			>
-				<DashboardProvider>
-					{children}
-				</DashboardProvider>
-			</ThemeProvider>
-			{process.env.NODE_ENV === 'development' && (
-				<ReactQueryDevtools initialIsOpen={false} />
-			)}
-		</QueryClientProvider>
+		<ClerkProvider>
+			<QueryClientProvider client={queryClient}>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="light"
+					enableSystem={false}
+					disableTransitionOnChange
+					storageKey="financbase-theme"
+				>
+					<DashboardProvider>
+						{children}
+					</DashboardProvider>
+				</ThemeProvider>
+				{process.env.NODE_ENV === 'development' && (
+					<ReactQueryDevtoolsDevelopment initialIsOpen={false} />
+				)}
+			</QueryClientProvider>
+		</ClerkProvider>
 	);
 }

@@ -204,7 +204,20 @@ export default function SupportCategoryPage() {
 	const params = useParams();
 	const router = useRouter();
 	const slug = params.slug as string;
-	const category = categoryData[slug];
+	
+	// Normalize the slug to handle URL encoding and formatting variations
+	// Next.js already decodes the slug, but we need to normalize it
+	// to match the format used in categoryData keys (e.g., "account-&-billing" -> "account-billing")
+	const normalizedSlug = slug
+		.toLowerCase()
+		.replace(/\s+/g, '-')        // Replace spaces with hyphens
+		.replace(/&/g, '')            // Remove ampersands
+		.replace(/&amp;/g, '')        // Remove HTML-encoded ampersands
+		.replace(/[^\w-]/g, '')      // Remove any other special characters
+		.replace(/-+/g, '-')          // Collapse multiple hyphens
+		.replace(/^-|-$/g, '');      // Remove leading/trailing hyphens
+	
+	const category = categoryData[normalizedSlug];
 
 	if (!category) {
 		return (

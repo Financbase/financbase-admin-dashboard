@@ -1,26 +1,64 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { z } from 'zod';
 
 // Simple database connection using neon directly
 async function getDbConnection() {
 	const { neon } = await import('@neondatabase/serverless');
-	return neon(process.env.DATABASE_URL!);
+	if (!process.env.DATABASE_URL) {
+		throw new Error('DATABASE_URL is not configured');
+	}
+	return neon(process.env.DATABASE_URL);
 }
+
+const queryParamsSchema = z.object({
+	limit: z.string().optional().transform((val) => {
+		const num = parseInt(val || '50', 10);
+		return Math.min(Math.max(num, 1), 100);
+	}),
+	offset: z.string().optional().transform((val) => {
+		const num = parseInt(val || '0', 10);
+		return Math.max(num, 0);
+	}),
+});
+
+const createListingSchema = z.object({
+	name: z.string().min(1),
+	address: z.string().min(1),
+	city: z.string().min(1),
+	state: z.string().length(2),
+	zipCode: z.string().min(5),
+	propertyType: z.string(),
+	purchasePrice: z.number().positive(),
+	currentValue: z.number().positive().optional(),
+	squareFootage: z.number().positive().optional(),
+	yearBuilt: z.number().int().positive().optional(),
+	bedrooms: z.number().int().positive().optional(),
+	bathrooms: z.number().positive().optional(),
+	monthlyRent: z.number().positive().optional(),
+	commissionAmount: z.number().positive().optional(),
+});
 
 // GET /api/real-estate/realtor/listings - Get realtor listings
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		// Temporarily disable auth for testing
 		// const { userId } = await auth();
 		// if (!userId) {
-		// 	return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		// 	return ApiErrorHandler.unauthorized('Authentication required');
 		// }
 		
 		const userId = 'test-user'; // Mock user ID for testing
 
 		const { searchParams } = new URL(request.url);
-		const limit = parseInt(searchParams.get('limit') || '50');
-		const offset = parseInt(searchParams.get('offset') || '0');
+		const params = queryParamsSchema.parse({
+			limit: searchParams.get('limit'),
+			offset: searchParams.get('offset'),
+		});
+		const limit = params.limit || 50;
+		const offset = params.offset || 0;
 
 		// Get database connection
 		const sql = await getDbConnection();
@@ -74,31 +112,28 @@ export async function GET(request: NextRequest) {
 		});
 
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return ApiErrorHandler.validationError(error, requestId);
+		}
 		console.error('Failed to fetch listings:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch listings' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.databaseError(error, requestId);
 	}
 }
 
 // POST /api/real-estate/realtor/listings - Create a new listing
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		// Temporarily disable auth for testing
 		// const { userId } = await auth();
 		// if (!userId) {
-		// 	return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		// 	return ApiErrorHandler.unauthorized('Authentication required');
 		// }
 		
 		const userId = 'test-user'; // Mock user ID for testing
 
 		const body = await request.json();
-		const { 
-			name, address, city, state, zipCode, propertyType, 
-			purchasePrice, currentValue, squareFootage, yearBuilt, 
-			bedrooms, bathrooms, monthlyRent, commissionAmount 
-		} = body;
+		const listingData = createListingSchema.parse(body);
 
 		// Get database connection
 		const sql = await getDbConnection();
@@ -111,9 +146,9 @@ export async function POST(request: NextRequest) {
 				bedrooms, bathrooms, monthly_rent, commission_amount, status,
 				listed_date
 			) VALUES (
-				${userId}, ${name}, ${address}, ${city}, ${state}, ${zipCode}, ${propertyType},
-				${purchasePrice}, ${currentValue || null}, ${squareFootage || null}, ${yearBuilt || null},
-				${bedrooms || null}, ${bathrooms || null}, ${monthlyRent || null}, ${commissionAmount || null},
+				${userId}, ${listingData.name}, ${listingData.address}, ${listingData.city}, ${listingData.state}, ${listingData.zipCode}, ${listingData.propertyType},
+				${listingData.purchasePrice}, ${listingData.currentValue || null}, ${listingData.squareFootage || null}, ${listingData.yearBuilt || null},
+				${listingData.bedrooms || null}, ${listingData.bathrooms || null}, ${listingData.monthlyRent || null}, ${listingData.commissionAmount || null},
 				'active', CURRENT_DATE
 			) RETURNING *
 		`;
@@ -145,10 +180,10 @@ export async function POST(request: NextRequest) {
 		}, { status: 201 });
 
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return ApiErrorHandler.validationError(error, requestId);
+		}
 		console.error('Failed to create listing:', error);
-		return NextResponse.json(
-			{ error: 'Failed to create listing' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.databaseError(error, requestId);
 	}
 }

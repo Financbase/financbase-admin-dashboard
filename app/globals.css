@@ -9,38 +9,38 @@
 }
 
 :root {
-  --background: oklch(0.9850 0.0010 106.4230);
-  --foreground: oklch(0.3880 0.1423 271.1300);
-  --card: oklch(0.9784 0.0011 197.1387);
-  --card-foreground: oklch(0.3880 0.1423 271.1300);
-  --popover: oklch(1.0000 0 0);
-  --popover-foreground: oklch(0.3880 0.1423 271.1300);
-  --primary: oklch(0.3880 0.1423 271.1300);
-  --primary-foreground: oklch(1.0000 0 0);
-  --secondary: oklch(0.3880 0.1423 271.1300);
-  --secondary-foreground: oklch(1.0000 0 0);
-  --muted: oklch(0.9700 0.0010 106.4240);
-  --muted-foreground: oklch(0.1884 0.0128 248.5103);
-  --accent: oklch(0.9392 0.0166 250.8453);
-  --accent-foreground: oklch(0.3880 0.1423 271.1300);
-  --destructive: oklch(0.6188 0.2376 25.7658);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --border: oklch(0.9317 0.0118 231.6594);
-  --input: oklch(0.9809 0.0025 228.7836);
-  --ring: oklch(0.3880 0.1423 271.1300);
-  --chart-1: oklch(0.3880 0.1423 271.1300);
-  --chart-2: oklch(0.6270 0.1940 149.2140);
-  --chart-3: oklch(0.8790 0.1690 91.6050);
-  --chart-4: oklch(0.5510 0.0270 264.3640);
-  --chart-5: oklch(0.5770 0.2450 27.3250);
-  --sidebar: oklch(0.9784 0.0011 197.1387);
-  --sidebar-foreground: oklch(0.1884 0.0128 248.5103);
-  --sidebar-primary: oklch(0.3880 0.1423 271.1300);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.9392 0.0166 250.8453);
-  --sidebar-accent-foreground: oklch(0.3880 0.1423 271.1300);
-  --sidebar-border: oklch(0.9271 0.0101 238.5177);
-  --sidebar-ring: oklch(0.3880 0.1423 271.1300);
+  --background: 0.9850 0.0010 106.4230;
+  --foreground: 0.3880 0.1423 271.1300;
+  --card: 0.9784 0.0011 197.1387;
+  --card-foreground: 0.3880 0.1423 271.1300;
+  --popover: 1.0000 0 0;
+  --popover-foreground: 0.3880 0.1423 271.1300;
+  --primary: 0.3880 0.1423 271.1300;
+  --primary-foreground: 1.0000 0 0;
+  --secondary: 0.3880 0.1423 271.1300;
+  --secondary-foreground: 1.0000 0 0;
+  --muted: 0.9700 0.0010 106.4240;
+  --muted-foreground: 0.1884 0.0128 248.5103;
+  --accent: 0.9392 0.0166 250.8453;
+  --accent-foreground: 0.3880 0.1423 271.1300;
+  --destructive: 0.6188 0.2376 25.7658;
+  --destructive-foreground: 1.0000 0 0;
+  --border: 0.9317 0.0118 231.6594;
+  --input: 0.9809 0.0025 228.7836;
+  --ring: 0.3880 0.1423 271.1300;
+  --chart-1: 0.3880 0.1423 271.1300;
+  --chart-2: 0.6270 0.1940 149.2140;
+  --chart-3: 0.8790 0.1690 91.6050;
+  --chart-4: 0.5510 0.0270 264.3640;
+  --chart-5: 0.5770 0.2450 27.3250;
+  --sidebar: 0.9784 0.0011 197.1387;
+  --sidebar-foreground: 0.1884 0.0128 248.5103;
+  --sidebar-primary: 0.3880 0.1423 271.1300;
+  --sidebar-primary-foreground: 1.0000 0 0;
+  --sidebar-accent: 0.9392 0.0166 250.8453;
+  --sidebar-accent-foreground: 0.3880 0.1423 271.1300;
+  --sidebar-border: 0.9271 0.0101 238.5177;
+  --sidebar-ring: 0.3880 0.1423 271.1300;
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
@@ -50,7 +50,7 @@
   --shadow-blur: 9px;
   --shadow-spread: 1.5px;
   --shadow-opacity: 0.11;
-  --shadow-color: oklch(0.388 0.1423 271.13);
+  --shadow-color: 0.388 0.1423 271.13;
   --shadow-2xs: 0px 1px 9px 1.5px hsl(231.5993 53.7486% 36.4689% / 0.06);
   --shadow-xs: 0px 1px 9px 1.5px hsl(231.5993 53.7486% 36.4689% / 0.06);
   --shadow-sm: 0px 1px 9px 1.5px hsl(231.5993 53.7486% 36.4689% / 0.11), 0px 1px 2px 0.5px hsl(231.5993 53.7486% 36.4689% / 0.11);
@@ -63,46 +63,46 @@
   --spacing: 0.3rem;
   
   /* Financbase Brand Colors */
-  --brand-primary: oklch(0.388 0.1423 271.13);
-  --brand-primary-light: oklch(0.45 0.1423 271.13);
-  --brand-primary-dark: oklch(0.32 0.1423 271.13);
-  --brand-secondary: oklch(0.6270 0.1940 149.2140);
-  --brand-accent: oklch(0.8790 0.1690 91.6050);
+  --brand-primary: 0.388 0.1423 271.13;
+  --brand-primary-light: 0.45 0.1423 271.13;
+  --brand-primary-dark: 0.32 0.1423 271.13;
+  --brand-secondary: 0.6270 0.1940 149.2140;
+  --brand-accent: 0.8790 0.1690 91.6050;
 }
 
 .dark {
-  --background: oklch(0.2969 0.0162 285.3716);
-  --foreground: oklch(0.9700 0.0010 106.4240);
-  --card: oklch(0.3700 0.0130 285.8050);
-  --card-foreground: oklch(0.9700 0.0010 106.4240);
-  --popover: oklch(0.4420 0.0170 285.7860);
-  --popover-foreground: oklch(0.9700 0.0010 106.4240);
-  --primary: oklch(0.3880 0.1423 271.1300);
-  --primary-foreground: oklch(1.0000 0 0);
-  --secondary: oklch(0.9220 0 0);
-  --secondary-foreground: oklch(0.3700 0.0130 285.8050);
-  --muted: oklch(0.4420 0.0170 285.7860);
-  --muted-foreground: oklch(0.5637 0.0078 247.9662);
-  --accent: oklch(0.3880 0.1423 271.1300);
-  --accent-foreground: oklch(0.9700 0.0010 106.4240);
-  --destructive: oklch(0.4440 0.1770 26.8990);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --border: oklch(0.2690 0 0);
-  --input: oklch(0.4390 0 0);
-  --ring: oklch(0.3880 0.1423 271.1300);
-  --chart-1: oklch(0.3880 0.1423 271.1300);
-  --chart-2: oklch(0.7920 0.2090 151.7110);
-  --chart-3: oklch(0.8790 0.1690 91.6050);
-  --chart-4: oklch(0.4480 0.1190 151.3280);
-  --chart-5: oklch(0.4440 0.1770 26.8990);
-  --sidebar: oklch(0.3700 0.0130 285.8050);
-  --sidebar-foreground: oklch(0.8853 0 0);
-  --sidebar-primary: oklch(0.3880 0.1423 271.1300);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.8690 0.0050 56.3660);
-  --sidebar-accent-foreground: oklch(0.5560 0 0);
-  --sidebar-border: oklch(0.3795 0.0220 240.5943);
-  --sidebar-ring: oklch(0.3880 0.1423 271.1300);
+  --background: 0.2969 0.0162 285.3716;
+  --foreground: 0.9700 0.0010 106.4240;
+  --card: 0.3700 0.0130 285.8050;
+  --card-foreground: 0.9700 0.0010 106.4240;
+  --popover: 0.4420 0.0170 285.7860;
+  --popover-foreground: 0.9700 0.0010 106.4240;
+  --primary: 0.3880 0.1423 271.1300;
+  --primary-foreground: 1.0000 0 0;
+  --secondary: 0.9220 0 0;
+  --secondary-foreground: 0.3700 0.0130 285.8050;
+  --muted: 0.4420 0.0170 285.7860;
+  --muted-foreground: 0.5637 0.0078 247.9662;
+  --accent: 0.3880 0.1423 271.1300;
+  --accent-foreground: 0.9700 0.0010 106.4240;
+  --destructive: 0.4440 0.1770 26.8990;
+  --destructive-foreground: 1.0000 0 0;
+  --border: 0.2690 0 0;
+  --input: 0.4390 0 0;
+  --ring: 0.3880 0.1423 271.1300;
+  --chart-1: 0.3880 0.1423 271.1300;
+  --chart-2: 0.7920 0.2090 151.7110;
+  --chart-3: 0.8790 0.1690 91.6050;
+  --chart-4: 0.4480 0.1190 151.3280;
+  --chart-5: 0.4440 0.1770 26.8990;
+  --sidebar: 0.3700 0.0130 285.8050;
+  --sidebar-foreground: 0.8853 0 0;
+  --sidebar-primary: 0.3880 0.1423 271.1300;
+  --sidebar-primary-foreground: 1.0000 0 0;
+  --sidebar-accent: 0.8690 0.0050 56.3660;
+  --sidebar-accent-foreground: 0.5560 0 0;
+  --sidebar-border: 0.3795 0.0220 240.5943;
+  --sidebar-ring: 0.3880 0.1423 271.1300;
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
@@ -123,11 +123,11 @@
   --shadow-2xl: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.28);
   
   /* Financbase Brand Colors - Dark Theme */
-  --brand-primary: oklch(0.388 0.1423 271.13);
-  --brand-primary-light: oklch(0.45 0.1423 271.13);
-  --brand-primary-dark: oklch(0.32 0.1423 271.13);
-  --brand-secondary: oklch(0.7920 0.2090 151.7110);
-  --brand-accent: oklch(0.8790 0.1690 91.6050);
+  --brand-primary: 0.388 0.1423 271.13;
+  --brand-primary-light: 0.45 0.1423 271.13;
+  --brand-primary-dark: 0.32 0.1423 271.13;
+  --brand-secondary: 0.7920 0.2090 151.7110;
+  --brand-accent: 0.8790 0.1690 91.6050;
 }
 
 @theme inline {
@@ -185,13 +185,13 @@
 
 @layer base {
 	* {
-		border-color: var(--border);
+		border-color: oklch(var(--border));
 	}
 
 	html {
 		/* Ensure CSS variables are loaded */
-		background-color: var(--background);
-		color: var(--foreground);
+		background-color: oklch(var(--background));
+		color: oklch(var(--foreground));
 	}
 
 	/* Light theme color scheme */
@@ -202,13 +202,13 @@
 	/* Dark theme color scheme */
 	html.dark {
 		color-scheme: dark;
-		background-color: var(--background);
-		color: var(--foreground);
+		background-color: oklch(var(--background));
+		color: oklch(var(--foreground));
 	}
 
 	body {
-		background-color: var(--background);
-		color: var(--foreground);
+		background-color: oklch(var(--background));
+		color: oklch(var(--foreground));
 		font-family: var(--font-sans);
 		/* Ensure proper inheritance */
 		background-color: inherit;
@@ -217,13 +217,13 @@
 
 	/* Debug: Add visible borders to test theme application */
 	.debug-theme * {
-		border: 1px solid var(--border) !important;
+		border: 1px solid oklch(var(--border)) !important;
 	}
 
 	/* Force theme application for testing */
 	.force-theme-test {
-		background-color: var(--background) !important;
-		color: var(--foreground) !important;
-		border-color: var(--border) !important;
+		background-color: oklch(var(--background)) !important;
+		color: oklch(var(--foreground)) !important;
+		border-color: oklch(var(--border)) !important;
 	}
 }

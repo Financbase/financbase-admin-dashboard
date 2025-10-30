@@ -1,9 +1,8 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
-  // '/real-estate(.*)', // Temporarily disable auth for real estate routes for testing
+  // '/real-estate(.*)', // Temporarily disabled for testing
   '/profile(.*)',
   '/settings(.*)',
   '/api/leads(.*)',
@@ -19,39 +18,18 @@ const isProtectedRoute = createRouteMatcher([
   '/api/ai(.*)',
   '/api/dashboard(.*)',
   '/api/support(.*)',
-  '/api/platform(.*)', // Add Platform Services API routes
-  '/api/workflows(.*)', // Add Workflows API routes
-  '/api/monitoring(.*)', // Add Monitoring API routes
-  '/api/integrations(.*)', // Add Integrations API routes
-  // '/api/real-estate(.*)', // Temporarily disable auth for real estate API routes for testing
+  '/api/platform(.*)',
+  '/api/workflows(.*)',
+  '/api/monitoring(.*)',
+  '/api/integrations(.*)',
+  '/api/real-estate(.*)',
   '/onboarding(.*)',
 ]);
 
-const isAuthRoute = createRouteMatcher([
-  '/auth(.*)',
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
-
-  // Protect routes that require authentication
-  if (isProtectedRoute(req)) {
-    if (!userId) {
-      return NextResponse.redirect(new URL('/auth/sign-in', req.url));
-    }
-  }
-
-  // If user is authenticated and accessing auth pages, redirect to dashboard
-  if (userId && isAuthRoute(req)) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
-  return NextResponse.next();
+export default clerkMiddleware((auth, req) => {
+  if (isProtectedRoute(req)) auth().protect();
 });
 
 export const config = {
-  matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
-  ],
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 };

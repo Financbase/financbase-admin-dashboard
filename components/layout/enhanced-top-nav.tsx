@@ -54,7 +54,7 @@ interface EnhancedTopNavProps {
 }
 
 // Memoized notification items
-const NotificationItems = React.memo<{ notifications: number }>(({ }) => {
+const NotificationItems = React.memo<{ notifications: number }>(() => {
 	const notificationData = useMemo(() => [
 		{
 			id: 1,
@@ -126,14 +126,14 @@ export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 			initial={{ y: -100 }}
 			animate={{ y: 0 }}
 			transition={{ duration: 0.3 }}
-			className={`sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
+			className={`sticky top-0 z-[60] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
 				isScrolled ? "shadow-sm" : ""
 			}`}
 		>
 			<div className="container mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex h-16 items-center justify-between">
+				<div className="flex h-16 items-center justify-between gap-4">
 					{/* Left Section - Logo & Mobile Menu */}
-					<div className="flex items-center gap-4">
+					<div className="flex items-center gap-4 flex-shrink-0">
 						{/* Mobile Menu Button */}
 						<Button
 							variant="ghost"
@@ -152,14 +152,14 @@ export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 					</div>
 
 					{/* Center Section - Animated Navbar */}
-					<div className="flex-1 flex justify-center">
-						<AnimatedNavbar items={navbarItems} />
+					<div className="hidden lg:flex flex-1 justify-center min-w-0 px-4">
+						<AnimatedNavbar items={navbarItems} className="max-w-full" />
 					</div>
 
 					{/* Right Section - Actions & User Menu */}
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-2 flex-shrink-0">
 						{/* Desktop Search */}
-						<div className="hidden md:block w-80">
+						<div className="hidden md:block md:w-64 lg:w-72 xl:w-80">
 							<SearchComponent placeholder="Search financial data..." />
 						</div>
 
@@ -263,12 +263,13 @@ export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 							<DropdownMenuTrigger asChild>
 								<Button
 									variant="ghost"
-									className="relative h-8 w-8 rounded-full"
+									className="relative h-8 w-8 rounded-full p-0"
 								>
 									<Avatar className="h-8 w-8">
 										<AvatarImage
 											src={user?.avatar}
 											alt={user?.name || "User"}
+											className="object-cover"
 										/>
 										<AvatarFallback className="bg-primary text-primary-foreground">
 											{user?.name?.charAt(0) || "U"}

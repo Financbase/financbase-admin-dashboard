@@ -29,7 +29,7 @@ export interface PropertyCardData {
   bathrooms: number;
   squareFootage: number;
   propertyType: string;
-  status: 'active' | 'pending' | 'sold' | 'off_market';
+  status?: 'active' | 'pending' | 'sold' | 'off_market' | null;
   imageUrl?: string;
   description?: string;
   features?: string[];
@@ -58,7 +58,7 @@ export function PropertyCard({
   onSchedule,
   className = '' 
 }: PropertyCardProps) {
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status?: string | null) => {
     switch (status) {
       case 'active':
         return 'bg-green-100 text-green-800';
@@ -73,6 +73,11 @@ export function PropertyCard({
     }
   };
 
+  const formatStatus = (status?: string | null) => {
+    if (!status) return 'Unknown';
+    return status.replace('_', ' ');
+  };
+
   if (variant === 'compact') {
     return (
       <Card className={`hover:shadow-md transition-all duration-200 hover:scale-105 ${className}`}>
@@ -80,7 +85,7 @@ export function PropertyCard({
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-sm truncate">{property.name}</h3>
             <Badge className={getStatusColor(property.status)}>
-              {property.status.replace('_', ' ')}
+              {formatStatus(property.status)}
             </Badge>
           </div>
           <div className="flex items-center text-sm text-muted-foreground mb-2">
@@ -213,7 +218,7 @@ export function PropertyCard({
               <span>{property.city}, {property.state}</span>
             </div>
             <Badge className={getStatusColor(property.status)}>
-              {property.status.replace('_', ' ')}
+              {formatStatus(property.status)}
             </Badge>
           </div>
           {property.rating && (

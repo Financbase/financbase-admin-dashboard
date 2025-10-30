@@ -1,23 +1,19 @@
 "use client";
 
-import React from 'react';
+import type React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-  Building2,
   Home,
   TrendingUp,
-  Users,
-  DollarSign,
-  Search,
-  Calculator,
   Briefcase,
-  Heart,
 } from 'lucide-react';
-import { RealEstateRole } from '@/lib/hooks/use-real-estate-role';
+import type { RealEstateRole } from '@/lib/hooks/use-real-estate-role';
+
+type RoleId = 'investor' | 'realtor' | 'buyer';
 
 interface RoleOption {
-  id: RealEstateRole;
+  id: RoleId;
   title: string;
   description: string;
   icon: React.ReactNode;
@@ -94,7 +90,7 @@ export function RoleSelector({ onRoleSelect, currentRole }: RoleSelectorProps) {
             className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 ${
               currentRole === option.id ? 'ring-2 ring-primary' : ''
             }`}
-            onClick={() => onRoleSelect(option.id)}
+            onClick={() => onRoleSelect(option.id as RealEstateRole)}
           >
             <CardHeader className="text-center">
               <div className={`${option.color} rounded-full p-4 w-fit mx-auto mb-4`}>
@@ -107,8 +103,8 @@ export function RoleSelector({ onRoleSelect, currentRole }: RoleSelectorProps) {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
-                {option.features.map((feature, index) => (
-                  <li key={index} className="flex items-center text-sm">
+                {option.features.map((feature) => (
+                  <li key={feature} className="flex items-center text-sm">
                     <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2" />
                     {feature}
                   </li>

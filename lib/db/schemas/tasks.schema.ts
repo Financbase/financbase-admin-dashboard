@@ -4,37 +4,25 @@ import {
 	timestamp,
 	uuid,
 	numeric,
-	pgEnum,
+	integer,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
-import { projects } from "./projects.schema";
 
-export const taskStatusEnum = pgEnum("task_status", [
-	"todo",
-	"in_progress",
-	"review",
-	"completed",
-	"cancelled"
-]);
-
-export const taskPriorityEnum = pgEnum("task_priority", [
-	"low",
-	"medium",
-	"high",
-	"urgent"
-]);
+// Note: Database uses existing task_status enum with values: 'pending', 'in_progress', 'completed', 'cancelled', 'overdue'
+// Projects table uses INTEGER id, not UUID
+// Using text with CHECK constraint to match existing enum values
 
 export const tasks = pgTable("tasks", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: uuid("user_id").notNull().references(() => users.id),
-	projectId: uuid("project_id").notNull().references(() => projects.id),
+	projectId: integer("project_id").notNull(), // INTEGER reference to projects(id)
 	parentTaskId: uuid("parent_task_id").references(() => tasks.id), // For subtasks
 	
 	// Task details
 	title: text("title").notNull(),
 	description: text("description"),
-	status: taskStatusEnum("status").default("todo").notNull(),
-	priority: taskPriorityEnum("priority").default("medium").notNull(),
+	status: text("status").default("pending").notNull(), // Uses existing task_status enum
+	priority: text("priority").default("medium").notNull(), // Text with CHECK constraint
 	
 	// Task timeline
 	dueDate: timestamp("due_date"),

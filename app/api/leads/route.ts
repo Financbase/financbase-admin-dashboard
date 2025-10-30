@@ -56,7 +56,11 @@ export async function GET(request: NextRequest) {
 	} catch (error) {
 		console.error('Error fetching leads:', error);
 		return NextResponse.json(
-			{ error: 'Failed to fetch leads' },
+			{
+				error: 'Failed to fetch leads',
+				details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined,
+				code: 'DATABASE_ERROR',
+			},
 			{ status: 500 }
 		);
 	}
@@ -90,14 +94,22 @@ export async function POST(request: NextRequest) {
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
+				{
+					error: 'Validation error',
+					details: error.issues,
+					code: 'VALIDATION_ERROR',
+				},
 				{ status: 400 }
 			);
 		}
 
 		console.error('Error creating lead:', error);
 		return NextResponse.json(
-			{ error: 'Failed to create lead' },
+			{
+				error: 'Failed to create lead',
+				details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined,
+				code: 'DATABASE_ERROR',
+			},
 			{ status: 500 }
 		);
 	}

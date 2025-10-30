@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +39,7 @@ interface InvestorStats {
 }
 
 export default function InvestorDashboard() {
+  const router = useRouter();
   const { role, updateRole } = useRealEstateRole();
 
   // Fetch investor stats
@@ -235,19 +237,19 @@ export default function InvestorDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => router.push('/real-estate/investor/maintenance')}>
               <Calendar className="h-6 w-6" />
               <span>Schedule Maintenance</span>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => router.push('/real-estate/investor/tenants')}>
               <Users className="h-6 w-6" />
               <span>Manage Tenants</span>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => router.push('/real-estate/investor/analytics')}>
               <TrendingUp className="h-6 w-6" />
               <span>View Analytics</span>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => router.push('/real-estate/investor/expenses')}>
               <DollarSign className="h-6 w-6" />
               <span>Track Expenses</span>
             </Button>
