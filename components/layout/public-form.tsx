@@ -126,51 +126,63 @@ export function PublicCTA({
   background = "gradient",
   className,
 }: PublicCTAProps) {
-  const backgroundClasses = {
-    gradient: "bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-dark)]",
-    solid: "bg-primary",
-    muted: "bg-muted/50",
+  // Use inline styles with oklch() for proper Financbase brand colors
+  const getBackgroundStyle = () => {
+    if (background === "gradient") {
+      return {
+        background: "linear-gradient(to right, oklch(var(--brand-primary)), oklch(var(--brand-primary-dark)))",
+      };
+    }
+    if (background === "solid") {
+      return {
+        backgroundColor: "oklch(var(--brand-primary))",
+      };
+    }
+    return undefined;
   };
 
   return (
-    <section className={cn(
-      "py-20",
-      backgroundClasses[background],
-      className
-    )}>
+    <section 
+      className={cn(
+        "py-20",
+        className
+      )}
+      style={getBackgroundStyle()}
+    >
       <div className="max-w-4xl mx-auto px-6 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6" style={{ color: "white" }}>
           {title}
         </h2>
         {description && (
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl mb-8 max-w-2xl mx-auto text-foreground/90">
             {description}
           </p>
         )}
         {(primaryAction || secondaryAction) && (
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {primaryAction && (
-              <Button
-                asChild
-                size="lg"
-                className="bg-white text-[var(--brand-primary)] hover:bg-gray-100"
+              <a 
+                href={primaryAction.href}
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 bg-white hover:bg-gray-100 shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
+                style={{
+                  color: "oklch(var(--primary))",
+                  textDecoration: "none",
+                }}
               >
-                <a href={primaryAction.href}>
-                  {primaryAction.text}
-                </a>
-              </Button>
+                {primaryAction.text}
+              </a>
             )}
             {secondaryAction && (
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-[var(--brand-primary)]"
+              <a 
+                href={secondaryAction.href}
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 border-2 bg-transparent text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer hover:bg-white [&:hover]:text-[oklch(var(--primary))]"
+                style={{
+                  borderColor: "white",
+                  color: "white",
+                }}
               >
-                <a href={secondaryAction.href}>
-                  {secondaryAction.text}
-                </a>
-              </Button>
+                {secondaryAction.text}
+              </a>
             )}
           </div>
         )}

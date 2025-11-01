@@ -21,11 +21,12 @@ import {
 	Tooltip,
 	Chart as chartJs,
 } from "chart.js";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Bar, Line } from "react-chartjs-2";
 import EmptyState, { EmptyStates } from "./empty-state";
 import DashboardErrorBoundary from "./error-boundary";
 import { useWindowSize } from "@/hooks";
+import { getThemeRgb } from "@/lib/utils/theme-colors";
 
 chartJs.register(
 	CategoryScale,
@@ -38,96 +39,110 @@ chartJs.register(
 	BarElement,
 );
 
-const chartOptions = {
-	responsive: true,
-	maintainAspectRatio: false,
-	plugins: {
-		legend: {
-			position: "top" as const,
-			labels: {
-				usePointStyle: true,
-				padding: 20,
-				font: {
-					size: 12,
+/**
+ * Get chart options with theme colors
+ */
+function getChartOptions() {
+	// Get border color with opacity for grid lines
+	const borderColor = getThemeRgb("--border", 0.1);
+	
+	return {
+		responsive: true,
+		maintainAspectRatio: false,
+		plugins: {
+			legend: {
+				position: "top" as const,
+				labels: {
+					usePointStyle: true,
+					padding: 20,
+					font: {
+						size: 12,
+					},
+				},
+			},
+			title: {
+				display: false,
+			},
+			tooltip: {
+				mode: "index" as const,
+				intersect: false,
+			},
+		},
+		scales: {
+			y: {
+				beginAtZero: true,
+				grid: {
+					color: borderColor || "rgba(0, 0, 0, 0.1)",
+				},
+				ticks: {
+					font: {
+						size: 11,
+					},
+				},
+			},
+			x: {
+				grid: {
+					color: borderColor || "rgba(0, 0, 0, 0.1)",
+				},
+				ticks: {
+					font: {
+						size: 11,
+					},
 				},
 			},
 		},
-		title: {
-			display: false,
-		},
-		tooltip: {
-			mode: "index" as const,
+		interaction: {
+			mode: "nearest" as const,
+			axis: "x" as const,
 			intersect: false,
 		},
-	},
-	scales: {
-		y: {
-			beginAtZero: true,
-			grid: {
-				color: "rgba(0, 0, 0, 0.1)",
-			},
-			ticks: {
-				font: {
-					size: 11,
-				},
-			},
-		},
-		x: {
-			grid: {
-				color: "rgba(0, 0, 0, 0.1)",
-			},
-			ticks: {
-				font: {
-					size: 11,
-				},
-			},
-		},
-	},
-	interaction: {
-		mode: "nearest" as const,
-		axis: "x" as const,
-		intersect: false,
-	},
-};
+	};
+}
 
-const mobileChartOptions = {
-	...chartOptions,
-	plugins: {
-		...chartOptions.plugins,
-		legend: {
-			...chartOptions.plugins.legend,
-			labels: {
-				...chartOptions.plugins.legend.labels,
-				padding: 10,
-				font: {
-					size: 10,
+/**
+ * Get mobile chart options with theme colors
+ */
+function getMobileChartOptions() {
+	const baseOptions = getChartOptions();
+	return {
+		...baseOptions,
+		plugins: {
+			...baseOptions.plugins,
+			legend: {
+				...baseOptions.plugins.legend,
+				labels: {
+					...baseOptions.plugins.legend.labels,
+					padding: 10,
+					font: {
+						size: 10,
+					},
 				},
 			},
 		},
-	},
-	scales: {
-		...chartOptions.scales,
-		y: {
-			...chartOptions.scales.y,
-			ticks: {
-				font: {
-					size: 9,
+		scales: {
+			...baseOptions.scales,
+			y: {
+				...baseOptions.scales.y,
+				ticks: {
+					font: {
+						size: 9,
+					},
+					maxTicksLimit: 6,
 				},
-				maxTicksLimit: 6,
+			},
+			x: {
+				...baseOptions.scales.x,
+				ticks: {
+					font: {
+						size: 9,
+					},
+					maxRotation: 45,
+					minRotation: 0,
+				},
 			},
 		},
-		x: {
-			...chartOptions.scales.x,
-			ticks: {
-				font: {
-					size: 9,
-				},
-				maxRotation: 45,
-				minRotation: 0,
-			},
-		},
-	},
-};
+	};
+}
 
 export function SalesChart() {
 	const { width } = useWindowSize();
@@ -139,6 +154,10 @@ export function SalesChart() {
 		loading,
 		error,
 	} = useChartData("sales", undefined, timeRange);
+
+	// Memoize chart options to avoid recalculating on every render
+	const chartOptionsMemo = useMemo(() => getChartOptions(), []);
+	const mobileChartOptionsMemo = useMemo(() => getMobileChartOptions(), []);
 
 	const handleTimeRangeChange = (value: string) => {
 		setTimeRange(value as "month" | "week" | "day");
@@ -209,7 +228,7 @@ export function SalesChart() {
 				>
 					<Line
 						data={chartData}
-						options={isMobile ? mobileChartOptions : chartOptions}
+						options={isMobile ? mobileChartOptionsMemo : chartOptionsMemo}
 					/>
 				</div>
 			</div>
@@ -226,6 +245,10 @@ export function RevenueChart() {
 		loading,
 		error,
 	} = useChartData("revenue", undefined, "week");
+
+	// Memoize chart options to avoid recalculating on every render
+	const chartOptionsMemo = useMemo(() => getChartOptions(), []);
+	const mobileChartOptionsMemo = useMemo(() => getMobileChartOptions(), []);
 
 	if (loading) {
 		return (
@@ -280,7 +303,7 @@ export function RevenueChart() {
 				>
 					<Bar
 						data={chartData}
-						options={isMobile ? mobileChartOptions : chartOptions}
+						options={isMobile ? mobileChartOptionsMemo : chartOptionsMemo}
 					/>
 				</div>
 			</div>

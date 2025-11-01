@@ -6,7 +6,7 @@
 
 import { db } from '@/lib/db';
 import { bills, vendors, payments, approvalWorkflows } from '@/lib/db/schemas/bills.schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, or, desc, sql, lt, lte, gte, isNull, isNotNull } from 'drizzle-orm';
 import { auditLogger, AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
 
 // Core interfaces
@@ -396,11 +396,31 @@ export class BillPayAutomationService {
   /**
    * Get pending approvals for a user
    */
-  async getPendingApprovals(userId: string): Promise<any[]> {
+  async getPendingApprovals(userId: string): Promise<Bill[]> {
     try {
-      // TODO: Implement pending approvals logic
-      // For now, return empty array
-      return [];
+      const now = new Date();
+      
+      // Bills that require approval: approvalRequired = true AND (approvedBy IS NULL OR status = 'pending_approval')
+      const pendingApprovals = await db
+        .select()
+        .from(bills)
+        .where(
+          and(
+            eq(bills.userId, userId),
+            eq(bills.approvalRequired, true),
+            or(
+              isNull(bills.approvedBy),
+              eq(bills.status, 'pending_approval' as any)
+            ),
+            sql`${bills.status} != 'paid'`,
+            sql`${bills.status} != 'rejected'`,
+            sql`${bills.status} != 'cancelled'`
+          )
+        )
+        .orderBy(desc(bills.dueDate))
+        .limit(50);
+
+      return pendingApprovals;
     } catch (error) {
       console.error('Error fetching pending approvals:', error);
       return [];
@@ -410,17 +430,67 @@ export class BillPayAutomationService {
   /**
    * Process an approval decision
    */
-  async processApproval(userId: string, approvalId: string, decision: string, comments?: string): Promise<any> {
+  async processApproval(userId: string, approvalId: string, decision: 'approved' | 'rejected', comments?: string): Promise<Bill> {
     try {
-      // TODO: Implement approval processing logic
-      // For now, return a mock approval object
-      return {
-        id: approvalId,
-        decision,
-        comments,
-        processedAt: new Date(),
-        processedBy: userId
+      // Get the bill first to verify it belongs to the user
+      const bill = await db
+        .select()
+        .from(bills)
+        .where(
+          and(
+            eq(bills.id, approvalId),
+            eq(bills.userId, userId)
+          )
+        )
+        .limit(1);
+
+      if (bill.length === 0) {
+        throw new Error('Bill not found or access denied');
+      }
+
+      const now = new Date();
+      const updateData: any = {
+        approvedBy: userId,
+        approvedAt: now,
+        updatedAt: now
       };
+
+      if (comments) {
+        updateData.approvalNotes = comments;
+      }
+
+      // Update status based on decision
+      if (decision === 'approved') {
+        updateData.status = 'approved';
+      } else {
+        updateData.status = 'rejected';
+      }
+
+      const [updatedBill] = await db
+        .update(bills)
+        .set(updateData)
+        .where(eq(bills.id, approvalId))
+        .returning();
+
+      // Log approval decision
+      await auditLogger.logEvent({
+        userId,
+        eventType: AuditEventType.APPROVAL_DECISION,
+        action: decision,
+        entityType: 'bill',
+        entityId: approvalId,
+        description: `Bill ${decision}: ${comments || 'No comments provided'}`,
+        riskLevel: decision === 'approved' ? RiskLevel.MEDIUM : RiskLevel.LOW,
+        metadata: {
+          billId: approvalId,
+          amount: bill[0].amount,
+          decision,
+          comments
+        },
+        complianceFlags: [ComplianceFramework.SOC2]
+      });
+
+      return updatedBill;
     } catch (error) {
       console.error('Error processing approval:', error);
       throw new Error(`Failed to process approval: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -517,12 +587,69 @@ export class BillPayAutomationService {
 
   /**
    * Get bills requiring attention
+   * Returns bills that are:
+   * - Overdue (dueDate < now AND status != 'paid')
+   * - Pending approval (approvalRequired = true AND approvedBy IS NULL)
+   * - Due soon (dueDate within next 7 days AND status != 'paid')
+   * - In processing state that needs review
    */
   async getBillsRequiringAttention(userId: string): Promise<Bill[]> {
     try {
-      // TODO: Implement logic to get bills requiring attention
-      // For now, return empty array
-      return [];
+      const now = new Date();
+      const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+      // Bills requiring attention:
+      // 1. Overdue bills
+      // 2. Bills pending approval
+      // 3. Bills due within 7 days
+      // 4. Bills in processing that need review
+      const billsRequiringAttention = await db
+        .select()
+        .from(bills)
+        .where(
+          and(
+            eq(bills.userId, userId),
+            or(
+              // Overdue bills
+              and(
+                lt(bills.dueDate, now),
+                sql`${bills.status} != 'paid'`,
+                sql`${bills.status} != 'cancelled'`
+              ),
+              // Pending approval
+              and(
+                eq(bills.approvalRequired, true),
+                isNull(bills.approvedBy),
+                sql`${bills.status} != 'rejected'`,
+                sql`${bills.status} != 'cancelled'`
+              ),
+              // Due within 7 days and not paid
+              and(
+                gte(bills.dueDate, now),
+                lte(bills.dueDate, sevenDaysFromNow),
+                sql`${bills.status} != 'paid'`,
+                sql`${bills.status} != 'cancelled'`,
+                sql`${bills.status} != 'rejected'`
+              ),
+              // Pending approval status
+              eq(bills.status, 'pending_approval' as any),
+              // Processing status (may need review)
+              eq(bills.status, 'processing' as any)
+            )
+          )
+        )
+        .orderBy(
+          // Prioritize: overdue first, then by due date
+          sql`CASE 
+            WHEN ${bills.dueDate} < ${now} THEN 1 
+            WHEN ${bills.approvalRequired} = true AND ${bills.approvedBy} IS NULL THEN 2
+            ELSE 3 
+          END`,
+          bills.dueDate
+        )
+        .limit(50);
+
+      return billsRequiringAttention;
     } catch (error) {
       console.error('Error fetching bills requiring attention:', error);
       return [];

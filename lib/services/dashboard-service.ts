@@ -8,6 +8,7 @@ import { clients } from '@/lib/db/schemas/clients.schema';
 import { invoices } from '@/lib/db/schemas/invoices.schema';
 import { expenses } from '@/lib/db/schemas/expenses.schema';
 import { eq, desc, sql, and, gte, lte } from 'drizzle-orm';
+import { getChartColor, getSemanticColor } from '@/lib/utils/theme-colors';
 
 interface DashboardOverview {
 	revenue: {
@@ -91,8 +92,8 @@ export async function getDashboardOverview(userId: string): Promise<DashboardOve
 	const [revenueData] = await db
 		.select({
 			total: sql<number>`sum(case when ${invoices.status} = 'paid' then ${invoices.total}::numeric else 0 end)`,
-			thisMonth: sql<number>`sum(case when ${invoices.status} = 'paid' and ${invoices.paidDate} >= ${startOfMonth} then ${invoices.total}::numeric else 0 end)`,
-			lastMonth: sql<number>`sum(case when ${invoices.status} = 'paid' and ${invoices.paidDate} >= ${startOfLastMonth} and ${invoices.paidDate} <= ${endOfLastMonth} then ${invoices.total}::numeric else 0 end)`,
+			thisMonth: sql<number>`sum(case when ${invoices.status} = 'paid' and ${invoices.createdAt} >= ${startOfMonth} then ${invoices.total}::numeric else 0 end)`,
+			lastMonth: sql<number>`sum(case when ${invoices.status} = 'paid' and ${invoices.createdAt} >= ${startOfLastMonth} and ${invoices.createdAt} <= ${endOfLastMonth} then ${invoices.total}::numeric else 0 end)`,
 		})
 		.from(invoices)
 		.where(eq(invoices.userId, userId));
@@ -101,19 +102,21 @@ export async function getDashboardOverview(userId: string): Promise<DashboardOve
 	const [clientData] = await db
 		.select({
 			total: sql<number>`count(*)`,
-			active: sql<number>`count(case when ${clients.isActive} then 1 end)`,
+			active: sql<number>`count(case when ${clients.status} = 'active' then 1 end)`,
 			newThisMonth: sql<number>`count(case when ${clients.createdAt} >= ${startOfMonth} then 1 end)`,
 		})
 		.from(clients)
 		.where(eq(clients.userId, userId));
 
-	// Get invoice data
+	// Get invoice data (current month)
 	const [invoiceData] = await db
 		.select({
 			total: sql<number>`count(*)`,
 			pending: sql<number>`count(case when ${invoices.status} in ('draft', 'sent') then 1 end)`,
-			overdue: sql<number>`count(case when ${invoices.status} in ('sent') and ${invoices.dueDate} < ${now} then 1 end)`,
+			overdue: sql<number>`count(case when ${invoices.status} = 'sent' then 1 end)`,
 			totalAmount: sql<number>`sum(case when ${invoices.status} in ('draft', 'sent') then ${invoices.total}::numeric else 0 end)`,
+			thisMonth: sql<number>`count(case when ${invoices.createdAt} >= ${startOfMonth} then 1 end)`,
+			lastMonth: sql<number>`count(case when ${invoices.createdAt} >= ${startOfLastMonth} and ${invoices.createdAt} <= ${endOfLastMonth} then 1 end)`,
 		})
 		.from(invoices)
 		.where(eq(invoices.userId, userId));
@@ -122,8 +125,8 @@ export async function getDashboardOverview(userId: string): Promise<DashboardOve
 	const [expenseData] = await db
 		.select({
 			total: sql<number>`sum(${expenses.amount}::numeric)`,
-			thisMonth: sql<number>`sum(case when ${expenses.expenseDate} >= ${startOfMonth} then ${expenses.amount}::numeric else 0 end)`,
-			lastMonth: sql<number>`sum(case when ${expenses.expenseDate} >= ${startOfLastMonth} and ${expenses.expenseDate} <= ${endOfLastMonth} then ${expenses.amount}::numeric else 0 end)`,
+			thisMonth: sql<number>`sum(case when ${expenses.createdAt} >= ${startOfMonth} then ${expenses.amount}::numeric else 0 end)`,
+			lastMonth: sql<number>`sum(case when ${expenses.createdAt} >= ${startOfLastMonth} and ${expenses.createdAt} <= ${endOfLastMonth} then ${expenses.amount}::numeric else 0 end)`,
 		})
 		.from(expenses)
 		.where(eq(expenses.userId, userId));
@@ -165,6 +168,8 @@ export async function getDashboardOverview(userId: string): Promise<DashboardOve
 			pending: Number(invoiceData?.pending || 0),
 			overdue: Number(invoiceData?.overdue || 0),
 			totalAmount: Number(invoiceData?.totalAmount || 0),
+			thisMonth: Number(invoiceData?.thisMonth || 0),
+			lastMonth: Number(invoiceData?.lastMonth || 0),
 		},
 		expenses: {
 			total: totalExpenses,
@@ -397,12 +402,23 @@ export async function getChartData(userId: string, params: ChartDataParams): Pro
 		}
 	}
 
+	// Map chart types to theme colors
+	const getColorForType = (chartType: string) => {
+		if (chartType === 'sales') return getChartColor(1); // chart-1 (primary blue) for sales
+		if (chartType === 'revenue') return getChartColor(2); // chart-2 (green) for revenue
+		return getSemanticColor('destructive'); // destructive (red) for expenses
+	};
+	
 	// Create chart dataset
 	const dataset: ChartDataset = {
 		label: type === 'sales' ? 'Sales Count' : type === 'revenue' ? 'Revenue' : 'Expenses',
 		data: dataPoints,
-		borderColor: type === 'sales' ? 'rgb(59, 130, 246)' : type === 'revenue' ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)',
-		backgroundColor: type === 'sales' ? 'rgba(59, 130, 246, 0.1)' : type === 'revenue' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+		borderColor: getColorForType(type),
+		backgroundColor: type === 'sales' 
+			? getChartColor(1, 0.1) 
+			: type === 'revenue' 
+				? getChartColor(2, 0.1) 
+				: getSemanticColor('destructive', 0.1),
 		fill: true,
 	};
 

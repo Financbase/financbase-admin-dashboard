@@ -228,14 +228,89 @@ export function ReportBuilder() {
 	}, [widgets]);
 
 	const saveReport = useCallback(async () => {
-		// TODO: Implement save to database
-		console.log("Saving report:", { ...currentReport, widgets });
+		try {
+			const response = await fetch('/api/reports', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					name: currentReport.name || 'Untitled Report',
+					description: currentReport.description || '',
+					type: 'custom',
+					config: {
+						dateRange: currentReport.filters?.dateRange,
+						filters: currentReport.filters,
+						widgets: widgets.map(w => ({
+							id: w.id,
+							type: w.type,
+							config: w.config,
+							position: w.position,
+						})),
+					},
+					visualizationType: currentReport.layout,
+					chartConfig: {},
+					isPublic: currentReport.isPublic,
+					isFavorite: false,
+					tags: [],
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to save report');
+			}
+
+			const savedReport = await response.json();
+			console.log("Report saved:", savedReport);
+			// You might want to show a toast notification here
+		} catch (error) {
+			console.error('Error saving report:', error);
+			// You might want to show an error toast here
+		}
 	}, [currentReport, widgets]);
 
-	const exportReport = useCallback(async (format: string) => {
-		// TODO: Implement export functionality
-		console.log(`Exporting report as ${format}`);
-	}, []);
+	const exportReport = useCallback(async (format: 'csv' | 'excel' | 'pdf' | 'json') => {
+		try {
+			// Extract data from widgets for export
+			const exportData = widgets.map(widget => {
+				const data = widget.data || [];
+				if (Array.isArray(data)) {
+					return data;
+				}
+				return [];
+			}).flat();
+
+			if (exportData.length === 0) {
+				console.warn('No data to export');
+				return;
+			}
+
+			// Use the ReportExecutionService for export
+			const response = await fetch('/api/reports/export', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					data: exportData,
+					format,
+					reportName: currentReport.name || 'report',
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to export report');
+			}
+
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `${currentReport.name || 'report'}.${format}`;
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+			document.body.removeChild(a);
+		} catch (error) {
+			console.error(`Error exporting report as ${format}:`, error);
+		}
+	}, [currentReport, widgets]);
 
 	const loadTemplate = useCallback((template: ReportTemplate) => {
 		setWidgets(template.widgets);

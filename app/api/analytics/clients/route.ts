@@ -11,11 +11,21 @@ export async function GET() {
 
 		const clientAnalytics = await AnalyticsService.getClientAnalytics(userId);
 
-		return NextResponse.json({ analytics: clientAnalytics });
+		// Return in format expected by the hook
+		return NextResponse.json({
+			totalClients: clientAnalytics.totalClients,
+			activeClients: clientAnalytics.activeClients,
+			newClientsThisMonth: clientAnalytics.newClients[clientAnalytics.newClients.length - 1]?.count || 0,
+			clientRetention: clientAnalytics.clientRetention,
+			satisfactionScore: clientAnalytics.satisfactionScore,
+		});
 	} catch (error) {
 		console.error('Error fetching client analytics:', error);
 		return NextResponse.json(
-			{ error: 'Failed to fetch client analytics' },
+			{ 
+				error: 'Failed to fetch client analytics',
+				details: error instanceof Error ? error.message : 'Unknown error'
+			},
 			{ status: 500 }
 		);
 	}

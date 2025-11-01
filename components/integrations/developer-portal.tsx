@@ -109,8 +109,16 @@ export function DeveloperPortal() {
 	const { data: apiKeys = SAMPLE_API_KEYS } = useQuery({
 		queryKey: ['api-keys'],
 		queryFn: async () => {
-			const response = await fetch('/api/developer/api-keys');
-			return response.json();
+			try {
+				const response = await fetch('/api/developer/api-keys');
+				if (!response.ok) {
+					throw new Error(`Failed to fetch API keys: ${response.statusText}`);
+				}
+				return response.json();
+			} catch (error) {
+				console.error('Error fetching API keys:', error);
+				return SAMPLE_API_KEYS;
+			}
 		},
 	});
 
@@ -118,8 +126,16 @@ export function DeveloperPortal() {
 	const { data: usageData = SAMPLE_USAGE_DATA } = useQuery({
 		queryKey: ['api-usage'],
 		queryFn: async () => {
-			const response = await fetch('/api/developer/usage');
-			return response.json();
+			try {
+				const response = await fetch('/api/developer/usage');
+				if (!response.ok) {
+					throw new Error(`Failed to fetch usage data: ${response.statusText}`);
+				}
+				return response.json();
+			} catch (error) {
+				console.error('Error fetching usage data:', error);
+				return SAMPLE_USAGE_DATA;
+			}
 		},
 	});
 

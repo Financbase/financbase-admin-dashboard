@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { headers } from 'next/headers';
+// import { headers } from 'next/headers'; // Temporarily disabled
 import { DashboardService } from '@/lib/services/dashboard-service';
 
 export async function GET(request: Request) {
 	try {
-		await headers(); // Await headers before using auth
 		// TEMPORARILY DISABLED FOR TESTING
+		// const headersList = await headers();
 		// const { userId } = await auth();
 		// if (!userId) {
 		// 	return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -24,6 +24,11 @@ export async function GET(request: Request) {
 		});
 	} catch (error) {
 		console.error('Dashboard API error:', error);
-		return NextResponse.json({ error: 'Failed to fetch dashboard overview', details: (error as Error).message }, { status: 500 });
+		console.error('Error stack:', (error as Error).stack);
+		return NextResponse.json({ 
+			error: 'Failed to fetch dashboard overview', 
+			details: (error as Error).message,
+			stack: (error as Error).stack 
+		}, { status: 500 });
 	}
 }

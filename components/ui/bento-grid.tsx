@@ -47,7 +47,7 @@ export const BentoCard = ({
     className={cn(
       "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
       // light styles
-      "bg-card border border-border [box-shadow:0_0_0_1px_hsl(var(--border)),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+      "bg-card border border-border shadow-sm",
       // dark styles
       "transform-gpu dark:bg-card dark:border-border dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
       "transition-all duration-300 hover:shadow-lg",
@@ -103,7 +103,7 @@ export const BentoGridItem = ({
       className={cn(
         "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
         // light styles
-        "bg-card border border-border [box-shadow:0_0_0_1px_hsl(var(--border)),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+        "bg-card border border-border shadow-sm",
         // dark styles
         "transform-gpu dark:bg-card dark:border-border dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
         "transition-all duration-300 hover:shadow-lg",

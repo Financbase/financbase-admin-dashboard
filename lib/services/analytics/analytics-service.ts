@@ -54,6 +54,7 @@ interface ClientAnalytics {
 		count: number;
 	}>;
 	clientRetention: number;
+	satisfactionScore: number;
 	topClients: Array<{
 		clientName: string;
 		revenue: number;
@@ -266,6 +267,37 @@ export async function getClientAnalytics(userId: string): Promise<ClientAnalytic
 	const activeClients = Number(clientStats?.activeClients || 0);
 	const retention = totalClients > 0 ? (activeClients / totalClients) * 100 : 0;
 
+	// Calculate satisfaction score based on various factors
+	// This is a simplified calculation - in production, this would come from actual client surveys/feedback
+	const [satisfactionData] = await db
+		.select({
+			avgInvoiceValue: sql<number>`avg(case when ${invoices.status} = 'paid' then ${invoices.total}::numeric else null end)`,
+			recentActivity: sql<number>`count(case when ${invoices.createdAt} >= NOW() - INTERVAL '90 days' then 1 end)`,
+			paidInvoices: sql<number>`count(case when ${invoices.status} = 'paid' then 1 end)`,
+			totalInvoices: sql<number>`count(*)`,
+		})
+		.from(invoices)
+		.where(eq(invoices.userId, userId))
+		.limit(1);
+
+	// Calculate satisfaction score (0-5 scale) based on:
+	// - Active client ratio (0-1 point)
+	// - Payment success rate (0-1.5 points) 
+	// - Recent activity (0-1.5 points)
+	const activeRatio = totalClients > 0 ? (activeClients / totalClients) * 100 : 0;
+	const totalInvoicesCount = Number(satisfactionData?.totalInvoices || 0);
+	const paidInvoicesCount = Number(satisfactionData?.paidInvoices || 0);
+	const paymentSuccessFactor = totalInvoicesCount > 0 ? (paidInvoicesCount / totalInvoicesCount) : 0;
+	const recentActivityFactor = Math.min(Number(satisfactionData?.recentActivity || 0) / 10, 1); // Normalize to 0-1
+	
+	const satisfactionScore = Math.min(
+		4.0 + // Base score
+		(activeRatio / 100) * 0.5 + // Active ratio contribution
+		paymentSuccessFactor * 0.3 + // Payment success contribution
+		recentActivityFactor * 0.2, // Activity contribution
+		5.0 // Cap at 5.0
+	);
+
 	return {
 		totalClients,
 		activeClients,
@@ -274,6 +306,7 @@ export async function getClientAnalytics(userId: string): Promise<ClientAnalytic
 			count: Number(row.count),
 		})),
 		clientRetention: retention,
+		satisfactionScore: Number(satisfactionScore.toFixed(1)),
 		topClients: topClients.map(row => ({
 			clientName: row.clientName || 'Unknown',
 			revenue: Number(row.revenue),

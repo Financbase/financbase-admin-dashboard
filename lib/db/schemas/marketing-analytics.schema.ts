@@ -6,6 +6,8 @@ import {
 	numeric,
 	pgEnum,
 	index,
+	boolean as pgBoolean,
+	integer,
 } from "drizzle-orm/pg-core";
 import { campaigns } from "./campaigns.schema";
 
@@ -17,6 +19,22 @@ export const analyticsCacheTypeEnum = pgEnum("analytics_cache_type", [
 	"daily_metrics",
 	"conversion_funnel",
 	"audience_insights",
+]);
+
+// Enum for contact submission status
+export const contactStatusEnum = pgEnum("contact_status", [
+	"new",
+	"in_progress",
+	"resolved",
+	"archived",
+]);
+
+// Enum for contact submission priority
+export const contactPriorityEnum = pgEnum("contact_priority", [
+	"low",
+	"medium",
+	"high",
+	"urgent",
 ]);
 
 // Campaign Analytics Daily - Stores daily aggregated metrics per campaign
@@ -105,8 +123,141 @@ export const marketingAnalyticsCache = pgTable(
 	})
 );
 
+// Contact Submissions Table - Public contact form submissions
+export const contactSubmissions = pgTable(
+	"financbase_contact_submissions",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		
+		// Contact information
+		name: text("name").notNull(),
+		email: text("email").notNull(),
+		company: text("company"),
+		message: text("message").notNull(),
+		
+		// Submission metadata
+		status: contactStatusEnum("status").default("new").notNull(),
+		priority: contactPriorityEnum("priority").default("medium").notNull(),
+		
+		// Tracking information
+		ipAddress: text("ip_address"),
+		userAgent: text("user_agent"),
+		referrer: text("referrer"),
+		source: text("source"), // Where the form was submitted from
+		
+		// Response tracking
+		respondedAt: timestamp("responded_at"),
+		responseNotes: text("response_notes"),
+		
+		// Additional metadata
+		metadata: text("metadata"), // JSON string for additional data
+		
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	},
+	(table) => ({
+		emailIdx: index("contact_submissions_email_idx").on(table.email),
+		statusIdx: index("contact_submissions_status_idx").on(table.status),
+		createdAtIdx: index("contact_submissions_created_at_idx").on(table.createdAt),
+	})
+);
+
+// Marketing Events Table - Track marketing interactions
+export const marketingEvents = pgTable(
+	"financbase_marketing_events",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		userId: uuid("user_id"),
+		sessionId: text("session_id"),
+		
+		// Event details
+		eventType: text("event_type").notNull(), // 'page_view', 'click', 'download', etc.
+		component: text("component"), // Component name
+		page: text("page"), // Page path
+		
+		// Event data
+		metadata: text("metadata"), // JSON string
+		
+		// User context
+		userAgent: text("user_agent"),
+		ipAddress: text("ip_address"),
+		referrer: text("referrer"),
+		
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => ({
+		userIdIdx: index("marketing_events_user_id_idx").on(table.userId),
+		eventTypeIdx: index("marketing_events_event_type_idx").on(table.eventType),
+		createdAtIdx: index("marketing_events_created_at_idx").on(table.createdAt),
+	})
+);
+
+// Marketing Stats Table - Aggregated marketing statistics
+export const marketingStats = pgTable(
+	"financbase_marketing_stats",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		userId: uuid("user_id").notNull(),
+		
+		// Stat details
+		metricName: text("metric_name").notNull(),
+		value: numeric("value", { precision: 12, scale: 2 }).notNull(),
+		change: numeric("change", { precision: 12, scale: 2 }),
+		trend: text("trend"), // JSON array of trend values
+		
+		// Status
+		isActive: pgBoolean("is_active").default(true).notNull(),
+		
+		// Timestamps
+		lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => ({
+		userIdIdx: index("marketing_stats_user_id_idx").on(table.userId),
+		metricNameIdx: index("marketing_stats_metric_name_idx").on(table.metricName),
+	})
+);
+
+// User Feedback Table - User feedback and ratings
+export const userFeedback = pgTable(
+	"financbase_user_feedback",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		userId: uuid("user_id"),
+		
+		// Feedback details
+		category: text("category").notNull(), // 'bug', 'feature_request', 'general', etc.
+		rating: integer("rating"), // 1-5 star rating
+		comment: text("comment"),
+		isPositive: pgBoolean("is_positive"),
+		
+		// Context
+		component: text("component"),
+		page: text("page"),
+		
+		// User context
+		userAgent: text("user_agent"),
+		ipAddress: text("ip_address"),
+		
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => ({
+		userIdIdx: index("user_feedback_user_id_idx").on(table.userId),
+		categoryIdx: index("user_feedback_category_idx").on(table.category),
+		createdAtIdx: index("user_feedback_created_at_idx").on(table.createdAt),
+	})
+);
+
 export type CampaignAnalyticsDaily = typeof campaignAnalyticsDaily.$inferSelect;
 export type NewCampaignAnalyticsDaily = typeof campaignAnalyticsDaily.$inferInsert;
 export type MarketingAnalyticsCache = typeof marketingAnalyticsCache.$inferSelect;
 export type NewMarketingAnalyticsCache = typeof marketingAnalyticsCache.$inferInsert;
+export type ContactSubmission = typeof contactSubmissions.$inferSelect;
+export type NewContactSubmission = typeof contactSubmissions.$inferInsert;
+export type MarketingEvent = typeof marketingEvents.$inferSelect;
+export type NewMarketingEvent = typeof marketingEvents.$inferInsert;
+export type MarketingStat = typeof marketingStats.$inferSelect;
+export type NewMarketingStat = typeof marketingStats.$inferInsert;
+export type UserFeedback = typeof userFeedback.$inferSelect;
+export type NewUserFeedback = typeof userFeedback.$inferInsert;
 

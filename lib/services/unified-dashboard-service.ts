@@ -17,6 +17,7 @@ import {
 	expenseCategories 
 } from '@/lib/db/schemas';
 import { eq, and, desc, sql, gte, lte } from 'drizzle-orm';
+import { getChartColor, getSemanticColor } from '@/lib/utils/theme-colors';
 
 interface UnifiedMetrics {
 	// Financial Overview
@@ -315,8 +316,8 @@ async function getRevenueChartData(userId: string) {
 		datasets: [{
 			label: 'Revenue',
 			data: revenueData.map(item => Number(item.revenue)),
-			borderColor: 'rgb(34, 197, 94)',
-			backgroundColor: 'rgba(34, 197, 94, 0.1)',
+			borderColor: getChartColor(2), // chart-2 (green) for revenue
+			backgroundColor: getChartColor(2, 0.1),
 		}]
 	};
 }
@@ -363,8 +364,8 @@ async function getClientAcquisitionData(userId: string) {
 		datasets: [{
 			label: 'New Clients',
 			data: clientData.map(item => item.count),
-			borderColor: 'rgb(59, 130, 246)',
-			backgroundColor: 'rgba(59, 130, 246, 0.1)',
+			borderColor: getChartColor(1), // chart-1 (primary blue) for clients
+			backgroundColor: getChartColor(1, 0.1),
 		}]
 	};
 }
@@ -435,14 +436,14 @@ async function getCashFlowData(userId: string) {
 			{
 				label: 'Inflow',
 				data: cashFlowData.map(item => Number(item.inflow)),
-				borderColor: 'rgb(34, 197, 94)',
-				backgroundColor: 'rgba(34, 197, 94, 0.1)',
+				borderColor: getChartColor(2), // chart-2 (green) for inflow
+				backgroundColor: getChartColor(2, 0.1),
 			},
 			{
 				label: 'Outflow',
 				data: cashFlowData.map(item => Number(item.outflow)),
-				borderColor: 'rgb(239, 68, 68)',
-				backgroundColor: 'rgba(239, 68, 68, 0.1)',
+				borderColor: getSemanticColor('destructive'), // destructive (red) for outflow
+				backgroundColor: getSemanticColor('destructive', 0.1),
 			}
 		]
 	};

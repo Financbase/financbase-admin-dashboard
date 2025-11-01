@@ -38,19 +38,27 @@ export function PublicHero({
     lg: "py-32",
   };
 
-  const backgroundClasses = {
-    gradient: "bg-gradient-to-br from-[var(--brand-primary)] via-[var(--brand-primary-dark)] to-[var(--brand-primary-dark)]",
-    solid: "bg-primary",
-    pattern: "bg-gradient-to-br from-[var(--brand-primary)] via-[var(--brand-primary-dark)] to-[var(--brand-primary-dark)] relative overflow-hidden",
+  // Use inline styles with oklch() for proper Financbase brand colors
+  const getBackgroundStyle = () => {
+    if (background === "gradient" || background === "pattern") {
+      return {
+        background: "linear-gradient(to bottom right, oklch(var(--brand-primary)), oklch(var(--brand-primary-dark)), oklch(var(--brand-primary-dark)))",
+      };
+    }
+    return {
+      backgroundColor: "oklch(var(--brand-primary))",
+    };
   };
 
   return (
-    <section className={cn(
-      "relative",
-      backgroundClasses[background],
-      sizeClasses[size],
-      className
-    )}>
+    <section 
+      className={cn(
+        "relative",
+        sizeClasses[size],
+        className
+      )}
+      style={getBackgroundStyle()}
+    >
       {background === "pattern" && (
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] pointer-events-none" />
       )}
@@ -84,27 +92,27 @@ export function PublicHero({
           {(primaryAction || secondaryAction) && (
             <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-20">
               {primaryAction && (
-                <Button
-                  asChild
-                  size="sm"
-                  className="bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-dark)] cursor-pointer relative z-30"
+                <Link 
+                  href={primaryAction.href}
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 bg-white hover:bg-gray-100 shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer relative z-30"
+                  style={{
+                    color: "oklch(var(--primary))",
+                  }}
                 >
-                  <Link href={primaryAction.href} className="cursor-pointer">
-                    {primaryAction.text}
-                  </Link>
-                </Button>
+                  {primaryAction.text}
+                </Link>
               )}
               {secondaryAction && (
-                <Button
-                  asChild
-                  size="sm"
-                  variant="outline"
-                  className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white cursor-pointer relative z-30"
+                <Link 
+                  href={secondaryAction.href}
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 border-2 bg-transparent text-white hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer relative z-30 [&:hover]:text-[oklch(var(--primary))]"
+                  style={{
+                    borderColor: "white",
+                    color: "white",
+                  }}
                 >
-                  <Link href={secondaryAction.href} className="cursor-pointer">
-                    {secondaryAction.text}
-                  </Link>
-                </Button>
+                  {secondaryAction.text}
+                </Link>
               )}
             </div>
           )}

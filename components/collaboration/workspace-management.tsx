@@ -113,11 +113,33 @@ export function WorkspaceManagementDashboard() {
 	};
 
 	const handleCreateWorkspace = async () => {
+		if (!user?.id) {
+			toast({
+				title: 'Error',
+				description: 'User not authenticated',
+				variant: 'destructive',
+			});
+			return;
+		}
+
+		// Get organizationId from user metadata
+		const metadata = user.publicMetadata as { organizationId?: string };
+		const organizationId = metadata?.organizationId || user.organizationMemberships?.[0]?.organization?.id;
+
+		if (!organizationId) {
+			toast({
+				title: 'Error',
+				description: 'Organization ID not found. Please ensure you are part of an organization.',
+				variant: 'destructive',
+			});
+			return;
+		}
+
 		try {
 			const workspace = await workspaceService.createWorkspace({
 				...newWorkspace,
-				organizationId: 'org_123', // TODO: Get from user context
-				ownerId: user?.id || '',
+				organizationId,
+				ownerId: user.id,
 				members: [],
 				settings: {
 					allowClientInvites: true,
@@ -156,11 +178,44 @@ export function WorkspaceManagementDashboard() {
 	const handleInviteMember = async () => {
 		if (!selectedWorkspace) return;
 
+		if (!newMember.email) {
+			toast({
+				title: 'Error',
+				description: 'Email is required to invite a member',
+				variant: 'destructive',
+			});
+			return;
+		}
+
+		// Get default permissions for the role
+		const { DEFAULT_ROLES } = await import('@/types/auth');
+		const defaultPermissions = DEFAULT_ROLES[newMember.role] || [];
+
 		try {
+			// First, try to resolve user by email
+			// The backend API endpoint should handle email-to-userId lookup
+			// If user doesn't exist, it should create an invitation
+			const lookupResponse = await fetch(`/api/admin/users/lookup?email=${encodeURIComponent(newMember.email)}`);
+			
+			let userId: string;
+			if (lookupResponse.ok) {
+				const userData = await lookupResponse.json();
+				userId = userData.id;
+			} else {
+				// If user lookup fails, we'll need the backend to create an invitation
+				// For now, show an error
+				toast({
+					title: 'Error',
+					description: 'User not found. User must be registered first.',
+					variant: 'destructive',
+				});
+				return;
+			}
+
 			await workspaceService.addWorkspaceMember(selectedWorkspace.id, {
-				userId: 'temp_' + Date.now(), // TODO: Implement proper user lookup
+				userId,
 				role: newMember.role,
-				permissions: [], // TODO: Get permissions based on role
+				permissions: defaultPermissions,
 				isActive: true,
 			});
 

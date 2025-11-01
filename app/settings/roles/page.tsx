@@ -7,11 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Key, Shield, Users } from 'lucide-react';
 import { isAdmin } from '@/lib/auth/financbase-rbac';
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+// import { headers } from 'next/headers'; // Temporarily disabled
 
 export default async function RolesSettingsPage() {
-	// Await headers before using dynamic APIs (required in Next.js 15)
-	await headers();
+	// Get headers (required in Next.js 15 for dynamic APIs)
+	// const headersList = await headers();
 	
 	// Check if user is admin
 	const userIsAdmin = await isAdmin();

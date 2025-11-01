@@ -19,30 +19,10 @@ import {
 	Shield,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 
 export default function PrivacyPage() {
-	const [isVisible, setIsVisible] = useState(false);
-
-	useEffect(() => {
-		const toggleVisibility = () => {
-			if (window.pageYOffset > 300) {
-				setIsVisible(true);
-			} else {
-				setIsVisible(false);
-			}
-		};
-
-		window.addEventListener("scroll", toggleVisibility);
-		return () => window.removeEventListener("scroll", toggleVisibility);
-	}, []);
-
-	const scrollToTop = () => {
-		window.scrollTo({
-			top: 0,
-			behavior: "smooth",
-		});
-	};
+	const { isVisible, scrollToTop } = useScrollToTop(300);
 
 	const sections = [
 		{ id: "introduction", title: "Introduction", icon: FileText },

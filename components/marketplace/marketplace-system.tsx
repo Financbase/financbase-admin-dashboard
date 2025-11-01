@@ -96,13 +96,21 @@ export function MarketplaceSystem() {
   const { data: plugins = [], isLoading: pluginsLoading } = useQuery({
     queryKey: ['marketplacePlugins', { category: selectedCategory, search: searchTerm, sort: sortBy }],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        category: selectedCategory,
-        search: searchTerm,
-        sort: sortBy,
-      });
-      const response = await fetch(`/api/marketplace/plugins?${params}`);
-      return response.json();
+      try {
+        const params = new URLSearchParams({
+          category: selectedCategory,
+          search: searchTerm,
+          sort: sortBy,
+        });
+        const response = await fetch(`/api/marketplace/plugins?${params}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch plugins: ${response.statusText}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching plugins:', error);
+        return [];
+      }
     },
   });
 
@@ -110,8 +118,16 @@ export function MarketplaceSystem() {
   const { data: installedPlugins = [], isLoading: installedLoading } = useQuery({
     queryKey: ['installedPlugins'],
     queryFn: async () => {
-      const response = await fetch('/api/marketplace/plugins/installed');
-      return response.json();
+      try {
+        const response = await fetch('/api/marketplace/plugins/installed');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch installed plugins: ${response.statusText}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching installed plugins:', error);
+        return [];
+      }
     },
   });
 

@@ -44,25 +44,27 @@ export * from "./reports.schema";
 // Real Estate
 export * from "./real-estate.schema";
 // Note: real-estate-expanded.schema has conflicting exports with projects.schema
-// Only import specific types that don't conflict
-export type {
-	Contractor,
-	NewContractor,
-	ProjectTask,
-	NewProjectTask,
-	ServiceRequest,
-	NewServiceRequest,
-	TenantApplication,
-	NewTenantApplication,
-	Lender,
-	NewLender,
-	LoanApplication,
-	NewLoanApplication,
-	RealEstateProfessional,
-	NewRealEstateProfessional,
-	PropertyListing,
-	NewPropertyListing,
-} from "./real-estate-expanded.schema";
+// Only import specific types that don't conflict (commented out for now)
+// export type {
+// 	Contractor,
+// 	NewContractor,
+// 	ContractorProject,
+// 	NewContractorProject,
+// 	ProjectTask,
+// 	NewProjectTask,
+// 	ServiceRequest,
+// 	NewServiceRequest,
+// 	TenantApplication,
+// 	NewTenantApplication,
+// 	Lender,
+// 	NewLender,
+// 	LoanApplication,
+// 	NewLoanApplication,
+// 	RealEstateProfessional,
+// 	NewRealEstateProfessional,
+// 	PropertyListing,
+// 	NewPropertyListing,
+// } from "./real-estate-expanded.schema";
 
 // Activity tracking
 export * from "./activities.schema";
@@ -76,14 +78,14 @@ export * from "./billing.schema";
 // Notifications System
 export * from "./notifications.schema";
 
-// Workflows and automation
-export * from "./workflows.schema";
+// Workflows and automation (commented out for now)
+// export * from "./workflows.schema";
 
 // AI Bookkeeping and Reconciliation
 export * from "./reconciliation.schema";
 
-// Bill Pay Automation and Document Processing
-export * from "./bill-pay.schema";
+// Bill Pay Automation and Document Processing (commented out for now)
+// export * from "./bill-pay.schema";
 
 // Webhooks System
 export * from "./webhooks.schema";

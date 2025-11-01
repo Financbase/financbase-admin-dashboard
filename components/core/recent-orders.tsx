@@ -45,7 +45,7 @@ export default function RecentOrders() {
 
 	if (loading) {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-6 border border-gray-200 dark:border-[#1F1F23]">
+			<div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-border">
 				<div className="animate-pulse">
 					<div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
 					<div className="space-y-4">
@@ -67,7 +67,7 @@ export default function RecentOrders() {
 	if (error) {
 		return (
 			<DashboardErrorBoundary>
-				<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-6 border border-gray-200 dark:border-[#1F1F23]">
+				<div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-border">
 					<EmptyState
 						title="Failed to load orders"
 						description="Unable to fetch recent orders. Please try refreshing the page."
@@ -79,7 +79,7 @@ export default function RecentOrders() {
 
 	if (!orders || orders.length === 0) {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-6 border border-gray-200 dark:border-[#1F1F23]">
+			<div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-border">
 				<EmptyState {...EmptyStates.orders} />
 			</div>
 		);
@@ -97,7 +97,7 @@ export default function RecentOrders() {
 	return (
 		<DashboardErrorBoundary>
 			<div
-				className="bg-white dark:bg-[#0F0F12] rounded-xl p-6 border border-gray-200 dark:border-[#1F1F23]"
+				className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-border"
 				data-testid="recent-orders"
 			>
 				<div className="flex items-center justify-between mb-6">

@@ -109,8 +109,16 @@ export function WebhookManagement() {
 	const { data: webhookEndpoints = SAMPLE_WEBHOOK_ENDPOINTS } = useQuery({
 		queryKey: ['webhook-endpoints'],
 		queryFn: async () => {
-			const response = await fetch('/api/integrations/webhooks/endpoints');
-			return response.json();
+			try {
+				const response = await fetch('/api/integrations/webhooks/endpoints');
+				if (!response.ok) {
+					throw new Error(`Failed to fetch webhook endpoints: ${response.statusText}`);
+				}
+				return response.json();
+			} catch (error) {
+				console.error('Error fetching webhook endpoints:', error);
+				return SAMPLE_WEBHOOK_ENDPOINTS;
+			}
 		},
 	});
 
@@ -118,8 +126,16 @@ export function WebhookManagement() {
 	const { data: webhookEvents = SAMPLE_WEBHOOK_EVENTS } = useQuery({
 		queryKey: ['webhook-events'],
 		queryFn: async () => {
-			const response = await fetch('/api/integrations/webhooks');
-			return response.json();
+			try {
+				const response = await fetch('/api/integrations/webhooks');
+				if (!response.ok) {
+					throw new Error(`Failed to fetch webhook events: ${response.statusText}`);
+				}
+				return response.json();
+			} catch (error) {
+				console.error('Error fetching webhook events:', error);
+				return SAMPLE_WEBHOOK_EVENTS;
+			}
 		},
 	});
 

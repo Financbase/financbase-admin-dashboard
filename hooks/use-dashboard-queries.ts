@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
+import { getChartColor, getSemanticColor } from '@/lib/utils/theme-colors';
 
 // Types for API responses
 export interface StatData {
@@ -150,13 +151,23 @@ export function useChartData(
 			
 			if (!data.chartData) {
 				// Return empty chart data if not available
+				const getColorForType = (chartType: string) => {
+					if (chartType === 'sales') return getChartColor(1); // chart-1 (primary blue)
+					if (chartType === 'revenue') return getChartColor(2); // chart-2 (green)
+					return getSemanticColor('destructive'); // destructive (red)
+				};
+				
 				return {
 					labels: [],
 					datasets: [{
 						label: type === 'sales' ? 'Sales Count' : type === 'revenue' ? 'Revenue' : 'Expenses',
 						data: [],
-						borderColor: type === 'sales' ? 'rgb(59, 130, 246)' : type === 'revenue' ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)',
-						backgroundColor: type === 'sales' ? 'rgba(59, 130, 246, 0.1)' : type === 'revenue' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+						borderColor: getColorForType(type),
+						backgroundColor: type === 'sales' 
+							? getChartColor(1, 0.1) 
+							: type === 'revenue' 
+								? getChartColor(2, 0.1) 
+								: getSemanticColor('destructive', 0.1),
 						fill: true,
 					}],
 				};

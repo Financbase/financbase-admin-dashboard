@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +32,8 @@ import {
 	ThumbsDown,
 	MessageSquare,
 	Calendar,
-	Timer
+	Timer,
+	Trash2
 } from 'lucide-react';
 import { ApprovalWorkflow, ApprovalRequest, ApprovalStep } from '@/types/auth';
 import { workspaceService } from '@/lib/services/workspace-service';
@@ -44,6 +46,7 @@ interface ApprovalWorkflowManagerProps {
 }
 
 export function ApprovalWorkflowManager({ workspaceId }: ApprovalWorkflowManagerProps) {
+	const { user } = useUser();
 	const { toast } = useToast();
 	const [workflows, setWorkflows] = useState<ApprovalWorkflow[]>([]);
 	const [requests, setRequests] = useState<ApprovalRequest[]>([]);
@@ -52,6 +55,8 @@ export function ApprovalWorkflowManager({ workspaceId }: ApprovalWorkflowManager
 	const [loading, setLoading] = useState(true);
 	const [showCreateWorkflow, setShowCreateWorkflow] = useState(false);
 	const [showCreateRequest, setShowCreateRequest] = useState(false);
+	const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
+	const [workflowSteps, setWorkflowSteps] = useState<ApprovalStep[]>([]);
 
 	// Form states
 	const [newWorkflow, setNewWorkflow] = useState({
@@ -97,13 +102,14 @@ export function ApprovalWorkflowManager({ workspaceId }: ApprovalWorkflowManager
 			const workflow = await workspaceService.createApprovalWorkflow({
 				...newWorkflow,
 				workspaceId,
-				steps: [], // TODO: Add step creation UI
+				steps: workflowSteps,
 				isActive: true,
 			});
 
 			setWorkflows(prev => [...prev, workflow]);
 			setShowCreateWorkflow(false);
 			setNewWorkflow({ name: '', description: '', type: 'expense_approval' });
+			setWorkflowSteps([]);
 
 			toast({
 				title: 'Success',
@@ -119,18 +125,37 @@ export function ApprovalWorkflowManager({ workspaceId }: ApprovalWorkflowManager
 	};
 
 	const handleCreateRequest = async () => {
+		if (!user?.id) {
+			toast({
+				title: 'Error',
+				description: 'User not authenticated',
+				variant: 'destructive',
+			});
+			return;
+		}
+
+		if (!selectedWorkflowId && workflows.length > 0) {
+			toast({
+				title: 'Error',
+				description: 'Please select a workflow',
+				variant: 'destructive',
+			});
+			return;
+		}
+
 		try {
 			const request = await workspaceService.createApprovalRequest({
 				...newRequest,
-				workflowId: workflows[0]?.id || '', // TODO: Allow workflow selection
+				workflowId: selectedWorkflowId || workflows[0]?.id || '',
 				workspaceId,
-				requestedBy: 'current-user-id', // TODO: Get from auth context
+				requestedBy: user.id,
 				metadata: {},
 			});
 
 			setRequests(prev => [...prev, request]);
 			setShowCreateRequest(false);
 			setNewRequest({ title: '', description: '', priority: 'medium', dueDate: '' });
+			setSelectedWorkflowId('');
 
 			toast({
 				title: 'Success',
@@ -146,8 +171,17 @@ export function ApprovalWorkflowManager({ workspaceId }: ApprovalWorkflowManager
 	};
 
 	const handleApproveRequest = async (requestId: string) => {
+		if (!user?.id) {
+			toast({
+				title: 'Error',
+				description: 'User not authenticated',
+				variant: 'destructive',
+			});
+			return;
+		}
+
 		try {
-			await workspaceService.approveRequest(workspaceId, requestId, 'current-user-id');
+			await workspaceService.approveRequest(workspaceId, requestId, user.id);
 			await loadWorkflowsAndRequests();
 
 			toast({
@@ -164,8 +198,17 @@ export function ApprovalWorkflowManager({ workspaceId }: ApprovalWorkflowManager
 	};
 
 	const handleRejectRequest = async (requestId: string, reason?: string) => {
+		if (!user?.id) {
+			toast({
+				title: 'Error',
+				description: 'User not authenticated',
+				variant: 'destructive',
+			});
+			return;
+		}
+
 		try {
-			await workspaceService.rejectRequest(workspaceId, requestId, 'current-user-id', reason);
+			await workspaceService.rejectRequest(workspaceId, requestId, user.id, reason);
 			await loadWorkflowsAndRequests();
 
 			toast({
@@ -476,8 +519,78 @@ export function ApprovalWorkflowManager({ workspaceId }: ApprovalWorkflowManager
 								</SelectContent>
 							</Select>
 						</div>
+						<div className="space-y-2">
+							<div className="flex items-center justify-between">
+								<Label>Workflow Steps</Label>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onClick={() => {
+										setWorkflowSteps(prev => [...prev, {
+											id: `step_${Date.now()}`,
+											name: `Step ${prev.length + 1}`,
+											order: prev.length + 1,
+											approvers: [],
+											requiresAllApprovers: false,
+											notifyOnTimeout: true,
+										}]);
+									}}
+								>
+									<Plus className="h-4 w-4 mr-1" />
+									Add Step
+								</Button>
+							</div>
+							<div className="space-y-2 max-h-48 overflow-y-auto">
+								{workflowSteps.map((step, index) => (
+									<div key={step.id} className="p-3 border rounded-lg flex items-center justify-between">
+										<div className="flex-1">
+											<Input
+												value={step.name}
+												onChange={(e) => {
+													setWorkflowSteps(prev => prev.map((s, i) => 
+														i === index ? { ...s, name: e.target.value } : s
+													));
+												}}
+												placeholder="Step name"
+												className="mb-2"
+											/>
+											<div className="flex items-center gap-2 text-xs text-muted-foreground">
+												<Switch
+													checked={step.requiresAllApprovers}
+													onCheckedChange={(checked) => {
+														setWorkflowSteps(prev => prev.map((s, i) => 
+															i === index ? { ...s, requiresAllApprovers: checked } : s
+														));
+													}}
+												/>
+												<span>Requires all approvers</span>
+											</div>
+										</div>
+										<Button
+											type="button"
+											variant="ghost"
+											size="sm"
+											onClick={() => {
+												setWorkflowSteps(prev => prev.filter((_, i) => i !== index));
+											}}
+										>
+											<Trash2 className="h-4 w-4 text-red-600" />
+										</Button>
+									</div>
+								))}
+								{workflowSteps.length === 0 && (
+									<p className="text-sm text-muted-foreground text-center py-4">
+										No steps added. Click "Add Step" to create your first approval step.
+									</p>
+								)}
+							</div>
+						</div>
 						<div className="flex justify-end gap-2">
-							<Button variant="outline" onClick={() => setShowCreateWorkflow(false)}>
+							<Button variant="outline" onClick={() => {
+								setShowCreateWorkflow(false);
+								setWorkflowSteps([]);
+							}}>
 								Cancel
 							</Button>
 							<Button onClick={handleCreateWorkflow} disabled={!newWorkflow.name}>
@@ -516,6 +629,23 @@ export function ApprovalWorkflowManager({ workspaceId }: ApprovalWorkflowManager
 								placeholder="Detailed description of the request"
 							/>
 						</div>
+						{workflows.length > 0 && (
+							<div className="space-y-2">
+								<Label htmlFor="requestWorkflow">Workflow</Label>
+								<Select value={selectedWorkflowId} onValueChange={setSelectedWorkflowId}>
+									<SelectTrigger>
+										<SelectValue placeholder="Select a workflow" />
+									</SelectTrigger>
+									<SelectContent>
+										{workflows.map((workflow) => (
+											<SelectItem key={workflow.id} value={workflow.id}>
+												{workflow.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						)}
 						<div className="grid grid-cols-2 gap-4">
 							<div className="space-y-2">
 								<Label htmlFor="requestPriority">Priority</Label>

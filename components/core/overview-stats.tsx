@@ -35,7 +35,7 @@ export default function OverviewStats() {
 				{[...new Array(4)].map((_, i) => (
 					<div
 						key={`loading-stat-${i}-${Date.now()}`}
-						className="bg-white dark:bg-[#0F0F12] rounded-lg sm:rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23]"
+						className="bg-white dark:bg-card rounded-lg sm:rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-border"
 						data-testid="stat-card"
 					>
 						<div className="animate-pulse">
@@ -62,7 +62,7 @@ export default function OverviewStats() {
 					data-testid="dashboard-stats"
 				>
 					<div
-						className="bg-white dark:bg-[#0F0F12] rounded-lg sm:rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23]"
+						className="bg-white dark:bg-card rounded-lg sm:rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-border"
 						data-testid="stat-card"
 					>
 						<EmptyState
@@ -82,7 +82,7 @@ export default function OverviewStats() {
 				data-testid="dashboard-stats"
 			>
 				<div
-					className="bg-white dark:bg-[#0F0F12] rounded-lg sm:rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23]"
+					className="bg-white dark:bg-card rounded-lg sm:rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-border"
 					data-testid="stat-card"
 				>
 					<EmptyState
@@ -134,7 +134,7 @@ export default function OverviewStats() {
 				{statCards.map((stat) => (
 					<section
 						key={stat.title}
-						className="bg-white dark:bg-[#0F0F12] rounded-lg sm:rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] hover:shadow-md transition-shadow"
+						className="bg-white dark:bg-card rounded-lg sm:rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-border hover:shadow-md transition-shadow"
 						aria-label={`${stat.title} statistic`}
 						data-testid="stat-card"
 					>

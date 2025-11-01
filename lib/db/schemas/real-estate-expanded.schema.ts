@@ -25,7 +25,7 @@ export const contractors = pgTable("contractors", {
 });
 
 // Projects table (for contractor projects)
-export const projects = pgTable("projects", {
+export const contractorProjects = pgTable("contractor_projects", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: text("user_id").notNull(),
 	propertyId: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }),
@@ -49,7 +49,7 @@ export const projects = pgTable("projects", {
 // Project tasks table
 export const projectTasks = pgTable("project_tasks", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+	projectId: uuid("project_id").references(() => contractorProjects.id, { onDelete: "cascade" }).notNull(),
 	userId: text("user_id").notNull(),
 	title: text("title").notNull(),
 	description: text("description"),
@@ -218,8 +218,8 @@ export const propertyListings = pgTable("property_listings", {
 export type Contractor = typeof contractors.$inferSelect;
 export type NewContractor = typeof contractors.$inferInsert;
 
-export type Project = typeof projects.$inferSelect;
-export type NewProject = typeof projects.$inferInsert;
+export type ContractorProject = typeof contractorProjects.$inferSelect;
+export type NewContractorProject = typeof contractorProjects.$inferInsert;
 
 export type ProjectTask = typeof projectTasks.$inferSelect;
 export type NewProjectTask = typeof projectTasks.$inferInsert;

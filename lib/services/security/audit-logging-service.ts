@@ -884,16 +884,328 @@ export class AuditLoggingService {
     events: AuditEvent[],
     framework: ComplianceFramework
   ): number {
-    // Calculate compliance score based on events and framework requirements
-    return 85; // Implementation needed
+    if (events.length === 0) {
+      return 0;
+    }
+
+    let score = 0;
+    const maxScore = 100;
+    const eventTypes = new Set(events.map(e => e.eventType));
+    const eventCounts = events.reduce((acc, e) => {
+      acc[e.eventType] = (acc[e.eventType] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Define required event types per framework
+    const frameworkRequirements: Record<ComplianceFramework, {
+      required: AuditEventType[];
+      critical: AuditEventType[];
+      weights: { [key in AuditEventType]?: number };
+    }> = {
+      [ComplianceFramework.SOC2]: {
+        required: [
+          AuditEventType.LOGIN,
+          AuditEventType.LOGOUT,
+          AuditEventType.LOGIN_FAILED,
+          AuditEventType.USER_CREATED,
+          AuditEventType.USER_UPDATED,
+          AuditEventType.PAYMENT_PROCESSED,
+          AuditEventType.DATA_EXPORTED,
+          AuditEventType.SUSPICIOUS_ACTIVITY
+        ],
+        critical: [
+          AuditEventType.LOGIN,
+          AuditEventType.PAYMENT_PROCESSED,
+          AuditEventType.SUSPICIOUS_ACTIVITY,
+          AuditEventType.SECURITY_VIOLATION
+        ],
+        weights: {
+          [AuditEventType.LOGIN]: 15,
+          [AuditEventType.PAYMENT_PROCESSED]: 20,
+          [AuditEventType.SUSPICIOUS_ACTIVITY]: 25,
+          [AuditEventType.DATA_EXPORTED]: 15,
+          [AuditEventType.USER_CREATED]: 10,
+          [AuditEventType.SECURITY_VIOLATION]: 15
+        }
+      },
+      [ComplianceFramework.GDPR]: {
+        required: [
+          AuditEventType.LOGIN,
+          AuditEventType.USER_CREATED,
+          AuditEventType.USER_UPDATED,
+          AuditEventType.USER_DELETED,
+          AuditEventType.DATA_EXPORTED,
+          AuditEventType.PERMISSION_GRANTED,
+          AuditEventType.PERMISSION_REVOKED
+        ],
+        critical: [
+          AuditEventType.DATA_EXPORTED,
+          AuditEventType.USER_DELETED,
+          AuditEventType.PERMISSION_REVOKED
+        ],
+        weights: {
+          [AuditEventType.DATA_EXPORTED]: 30,
+          [AuditEventType.USER_DELETED]: 25,
+          [AuditEventType.PERMISSION_REVOKED]: 20,
+          [AuditEventType.LOGIN]: 15,
+          [AuditEventType.USER_CREATED]: 10
+        }
+      },
+      [ComplianceFramework.HIPAA]: {
+        required: [
+          AuditEventType.LOGIN,
+          AuditEventType.LOGOUT,
+          AuditEventType.DATA_EXPORTED,
+          AuditEventType.UNAUTHORIZED_ACCESS,
+          AuditEventType.USER_UPDATED
+        ],
+        critical: [
+          AuditEventType.UNAUTHORIZED_ACCESS,
+          AuditEventType.DATA_EXPORTED,
+          AuditEventType.SECURITY_VIOLATION
+        ],
+        weights: {
+          [AuditEventType.UNAUTHORIZED_ACCESS]: 30,
+          [AuditEventType.DATA_EXPORTED]: 25,
+          [AuditEventType.LOGIN]: 20,
+          [AuditEventType.SECURITY_VIOLATION]: 25
+        }
+      },
+      [ComplianceFramework.PCI]: {
+        required: [
+          AuditEventType.LOGIN,
+          AuditEventType.PAYMENT_PROCESSED,
+          AuditEventType.PAYMENT_FAILED,
+          AuditEventType.SUSPICIOUS_ACTIVITY,
+          AuditEventType.UNAUTHORIZED_ACCESS
+        ],
+        critical: [
+          AuditEventType.PAYMENT_PROCESSED,
+          AuditEventType.UNAUTHORIZED_ACCESS,
+          AuditEventType.SECURITY_VIOLATION
+        ],
+        weights: {
+          [AuditEventType.PAYMENT_PROCESSED]: 35,
+          [AuditEventType.UNAUTHORIZED_ACCESS]: 30,
+          [AuditEventType.SECURITY_VIOLATION]: 25,
+          [AuditEventType.LOGIN]: 10
+        }
+      },
+      [ComplianceFramework.SOX]: {
+        required: [
+          AuditEventType.TRANSACTION_CREATED,
+          AuditEventType.TRANSACTION_UPDATED,
+          AuditEventType.INVOICE_CREATED,
+          AuditEventType.USER_UPDATED,
+          AuditEventType.REPORT_GENERATED
+        ],
+        critical: [
+          AuditEventType.TRANSACTION_CREATED,
+          AuditEventType.INVOICE_CREATED,
+          AuditEventType.REPORT_GENERATED
+        ],
+        weights: {
+          [AuditEventType.TRANSACTION_CREATED]: 30,
+          [AuditEventType.INVOICE_CREATED]: 25,
+          [AuditEventType.REPORT_GENERATED]: 25,
+          [AuditEventType.TRANSACTION_UPDATED]: 20
+        }
+      }
+    };
+
+    const requirements = frameworkRequirements[framework];
+    
+    // Check for required event types (40% of score)
+    const requiredPresent = requirements.required.filter(et => eventTypes.has(et)).length;
+    const requiredScore = (requiredPresent / requirements.required.length) * 40;
+    score += requiredScore;
+
+    // Check for critical event types (30% of score)
+    const criticalPresent = requirements.critical.filter(et => eventTypes.has(et)).length;
+    const criticalScore = (criticalPresent / requirements.critical.length) * 30;
+    score += criticalScore;
+
+    // Calculate weighted event coverage (20% of score)
+    let weightedScore = 0;
+    let totalWeight = 0;
+    for (const [eventType, weight] of Object.entries(requirements.weights)) {
+      totalWeight += weight || 0;
+      if (eventTypes.has(eventType as AuditEventType)) {
+        weightedScore += weight || 0;
+      }
+    }
+    const weightedCoverage = totalWeight > 0 ? (weightedScore / totalWeight) * 20 : 0;
+    score += weightedCoverage;
+
+    // Risk level handling (10% of score)
+    const highRiskEvents = events.filter(e => e.riskLevel === RiskLevel.HIGH || e.riskLevel === RiskLevel.CRITICAL);
+    const hasHighRiskEvents = highRiskEvents.length > 0;
+    const hasSecurityEvents = events.some(e => 
+      e.eventType === AuditEventType.SUSPICIOUS_ACTIVITY || 
+      e.eventType === AuditEventType.SECURITY_VIOLATION ||
+      e.eventType === AuditEventType.UNAUTHORIZED_ACCESS
+    );
+    const riskScore = (hasHighRiskEvents && hasSecurityEvents) ? 10 : hasSecurityEvents ? 5 : 0;
+    score += riskScore;
+
+    // Normalize to 0-100 and round
+    return Math.min(Math.round(score), maxScore);
   }
 
   private identifyComplianceGaps(
     events: AuditEvent[],
     framework: ComplianceFramework
   ): string[] {
-    // Identify missing compliance requirements
-    return []; // Implementation needed
+    const gaps: string[] = [];
+    const eventTypes = new Set(events.map(e => e.eventType));
+
+    // Define required event types per framework
+    const frameworkRequirements: Record<ComplianceFramework, {
+      required: AuditEventType[];
+      critical: AuditEventType[];
+      recommended: AuditEventType[];
+    }> = {
+      [ComplianceFramework.SOC2]: {
+        required: [
+          AuditEventType.LOGIN,
+          AuditEventType.LOGOUT,
+          AuditEventType.PAYMENT_PROCESSED,
+          AuditEventType.DATA_EXPORTED
+        ],
+        critical: [
+          AuditEventType.LOGIN,
+          AuditEventType.SUSPICIOUS_ACTIVITY,
+          AuditEventType.SECURITY_VIOLATION
+        ],
+        recommended: [
+          AuditEventType.MFA_ENABLED,
+          AuditEventType.BACKUP_COMPLETED,
+          AuditEventType.SYSTEM_UPDATE
+        ]
+      },
+      [ComplianceFramework.GDPR]: {
+        required: [
+          AuditEventType.LOGIN,
+          AuditEventType.DATA_EXPORTED,
+          AuditEventType.USER_DELETED,
+          AuditEventType.PERMISSION_REVOKED
+        ],
+        critical: [
+          AuditEventType.DATA_EXPORTED,
+          AuditEventType.USER_DELETED
+        ],
+        recommended: [
+          AuditEventType.USER_UPDATED,
+          AuditEventType.API_ACCESS
+        ]
+      },
+      [ComplianceFramework.HIPAA]: {
+        required: [
+          AuditEventType.LOGIN,
+          AuditEventType.LOGOUT,
+          AuditEventType.DATA_EXPORTED,
+          AuditEventType.UNAUTHORIZED_ACCESS
+        ],
+        critical: [
+          AuditEventType.UNAUTHORIZED_ACCESS,
+          AuditEventType.SECURITY_VIOLATION
+        ],
+        recommended: [
+          AuditEventType.MFA_ENABLED,
+          AuditEventType.BACKUP_COMPLETED
+        ]
+      },
+      [ComplianceFramework.PCI]: {
+        required: [
+          AuditEventType.LOGIN,
+          AuditEventType.PAYMENT_PROCESSED,
+          AuditEventType.UNAUTHORIZED_ACCESS,
+          AuditEventType.SECURITY_VIOLATION
+        ],
+        critical: [
+          AuditEventType.PAYMENT_PROCESSED,
+          AuditEventType.UNAUTHORIZED_ACCESS
+        ],
+        recommended: [
+          AuditEventType.PAYMENT_FAILED,
+          AuditEventType.MFA_ENABLED
+        ]
+      },
+      [ComplianceFramework.SOX]: {
+        required: [
+          AuditEventType.TRANSACTION_CREATED,
+          AuditEventType.INVOICE_CREATED,
+          AuditEventType.REPORT_GENERATED,
+          AuditEventType.USER_UPDATED
+        ],
+        critical: [
+          AuditEventType.TRANSACTION_CREATED,
+          AuditEventType.REPORT_GENERATED
+        ],
+        recommended: [
+          AuditEventType.TRANSACTION_UPDATED,
+          AuditEventType.BACKUP_COMPLETED
+        ]
+      }
+    };
+
+    const requirements = frameworkRequirements[framework];
+
+    // Check for missing required events
+    const missingRequired = requirements.required.filter(et => !eventTypes.has(et));
+    missingRequired.forEach(eventType => {
+      gaps.push(`Missing required event logging: ${eventType}`);
+    });
+
+    // Check for missing critical events
+    const missingCritical = requirements.critical.filter(et => !eventTypes.has(et));
+    missingCritical.forEach(eventType => {
+      gaps.push(`Missing critical event logging: ${eventType}`);
+    });
+
+    // Check for risk level coverage
+    const hasHighRiskEvents = events.some(e => 
+      e.riskLevel === RiskLevel.HIGH || e.riskLevel === RiskLevel.CRITICAL
+    );
+    if (!hasHighRiskEvents && events.length > 10) {
+      gaps.push('No high or critical risk events detected - may indicate insufficient monitoring');
+    }
+
+    // Check for security event coverage
+    const hasSecurityEvents = events.some(e => 
+      e.eventType === AuditEventType.SUSPICIOUS_ACTIVITY || 
+      e.eventType === AuditEventType.SECURITY_VIOLATION ||
+      e.eventType === AuditEventType.UNAUTHORIZED_ACCESS
+    );
+    if (!hasSecurityEvents && events.length > 50) {
+      gaps.push('No security violation events logged - security monitoring may be incomplete');
+    }
+
+    // Check for user authentication coverage
+    const hasAuthEvents = events.some(e => 
+      e.eventType === AuditEventType.LOGIN || 
+      e.eventType === AuditEventType.LOGOUT ||
+      e.eventType === AuditEventType.LOGIN_FAILED
+    );
+    if (!hasAuthEvents) {
+      gaps.push('No authentication events logged - access control audit trail incomplete');
+    }
+
+    // Check for compliance flags
+    const eventsWithFrameworkFlag = events.filter(e => 
+      e.complianceFlags && e.complianceFlags.includes(framework)
+    );
+    if (eventsWithFrameworkFlag.length < events.length * 0.8) {
+      gaps.push(`Less than 80% of events are flagged for ${framework} compliance`);
+    }
+
+    // Check for recommended events
+    const missingRecommended = requirements.recommended.filter(et => !eventTypes.has(et));
+    if (missingRecommended.length > 0 && events.length > 100) {
+      gaps.push(`Missing recommended event types: ${missingRecommended.join(', ')}`);
+    }
+
+    return gaps;
   }
 
   private generateComplianceRecommendations(

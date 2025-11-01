@@ -1,54 +1,35 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import {
-	ArrowRight,
-	ArrowUp,
 	BarChart3,
 	BookOpen,
-	CheckCircle,
-	ChevronDown,
-	Clock,
 	Code,
-	Database,
-	Download,
 	FileText,
-	Filter,
 	Globe,
-	Headphones,
 	HelpCircle,
-	Image,
-	Key,
 	Play,
-	Puzzle,
 	Search,
 	Shield,
 	Sparkles,
-	Star,
-	Tag,
 	Target,
-	TrendingUp,
-	User,
-	Users,
 	Video,
-	Workflow,
 	Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { GuideCard, type Guide } from "@/components/guides/guide-card";
+import { GuideCardSkeleton } from "@/components/guides/guide-card-skeleton";
+import { GuideFilters, type SortOption } from "@/components/guides/guide-filters";
+import { PublicHero } from "@/components/layout/public-hero";
+import { PublicCTA } from "@/components/layout/public-form";
 
 export default function GuidesPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
+	const [sortBy, setSortBy] = useState<SortOption>("popular");
+	const [isLoading] = useState(false); // For future loading states
 
 	const containerVariants = {
 		hidden: { opacity: 0 },
@@ -234,119 +215,115 @@ export default function GuidesPage() {
 		},
 	];
 
-	const filteredGuides = guides.filter((guide) => {
-		const matchesSearch =
-			guide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			guide.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			guide.tags.some((tag) =>
-				tag.toLowerCase().includes(searchTerm.toLowerCase()),
-			);
-		const matchesCategory =
-			selectedCategory === "all" || guide.category === selectedCategory;
-		return matchesSearch && matchesCategory;
-	});
+	// Memoized filtered and sorted guides
+	const filteredAndSortedGuides = useMemo(() => {
+		let filtered = guides.filter((guide) => {
+			const matchesSearch =
+				guide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				guide.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				guide.tags.some((tag) =>
+					tag.toLowerCase().includes(searchTerm.toLowerCase()),
+				);
+			const matchesCategory =
+				selectedCategory === "all" || guide.category === selectedCategory;
+			return matchesSearch && matchesCategory;
+		});
 
-	const getDifficultyColor = (difficulty: string) => {
-		switch (difficulty) {
-			case "beginner":
-				return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
-			case "intermediate":
-				return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
-			case "advanced":
-				return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
-			default:
-				return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
-		}
-	};
+		// Sort guides
+		filtered = [...filtered].sort((a, b) => {
+			switch (sortBy) {
+				case "popular":
+					return b.views - a.views;
+				case "rating":
+					return b.rating - a.rating;
+				case "difficulty":
+					const difficultyOrder = { beginner: 0, intermediate: 1, advanced: 2 };
+					return difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty];
+				case "recent":
+					// Assuming guides with higher IDs are more recent
+					return b.id - a.id;
+				default:
+					return 0;
+			}
+		});
 
-	const getTypeIcon = (type: string) => {
-		switch (type) {
-			case "tutorial":
-				return <Play className="w-4 h-4" />;
-			case "guide":
-				return <BookOpen className="w-4 h-4" />;
-			case "documentation":
-				return <FileText className="w-4 h-4" />;
-			default:
-				return <BookOpen className="w-4 h-4" />;
-		}
-	};
+		return filtered;
+	}, [guides, searchTerm, selectedCategory, sortBy]);
+
+	const handleCategoryChange = useCallback((category: string) => {
+		setSelectedCategory(category);
+	}, []);
+
+	const handleSortChange = useCallback((sort: SortOption) => {
+		setSortBy(sort);
+	}, []);
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+		<div className="min-h-screen bg-background">
 			{/* Hero Section */}
-			<motion.section
-				className="py-20 md:py-32"
-				initial="hidden"
-				animate="visible"
-				variants={containerVariants}
-			>
-				<div className="max-w-6xl mx-auto px-6">
-					<motion.div className="text-center mb-16" variants={itemVariants}>
-						<motion.span
-							className="text-blue-600 font-medium mb-4 flex items-center justify-center gap-2"
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6, delay: 0.2 }}
-						>
-							<Sparkles className="w-4 h-4" />
-							LEARNING CENTER
-						</motion.span>
-						<h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-							Knowledge <span className="text-blue-600">Base</span>
-						</h1>
-						<motion.div
-							className="w-24 h-1 bg-blue-600 mx-auto"
-							initial={{ width: 0 }}
-							animate={{ width: 96 }}
-							transition={{ duration: 1, delay: 0.5 }}
-						/>
-						<p className="text-xl text-gray-600 dark:text-gray-300 mt-8 max-w-3xl mx-auto">
-							Master Financbase with our comprehensive guides, tutorials, and
-							documentation. From beginner basics to advanced features, we've
-							got you covered.
-						</p>
-					</motion.div>
+			<PublicHero
+				title="Knowledge Base"
+				subtitle={
+					<span className="flex items-center gap-2">
+						<Sparkles className="w-4 h-4" />
+						LEARNING CENTER
+					</span>
+				}
+				description="Master Financbase with our comprehensive guides, tutorials, and documentation. From beginner basics to advanced features, we've got you covered."
+				size="md"
+			/>
 
-					{/* Search and Filter */}
+			{/* Search and Filter Section */}
+			<section className="py-12 bg-background border-b">
+				<div className="max-w-6xl mx-auto px-6">
 					<motion.div
-						className="flex flex-col md:flex-row gap-4 mb-16"
-						variants={itemVariants}
+						className="flex flex-col gap-6"
+						initial="hidden"
+						animate="visible"
+						variants={containerVariants}
 					>
-						<div className="relative flex-1">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+						{/* Search Input */}
+						<motion.div className="relative" variants={itemVariants}>
+							<Search
+								className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground"
+								aria-hidden="true"
+							/>
 							<Input
 								placeholder="Search guides, tutorials, and documentation..."
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
-								className="pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+								className="pl-10 pr-4 py-3 bg-background"
+								aria-label="Search guides"
 							/>
-						</div>
-						<div className="flex gap-2">
-							{categories.slice(0, 4).map((category) => (
-								<Button
-									key={category.id}
-									variant={
-										selectedCategory === category.id ? "default" : "outline"
-									}
-									onClick={() => setSelectedCategory(category.id)}
-									className="flex items-center gap-2"
+							{searchTerm && (
+								<button
+									onClick={() => setSearchTerm("")}
+									className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+									aria-label="Clear search"
 								>
-									{category.icon}
-									{category.name}
-									<Badge variant="secondary" className="ml-1">
-										{category.count}
-									</Badge>
-								</Button>
-							))}
-						</div>
+									×
+								</button>
+							)}
+						</motion.div>
+
+						{/* Filters */}
+						<motion.div variants={itemVariants}>
+							<GuideFilters
+								categories={categories}
+								selectedCategory={selectedCategory}
+								onCategoryChange={handleCategoryChange}
+								sortBy={sortBy}
+								onSortChange={handleSortChange}
+								resultsCount={filteredAndSortedGuides.length}
+							/>
+						</motion.div>
 					</motion.div>
 				</div>
-			</motion.section>
+			</section>
 
 			{/* Featured Guides */}
 			<motion.section
-				className="py-20"
+				className="py-20 bg-background"
 				initial="hidden"
 				whileInView="visible"
 				viewport={{ once: true }}
@@ -363,66 +340,38 @@ export default function GuidesPage() {
 					</motion.div>
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-						{featuredGuides.map((guide, index) => (
-							<motion.div
-								key={index}
-								className="group"
-								variants={itemVariants}
-								whileHover={{ y: -5, transition: { duration: 0.2 } }}
-							>
-								<Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300">
-									<div className="relative">
-										<img
-											src={guide.image}
-											alt={guide.title}
-											className="w-full h-48 object-cover"
+						{isLoading
+							? Array.from({ length: 2 }).map((_, i) => (
+									<GuideCardSkeleton key={i} variant="featured" />
+								))
+							: featuredGuides.map((guide, index) => {
+									const featuredGuide: Guide = {
+										...guide,
+										id: index + 100,
+										category: "getting-started",
+										type: "tutorial",
+										difficulty: guide.difficulty as "beginner" | "intermediate" | "advanced",
+										author: "Financbase Team",
+										rating: 4.9,
+										tags: ["featured", "popular"],
+										icon: <Video className="w-5 h-5" />,
+									};
+									return (
+										<GuideCard
+											key={index}
+											guide={featuredGuide}
+											index={index}
+											variant="featured"
 										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-										<div className="absolute bottom-4 left-4 text-white">
-											<Badge className="bg-blue-600 text-white mb-2">
-												Featured
-											</Badge>
-											<h3 className="text-xl font-bold mb-2">{guide.title}</h3>
-											<p className="text-white/90 text-sm">
-												{guide.description}
-											</p>
-										</div>
-									</div>
-									<CardContent className="p-6">
-										<div className="flex items-center justify-between mb-4">
-											<div className="flex items-center gap-4">
-												<div className="flex items-center gap-1">
-													<Clock className="w-4 h-4 text-gray-400" />
-													<span className="text-sm text-gray-600 dark:text-gray-400">
-														{guide.duration}
-													</span>
-												</div>
-												<Badge className={getDifficultyColor(guide.difficulty)}>
-													{guide.difficulty}
-												</Badge>
-											</div>
-											<div className="flex items-center gap-1">
-												<Star className="w-4 h-4 text-yellow-500 fill-current" />
-												<span className="text-sm text-gray-600 dark:text-gray-400">
-													{guide.views} views
-												</span>
-											</div>
-										</div>
-										<Button className="w-full group-hover:bg-blue-700 transition-colors">
-											Start Learning
-											<ArrowRight className="w-4 h-4 ml-2" />
-										</Button>
-									</CardContent>
-								</Card>
-							</motion.div>
-						))}
+									);
+								})}
 					</div>
 				</div>
 			</motion.section>
 
 			{/* All Guides */}
 			<motion.section
-				className="py-20 bg-white dark:bg-gray-900"
+				className="py-20 bg-muted/30"
 				initial="hidden"
 				whileInView="visible"
 				viewport={{ once: true }}
@@ -438,136 +387,70 @@ export default function GuidesPage() {
 						</p>
 					</motion.div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{filteredGuides.map((guide, index) => (
-							<motion.div
-								key={guide.id}
-								className="group"
-								variants={itemVariants}
-								whileHover={{ y: -5, transition: { duration: 0.2 } }}
-							>
-								<Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300">
-									<div className="relative">
-										<img
-											src={guide.image}
-											alt={guide.title}
-											className="w-full h-40 object-cover"
-										/>
-										<div className="absolute top-4 left-4">
-											<div className="flex items-center gap-2">
-												<div className="bg-white/90 backdrop-blur-sm p-2 rounded-lg">
-													{guide.icon}
-												</div>
-												<Badge className="bg-white/90 text-gray-900">
-													{guide.type}
-												</Badge>
-											</div>
-										</div>
-									</div>
-									<CardContent className="p-6">
-										<div className="flex items-center justify-between mb-3">
-											<Badge className={getDifficultyColor(guide.difficulty)}>
-												{guide.difficulty}
-											</Badge>
-											<div className="flex items-center gap-1">
-												<Star className="w-4 h-4 text-yellow-500 fill-current" />
-												<span className="text-sm text-gray-600 dark:text-gray-400">
-													{guide.rating}
-												</span>
-											</div>
-										</div>
-										<h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 transition-colors">
-											{guide.title}
-										</h3>
-										<p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-											{guide.description}
-										</p>
-										<div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-											<div className="flex items-center gap-1">
-												<Clock className="w-4 h-4" />
-												<span>{guide.duration}</span>
-											</div>
-											<div className="flex items-center gap-1">
-												<User className="w-4 h-4" />
-												<span>{guide.author}</span>
-											</div>
-										</div>
-										<div className="flex flex-wrap gap-1 mb-4">
-											{guide.tags.slice(0, 2).map((tag, tagIndex) => (
-												<Badge
-													key={tagIndex}
-													variant="outline"
-													className="text-xs"
-												>
-													{tag}
-												</Badge>
-											))}
-										</div>
-										<Button
-											variant="outline"
-											className="w-full group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors"
-										>
-											{getTypeIcon(guide.type)}
-											<span className="ml-2">
-												{guide.type === "tutorial" ? "Watch" : "Read"}
-											</span>
-										</Button>
-									</CardContent>
-								</Card>
-							</motion.div>
-						))}
-					</div>
-
-					{filteredGuides.length === 0 && (
-						<motion.div className="text-center py-12" variants={itemVariants}>
-							<BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+					{isLoading ? (
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+							{Array.from({ length: 6 }).map((_, i) => (
+								<GuideCardSkeleton key={i} />
+							))}
+						</div>
+					) : filteredAndSortedGuides.length > 0 ? (
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+							{filteredAndSortedGuides.map((guide, index) => (
+								<GuideCard
+									key={guide.id}
+									guide={guide}
+									index={index}
+								/>
+							))}
+						</div>
+					) : (
+						<motion.div
+							className="text-center py-12"
+							variants={itemVariants}
+							role="status"
+							aria-live="polite"
+						>
+							<BookOpen
+								className="w-16 h-16 text-gray-400 mx-auto mb-4"
+								aria-hidden="true"
+							/>
 							<h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
 								No guides found
 							</h3>
-							<p className="text-gray-600 dark:text-gray-400">
-								Try adjusting your search terms or filters
+							<p className="text-gray-600 dark:text-gray-400 mb-4">
+								{searchTerm
+									? `No results match "${searchTerm}". Try adjusting your search terms.`
+									: selectedCategory !== "all"
+										? `No guides found in this category. Try selecting a different category.`
+										: "Try adjusting your search terms or filters"}
 							</p>
+							{searchTerm && (
+								<Button
+									variant="outline"
+									onClick={() => setSearchTerm("")}
+									className="mt-4"
+								>
+									Clear Search
+								</Button>
+							)}
 						</motion.div>
 					)}
 				</div>
 			</motion.section>
 
 			{/* CTA Section */}
-			<motion.section
-				className="py-20 bg-blue-600"
-				initial="hidden"
-				whileInView="visible"
-				viewport={{ once: true }}
-				variants={containerVariants}
-			>
-				<div className="max-w-4xl mx-auto px-6 text-center">
-					<motion.div variants={itemVariants}>
-						<h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-							Can't find what you're looking for?
-						</h2>
-						<p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-							Our support team is here to help. Get personalized assistance with
-							your specific questions.
-						</p>
-						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<motion.button
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-								className="bg-white text-blue-600 hover:bg-gray-100 px-6 py-3 rounded-lg font-medium transition-colors"
-							>
-								Contact Support
-							</motion.button>
-							<motion.button
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-								className="border border-white text-white hover:bg-white hover:text-blue-600 px-6 py-3 rounded-lg font-medium transition-colors"
-							>
-								Request a Guide
-							</motion.button>
-						</div>
-					</motion.div>
-				</div>
-			</motion.section>
+			<PublicCTA
+				title="Can't find what you're looking for?"
+				description="Our support team is here to help. Get personalized assistance with your specific questions."
+				primaryAction={{
+					text: "Contact Support",
+					href: "/support",
+				}}
+				secondaryAction={{
+					text: "Request a Guide",
+					href: "/support#contact",
+				}}
+			/>
 		</div>
 	);
 }

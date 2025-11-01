@@ -112,7 +112,7 @@
   --shadow-blur: 9px;
   --shadow-spread: 1.5px;
   --shadow-opacity: 0.11;
-  --shadow-color: #000000;
+  --shadow-color: oklch(0 0 0); /* Use foreground color in dark mode - matches theme */
   --shadow-2xs: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.06);
   --shadow-xs: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.06);
   --shadow-sm: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.11), 0px 1px 2px 0.5px hsl(0 0% 0% / 0.11);
