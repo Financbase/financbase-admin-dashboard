@@ -93,5 +93,7 @@ export const viewport: Viewport = {
 	initialScale: 1,
 	maximumScale: 5,
 	userScalable: true,
-	themeColor: '#667eea',
+	// themeColor should match --primary from globals.css
+	// Current --primary OKLCH: 0.3880 0.1423 271.1300 converts to approximately #667eea
+	themeColor: '#667eea', // Matches --primary theme color
 }

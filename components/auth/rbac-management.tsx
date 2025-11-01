@@ -22,12 +22,26 @@ interface UserWithPermissions extends FinancbaseUserMetadata {
 	lastActive?: string;
 }
 
-// Client-side placeholder for updating user permissions
-// In production, this should call an API endpoint
-async function updateUserPermissions(userId: string, permissions: string[]): Promise<boolean> {
+// API call to update user permissions
+async function updateUserPermissions(userId: string, permissions: string[], role?: string): Promise<boolean> {
 	try {
-		// TODO: Implement API call to update user permissions
-		console.log('Update permissions for user:', userId, permissions);
+		const response = await fetch(`/api/admin/users/${userId}/permissions`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				permissions,
+				...(role && { role }),
+			}),
+		});
+
+		if (!response.ok) {
+			const error = await response.json();
+			console.error('Failed to update permissions:', error);
+			return false;
+		}
+
 		return true;
 	} catch (error) {
 		console.error('Error updating permissions:', error);
@@ -117,7 +131,7 @@ export function RBACManagementDashboard() {
 			// Get default permissions for the new role
 			const defaultPermissions = DEFAULT_ROLES[newRole] || [];
 
-			const success = await updateUserPermissions(userId, defaultPermissions);
+			const success = await updateUserPermissions(userId, defaultPermissions, newRole);
 
 			if (success) {
 				// Update local state

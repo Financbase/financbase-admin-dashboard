@@ -16,7 +16,7 @@ export default function CustomerAnalytics() {
 
 	if (loading) {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+			<div className="bg-white dark:bg-card rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-border w-full min-w-0">
 				<div className="animate-pulse">
 					<div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-6" />
 					<div className="h-48 bg-gray-200 dark:bg-gray-700 rounded" />
@@ -28,7 +28,7 @@ export default function CustomerAnalytics() {
 	if (error) {
 		return (
 			<DashboardErrorBoundary>
-				<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+				<div className="bg-white dark:bg-card rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-border w-full min-w-0">
 					<EmptyState
 						title="Failed to load analytics"
 						description="Unable to fetch customer analytics. Please try refreshing the page."
@@ -40,7 +40,7 @@ export default function CustomerAnalytics() {
 
 	if (!analytics || analytics.summary.totalCustomers === "0") {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+			<div className="bg-white dark:bg-card rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-border w-full min-w-0">
 				<EmptyState {...EmptyStates.customers} />
 			</div>
 		);
@@ -67,7 +67,7 @@ export default function CustomerAnalytics() {
 
 	return (
 		<DashboardErrorBoundary>
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-[#1F1F23] w-full min-w-0">
+			<div className="bg-white dark:bg-card rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-border w-full min-w-0">
 				<div className="flex items-center justify-between mb-4 sm:mb-6">
 					<h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
 						Customer Analytics

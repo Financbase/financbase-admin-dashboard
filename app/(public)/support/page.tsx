@@ -63,7 +63,9 @@ export default function SupportPage() {
 
 		if (!formData.name.trim()) errors.name = "Name is required";
 		if (!formData.email.trim()) errors.email = "Email is required";
-		if (!formData.email.includes("@")) errors.email = "Valid email is required";
+		else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+			errors.email = "Please enter a valid email address";
+		}
 		if (!formData.subject.trim()) errors.subject = "Subject is required";
 		if (!formData.message.trim()) errors.message = "Message is required";
 		if (formData.message.length < 10) errors.message = "Message must be at least 10 characters";
@@ -83,21 +85,50 @@ export default function SupportPage() {
 		if (!validateForm()) return;
 
 		setIsSubmitting(true);
+		setSubmitMessage("");
 
 		try {
-			// Simulate API call
-			await new Promise(resolve => setTimeout(resolve, 2000));
-
-			setSubmitMessage("✅ Thank you! We've received your message and will respond within 24 hours.");
-			setFormData({
-				name: "",
-				email: "",
-				subject: "",
-				priority: "medium",
-				category: "general",
-				message: "",
+			const response = await fetch('/api/support/public', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					...formData,
+					website: '', // Honeypot field
+				}),
 			});
-		} catch {
+
+			const result = await response.json();
+
+			if (response.ok) {
+				setSubmitMessage(
+					`✅ Thank you! We've received your support request (Ticket: ${result.ticketNumber}) and will respond within 24 hours.`
+				);
+				setFormData({
+					name: "",
+					email: "",
+					subject: "",
+					priority: "medium",
+					category: "general",
+					message: "",
+				});
+			} else {
+				setSubmitMessage(`❌ ${result.error || 'Something went wrong. Please try again.'}`);
+				
+				// Show validation errors if provided
+				if (result.details && Array.isArray(result.details)) {
+					const newErrors: Partial<ContactFormData> = {};
+					result.details.forEach((detail: { field: string; message: string }) => {
+						if (detail.field in formData) {
+							newErrors[detail.field as keyof ContactFormData] = detail.message;
+						}
+					});
+					setFormErrors(newErrors);
+				}
+			}
+		} catch (error) {
+			console.error('Support form error:', error);
 			setSubmitMessage("❌ Something went wrong. Please try again or contact us directly.");
 		} finally {
 			setIsSubmitting(false);
@@ -328,6 +359,15 @@ export default function SupportPage() {
 								)}
 
 								<form onSubmit={handleSubmit} className="space-y-6">
+									{/* Honeypot field - hidden from users, visible to bots */}
+									<input
+										type="text"
+										name="website"
+										tabIndex={-1}
+										autoComplete="off"
+										style={{ position: 'absolute', left: '-9999px' }}
+										aria-hidden="true"
+									/>
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 										<div>
 											<label htmlFor={nameId} className="block text-sm font-medium mb-2">

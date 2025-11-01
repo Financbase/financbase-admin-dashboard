@@ -91,10 +91,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
 	return (
 		<div className="relative w-full max-w-sm mx-auto">
 			<div
-				className="relative flex flex-col items-center p-6 rounded-2xl border transition-all duration-500 ease-out backdrop-blur-xl bg-card/40 border-white/10"
-				style={{
-					boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-				}}
+				className="relative flex flex-col items-center p-6 rounded-2xl border transition-all duration-500 ease-out backdrop-blur-xl bg-card/40 border-white/10 shadow-lg"
 			>
 				{/* Avatar Section */}
 				<div className="w-24 h-24 mb-4 rounded-full p-1 border-2 border-white/20 bg-gradient-to-br from-primary/20 to-secondary/20">
@@ -240,8 +237,7 @@ const ActionButton = ({
 			e.preventDefault();
 			action?.onClick?.();
 		}}
-		className="flex items-center gap-2 px-6 py-3 mt-6 rounded-full font-semibold text-base backdrop-blur-sm transition-all duration-300 ease-out hover:scale-[1.03] active:scale-95 group bg-primary text-primary-foreground"
-		style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}
+		className="flex items-center gap-2 px-6 py-3 mt-6 rounded-full font-semibold text-base backdrop-blur-sm transition-all duration-300 ease-out hover:scale-[1.03] active:scale-95 group bg-primary text-primary-foreground shadow-md"
 	>
 		<span>{action?.text}</span>
 		<ArrowUpRight
@@ -261,8 +257,7 @@ const Tooltip = ({
 }) => (
 	<div
 		role="tooltip"
-		className={`absolute -top-12 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 rounded-lg backdrop-blur-md border text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out pointer-events-none bg-popover text-popover-foreground border-border ${hoveredItem === item.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
-		style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}
+		className={`absolute -top-12 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 rounded-lg backdrop-blur-md border text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out pointer-events-none bg-popover text-popover-foreground border-border shadow-md ${hoveredItem === item.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
 	>
 		{item.label}
 		<div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-popover border-b border-r border-border" />

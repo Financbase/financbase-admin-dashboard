@@ -12,6 +12,7 @@ import {
 	HiOutlineShieldExclamation,
 } from "react-icons/hi";
 import { LuServerCog } from "react-icons/lu";
+import { getSemanticColor, rgbToHex } from "@/lib/utils/theme-colors";
 
 // Props for the component
 type ComponentProps = {
@@ -52,6 +53,20 @@ export const Component = ({
 	// Determine if throttling is active based on recent events
 	const isThrottled = data ? data.summary.throttledRequests > 0 : false;
 	const isError = !!error;
+	
+	// Get theme colors for animations
+	const destructiveColor = getSemanticColor('destructive');
+	const successColor = getSemanticColor('success');
+	const destructiveWithOpacity = getSemanticColor('destructive', 0.5);
+	const successWithOpacity = getSemanticColor('success', 0.5);
+	
+	// Convert RGB to hex for framer-motion
+	const themeColors = {
+		destructive: rgbToHex(destructiveColor),
+		success: rgbToHex(successColor),
+		destructiveWithOpacity,
+		successWithOpacity,
+	};
 
 	// Show loading state
 	if (loading) {
@@ -107,8 +122,8 @@ export const Component = ({
 						className="z-10 flex size-20 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900 shadow-lg"
 						animate={{
 							borderColor: isThrottled
-								? "rgba(239, 68, 68, 0.5)"
-								: "rgba(52, 211, 153, 0.5)",
+								? themeColors.destructiveWithOpacity
+								: themeColors.successWithOpacity,
 							transition: { duration: 0.5, ease: "easeInOut" },
 						}}
 					>
@@ -144,7 +159,7 @@ export const Component = ({
 			<div className="absolute bottom-0 w-full px-4 pb-4">
 				<div className="flex items-center gap-2">
 					<motion.div
-						animate={{ color: isThrottled ? "#ef4444" : "#10b981" }}
+						animate={{ color: isThrottled ? themeColors.destructive : themeColors.success }}
 						transition={{ duration: 0.5 }}
 					>
 						{isThrottled ? (
@@ -155,7 +170,7 @@ export const Component = ({
 					</motion.div>
 					<motion.p
 						className="text-xs font-medium"
-						animate={{ color: isThrottled ? "#ef4444" : "#10b981" }}
+						animate={{ color: isThrottled ? themeColors.destructive : themeColors.success }}
 						transition={{ duration: 0.5 }}
 					>
 						{isThrottled ? "Throttling Active" : "All Systems Normal"}

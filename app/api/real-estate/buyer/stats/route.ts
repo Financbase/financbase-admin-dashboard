@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // Simple database connection using neon directly
@@ -14,13 +15,10 @@ async function getDbConnection() {
 export async function GET() {
 	const requestId = generateRequestId();
 	try {
-		// Temporarily disable auth for testing
-		// const { userId } = await auth();
-		// if (!userId) {
-		// 	return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		// }
-		
-		const userId = 'test-user'; // Mock user ID for testing
+		const { userId } = await auth();
+		if (!userId) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
 
 		// Get database connection
 		const sql = await getDbConnection();

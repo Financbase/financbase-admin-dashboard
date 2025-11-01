@@ -142,23 +142,39 @@ const chartData = [
   { month: 'Oct', desktop: 400, mobile: 800 },
 ]
 
-const chartConfig = {
-  desktop: {
-    label: 'Ruixen Dashboard (Desktop)',
-    color: '#2563eb', // Primary Blue
-  },
-  mobile: {
-    label: 'Ruixen App (Mobile)',
-    color: '#60a5fa', // Lighter Blue
-  },
-} satisfies ChartConfig
-
-
 function MonitoringChart() {
   const desktopId = React.useId()
   const mobileId = React.useId()
   const desktopGradientId = `fillDesktop-${desktopId.replace(/:/g, '')}`
   const mobileGradientId = `fillMobile-${mobileId.replace(/:/g, '')}`
+  
+  // Import theme colors dynamically for client-side
+  const [chartConfig, setChartConfig] = React.useState<ChartConfig>({
+    desktop: {
+      label: 'Ruixen Dashboard (Desktop)',
+      color: '#2563eb', // Fallback
+    },
+    mobile: {
+      label: 'Ruixen App (Mobile)',
+      color: '#60a5fa', // Fallback
+    },
+  });
+  
+  React.useEffect(() => {
+    // Update chart config with theme colors
+    import('@/lib/utils/theme-colors').then(({ getChartColor }) => {
+      setChartConfig({
+        desktop: {
+          label: 'Ruixen Dashboard (Desktop)',
+          color: getChartColor(1), // chart-1 (primary blue) for desktop
+        },
+        mobile: {
+          label: 'Ruixen App (Mobile)',
+          color: getChartColor(1), // chart-1 with same color (or use chart-2 for variation)
+        },
+      });
+    });
+  }, []);
   
   return (
     <ChartContainer className="h-60 aspect-auto" config={chartConfig}>

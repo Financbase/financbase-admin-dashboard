@@ -2,7 +2,25 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { drizzle as drizzleNode } from 'drizzle-orm/neon-serverless';
+import { sql } from 'drizzle-orm';
 import * as schema from './schemas/index';
+
+// Raw SQL connection for session variables and raw queries
+let rawSql: ReturnType<typeof neon> | null = null;
+
+/**
+ * Get raw Neon SQL connection for executing session variables and raw SQL
+ * This is needed for operations like set_config() that require session-level access
+ */
+export function getRawSqlConnection(): ReturnType<typeof neon> {
+	if (!rawSql) {
+		if (!process.env.DATABASE_URL) {
+			throw new Error('DATABASE_URL is required for raw SQL connection');
+		}
+		rawSql = neon(process.env.DATABASE_URL);
+	}
+	return rawSql;
+}
 
 // Environment-based driver selection
 const getDatabaseDriver = () => {

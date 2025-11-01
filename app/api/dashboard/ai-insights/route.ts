@@ -1,12 +1,14 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { headers } from 'next/headers';
+// import { headers } from 'next/headers'; // Temporarily disabled
 import { ApiErrorHandler } from '@/lib/api-error-handler';
 import { aiInsightsResponseSchema } from '@/lib/validation-schemas';
 
 export async function GET() {
   try {
+    // TEMPORARILY DISABLED FOR TESTING
+    // const headersList = await headers();
     const { userId } = await auth();
     if (!userId) {
       return ApiErrorHandler.unauthorized();

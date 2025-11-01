@@ -4,7 +4,7 @@ import {
 	marketingEvents,
 	marketingStats,
 	userFeedback,
-} from "@/lib/db/schemas/marketing.schema";
+} from "@/lib/db/schemas/marketing-analytics.schema";
 import { format, subDays } from "date-fns";
 import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { BarChart3, Clock } from "lucide-react";

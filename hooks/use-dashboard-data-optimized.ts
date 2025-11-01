@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
+import { getChartColor } from '@/lib/utils/theme-colors';
 
 export interface StatData {
 	value: string | number;
@@ -103,8 +104,17 @@ export function useDashboardStats() {
 		},
 		orders: {
 			value: apiData.overview?.invoices?.total || 0,
-			change: 0, // TODO: Calculate actual change
-			changeType: 'increase' as 'increase' | 'decrease'
+			change: (() => {
+				const thisMonth = apiData.overview?.invoices?.thisMonth || 0;
+				const lastMonth = apiData.overview?.invoices?.lastMonth || 0;
+				if (lastMonth === 0) return thisMonth > 0 ? 100 : 0;
+				return ((thisMonth - lastMonth) / lastMonth) * 100;
+			})(),
+			changeType: ((() => {
+				const thisMonth = apiData.overview?.invoices?.thisMonth || 0;
+				const lastMonth = apiData.overview?.invoices?.lastMonth || 0;
+				return thisMonth >= lastMonth ? 'increase' : 'decrease';
+			})()) as 'increase' | 'decrease'
 		},
 		customers: {
 			value: apiData.overview?.clients?.total || 0,
@@ -138,7 +148,7 @@ export function useCustomerAnalytics() {
 		totalCustomers: apiData.totalClients || 0,
 		newCustomers: apiData.newClientsThisMonth || 0,
 		retentionRate: apiData.clientRetention || 0,
-		satisfactionScore: 4.8 // TODO: Get from API
+		satisfactionScore: apiData.satisfactionScore || 0
 	} : null;
 
 	return { data, loading: isLoading, error };
@@ -218,8 +228,8 @@ export function useChartData(type: 'sales' | 'revenue' | 'expenses' = 'revenue',
 			{
 				label: type === 'revenue' ? 'Revenue' : 'Sales',
 				data: chartData.analytics.monthlyRevenue.map((item) => item.revenue),
-				borderColor: type === 'revenue' ? 'rgb(34, 197, 94)' : 'rgb(59, 130, 246)',
-				backgroundColor: type === 'revenue' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+				borderColor: type === 'revenue' ? getChartColor(2) : getChartColor(1), // chart-2 (green) for revenue, chart-1 (blue) for sales
+				backgroundColor: type === 'revenue' ? getChartColor(2, 0.1) : getChartColor(1, 0.1),
 			}
 		]
 	} : null;

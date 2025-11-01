@@ -1,0 +1,26 @@
+name: Daily Query Snapshot
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  # Allow manual triggering from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Query Snapshot
+        run: |
+          curl -X POST "${{ secrets.APP_URL }}/api/monitoring/snapshot-queries?limit=50&min_ms=20" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -f -s -o /dev/null -w "HTTP Status: %{http_code}\n"
+        
+      - name: Verify Snapshot
+        run: |
+          response=$(curl -s "${{ secrets.APP_URL }}/api/monitoring/snapshot-queries?days=1")
+          echo "Recent snapshots:"
+          echo "$response" | grep -o '"snapshot_count":[0-9]*' || echo "No snapshots found yet"
+

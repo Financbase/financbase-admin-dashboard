@@ -1,5 +1,56 @@
 import type { Appearance } from "@clerk/nextjs";
 
+/**
+ * Get Clerk theme colors from CSS variables.
+ * Since Clerk variables need hex colors, we convert theme CSS variables at runtime.
+ */
+function getClerkThemeColors() {
+  // Only compute on client-side
+  if (typeof window === 'undefined') {
+    // SSR fallback - return default colors matching theme defaults
+    return {
+      colorPrimary: '#2563eb', // --primary from globals.css light theme
+      colorBackground: '#ffffff', // --background
+      colorInputBackground: '#f9fafb', // --input
+      colorInputText: '#111827', // --foreground
+      colorText: '#374151', // --foreground muted
+      colorTextSecondary: '#6b7280', // --muted-foreground
+      colorDanger: '#dc2626', // --destructive
+      colorSuccess: '#059669', // chart-2 (green) as success
+    };
+  }
+
+  // Client-side: Import and use theme color utilities
+  try {
+    // Dynamic import to avoid SSR issues
+    const { getThemeRgb, getChartColor, rgbToHex } = require('@/lib/utils/theme-colors');
+    
+    return {
+      colorPrimary: rgbToHex(getThemeRgb('--primary')),
+      colorBackground: rgbToHex(getThemeRgb('--background')),
+      colorInputBackground: rgbToHex(getThemeRgb('--input')),
+      colorInputText: rgbToHex(getThemeRgb('--foreground')),
+      colorText: rgbToHex(getThemeRgb('--foreground')),
+      colorTextSecondary: rgbToHex(getThemeRgb('--muted-foreground')),
+      colorDanger: rgbToHex(getThemeRgb('--destructive')),
+      colorSuccess: rgbToHex(getChartColor(2)), // chart-2 (green) as success
+    };
+  } catch (error) {
+    console.warn('Failed to load theme colors for Clerk, using fallback:', error);
+    // Fallback to defaults
+    return {
+      colorPrimary: '#2563eb',
+      colorBackground: '#ffffff',
+      colorInputBackground: '#f9fafb',
+      colorInputText: '#111827',
+      colorText: '#374151',
+      colorTextSecondary: '#6b7280',
+      colorDanger: '#dc2626',
+      colorSuccess: '#059669',
+    };
+  }
+}
+
 export const clerkTheme: Appearance = {
   elements: {
     // Root container
@@ -73,16 +124,9 @@ export const clerkTheme: Appearance = {
     showOptionalFields: true,
   },
   
-  // Variables for custom styling
+  // Variables for custom styling - using theme colors from globals.css
   variables: {
-    colorPrimary: "#2563eb", // blue-600
-    colorBackground: "#ffffff",
-    colorInputBackground: "#f9fafb", // gray-50
-    colorInputText: "#111827", // gray-900
-    colorText: "#374151", // gray-700
-    colorTextSecondary: "#6b7280", // gray-500
-    colorDanger: "#dc2626", // red-600
-    colorSuccess: "#059669", // green-600
+    ...getClerkThemeColors(),
     borderRadius: "0.5rem", // rounded-lg
     fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif",
   },

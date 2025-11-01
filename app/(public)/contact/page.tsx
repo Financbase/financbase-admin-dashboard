@@ -41,7 +41,25 @@ export default function ContactPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (formDataObj: Record<string, string>) => {
+    // Extract form data and ensure honeypot is empty
+    const data = {
+      name: formDataObj.name || formData.name,
+      email: formDataObj.email || formData.email,
+      company: formDataObj.company || formData.company,
+      message: formDataObj.message || formData.message,
+      website: formDataObj.website || '', // Honeypot field should be empty
+    };
+
+    // Update form state
+    setFormData({
+      name: data.name,
+      email: data.email,
+      company: data.company,
+      message: data.message,
+    });
+
+    // Validate
     if (!validateForm()) return;
 
     setIsSubmitting(true);
@@ -53,7 +71,7 @@ export default function ContactPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
@@ -68,6 +86,17 @@ export default function ContactPage() {
         });
       } else {
         setSubmitMessage(`❌ ${result.error || 'Something went wrong. Please try again.'}`);
+        
+        // Show validation errors if provided
+        if (result.details && Array.isArray(result.details)) {
+          const newErrors: Partial<ContactFormData> = {};
+          result.details.forEach((detail: { field: string; message: string }) => {
+            if (detail.field === 'name' || detail.field === 'email' || detail.field === 'message') {
+              newErrors[detail.field] = detail.message;
+            }
+          });
+          setErrors(newErrors);
+        }
       }
     } catch (error) {
       console.error('Contact form error:', error);
@@ -144,6 +173,16 @@ export default function ContactPage() {
               )}
 
               <PublicForm onSubmit={handleSubmit} isLoading={isSubmitting}>
+                {/* Honeypot field - hidden from users, visible to bots */}
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  style={{ position: 'absolute', left: '-9999px' }}
+                  aria-hidden="true"
+                />
+                
                 <PublicFormField
                   label="Full Name"
                   name="name"

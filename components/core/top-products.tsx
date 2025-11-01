@@ -29,7 +29,7 @@ export default function TopProducts() {
 
 	if (loading) {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-6 border border-gray-200 dark:border-[#1F1F23]">
+			<div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-border">
 				<div className="animate-pulse">
 					<div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
 					<div className="space-y-4">
@@ -51,7 +51,7 @@ export default function TopProducts() {
 	if (error) {
 		return (
 			<DashboardErrorBoundary>
-				<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-6 border border-gray-200 dark:border-[#1F1F23]">
+				<div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-border">
 					<EmptyState
 						title="Failed to load products"
 						description="Unable to fetch top products. Please try refreshing the page."
@@ -63,7 +63,7 @@ export default function TopProducts() {
 
 	if (!products || products.length === 0) {
 		return (
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-6 border border-gray-200 dark:border-[#1F1F23]">
+			<div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-border">
 				<EmptyState {...EmptyStates.products} />
 			</div>
 		);
@@ -71,7 +71,7 @@ export default function TopProducts() {
 
 	return (
 		<DashboardErrorBoundary>
-			<div className="bg-white dark:bg-[#0F0F12] rounded-xl p-6 border border-gray-200 dark:border-[#1F1F23]">
+			<div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-border">
 				<div className="flex items-center justify-between mb-6">
 					<h3 className="text-lg font-semibold text-gray-900 dark:text-white">
 						Top Products

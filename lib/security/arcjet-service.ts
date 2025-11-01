@@ -30,6 +30,14 @@ const rateLimitRules = [
 		interval: 60,
 		capacity: 100,
 	}),
+
+	// Contact form endpoints (stricter limits for public forms)
+	tokenBucket({
+		mode: 'LIVE',
+		refillRate: 5, // requests per window - stricter for public forms
+		interval: 60,
+		capacity: 10,
+	}),
 ];
 
 // Bot detection and threat protection
@@ -44,8 +52,16 @@ const protectionRules = [
 ];
 
 // Create Arcjet instance with rules
+// ARCJET_KEY is required - throw error if not set
+if (!process.env.ARCJET_KEY) {
+	throw new Error(
+		'ARCJET_KEY environment variable is required for security. ' +
+		'Please set it in your .env.local file. Get your key from https://arcjet.com'
+	);
+}
+
 export const arcjetSecurity = arcjet({
-	key: process.env.ARCJET_KEY!,
+	key: process.env.ARCJET_KEY,
 	rules: [
 		...rateLimitRules,
 		...protectionRules,
@@ -68,6 +84,8 @@ export class SecurityService {
 				rateLimitRule = rateLimitRules[1]; // Stricter for auth
 			} else if (endpoint.includes('/upload') || endpoint.includes('/files')) {
 				rateLimitRule = rateLimitRules[2]; // File upload limits
+			} else if (endpoint.includes('/contact') || endpoint.includes('/support')) {
+				rateLimitRule = rateLimitRules[3]; // Stricter for public forms
 			}
 
 			const decision = await rateLimitRule.protect(request);
@@ -86,9 +104,11 @@ export class SecurityService {
 			};
 		} catch (error) {
 			console.error('Rate limit check error:', error);
-			// Allow request to proceed if rate limit check fails
+			// Deny request if rate limit check fails (fail secure)
 			return {
-				denied: false,
+				denied: true,
+				reason: 'Rate limit check failed',
+				status: 429,
 			};
 		}
 	}
@@ -109,7 +129,8 @@ export class SecurityService {
 			};
 		} catch (error) {
 			console.error('Bot detection error:', error);
-			return { isBot: false };
+			// Fail secure - treat as bot if detection fails
+			return { isBot: true, reason: 'Bot detection failed' };
 		}
 	}
 
@@ -129,7 +150,8 @@ export class SecurityService {
 			};
 		} catch (error) {
 			console.error('Threat detection error:', error);
-			return { isThreat: false };
+			// Fail secure - treat as threat if detection fails
+			return { isThreat: true, reason: 'Threat detection failed' };
 		}
 	}
 
@@ -166,8 +188,12 @@ export class SecurityService {
 			};
 		} catch (error) {
 			console.error('Security check error:', error);
-			// Allow request if security check fails
-			return { denied: false };
+			// Fail secure - deny request if security check fails
+			return {
+				denied: true,
+				reasons: ['Security check failed'],
+				status: 500,
+			};
 		}
 	}
 }

@@ -689,14 +689,34 @@ export class WorkflowEngine {
 		payload: Record<string, any>
 	): Promise<void> {
 		try {
-			// TODO: Integrate with webhook service
-			console.log('Webhook event created:', { userId, eventType, entityId, entityType });
+			// Import webhook service dynamically to avoid circular dependencies
+			const { WebhookService } = await import('@/lib/services/webhook-service');
+			
+			// Generate unique event ID
+			const eventId = `${entityType}_${entityId}_${Date.now()}`;
+
+			// Process webhook event through webhook service
+			await WebhookService.processWebhookEvent(
+				eventType,
+				eventId,
+				entityId,
+				entityType,
+				payload,
+				userId
+			);
 
 			// Trigger workflows
 			await this.checkWorkflowTriggers(eventType, { ...payload, entityId, entityType });
 
 		} catch (error) {
 			console.error('Error creating webhook event:', error);
+			// Continue execution even if webhook processing fails
+			// Workflow triggers should still work
+			try {
+				await this.checkWorkflowTriggers(eventType, { ...payload, entityId, entityType });
+			} catch (workflowError) {
+				console.error('Error triggering workflows:', workflowError);
+			}
 		}
 	}
 

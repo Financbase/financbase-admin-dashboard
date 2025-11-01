@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { headers } from 'next/headers';
+// import { headers } from 'next/headers'; // Temporarily disabled
 import { DashboardService } from '@/lib/services/dashboard-service';
 
 export async function GET(request: NextRequest) {
 	try {
+		// TEMPORARILY DISABLED FOR TESTING
+		// const headersList = await headers();
 		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

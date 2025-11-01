@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -257,6 +258,7 @@ function CommentThread({ comment, replies, onReply, onEdit, onDelete, onResolve 
 }
 
 export function CommentSystem({ workspaceId, entityType, entityId, entityTitle }: CommentSystemProps) {
+	const { user } = useUser();
 	const { toast } = useToast();
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [newComment, setNewComment] = useState('');
@@ -288,15 +290,33 @@ export function CommentSystem({ workspaceId, entityType, entityId, entityTitle }
 	const handleCreateComment = async () => {
 		if (!newComment.trim()) return;
 
+		if (!user?.id) {
+			toast({
+				title: 'Error',
+				description: 'User not authenticated',
+				variant: 'destructive',
+			});
+			return;
+		}
+
+		// Extract mentions from content (simple @ mention extraction)
+		const mentionMatches = newComment.match(/@(\w+)/g) || [];
+		const mentions = mentionMatches.map(m => m.substring(1)); // Remove @ symbol
+
+		const authorName = user.fullName || 
+			`${user.firstName || ''} ${user.lastName || ''}`.trim() || 
+			user.emailAddresses[0]?.emailAddress || 
+			'User';
+
 		try {
 			const comment = await workspaceService.createComment({
 				workspaceId,
 				entityType,
 				entityId,
 				content: newComment,
-				authorId: 'current-user-id', // TODO: Get from auth context
-				authorName: 'Current User', // TODO: Get from auth context
-				mentions: [], // TODO: Extract mentions from content
+				authorId: user.id,
+				authorName,
+				mentions,
 				isInternal,
 				status: 'active',
 			});
@@ -320,16 +340,34 @@ export function CommentSystem({ workspaceId, entityType, entityId, entityTitle }
 	};
 
 	const handleReply = async (parentId: string, content: string) => {
+		if (!user?.id) {
+			toast({
+				title: 'Error',
+				description: 'User not authenticated',
+				variant: 'destructive',
+			});
+			return;
+		}
+
+		// Extract mentions from content
+		const mentionMatches = content.match(/@(\w+)/g) || [];
+		const mentions = mentionMatches.map(m => m.substring(1));
+
+		const authorName = user.fullName || 
+			`${user.firstName || ''} ${user.lastName || ''}`.trim() || 
+			user.emailAddresses[0]?.emailAddress || 
+			'User';
+
 		try {
 			const reply = await workspaceService.createComment({
 				workspaceId,
 				entityType,
 				entityId,
 				content,
-				authorId: 'current-user-id',
-				authorName: 'Current User',
+				authorId: user.id,
+				authorName,
 				parentId,
-				mentions: [],
+				mentions,
 				isInternal,
 				status: 'active',
 			});
