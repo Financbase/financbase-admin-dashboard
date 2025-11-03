@@ -103,7 +103,7 @@ export function AvatarUpload({
 					<div className="relative">
 						<Avatar
 							className="ring-4 ring-background shadow-lg"
-							style={{ width: size, height: size }}
+							style={{ width: size, height: size, minWidth: size, minHeight: size }}
 						>
 							{displayUrl ? (
 								<AvatarImage

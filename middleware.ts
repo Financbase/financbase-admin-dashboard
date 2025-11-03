@@ -35,6 +35,7 @@ const isProtectedRoute = createRouteMatcher([
   '/api/workflows(.*)', // Add Workflows API routes
   '/api/monitoring(.*)', // Add Monitoring API routes
   '/api/integrations(.*)', // Add Integrations API routes
+  '/api/marketplace(.*)', // Add Marketplace API routes
   // '/api/real-estate(.*)', // Temporarily disable auth for real estate API routes for testing
   '/onboarding(.*)',
 ]);
@@ -78,7 +79,14 @@ export default clerkMiddleware(async (auth, req) => {
   // Get userId only when needed (for protected routes and auth route checks)
   const { userId } = await auth();
 
-  // Allow public routes without authentication
+  // If user is authenticated and accessing auth pages, redirect to dashboard FIRST
+  // This check must come before the public route check to prevent authenticated users
+  // from accessing sign-in/sign-up pages
+  if (userId && isAuthRoute(req)) {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+
+  // Allow public routes without authentication (only if not authenticated)
   if (isPublicRoute(req)) {
     return NextResponse.next();
   }
@@ -100,11 +108,6 @@ export default clerkMiddleware(async (auth, req) => {
       // For page routes, redirect to sign-in
       return NextResponse.redirect(new URL('/auth/sign-in', req.url));
     }
-  }
-
-  // If user is authenticated and accessing auth pages, redirect to dashboard
-  if (userId && isAuthRoute(req)) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   return NextResponse.next();

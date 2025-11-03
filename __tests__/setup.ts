@@ -33,17 +33,28 @@ vi.mock('next/navigation', () => ({
 // Mock Next.js server components
 vi.mock('next/server', () => ({
   NextRequest: class MockNextRequest {
-    constructor(public url: string, public init?: RequestInit) {}
+    public headers: Headers;
+    constructor(public url: string, public init?: RequestInit) {
+      this.headers = new Headers(init?.headers);
+      this.nextUrl = {
+        searchParams: new URLSearchParams(),
+      };
+    }
     nextUrl = {
       searchParams: new URLSearchParams(),
     };
     json = vi.fn();
-    text = vi.fn();
+    text = vi.fn(async () => {
+      if (this.init?.body) {
+        return typeof this.init.body === 'string' ? this.init.body : JSON.stringify(this.init.body);
+      }
+      return '';
+    });
     formData = vi.fn();
   },
   NextResponse: {
     json: vi.fn((data, init) => ({
-      json: () => Promise.resolve(data),
+      json: async () => Promise.resolve(data),
       status: init?.status || 200,
     })),
     redirect: vi.fn(),
@@ -59,6 +70,15 @@ vi.mock('@clerk/nextjs/server', () => ({
     emailAddresses: [{ emailAddress: 'test@example.com' }],
     firstName: 'Test',
     lastName: 'User',
+  })),
+}));
+
+// Mock Svix Webhook (for Clerk webhook tests)
+// Create a shared mock verify function that tests can customize
+export const mockSvixVerify = vi.fn();
+vi.mock('svix', () => ({
+  Webhook: vi.fn().mockImplementation(() => ({
+    verify: (...args: any[]) => mockSvixVerify(...args),
   })),
 }));
 

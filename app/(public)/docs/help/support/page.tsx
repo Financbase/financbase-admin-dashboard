@@ -214,7 +214,7 @@ export default function HelpSupportPage() {
 										Step-by-step video guides to help you master Financbase features.
 									</p>
 									<Button variant="outline" asChild>
-										<Link href="/docs#video-tutorials">
+										<Link href="/docs">
 											Watch Tutorials
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>

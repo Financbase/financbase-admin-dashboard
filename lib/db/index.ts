@@ -1,3 +1,5 @@
+import 'server-only';
+
 // Database connection utilities with dual driver support
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
@@ -34,19 +36,19 @@ const getDatabaseDriver = () => {
 const createDatabaseConnection = () => {
 	const driver = getDatabaseDriver();
 	
+	if (!process.env.DATABASE_URL) {
+		throw new Error(
+			'DATABASE_URL is required but not set. Please ensure your .env.local file contains DATABASE_URL.'
+		);
+	}
+	
 	switch (driver) {
 		case 'neon-http': {
-			if (!process.env.DATABASE_URL) {
-				throw new Error('DATABASE_URL is required for neon-http driver');
-			}
 			const sql = neon(process.env.DATABASE_URL);
 			return drizzle(sql, { schema });
 		}
 			
 		case 'neon-serverless': {
-			if (!process.env.DATABASE_URL) {
-				throw new Error('DATABASE_URL is required for neon-serverless driver');
-			}
 			const neonSql = neon(process.env.DATABASE_URL);
 			return drizzleNode(neonSql, { schema });
 		}
@@ -54,9 +56,6 @@ const createDatabaseConnection = () => {
 		case 'postgres': {
 			// Fallback to neon-http for postgres driver to avoid pg module issues
 			console.warn('Postgres driver not available in browser, falling back to neon-http');
-			if (!process.env.DATABASE_URL) {
-				throw new Error('DATABASE_URL is required for neon-http driver');
-			}
 			const sql = neon(process.env.DATABASE_URL);
 			return drizzle(sql, { schema });
 		}
@@ -66,15 +65,28 @@ const createDatabaseConnection = () => {
 	}
 };
 
-// Create the database instance
-export const db = createDatabaseConnection();
+// Lazy-loaded database connection to ensure env vars are loaded
+type DatabaseInstance = ReturnType<typeof createDatabaseConnection>;
+let dbInstance: DatabaseInstance | null = null;
+
+// Lazy getter for database instance
+const getDb = (): DatabaseInstance => {
+	if (!dbInstance) {
+		dbInstance = createDatabaseConnection();
+	}
+	return dbInstance;
+};
+
+// Export database instance with lazy initialization
+export const db = new Proxy({} as DatabaseInstance, {
+	get(_target, prop) {
+		return getDb()[prop as keyof DatabaseInstance];
+	}
+});
 
 // Helper function to get database instance or throw error
 export function getDbOrThrow() {
-	if (!db) {
-		throw new Error('Database connection not initialized');
-	}
-	return db;
+	return getDb();
 }
 
 // Export connection info for health checks
@@ -86,10 +98,9 @@ export const getConnectionInfo = () => ({
 // Database health check function
 export async function checkDatabaseHealth(): Promise<boolean> {
 	try {
-		if (!db) return false;
-		
+		const database = getDb();
 		// Simple health check query using raw SQL
-		const result = await db.execute(sql`SELECT 1 as health_check`);
+		const result = await database.execute(sql`SELECT 1 as health_check`);
 		return result.rows.length > 0;
 	} catch (error) {
 		console.error('Database health check failed:', error);
@@ -100,9 +111,10 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 // Graceful shutdown function
 export async function closeDatabaseConnection(): Promise<void> {
 	try {
-		if (db && 'end' in db) {
-			await (db as { end: () => Promise<void> }).end();
+		if (dbInstance && 'end' in dbInstance) {
+			await (dbInstance as { end: () => Promise<void> }).end();
 		}
+		dbInstance = null;
 		console.log('Database connection closed');
 	} catch (error) {
 		console.error('Error closing database connection:', error);

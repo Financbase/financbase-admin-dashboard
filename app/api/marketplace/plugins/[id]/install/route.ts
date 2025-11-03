@@ -33,11 +33,42 @@ export async function POST(
       message: 'Plugin installed successfully'
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Error installing plugin:', error);
-    return NextResponse.json({ 
-      error: 'Failed to install plugin',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Plugin not found or already installed
+    if (errorMessage.includes('not found') || errorMessage.includes('already installed')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Installation failed',
+          message: errorMessage
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Database errors
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to install plugin',
+        message: 'An error occurred while installing the plugin',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
+      { status: 500 }
+    );
   }
 }

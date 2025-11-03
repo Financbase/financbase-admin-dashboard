@@ -43,6 +43,7 @@ export function Providers({ children }: ProvidersProps) {
 					enableSystem={false}
 					disableTransitionOnChange
 					storageKey="financbase-theme"
+					suppressHydrationWarning
 				>
 					<DashboardProvider>
 						{children}

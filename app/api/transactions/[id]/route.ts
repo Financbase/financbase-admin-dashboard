@@ -14,7 +14,7 @@ const updateTransactionSchema = z.object({
 	referenceId: z.string().optional(),
 	referenceType: z.string().optional(),
 	accountId: z.string().optional(),
-	transactionDate: z.string().transform(str => new Date(str)).refine(d => !Number.Number.isNaN(d.getTime()), { message: 'Invalid date' }).optional(),
+	transactionDate: z.string().transform(str => new Date(str)).refine(d => !isNaN(d.getTime()), { message: 'Invalid date' }).optional(),
 	notes: z.string().optional(),
 	metadata: z.record(z.unknown()).optional(),
 });
@@ -29,6 +29,7 @@ export async function GET(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		const transaction = await TransactionService.getById(id, userId);
 		if (!transaction) {
 			return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
@@ -56,11 +57,12 @@ export async function PUT(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		const body = await request.json();
 		const validatedData = updateTransactionSchema.parse(body);
 
 		const transaction = await TransactionService.update({
-			id: id,
+			id,
 			userId,
 			...validatedData,
 		});
@@ -94,6 +96,7 @@ export async function DELETE(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		await TransactionService.delete(id, userId);
 
 		return NextResponse.json({ success: true });

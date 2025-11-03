@@ -334,7 +334,8 @@ Format responses professionally and conversationally. Use the financial data to 
 	private suggestActions(query: string, context: FinancialContext) {
 		const actions = [];
 
-		if (query.toLowerCase().includes('invoice')) {
+		// Security: Validate query is a string before using toLowerCase()
+		if (typeof query === 'string' && query.toLowerCase().includes('invoice')) {
 			actions.push({
 				type: 'navigate' as const,
 				title: 'View Invoice Dashboard',
@@ -344,7 +345,7 @@ Format responses professionally and conversationally. Use the financial data to 
 			});
 		}
 
-		if (query.toLowerCase().includes('expense')) {
+		if (typeof query === 'string' && query.toLowerCase().includes('expense')) {
 			actions.push({
 				type: 'analyze' as const,
 				title: 'Review Expense Trends',
@@ -354,7 +355,7 @@ Format responses professionally and conversationally. Use the financial data to 
 			});
 		}
 
-		if (query.toLowerCase().includes('budget')) {
+		if (typeof query === 'string' && query.toLowerCase().includes('budget')) {
 			actions.push({
 				type: 'create' as const,
 				title: 'Create New Budget',
@@ -373,17 +374,17 @@ Format responses professionally and conversationally. Use the financial data to 
 	private generateFollowUpQuestions(query: string, context: FinancialContext): string[] {
 		const questions = [];
 
-		if (query.toLowerCase().includes('forecast') || query.toLowerCase().includes('future')) {
+		if (typeof query === 'string' && (query.toLowerCase().includes('forecast') || query.toLowerCase().includes('future'))) {
 			questions.push('What are your growth targets for the next quarter?');
 			questions.push('Are you planning any major investments or expansions?');
 		}
 
-		if (query.toLowerCase().includes('expense') || query.toLowerCase().includes('cost')) {
+		if (typeof query === 'string' && (query.toLowerCase().includes('expense') || query.toLowerCase().includes('cost'))) {
 			questions.push('Which expense categories are most important to your business?');
 			questions.push('Are there any expenses you\'d like to reduce or eliminate?');
 		}
 
-		if (query.toLowerCase().includes('revenue') || query.toLowerCase().includes('income')) {
+		if (typeof query === 'string' && (query.toLowerCase().includes('revenue') || query.toLowerCase().includes('income'))) {
 			questions.push('What are your main revenue streams?');
 			questions.push('Are you looking to diversify your income sources?');
 		}

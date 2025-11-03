@@ -100,14 +100,48 @@ export const dashboardToasts = {
 };
 
 // Generic error handler for API responses
-export const handleApiError = (error: Error | unknown, context: string = 'dashboard') => {
+export const handleApiError = async (error: Error | unknown, context: string = 'dashboard') => {
 	console.error(`API Error in ${context}:`, error);
 
+	// Try to parse API error if it's a Response object
 	if (error && typeof error === 'object' && 'response' in error) {
-		const apiError = error as { response?: { status?: number } };
-		if (apiError.response?.status === 401) {
+		const apiError = error as { response?: Response };
+		
+		if (apiError.response) {
+			// Import parseApiError dynamically to avoid circular dependencies
+			const { parseApiError, isValidationError, isServerError } = await import('@/lib/utils/api-error-handler');
+			const parsedError = await parseApiError(apiError.response);
+			
+			if (parsedError) {
+				if (apiError.response.status === 401) {
+					dashboardToasts.error.unauthorized();
+				} else if (isValidationError(parsedError)) {
+					toast.error('Validation failed', {
+						description: parsedError.message || 'Please check your input',
+						duration: 5000,
+					});
+				} else if (isServerError(parsedError, apiError.response.status)) {
+					toast.error('Server error', {
+						description: parsedError.requestId 
+							? `Error ID: ${parsedError.requestId}` 
+							: 'Something went wrong on our end. Please try again later.',
+						duration: 7000,
+					});
+				} else {
+					toast.error(parsedError.message || 'An error occurred', {
+						description: parsedError.requestId ? `Request ID: ${parsedError.requestId}` : undefined,
+						duration: 5000,
+					});
+				}
+				return;
+			}
+		}
+
+		// Fallback to status code checking
+		const statusError = error as { response?: { status?: number } };
+		if (statusError.response?.status === 401) {
 			dashboardToasts.error.unauthorized();
-		} else if (apiError.response?.status && apiError.response.status >= 500) {
+		} else if (statusError.response?.status && statusError.response.status >= 500) {
 			dashboardToasts.error.serverError();
 		} else {
 			dashboardToasts.error.networkError();

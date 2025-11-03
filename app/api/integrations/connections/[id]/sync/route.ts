@@ -15,8 +15,9 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const connectionId = parseInt(id);
-    if (Number.Number.isNaN(connectionId)) {
+    if (Number.isNaN(connectionId)) {
       return NextResponse.json({ error: 'Invalid connection ID' }, { status: 400 });
     }
 
@@ -63,12 +64,30 @@ export async function POST(
       }, { status: 500 });
     }
   } catch (error) {
-     
-    // eslint-disable-next-line no-console
     console.error('Error starting sync:', error);
-    return NextResponse.json({ 
-      error: 'Failed to start sync',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Check if it's a database connection error
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to start sync',
+        message: 'An error occurred while starting the sync',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
+      { status: 500 }
+    );
   }
 }

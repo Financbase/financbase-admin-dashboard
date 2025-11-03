@@ -1,6 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+"use client";
+
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { EnhancedSidebar } from "./enhanced-sidebar";
 import { EnhancedTopNav } from "./enhanced-top-nav";
 import { cn } from "@/lib/utils";
@@ -24,6 +27,8 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 }) => {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+	const pathname = usePathname();
+	const isMountedRef = useRef(true);
 	
 	// Enhanced mobile navigation with touch support
 	const { 
@@ -40,6 +45,7 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 
 	// Memoize event handlers
 	const toggleMobileMenu = useCallback(() => {
+		if (!isMountedRef.current) return;
 		if (isMobile && touchSupported) {
 			toggleMenu();
 		} else {
@@ -48,10 +54,12 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 	}, [isMobile, touchSupported, toggleMenu]);
 
 	const toggleSidebarCollapse = useCallback(() => {
+		if (!isMountedRef.current) return;
 		setSidebarCollapsed(prev => !prev);
 	}, []);
 
 	const closeMobileMenu = useCallback(() => {
+		if (!isMountedRef.current) return;
 		if (isMobile && touchSupported) {
 			closeMenu();
 		} else {
@@ -61,23 +69,42 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 
 	// Close mobile menu on route change
 	useEffect(() => {
-		setMobileMenuOpen(false);
-	}, []);
+		if (!isMountedRef.current) return;
+		
+		// Close both menu states on route change
+		if (isMobile && touchSupported) {
+			closeMenu();
+		} else {
+			setMobileMenuOpen(false);
+		}
+	}, [pathname, isMobile, touchSupported, closeMenu]);
 
 	// Handle escape key
 	useEffect(() => {
 		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === "Escape" && mobileMenuOpen) {
-				setMobileMenuOpen(false);
+			if (e.key === "Escape" && isMenuOpen && isMountedRef.current) {
+				if (isMobile && touchSupported) {
+					closeMenu();
+				} else {
+					setMobileMenuOpen(false);
+				}
 			}
 		};
 
 		document.addEventListener("keydown", handleEscape);
 		return () => document.removeEventListener("keydown", handleEscape);
-	}, [mobileMenuOpen]);
+	}, [isMenuOpen, isMobile, touchSupported, closeMenu]);
+
+	// Cleanup on unmount
+	useEffect(() => {
+		isMountedRef.current = true;
+		return () => {
+			isMountedRef.current = false;
+		};
+	}, []);
 
 	return (
-		<div className="min-h-screen bg-background flex flex-col">
+		<div className="h-screen bg-background overflow-hidden">
 			{/* Mobile Overlay */}
 			{isMenuOpen && (
 				<motion.div
@@ -103,7 +130,10 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 			</motion.div>
 
 			{/* Desktop Sidebar */}
-			<div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
+			<div 
+				className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col" 
+				style={{ width: sidebarCollapsed ? '64px' : '256px' }}
+			>
 				<EnhancedSidebar
 					collapsed={sidebarCollapsed}
 					onToggleCollapse={toggleSidebarCollapse}
@@ -111,11 +141,12 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 				/>
 			</div>
 
-			{/* Top Navigation */}
-			<div className={cn(
-				"transition-all duration-300 w-full",
-				sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
-			)}>
+			{/* Top Navigation - Mobile */}
+			<div 
+				className={cn(
+					"lg:hidden fixed top-0 left-0 right-0 z-40 h-16"
+				)}
+			>
 				<EnhancedTopNav
 					onMenuClick={toggleMobileMenu}
 					user={user}
@@ -123,21 +154,52 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 				/>
 			</div>
 
-			{/* Main Content */}
-			<div
+			{/* Top Navigation - Desktop */}
+			<div 
 				className={cn(
-					"flex flex-col transition-all duration-300 flex-1",
-					"pt-16",
-					sidebarCollapsed ? "lg:ml-16" : "lg:ml-64",
+					"hidden lg:block fixed top-0 z-40 h-16 transition-all duration-300",
+					sidebarCollapsed ? "left-16 right-0" : "left-64 right-0"
 				)}
 			>
-				{/* Page Content */}
-				<main className="flex-1 w-full overflow-x-hidden">
+				<EnhancedTopNav
+					onMenuClick={toggleMobileMenu}
+					user={user}
+					notifications={notifications}
+				/>
+			</div>
+
+			{/* Main Content Area - Mobile */}
+			<div 
+				className={cn(
+					"lg:hidden fixed inset-0 pt-16"
+				)}
+			>
+				<main className="h-full w-full overflow-x-hidden overflow-y-auto">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.3 }}
 						className="w-full p-4 sm:p-6 lg:p-8"
+					>
+						{children}
+					</motion.div>
+				</main>
+			</div>
+
+			{/* Main Content Area - Desktop */}
+			<div 
+				className={cn(
+					"hidden lg:block fixed inset-0 transition-all duration-300",
+					"pt-16",
+					sidebarCollapsed ? "left-16" : "left-64"
+				)}
+			>
+				<main className="h-full w-full overflow-x-hidden overflow-y-auto">
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.3 }}
+						className="w-full p-4 sm:p-6 lg:p-8 max-w-[1920px] mx-auto"
 					>
 						{children}
 					</motion.div>

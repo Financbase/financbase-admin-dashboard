@@ -17,26 +17,27 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = db.select().from(webhooks).where(eq(webhooks.userId, userId));
+    // Build where conditions array
+    const whereConditions = [eq(webhooks.userId, userId)];
 
     if (search) {
-      query = query.where(and(
-        eq(webhooks.userId, userId),
+      whereConditions.push(
         or(
           like(webhooks.name, `%${search}%`),
           like(webhooks.url, `%${search}%`)
         )
-      ));
+      );
     }
 
     if (status) {
-      query = query.where(and(
-        eq(webhooks.userId, userId),
-        eq(webhooks.isActive, status === 'active')
-      ));
+      whereConditions.push(eq(webhooks.isActive, status === 'active'));
     }
 
-    const userWebhooks = await query
+    // Apply all conditions at once
+    const userWebhooks = await db
+      .select()
+      .from(webhooks)
+      .where(and(...whereConditions))
       .orderBy(desc(webhooks.createdAt))
       .limit(limit)
       .offset(offset);

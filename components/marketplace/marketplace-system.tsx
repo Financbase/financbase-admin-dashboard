@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useAuthenticatedFetch } from '@/hooks/use-authenticated-fetch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -92,43 +93,90 @@ export function MarketplaceSystem() {
   const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null);
   const [activeTab, setActiveTab] = useState('browse');
 
+  // Get authenticated fetch function and session status
+  const { authenticatedFetch, isLoaded, isSignedIn } = useAuthenticatedFetch();
+
   // Fetch available plugins
-  const { data: plugins = [], isLoading: pluginsLoading } = useQuery({
+  const { data: pluginsData, isLoading: pluginsLoading } = useQuery({
     queryKey: ['marketplacePlugins', { category: selectedCategory, search: searchTerm, sort: sortBy }],
     queryFn: async () => {
+      // Wait for auth to load
+      if (!isLoaded) {
+        return { plugins: [], pagination: { total: 0, limit: 20, offset: 0, hasMore: false } };
+      }
+
+      // Check if user is signed in
+      if (!isSignedIn) {
+        console.warn('User is not authenticated');
+        return { plugins: [], pagination: { total: 0, limit: 20, offset: 0, hasMore: false } };
+      }
+
       try {
         const params = new URLSearchParams({
           category: selectedCategory,
           search: searchTerm,
           sort: sortBy,
         });
-        const response = await fetch(`/api/marketplace/plugins?${params}`);
+        const response = await authenticatedFetch(`/api/marketplace/plugins?${params}`);
         if (!response.ok) {
+          if (response.status === 401) {
+            console.error('Unauthorized - authentication token may be invalid');
+            throw new Error('Your session has expired. Please sign in again.');
+          }
           throw new Error(`Failed to fetch plugins: ${response.statusText}`);
         }
-        return response.json();
+        const data = await response.json();
+        return data.plugins ? data : { plugins: Array.isArray(data) ? data : [], pagination: { total: 0, limit: 20, offset: 0, hasMore: false } };
       } catch (error) {
+        if (error instanceof Error && error.message.includes('not authenticated')) {
+          console.error('Authentication error:', error);
+          throw error;
+        }
         console.error('Error fetching plugins:', error);
-        return [];
+        return { plugins: [], pagination: { total: 0, limit: 20, offset: 0, hasMore: false } };
       }
     },
+    enabled: isLoaded, // Only run query when auth is loaded
   });
+
+  const plugins = pluginsData?.plugins || [];
 
   // Fetch installed plugins
   const { data: installedPlugins = [], isLoading: installedLoading } = useQuery({
     queryKey: ['installedPlugins'],
     queryFn: async () => {
+      // Wait for auth to load
+      if (!isLoaded) {
+        return [];
+      }
+
+      // Check if user is signed in
+      if (!isSignedIn) {
+        console.warn('User is not authenticated');
+        return [];
+      }
+
       try {
-        const response = await fetch('/api/marketplace/plugins/installed');
+        const response = await authenticatedFetch('/api/marketplace/plugins/installed');
         if (!response.ok) {
+          if (response.status === 401) {
+            console.error('Unauthorized - authentication token may be invalid');
+            throw new Error('Your session has expired. Please sign in again.');
+          }
           throw new Error(`Failed to fetch installed plugins: ${response.statusText}`);
         }
-        return response.json();
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
       } catch (error) {
+        if (error instanceof Error && error.message.includes('not authenticated')) {
+          console.error('Authentication error:', error);
+          throw error;
+        }
         console.error('Error fetching installed plugins:', error);
         return [];
       }
     },
+    enabled: isLoaded, // Only run query when auth is loaded
   });
 
   // Enhanced categories including the 13 integrations

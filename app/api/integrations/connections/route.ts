@@ -46,7 +46,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(transformedConnections);
   } catch (error) {
     console.error('Error fetching connections:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Check if it's a database connection error
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? errorMessage : 'An error occurred while fetching connections'
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -100,6 +122,40 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(newConnection[0], { status: 201 });
   } catch (error) {
     console.error('Error creating connection:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Validation errors
+    if (errorMessage.includes('required') || errorMessage.includes('invalid')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Validation error',
+          message: errorMessage
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Database errors
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? errorMessage : 'An error occurred while creating the connection'
+      },
+      { status: 500 }
+    );
   }
 }

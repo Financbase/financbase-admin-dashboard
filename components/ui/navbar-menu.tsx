@@ -110,9 +110,11 @@ export const ProductItem = ({
 };
 
 export const HoveredLink = ({ children, ...rest }: any) => {
+  // Filter out event handlers that can't be passed to Link
+  const { onMouseEnter, onMouseLeave, ...linkProps } = rest;
   return (
     <Link
-      {...rest}
+      {...linkProps}
       className="text-neutral-700 dark:text-neutral-200 hover:text-black "
     >
       {children}

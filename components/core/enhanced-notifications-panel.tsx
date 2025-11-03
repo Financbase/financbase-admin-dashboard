@@ -143,7 +143,29 @@ export function EnhancedNotificationsPanel() {
 
 		// Navigate to action URL if provided
 		if (notification.actionUrl) {
-			window.location.href = notification.actionUrl;
+			// Security: Validate URL to prevent open redirect vulnerability
+			// Only allow relative paths or same-origin URLs
+			const url = notification.actionUrl;
+			
+			// Allow relative paths
+			if (url.startsWith('/')) {
+				window.location.href = url;
+				return;
+			}
+			
+			// For absolute URLs, only allow same origin
+			try {
+				const urlObj = new URL(url, window.location.origin);
+				if (urlObj.origin === window.location.origin) {
+					window.location.href = url;
+				} else {
+					console.warn('Blocked redirect to external URL:', url);
+					toast.error('Invalid redirect URL');
+				}
+			} catch (error) {
+				console.error('Invalid URL format:', url, error);
+				toast.error('Invalid redirect URL');
+			}
 		}
 	};
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -144,7 +146,7 @@ export default function ApiSdksPage() {
 								<CardContent>
 									<div className="space-y-3">
 										<div className="bg-muted p-3 rounded-lg">
-											<p className="text-sm font-mono">https://api.financbase.com/v1/</p>
+											<p className="text-sm font-mono">https://api.financbase.com/api/</p>
 										</div>
 										<Button variant="outline" size="sm" className="w-full" asChild>
 											<Link href="/docs/api/endpoints">
@@ -205,7 +207,7 @@ export default function ApiSdksPage() {
 										<div className="bg-muted p-4 rounded-lg font-mono text-sm overflow-x-auto">
 											curl -H <div className="text-green-400">"Authorization: Bearer your_api_key"</div> \<br />
 											&nbsp;&nbsp;&nbsp;&nbsp;-H <div className="text-green-400">"Content-Type: application/json"</div> \<br />
-											&nbsp;&nbsp;&nbsp;&nbsp;https://api.financbase.com/v1/transactions
+											&nbsp;&nbsp;&nbsp;&nbsp;https://api.financbase.com/api/transactions
 										</div>
 									</CardContent>
 								</Card>

@@ -21,9 +21,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(installedPlugins);
   } catch (error) {
     console.error('Error fetching installed plugins:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch installed plugins',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Database errors
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to fetch installed plugins',
+        message: 'An error occurred while fetching installed plugins',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
+      { status: 500 }
+    );
   }
 }

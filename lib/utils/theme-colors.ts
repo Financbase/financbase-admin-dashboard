@@ -21,12 +21,12 @@ function oklchToRgb(oklchValue: string): string {
   // Convert OKLCH to linear RGB
   // OKLCH -> OKLab -> Linear RGB -> sRGB
   const a = C * Math.cos((H * Math.PI) / 180);
-  const b = C * Math.sin((H * Math.PI) / 180);
+  const bLab = C * Math.sin((H * Math.PI) / 180);
 
   // OKLab to linear RGB matrix
-  const l = L + 0.3963377774 * a + 0.2158037573 * b;
-  const m = L - 0.1055613458 * a - 0.0638541728 * b;
-  const s = L - 0.0894841775 * a - 1.291485548 * b;
+  const l = L + 0.3963377774 * a + 0.2158037573 * bLab;
+  const m = L - 0.1055613458 * a - 0.0638541728 * bLab;
+  const s = L - 0.0894841775 * a - 1.291485548 * bLab;
 
   // Linear RGB values
   const rLinear = +1.227013851103521 * l - 0.557799980651822 * m + 0.281256148966468 * s;

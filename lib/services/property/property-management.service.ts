@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, lte, sql, sum } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, ilike, lte, sql, sum } from "drizzle-orm";
 import {
 	BarChart3,
 	Clock,
@@ -135,8 +135,10 @@ export class PropertyManagementService {
 			);
 		}
 		if (filters?.city) {
+			// Security: Use Drizzle's ilike function for safe parameterized LIKE queries
+			// This prevents SQL injection by properly parameterizing the query
 			query = query.where(
-				sql`LOWER(${properties.city}) LIKE LOWER(${`%${filters.city}%`})`,
+				ilike(properties.city, `%${filters.city}%`),
 			);
 		}
 

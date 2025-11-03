@@ -18,32 +18,30 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // Build query conditions
-    let query = db
-      .select()
-      .from(marketplacePlugins)
-      .where(eq(marketplacePlugins.isActive, true));
+    // Build where conditions array
+    const whereConditions = [eq(marketplacePlugins.isActive, true)];
 
     // Filter by category
     if (category !== 'all') {
-      query = query.where(and(
-        eq(marketplacePlugins.isActive, true),
-        eq(marketplacePlugins.category, category)
-      ));
+      whereConditions.push(eq(marketplacePlugins.category, category));
     }
 
     // Filter by search term
     if (search) {
-      query = query.where(and(
-        eq(marketplacePlugins.isActive, true),
-        category !== 'all' ? eq(marketplacePlugins.category, category) : undefined,
+      whereConditions.push(
         sql`(
           ${marketplacePlugins.name} ILIKE ${`%${search}%`} OR
           ${marketplacePlugins.description} ILIKE ${`%${search}%`} OR
           ${marketplacePlugins.tags}::text ILIKE ${`%${search}%`}
         )`
-      ));
+      );
     }
+
+    // Build query with all conditions
+    let query = db
+      .select()
+      .from(marketplacePlugins)
+      .where(and(...whereConditions));
 
     // Apply sorting
     switch (sort) {
@@ -68,26 +66,70 @@ export async function GET(request: NextRequest) {
     // Apply pagination
     const plugins = await query.limit(limit).offset(offset);
 
-    // Get total count for pagination
+    // Get total count for pagination (matching the same where conditions)
+    const countConditions = [eq(marketplacePlugins.isActive, true)];
+    if (category !== 'all') {
+      countConditions.push(eq(marketplacePlugins.category, category));
+    }
+    if (search) {
+      countConditions.push(
+        sql`(
+          ${marketplacePlugins.name} ILIKE ${`%${search}%`} OR
+          ${marketplacePlugins.description} ILIKE ${`%${search}%`} OR
+          ${marketplacePlugins.tags}::text ILIKE ${`%${search}%`}
+        )`
+      );
+    }
+    
     const totalCount = await db
       .select({ count: sql<number>`count(*)` })
       .from(marketplacePlugins)
-      .where(eq(marketplacePlugins.isActive, true));
+      .where(and(...countConditions));
+
+    const total = totalCount[0]?.count || 0;
+    
+    // Debug logging
+    console.log('Marketplace Plugins API:', {
+      queryParams: { category, search, sort, limit, offset },
+      pluginsReturned: plugins.length,
+      totalPlugins: total,
+      hasMore: offset + limit < total
+    });
 
     return NextResponse.json({
       plugins,
       pagination: {
-        total: totalCount[0]?.count || 0,
+        total,
         limit,
         offset,
-        hasMore: offset + limit < (totalCount[0]?.count || 0)
+        hasMore: offset + limit < total
       }
     });
   } catch (error) {
     console.error('Error fetching marketplace plugins:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch plugins',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Check if it's a database connection error
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to fetch plugins',
+        message: 'An error occurred while fetching marketplace plugins',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
+      { status: 500 }
+    );
   }
 }

@@ -17,26 +17,27 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = db.select().from(integrations).where(eq(integrations.isActive, true));
+    // Build where conditions array
+    const whereConditions = [eq(integrations.isActive, true)];
 
     if (category && category !== 'all') {
-      query = query.where(and(
-        eq(integrations.isActive, true),
-        eq(integrations.category, category)
-      ));
+      whereConditions.push(eq(integrations.category, category));
     }
 
     if (search) {
-      query = query.where(and(
-        eq(integrations.isActive, true),
+      whereConditions.push(
         or(
           like(integrations.name, `%${search}%`),
           like(integrations.description, `%${search}%`)
         )
-      ));
+      );
     }
 
-    const availableIntegrations = await query
+    // Apply all conditions at once
+    const availableIntegrations = await db
+      .select()
+      .from(integrations)
+      .where(and(...whereConditions))
       .orderBy(desc(integrations.isOfficial), desc(integrations.createdAt))
       .limit(limit)
       .offset(offset);
@@ -44,6 +45,38 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(availableIntegrations);
   } catch (error) {
     console.error('Error fetching integrations:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    // Log full error details for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error details:', {
+        message: errorMessage,
+        stack: errorStack,
+        error
+      });
+    }
+    
+    // Check if it's a database connection error
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? errorMessage : 'An error occurred while fetching integrations'
+      },
+      { status: 500 }
+    );
   }
 }

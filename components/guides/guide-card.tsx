@@ -154,7 +154,11 @@ export const GuideCard = memo<GuideCardProps>(
 						<div className="absolute top-4 left-4">
 							<div className="flex items-center gap-2">
 								<div className="bg-white/90 backdrop-blur-sm p-2 rounded-lg">
-									{guide.icon || getTypeIcon(guide.type)}
+									{guide.icon 
+										? (typeof guide.icon === 'function' 
+											? React.createElement(guide.icon as React.ComponentType<{ className?: string }>, { className: "w-5 h-5" })
+											: guide.icon)
+										: getTypeIcon(guide.type)}
 								</div>
 								<Badge className="bg-white/90 text-gray-900">
 									{guide.type}
