@@ -15,9 +15,14 @@ interface DashboardContextType {
 const DashboardContext = React.createContext<DashboardContextType | undefined>(undefined);
 
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
+	// Set default date range to current month
+	const now = new Date();
+	const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+	const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+	
 	const [dateRange, setDateRange] = React.useState<DateRange>({
-		from: new Date('2024-01-01'),
-		to: new Date('2024-01-31')
+		from: startOfMonth,
+		to: endOfMonth
 	});
 
 	return (

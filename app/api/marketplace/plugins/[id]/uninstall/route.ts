@@ -33,11 +33,42 @@ export async function DELETE(
       message: 'Plugin uninstalled successfully'
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Error uninstalling plugin:', error);
-    return NextResponse.json({ 
-      error: 'Failed to uninstall plugin',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Installation not found
+    if (errorMessage.includes('not found')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Uninstall failed',
+          message: errorMessage
+        },
+        { status: 404 }
+      );
+    }
+    
+    // Database errors
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to uninstall plugin',
+        message: 'An error occurred while uninstalling the plugin',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
+      { status: 500 }
+    );
   }
 }

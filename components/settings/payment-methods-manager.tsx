@@ -390,7 +390,23 @@ export function PaymentMethodsManager() {
 										<TableCell>
 											{record.invoiceUrl && (
 												<Button size="sm" variant="outline" asChild>
-													<a href={record.invoiceUrl} target="_blank" rel="noopener noreferrer">
+													<a 
+														href={(() => {
+															// Security: Sanitize URL to prevent XSS
+															try {
+																const url = new URL(record.invoiceUrl, window.location.origin);
+																// Only allow http/https URLs
+																if (url.protocol === 'http:' || url.protocol === 'https:') {
+																	return url.href;
+																}
+																return '#';
+															} catch {
+																return '#';
+															}
+														})()} 
+														target="_blank" 
+														rel="noopener noreferrer"
+													>
 														View Invoice
 													</a>
 												</Button>

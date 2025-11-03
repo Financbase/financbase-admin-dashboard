@@ -96,6 +96,8 @@ export async function getRevenueAnalytics(userId: string): Promise<RevenueAnalyt
 		.from(invoices)
 		.where(and(
 			eq(invoices.userId, userId),
+			eq(invoices.status, 'paid'),
+			sql`${invoices.paidDate} is not null`,
 			gte(invoices.paidDate, twelveMonthsAgo)
 		))
 		.groupBy(sql`to_char(${invoices.paidDate}, 'YYYY-MM')`)
@@ -163,16 +165,16 @@ export async function getExpenseAnalytics(userId: string): Promise<ExpenseAnalyt
 
 	const monthlyExpenses = await db
 		.select({
-			month: sql<string>`to_char(${expenses.expenseDate}, 'YYYY-MM')`,
+			month: sql<string>`to_char(${expenses.date}, 'YYYY-MM')`,
 			expenses: sql<number>`sum(${expenses.amount}::numeric)`,
 		})
 		.from(expenses)
 		.where(and(
 			eq(expenses.userId, userId),
-			gte(expenses.expenseDate, twelveMonthsAgo)
+			gte(expenses.date, twelveMonthsAgo)
 		))
-		.groupBy(sql`to_char(${expenses.expenseDate}, 'YYYY-MM')`)
-		.orderBy(sql`to_char(${expenses.expenseDate}, 'YYYY-MM')`);
+		.groupBy(sql`to_char(${expenses.date}, 'YYYY-MM')`)
+		.orderBy(sql`to_char(${expenses.date}, 'YYYY-MM')`);
 
 	// Get expenses by category
 	const expensesByCategory = await db
@@ -223,7 +225,7 @@ export async function getClientAnalytics(userId: string): Promise<ClientAnalytic
 	const [clientStats] = await db
 		.select({
 			totalClients: sql<number>`count(*)`,
-			activeClients: sql<number>`count(case when ${clients.isActive} = true then 1 end)`,
+			activeClients: sql<number>`count(case when ${clients.status} = 'active' then 1 end)`,
 		})
 		.from(clients)
 		.where(eq(clients.userId, userId));

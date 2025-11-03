@@ -145,9 +145,30 @@ export function InvestorPortal({ portalId, accessToken }: InvestorPortalProps) {
 						<div className="flex items-center gap-4">
 							{portalData.company.logo ? (
 								<img
-									src={portalData.company.logo}
+									src={(() => {
+										// Security: Validate image URL to prevent XSS
+										try {
+											const url = new URL(portalData.company.logo, window.location.origin);
+											// Allow http/https and data URLs for images
+											if (
+												url.protocol === 'http:' || 
+												url.protocol === 'https:' ||
+												portalData.company.logo.startsWith('data:image/')
+											) {
+												return portalData.company.logo;
+											}
+											return '';
+										} catch {
+											return '';
+										}
+									})()}
 									alt={portalData.company.name}
 									className="h-10 w-10 rounded-lg"
+									onError={(e) => {
+										// Fallback if image fails to load
+										const target = e.target as HTMLImageElement;
+										target.style.display = 'none';
+									}}
 								/>
 							) : (
 								<div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">

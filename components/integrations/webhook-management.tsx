@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthenticatedFetch } from '@/hooks/use-authenticated-fetch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,7 +57,7 @@ const SAMPLE_WEBHOOK_ENDPOINTS: WebhookEndpoint[] = [
 		id: '1',
 		url: 'https://api.myapp.com/webhooks/financbase',
 		events: ['payment.received', 'invoice.paid', 'invoice.overdue'],
-		secret: 'wh_sec_1234567890abcdef',
+		secret: 'wh_sec_XXXXXXXXXXXXXXXX', // Placeholder - not a real secret
 		status: 'active',
 		createdAt: '2024-10-15T10:30:00Z',
 		lastDelivery: '2024-11-15T14:22:00Z',
@@ -66,7 +67,7 @@ const SAMPLE_WEBHOOK_ENDPOINTS: WebhookEndpoint[] = [
 		id: '2',
 		url: 'https://webhook.site/12345678-1234-1234-1234-123456789abc',
 		events: ['transaction.created', 'transaction.updated'],
-		secret: 'wh_sec_0987654321fedcba',
+		secret: 'wh_sec_XXXXXXXXXXXXXXXX', // Placeholder - not a real secret
 		status: 'active',
 		createdAt: '2024-10-20T09:15:00Z',
 		lastDelivery: '2024-11-15T13:45:00Z',
@@ -105,47 +106,119 @@ export function WebhookManagement() {
 
 	const queryClient = useQueryClient();
 
+	// Get authenticated fetch function and session status
+	const { authenticatedFetch, isLoaded, isSignedIn } = useAuthenticatedFetch();
+
 	// Fetch webhook endpoints
 	const { data: webhookEndpoints = SAMPLE_WEBHOOK_ENDPOINTS } = useQuery({
 		queryKey: ['webhook-endpoints'],
 		queryFn: async () => {
+			// Wait for auth to load
+			if (!isLoaded) {
+				return SAMPLE_WEBHOOK_ENDPOINTS;
+			}
+
+			// Check if user is signed in
+			if (!isSignedIn) {
+				console.warn('User is not authenticated');
+				return SAMPLE_WEBHOOK_ENDPOINTS;
+			}
+
 			try {
-				const response = await fetch('/api/integrations/webhooks/endpoints');
+				const response = await authenticatedFetch('/api/integrations/webhooks/endpoints');
 				if (!response.ok) {
+					if (response.status === 401) {
+						console.error('Unauthorized - authentication token may be invalid');
+						throw new Error('Your session has expired. Please sign in again.');
+					}
 					throw new Error(`Failed to fetch webhook endpoints: ${response.statusText}`);
 				}
-				return response.json();
+				const data = await response.json();
+				// Transform API response to match component's expected format
+				return Array.isArray(data) ? data.map((webhook: any) => ({
+					id: String(webhook.id),
+					url: webhook.url,
+					events: Array.isArray(webhook.events) ? webhook.events : [],
+					secret: webhook.secret || '',
+					status: webhook.isActive ? 'active' : 'inactive',
+					createdAt: webhook.createdAt || new Date().toISOString(),
+					lastDelivery: webhook.lastDelivery || undefined,
+					failureCount: webhook.failureCount || 0,
+				})) : SAMPLE_WEBHOOK_ENDPOINTS;
 			} catch (error) {
+				if (error instanceof Error && error.message.includes('not authenticated')) {
+					console.error('Authentication error:', error);
+					throw error;
+				}
 				console.error('Error fetching webhook endpoints:', error);
+				// Return sample data if fetch fails (for development/demo)
 				return SAMPLE_WEBHOOK_ENDPOINTS;
 			}
 		},
+		enabled: isLoaded, // Only run query when auth is loaded
 	});
 
 	// Fetch webhook events
 	const { data: webhookEvents = SAMPLE_WEBHOOK_EVENTS } = useQuery({
 		queryKey: ['webhook-events'],
 		queryFn: async () => {
+			// Wait for auth to load
+			if (!isLoaded) {
+				return SAMPLE_WEBHOOK_EVENTS;
+			}
+
+			// Check if user is signed in
+			if (!isSignedIn) {
+				console.warn('User is not authenticated');
+				return SAMPLE_WEBHOOK_EVENTS;
+			}
+
 			try {
-				const response = await fetch('/api/integrations/webhooks');
+				const response = await authenticatedFetch('/api/integrations/webhooks');
 				if (!response.ok) {
+					if (response.status === 401) {
+						console.error('Unauthorized - authentication token may be invalid');
+						throw new Error('Your session has expired. Please sign in again.');
+					}
 					throw new Error(`Failed to fetch webhook events: ${response.statusText}`);
 				}
-				return response.json();
+				const data = await response.json();
+				return Array.isArray(data) ? data : SAMPLE_WEBHOOK_EVENTS;
 			} catch (error) {
+				if (error instanceof Error && error.message.includes('not authenticated')) {
+					console.error('Authentication error:', error);
+					throw error;
+				}
 				console.error('Error fetching webhook events:', error);
 				return SAMPLE_WEBHOOK_EVENTS;
 			}
 		},
+		enabled: isLoaded, // Only run query when auth is loaded
 	});
 
 	// Create webhook endpoint mutation
 	const createEndpointMutation = useMutation({
-		mutationFn: async (data: { url: string; events: string[]; secret?: string }) => {
-			const response = await fetch('/api/integrations/webhooks/endpoints', {
+		mutationFn: async (data: { url: string; events: string[]; secret?: string; name?: string }) => {
+			if (!isLoaded || !isSignedIn) {
+				throw new Error('User is not authenticated');
+			}
+
+			const response = await authenticatedFetch('/api/webhooks', {
 				method: 'POST',
-				body: JSON.stringify(data),
+				body: JSON.stringify({
+					name: data.name || 'Webhook Endpoint',
+					url: data.url,
+					events: data.events,
+					secret: data.secret,
+				}),
 			});
+			if (!response.ok) {
+				if (response.status === 401) {
+					throw new Error('Your session has expired. Please sign in again.');
+				}
+				const errorData = await response.json().catch(() => ({ error: response.statusText }));
+				throw new Error(errorData.error || `Failed to create webhook: ${response.statusText}`);
+			}
 			return response.json();
 		},
 		onSuccess: () => {
@@ -157,9 +230,20 @@ export function WebhookManagement() {
 	// Delete webhook endpoint mutation
 	const deleteEndpointMutation = useMutation({
 		mutationFn: async (endpointId: string) => {
-			const response = await fetch(`/api/integrations/webhooks/endpoints/${endpointId}`, {
+			if (!isLoaded || !isSignedIn) {
+				throw new Error('User is not authenticated');
+			}
+
+			const response = await authenticatedFetch(`/api/webhooks/${endpointId}`, {
 				method: 'DELETE',
 			});
+			if (!response.ok) {
+				if (response.status === 401) {
+					throw new Error('Your session has expired. Please sign in again.');
+				}
+				const errorData = await response.json().catch(() => ({ error: response.statusText }));
+				throw new Error(errorData.error || `Failed to delete webhook: ${response.statusText}`);
+			}
 			return response.json();
 		},
 		onSuccess: () => {
@@ -170,13 +254,25 @@ export function WebhookManagement() {
 	// Test webhook endpoint mutation
 	const testEndpointMutation = useMutation({
 		mutationFn: async (endpointId: string) => {
-			const response = await fetch(`/api/integrations/webhooks/endpoints/${endpointId}/test`, {
+			if (!isLoaded || !isSignedIn) {
+				throw new Error('User is not authenticated');
+			}
+
+			const response = await authenticatedFetch(`/api/webhooks/${endpointId}/test`, {
 				method: 'POST',
 			});
+			if (!response.ok) {
+				if (response.status === 401) {
+					throw new Error('Your session has expired. Please sign in again.');
+				}
+				const errorData = await response.json().catch(() => ({ error: response.statusText }));
+				throw new Error(errorData.error || `Failed to test webhook: ${response.statusText}`);
+			}
 			return response.json();
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries(['webhook-events']);
+			queryClient.invalidateQueries(['webhook-endpoints']);
 		},
 	});
 
@@ -244,13 +340,48 @@ export function WebhookManagement() {
 								</DialogDescription>
 							</DialogHeader>
 
-							<div className="space-y-4">
+							<form
+								onSubmit={(e) => {
+									e.preventDefault();
+									const formData = new FormData(e.currentTarget);
+									const url = formData.get('url') as string;
+									const name = formData.get('name') as string || 'Webhook Endpoint';
+									const secret = formData.get('secret') as string || undefined;
+									const selectedEvents = Array.from(
+										document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked')
+									).map((checkbox) => checkbox.id);
+
+									if (!url || selectedEvents.length === 0) {
+										return;
+									}
+
+									createEndpointMutation.mutate({
+										name,
+										url,
+										events: selectedEvents,
+										secret,
+									});
+								}}
+								className="space-y-4"
+							>
+								<div className="space-y-2">
+									<Label htmlFor="name">Endpoint Name</Label>
+									<Input
+										id="name"
+										name="name"
+										placeholder="My Webhook Endpoint"
+										required
+									/>
+								</div>
+
 								<div className="space-y-2">
 									<Label htmlFor="url">Endpoint URL</Label>
 									<Input
 										id="url"
+										name="url"
 										placeholder="https://your-app.com/webhooks/financbase"
 										type="url"
+										required
 									/>
 								</div>
 
@@ -258,6 +389,7 @@ export function WebhookManagement() {
 									<Label htmlFor="secret">Webhook Secret (Optional)</Label>
 									<Input
 										id="secret"
+										name="secret"
 										placeholder="Generate a secure secret for signature verification"
 									/>
 									<p className="text-sm text-muted-foreground">
@@ -290,21 +422,22 @@ export function WebhookManagement() {
 
 								<div className="flex gap-2">
 									<Button
+										type="submit"
 										className="flex-1"
-										onClick={() => createEndpointMutation.mutate({
-											url: 'https://example.com/webhook',
-											events: ['payment.received', 'invoice.paid'],
-											secret: 'test-secret'
-										})}
 										disabled={createEndpointMutation.isPending}
 									>
 										{createEndpointMutation.isPending ? 'Creating...' : 'Create Endpoint'}
 									</Button>
-									<Button variant="outline" className="flex-1">
+									<Button
+										type="button"
+										variant="outline"
+										className="flex-1"
+										onClick={() => setShowCreateDialog(false)}
+									>
 										Cancel
 									</Button>
 								</div>
-							</div>
+							</form>
 						</DialogContent>
 					</Dialog>
 				</div>

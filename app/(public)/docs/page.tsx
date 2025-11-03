@@ -182,9 +182,57 @@ interface DocsPageProps {
 	};
 }
 
+// Helper function to filter items based on search query
+function filterItems<T extends { title: string; description?: string }>(
+	items: T[],
+	query: string
+): T[] {
+	if (!query.trim()) return items;
+	const lowerQuery = query.toLowerCase();
+	return items.filter(
+		(item) =>
+			item.title.toLowerCase().includes(lowerQuery) ||
+			item.description?.toLowerCase().includes(lowerQuery)
+	);
+}
+
+// Helper function to filter sections based on search query
+function filterSections<T extends { title: string; description: string; items: Array<{ title: string; description?: string }> }>(
+	sections: T[],
+	query: string
+): T[] {
+	if (!query.trim()) return sections;
+	const lowerQuery = query.toLowerCase();
+	return sections
+		.map((section) => {
+			const matchesTitle = section.title.toLowerCase().includes(lowerQuery);
+			const matchesDescription = section.description.toLowerCase().includes(lowerQuery);
+			const filteredItems = filterItems(section.items, query);
+			const hasMatchingItems = filteredItems.length > 0;
+
+			if (matchesTitle || matchesDescription || hasMatchingItems) {
+				return {
+					...section,
+					items: hasMatchingItems ? filteredItems : section.items,
+				};
+			}
+			return null;
+		})
+		.filter((section): section is T => section !== null);
+}
+
 export default async function DocsPage({ searchParams }: DocsPageProps) {
 	const data = await getDocsPageData();
 	const searchQuery = searchParams.search || "";
+
+	// Filter data based on search query
+	const filteredQuickLinks = filterItems(data.quickLinks, searchQuery);
+	const filteredDocSections = filterSections(data.docSections, searchQuery);
+	const filteredPopularArticles = filterItems(data.popularArticles, searchQuery);
+	const hasSearchResults =
+		filteredQuickLinks.length > 0 ||
+		filteredDocSections.length > 0 ||
+		filteredPopularArticles.length > 0;
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -234,11 +282,30 @@ export default async function DocsPage({ searchParams }: DocsPageProps) {
 
 			<div className="container mx-auto px-4 py-16">
 				<div className="max-w-6xl mx-auto">
+					{searchQuery && !hasSearchResults && (
+						<div className="mb-8 text-center py-12">
+							<Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+							<h3 className="text-xl font-semibold mb-2">No results found</h3>
+							<p className="text-muted-foreground mb-4">
+								Try searching with different keywords or browse our documentation below.
+							</p>
+						</div>
+					)}
+
+					{searchQuery && hasSearchResults && (
+						<div className="mb-8">
+							<p className="text-muted-foreground">
+								Found results for: <span className="font-semibold text-foreground">"{searchQuery}"</span>
+							</p>
+						</div>
+					)}
+
 					{/* Quick Links */}
+					{filteredQuickLinks.length > 0 && (
 					<div className="mb-16">
 						<h2 className="text-2xl font-semibold mb-6">Quick Links</h2>
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-							{data.quickLinks.map((link) => (
+								{filteredQuickLinks.map((link) => (
 								<Link key={link.title} href={link.href}>
 									<Card className="group hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
 										<CardContent className="p-6">
@@ -262,14 +329,16 @@ export default async function DocsPage({ searchParams }: DocsPageProps) {
 							))}
 						</div>
 					</div>
+					)}
 
 					{/* Documentation Sections */}
+					{filteredDocSections.length > 0 && (
 					<div className="mb-16">
 						<h2 className="text-2xl font-semibold mb-6">
 							Documentation Sections
 						</h2>
 						<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-							{data.docSections.map((section) => (
+								{filteredDocSections.map((section) => (
 								<Card
 									key={section.title}
 									className="group hover:shadow-lg transition-all duration-200"
@@ -310,12 +379,14 @@ export default async function DocsPage({ searchParams }: DocsPageProps) {
 							))}
 						</div>
 					</div>
+					)}
 
 					{/* Popular Articles */}
+					{filteredPopularArticles.length > 0 && (
 					<div className="mb-16">
 						<h2 className="text-2xl font-semibold mb-6">Popular Articles</h2>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							{data.popularArticles.map((article) => (
+								{filteredPopularArticles.map((article) => (
 								<Link key={article.title} href={article.href}>
 									<Card className="group hover:shadow-md transition-all duration-200">
 										<CardContent className="p-6">
@@ -337,6 +408,7 @@ export default async function DocsPage({ searchParams }: DocsPageProps) {
 							))}
 						</div>
 					</div>
+					)}
 
 					{/* Support Section */}
 					<Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">

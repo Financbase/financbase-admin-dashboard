@@ -19,6 +19,7 @@ export default function SignInPage() {
           path="/auth/sign-in"
           signUpUrl="/auth/sign-up"
           redirectUrl="/dashboard"
+          afterSignInUrl="/dashboard"
         />
       </AuthLayout>
     </AuthErrorBoundary>

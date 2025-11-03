@@ -353,7 +353,15 @@ export const EconomicCalendar = React.forwardRef<
 
 								<div className="flex items-center gap-3 mb-4">
 									<img
-										src={`https://flagcdn.com/w40/${event.countryCode.toLowerCase()}.png`}
+										src={(() => {
+											// Security: Validate country code to prevent XSS
+											// Country codes should be 2-3 letter uppercase ISO codes
+											const countryCode = event.countryCode?.toLowerCase().slice(0, 3);
+											if (countryCode && /^[a-z]{2,3}$/.test(countryCode)) {
+												return `https://flagcdn.com/w40/${countryCode}.png`;
+											}
+											return '';
+										})()}
 										alt={`${event.countryCode} flag`}
 										className="h-8 w-8 rounded-full object-cover bg-muted"
 										onError={(e) => {

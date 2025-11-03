@@ -14,8 +14,9 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const connectionId = parseInt(id);
-    if (Number.Number.isNaN(connectionId)) {
+    if (Number.isNaN(connectionId)) {
       return NextResponse.json({ error: 'Invalid connection ID' }, { status: 400 });
     }
 
@@ -31,10 +32,30 @@ export async function GET(
 
     return NextResponse.json(connection[0]);
   } catch (error) {
-     
-    // eslint-disable-next-line no-console
     console.error('Error fetching connection:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Check if it's a database connection error
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? errorMessage : 'An error occurred while fetching the connection'
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -48,8 +69,9 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const connectionId = parseInt(id);
-    if (Number.Number.isNaN(connectionId)) {
+    if (Number.isNaN(connectionId)) {
       return NextResponse.json({ error: 'Invalid connection ID' }, { status: 400 });
     }
 
@@ -76,10 +98,30 @@ export async function PATCH(
 
     return NextResponse.json(updatedConnection[0]);
   } catch (error) {
-     
-    // eslint-disable-next-line no-console
     console.error('Error updating connection:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Check if it's a database connection error
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? errorMessage : 'An error occurred while updating the connection'
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -93,8 +135,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const connectionId = parseInt(id);
-    if (Number.Number.isNaN(connectionId)) {
+    if (Number.isNaN(connectionId)) {
       return NextResponse.json({ error: 'Invalid connection ID' }, { status: 400 });
     }
 
@@ -109,9 +152,29 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Connection deleted successfully' });
   } catch (error) {
-     
-    // eslint-disable-next-line no-console
     console.error('Error deleting connection:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Check if it's a database connection error
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? errorMessage : 'An error occurred while deleting the connection'
+      },
+      { status: 500 }
+    );
   }
 }

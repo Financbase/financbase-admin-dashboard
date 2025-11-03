@@ -103,7 +103,7 @@ export async function getDashboardOverview(userId: string): Promise<DashboardOve
 		.select({
 			total: sql<number>`count(*)`,
 			active: sql<number>`count(case when ${clients.status} = 'active' then 1 end)`,
-			newThisMonth: sql<number>`count(case when ${clients.createdAt} >= ${startOfMonth} then 1 end)`,
+			newThisMonth: sql<number>`count(case when ${clients.createdAt} >= ${startOfMonth}::timestamp then 1 end)`,
 		})
 		.from(clients)
 		.where(eq(clients.userId, userId));
@@ -355,27 +355,40 @@ export async function getChartData(userId: string, params: ChartDataParams): Pro
 	// Query data based on type
 	if (type === 'sales' || type === 'revenue') {
 		// Get invoice data grouped by time intervals
+		// For revenue charts, use paidDate if available, otherwise use issueDate for pending invoices
 		for (let i = 0; i < intervals.length - 1; i++) {
 			const intervalStart = intervals[i];
 			const intervalEnd = intervals[i + 1];
 			
-			const [result] = await db
-				.select({
-					total: sql<number>`sum(case when ${invoices.status} = 'paid' then ${invoices.total}::numeric else 0 end)`,
-					count: sql<number>`count(case when ${invoices.status} = 'paid' then 1 end)`,
-				})
-				.from(invoices)
-				.where(
-					and(
-						eq(invoices.userId, userId),
-						gte(invoices.paidDate, intervalStart),
-						lte(invoices.paidDate, intervalEnd)
-					)
-				);
-
 			if (type === 'sales') {
+				// Sales count: count all invoices in this period
+				const [result] = await db
+					.select({
+						count: sql<number>`count(*)`,
+					})
+					.from(invoices)
+					.where(
+						and(
+							eq(invoices.userId, userId),
+							gte(invoices.issueDate, intervalStart),
+							lte(invoices.issueDate, intervalEnd)
+						)
+					);
 				dataPoints.push(Number(result?.count || 0));
 			} else {
+				// Revenue: sum of paid invoices using paidDate, fallback to issueDate for recent pending
+				const [result] = await db
+					.select({
+						total: sql<number>`sum(case 
+							when ${invoices.status} = 'paid' and ${invoices.paidDate} is not null 
+								and ${invoices.paidDate} >= ${intervalStart} 
+								and ${invoices.paidDate} <= ${intervalEnd}
+							then ${invoices.total}::numeric 
+							else 0 
+						end)`,
+					})
+					.from(invoices)
+					.where(eq(invoices.userId, userId));
 				dataPoints.push(Number(result?.total || 0));
 			}
 		}
@@ -393,8 +406,8 @@ export async function getChartData(userId: string, params: ChartDataParams): Pro
 				.where(
 					and(
 						eq(expenses.userId, userId),
-						gte(expenses.expenseDate, intervalStart),
-						lte(expenses.expenseDate, intervalEnd)
+						gte(expenses.date, intervalStart),
+						lte(expenses.date, intervalEnd)
 					)
 				);
 

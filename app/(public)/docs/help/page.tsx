@@ -41,14 +41,14 @@ const helpCategories = [
 			{
 				title: "Account Setup",
 				description: "Configure your organization and users",
-				href: "/docs/help/account-setup",
+				href: "/docs/account-setup",
 				type: "guide",
 				difficulty: "beginner",
 			},
 			{
 				title: "Dashboard Overview",
 				description: "Understanding your financial dashboard",
-				href: "/docs/help/dashboard",
+				href: "/docs/dashboard",
 				type: "guide",
 				difficulty: "beginner",
 			},

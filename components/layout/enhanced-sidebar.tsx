@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FinancbaseLogo } from "@/components/ui/financbase-logo";
+import { UserAvatar } from "@/components/core/ui/layout/user-avatar";
 import { cn } from "@/lib/utils";
 import {
 	LayoutDashboard,
@@ -220,11 +221,12 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 			className={cn(
 				"flex h-full flex-col transition-all duration-300",
 				"bg-[var(--sidebar)] border-r border-[var(--sidebar-border)]",
+				"overflow-hidden",
 				collapsed ? "w-16" : "w-64",
 			)}
 		>
 			{/* Header */}
-			<div className="flex h-16 items-center justify-between px-4 border-b border-[var(--sidebar-border)]">
+			<div className="flex h-16 items-center justify-between px-4 border-b border-[var(--sidebar-border)] flex-shrink-0">
 				{!collapsed && (
 					<Link href="/dashboard" className="flex items-center gap-2">
 						<FinancbaseLogo size="sm" />
@@ -258,7 +260,7 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 			</div>
 
 			{/* Navigation */}
-			<nav className="flex-1 overflow-y-auto py-4">
+			<nav className="flex-1 overflow-y-auto overflow-x-hidden py-4 min-h-0">
 				<div className="px-4 space-y-6">
 					{Object.entries(groupedNavigation).map(([section, items]) => (
 						<div key={section}>
@@ -284,24 +286,51 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 				</div>
 			</nav>
 
-			{/* Footer */}
-			<div className="border-t border-[var(--sidebar-border)] p-4">
-				<div className={cn(
-					"flex items-center gap-3",
-					collapsed && "justify-center",
-				)}>
-					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] text-sm font-medium">
-						{user?.name?.charAt(0) || "U"}
+			{/* Footer - User Section */}
+			<div className="border-t border-[var(--sidebar-border)] p-4 flex-shrink-0">
+				{user ? (
+					<div className={cn(
+						"flex items-center gap-3",
+						collapsed && "justify-center",
+					)}>
+						<UserAvatar
+							name={user.name || "User"}
+							imageUrl={user.avatar}
+							size={collapsed ? 32 : 40}
+						/>
+						{!collapsed && (
+							<div className="flex-1 min-w-0">
+								<p className="text-sm font-medium text-[var(--sidebar-foreground)] truncate">
+									{user.name || "User"}
+								</p>
+								{user.email && (
+									<p className="text-xs text-[var(--sidebar-foreground)] opacity-60 truncate">
+										{user.email}
+									</p>
+								)}
+							</div>
+						)}
 					</div>
-					{!collapsed && user && (
-						<div className="flex-1 min-w-0">
-							<p className="text-sm font-medium text-[var(--sidebar-foreground)] truncate">{user.name}</p>
-							<p className="text-xs text-[var(--sidebar-foreground)] opacity-60 truncate">
-								{user.email}
-							</p>
+				) : (
+					<div className={cn(
+						"flex items-center gap-3",
+						collapsed && "justify-center",
+					)}>
+						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] text-sm font-medium">
+							U
 						</div>
-					)}
-				</div>
+						{!collapsed && (
+							<div className="flex-1 min-w-0">
+								<p className="text-sm font-medium text-[var(--sidebar-foreground)] truncate">
+									Guest User
+								</p>
+								<p className="text-xs text-[var(--sidebar-foreground)] opacity-60 truncate">
+									Not signed in
+								</p>
+							</div>
+						)}
+					</div>
+				)}
 			</div>
 		</motion.div>
 	);

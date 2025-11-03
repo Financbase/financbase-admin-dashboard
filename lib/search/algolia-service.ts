@@ -1,10 +1,20 @@
-import { algoliasearch } from 'algoliasearch';
+import { algoliasearch, type SearchClient } from 'algoliasearch';
 
-// Initialize Algolia client
-const client = algoliasearch(
-	process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '',
-	process.env.ALGOLIA_ADMIN_KEY || ''
-);
+// Lazy initialization function for Algolia client
+function getAlgoliaClient(): SearchClient {
+	const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
+	const adminKey = process.env.ALGOLIA_ADMIN_KEY;
+
+	if (!appId || !adminKey) {
+		throw new Error(
+			'Algolia configuration missing: NEXT_PUBLIC_ALGOLIA_APP_ID and ALGOLIA_ADMIN_KEY required'
+		);
+	}
+
+	// Algolia v5: algoliasearch() returns a SearchClient directly
+	const client = algoliasearch(appId, adminKey);
+	return client;
+}
 
 // Search indices
 export const SEARCH_INDICES = {
@@ -32,10 +42,20 @@ export interface SearchResponse {
 }
 
 export class AlgoliaSearchService {
-	private client = client;
+	private client: SearchClient | null = null;
 
 	/**
-	 * Search across all indices
+	 * Get or initialize Algolia client
+	 */
+	private getClient() {
+		if (!this.client) {
+			this.client = getAlgoliaClient();
+		}
+		return this.client;
+	}
+
+	/**
+	 * Search across all indices with timeout protection
 	 */
 	async searchAll(query: string, options?: {
 		hitsPerPage?: number;
@@ -43,15 +63,40 @@ export class AlgoliaSearchService {
 		filters?: string;
 	}): Promise<SearchResponse[]> {
 		try {
-			const searchPromises = Object.values(SEARCH_INDICES).map(indexName =>
-				this.search(indexName, query, options)
-			);
+			// Validate client is available
+			const client = this.getClient();
+
+			// Create search promises with individual error handling
+			const searchPromises = Object.values(SEARCH_INDICES).map(async (indexName) => {
+				try {
+					return await Promise.race([
+						this.search(indexName, query, options),
+						new Promise<SearchResponse>((_, reject) =>
+							setTimeout(() => reject(new Error(`Search timeout for index ${indexName}`)), 10000)
+						),
+					]);
+				} catch (error) {
+					console.error(`Search failed for index ${indexName}:`, error);
+					// Return empty result for failed index instead of failing all
+					return {
+						hits: [],
+						nbHits: 0,
+						page: 0,
+						nbPages: 0,
+						hitsPerPage: options?.hitsPerPage || 20,
+						processingTimeMS: 0,
+						query,
+						params: '',
+					};
+				}
+			});
 
 			const results = await Promise.all(searchPromises);
 			return results;
 		} catch (error) {
-			console.error('Search all indices error:', error);
-			return [];
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			console.error('Search all indices error:', errorMessage, error);
+			throw new Error(`Search service unavailable: ${errorMessage}`);
 		}
 	}
 
@@ -70,27 +115,32 @@ export class AlgoliaSearchService {
 		}
 	): Promise<SearchResponse> {
 		try {
-			const index = this.client.initIndex(indexName);
+			const client = this.getClient();
 
-			const searchParams: any = {
-				query,
+			// Build search options according to Algolia v5 API
+			const searchOptions: any = {
 				hitsPerPage: options?.hitsPerPage || 20,
 				page: options?.page || 0,
 			};
 
 			if (options?.filters) {
-				searchParams.filters = options.filters;
+				searchOptions.filters = options.filters;
 			}
 
 			if (options?.facetFilters) {
-				searchParams.facetFilters = options.facetFilters;
+				searchOptions.facetFilters = options.facetFilters;
 			}
 
 			if (options?.numericFilters) {
-				searchParams.numericFilters = options.numericFilters;
+				searchOptions.numericFilters = options.numericFilters;
 			}
 
-			const response = await index.search(searchParams);
+			// Algolia v5 API: client.searchSingleIndex({ indexName, query, ...options })
+			const response = await client.searchSingleIndex({
+				indexName,
+				query,
+				...searchOptions,
+			});
 
 			return {
 				hits: response.hits as SearchResult[],
@@ -103,17 +153,27 @@ export class AlgoliaSearchService {
 				params: response.params,
 			};
 		} catch (error) {
-			console.error(`Search error for index ${indexName}:`, error);
-			return {
-				hits: [],
-				nbHits: 0,
-				page: 0,
-				nbPages: 0,
-				hitsPerPage: options?.hitsPerPage || 20,
-				processingTimeMS: 0,
+			// Enhanced error logging for Algolia-specific errors
+			const errorDetails: any = {
+				indexName,
 				query,
-				params: '',
+				errorType: error instanceof Error ? error.name : 'Unknown',
+				errorMessage: error instanceof Error ? error.message : String(error),
 			};
+
+			// Check for Algolia-specific error properties
+			if (error && typeof error === 'object') {
+				if ('status' in error) errorDetails.status = error.status;
+				if ('statusCode' in error) errorDetails.statusCode = error.statusCode;
+				if ('indexName' in error) errorDetails.algoliaIndexName = error.indexName;
+			}
+
+			console.error(`Algolia search error for index ${indexName}:`, errorDetails, error);
+
+			// Re-throw with more context
+			throw new Error(
+				`Algolia search failed for index "${indexName}": ${error instanceof Error ? error.message : 'Unknown error'}`
+			);
 		}
 	}
 
@@ -191,27 +251,25 @@ export class AlgoliaSearchService {
 	 * Get search suggestions/autocomplete
 	 */
 	async getSuggestions(query: string, indexName: string = SEARCH_INDICES.PRODUCTS): Promise<string[]> {
-		try {
-			const index = this.client.initIndex(indexName);
+		const client = this.getClient();
 
-			const response = await index.search(query, {
-				hitsPerPage: 5,
-				attributesToRetrieve: ['name', 'description'],
-				attributesToHighlight: ['name'],
-			});
+		// Algolia v5 API: client.searchSingleIndex({ indexName, query, ...options })
+		const response = await client.searchSingleIndex({
+			indexName,
+			query,
+			hitsPerPage: 5,
+			attributesToRetrieve: ['name', 'description'],
+			attributesToHighlight: ['name'],
+		});
 
-			// Extract unique suggestions from results
-			const suggestions = new Set<string>();
-			response.hits.forEach(hit => {
-				if (hit.name) suggestions.add(hit.name);
-				if (hit.description) suggestions.add(hit.description);
-			});
+		// Extract unique suggestions from results
+		const suggestions = new Set<string>();
+		response.hits.forEach(hit => {
+			if (hit.name) suggestions.add(hit.name);
+			if (hit.description) suggestions.add(hit.description);
+		});
 
-			return Array.from(suggestions).slice(0, 5);
-		} catch (error) {
-			console.error('Suggestions error:', error);
-			return [];
-		}
+		return Array.from(suggestions).slice(0, 5);
 	}
 }
 

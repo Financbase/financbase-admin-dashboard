@@ -28,7 +28,7 @@ export function UserAvatar({
 	return (
 		<Avatar
 			className={cn("shrink-0", className)}
-			style={{ width: size, height: size }}
+			style={{ width: size, height: size, minWidth: size, minHeight: size }}
 		>
 			{avatarProps.src && (
 				<AvatarImage

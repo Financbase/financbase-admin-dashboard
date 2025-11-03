@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { sql } from "@/lib/neon";
 import { BarChart3, MessageCircle, XCircle } from "lucide-react";
 

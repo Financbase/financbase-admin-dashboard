@@ -12,10 +12,15 @@ export async function GET() {
 		const clientAnalytics = await AnalyticsService.getClientAnalytics(userId);
 
 		// Return in format expected by the hook
+		// Get the latest month's new clients count, or 0 if no data
+		const latestMonth = clientAnalytics.newClients.length > 0 
+			? clientAnalytics.newClients[clientAnalytics.newClients.length - 1]?.count || 0
+			: 0;
+
 		return NextResponse.json({
 			totalClients: clientAnalytics.totalClients,
 			activeClients: clientAnalytics.activeClients,
-			newClientsThisMonth: clientAnalytics.newClients[clientAnalytics.newClients.length - 1]?.count || 0,
+			newClientsThisMonth: latestMonth,
 			clientRetention: clientAnalytics.clientRetention,
 			satisfactionScore: clientAnalytics.satisfactionScore,
 		});

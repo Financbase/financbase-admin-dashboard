@@ -131,9 +131,9 @@ export function useDashboardStats() {
 	return { data, loading: isLoading, error };
 }
 
-export function useCustomerAnalytics() {
+export function useCustomerAnalytics(dateRange?: { from: Date; to: Date }) {
 	const { data: apiData, isLoading, error } = useQuery({
-		queryKey: ['customer-analytics'],
+		queryKey: ['customer-analytics', dateRange],
 		queryFn: async () => {
 			const response = await fetch('/api/analytics/clients');
 			if (!response.ok) {
@@ -143,13 +143,82 @@ export function useCustomerAnalytics() {
 		},
 	});
 
-	// Transform API data to match expected format
-	const data = apiData ? {
-		totalCustomers: apiData.totalClients || 0,
-		newCustomers: apiData.newClientsThisMonth || 0,
-		retentionRate: apiData.clientRetention || 0,
-		satisfactionScore: apiData.satisfactionScore || 0
-	} : null;
+	// Transform API data to match component's expected format
+	const data = apiData ? (() => {
+		const totalClients = apiData.totalClients || 0;
+		const activeClients = apiData.activeClients || 0;
+		const newClients = apiData.newClientsThisMonth || 0;
+		const retentionRate = apiData.clientRetention || 0;
+		const satisfactionScore = apiData.satisfactionScore || 0;
+		
+		// Calculate growth (simplified - use newClients as growth indicator)
+		const customerGrowth = newClients > 0 ? (newClients / Math.max(totalClients - newClients, 1)) * 100 : 0;
+		const growthType: 'increase' | 'decrease' = newClients > 0 ? 'increase' : 'decrease';
+
+		// Create Doughnut chart data (distribution: active, new, inactive)
+		const inactiveClients = Math.max(0, totalClients - activeClients);
+		const chartData = {
+			labels: ['Active Clients', 'New This Month', 'Inactive'],
+			datasets: [{
+				label: 'Customers',
+				data: [
+					activeClients - newClients, // Active but not new
+					newClients,
+					inactiveClients,
+				],
+				backgroundColor: [
+					getChartColor(2, 0.8), // Green for active
+					getChartColor(1, 0.8), // Blue for new
+					getChartColor(5, 0.8), // Gray for inactive
+				],
+				borderColor: [
+					getChartColor(2),
+					getChartColor(1),
+					getChartColor(5),
+				],
+				borderWidth: 1,
+			}],
+		};
+
+		// Create stats array for display
+		const total = totalClients || 1; // Prevent division by zero
+		const stats = [
+			{
+				label: 'Active Clients',
+				value: activeClients.toString(),
+				percentage: `${((activeClients / total) * 100).toFixed(1)}%`,
+				color: 'bg-green-500',
+			},
+			{
+				label: 'New This Month',
+				value: newClients.toString(),
+				percentage: `${((newClients / total) * 100).toFixed(1)}%`,
+				color: 'bg-blue-500',
+			},
+			{
+				label: 'Retention Rate',
+				value: `${retentionRate.toFixed(1)}%`,
+				percentage: `${((activeClients / total) * 100).toFixed(1)}%`,
+				color: 'bg-purple-500',
+			},
+			{
+				label: 'Satisfaction',
+				value: `${satisfactionScore.toFixed(1)}/5.0`,
+				percentage: `${((satisfactionScore / 5) * 100).toFixed(1)}%`,
+				color: 'bg-yellow-500',
+			},
+		];
+
+		return {
+			chartData,
+			stats,
+			summary: {
+				totalCustomers: totalClients.toString(),
+				customerGrowth: Math.abs(customerGrowth),
+				growthType,
+			},
+		};
+	})() : null;
 
 	return { data, loading: isLoading, error };
 }

@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-// import { headers } from 'next/headers'; // Temporarily disabled
 import { DashboardService } from '@/lib/services/dashboard-service';
 
 export async function GET(request: Request) {
 	try {
-		// TEMPORARILY DISABLED FOR TESTING
-		// const headersList = await headers();
-		// const { userId } = await auth();
-		// if (!userId) {
-		// 	return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		// }
-		const userId = '550e8400-e29b-41d4-a716-446655440001'; // Temporary for testing
+		// Authenticate user
+		const { userId } = await auth();
+		if (!userId) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
 
 		// Get overview data from database
 		const overview = await DashboardService.getOverview(userId);

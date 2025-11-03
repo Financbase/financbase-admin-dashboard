@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
 	Plug,
 	Activity,
@@ -30,7 +34,9 @@ import {
 	BookOpen,
 	AlertCircle,
 	XCircle,
-	Loader2
+	Loader2,
+	ExternalLink,
+	Info
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MarketplaceSystem } from '@/components/marketplace/marketplace-system';
@@ -113,6 +119,7 @@ const SAMPLE_INTEGRATIONS: Integration[] = [
 ];
 
 export default function IntegrationsPage() {
+	const router = useRouter();
 	const [activeTab, setActiveTab] = useState('overview');
 	const [integrations, setIntegrations] = useState<Integration[]>(SAMPLE_INTEGRATIONS);
 	const [loading, setLoading] = useState(false);
@@ -120,6 +127,18 @@ export default function IntegrationsPage() {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState('all');
 	const [categoryFilter, setCategoryFilter] = useState('all');
+	
+	// Dialog states
+	const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+	const [configureDialogOpen, setConfigureDialogOpen] = useState(false);
+	const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+	const [addIntegrationDialogOpen, setAddIntegrationDialogOpen] = useState(false);
+	const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
+	
+	// Settings states
+	const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
+	const [errorNotificationsEnabled, setErrorNotificationsEnabled] = useState(true);
+	const [dataRetentionDays, setDataRetentionDays] = useState(90);
 
 	const [stats] = useState<IntegrationStats>({
 		totalIntegrations: 4,
@@ -187,6 +206,60 @@ export default function IntegrationsPage() {
 		}
 	};
 
+	const handleViewDetails = (integration: Integration) => {
+		setSelectedIntegration(integration);
+		setDetailsDialogOpen(true);
+	};
+
+	const handleConfigure = (integration: Integration) => {
+		setSelectedIntegration(integration);
+		setConfigureDialogOpen(true);
+	};
+
+	const handleSettings = (integration: Integration) => {
+		setSelectedIntegration(integration);
+		setSettingsDialogOpen(true);
+	};
+
+	const handleDocumentation = () => {
+		router.push('/integrations/api-docs');
+	};
+
+	const handleAddIntegration = () => {
+		setAddIntegrationDialogOpen(true);
+	};
+
+	const handleSaveConfiguration = async () => {
+		setLoading(true);
+		try {
+			// Simulate API call
+			await new Promise(resolve => setTimeout(resolve, 1000));
+			setConfigureDialogOpen(false);
+			setError(null);
+			// Show success message or update integration
+		} catch (err) {
+			setError('Failed to save configuration. Please try again.');
+			console.error('Error saving configuration:', err);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleSaveSettings = async () => {
+		setLoading(true);
+		try {
+			// Simulate API call
+			await new Promise(resolve => setTimeout(resolve, 1000));
+			setSettingsDialogOpen(false);
+			setError(null);
+		} catch (err) {
+			setError('Failed to save settings. Please try again.');
+			console.error('Error saving settings:', err);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const filteredIntegrations = integrations.filter(integration => {
 		const matchesSearch = integration.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 							  integration.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -230,11 +303,11 @@ export default function IntegrationsPage() {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button variant="outline">
+					<Button variant="outline" onClick={handleDocumentation}>
 						<BookOpen className="mr-2 h-4 w-4" />
 						Documentation
 					</Button>
-					<Button>
+					<Button onClick={handleAddIntegration}>
 						<Plus className="mr-2 h-4 w-4" />
 						Add Integration
 					</Button>
@@ -431,15 +504,15 @@ export default function IntegrationsPage() {
 																	</Button>
 																</DropdownMenuTrigger>
 																<DropdownMenuContent align="end">
-																	<DropdownMenuItem>
+																	<DropdownMenuItem onClick={() => handleViewDetails(integration)}>
 																		<Eye className="h-4 w-4 mr-2" />
 																		View Details
 																	</DropdownMenuItem>
-																	<DropdownMenuItem>
+																	<DropdownMenuItem onClick={() => handleConfigure(integration)}>
 																		<Edit className="h-4 w-4 mr-2" />
 																		Configure
 																	</DropdownMenuItem>
-																	<DropdownMenuItem>
+																	<DropdownMenuItem onClick={() => handleSettings(integration)}>
 																		<Settings className="h-4 w-4 mr-2" />
 																		Settings
 																	</DropdownMenuItem>
@@ -490,45 +563,386 @@ export default function IntegrationsPage() {
 						</CardHeader>
 						<CardContent className="space-y-6">
 							<div className="flex items-center justify-between">
-								<div>
+								<div className="flex-1">
 									<h4 className="font-medium">Auto-sync Enabled</h4>
 									<p className="text-sm text-muted-foreground">
 										Automatically sync data from integrations
 									</p>
 								</div>
-								<Button variant="outline" size="sm">
-									<Settings className="h-4 w-4 mr-2" />
-									Configure
-								</Button>
+								<Switch
+									checked={autoSyncEnabled}
+									onCheckedChange={setAutoSyncEnabled}
+								/>
 							</div>
 							<div className="flex items-center justify-between">
-								<div>
+								<div className="flex-1">
 									<h4 className="font-medium">Error Notifications</h4>
 									<p className="text-sm text-muted-foreground">
 										Receive notifications when integrations fail
 									</p>
 								</div>
-								<Button variant="outline" size="sm">
-									<Settings className="h-4 w-4 mr-2" />
-									Configure
-								</Button>
+								<Switch
+									checked={errorNotificationsEnabled}
+									onCheckedChange={setErrorNotificationsEnabled}
+								/>
 							</div>
 							<div className="flex items-center justify-between">
-								<div>
+								<div className="flex-1">
 									<h4 className="font-medium">Data Retention</h4>
 									<p className="text-sm text-muted-foreground">
-										Configure how long to keep integration data
+										Configure how long to keep integration data (days)
 									</p>
 								</div>
-								<Button variant="outline" size="sm">
-									<Settings className="h-4 w-4 mr-2" />
-									Configure
+								<Input
+									type="number"
+									value={dataRetentionDays}
+									onChange={(e) => setDataRetentionDays(parseInt(e.target.value) || 90)}
+									className="w-24"
+									min={1}
+									max={365}
+								/>
+							</div>
+							<div className="pt-4 border-t">
+								<Button onClick={async () => {
+									setLoading(true);
+									try {
+										await new Promise(resolve => setTimeout(resolve, 1000));
+										setError(null);
+									} catch (err) {
+										setError('Failed to save settings');
+									} finally {
+										setLoading(false);
+									}
+								}} disabled={loading}>
+									{loading ? (
+										<>
+											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+											Saving...
+										</>
+									) : (
+										'Save Settings'
+									)}
 								</Button>
 							</div>
 						</CardContent>
 					</Card>
 				</TabsContent>
 			</Tabs>
+
+			{/* View Details Dialog */}
+			<Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+				<DialogContent className="max-w-2xl">
+					<DialogHeader>
+						<DialogTitle className="flex items-center gap-2">
+							<Eye className="h-5 w-5" />
+							{selectedIntegration?.name} Details
+						</DialogTitle>
+						<DialogDescription>
+							View detailed information about this integration
+						</DialogDescription>
+					</DialogHeader>
+					{selectedIntegration && (
+						<div className="space-y-4">
+							<div>
+								<Label className="text-sm font-medium">Description</Label>
+								<p className="text-sm text-muted-foreground mt-1">
+									{selectedIntegration.description}
+								</p>
+							</div>
+							<div className="grid grid-cols-2 gap-4">
+								<div>
+									<Label className="text-sm font-medium">Category</Label>
+									<p className="text-sm text-muted-foreground mt-1">
+										{selectedIntegration.category}
+									</p>
+								</div>
+								<div>
+									<Label className="text-sm font-medium">Status</Label>
+									<div className="mt-1">
+										<Badge className={getStatusColor(selectedIntegration.status)}>
+											{selectedIntegration.status}
+										</Badge>
+									</div>
+								</div>
+								<div>
+									<Label className="text-sm font-medium">Connections</Label>
+									<p className="text-sm text-muted-foreground mt-1">
+										{selectedIntegration.connectionCount || 0} active
+									</p>
+								</div>
+								{selectedIntegration.lastSync && (
+									<div>
+										<Label className="text-sm font-medium">Last Sync</Label>
+										<p className="text-sm text-muted-foreground mt-1">
+											{new Date(selectedIntegration.lastSync).toLocaleString()}
+										</p>
+									</div>
+								)}
+							</div>
+							<div>
+								<Label className="text-sm font-medium">Features</Label>
+								<div className="flex flex-wrap gap-2 mt-2">
+									{selectedIntegration.features.map((feature) => (
+										<Badge key={feature} variant="outline">
+											{feature}
+										</Badge>
+									))}
+								</div>
+							</div>
+							{selectedIntegration.errorCount && selectedIntegration.errorCount > 0 && (
+								<Alert variant="destructive">
+									<AlertTriangle className="h-4 w-4" />
+									<AlertDescription>
+										{selectedIntegration.errorCount} error(s) detected
+										{selectedIntegration.lastError && (
+											<span className="block mt-1">Latest: {selectedIntegration.lastError}</span>
+										)}
+									</AlertDescription>
+								</Alert>
+							)}
+						</div>
+					)}
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
+							Close
+						</Button>
+						<Button onClick={() => {
+							setDetailsDialogOpen(false);
+							if (selectedIntegration) {
+								handleConfigure(selectedIntegration);
+							}
+						}}>
+							<Edit className="mr-2 h-4 w-4" />
+							Configure
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			{/* Configure Dialog */}
+			<Dialog open={configureDialogOpen} onOpenChange={setConfigureDialogOpen}>
+				<DialogContent className="max-w-2xl">
+					<DialogHeader>
+						<DialogTitle className="flex items-center gap-2">
+							<Edit className="h-5 w-5" />
+							Configure {selectedIntegration?.name}
+						</DialogTitle>
+						<DialogDescription>
+							Configure integration settings and connection parameters
+						</DialogDescription>
+					</DialogHeader>
+					{selectedIntegration && (
+						<div className="space-y-4">
+							<div>
+								<Label htmlFor="integration-name">Connection Name</Label>
+								<Input
+									id="integration-name"
+									defaultValue={`${selectedIntegration.name} Connection`}
+									className="mt-1"
+								/>
+							</div>
+							<div>
+								<Label htmlFor="sync-frequency">Sync Frequency</Label>
+								<Select defaultValue="hourly">
+									<SelectTrigger className="mt-1">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="realtime">Real-time</SelectItem>
+										<SelectItem value="hourly">Hourly</SelectItem>
+										<SelectItem value="daily">Daily</SelectItem>
+										<SelectItem value="weekly">Weekly</SelectItem>
+										<SelectItem value="manual">Manual</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+							<div className="flex items-center justify-between">
+								<div className="flex-1">
+									<Label>Enable Auto-sync</Label>
+									<p className="text-sm text-muted-foreground">
+										Automatically sync data on schedule
+									</p>
+								</div>
+								<Switch defaultChecked />
+							</div>
+							<div className="flex items-center justify-between">
+								<div className="flex-1">
+									<Label>Enable Webhooks</Label>
+									<p className="text-sm text-muted-foreground">
+										Receive real-time updates via webhooks
+									</p>
+								</div>
+								<Switch defaultChecked={selectedIntegration.status === 'active'} />
+							</div>
+							<div>
+								<Label htmlFor="webhook-url">Webhook URL (Optional)</Label>
+								<Input
+									id="webhook-url"
+									placeholder="https://your-domain.com/webhooks/integration"
+									className="mt-1"
+								/>
+							</div>
+						</div>
+					)}
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setConfigureDialogOpen(false)}>
+							Cancel
+						</Button>
+						<Button onClick={handleSaveConfiguration} disabled={loading}>
+							{loading ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Saving...
+								</>
+							) : (
+								'Save Configuration'
+							)}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			{/* Settings Dialog */}
+			<Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+				<DialogContent className="max-w-2xl">
+					<DialogHeader>
+						<DialogTitle className="flex items-center gap-2">
+							<Settings className="h-5 w-5" />
+							{selectedIntegration?.name} Settings
+						</DialogTitle>
+						<DialogDescription>
+							Manage advanced settings for this integration
+						</DialogDescription>
+					</DialogHeader>
+					{selectedIntegration && (
+						<div className="space-y-4">
+							<div className="flex items-center justify-between">
+								<div className="flex-1">
+									<Label>Enable Integration</Label>
+									<p className="text-sm text-muted-foreground">
+										Toggle integration on/off
+									</p>
+								</div>
+								<Switch defaultChecked={selectedIntegration.status === 'active'} />
+							</div>
+							<div className="flex items-center justify-between">
+								<div className="flex-1">
+									<Label>Error Notifications</Label>
+									<p className="text-sm text-muted-foreground">
+										Notify on errors
+									</p>
+								</div>
+								<Switch defaultChecked />
+							</div>
+							<div>
+								<Label htmlFor="retry-count">Max Retry Attempts</Label>
+								<Input
+									id="retry-count"
+									type="number"
+									defaultValue="3"
+									min={0}
+									max={10}
+									className="mt-1 w-32"
+								/>
+							</div>
+							<div>
+								<Label htmlFor="timeout">Request Timeout (seconds)</Label>
+								<Input
+									id="timeout"
+									type="number"
+									defaultValue="30"
+									min={5}
+									max={300}
+									className="mt-1 w-32"
+								/>
+							</div>
+							{selectedIntegration.status === 'error' && (
+								<Alert>
+									<Info className="h-4 w-4" />
+									<AlertDescription>
+										This integration has errors. Check the connection and try reconnecting.
+									</AlertDescription>
+								</Alert>
+							)}
+						</div>
+					)}
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>
+							Cancel
+						</Button>
+						<Button onClick={handleSaveSettings} disabled={loading}>
+							{loading ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Saving...
+								</>
+							) : (
+								'Save Settings'
+							)}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			{/* Add Integration Dialog */}
+			<Dialog open={addIntegrationDialogOpen} onOpenChange={setAddIntegrationDialogOpen}>
+				<DialogContent className="max-w-lg">
+					<DialogHeader>
+						<DialogTitle className="flex items-center gap-2">
+							<Plus className="h-5 w-5" />
+							Add New Integration
+						</DialogTitle>
+						<DialogDescription>
+							Connect a new integration service to your account
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-4">
+						<div>
+							<Label>Select Integration</Label>
+							<Select>
+								<SelectTrigger className="mt-1">
+									<SelectValue placeholder="Choose an integration..." />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="stripe">Stripe - Payment Processing</SelectItem>
+									<SelectItem value="slack">Slack - Team Communication</SelectItem>
+									<SelectItem value="quickbooks">QuickBooks - Accounting</SelectItem>
+									<SelectItem value="google-workspace">Google Workspace - Productivity</SelectItem>
+									<SelectItem value="shopify">Shopify - E-commerce</SelectItem>
+									<SelectItem value="mailchimp">Mailchimp - Email Marketing</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+						<div>
+							<Label htmlFor="connection-name">Connection Name</Label>
+							<Input
+								id="connection-name"
+								placeholder="My Integration Connection"
+								className="mt-1"
+							/>
+						</div>
+						<Alert>
+							<Info className="h-4 w-4" />
+							<AlertDescription>
+								You will be redirected to authorize this integration. Make sure you have the necessary credentials ready.
+							</AlertDescription>
+						</Alert>
+					</div>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setAddIntegrationDialogOpen(false)}>
+							Cancel
+						</Button>
+						<Button onClick={() => {
+							setAddIntegrationDialogOpen(false);
+							// In a real app, this would trigger OAuth flow
+							setError(null);
+						}}>
+							<ExternalLink className="mr-2 h-4 w-4" />
+							Continue to Authorization
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

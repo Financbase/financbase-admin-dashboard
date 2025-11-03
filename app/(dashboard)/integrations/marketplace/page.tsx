@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -63,141 +64,12 @@ interface MarketplaceStats {
   availablePlugins: number;
   totalDownloads: number;
   averageRating: number;
+  categoryCounts?: Record<string, number>;
 }
 
-// Sample plugins data - moved outside component to avoid dependency issues
-const samplePlugins: Plugin[] = [
-    {
-      id: 1,
-      name: "Stripe Payment Gateway",
-      description: "Accept payments online with Stripe integration",
-      category: "Payments",
-      developer: "Stripe Inc.",
-      price: "Free",
-      rating: 4.9,
-      downloads: 15420,
-      status: "installed",
-      version: "2.1.0",
-      lastUpdated: "2024-10-15",
-      compatibility: "v2.0+",
-      features: ["Payment Processing", "Subscription Management", "Webhooks"],
-      icon: CreditCard
-    },
-    {
-      id: 2,
-      name: "Google Analytics Integration",
-      description: "Track website analytics with Google Analytics 4",
-      category: "Analytics",
-      developer: "Google LLC",
-      price: "Free",
-      rating: 4.8,
-      downloads: 12850,
-      status: "available",
-      version: "1.8.2",
-      lastUpdated: "2024-10-12",
-      compatibility: "v2.0+",
-      features: ["Real-time Analytics", "Custom Events", "E-commerce Tracking"],
-      icon: BarChart3
-    },
-    {
-      id: 3,
-      name: "Mailchimp Email Marketing",
-      description: "Send marketing emails and manage subscribers",
-      category: "Marketing",
-      developer: "Mailchimp",
-      price: "$29/month",
-      rating: 4.7,
-      downloads: 9850,
-      status: "installed",
-      version: "3.2.1",
-      lastUpdated: "2024-10-10",
-      compatibility: "v2.0+",
-      features: ["Email Campaigns", "Automation", "Segmentation"],
-      icon: Mail
-    },
-    {
-      id: 4,
-      name: "Slack Notifications",
-      description: "Send notifications to Slack channels",
-      category: "Communication",
-      developer: "Slack Technologies",
-      price: "Free",
-      rating: 4.6,
-      downloads: 7650,
-      status: "available",
-      version: "1.5.0",
-      lastUpdated: "2024-10-08",
-      compatibility: "v2.0+",
-      features: ["Real-time Notifications", "Custom Channels", "Rich Messages"],
-      icon: MessageSquare
-    },
-    {
-      id: 5,
-      name: "AWS S3 Storage",
-      description: "Store files securely in AWS S3 buckets",
-      category: "Storage",
-      developer: "Amazon Web Services",
-      price: "$15/month",
-      rating: 4.9,
-      downloads: 11200,
-      status: "installed",
-      version: "2.0.3",
-      lastUpdated: "2024-10-05",
-      compatibility: "v2.0+",
-      features: ["File Upload", "CDN Integration", "Backup"],
-      icon: Database
-    },
-    {
-      id: 6,
-      name: "Zapier Automation",
-      description: "Connect with 5000+ apps via Zapier",
-      category: "Automation",
-      developer: "Zapier Inc.",
-      price: "$20/month",
-      rating: 4.8,
-      downloads: 8900,
-      status: "available",
-      version: "1.9.1",
-      lastUpdated: "2024-10-03",
-      compatibility: "v2.0+",
-      features: ["Workflow Automation", "Multi-app Integration", "Triggers"],
-      icon: Zap
-    },
-    {
-      id: 7,
-      name: "Calendly Scheduling",
-      description: "Let customers book appointments online",
-      category: "Scheduling",
-      developer: "Calendly LLC",
-      price: "Free",
-      rating: 4.7,
-      downloads: 6540,
-      status: "available",
-      version: "1.4.2",
-      lastUpdated: "2024-10-01",
-      compatibility: "v2.0+",
-      features: ["Online Booking", "Calendar Sync", "Reminders"],
-      icon: Calendar
-    },
-    {
-      id: 8,
-      name: "Shopify E-commerce",
-      description: "Sell products online with Shopify integration",
-      category: "E-commerce",
-      developer: "Shopify Inc.",
-      price: "$39/month",
-      rating: 4.9,
-      downloads: 18750,
-      status: "installed",
-      version: "3.1.0",
-      lastUpdated: "2024-09-28",
-      compatibility: "v2.0+",
-      features: ["Product Management", "Order Processing", "Inventory Sync"],
-      icon: ShoppingCart
-    }
-  ];
 
 export default function PluginMarketplacePage() {
+  const { isLoaded, isSignedIn } = useAuth();
   const [plugins, setPlugins] = useState<Plugin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -214,35 +86,143 @@ export default function PluginMarketplacePage() {
     averageRating: 0
   });
 
-  // Load plugins on component mount
+  // Load plugins and stats on component mount
   useEffect(() => {
-    const loadPlugins = async () => {
+    if (!isLoaded) {
+      console.log('Clerk auth is still loading...');
+      return; // Wait for Clerk to load
+    }
+    
+    console.log('Auth state:', { isLoaded, isSignedIn });
+    
+    // Try to load data even if isSignedIn is false - Clerk might have cookies but state not updated
+    // The API will return 401 if truly unauthorized, so we can let it through
+    const loadData = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Simulate API call - in real app, this would fetch from your API
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setPlugins(samplePlugins);
+        // Fetch marketplace stats - cookies are automatically included for same-origin requests
+        const statsResponse = await fetch('/api/marketplace/stats', {
+          credentials: 'include',
+        });
+        if (!statsResponse.ok) {
+          if (statsResponse.status === 401) {
+            const errorMsg = 'Please sign in to access the marketplace. If you are signed in, try refreshing the page.';
+            setError(errorMsg);
+            setLoading(false);
+            return; // Stop here if unauthorized
+          }
+          throw new Error('Failed to load marketplace statistics');
+        }
+        const statsData = await statsResponse.json();
+        if (statsData.success && statsData.stats) {
+          setMarketplaceStats({
+            totalPlugins: statsData.stats.totalPlugins,
+            installedPlugins: statsData.stats.installedPlugins,
+            availablePlugins: statsData.stats.availablePlugins,
+            totalDownloads: statsData.stats.totalDownloads,
+            averageRating: statsData.stats.averageRating,
+            categoryCounts: statsData.stats.categoryCounts || {}
+          });
+        }
+
+        // Fetch installed plugins to determine status
+        const installedResponse = await fetch('/api/marketplace/plugins/installed', {
+          credentials: 'include',
+        });
+        let installedPluginsData = [];
+        if (installedResponse.ok) {
+          try {
+            installedPluginsData = await installedResponse.json();
+          } catch (e) {
+            console.warn('Failed to parse installed plugins response:', e);
+          }
+        } else if (installedResponse.status === 401) {
+          console.warn('Unauthorized - cannot load installed plugins');
+        }
+        const installedPluginIds = new Set(
+          Array.isArray(installedPluginsData) 
+            ? installedPluginsData.map((ip: any) => ip.pluginId || ip.id)
+            : []
+        );
+
+        // Fetch all marketplace plugins - increase limit to get all 156 plugins
+        const pluginsResponse = await fetch('/api/marketplace/plugins?limit=200&offset=0', {
+          credentials: 'include',
+        });
+        if (!pluginsResponse.ok) {
+          if (pluginsResponse.status === 401) {
+            // Don't throw - just log and set empty array
+            console.error('Unauthorized - cannot load plugins');
+            setPlugins([]);
+            return; // Exit early but don't show error if stats loaded
+          }
+          throw new Error(`Failed to load plugins: ${pluginsResponse.status} ${pluginsResponse.statusText}`);
+        }
+        const pluginsData = await pluginsResponse.json();
         
-        // Calculate stats
-        const stats = {
-          totalPlugins: samplePlugins.length,
-          installedPlugins: samplePlugins.filter(p => p.status === 'installed').length,
-          availablePlugins: samplePlugins.filter(p => p.status === 'available').length,
-          totalDownloads: samplePlugins.reduce((sum, p) => sum + p.downloads, 0),
-          averageRating: samplePlugins.reduce((sum, p) => sum + p.rating, 0) / samplePlugins.length
-        };
-        setMarketplaceStats(stats);
+        // Debug logging
+        console.log('Plugins API Response:', {
+          pluginsCount: pluginsData.plugins?.length || 0,
+          pagination: pluginsData.pagination,
+          totalPlugins: pluginsData.pagination?.total || 0
+        });
+        
+        // Map database schema to UI format
+        const mappedPlugins: Plugin[] = (pluginsData.plugins || []).map((plugin: any) => {
+          const isInstalled = installedPluginIds.has(plugin.id);
+          const features = Array.isArray(plugin.features) ? plugin.features : [];
+          const tags = Array.isArray(plugin.tags) ? plugin.tags : [];
+          
+          // Map icon based on category or use a default
+          const getIcon = () => {
+            const category = (plugin.category || '').toLowerCase();
+            if (category.includes('payment')) return CreditCard;
+            if (category.includes('analytics')) return BarChart3;
+            if (category.includes('marketing')) return Mail;
+            if (category.includes('communication')) return MessageSquare;
+            if (category.includes('storage')) return Database;
+            if (category.includes('automation')) return Zap;
+            if (category.includes('scheduling')) return Calendar;
+            if (category.includes('e-commerce') || category.includes('ecommerce')) return ShoppingCart;
+            return Code;
+          };
+
+          return {
+            id: plugin.id,
+            name: plugin.name || 'Unknown Plugin',
+            description: plugin.description || plugin.shortDescription || '',
+            category: plugin.category || 'Other',
+            developer: plugin.author || 'Unknown',
+            price: plugin.isFree ? 'Free' : `$${(plugin.price || 0) / 100}/month`,
+            rating: Number(plugin.rating) || 0,
+            downloads: plugin.downloadCount || plugin.installCount || 0,
+            status: isInstalled ? 'installed' as const : 'available' as const,
+            version: plugin.version || '1.0.0',
+            lastUpdated: plugin.updatedAt ? new Date(plugin.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            compatibility: `v${plugin.version || '1.0.0'}+`,
+            features: features.length > 0 ? features : ['Feature 1', 'Feature 2'],
+            icon: getIcon()
+          };
+        });
+
+        console.log('Mapped plugins:', {
+          totalMapped: mappedPlugins.length,
+          samplePlugin: mappedPlugins[0]
+        });
+        
+        setPlugins(mappedPlugins);
       } catch (err) {
-        setError('Failed to load plugins. Please try again.');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load plugins. Please try again.';
+        setError(errorMessage);
         console.error('Error loading plugins:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadPlugins();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    loadData();
+  }, [isLoaded, isSignedIn]); // Only depend on auth state, not functions
 
   // Handle plugin installation
   const handleInstallPlugin = async (pluginId: number) => {
@@ -250,8 +230,20 @@ export default function PluginMarketplacePage() {
     setError(null);
     
     try {
-      // Simulate installation process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await fetch(`/api/marketplace/plugins/${pluginId}/install`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Installation failed');
+      }
       
       // Update plugin status
       setPlugins(prev => prev.map(plugin => 
@@ -260,20 +252,32 @@ export default function PluginMarketplacePage() {
           : plugin
       ));
       
-      // Update stats
-      setMarketplaceStats(prev => ({
-        ...prev,
-        installedPlugins: prev.installedPlugins + 1,
-        availablePlugins: prev.availablePlugins - 1
-      }));
+      // Refresh stats
+      const statsResponse = await fetch('/api/marketplace/stats', {
+        credentials: 'include',
+      });
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        if (statsData.success && statsData.stats) {
+          setMarketplaceStats({
+            totalPlugins: statsData.stats.totalPlugins,
+            installedPlugins: statsData.stats.installedPlugins,
+            availablePlugins: statsData.stats.availablePlugins,
+            totalDownloads: statsData.stats.totalDownloads,
+            averageRating: statsData.stats.averageRating,
+            categoryCounts: statsData.stats.categoryCounts || {}
+          });
+        }
+      }
     } catch (err) {
-      setError(`Failed to install plugin. Please try again.`);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to install plugin. Please try again.';
+      setError(errorMessage);
       console.error('Error installing plugin:', err);
       
       // Update plugin status to error
       setPlugins(prev => prev.map(plugin => 
         plugin.id === pluginId 
-          ? { ...plugin, status: 'error' as const, errorMessage: 'Installation failed' }
+          ? { ...plugin, status: 'error' as const, errorMessage }
           : plugin
       ));
     } finally {
@@ -291,8 +295,37 @@ export default function PluginMarketplacePage() {
     
     setError(null);
     try {
-      // Simulate uninstallation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get installation ID first
+      const installedResponse = await fetch('/api/marketplace/plugins/installed', {
+        credentials: 'include',
+      });
+      if (!installedResponse.ok) {
+        if (installedResponse.status === 401) {
+          throw new Error('Authentication required. Please sign in again.');
+        }
+        throw new Error('Failed to fetch installed plugins');
+      }
+      const installedPluginsData = await installedResponse.json();
+      const installation = Array.isArray(installedPluginsData)
+        ? installedPluginsData.find((ip: any) => (ip.pluginId || ip.id) === pluginId)
+        : null;
+
+      if (!installation) {
+        throw new Error('Plugin installation not found');
+      }
+
+      const installationId = installation.id || installation.installationId;
+      
+      const response = await fetch(`/api/marketplace/plugins/${pluginId}/uninstall?installationId=${installationId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Uninstallation failed');
+      }
       
       // Update plugin status
       setPlugins(prev => prev.map(plugin => 
@@ -301,21 +334,34 @@ export default function PluginMarketplacePage() {
           : plugin
       ));
       
-      // Update stats
-      setMarketplaceStats(prev => ({
-        ...prev,
-        installedPlugins: prev.installedPlugins - 1,
-        availablePlugins: prev.availablePlugins + 1
-      }));
+      // Refresh stats
+      const statsResponse = await fetch('/api/marketplace/stats', {
+        credentials: 'include',
+      });
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        if (statsData.success && statsData.stats) {
+          setMarketplaceStats({
+            totalPlugins: statsData.stats.totalPlugins,
+            installedPlugins: statsData.stats.installedPlugins,
+            availablePlugins: statsData.stats.availablePlugins,
+            totalDownloads: statsData.stats.totalDownloads,
+            averageRating: statsData.stats.averageRating,
+            categoryCounts: statsData.stats.categoryCounts || {}
+          });
+        }
+      }
     } catch (err) {
-      setError(`Failed to uninstall plugin. Please try again.`);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to uninstall plugin. Please try again.';
+      setError(errorMessage);
       console.error('Error uninstalling plugin:', err);
     }
   };
 
   // Filter plugins based on search and filters
   const filteredPlugins = plugins.filter(plugin => {
-    const matchesSearch = plugin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = searchTerm === '' || 
+                         plugin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          plugin.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          plugin.developer.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || plugin.category.toLowerCase() === categoryFilter.toLowerCase();
@@ -323,17 +369,76 @@ export default function PluginMarketplacePage() {
     
     return matchesSearch && matchesCategory && matchesStatus;
   });
+  
+  // Debug: Log filtering results
+  useEffect(() => {
+    if (plugins.length > 0) {
+      console.log('Plugin Filtering:', {
+        totalPlugins: plugins.length,
+        filteredPlugins: filteredPlugins.length,
+        searchTerm,
+        categoryFilter,
+        statusFilter,
+        sampleCategories: [...new Set(plugins.map(p => p.category))].slice(0, 5)
+      });
+    }
+  }, [plugins, filteredPlugins, searchTerm, categoryFilter, statusFilter]);
 
+  // Map database category names (lowercase) to display names and icons
+  const categoryMapping: Array<{
+    dbKeys: string[]; // Multiple possible keys to match
+    displayName: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }> = [
+    { dbKeys: ["payments", "payment"], displayName: "Payments", icon: CreditCard },
+    { dbKeys: ["analytics", "analytic"], displayName: "Analytics", icon: BarChart3 },
+    { dbKeys: ["marketing"], displayName: "Marketing", icon: Mail },
+    { dbKeys: ["communication", "communications"], displayName: "Communication", icon: MessageSquare },
+    { dbKeys: ["storage"], displayName: "Storage", icon: Database },
+    { dbKeys: ["automation"], displayName: "Automation", icon: Zap },
+    { dbKeys: ["scheduling", "schedule"], displayName: "Scheduling", icon: Calendar },
+    { dbKeys: ["e-commerce", "ecommerce", "e_commerce"], displayName: "E-commerce", icon: ShoppingCart },
+  ];
+
+  // Helper function to get count for a category, trying multiple key variations
+  const getCategoryCount = (dbKeys: string[], categoryCounts?: Record<string, number>): number => {
+    if (!categoryCounts) return 0;
+    
+    for (const key of dbKeys) {
+      // Try exact match (case-insensitive)
+      const lowerKey = key.toLowerCase();
+      if (categoryCounts[lowerKey] !== undefined) {
+        return Number(categoryCounts[lowerKey]) || 0;
+      }
+      
+      // Try case-insensitive match on all keys in categoryCounts
+      const matchingKey = Object.keys(categoryCounts).find(
+        k => k.toLowerCase() === lowerKey
+      );
+      if (matchingKey !== undefined) {
+        return Number(categoryCounts[matchingKey]) || 0;
+      }
+    }
+    
+    return 0;
+  };
+
+  // Build categories array with dynamic counts
   const categories = [
-    { name: "All", count: 156, icon: Globe },
-    { name: "Payments", count: 23, icon: CreditCard },
-    { name: "Analytics", count: 18, icon: BarChart3 },
-    { name: "Marketing", count: 31, icon: Mail },
-    { name: "Communication", count: 15, icon: MessageSquare },
-    { name: "Storage", count: 12, icon: Database },
-    { name: "Automation", count: 28, icon: Zap },
-    { name: "Scheduling", count: 9, icon: Calendar },
-    { name: "E-commerce", count: 20, icon: ShoppingCart }
+    { 
+      name: "All", 
+      count: marketplaceStats.totalPlugins || 0, 
+      icon: Globe 
+    },
+    ...categoryMapping.map(({ dbKeys, displayName, icon }) => {
+      const count = getCategoryCount(dbKeys, marketplaceStats.categoryCounts);
+      return {
+        name: displayName,
+        count,
+        icon,
+        dbKeys // Store for filtering
+      };
+    })
   ];
 
   const getStatusColor = (status: string) => {
@@ -382,10 +487,29 @@ export default function PluginMarketplacePage() {
         <span className="text-gray-900">Plugin Marketplace</span>
       </nav>
 
-      {/* Error Alert */}
-      {error && (
+      {/* Error Alert - Only show if we have an actual error and no data loaded */}
+      {error && plugins.length === 0 && marketplaceStats.totalPlugins === 0 && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {error}
+            <div className="mt-2 text-sm">
+              <p>Debug Info:</p>
+              <ul className="list-disc list-inside">
+                <li>Auth Loaded: {isLoaded ? 'Yes' : 'No'}</li>
+                <li>Signed In: {isSignedIn ? 'Yes' : 'No'}</li>
+                <li>Plugins Loaded: {plugins.length}</li>
+                <li>Loading: {loading ? 'Yes' : 'No'}</li>
+              </ul>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {/* Warning Alert - Show if partially loaded but still have error */}
+      {error && (plugins.length > 0 || marketplaceStats.totalPlugins > 0) && (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -532,6 +656,28 @@ export default function PluginMarketplacePage() {
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin mr-2" />
                   <span>Loading plugins...</span>
+                </div>
+              ) : filteredPlugins.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Code className="h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No plugins found</h3>
+                  <p className="text-gray-600 mb-4">
+                    {plugins.length === 0 
+                      ? 'No plugins are available in the marketplace yet.'
+                      : `No plugins match your current filters. Found ${plugins.length} total plugins.`}
+                  </p>
+                  {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all' ? (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setSearchTerm('');
+                        setCategoryFilter('all');
+                        setStatusFilter('all');
+                      }}
+                    >
+                      Clear Filters
+                    </Button>
+                  ) : null}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -731,7 +877,7 @@ export default function PluginMarketplacePage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-xs">
                         {plugin.category}
@@ -744,6 +890,15 @@ export default function PluginMarketplacePage() {
                       <Button variant="outline" size="sm">
                         <Settings className="h-4 w-4 mr-2" />
                         Configure
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleUninstallPlugin(plugin.id)}
+                        disabled={loading}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Uninstall
                       </Button>
                       <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
@@ -804,14 +959,38 @@ export default function PluginMarketplacePage() {
                       </div>
                       <div className="flex gap-2">
                         {plugin.status === "installed" ? (
-                          <Button variant="outline" size="sm">
-                            <Settings className="h-4 w-4 mr-2" />
-                            Configure
-                          </Button>
+                          <>
+                            <Button variant="outline" size="sm">
+                              <Settings className="h-4 w-4 mr-2" />
+                              Configure
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleUninstallPlugin(plugin.id)}
+                              disabled={loading}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Uninstall
+                            </Button>
+                          </>
                         ) : (
-                          <Button size="sm">
-                            <DownloadIcon className="h-4 w-4 mr-2" />
-                            Install
+                          <Button 
+                            size="sm"
+                            onClick={() => handleInstallPlugin(plugin.id)}
+                            disabled={installingPlugins.has(plugin.id) || loading}
+                          >
+                            {installingPlugins.has(plugin.id) ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Installing...
+                              </>
+                            ) : (
+                              <>
+                                <DownloadIcon className="h-4 w-4 mr-2" />
+                                Install
+                              </>
+                            )}
                           </Button>
                         )}
                         <Button variant="outline" size="sm">

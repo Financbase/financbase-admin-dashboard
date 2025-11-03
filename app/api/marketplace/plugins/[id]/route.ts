@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { marketplacePlugins } from '@/lib/db/schemas';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -14,7 +14,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const pluginId = parseInt(params.id);
+    const { id } = await params;
+    const pluginId = parseInt(id);
     if (Number.isNaN(pluginId)) {
       return NextResponse.json({ error: 'Invalid plugin ID' }, { status: 400 });
     }
@@ -34,11 +35,30 @@ export async function GET(
 
     return NextResponse.json(plugin[0]);
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Error fetching plugin details:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch plugin details',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Check if it's a database connection error
+    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Database connection error',
+          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        },
+        { status: 503 }
+      );
+    }
+    
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to fetch plugin details',
+        message: 'An error occurred while fetching plugin details',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
+      { status: 500 }
+    );
   }
 }

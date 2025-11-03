@@ -126,7 +126,7 @@ export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 			initial={{ y: -100 }}
 			animate={{ y: 0 }}
 			transition={{ duration: 0.3 }}
-			className={`sticky top-0 z-[60] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
+			className={`w-full h-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
 				isScrolled ? "shadow-sm" : ""
 			}`}
 		>

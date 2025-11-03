@@ -105,6 +105,16 @@ const nextConfig = {
 			config.externals = [...(config.externals || []), 'pg-native'];
 		}
 
+		// Exclude database modules from client bundle
+		if (!isServer) {
+			config.resolve.alias = {
+				...config.resolve.alias,
+				'@/lib/neon': false,
+				'@/lib/services/content/search-service': false,
+				'@/lib/db': false,
+			};
+		}
+
 		// Let Next.js handle chunk optimization - don't override
 		return config;
 	},

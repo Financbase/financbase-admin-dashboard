@@ -159,6 +159,15 @@ export class PluginSystem {
         permissions: plugin[0].permissions || [],
       }).returning();
 
+      // Update plugin install count
+      await db
+        .update(marketplacePlugins)
+        .set({
+          installCount: sql`${marketplacePlugins.installCount} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(marketplacePlugins.id, pluginId));
+
       // Initialize plugin settings
       if (plugin[0].manifest?.settings) {
         for (const setting of plugin[0].manifest.settings) {
@@ -214,6 +223,8 @@ export class PluginSystem {
         throw new Error('Plugin installation not found');
       }
 
+      const pluginId = installation[0].pluginId;
+
       // Deactivate plugin
       await db
         .update(installedPlugins)
@@ -223,6 +234,15 @@ export class PluginSystem {
           updatedAt: new Date(),
         })
         .where(eq(installedPlugins.id, installationId));
+
+      // Update plugin install count (decrement)
+      await db
+        .update(marketplacePlugins)
+        .set({
+          installCount: sql`GREATEST(${marketplacePlugins.installCount} - 1, 0)`,
+          updatedAt: new Date(),
+        })
+        .where(eq(marketplacePlugins.id, pluginId));
 
       // Remove plugin settings
       await db

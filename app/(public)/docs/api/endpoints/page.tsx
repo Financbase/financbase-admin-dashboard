@@ -119,32 +119,56 @@ export default function ApiEndpointsPage() {
 							<CardContent className="p-8">
 								<div className="space-y-6">
 									<div className="border-l-4 border-blue-500 pl-4">
-										<h3 className="font-semibold mb-2">GET /api/v1/accounts</h3>
+										<h3 className="font-semibold mb-2">GET /api/accounts</h3>
 										<p className="text-muted-foreground mb-4">
 											Retrieve all connected accounts for the authenticated user.
 										</p>
 										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
-											Response: Array of account objects
+											Query Parameters: page, limit, search, accountType, status
+											<br />
+											Response: {"{ accounts, pagination }"}
 										</div>
 									</div>
 
 									<div className="border-l-4 border-green-500 pl-4">
-										<h3 className="font-semibold mb-2">POST /api/v1/accounts</h3>
+										<h3 className="font-semibold mb-2">POST /api/accounts</h3>
 										<p className="text-muted-foreground mb-4">
 											Create a new account connection.
 										</p>
 										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
-											Body: {"{ institution_id, credentials }"}
+											Body: {"{ accountName, accountType, bankName, currency, ... }"}
+										</div>
+									</div>
+
+									<div className="border-l-4 border-purple-500 pl-4">
+										<h3 className="font-semibold mb-2">GET /api/accounts/{`{id}`}</h3>
+										<p className="text-muted-foreground mb-4">
+											Get detailed information about a specific account.
+										</p>
+										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
+											Path Parameter: id
+										</div>
+									</div>
+
+									<div className="border-l-4 border-yellow-500 pl-4">
+										<h3 className="font-semibold mb-2">PUT /api/accounts/{`{id}`}</h3>
+										<p className="text-muted-foreground mb-4">
+											Update an existing account.
+										</p>
+										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
+											Path Parameter: id
+											<br />
+											Body: {"{ accountName?, accountType?, ... }"}
 										</div>
 									</div>
 
 									<div className="border-l-4 border-red-500 pl-4">
-										<h3 className="font-semibold mb-2">DELETE /api/v1/accounts/{`{id}`}</h3>
+										<h3 className="font-semibold mb-2">DELETE /api/accounts/{`{id}`}</h3>
 										<p className="text-muted-foreground mb-4">
 											Remove an account connection.
 										</p>
 										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
-											Path Parameter: account_id
+											Path Parameter: id
 										</div>
 									</div>
 								</div>
@@ -159,22 +183,56 @@ export default function ApiEndpointsPage() {
 							<CardContent className="p-8">
 								<div className="space-y-6">
 									<div className="border-l-4 border-blue-500 pl-4">
-										<h3 className="font-semibold mb-2">GET /api/v1/transactions</h3>
+										<h3 className="font-semibold mb-2">GET /api/transactions</h3>
 										<p className="text-muted-foreground mb-4">
 											Get all transactions with optional filtering.
 										</p>
 										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
-											Query Parameters: account_id, start_date, end_date, limit
+											Query Parameters: type, status, category, startDate, endDate, search, limit, offset
+											<br />
+											Response: {"{ transactions }"}
 										</div>
 									</div>
 
 									<div className="border-l-4 border-green-500 pl-4">
-										<h3 className="font-semibold mb-2">GET /api/v1/transactions/{`{id}`}</h3>
+										<h3 className="font-semibold mb-2">POST /api/transactions</h3>
+										<p className="text-muted-foreground mb-4">
+											Create a new transaction.
+										</p>
+										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
+											Body: {"{ type, amount, currency, description, accountId, ... }"}
+										</div>
+									</div>
+
+									<div className="border-l-4 border-purple-500 pl-4">
+										<h3 className="font-semibold mb-2">GET /api/transactions/{`{id}`}</h3>
 										<p className="text-muted-foreground mb-4">
 											Get detailed information about a specific transaction.
 										</p>
 										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
-											Path Parameter: transaction_id
+											Path Parameter: id
+										</div>
+									</div>
+
+									<div className="border-l-4 border-yellow-500 pl-4">
+										<h3 className="font-semibold mb-2">PUT /api/transactions/{`{id}`}</h3>
+										<p className="text-muted-foreground mb-4">
+											Update an existing transaction.
+										</p>
+										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
+											Path Parameter: id
+											<br />
+											Body: {"{ type?, amount?, description?, ... }"}
+										</div>
+									</div>
+
+									<div className="border-l-4 border-red-500 pl-4">
+										<h3 className="font-semibold mb-2">DELETE /api/transactions/{`{id}`}</h3>
+										<p className="text-muted-foreground mb-4">
+											Delete a transaction.
+										</p>
+										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
+											Path Parameter: id
 										</div>
 									</div>
 								</div>
@@ -189,22 +247,56 @@ export default function ApiEndpointsPage() {
 							<CardContent className="p-8">
 								<div className="space-y-6">
 									<div className="border-l-4 border-blue-500 pl-4">
-										<h3 className="font-semibold mb-2">GET /api/v1/analytics/summary</h3>
+										<h3 className="font-semibold mb-2">GET /api/analytics</h3>
 										<p className="text-muted-foreground mb-4">
-											Get financial summary and key metrics.
+											Get comprehensive financial analytics and overview metrics.
 										</p>
 										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
-											Query Parameters: period (daily, weekly, monthly)
+											Query Parameters: period (30d), metric (overview)
+											<br />
+											Response: {"{ period, metric, data: { overview, revenue, expenses, performance } }"}
 										</div>
 									</div>
 
 									<div className="border-l-4 border-green-500 pl-4">
-										<h3 className="font-semibold mb-2">GET /api/v1/analytics/trends</h3>
+										<h3 className="font-semibold mb-2">GET /api/analytics/revenue</h3>
 										<p className="text-muted-foreground mb-4">
-											Get spending and income trends over time.
+											Get revenue analytics and trends.
 										</p>
 										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
-											Query Parameters: start_date, end_date, category
+											Query Parameters: period (12months)
+											<br />
+											Response: {"{ analytics }"}
+										</div>
+									</div>
+
+									<div className="border-l-4 border-purple-500 pl-4">
+										<h3 className="font-semibold mb-2">GET /api/analytics/expenses</h3>
+										<p className="text-muted-foreground mb-4">
+											Get expense analytics and breakdowns.
+										</p>
+										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
+											Response: {"{ analytics }"}
+										</div>
+									</div>
+
+									<div className="border-l-4 border-orange-500 pl-4">
+										<h3 className="font-semibold mb-2">GET /api/analytics/performance</h3>
+										<p className="text-muted-foreground mb-4">
+											Get performance metrics and KPIs.
+										</p>
+										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
+											Response: {"{ metrics }"}
+										</div>
+									</div>
+
+									<div className="border-l-4 border-cyan-500 pl-4">
+										<h3 className="font-semibold mb-2">GET /api/analytics/clients</h3>
+										<p className="text-muted-foreground mb-4">
+											Get client analytics and statistics.
+										</p>
+										<div className="bg-muted p-4 rounded-lg font-mono text-sm">
+											Response: {"{ totalClients, activeClients, newClientsThisMonth, clientRetention, satisfactionScore }"}
 										</div>
 									</div>
 								</div>

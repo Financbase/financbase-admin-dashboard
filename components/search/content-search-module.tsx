@@ -27,8 +27,8 @@ import {
   MessageCircle,
   X
 } from 'lucide-react';
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { searchService } from '@/lib/services/content/search-service';
 
 interface SearchResult {
   entityType: string;
@@ -94,10 +94,36 @@ export function ContentSearchModule() {
   const { data: searchResults, isLoading: isSearching, refetch } = useQuery({
     queryKey: ['search', query, filters],
     queryFn: async () => {
-      if (!query.trim()) return { results: [], total: 0 };
+      if (!query.trim()) return { results: [], total: 0, query: '', filters: {} };
 
-      const result = await searchService.search(query, filters);
-      return result;
+      const params = new URLSearchParams({
+        q: query,
+        limit: String(filters.limit || 50),
+        offset: String(filters.offset || 0),
+      });
+
+      if (filters.entityTypes?.length) {
+        params.append('entityTypes', filters.entityTypes.join(','));
+      }
+      if (filters.categories?.length) {
+        params.append('categories', filters.categories.join(','));
+      }
+      if (filters.tags?.length) {
+        params.append('tags', filters.tags.join(','));
+      }
+      if (filters.dateFrom) {
+        params.append('dateFrom', filters.dateFrom.toISOString());
+      }
+      if (filters.dateTo) {
+        params.append('dateTo', filters.dateTo.toISOString());
+      }
+
+      const response = await fetch(`/api/search/content?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('Search failed');
+      }
+      const data = await response.json();
+      return data.data;
     },
     enabled: query.length > 0,
   });
@@ -105,7 +131,15 @@ export function ContentSearchModule() {
   // Popular queries
   const { data: popularQueries } = useQuery({
     queryKey: ['popular-queries'],
-    queryFn: () => searchService.getPopularQueries(10),
+    queryFn: async () => {
+      const response = await fetch('/api/search/content/popular?limit=10');
+      if (!response.ok) {
+        return [];
+      }
+      const data = await response.json();
+      return data.data || [];
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Search suggestions
@@ -113,7 +147,22 @@ export function ContentSearchModule() {
     queryKey: ['suggestions', query],
     queryFn: async () => {
       if (query.length < 2) return [];
-      return await searchService.getSuggestions(query, 5);
+
+      const response = await fetch('/api/search/content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query,
+          limit: 5,
+        }),
+      });
+      if (!response.ok) {
+        return [];
+      }
+      const data = await response.json();
+      return data.data || [];
     },
     enabled: query.length >= 2,
   });
@@ -129,9 +178,7 @@ export function ContentSearchModule() {
     setRecentSearches(updated);
     localStorage.setItem('recentSearches', JSON.stringify(updated));
 
-    // Log search query for analytics
-    await searchService.logSearchQuery(searchQuery, undefined, filters.entityTypes);
-
+    // Search query logging is handled by the API route
     refetch();
   };
 
@@ -182,13 +229,18 @@ export function ContentSearchModule() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => {
+            // Toggle advanced filters - you can implement this functionality
+            console.log('Advanced filters clicked');
+          }}>
             <Filter className="mr-2 h-4 w-4" />
             Advanced Filters
           </Button>
-          <Button variant="outline" size="sm">
-            <BookOpen className="mr-2 h-4 w-4" />
-            Search Help
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/help-center?topic=search">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Search Help
+            </Link>
           </Button>
         </div>
       </div>
