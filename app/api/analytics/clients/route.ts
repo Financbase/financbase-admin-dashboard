@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AnalyticsService } from '@/lib/services/analytics/analytics-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const clientAnalytics = await AnalyticsService.getClientAnalytics(userId);
@@ -25,13 +27,6 @@ export async function GET() {
 			satisfactionScore: clientAnalytics.satisfactionScore,
 		});
 	} catch (error) {
-		console.error('Error fetching client analytics:', error);
-		return NextResponse.json(
-			{ 
-				error: 'Failed to fetch client analytics',
-				details: error instanceof Error ? error.message : 'Unknown error'
-			},
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

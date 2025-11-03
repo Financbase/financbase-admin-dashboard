@@ -36,10 +36,12 @@ export async function GET(req: NextRequest) {
       ].filter((condition): condition is NonNullable<typeof condition> => condition !== undefined);
       
       if (searchConditions.length > 0) {
-        const firstCondition = searchConditions[0];
-        if (firstCondition && searchConditions.length === 1) {
-          whereConditions.push(firstCondition);
-        } else if (searchConditions.length > 1) {
+        if (searchConditions.length === 1) {
+          const condition = searchConditions[0];
+          if (condition) {
+            whereConditions.push(condition);
+          }
+        } else {
           whereConditions.push(or(...searchConditions));
         }
       }
@@ -87,9 +89,15 @@ export async function POST(req: NextRequest) {
     });
 
     // Create the client
+    // Convert numeric fields to strings for decimal columns
     const [newClient] = await db
       .insert(clients)
-      .values(validatedData)
+      .values({
+        ...validatedData,
+        totalInvoiced: validatedData.totalInvoiced?.toString() || '0',
+        totalPaid: validatedData.totalPaid?.toString() || '0',
+        outstandingBalance: validatedData.outstandingBalance?.toString() || '0',
+      })
       .returning();
 
     return NextResponse.json({

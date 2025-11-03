@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/accounts/balances - Get user's account balances
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Mock account balances data since we don't have a full banking integration
@@ -42,10 +44,6 @@ export async function GET() {
 		return NextResponse.json({ balances });
 
 	} catch (error) {
-		console.error('Error fetching account balances:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch account balances' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

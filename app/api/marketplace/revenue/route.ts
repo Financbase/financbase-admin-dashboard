@@ -9,10 +9,11 @@ import { RevenueSharingService } from '@/lib/services/integration/revenue-sharin
  * Get revenue analytics for marketplace
  */
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
 			case 'plugin': {
 				const pluginId = searchParams.get('pluginId');
 				if (!pluginId) {
-					return NextResponse.json({ error: 'Plugin ID required' }, { status: 400 });
+					return ApiErrorHandler.badRequest('Plugin ID required');
 				}
 				const pluginAnalytics = await RevenueSharingService.getPluginAnalytics(pluginId);
 				return NextResponse.json(pluginAnalytics);
@@ -46,8 +47,7 @@ export async function GET(request: NextRequest) {
 			}
 		}
 	} catch (error: unknown) {
-		console.error('Error fetching revenue data:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -56,23 +56,30 @@ export async function GET(request: NextRequest) {
  * Process developer payouts (admin only)
  */
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Check admin role
 		const adminStatus = await isAdmin();
 		if (!adminStatus) {
-			return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+			return ApiErrorHandler.forbidden('Admin access required');
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const { developerId, period } = body;
 
 		if (!developerId || !period) {
-			return NextResponse.json({ error: 'Developer ID and period required' }, { status: 400 });
+			return ApiErrorHandler.badRequest('Developer ID and period required');
 		}
 
 		const payout = await RevenueSharingService.processPayouts(developerId, period);
@@ -80,8 +87,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(payout, { status: 201 });
 
 	} catch (error) {
-		console.error('Error processing payouts:', error);
-		return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -90,16 +96,17 @@ export async function POST(request: NextRequest) {
  * Process subscription billing (admin only)
  */
 export async function PATCH(_request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Check admin role
 		const adminStatus = await isAdmin();
 		if (!adminStatus) {
-			return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+			return ApiErrorHandler.forbidden('Admin access required');
 		}
 
 		const processedCount = await RevenueSharingService.processSubscriptionBilling();
@@ -110,7 +117,6 @@ export async function PATCH(_request: NextRequest) {
 		});
 
 	} catch (error: unknown) {
-		console.error('Error processing billing:', error);
-		return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
