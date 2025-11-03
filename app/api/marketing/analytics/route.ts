@@ -2,15 +2,14 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { campaignAnalyticsService } from '@/lib/services/marketing/campaign-analytics-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -25,24 +24,15 @@ export async function GET(request: NextRequest) {
 
     // Validate dates
     if (startDate && Number.isNaN(startDate.getTime())) {
-      return NextResponse.json(
-        { error: 'Invalid startDate format', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
+      return ApiErrorHandler.badRequest('Invalid startDate format');
     }
     if (endDate && Number.isNaN(endDate.getTime())) {
-      return NextResponse.json(
-        { error: 'Invalid endDate format', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
+      return ApiErrorHandler.badRequest('Invalid endDate format');
     }
 
     // Validate date range
     if (startDate && endDate && startDate > endDate) {
-      return NextResponse.json(
-        { error: 'startDate must be before endDate', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
+      return ApiErrorHandler.badRequest('startDate must be before endDate');
     }
 
     // Parse campaign IDs if provided

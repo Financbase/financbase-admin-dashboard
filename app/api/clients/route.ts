@@ -29,21 +29,17 @@ export async function GET(req: NextRequest) {
     }
     
     if (search) {
-      const searchConditions = [
-        like(clients.name, `%${search}%`),
-        like(clients.email, `%${search}%`),
-        clients.company ? like(clients.company, `%${search}%`) : undefined
-      ].filter((condition): condition is NonNullable<typeof condition> => condition !== undefined);
+      const searchConditions: ReturnType<typeof like>[] = [];
+      searchConditions.push(like(clients.name, `%${search}%`));
+      searchConditions.push(like(clients.email, `%${search}%`));
+      if (clients.company) {
+        searchConditions.push(like(clients.company, `%${search}%`));
+      }
       
-      if (searchConditions.length > 0) {
-        if (searchConditions.length === 1) {
-          const condition = searchConditions[0];
-          if (condition) {
-            whereConditions.push(condition);
-          }
-        } else {
-          whereConditions.push(or(...searchConditions));
-        }
+      if (searchConditions.length === 1) {
+        whereConditions.push(searchConditions[0]);
+      } else if (searchConditions.length > 1) {
+        whereConditions.push(or(...searchConditions));
       }
     }
 
