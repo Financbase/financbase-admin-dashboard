@@ -39,7 +39,10 @@ export async function GET(req: NextRequest) {
       if (searchConditions.length === 1) {
         whereConditions.push(searchConditions[0]);
       } else if (searchConditions.length > 1) {
-        whereConditions.push(or(...searchConditions));
+        const orCondition = or(...searchConditions);
+        if (orCondition) {
+          whereConditions.push(orCondition);
+        }
       }
     }
 
