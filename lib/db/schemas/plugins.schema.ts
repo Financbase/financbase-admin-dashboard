@@ -30,7 +30,7 @@ export const marketplacePlugins = pgTable('financbase_marketplace_plugins', {
   isFree: boolean('is_free').default(true).notNull(),
   price: integer('price'), // Price in cents
   currency: text('currency').default('USD'),
-  license: text('license').default('MIT'), // MIT, GPL, Commercial, etc.
+  license: text('license').default('Proprietary'), // Proprietary, Commercial, Custom, etc.
   
   // Plugin files and configuration
   pluginFile: text('plugin_file'), // URL to plugin package

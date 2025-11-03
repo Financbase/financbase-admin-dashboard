@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { TransactionService } from '@/lib/services/transaction-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const createTransactionSchema = z.object({
 	type: z.enum(['income', 'expense', 'transfer', 'payment']),
@@ -20,10 +21,11 @@ const createTransactionSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -51,22 +53,25 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json({ transactions });
 	} catch (error) {
-		console.error('Error fetching transactions:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch transactions' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = createTransactionSchema.parse(body);
 
 		const transaction = await TransactionService.create({
@@ -76,17 +81,6 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ transaction }, { status: 201 });
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error('Error creating transaction:', error);
-		return NextResponse.json(
-			{ error: 'Failed to create transaction' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

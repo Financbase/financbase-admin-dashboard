@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { LeadManagementService } from '@/lib/services/lead-management-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const createLeadSchema = z.object({
 	firstName: z.string().min(1, 'First name is required'),
@@ -24,11 +25,12 @@ const createLeadSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		// Authenticate user
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -52,15 +54,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(result);
 	} catch (error) {
-		console.error('Error fetching leads:', error);
-		return NextResponse.json(
-			{
-				error: 'Failed to fetch leads',
-				details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined,
-				code: 'DATABASE_ERROR',
-			},
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -69,10 +63,18 @@ export async function POST(request: NextRequest) {
 		// Authenticate user
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		const requestId = generateRequestId();
+
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = createLeadSchema.parse(body);
 
 		// Convert date strings to Date objects
@@ -88,25 +90,6 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ lead }, { status: 201 });
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{
-					error: 'Validation error',
-					details: error.issues,
-					code: 'VALIDATION_ERROR',
-				},
-				{ status: 400 }
-			);
-		}
-
-		console.error('Error creating lead:', error);
-		return NextResponse.json(
-			{
-				error: 'Failed to create lead',
-				details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined,
-				code: 'DATABASE_ERROR',
-			},
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

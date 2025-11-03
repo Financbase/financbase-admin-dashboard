@@ -118,69 +118,65 @@ const ActivityFeed = memo(function ActivityFeed() {
 	return (
 		<DashboardErrorBoundary>
 			<div
-				className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-border"
+				className="w-full"
 				data-testid="activity-feed"
 			>
-				<div className="flex items-center justify-between mb-6">
-					<h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-						Recent Activity
-					</h3>
-					<button
-						type="button"
-						onClick={() => (window.location.href = "/activity-logs")}
-						className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-						data-testid="view-all-activity"
-					>
-						View all
-					</button>
-				</div>
+				<button
+					type="button"
+					onClick={() => (window.location.href = "/activity-logs")}
+					className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4 block ml-auto"
+					data-testid="view-all-activity"
+				>
+					View all
+				</button>
 
 				<div className="space-y-4" data-testid="activity-list">
 					{activities.map((activity) => (
 						<div
 							key={activity.id}
-							className="flex items-start space-x-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors"
+							className="flex items-start gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors"
 							data-testid="activity-item"
 						>
 							<div
-								className={`p-2 rounded-full ${getActivityColor(activity.type)}`}
+								className={`p-2 rounded-full ${getActivityColor(activity.type)} flex-shrink-0`}
 							>
 								{getActivityIcon(activity.type)}
 							</div>
 
 							<div className="flex-1 min-w-0">
-								<div className="flex items-center justify-between">
-									<p className="text-sm font-medium text-gray-900 dark:text-white">
+								<div className="flex items-center justify-between gap-2">
+									<p className="text-sm font-medium text-gray-900 dark:text-white break-words flex-1">
 										{activity.title}
 									</p>
-									<span className="text-xs text-gray-500 dark:text-gray-400">
+									<span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">
 										{formatRelativeTime(new Date(activity.time))}
 									</span>
 								</div>
 
-								<p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+								<p className="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words">
 									{activity.description}
 								</p>
 
-								<div className="flex items-center justify-between mt-2">
-									<div className="flex items-center space-x-2">
+								<div className="flex items-center justify-between gap-2 mt-2">
+									<div className="flex items-center space-x-2 min-w-0 flex-1">
 										{activity.user && (
-											<div className="flex items-center space-x-2">
+											<div className="flex items-center space-x-2 min-w-0">
 												<UserAvatar
 													name={activity.user.name}
 													imageUrl={activity.user.avatar}
 													size={24}
+													className="flex-shrink-0"
 												/>
-												<span className="text-xs text-gray-500 dark:text-gray-400">
+												<span className="text-xs text-gray-500 dark:text-gray-400 truncate">
 													{activity.user.name}
 												</span>
 											</div>
 										)}
 									</div>
 
-									<div className="flex items-center space-x-2">
+									<div className="flex items-center space-x-2 flex-shrink-0">
 										{activity.metadata?.amount && (
-											<Badge variant="outline" className="text-xs">
+											<Badge variant="outline" className="text-xs whitespace-nowrap">
 												{activity.metadata.amount}
 											</Badge>
 										)}
@@ -190,7 +186,7 @@ const ActivityFeed = memo(function ActivityFeed() {
 													(_, i) => (
 														<Star
 															key={i}
-															className="h-3 w-3 fill-yellow-400 text-yellow-400"
+															className="h-3 w-3 fill-yellow-400 text-yellow-400 flex-shrink-0"
 														/>
 													),
 												)}

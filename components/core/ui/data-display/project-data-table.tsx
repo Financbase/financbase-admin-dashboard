@@ -111,8 +111,10 @@ export const ProjectDataTable = ({
 									className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
 								>
 									{visibleColumns.has("name") && (
-										<TableCell className="font-medium">
-											{project.name}
+										<TableCell className="font-medium min-w-[120px]">
+											<div className="break-words" title={project.name}>
+												{project.name}
+											</div>
 										</TableCell>
 									)}
 
@@ -133,10 +135,18 @@ export const ProjectDataTable = ({
 									)}
 
 									{visibleColumns.has("team") && (
-										<TableCell>{project.team}</TableCell>
+										<TableCell className="min-w-[80px]">
+											<div className="break-words" title={project.team}>
+												{project.team}
+											</div>
+										</TableCell>
 									)}
 									{visibleColumns.has("tech") && (
-										<TableCell>{project.tech}</TableCell>
+										<TableCell className="min-w-[100px]">
+											<div className="break-words" title={project.tech}>
+												{project.tech}
+											</div>
+										</TableCell>
 									)}
 									{visibleColumns.has("createdAt") && (
 										<TableCell>{project.createdAt}</TableCell>

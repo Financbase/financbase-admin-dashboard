@@ -175,7 +175,7 @@ export function DataTableTemplate({
 										{columns.map((column) => (
 											<th
 												key={column.key}
-												className="px-4 py-3 text-left text-sm font-medium text-muted-foreground"
+												className="px-4 py-3 text-left text-sm font-medium text-muted-foreground min-w-0 whitespace-nowrap"
 												style={{ width: column.width }}
 											>
 												{column.label}
@@ -186,9 +186,9 @@ export function DataTableTemplate({
 								<tbody>
 									{data.map((row, rowIndex) => (
 										<tr key={rowIndex} className="border-b hover:bg-muted/50">
-											{columns.map((column) => (
-												<td key={column.key} className="px-4 py-3 text-sm">
-													{typeof row[column.key] === "object" &&
+											{columns.map((column) => {
+												const cellContent =
+													typeof row[column.key] === "object" &&
 													row[column.key]?.badge ? (
 														<Badge
 															variant={row[column.key].variant || "default"}
@@ -197,9 +197,26 @@ export function DataTableTemplate({
 														</Badge>
 													) : (
 														row[column.key]
-													)}
-												</td>
-											))}
+													);
+												const cellText = String(
+													typeof row[column.key] === "object" && row[column.key]?.value
+														? row[column.key].value
+														: row[column.key] || ""
+												);
+												
+												return (
+													<td key={column.key} className="px-4 py-3 text-sm min-w-0">
+														{typeof row[column.key] === "object" &&
+														row[column.key]?.badge ? (
+															cellContent
+														) : (
+															<div className="break-words" title={cellText}>
+																{cellContent}
+															</div>
+														)}
+													</td>
+												);
+											})}
 										</tr>
 									))}
 								</tbody>

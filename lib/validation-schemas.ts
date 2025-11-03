@@ -119,6 +119,37 @@ export const aiInsightsResponseSchema = z.object({
   })
 });
 
+// Blog validation schemas
+export const createBlogPostSchema = z.object({
+	userId: z.string().min(1, 'User ID is required'),
+	title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
+	slug: z.string().min(1, 'Slug is required').max(200, 'Slug must be less than 200 characters').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase alphanumeric with hyphens'),
+	excerpt: z.string().max(500, 'Excerpt must be less than 500 characters').optional(),
+	content: z.string().min(1, 'Content is required'),
+	featuredImage: z.string().url('Featured image must be a valid URL').optional(),
+	categoryId: z.number().positive('Category ID must be positive').optional(),
+	status: z.enum(['draft', 'published', 'scheduled', 'archived']).default('draft'),
+	isFeatured: z.boolean().default(false),
+	publishedAt: z.string().datetime().optional(),
+	scheduledAt: z.string().datetime().optional(),
+});
+
+export const updateBlogPostSchema = createBlogPostSchema.partial().extend({
+	id: z.number().positive('Valid blog post ID is required')
+});
+
+export const blogCategorySchema = z.object({
+	name: z.string().min(1, 'Category name is required').max(100, 'Category name must be less than 100 characters'),
+	slug: z.string().min(1, 'Slug is required').max(100, 'Slug must be less than 100 characters').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase alphanumeric with hyphens'),
+	description: z.string().max(500, 'Description must be less than 500 characters').optional(),
+	color: z.string().max(50, 'Color must be less than 50 characters').optional(),
+});
+
+export const createBlogCategorySchema = blogCategorySchema;
+export const updateBlogCategorySchema = blogCategorySchema.partial().extend({
+	id: z.number().positive('Valid category ID is required')
+});
+
 // Type exports
 export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>;
 export type UpdateInvoiceInput = z.infer<typeof updateInvoiceSchema>;
@@ -127,3 +158,7 @@ export type UpdateExpenseInput = z.infer<typeof updateExpenseSchema>;
 export type CreateClientInput = z.infer<typeof createClientSchema>;
 export type UpdateClientInput = z.infer<typeof updateClientSchema>;
 export type AIInsightsResponse = z.infer<typeof aiInsightsResponseSchema>;
+export type CreateBlogPostInput = z.infer<typeof createBlogPostSchema>;
+export type UpdateBlogPostInput = z.infer<typeof updateBlogPostSchema>;
+export type CreateBlogCategoryInput = z.infer<typeof createBlogCategorySchema>;
+export type UpdateBlogCategoryInput = z.infer<typeof updateBlogCategorySchema>;

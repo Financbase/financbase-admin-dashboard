@@ -3,13 +3,19 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { marketplacePlugins } from '@/lib/db/schemas';
 import { eq, and, like, desc, asc, sql } from 'drizzle-orm';
+import { isAdmin } from '@/lib/auth/financbase-rbac';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
+
+    // Check if user is admin
+    const adminStatus = await isAdmin();
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category') || 'all';
@@ -19,7 +25,14 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Build where conditions array
+    // Regular users: only show approved and active plugins
+    // Admins: can see all active plugins (including pending)
     const whereConditions = [eq(marketplacePlugins.isActive, true)];
+    
+    // For regular users, only show approved plugins
+    if (!adminStatus) {
+      whereConditions.push(eq(marketplacePlugins.isApproved, true));
+    }
 
     // Filter by category
     if (category !== 'all') {
@@ -68,6 +81,12 @@ export async function GET(request: NextRequest) {
 
     // Get total count for pagination (matching the same where conditions)
     const countConditions = [eq(marketplacePlugins.isActive, true)];
+    
+    // Apply same approval filter for count
+    if (!adminStatus) {
+      countConditions.push(eq(marketplacePlugins.isApproved, true));
+    }
+    
     if (category !== 'all') {
       countConditions.push(eq(marketplacePlugins.category, category));
     }
@@ -106,30 +125,11 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error fetching marketplace plugins:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    // Check if it's a database connection error
-    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Database connection error',
-          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
-          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-        },
-        { status: 503 }
-      );
+    // Check if it's a database connection error and return appropriate status
+    if (error instanceof Error && (error.message.includes('DATABASE_URL') || error.message.includes('connection'))) {
+      return ApiErrorHandler.databaseError(error, requestId);
     }
     
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Failed to fetch plugins',
-        message: 'An error occurred while fetching marketplace plugins',
-        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

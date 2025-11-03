@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { handleApiVersioning } from '@/lib/api/versioning';
 
 const isPublicRoute = createRouteMatcher([
   // '/' is handled separately in middleware
@@ -59,6 +60,13 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
+  // Handle API versioning - prepare headers for all API routes
+  // We'll apply these headers to the final response
+  let versioningHeaders: NextResponse | null = null;
+  if (pathname.startsWith('/api/')) {
+    versioningHeaders = handleApiVersioning(req);
+  }
+
   // Handle root route - always redirect (avoid auth() call to prevent headers() issues)
   // Since we redirect regardless of auth status, we can skip the auth() call
   if (pathname === '/') {
@@ -94,9 +102,9 @@ export default clerkMiddleware(async (auth, req) => {
   // Protect routes that require authentication
   if (isProtectedRoute(req)) {
     if (!userId) {
-      // For API routes, return 401 JSON response
+      // For API routes, return 401 JSON response with version headers
       if (pathname.startsWith('/api/')) {
-        return NextResponse.json(
+        const errorResponse = NextResponse.json(
           {
             error: 'Unauthorized',
             message: 'Authentication required',
@@ -104,13 +112,30 @@ export default clerkMiddleware(async (auth, req) => {
           },
           { status: 401 }
         );
+        
+        // Ensure version headers are added even to error responses
+        if (versioningHeaders) {
+          versioningHeaders.headers.forEach((value, key) => {
+            errorResponse.headers.set(key, value);
+          });
+        }
+        
+        return errorResponse;
       }
       // For page routes, redirect to sign-in
       return NextResponse.redirect(new URL('/auth/sign-in', req.url));
     }
   }
 
-  return NextResponse.next();
+  // Final response - ensure version headers are included
+  const finalResponse = NextResponse.next();
+  if (versioningHeaders) {
+    versioningHeaders.headers.forEach((value, key) => {
+      finalResponse.headers.set(key, value);
+    });
+  }
+
+  return finalResponse;
 });
 
 export const config = {
