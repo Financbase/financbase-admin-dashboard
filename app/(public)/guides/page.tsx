@@ -123,7 +123,7 @@ export default function GuidesPage() {
 			image:
 				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
 			tags: ["analytics", "reporting", "data"],
-			icon: BarChart3,
+			icon: <BarChart3 className="w-4 h-4" />,
 		},
 		{
 			id: 3,
@@ -140,7 +140,7 @@ export default function GuidesPage() {
 			image:
 				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
 			tags: ["api", "integration", "development"],
-			icon: Code,
+			icon: <Code className="w-4 h-4" />,
 		},
 		{
 			id: 4,
@@ -157,7 +157,7 @@ export default function GuidesPage() {
 			image:
 				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
 			tags: ["automation", "reports", "email"],
-			icon: FileText,
+			icon: <FileText className="w-4 h-4" />,
 		},
 		{
 			id: 5,
@@ -173,7 +173,7 @@ export default function GuidesPage() {
 			image:
 				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
 			tags: ["troubleshooting", "support", "issues"],
-			icon: Shield,
+			icon: <Shield className="w-4 h-4" />,
 		},
 		{
 			id: 6,
@@ -190,7 +190,7 @@ export default function GuidesPage() {
 			image:
 				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
 			tags: ["visualization", "charts", "dashboards"],
-			icon: BarChart3,
+			icon: <BarChart3 className="w-4 h-4" />,
 		},
 	];
 

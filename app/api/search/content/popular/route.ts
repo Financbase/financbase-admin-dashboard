@@ -8,10 +8,11 @@ import { searchService } from '@/lib/services/content/search-service';
  * Get popular search queries
  */
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -27,14 +28,7 @@ export async function GET(request: NextRequest) {
 			})),
 		});
 	} catch (error) {
-		console.error('Popular Queries API Error:', error);
-		return NextResponse.json(
-			{
-				error: 'Failed to get popular queries',
-				details: error instanceof Error ? error.message : 'Unknown error',
-			},
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
