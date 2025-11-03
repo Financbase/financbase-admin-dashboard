@@ -106,7 +106,7 @@ export default function GuidesPage() {
 			image:
 				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
 			tags: ["setup", "basics", "onboarding"],
-			icon: Play,
+			icon: <Play className="w-4 h-4" />,
 		},
 		{
 			id: 2,
