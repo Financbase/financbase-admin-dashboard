@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,7 @@ interface MarketplaceStats {
 
 
 export default function PluginMarketplacePage() {
+  const router = useRouter();
   const { isLoaded, isSignedIn } = useAuth();
   const [plugins, setPlugins] = useState<Plugin[]>([]);
   const [loading, setLoading] = useState(true);
@@ -471,7 +473,10 @@ export default function PluginMarketplacePage() {
             <DownloadIcon className="h-4 w-4 mr-2" />
             My Plugins
           </Button>
-          <Button className="flex items-center gap-2">
+          <Button 
+            className="flex items-center gap-2"
+            onClick={() => router.push('/integrations/marketplace/submit')}
+          >
             <Plus className="h-4 w-4" />
             Submit Plugin
           </Button>

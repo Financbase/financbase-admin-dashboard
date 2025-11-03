@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AccountService } from '@/lib/services/account-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const createAccountSchema = z.object({
 	accountName: z.string().min(1, 'Account name is required'),
@@ -22,10 +23,11 @@ const createAccountSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -45,22 +47,25 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(result);
 	} catch (error) {
-		console.error('Error fetching accounts:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch accounts' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = createAccountSchema.parse(body);
 
 		const account = await AccountService.createAccount({

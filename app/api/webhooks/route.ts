@@ -3,12 +3,14 @@ import { db } from '@/lib/db';
 import { webhooks } from '@/lib/db/schemas';
 import { eq, desc, and, like, or } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -44,19 +46,24 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(userWebhooks);
   } catch (error) {
-    console.error('Error fetching webhooks:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const { 
       name, 
       description, 
@@ -71,18 +78,14 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!name || !url || !events || !Array.isArray(events) || events.length === 0) {
-      return NextResponse.json({ 
-        error: 'Name, URL, and events are required' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest('Name, URL, and events are required');
     }
 
     // Validate URL
     try {
       new URL(url);
     } catch {
-      return NextResponse.json({ 
-        error: 'Invalid URL format' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid URL format');
     }
 
     // Generate secret if not provided
@@ -109,8 +112,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newWebhook[0], { status: 201 });
   } catch (error) {
-    console.error('Error creating webhook:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 

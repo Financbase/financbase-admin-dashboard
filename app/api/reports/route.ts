@@ -7,17 +7,19 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { ReportService } from '@/lib/services/report-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * GET /api/reports
  * Fetch all reports for the authenticated user
  */
 export async function GET(req: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const searchParams = req.nextUrl.searchParams;
@@ -37,11 +39,7 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json(reports);
 	} catch (error) {
-		console.error('Error fetching reports:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch reports' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -50,21 +48,24 @@ export async function GET(req: NextRequest) {
  * Create a new report
  */
 export async function POST(req: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await req.json();
+		let body;
+		try {
+			body = await req.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 
 		// Validate required fields
 		if (!body.name || !body.type || !body.config) {
-			return NextResponse.json(
-				{ error: 'Missing required fields' },
-				{ status: 400 }
-			);
+			return ApiErrorHandler.badRequest('Missing required fields: name, type, and config are required');
 		}
 
 		const report = await ReportService.create({
@@ -82,11 +83,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(report, { status: 201 });
 	} catch (error) {
-		console.error('Error creating report:', error);
-		return NextResponse.json(
-			{ error: 'Failed to create report' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 

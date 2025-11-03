@@ -139,15 +139,15 @@ export default function OverviewStats() {
 						data-testid="stat-card"
 					>
 						<div className="flex items-center justify-between space-y-0 pb-2">
-							<h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
+							<h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 break-words flex-1 min-w-0">
 								{stat.title}
 							</h3>
-							<div className="text-gray-600 dark:text-gray-400 flex-shrink-0">
+							<div className="text-gray-600 dark:text-gray-400 flex-shrink-0 ml-2">
 								{stat.icon}
 							</div>
 						</div>
 						<div className="space-y-1">
-							<div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
+							<div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white break-words">
 								{stat.value}
 							</div>
 							<div className="flex items-center text-xs">

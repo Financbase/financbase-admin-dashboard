@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS "financbase"."financbase_marketplace_plugins" (
   "is_free" boolean DEFAULT true NOT NULL,
   "price" integer,
   "currency" text DEFAULT 'USD',
-  "license" text DEFAULT 'MIT',
+  "license" text DEFAULT 'Proprietary',
   
   -- Plugin files and configuration
   "plugin_file" text,

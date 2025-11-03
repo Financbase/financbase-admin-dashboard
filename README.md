@@ -46,6 +46,8 @@ A comprehensive financial management platform with advanced automation, integrat
    git clone https://github.com/your-org/financbase-admin-dashboard.git
    cd financbase-admin-dashboard
    ```
+   
+   **Note**: This is a private repository. Access is restricted to authorized team members only.
 
 2. **Install dependencies**
 
@@ -282,16 +284,13 @@ npm run db:studio
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+This is proprietary commercial software. Contributions are limited to authorized team members only.
+
+For internal team members, please refer to [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and contribution instructions.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This is proprietary software. All rights reserved. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
 
 ## 📚 Documentation
 

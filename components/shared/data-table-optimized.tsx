@@ -114,17 +114,33 @@ const TableRow = memo(function TableRow({
 }) {
 	return (
 		<tr className="border-b hover:bg-muted/50 transform-gpu will-change-transform">
-			{columns.map((column) => (
-				<td key={column.key} className="px-4 py-3 text-sm">
-					{typeof row[column.key] === "object" && row[column.key]?.badge ? (
+			{columns.map((column) => {
+				const cellContent =
+					typeof row[column.key] === "object" && row[column.key]?.badge ? (
 						<Badge variant={row[column.key].variant || "default"}>
 							{row[column.key].value}
 						</Badge>
 					) : (
 						row[column.key]
-					)}
-				</td>
-			))}
+					);
+				const cellText = String(
+					typeof row[column.key] === "object" && row[column.key]?.value
+						? row[column.key].value
+						: row[column.key] || ""
+				);
+				
+				return (
+					<td key={column.key} className="px-4 py-3 text-sm min-w-0">
+						{typeof row[column.key] === "object" && row[column.key]?.badge ? (
+							cellContent
+						) : (
+							<div className="break-words" title={cellText}>
+								{cellContent}
+							</div>
+						)}
+					</td>
+				);
+			})}
 		</tr>
 	);
 });
@@ -142,7 +158,7 @@ const TableHeader = memo(function TableHeader({
 					<th
 						key={column.key}
 						scope="col"
-						className="px-4 py-3 text-left text-sm font-medium text-muted-foreground"
+						className="px-4 py-3 text-left text-sm font-medium text-muted-foreground min-w-0 whitespace-nowrap"
 						style={{ width: column.width }}
 					>
 						{column.label}

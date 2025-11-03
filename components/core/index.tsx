@@ -215,7 +215,7 @@ export default function DashboardContent() {
               <span className="text-sm font-medium">Top Performers</span>
             </div>
           }
-          className="md:col-span-1"
+          className="md:col-span-2"
         >
 					<TopProducts />
         </BentoGridItem>

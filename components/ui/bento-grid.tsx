@@ -15,7 +15,7 @@ export const BentoGrid = ({
   return (
     <div
       className={cn(
-        "grid w-full auto-rows-[22rem] grid-cols-3 gap-4",
+        "grid w-full auto-rows-[minmax(22rem,auto)] grid-cols-3 gap-4",
         className,
       )}
     >
@@ -101,7 +101,7 @@ export const BentoGridItem = ({
   return (
     <div
       className={cn(
-        "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
+        "group relative col-span-3 flex flex-col overflow-hidden rounded-xl h-full",
         // light styles
         "bg-card border border-border shadow-sm",
         // dark styles
@@ -111,14 +111,16 @@ export const BentoGridItem = ({
       )}
     >
       {(title || description || header) && (
-        <div className="mb-4 px-6 pt-6">
+        <div className="mb-4 px-6 pt-6 flex-shrink-0">
           {header}
           {title && <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>}
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
       )}
-      <div className="flex-1 p-6">
-        {children}
+      <div className="flex-1 px-6 pb-6 min-w-0 w-full min-h-0 overflow-hidden">
+        <div className="w-full h-full overflow-x-auto overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>
   );

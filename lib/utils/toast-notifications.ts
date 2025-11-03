@@ -48,6 +48,22 @@ export const dashboardToasts = {
 				duration: 5000,
 			});
 		},
+		validationError: (errors?: Record<string, string[]>) => {
+			const errorCount = errors ? Object.keys(errors).length : 0;
+			const message = errorCount > 0
+				? `Validation failed: ${errorCount} field${errorCount > 1 ? 's' : ''} need attention`
+				: 'Validation failed';
+			toast.error(message, {
+				description: 'Please check the form fields and try again.',
+				duration: 6000,
+			});
+		},
+		badRequest: (message?: string) => {
+			toast.error('Invalid request', {
+				description: message || 'Please check your input and try again.',
+				duration: 5000,
+			});
+		},
 	},
 
 	// Success notifications
@@ -99,7 +115,9 @@ export const dashboardToasts = {
 	},
 };
 
-// Generic error handler for API responses
+/**
+ * Handle API error with improved validation error support
+ */
 export const handleApiError = async (error: Error | unknown, context: string = 'dashboard') => {
 	console.error(`API Error in ${context}:`, error);
 
@@ -116,10 +134,9 @@ export const handleApiError = async (error: Error | unknown, context: string = '
 				if (apiError.response.status === 401) {
 					dashboardToasts.error.unauthorized();
 				} else if (isValidationError(parsedError)) {
-					toast.error('Validation failed', {
-						description: parsedError.message || 'Please check your input',
-						duration: 5000,
-					});
+					// Enhanced validation error handling
+					const fieldErrors = parsedError.details || {};
+					dashboardToasts.error.validationError(fieldErrors);
 				} else if (isServerError(parsedError, apiError.response.status)) {
 					toast.error('Server error', {
 						description: parsedError.requestId 

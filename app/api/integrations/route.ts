@@ -3,12 +3,14 @@ import { db } from '@/lib/db';
 import { integrations } from '@/lib/db/schemas';
 import { eq, desc, and, like, or } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -44,39 +46,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(availableIntegrations);
   } catch (error) {
-    console.error('Error fetching integrations:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : undefined;
-    
-    // Log full error details for debugging
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Error details:', {
-        message: errorMessage,
-        stack: errorStack,
-        error
-      });
-    }
-    
     // Check if it's a database connection error
-    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Database connection error',
-          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
-          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-        },
-        { status: 503 }
-      );
+    if (error instanceof Error && (error.message.includes('DATABASE_URL') || error.message.includes('connection'))) {
+      return ApiErrorHandler.databaseError(error, requestId);
     }
     
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Internal server error',
-        message: process.env.NODE_ENV === 'development' ? errorMessage : 'An error occurred while fetching integrations'
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

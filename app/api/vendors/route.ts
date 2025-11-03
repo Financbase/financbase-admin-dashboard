@@ -6,13 +6,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/vendors - Get user's vendors
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -37,23 +39,25 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Failed to fetch vendors:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch vendors' },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 // POST /api/vendors - Create new vendor
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const {
       name,
       email,
@@ -69,10 +73,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!name || !email) {
-      return NextResponse.json(
-        { error: 'Name and email are required' },
-        { status: 400 }
-      );
+      return ApiErrorHandler.badRequest('Name and email are required');
     }
 
     // Create vendor using service
@@ -93,10 +94,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ vendor }, { status: 201 });
 
   } catch (error) {
-    console.error('Failed to create vendor:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create vendor' },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

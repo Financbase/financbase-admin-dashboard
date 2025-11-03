@@ -57,10 +57,11 @@ async function getOrCreateDefaultOrganization(): Promise<string> {
     const actualType = await verifyOrganizationIdType();
     
     // First, try to find an existing default organization
+    // Check by name since slug might not exist in database
     const existingOrg = await db
       .select()
       .from(organizations)
-      .where(eq(organizations.slug, 'default'))
+      .where(eq(organizations.name, 'Default Organization'))
       .limit(1);
 
     if (existingOrg.length > 0) {
@@ -90,9 +91,9 @@ async function getOrCreateDefaultOrganization(): Promise<string> {
         .insert(organizations)
         .values({
           name: 'Default Organization',
-          slug: 'default',
           description: 'Default organization for new users',
-        })
+          // Note: slug is optional and may not exist in database schema
+        } as any)
         .returning();
     } catch (insertError: any) {
       // Check for type-related errors

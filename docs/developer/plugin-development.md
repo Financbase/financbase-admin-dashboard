@@ -103,7 +103,7 @@ my-plugin/
   "description": "A custom plugin for Financbase",
   "version": "1.0.0",
   "author": "Your Name",
-  "license": "MIT",
+  "license": "Proprietary",
   "category": "Integration",
   "tags": ["custom", "api", "automation"],
   "requirements": {
@@ -831,7 +831,7 @@ export class MyPlugin implements Plugin {
     "automation"
   ],
   "author": "Your Name <your.email@example.com>",
-  "license": "MIT",
+  "license": "Proprietary",
   "repository": {
     "type": "git",
     "url": "https://github.com/your-org/financbase-sms-plugin.git"
@@ -869,7 +869,7 @@ financbase plugin publish
   "description": "Send SMS messages and receive SMS triggers in your workflows",
   "version": "1.0.0",
   "author": "Your Name",
-  "license": "MIT",
+  "license": "Proprietary",
   "category": "Communication",
   "tags": ["sms", "messaging", "automation"],
   "price": {

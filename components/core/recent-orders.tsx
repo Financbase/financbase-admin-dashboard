@@ -117,21 +117,21 @@ export default function RecentOrders() {
 					{orders.map((order) => (
 						<div
 							key={order.id}
-							className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors"
+							className="flex items-center justify-between gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors"
 							data-testid="order-item"
 						>
-							<div className="flex items-center space-x-4">
-								<UserAvatar name={order.customerName} size={40} />
-								<div>
-									<div className="flex items-center space-x-2">
-										<p className="text-sm font-medium text-gray-900 dark:text-white">
+							<div className="flex items-center space-x-4 min-w-0 flex-1">
+								<UserAvatar name={order.customerName} size={40} className="flex-shrink-0" />
+								<div className="min-w-0 flex-1">
+									<div className="flex items-center gap-2">
+										<p className="text-sm font-medium text-gray-900 dark:text-white truncate">
 											{order.customerName}
 										</p>
-										<span className="text-xs text-gray-500 dark:text-gray-400">
+										<span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
 											{order.orderNumber}
 										</span>
 									</div>
-									<p className="text-xs text-gray-500 dark:text-gray-400">
+									<p className="text-xs text-gray-500 dark:text-gray-400 truncate">
 										{order.items.length > 0
 											? order.items[0].name
 											: "Multiple items"}
@@ -140,15 +140,15 @@ export default function RecentOrders() {
 									</p>
 								</div>
 							</div>
-							<div className="flex items-center space-x-4">
-								<Badge className={`${statusColors[order.status]} border-0`}>
+							<div className="flex items-center space-x-4 flex-shrink-0 ml-2">
+								<Badge className={`${statusColors[order.status]} border-0 whitespace-nowrap`}>
 									{order.status}
 								</Badge>
 								<div className="text-right">
-									<p className="text-sm font-medium text-gray-900 dark:text-white">
+									<p className="text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">
 										{formatCurrency(order.total)}
 									</p>
-									<p className="text-xs text-gray-500 dark:text-gray-400">
+									<p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
 										{formatRelativeTime(new Date(order.createdAt))}
 									</p>
 								</div>

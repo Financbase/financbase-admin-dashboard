@@ -82,6 +82,72 @@ export const ourFileRouter = {
 			console.log('Document uploaded:', file.url);
 			return { uploadedBy: metadata.userId, url: file.url };
 		}),
+
+	// Plugin package uploads (ZIP/TAR files)
+	pluginPackage: f({ 
+		blob: { 
+			maxFileSize: '10MB',
+			maxFileCount: 1,
+		} 
+	})
+		.middleware(async () => {
+			const { userId } = await auth();
+
+			if (!userId) {
+				throw new UploadThingError('Unauthorized');
+			}
+
+			return { userId };
+		})
+		.onUploadComplete(async ({ metadata, file }) => {
+			console.log('Plugin package uploaded:', file.url);
+			return { 
+				uploadedBy: metadata.userId, 
+				url: file.url,
+				name: file.name,
+				size: file.size,
+			};
+		}),
+
+	// Plugin icon upload (optional image)
+	pluginIcon: f({ image: { maxFileSize: '2MB' } })
+		.middleware(async () => {
+			const { userId } = await auth();
+
+			if (!userId) {
+				throw new UploadThingError('Unauthorized');
+			}
+
+			return { userId };
+		})
+		.onUploadComplete(async ({ metadata, file }) => {
+			console.log('Plugin icon uploaded:', file.url);
+			return {
+				uploadedBy: metadata.userId,
+				url: file.url,
+				optimized: true,
+			};
+		}),
+
+	// Plugin screenshots upload (multiple images)
+	pluginScreenshots: f({ image: { maxFileSize: '4MB' } })
+		.middleware(async () => {
+			const { userId } = await auth();
+
+			if (!userId) {
+				throw new UploadThingError('Unauthorized');
+			}
+
+			return { userId };
+		})
+		.onUploadComplete(async ({ metadata, file }) => {
+			console.log('Plugin screenshot uploaded:', file.url);
+			return {
+				uploadedBy: metadata.userId,
+				url: file.url,
+				optimized: true,
+			};
+		}),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

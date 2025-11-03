@@ -912,12 +912,12 @@ function PieChartWidget({ widget, data }: { widget: DashboardWidget; data: any }
 function TableWidget({ widget, data }: { widget: DashboardWidget; data: any }) {
   return (
     <div className="space-y-2">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto -mx-1 px-1">
+        <table className="w-full text-sm min-w-full">
           <thead>
             <tr className="border-b">
               {widget.config.columns?.map((column: TableColumn) => (
-                <th key={column.field} className="text-left p-2">
+                <th key={column.field} className="text-left p-2 min-w-0 whitespace-nowrap">
                   {column.label}
                 </th>
               ))}
@@ -927,8 +927,10 @@ function TableWidget({ widget, data }: { widget: DashboardWidget; data: any }) {
             {data.rows?.slice(0, 5).map((row: any, index: number) => (
               <tr key={index} className="border-b">
                 {widget.config.columns?.map((column: TableColumn) => (
-                  <td key={column.field} className="p-2">
-                    {formatTableCell(row[column.field], column.type)}
+                  <td key={column.field} className="p-2 min-w-0">
+                    <div className="break-words whitespace-normal" title={String(row[column.field] || '')}>
+                      {formatTableCell(row[column.field], column.type)}
+                    </div>
                   </td>
                 ))}
               </tr>
