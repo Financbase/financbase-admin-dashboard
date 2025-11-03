@@ -75,17 +75,6 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ account }, { status: 201 });
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error('Error creating account:', error);
-		return NextResponse.json(
-			{ error: 'Failed to create account' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

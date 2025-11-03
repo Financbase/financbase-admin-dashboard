@@ -13,25 +13,32 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     // Check if user is admin
     const adminStatus = await isAdmin();
     if (!adminStatus) {
-      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+      return ApiErrorHandler.forbidden('Admin access required');
     }
 
-    const { id } = await params;
     const pluginId = parseInt(id);
     if (Number.isNaN(pluginId)) {
-      return NextResponse.json({ error: 'Invalid plugin ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid plugin ID', requestId);
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+    }
+
     const { reason } = body;
 
     // Get the plugin
@@ -42,7 +49,7 @@ export async function POST(
       .limit(1);
 
     if (!plugin) {
-      return NextResponse.json({ error: 'Plugin not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Plugin not found');
     }
 
     // Reject the plugin by setting isApproved to false and isActive to false
@@ -72,16 +79,6 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('Error rejecting plugin:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Failed to reject plugin',
-        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

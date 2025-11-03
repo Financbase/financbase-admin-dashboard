@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { PaymentService } from '@/lib/services/payment-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const createPaymentMethodSchema = z.object({
 	accountId: z.string().optional(),
@@ -39,32 +40,36 @@ const createPaymentMethodSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const paymentMethods = await PaymentService.getPaymentMethods(userId);
 
 		return NextResponse.json({ paymentMethods });
 	} catch (error) {
-		console.error('Error fetching payment methods:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch payment methods' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = createPaymentMethodSchema.parse(body);
 
 		const paymentMethod = await PaymentService.createPaymentMethod({
@@ -74,17 +79,6 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ paymentMethod }, { status: 201 });
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error('Error creating payment method:', error);
-		return NextResponse.json(
-			{ error: 'Failed to create payment method' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 			dbUsers.map(async (dbUser) => {
 				try {
 					const clerkUser = await clerk.users.getUser(dbUser.clerkId);
-					const metadata = (clerkUser.publicMetadata as FinancbaseUserMetadata) || {};
+					const metadata = (clerkUser.publicMetadata as unknown as FinancbaseUserMetadata) || {};
 					
 					return {
 						id: dbUser.clerkId, // Use Clerk ID for client compatibility
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 						role: metadata.role || dbUser.role || 'user',
 						permissions: metadata.permissions || [],
 						financialAccess: metadata.financialAccess || {},
-						lastActive: clerkUser.lastSignInAt?.toISOString(),
+						lastActive: clerkUser.lastSignInAt ? new Date(clerkUser.lastSignInAt).toISOString() : undefined,
 					};
 				} catch (error) {
 					console.error(`Error fetching Clerk user ${dbUser.clerkId}:`, error);

@@ -36,7 +36,12 @@ export async function GET(req: NextRequest) {
       ].filter((condition): condition is NonNullable<typeof condition> => condition !== undefined);
       
       if (searchConditions.length > 0) {
-        whereConditions.push(searchConditions.length === 1 ? searchConditions[0] : or(...searchConditions));
+        const firstCondition = searchConditions[0];
+        if (firstCondition && searchConditions.length === 1) {
+          whereConditions.push(firstCondition);
+        } else if (searchConditions.length > 1) {
+          whereConditions.push(or(...searchConditions));
+        }
       }
     }
 

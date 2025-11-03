@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { DocumentationService } from '@/lib/services/documentation-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -23,22 +25,25 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ tickets });
   } catch (error) {
-    console.error('Error fetching support tickets:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch support tickets',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+    }
+
     const {
       subject,
       description,
@@ -51,9 +56,10 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!subject || !description || !category) {
-      return NextResponse.json({ 
-        error: 'Missing required fields: subject, description, category' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest(
+        'Missing required fields: subject, description, category',
+        requestId
+      );
     }
 
     const ticket = await DocumentationService.createSupportTicket(
@@ -70,10 +76,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(ticket);
   } catch (error) {
-    console.error('Error creating support ticket:', error);
-    return NextResponse.json({ 
-      error: 'Failed to create support ticket',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

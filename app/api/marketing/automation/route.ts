@@ -2,15 +2,14 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { marketingAutomationService } from '@/lib/services/marketing/marketing-automation-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -57,48 +56,30 @@ export async function GET(request: NextRequest) {
       actionTypes,
     });
   } catch (error) {
-    console.error('Error fetching marketing automation data:', error);
-    
-    if (error instanceof Error) {
-      return NextResponse.json(
-        {
-          error: 'Failed to fetch marketing automation data',
-          details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-          code: 'DATABASE_ERROR',
-        },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch marketing automation data',
-        code: 'INTERNAL_ERROR',
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
+
     const { action, automationId, automationData } = body;
 
     // Validate action
     if (!action) {
-      return NextResponse.json(
-        { error: 'Action is required', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
+      return ApiErrorHandler.badRequest('Action is required');
     }
 
     // Parse automationId to number if provided
@@ -111,10 +92,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'create': {
         if (!automationData) {
-          return NextResponse.json(
-            { error: 'Automation data is required for create action', code: 'VALIDATION_ERROR' },
-            { status: 400 }
-          );
+          return ApiErrorHandler.badRequest('Automation data is required for create action');
         }
 
         const automation = await marketingAutomationService.createAutomation({
@@ -143,17 +121,11 @@ export async function POST(request: NextRequest) {
 
       case 'update': {
         if (!id) {
-          return NextResponse.json(
-            { error: 'Automation ID is required for update action', code: 'VALIDATION_ERROR' },
-            { status: 400 }
-          );
+          return ApiErrorHandler.badRequest('Automation ID is required for update action');
         }
 
         if (!automationData) {
-          return NextResponse.json(
-            { error: 'Automation data is required for update action', code: 'VALIDATION_ERROR' },
-            { status: 400 }
-          );
+          return ApiErrorHandler.badRequest('Automation data is required for update action');
         }
 
         const updatedAutomation = await marketingAutomationService.updateAutomation(
@@ -175,10 +147,7 @@ export async function POST(request: NextRequest) {
 
       case 'activate': {
         if (!id) {
-          return NextResponse.json(
-            { error: 'Automation ID is required for activate action', code: 'VALIDATION_ERROR' },
-            { status: 400 }
-          );
+          return ApiErrorHandler.badRequest('Automation ID is required for activate action');
         }
 
         const activatedAutomation = await marketingAutomationService.activateAutomation(
@@ -199,10 +168,7 @@ export async function POST(request: NextRequest) {
 
       case 'pause': {
         if (!id) {
-          return NextResponse.json(
-            { error: 'Automation ID is required for pause action', code: 'VALIDATION_ERROR' },
-            { status: 400 }
-          );
+          return ApiErrorHandler.badRequest('Automation ID is required for pause action');
         }
 
         const pausedAutomation = await marketingAutomationService.pauseAutomation(id, userId);
@@ -220,10 +186,7 @@ export async function POST(request: NextRequest) {
 
       case 'delete': {
         if (!id) {
-          return NextResponse.json(
-            { error: 'Automation ID is required for delete action', code: 'VALIDATION_ERROR' },
-            { status: 400 }
-          );
+          return ApiErrorHandler.badRequest('Automation ID is required for delete action');
         }
 
         await marketingAutomationService.deleteAutomation(id, userId);
@@ -248,46 +211,14 @@ export async function POST(request: NextRequest) {
       }
 
       default:
-        return NextResponse.json(
-          {
-            error: 'Invalid action',
-            code: 'VALIDATION_ERROR',
-            validActions: ['create', 'update', 'activate', 'pause', 'delete', 'test'],
-          },
-          { status: 400 }
+        return ApiErrorHandler.badRequest(
+          `Invalid action. Valid actions: create, update, activate, pause, delete, test`
         );
     }
   } catch (error) {
-    console.error('Error processing marketing automation action:', error);
-
-    if (error instanceof Error) {
-      // Handle known errors
-      if (error.message.includes('not found')) {
-        return NextResponse.json(
-          {
-            error: error.message,
-            code: 'NOT_FOUND',
-          },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json(
-        {
-          error: 'Failed to process marketing automation action',
-          details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-          code: 'DATABASE_ERROR',
-        },
-        { status: 500 }
-      );
+    if (error instanceof Error && error.message.includes('not found')) {
+      return ApiErrorHandler.notFound(error.message);
     }
-
-    return NextResponse.json(
-      {
-        error: 'Failed to process marketing automation action',
-        code: 'INTERNAL_ERROR',
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
