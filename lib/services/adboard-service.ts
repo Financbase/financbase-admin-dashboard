@@ -28,6 +28,7 @@ interface CreateCampaignInput {
 	tags?: string[];
 	metadata?: Record<string, unknown>;
 	notes?: string;
+	status?: 'draft' | 'active' | 'paused' | 'completed' | 'cancelled';
 }
 
 interface CreateAdGroupInput {
@@ -253,6 +254,7 @@ export async function updateCampaign(
 				name: updateData.name,
 				description: updateData.description,
 				type: updateData.type,
+				status: updateData.status,
 				platform: updateData.platform,
 				audience: updateData.audience,
 				keywords: updateData.keywords ? JSON.stringify(updateData.keywords) : undefined,

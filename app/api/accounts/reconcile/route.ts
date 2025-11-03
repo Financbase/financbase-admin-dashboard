@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AccountService } from '@/lib/services/account-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const reconcileSchema = z.object({
 	accountId: z.string().min(1, 'Account ID is required'),
@@ -10,32 +11,36 @@ const reconcileSchema = z.object({
 });
 
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const reconciliationStatus = await AccountService.getReconciliationStatus(userId);
 
 		return NextResponse.json({ reconciliationStatus });
 	} catch (error) {
-		console.error('Error fetching reconciliation status:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch reconciliation status' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = reconcileSchema.parse(body);
 
 		const account = await AccountService.reconcileAccount(
@@ -46,17 +51,6 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ account });
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error('Error reconciling account:', error);
-		return NextResponse.json(
-			{ error: 'Failed to reconcile account' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

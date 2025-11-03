@@ -60,7 +60,9 @@ function getClientIP(request: NextRequest): string {
 		return realIP;
 	}
 	
-	return request.ip || 'unknown';
+	// NextRequest doesn't have .ip property directly
+	// Return 'unknown' as fallback if headers don't have IP info
+	return 'unknown';
 }
 
 export async function POST(request: NextRequest) {
@@ -100,7 +102,7 @@ export async function POST(request: NextRequest) {
 		try {
 			body = await request.json();
 		} catch (error) {
-			return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
 		}
 
 		// Validate request body
@@ -114,12 +116,12 @@ export async function POST(request: NextRequest) {
 
 		// Additional honeypot check (should be empty)
 		if (website && website.length > 0) {
-			return ApiErrorHandler.badRequest('Spam detected', requestId);
+			return ApiErrorHandler.badRequest('Spam detected');
 		}
 
 		// Additional email validation
 		if (!validateEmail(email)) {
-			return ApiErrorHandler.badRequest('Invalid email address format', requestId);
+			return ApiErrorHandler.badRequest('Invalid email address format');
 		}
 
 		// Sanitize inputs
@@ -137,7 +139,7 @@ export async function POST(request: NextRequest) {
 
 		const urlCount = (sanitizedMessage.match(/http[s]?:\/\//gi) || []).length;
 		if (urlCount > 3) {
-			return ApiErrorHandler.badRequest('Message contains too many links', requestId);
+			return ApiErrorHandler.badRequest('Message contains too many links');
 		}
 
 		// Get client information
@@ -166,7 +168,7 @@ export async function POST(request: NextRequest) {
 
 		// Send notification email (async - don't wait for it)
 		EmailService.sendEmail({
-			to: process.env.CONTACT_NOTIFICATION_EMAIL || 'hello@financbase.com',
+			to: { email: process.env.CONTACT_NOTIFICATION_EMAIL || 'hello@financbase.com' },
 			subject: `New Contact Form Submission from ${sanitizedName}`,
 			html: `
 				<h2>New Contact Form Submission</h2>

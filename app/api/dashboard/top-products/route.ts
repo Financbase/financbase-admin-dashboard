@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 // import { headers } from 'next/headers'; // Temporarily disabled
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/dashboard/top-products - Get top revenue generating services/products
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		// TEMPORARILY DISABLED FOR TESTING
 		// const headersList = await headers();
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -49,10 +51,6 @@ export async function GET(request: NextRequest) {
 		return NextResponse.json({ products: sortedProducts });
 
 	} catch (error) {
-		console.error('Error fetching top products:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch top products' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

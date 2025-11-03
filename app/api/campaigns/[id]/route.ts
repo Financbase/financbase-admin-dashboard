@@ -150,7 +150,7 @@ export async function DELETE(
 		// Update campaign status to cancelled (soft delete)
 		// In production, you might want to implement soft delete with a deleted_at field
 		await AdboardService.updateCampaign(id, userId, {
-			status: 'cancelled' as any,
+			status: 'cancelled',
 		});
 
 		return NextResponse.json({
