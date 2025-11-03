@@ -37,7 +37,7 @@ export async function PUT(
 		
 		// Get current user metadata
 		const clerkUser = await clerk.users.getUser(targetUserId);
-		const currentMetadata = (clerkUser.publicMetadata as FinancbaseUserMetadata) || {};
+		const currentMetadata = (clerkUser.publicMetadata as unknown as FinancbaseUserMetadata) || {};
 
 		// Build updated metadata
 		const updatedMetadata: FinancbaseUserMetadata = {
@@ -49,7 +49,7 @@ export async function PUT(
 
 		// Update user metadata in Clerk
 		await clerk.users.updateUserMetadata(targetUserId, {
-			publicMetadata: updatedMetadata,
+			publicMetadata: updatedMetadata as unknown as Record<string, unknown>,
 		});
 
 		return NextResponse.json({

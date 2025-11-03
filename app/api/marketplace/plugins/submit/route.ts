@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { marketplacePlugins } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * Generate a unique slug from plugin name
@@ -21,13 +22,19 @@ function generateSlug(name: string): string {
  * Submit a new plugin to the marketplace
  */
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+    }
     const {
       name,
       description,
@@ -57,12 +64,9 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!name || !description || !author || !category || !pluginFile || !entryPoint) {
-      return NextResponse.json(
-        { 
-          error: 'Missing required fields',
-          required: ['name', 'description', 'author', 'category', 'pluginFile', 'entryPoint']
-        },
-        { status: 400 }
+      return ApiErrorHandler.badRequest(
+        'Missing required fields: name, description, author, category, pluginFile, entryPoint',
+        requestId
       );
     }
 
@@ -142,27 +146,16 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Error submitting plugin:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    // Handle unique constraint violations
-    if (errorMessage.includes('unique') || errorMessage.includes('duplicate')) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'A plugin with this name already exists. Please choose a different name.',
-        },
-        { status: 409 }
-      );
+    if (error instanceof Error) {
+      // Handle unique constraint violations
+      if (error.message.includes('unique') || error.message.includes('duplicate')) {
+        return ApiErrorHandler.conflict(
+          'A plugin with this name already exists. Please choose a different name.',
+          requestId
+        );
+      }
     }
     
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Failed to submit plugin',
-        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

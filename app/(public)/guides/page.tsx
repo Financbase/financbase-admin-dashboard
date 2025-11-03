@@ -90,7 +90,7 @@ export default function GuidesPage() {
 		},
 	];
 
-	const guides = [
+	const guides: Guide[] = [
 		{
 			id: 1,
 			title: "Getting Started with Financbase",
@@ -237,7 +237,7 @@ export default function GuidesPage() {
 				case "rating":
 					return b.rating - a.rating;
 				case "difficulty":
-					const difficultyOrder = { beginner: 0, intermediate: 1, advanced: 2 };
+					const difficultyOrder: Record<"beginner" | "intermediate" | "advanced", number> = { beginner: 0, intermediate: 1, advanced: 2 };
 					return difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty];
 				case "recent":
 					// Assuming guides with higher IDs are more recent

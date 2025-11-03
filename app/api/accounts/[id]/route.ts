@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AccountService } from '@/lib/services/account-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const updateAccountSchema = z.object({
 	accountName: z.string().min(1).optional(),
@@ -24,26 +25,23 @@ export async function GET(
 	request: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
 	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const account = await AccountService.getAccountById(id, userId);
 
 		if (!account) {
-			return NextResponse.json({ error: 'Account not found' }, { status: 404 });
+			return ApiErrorHandler.notFound('Account not found');
 		}
 
 		return NextResponse.json({ account });
 	} catch (error) {
-		console.error('Error fetching account:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch account' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -51,32 +49,28 @@ export async function PUT(
 	request: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id } = await params;
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = updateAccountSchema.parse(body);
 
 		const account = await AccountService.updateAccount(id, userId, validatedData);
 
 		return NextResponse.json({ account });
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error('Error updating account:', error);
-		return NextResponse.json(
-			{ error: 'Failed to update account' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -84,21 +78,18 @@ export async function DELETE(
 	request: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id } = await params;
 		await AccountService.deleteAccount(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error deleting account:', error);
-		return NextResponse.json(
-			{ error: 'Failed to delete account' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

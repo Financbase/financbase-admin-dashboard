@@ -146,7 +146,5 @@ export async function PATCH(request: NextRequest) {
 			},
 			{ status: statusCode }
 		);
-	} catch (error) {
-		return ApiErrorHandler.handle(error, requestId);
 	}
 }

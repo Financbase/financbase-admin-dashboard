@@ -1,0 +1,91 @@
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { createBlogPostSchema } from '@/lib/validation-schemas';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { withRLS } from '@/lib/api/with-rls';
+import { checkAdminStatus } from '@/lib/auth/check-admin-status';
+import * as blogService from '@/lib/services/blog/blog-service';
+
+/**
+ * GET /api/blog
+ * List blog posts (public for published posts, admin can see all)
+ */
+export async function GET(req: NextRequest) {
+	const requestId = generateRequestId();
+	const { searchParams } = new URL(req.url);
+	const page = parseInt(searchParams.get('page') || '1');
+	const limit = parseInt(searchParams.get('limit') || '10');
+	const offset = (page - 1) * limit;
+
+	const status = searchParams.get('status') as 'draft' | 'published' | 'scheduled' | 'archived' | null;
+	const categoryId = searchParams.get('categoryId') ? parseInt(searchParams.get('categoryId')!) : undefined;
+	const search = searchParams.get('search') || undefined;
+	const isFeatured = searchParams.get('featured') === 'true' ? true : searchParams.get('featured') === 'false' ? false : undefined;
+
+	try {
+		const { userId } = await auth();
+		const isAdmin = userId ? await checkAdminStatus() : false;
+
+		// Public users can only see published posts
+		// Admin users can see all posts
+		const queryStatus = isAdmin ? (status || undefined) : 'published';
+
+		const result = await blogService.getPosts({
+			status: queryStatus,
+			categoryId,
+			search,
+			isFeatured,
+			limit,
+			offset,
+			includeArchived: isAdmin,
+		});
+
+		return NextResponse.json({
+			success: true,
+			data: result.posts,
+			pagination: {
+				page,
+				limit,
+				total: result.total,
+				pages: Math.ceil(result.total / limit),
+			},
+		});
+	} catch (error) {
+		return ApiErrorHandler.handle(error, requestId);
+	}
+}
+
+/**
+ * POST /api/blog
+ * Create a new blog post (admin only)
+ */
+export async function POST(req: NextRequest) {
+	return withRLS(async (clerkUserId) => {
+		// Check if user is admin
+		const isAdmin = await checkAdminStatus();
+		if (!isAdmin) {
+			return ApiErrorHandler.forbidden('Only administrators can create blog posts');
+		}
+
+		try {
+			const body = await req.json();
+			const validatedData = createBlogPostSchema.parse({
+				...body,
+				userId: clerkUserId, // Ensure userId comes from auth, not request body
+			});
+
+			const newPost = await blogService.createPost(validatedData);
+
+			return NextResponse.json({
+				success: true,
+				message: 'Blog post created successfully',
+				data: newPost,
+			}, { status: 201 });
+		} catch (error) {
+			const requestId = generateRequestId();
+			return ApiErrorHandler.handle(error, requestId);
+		}
+	});
+}
+

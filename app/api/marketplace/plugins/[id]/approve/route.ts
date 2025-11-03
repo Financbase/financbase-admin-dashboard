@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { marketplacePlugins } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { isAdmin } from '@/lib/auth/financbase-rbac';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * POST /api/marketplace/plugins/[id]/approve
@@ -13,22 +14,23 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     // Check if user is admin
     const adminStatus = await isAdmin();
     if (!adminStatus) {
-      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+      return ApiErrorHandler.forbidden('Admin access required');
     }
 
-    const { id } = await params;
     const pluginId = parseInt(id);
     if (Number.isNaN(pluginId)) {
-      return NextResponse.json({ error: 'Invalid plugin ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid plugin ID', requestId);
     }
 
     // Get the plugin
@@ -39,7 +41,7 @@ export async function POST(
       .limit(1);
 
     if (!plugin) {
-      return NextResponse.json({ error: 'Plugin not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Plugin not found');
     }
 
     // Approve the plugin
@@ -61,16 +63,6 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('Error approving plugin:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Failed to approve plugin',
-        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

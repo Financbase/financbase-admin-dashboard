@@ -4,12 +4,14 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { freelancers } from '@/lib/db/schemas/freelancers.schema';
 import { eq, and, desc, ilike, or, sql, gte, lte, inArray } from 'drizzle-orm';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -121,22 +123,24 @@ export async function GET(request: NextRequest) {
 			},
 		});
 	} catch (error) {
-		console.error('Error fetching freelancers:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch freelancers' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 		const {
 			displayName,
 			title,
@@ -175,10 +179,7 @@ export async function POST(request: NextRequest) {
 			.limit(1);
 
 		if (existingFreelancer.length > 0) {
-			return NextResponse.json(
-				{ error: 'Freelancer profile already exists for this user' },
-				{ status: 409 }
-			);
+			return ApiErrorHandler.conflict('Freelancer profile already exists for this user');
 		}
 
 		const newFreelancer = await db
@@ -217,10 +218,6 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ freelancer: newFreelancer[0] }, { status: 201 });
 	} catch (error) {
-		console.error('Error creating freelancer profile:', error);
-		return NextResponse.json(
-			{ error: 'Failed to create freelancer profile' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
