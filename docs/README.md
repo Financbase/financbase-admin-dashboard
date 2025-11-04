@@ -11,9 +11,10 @@ Complete documentation for the Financbase Admin Dashboard project.
 ### Core Documentation
 
 #### For Developers
+- **[Technical Deep Dive](architecture/TECHNICAL_DEEP_DIVE.md)** ⭐ - **START HERE** - Comprehensive technical architecture with code references
+- **[Architecture Documentation](architecture/README.md)** - Complete architecture documentation suite
 - **[Developer Guide](developer-guide/README.md)** - Development workflow and best practices
 - **[Developer Documentation](developer/)** - Plugin development and API integration
-- **[Architecture](architecture/README.md)** - System architecture and design decisions
 
 #### For Users
 - **[User Guides](user-guides/)** - Getting started and workflow guides
@@ -84,6 +85,15 @@ Complete documentation for the Financbase Admin Dashboard project.
 
 - **[Security](SECURITY.md)** - Security best practices and guidelines
 - **[Performance Testing](../performance-tests/PERFORMANCE_TESTING_GUIDE.md)** - Performance testing guide
+- **[External Resources](EXTERNAL_RESOURCES.md)** - External links and resources status
+
+## 📡 External Resources
+
+Some documentation references external resources (websites, GitHub repositories, etc.) that may not yet be deployed. See [External Resources](EXTERNAL_RESOURCES.md) for:
+- Status of external documentation sites
+- Local alternatives for external resources
+- GitHub repository status
+- Product page information
 
 ## 📖 Contributing to Documentation
 

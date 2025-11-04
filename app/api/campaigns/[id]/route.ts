@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AdboardService } from '@/lib/services/adboard-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const updateCampaignSchema = z.object({
 	name: z.string().min(1).optional(),
@@ -35,36 +36,23 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json(
-				{ error: 'Unauthorized', code: 'UNAUTHORIZED' },
-				{ status: 401 }
-			);
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id } = await params;
 		const campaign = await AdboardService.getCampaignById(id, userId);
 
 		if (!campaign) {
-			return NextResponse.json(
-				{ error: 'Campaign not found', code: 'NOT_FOUND' },
-				{ status: 404 }
-			);
+			return ApiErrorHandler.notFound('Campaign not found');
 		}
 
 		return NextResponse.json({ campaign });
 	} catch (error) {
-		console.error('Error fetching campaign:', error);
-		return NextResponse.json(
-			{
-				error: 'Failed to fetch campaign',
-				details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined,
-				code: 'DATABASE_ERROR',
-			},
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -72,17 +60,20 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json(
-				{ error: 'Unauthorized', code: 'UNAUTHORIZED' },
-				{ status: 401 }
-			);
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id } = await params;
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 		const action = body.action;
 
 		if (action === 'update_metrics') {
@@ -105,22 +96,7 @@ export async function PUT(
 			return NextResponse.json({ campaign });
 		}
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error('Error updating campaign:', error);
-		return NextResponse.json(
-			{
-				error: 'Failed to update campaign',
-				details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined,
-				code: 'DATABASE_ERROR',
-			},
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -128,23 +104,18 @@ export async function DELETE(
 	request: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json(
-				{ error: 'Unauthorized', code: 'UNAUTHORIZED' },
-				{ status: 401 }
-			);
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id } = await params;
 		const campaign = await AdboardService.getCampaignById(id, userId);
 
 		if (!campaign) {
-			return NextResponse.json(
-				{ error: 'Campaign not found', code: 'NOT_FOUND' },
-				{ status: 404 }
-			);
+			return ApiErrorHandler.notFound('Campaign not found');
 		}
 
 		// Update campaign status to cancelled (soft delete)
@@ -158,25 +129,6 @@ export async function DELETE(
 			campaignId: id,
 		});
 	} catch (error) {
-		console.error('Error deleting campaign:', error);
-
-		if (error instanceof Error) {
-			return NextResponse.json(
-				{
-					error: 'Failed to delete campaign',
-					details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-					code: 'DATABASE_ERROR',
-				},
-				{ status: 500 }
-			);
-		}
-
-		return NextResponse.json(
-			{
-				error: 'Failed to delete campaign',
-				code: 'INTERNAL_ERROR',
-			},
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

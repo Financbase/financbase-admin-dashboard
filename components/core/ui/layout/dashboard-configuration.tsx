@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -18,9 +20,13 @@ import {
 	LayoutGrid,
 	RotateCcw,
 	Settings,
+	GripVertical,
 } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 // Import new animation library
 import {
@@ -53,6 +59,8 @@ export interface DashboardLayoutConfiguratorProps {
 	visibleWidgetIds: string[];
 	/** Callback when widget visibility changes. */
 	onVisibilityChange: (newVisibleIds: string[]) => void;
+	/** Callback when widget order changes. */
+	onOrderChange?: (newOrder: string[]) => void;
 	/** Callback to restore the entire dashboard layout to default. */
 	onLayoutReset: () => void;
 	/** Optional class name for the card container. */
@@ -96,6 +104,106 @@ const DashboardLayoutConfigurator: React.FC<
 		tap: { scale: 0.98 },
 	};
 
+	const handleDragEnd = useCallback((event: DragEndEvent) => {
+		const { active, over } = event;
+		
+		if (over && active.id !== over.id && onOrderChange) {
+			const oldIndex = visibleWidgetIds.indexOf(active.id as string);
+			const newIndex = visibleWidgetIds.indexOf(over.id as string);
+			
+			if (oldIndex !== -1 && newIndex !== -1) {
+				const newOrder = [...visibleWidgetIds];
+				const [removed] = newOrder.splice(oldIndex, 1);
+				newOrder.splice(newIndex, 0, removed);
+				onOrderChange(newOrder);
+			}
+		}
+	}, [visibleWidgetIds, onOrderChange]);
+
+	// Sortable widget item component
+	const SortableWidgetItem = ({ widget }: { widget: DashboardWidget }) => {
+		const {
+			attributes,
+			listeners,
+			setNodeRef,
+			transform,
+			transition,
+			isDragging,
+		} = useSortable({ id: widget.id });
+
+		const style = {
+			transform: CSS.Transform.toString(transform),
+			transition,
+			opacity: isDragging ? 0.5 : 1,
+		};
+
+		return (
+			<motion.div
+				ref={setNodeRef}
+				style={style}
+				layout
+				initial={{ opacity: 0, x: -10 }}
+				animate={{ opacity: 1, x: 0 }}
+				exit={{ opacity: 0, x: -10 }}
+				transition={{
+					...smoothTransition,
+					layout: { duration: 0.3 },
+				}}
+				className={cn(
+					"flex items-start space-x-3 p-2 rounded-lg transition-colors duration-150",
+					isWidgetVisible(widget.id)
+						? "hover:bg-muted/70"
+						: "opacity-70 hover:bg-muted/50",
+					isDragging && "z-50"
+				)}
+			>
+				{!widget.isPermanent && onOrderChange && (
+					<div
+						{...attributes}
+						{...listeners}
+						className={cn(
+							"flex items-center justify-center w-6 h-6 rounded cursor-grab active:cursor-grabbing",
+							"text-muted-foreground hover:text-foreground transition-colors",
+							"mt-1"
+						)}
+						aria-label="Drag to reorder"
+					>
+						<GripVertical className="h-4 w-4" />
+					</div>
+				)}
+				<div className="pt-1">
+					<Checkbox
+						id={`widget-${widget.id}`}
+						checked={isWidgetVisible(widget.id)}
+						onCheckedChange={(checked: boolean) =>
+							handleToggleWidget(widget, checked)
+						}
+						disabled={widget.isPermanent}
+						className={cn(
+							widget.isPermanent && "bg-primary border-primary",
+							widget.isPermanent
+								? "opacity-100 cursor-not-allowed"
+								: "cursor-pointer",
+						)}
+					/>
+				</div>
+
+				<label
+					htmlFor={`widget-${widget.id}`}
+					className={cn(
+						"flex flex-col text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1",
+						widget.isPermanent && "text-primary/90",
+					)}
+				>
+					<span className="text-foreground">{widget.title}</span>
+					<span className="text-xs text-muted-foreground mt-0.5">
+						{widget.description}
+					</span>
+				</label>
+			</motion.div>
+		);
+	};
+
 	return (
 		<AnimatedCard
 			className="w-full max-w-lg mx-auto shadow-xl"
@@ -117,63 +225,92 @@ const DashboardLayoutConfigurator: React.FC<
 
 				<CardContent className="p-0">
 					<h3 className="text-lg font-semibold text-foreground px-6 pt-6 pb-2">
-						Widget Visibility
+						Widget Visibility {onOrderChange && <span className="text-sm text-muted-foreground font-normal">(Drag to reorder)</span>}
 					</h3>
 
 					<ScrollArea className="h-[300px] px-6">
-						<AnimatePresence initial={false}>
-							<StaggeredContainer delay={0.1}>
-								{availableWidgets.map((widget) => (
-									<motion.div
-										key={widget.id}
-										layout
-										initial={{ opacity: 0, x: -10 }}
-										animate={{ opacity: 1, x: 0 }}
-										exit={{ opacity: 0, x: -10 }}
-										transition={{
-											...smoothTransition,
-											layout: { duration: 0.3 },
-										}}
-										className={cn(
-											"flex items-start space-x-3 p-2 rounded-lg transition-colors duration-150",
-											isWidgetVisible(widget.id)
-												? "hover:bg-muted/70"
-												: "opacity-70 hover:bg-muted/50",
-										)}
-									>
-										<div className="pt-1">
-											<Checkbox
-												id={`widget-${widget.id}`}
-												checked={isWidgetVisible(widget.id)}
-												onCheckedChange={(checked: boolean) =>
-													handleToggleWidget(widget, checked)
-												}
-												disabled={widget.isPermanent}
-												className={cn(
-													widget.isPermanent && "bg-primary border-primary",
-													widget.isPermanent
-														? "opacity-100 cursor-not-allowed"
-														: "cursor-pointer",
-												)}
-											/>
-										</div>
-
-										<label
-											htmlFor={`widget-${widget.id}`}
+						{onOrderChange ? (
+							<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+								<SortableContext
+									items={visibleWidgetIds}
+									strategy={verticalListSortingStrategy}
+								>
+									<AnimatePresence initial={false}>
+										<StaggeredContainer delay={0.1}>
+											{availableWidgets
+												.sort((a, b) => {
+													const aIndex = visibleWidgetIds.indexOf(a.id);
+													const bIndex = visibleWidgetIds.indexOf(b.id);
+													// Permanent widgets first, then by visible order
+													if (a.isPermanent && !b.isPermanent) return -1;
+													if (!a.isPermanent && b.isPermanent) return 1;
+													if (aIndex === -1 && bIndex === -1) return 0;
+													if (aIndex === -1) return 1;
+													if (bIndex === -1) return -1;
+													return aIndex - bIndex;
+												})
+												.map((widget) => (
+													<SortableWidgetItem key={widget.id} widget={widget} />
+												))}
+										</StaggeredContainer>
+									</AnimatePresence>
+								</SortableContext>
+							</DndContext>
+						) : (
+							<AnimatePresence initial={false}>
+								<StaggeredContainer delay={0.1}>
+									{availableWidgets.map((widget) => (
+										<motion.div
+											key={widget.id}
+											layout
+											initial={{ opacity: 0, x: -10 }}
+											animate={{ opacity: 1, x: 0 }}
+											exit={{ opacity: 0, x: -10 }}
+											transition={{
+												...smoothTransition,
+												layout: { duration: 0.3 },
+											}}
 											className={cn(
-												"flex flex-col text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-												widget.isPermanent && "text-primary/90",
+												"flex items-start space-x-3 p-2 rounded-lg transition-colors duration-150",
+												isWidgetVisible(widget.id)
+													? "hover:bg-muted/70"
+													: "opacity-70 hover:bg-muted/50",
 											)}
 										>
-											<span className="text-foreground">{widget.title}</span>
-											<span className="text-xs text-muted-foreground mt-0.5">
-												{widget.description}
-											</span>
-										</label>
-									</motion.div>
-								))}
-							</StaggeredContainer>
-						</AnimatePresence>
+											<div className="pt-1">
+												<Checkbox
+													id={`widget-${widget.id}`}
+													checked={isWidgetVisible(widget.id)}
+													onCheckedChange={(checked: boolean) =>
+														handleToggleWidget(widget, checked)
+													}
+													disabled={widget.isPermanent}
+													className={cn(
+														widget.isPermanent && "bg-primary border-primary",
+														widget.isPermanent
+															? "opacity-100 cursor-not-allowed"
+															: "cursor-pointer",
+													)}
+												/>
+											</div>
+
+											<label
+												htmlFor={`widget-${widget.id}`}
+												className={cn(
+													"flex flex-col text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+													widget.isPermanent && "text-primary/90",
+												)}
+											>
+												<span className="text-foreground">{widget.title}</span>
+												<span className="text-xs text-muted-foreground mt-0.5">
+													{widget.description}
+												</span>
+											</label>
+										</motion.div>
+									))}
+								</StaggeredContainer>
+							</AnimatePresence>
+						)}
 					</ScrollArea>
 				</CardContent>
 

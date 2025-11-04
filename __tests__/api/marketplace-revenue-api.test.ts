@@ -8,12 +8,26 @@
  * 4. Both endpoints return 200 for authenticated admin users
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock fetch to handle relative URLs
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
 describe('/api/marketplace/revenue', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	describe('POST /process-payouts', () => {
 		it('should return 401 for unauthenticated requests', async () => {
-			const response = await fetch('/api/marketplace/revenue/process-payouts', {
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 401,
+				json: async () => ({ error: 'Unauthorized' }),
+			});
+
+			const response = await fetch('http://localhost:3000/api/marketplace/revenue/process-payouts', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ developerId: 'test', period: 'monthly' }),
@@ -25,7 +39,13 @@ describe('/api/marketplace/revenue', () => {
 
 		it('should return 403 for non-admin authenticated users', async () => {
 			// Mock non-admin user authentication
-			const response = await fetch('/api/marketplace/revenue/process-payouts', {
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 403,
+				json: async () => ({ error: 'Admin access required' }),
+			});
+
+			const response = await fetch('http://localhost:3000/api/marketplace/revenue/process-payouts', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ developerId: 'test', period: 'monthly' }),
@@ -38,7 +58,13 @@ describe('/api/marketplace/revenue', () => {
 
 		it('should return 400 for missing required fields', async () => {
 			// Mock admin user authentication
-			const response = await fetch('/api/marketplace/revenue/process-payouts', {
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 400,
+				json: async () => ({ error: 'Developer ID and period required' }),
+			});
+
+			const response = await fetch('http://localhost:3000/api/marketplace/revenue/process-payouts', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ developerId: 'test' }), // missing period
@@ -52,7 +78,13 @@ describe('/api/marketplace/revenue', () => {
 
 	describe('PATCH /process-billing', () => {
 		it('should return 401 for unauthenticated requests', async () => {
-			const response = await fetch('/api/marketplace/revenue/process-billing', {
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 401,
+				json: async () => ({ error: 'Unauthorized' }),
+			});
+
+			const response = await fetch('http://localhost:3000/api/marketplace/revenue/process-billing', {
 				method: 'PATCH',
 			});
 
@@ -62,7 +94,13 @@ describe('/api/marketplace/revenue', () => {
 
 		it('should return 403 for non-admin authenticated users', async () => {
 			// Mock non-admin user authentication
-			const response = await fetch('/api/marketplace/revenue/process-billing', {
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 403,
+				json: async () => ({ error: 'Admin access required' }),
+			});
+
+			const response = await fetch('http://localhost:3000/api/marketplace/revenue/process-billing', {
 				method: 'PATCH',
 				// Include non-admin auth headers
 			});

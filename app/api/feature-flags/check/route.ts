@@ -12,7 +12,7 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 export async function GET(request: NextRequest) {
 	const requestId = generateRequestId();
 	try {
-		const { userId } = await auth();
+		const { userId, orgId } = await auth();
 		const { searchParams } = new URL(request.url);
 		const key = searchParams.get('key');
 
@@ -20,9 +20,8 @@ export async function GET(request: NextRequest) {
 			return ApiErrorHandler.badRequest('Feature flag key is required');
 		}
 
-		// Get user's organization if available
-		// Note: This would need to be implemented based on your auth system
-		const organizationId = undefined; // TODO: Get from auth context
+		// Extract organization from Clerk auth
+		const organizationId = orgId || undefined;
 
 		// Check flag status
 		const isEnabled = await FeatureFlagsService.isEnabled(key, {

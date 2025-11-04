@@ -29,14 +29,36 @@ A comprehensive financial management platform with advanced automation, integrat
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: Next.js 14, React 18, TypeScript 5.9
-- **Backend**: Next.js API Routes, Drizzle ORM
-- **Database**: Neon PostgreSQL (Serverless)
-- **Authentication**: Clerk
-- **UI Components**: Radix UI, Tailwind CSS
-- **Testing**: Jest, Playwright, Testing Library
-- **Monitoring**: Sentry
-- **Deployment**: Vercel
+- **Frontend**: Next.js 15.4.7, React 18.3.1, TypeScript 5.9.3
+- **Backend**: Next.js API Routes, Drizzle ORM 0.36.4
+- **Database**: Neon PostgreSQL (Serverless) with Row Level Security (221 tables secured)
+- **Authentication**: Clerk v6.34.1
+- **UI Components**: shadcn/ui, Radix UI, Tailwind CSS 3.4.18
+- **State Management**: TanStack Query v5.90.5
+- **Real-time**: PartyKit WebSocket server
+- **AI/ML**: Multi-provider system (OpenAI, Claude, Google AI, Grok, OpenRouter)
+- **Testing**: Jest, Playwright, K6 load testing (80% coverage requirement)
+- **Monitoring**: Sentry, Vercel Analytics
+- **Deployment**: Vercel with automated CI/CD
+
+## 📚 Architecture Documentation
+
+**New to the codebase?** Start with our comprehensive architecture documentation:
+
+- **[Technical Deep Dive](./docs/architecture/TECHNICAL_DEEP_DIVE.md)** ⭐ - Complete technical overview with code references
+- **[Architecture Documentation](./docs/architecture/README.md)** - All architecture documents organized by topic
+
+**Focused Documents:**
+
+- [Frontend Architecture](./docs/architecture/FRONTEND_ARCHITECTURE.md) - Next.js 15 App Router, React Server Components
+- [Backend Architecture](./docs/architecture/BACKEND_ARCHITECTURE.md) - API routes, middleware, versioning
+- [Database Architecture](./docs/architecture/DATABASE_ARCHITECTURE.md) - PostgreSQL, Drizzle ORM, RLS policies
+- [Security Architecture](./docs/architecture/SECURITY_ARCHITECTURE.md) - Authentication, authorization, data protection
+- [Real-time Collaboration](./docs/architecture/REALTIME_COLLABORATION.md) - PartyKit WebSocket architecture
+- [AI/ML Integration](./docs/architecture/AI_ML_INTEGRATION.md) - Multi-provider AI system
+- [Performance Optimization](./docs/architecture/PERFORMANCE_OPTIMIZATION.md) - Optimization strategies
+- [Testing Infrastructure](./docs/architecture/TESTING_INFRASTRUCTURE.md) - Testing setup and practices
+- [Deployment & DevOps](./docs/architecture/DEPLOYMENT_DEVOPS.md) - Deployment procedures
 
 ## 📦 Installation
 
@@ -46,7 +68,7 @@ A comprehensive financial management platform with advanced automation, integrat
    git clone https://github.com/your-org/financbase-admin-dashboard.git
    cd financbase-admin-dashboard
    ```
-   
+
    **Note**: This is a private repository. Access is restricted to authorized team members only.
 
 2. **Install dependencies**

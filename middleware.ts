@@ -50,12 +50,23 @@ export default clerkMiddleware(async (auth, req) => {
 
   // Explicitly exclude Next.js internal files and static assets
   // This ensures middleware doesn't interfere with chunk loading
+  // Critical: Must exclude all webpack chunk paths to prevent ChunkLoadError
   if (
     pathname.startsWith('/_next/') ||
+    pathname.startsWith('/_next/static/') ||
+    pathname.startsWith('/_next/webpack/') ||
+    pathname.startsWith('/_next/image/') ||
     pathname.startsWith('/static/') ||
     pathname.includes('/favicon.ico') ||
     pathname.includes('/manifest.json') ||
-    pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)
+    pathname.includes('/robots.txt') ||
+    pathname.includes('/sitemap') ||
+    // Match all static file extensions (including chunk files)
+    pathname.match(/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp|avif|map)$/i) ||
+    // Match webpack chunk patterns (e.g., /_next/static/chunks/webpack-*.js)
+    pathname.match(/\/_next\/static\/chunks\/.*\.js$/) ||
+    // Match webpack runtime chunks
+    pathname.match(/\/_next\/static\/chunks\/webpack\.js/)
   ) {
     return NextResponse.next();
   }

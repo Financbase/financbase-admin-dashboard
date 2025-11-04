@@ -1,25 +1,25 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { WorkflowEngine } from '@/lib/services/workflow-engine'
 import { db } from '@/lib/db'
 
 // Mock database
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   db: {
-    select: jest.fn(),
-    insert: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
 // Mock email service
-jest.mock('@/lib/services/email-service', () => ({
-  sendEmail: jest.fn(),
+vi.mock('@/lib/services/email-service', () => ({
+  sendEmail: vi.fn(),
 }))
 
 // Mock webhook service
-jest.mock('@/lib/services/webhook-service', () => ({
-  WebhookService: jest.fn(),
+vi.mock('@/lib/services/webhook-service', () => ({
+  WebhookService: vi.fn(),
 }))
 
 describe('Workflow Performance Tests', () => {
@@ -27,7 +27,7 @@ describe('Workflow Performance Tests', () => {
   let mockDb: any
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     workflowEngine = new WorkflowEngine()
     mockDb = db as any
   })
@@ -56,13 +56,13 @@ describe('Workflow Performance Tests', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       const { sendEmail } = require('@/lib/services/email-service')
@@ -135,13 +135,13 @@ describe('Workflow Performance Tests', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       const { sendEmail } = require('@/lib/services/email-service')
@@ -179,13 +179,13 @@ describe('Workflow Performance Tests', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       const { sendEmail } = require('@/lib/services/email-service')
@@ -231,8 +231,8 @@ describe('Workflow Performance Tests', () => {
       mockDb.select.mockImplementation(() => {
         const start = Date.now()
         return {
-          from: jest.fn().mockReturnValue({
-            where: jest.fn().mockImplementation(() => {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockImplementation(() => {
               const end = Date.now()
               dbOperations.push(end - start)
               return Promise.resolve([mockWorkflow])
@@ -244,7 +244,7 @@ describe('Workflow Performance Tests', () => {
       mockDb.insert.mockImplementation(() => {
         const start = Date.now()
         return {
-          values: jest.fn().mockImplementation(() => {
+          values: vi.fn().mockImplementation(() => {
             const end = Date.now()
             dbOperations.push(end - start)
             return Promise.resolve({ insertId: 'execution-1' })
@@ -289,13 +289,13 @@ describe('Workflow Performance Tests', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       const { sendEmail } = require('@/lib/services/email-service')
@@ -341,13 +341,13 @@ describe('Workflow Performance Tests', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       // Mock email service to fail
@@ -387,13 +387,13 @@ describe('Workflow Performance Tests', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       const { sendEmail } = require('@/lib/services/email-service')

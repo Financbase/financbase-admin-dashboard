@@ -133,6 +133,21 @@ export default defineConfig({
       '@/types': path.resolve(__dirname, './types'),
       '@/hooks': path.resolve(__dirname, './hooks'),
       '@/contexts': path.resolve(__dirname, './contexts')
-    }
-  }
+    },
+    // Ensure proper module resolution
+    extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
+    dedupe: ['@radix-ui/react-slot'],
+  },
+  ssr: {
+    noExternal: ['@radix-ui/react-slot', '@radix-ui/react-dialog', '@radix-ui/react-popover'],
+  },
+  // Optimize dependencies
+  optimizeDeps: {
+    include: ['@radix-ui/react-slot', '@radix-ui/react-dialog', '@radix-ui/react-popover'],
+    exclude: [],
+  },
+  // Ensure proper handling of React components
+  esbuild: {
+    jsx: 'automatic',
+  },
 });

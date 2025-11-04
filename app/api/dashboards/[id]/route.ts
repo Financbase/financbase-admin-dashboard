@@ -1,54 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { DashboardBuilderService } from '@/lib/services/dashboard-builder-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const { id } = await params;
     const dashboardId = parseInt(id);
     if (isNaN(dashboardId)) {
-      return NextResponse.json({ error: 'Invalid dashboard ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid dashboard ID');
     }
 
     const dashboard = await DashboardBuilderService.getDashboard(dashboardId, userId);
     if (!dashboard) {
-      return NextResponse.json({ error: 'Dashboard not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Dashboard not found');
     }
 
     return NextResponse.json(dashboard);
   } catch (error) {
-    console.error('Error fetching dashboard:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch dashboard',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const dashboardId = parseInt(params.id);
+    const dashboardId = parseInt(id);
     if (isNaN(dashboardId)) {
-      return NextResponse.json({ error: 'Invalid dashboard ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid dashboard ID');
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const updates = {
       name: body.name,
       description: body.description,
@@ -66,37 +71,31 @@ export async function PATCH(
 
     return NextResponse.json(dashboard);
   } catch (error) {
-    console.error('Error updating dashboard:', error);
-    return NextResponse.json({ 
-      error: 'Failed to update dashboard',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const dashboardId = parseInt(params.id);
+    const dashboardId = parseInt(id);
     if (isNaN(dashboardId)) {
-      return NextResponse.json({ error: 'Invalid dashboard ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid dashboard ID');
     }
 
     await DashboardBuilderService.deleteDashboard(dashboardId, userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting dashboard:', error);
-    return NextResponse.json({ 
-      error: 'Failed to delete dashboard',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

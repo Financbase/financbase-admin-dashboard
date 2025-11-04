@@ -135,26 +135,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ analytics: analyticsData });
   } catch (error) {
-    console.error('Error fetching marketing analytics:', error);
-    
-    // Handle database errors
-    if (error instanceof Error) {
-      return NextResponse.json(
-        {
-          error: 'Failed to fetch marketing analytics',
-          details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-          code: 'DATABASE_ERROR',
-        },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch marketing analytics',
-        code: 'INTERNAL_ERROR',
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

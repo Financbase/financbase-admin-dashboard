@@ -2,43 +2,19 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	uuid,
-	pgEnum,
+	serial,
 	boolean as pgBoolean,
 	jsonb,
 } from "drizzle-orm/pg-core";
-import { users } from "./users.schema";
-
-export const notificationTypeEnum = pgEnum("notification_type", [
-	"invoice",
-	"expense", 
-	"alert",
-	"report",
-	"system"
-]);
-
-export const notificationCategoryEnum = pgEnum("notification_category", [
-	"financial",
-	"system",
-	"security",
-	"general"
-]);
-
-export const notificationPriorityEnum = pgEnum("notification_priority", [
-	"low",
-	"normal",
-	"high",
-	"urgent"
-]);
 
 export const notifications = pgTable("notifications", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	userId: uuid("user_id").notNull().references(() => users.id),
+	id: serial("id").primaryKey(),
+	userId: text("user_id").notNull(),
 	
 	// Notification details
-	type: notificationTypeEnum("type").notNull(),
-	category: notificationCategoryEnum("category").default("general"),
-	priority: notificationPriorityEnum("priority").default("normal"),
+	type: text("type").notNull(),
+	category: text("category"),
+	priority: text("priority").default("normal"),
 	
 	// Content
 	title: text("title").notNull(),
@@ -51,8 +27,8 @@ export const notifications = pgTable("notifications", {
 	metadata: jsonb("metadata"), // Additional metadata
 	
 	// Status and timing
-	isRead: pgBoolean("is_read").default(false),
-	isArchived: pgBoolean("is_archived").default(false),
+	isRead: pgBoolean("read").default(false),
+	isArchived: pgBoolean("archived").default(false),
 	expiresAt: timestamp("expires_at"),
 	
 	// Tracking

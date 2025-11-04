@@ -15,8 +15,10 @@ import {
   Shield,
   Zap,
   Globe,
-  TestTube
+  TestTube,
+  Palette
 } from 'lucide-react'
+import { ThemeManagerTest } from '@/components/dev/theme-manager-test'
 
 export default function TestPage() {
   const [testResults, setTestResults] = useState<Array<{endpoint: string, status: string | number, success: boolean, statusText?: string, error?: string}>>([])
@@ -216,6 +218,21 @@ export default function TestPage() {
           </CardContent>
         </Card>
 
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Palette className="w-6 h-6 mr-2" />
+              Theme Manager Testing
+            </CardTitle>
+            <CardDescription>
+              Test the centralized ThemeManager service with live theme switching, color utilities, and CSS variable access
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ThemeManagerTest />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Implementation Summary</CardTitle>
@@ -238,6 +255,7 @@ export default function TestPage() {
                   <li>• Security & Compliance</li>
                   <li>• Performance Optimization</li>
                   <li>• Internationalization</li>
+                  <li>• <strong>Centralized Theme Manager</strong></li>
                 </ul>
               </div>
               <div className="space-y-2">
@@ -251,6 +269,7 @@ export default function TestPage() {
                   <li>• Security Auditing</li>
                   <li>• Multi-language Support</li>
                   <li>• Enterprise Features</li>
+                  <li>• <strong>Theme Management System</strong></li>
                 </ul>
               </div>
             </div>

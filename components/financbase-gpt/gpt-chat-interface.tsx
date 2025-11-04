@@ -30,7 +30,6 @@ import {
 	Calendar,
 	Clock
 } from 'lucide-react';
-import { FinancbaseGPTService } from '@/lib/services/business/financbase-gpt-service';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -109,8 +108,6 @@ export function FinancbaseGPTChat({
 	const [isTyping, setIsTyping] = useState(false);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-	const gptService = new FinancbaseGPTService();
 
 	// Scroll to bottom when new messages arrive
 	useEffect(() => {

@@ -9,27 +9,30 @@ import * as blogService from '@/lib/services/blog/blog-service';
 
 /**
  * GET /api/blog/[id]
- * Get a blog post by ID (admin only)
+ * Get a blog post by ID (admin only) or by slug (public for published posts)
  */
 export async function GET(
 	req: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
-		// Check if user is admin
-		const isAdmin = await checkAdminStatus();
-		if (!isAdmin) {
-			return ApiErrorHandler.forbidden('Only administrators can view blog posts by ID');
-		}
+	try {
+		const { userId } = await auth();
+		const isAdmin = userId ? await checkAdminStatus() : false;
+		
+		const param = params.id;
+		
+		// Check if param is numeric (ID) or a slug
+		const numericId = parseInt(param);
+		const isNumericId = !isNaN(numericId) && numericId.toString() === param;
 
-		try {
-			const id = parseInt(params.id);
-			if (isNaN(id)) {
-				return ApiErrorHandler.validationError(new Error('Invalid blog post ID') as any);
+		if (isNumericId) {
+			// Handle numeric ID (admin only)
+			if (!isAdmin) {
+				return ApiErrorHandler.forbidden('Only administrators can view blog posts by ID');
 			}
 
-			const post = await blogService.getPostById(id, true);
+			const post = await blogService.getPostById(numericId, true);
 
 			if (!post) {
 				return ApiErrorHandler.notFound('Blog post not found');
@@ -39,10 +42,35 @@ export async function GET(
 				success: true,
 				data: post,
 			});
-		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+		} else {
+			// Handle slug (public for published posts, admin can see all)
+			const post = await blogService.getPostBySlug(param, isAdmin);
+
+			if (!post) {
+				return ApiErrorHandler.notFound('Blog post not found');
+			}
+
+			// Non-admin users can only see published posts
+			if (!isAdmin && post.status !== 'published') {
+				return ApiErrorHandler.notFound('Blog post not found');
+			}
+
+			// Increment view count if published and not viewed by author
+			if (post.status === 'published' && post.userId !== userId) {
+				// Fire and forget - don't wait for view count update
+				blogService.incrementViewCount(post.id).catch((err) => {
+					console.error('Error incrementing view count:', err);
+				});
+			}
+
+			return NextResponse.json({
+				success: true,
+				data: post,
+			});
 		}
-	});
+	} catch (error) {
+		return ApiErrorHandler.handle(error, requestId);
+	}
 }
 
 /**
@@ -64,10 +92,22 @@ export async function PUT(
 		try {
 			const id = parseInt(params.id);
 			if (isNaN(id)) {
-				return ApiErrorHandler.validationError(new Error('Invalid blog post ID') as any);
+				return ApiErrorHandler.badRequest('Invalid blog post ID');
 			}
 
-			const body = await req.json();
+			// Parse JSON body with proper error handling
+			let body;
+			try {
+				body = await req.json();
+			} catch (error) {
+				// Handle JSON parse errors (malformed JSON)
+				if (error instanceof SyntaxError || error instanceof TypeError) {
+					return ApiErrorHandler.badRequest('Invalid JSON in request body');
+				}
+				// Re-throw other errors to be handled by outer catch
+				throw error;
+			}
+
 			const validatedData = updateBlogPostSchema.parse({
 				...body,
 				id,
@@ -105,7 +145,7 @@ export async function DELETE(
 		try {
 			const id = parseInt(params.id);
 			if (isNaN(id)) {
-				return ApiErrorHandler.validationError(new Error('Invalid blog post ID') as any);
+				return ApiErrorHandler.badRequest('Invalid blog post ID');
 			}
 
 			const { searchParams } = new URL(req.url);

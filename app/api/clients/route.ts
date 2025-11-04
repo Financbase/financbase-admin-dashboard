@@ -4,10 +4,11 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { clients } from '@/lib/db/schemas/clients.schema';
 import { createClientSchema } from '@/lib/validation-schemas';
-import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { eq, count, and, like, or } from 'drizzle-orm';
 
 export async function GET(req: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -70,18 +71,24 @@ export async function GET(req: NextRequest) {
       }
     });
   } catch (error) {
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 export async function POST(req: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
       return ApiErrorHandler.unauthorized();
     }
 
-    const body = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const validatedData = createClientSchema.parse({
       ...body,
       userId // Ensure userId comes from auth, not request body
@@ -105,6 +112,6 @@ export async function POST(req: NextRequest) {
       data: newClient
     }, { status: 201 });
   } catch (error) {
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

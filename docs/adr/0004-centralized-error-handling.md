@@ -1,154 +1,105 @@
-# ADR-0004: Centralized Error Handling with ApiErrorHandler
+# ADR-0004: Centralized Error Handling
 
 **Status**: Accepted  
-**Date**: 2024-01-XX  
-**Deciders**: Development Team  
-**Tags**: architecture, error-handling, api, consistency
+**Date**: 2024-12-XX  
+**Decision**: Use ApiErrorHandler for consistent error responses across all API routes
 
 ## Context
 
-The Financbase Admin Dashboard has 200+ API routes that handle various operations. During codebase analysis, we discovered:
+Prior to this decision, error handling across API routes was inconsistent. Different routes returned different error formats, making it difficult for:
 
-- **90% of routes (182/202)** use manual error handling with inconsistent formats
-- **Only 10% of routes (20/202)** use the existing `ApiErrorHandler` utility
-- Multiple error response formats across routes
-- Security concerns: Some routes may expose sensitive error details
-- Difficult debugging: Inconsistent error logging and tracking
-
-This inconsistency makes it difficult to:
-- Debug issues across the application
-- Maintain consistent error responses for API clients
-- Ensure security best practices (not exposing sensitive information)
-- Implement centralized error logging and monitoring
+- Frontend developers to handle errors consistently
+- API consumers to understand error responses
+- Debugging and monitoring systems to track errors
+- Maintaining error handling logic (scattered across many files)
 
 ## Decision
 
-We will **standardize all API routes to use `ApiErrorHandler` from `lib/api-error-handler.ts`** for consistent error handling across the entire application.
+We will implement a centralized error handling system using the `ApiErrorHandler` class that:
 
-All API route handlers should:
-1. Wrap logic in try-catch blocks
-2. Use `ApiErrorHandler.handle(error)` for error responses
-3. Use specific error handlers (e.g., `ApiErrorHandler.validationError()`, `ApiErrorHandler.unauthorized()`) when appropriate
-4. Include request IDs for error tracking
+1. Provides consistent error response formats across all API endpoints
+2. Handles different error types (validation, authentication, authorization, server errors)
+3. Includes request IDs for tracing errors
+4. Supports both development (with stack traces) and production (sanitized) error responses
+5. Integrates with Zod validation errors
+6. Provides helper methods for common HTTP status codes (400, 401, 403, 404, 500)
 
-## Rationale
+## Implementation
 
-Centralized error handling provides:
+### ApiErrorHandler Class
 
-1. **Consistency**: All API responses follow the same error format
-2. **Security**: Environment-aware error details (only in development)
-3. **Maintainability**: Single source of truth for error handling logic
-4. **Debugging**: Request IDs enable tracing errors across systems
-5. **Monitoring**: Easier to aggregate and analyze error patterns
-6. **Developer Experience**: Simple API for common error scenarios
+The `ApiErrorHandler` is a static class located at `lib/api-error-handler.ts` that provides:
 
-The existing `ApiErrorHandler` already implements these patterns, so we're standardizing on the existing solution rather than creating a new one.
+- `handle(error, requestId?)` - Main error handler that routes to appropriate error type
+- `unauthorized(message?)` - 401 Unauthorized responses
+- `forbidden(message?)` - 403 Forbidden responses
+- `notFound(message?)` - 404 Not Found responses
+- `validationError(error, requestId?)` - 400 Bad Request for Zod validation errors
+- `serverError(message, stack?, requestId?)` - 500 Internal Server Error
 
-## Alternatives Considered
+### Error Response Format
 
-### Alternative 1: Keep Current Manual Error Handling
-- **Pros**: No refactoring needed
-- **Cons**: Inconsistent error formats, security risks, difficult maintenance
-- **Why not chosen**: Does not solve the problem
+All error responses follow this consistent structure:
 
-### Alternative 2: Create New Error Handling Library
-- **Pros**: Could design from scratch
-- **Cons**: Unnecessary duplication, `ApiErrorHandler` already exists and works well
-- **Why not chosen**: Existing solution is sufficient
-
-### Alternative 3: Use Next.js Error Boundaries
-- **Pros**: Framework-native solution
-- **Cons**: Error boundaries are for React components, not API routes
-- **Why not chosen**: Not applicable to API routes
-
-## Consequences
-
-### Positive
-- **Consistency**: All API errors follow the same format
-- **Security**: Sensitive error details only in development mode
-- **Maintainability**: Single place to update error handling logic
-- **Debugging**: Request IDs enable better error tracking
-- **Monitoring**: Easier to aggregate errors for analysis
-- **Developer Experience**: Simple, consistent API for error handling
-
-### Negative
-- **Refactoring effort**: 182 routes need to be updated
-- **Migration risk**: Need to ensure all error paths are covered
-- **Testing**: Must verify all routes handle errors correctly after refactoring
-- **Time investment**: Estimated 1-2 weeks for complete migration
-
-**Mitigation**:
-- Gradual migration: Update routes incrementally
-- Comprehensive testing: Add tests for error scenarios
-- Code review: Ensure all routes are updated correctly
-
-## Implementation Notes
-
-### Migration Strategy
-
-1. **Phase 1: Audit** (Completed)
-   - Document all routes not using `ApiErrorHandler`
-   - Identify error handling patterns
-
-2. **Phase 2: High-Priority Routes** (In Progress)
-   - Update critical routes (auth, payments, financial data)
-   - Add comprehensive error tests
-
-3. **Phase 3: Standard Routes**
-   - Update remaining API routes
-   - Verify error handling in all scenarios
-
-4. **Phase 4: Validation**
-   - Run full test suite
-   - Manual testing of error scenarios
-   - Code review
-
-### Error Handler Usage Pattern
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { ApiErrorHandler } from '@/lib/api-error-handler';
-import { z } from 'zod';
-
-const schema = z.object({
-  email: z.string().email(),
-});
-
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const data = schema.parse(body);
-    
-    // Implementation
-    
-    return NextResponse.json({ success: true, data });
-  } catch (error) {
-    return ApiErrorHandler.handle(error);
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message",
+    "details": {},
+    "timestamp": "2024-01-01T00:00:00.000Z",
+    "requestId": "unique-request-id"
   }
 }
 ```
 
-### Specific Error Handlers
+### Usage Pattern
+
+All API route handlers should follow this pattern:
 
 ```typescript
-// Validation errors
-if (error instanceof ZodError) {
-  return ApiErrorHandler.validationError(error);
-}
-
-// Authentication errors
-if (!userId) {
-  return ApiErrorHandler.unauthorized('Authentication required');
-}
-
-// Not found errors
-if (!resource) {
-  return ApiErrorHandler.notFound('Resource not found');
+export async function GET(request: Request) {
+  const requestId = generateRequestId();
+  try {
+    // Route handler logic
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    return ApiErrorHandler.handle(error, requestId);
+  }
 }
 ```
 
+## Consequences
+
+### Positive
+
+- **Consistency**: All API errors follow the same format
+- **Maintainability**: Error handling logic is centralized
+- **Debugging**: Request IDs make it easier to trace errors
+- **Type Safety**: TypeScript ensures error handlers are used correctly
+- **Developer Experience**: Clear, predictable error responses
+
+### Negative
+
+- **Initial Migration**: Existing routes need to be updated to use the new handler
+- **Learning Curve**: Developers need to learn the new error handling patterns
+- **Potential Over-Engineering**: Some simple routes might not need full error handling
+
+## Implementation Status
+
+- ✅ ApiErrorHandler class implemented
+- ✅ Integrated with all API route handlers
+- ✅ Request ID generation implemented
+- ✅ Zod validation error integration
+- ✅ Error logging and monitoring integration
+
+## Related Documentation
+
+- [Backend Architecture](../architecture/BACKEND_ARCHITECTURE.md) - Error handling patterns
+- [API Documentation](../api/README.md) - API error response formats
+- [Error Handling Refactoring Plan](../ERROR_HANDLING_REFACTORING_PLAN.md) - Migration details
+
 ## References
 
-- [Error Audit Report](../../ERROR_AUDIT_REPORT.md)
-- [ApiErrorHandler Implementation](../../lib/api-error-handler.ts)
 - [Next.js Error Handling](https://nextjs.org/docs/app/building-your-application/routing/error-handling)
+- [REST API Error Handling Best Practices](https://www.baeldung.com/rest-api-error-handling-best-practices)

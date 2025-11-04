@@ -18,11 +18,13 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { isSafeRedirectUrl, validateSafeUrl } from '@/lib/utils/security';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface Notification {
-	id: number;
+	id: string; // UUID from database
 	userId: string;
 	type: string;
 	category?: string;
@@ -32,32 +34,53 @@ interface Notification {
 	data?: Record<string, unknown>;
 	actionUrl?: string;
 	actionLabel?: string;
-	read: boolean;
-	readAt?: Date;
-	archived: boolean;
-	createdAt: Date;
+	isRead: boolean; // Matches database schema field name
+	readAt?: Date | string;
+	isArchived: boolean; // Matches database schema field name
+	createdAt: Date | string;
 }
 
 export function EnhancedNotificationsPanel() {
 	const queryClient = useQueryClient();
+	const { user, isLoaded } = useUser();
+	const router = useRouter();
 
 	// Fetch notifications
-	const { data, isLoading } = useQuery({
+	const { data, isLoading, error } = useQuery({
 		queryKey: ['notifications'],
 		queryFn: async () => {
 			const response = await fetch('/api/notifications');
-			if (!response.ok) throw new Error('Failed to fetch notifications');
-			return response.json();
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				console.error('[Notifications] API Error:', response.status, errorData);
+				throw new Error(errorData.error || `Failed to fetch notifications: ${response.status}`);
+			}
+			const result = await response.json();
+			console.log('[Notifications] Fetched:', result);
+			return result;
 		},
 		refetchInterval: 30000, // Refetch every 30 seconds
+		enabled: isLoaded && !!user?.id, // Only fetch when user is loaded and available
 	});
 
 	const notifications: Notification[] = data?.notifications || [];
 	const unreadCount = data?.unreadCount || 0;
 
+	// Debug logging
+	useEffect(() => {
+		console.log('[Notifications] State:', {
+			userLoaded: isLoaded,
+			userId: user?.id,
+			isLoading,
+			error: error?.message,
+			unreadCount,
+			notificationsCount: notifications.length,
+		});
+	}, [isLoaded, user?.id, isLoading, error, unreadCount, notifications.length]);
+
 	// Mark as read mutation
 	const markAsReadMutation = useMutation({
-		mutationFn: async (id: number) => {
+		mutationFn: async (id: string) => {
 			const response = await fetch(`/api/notifications/${id}/read`, {
 				method: 'POST',
 			});
@@ -107,10 +130,20 @@ export function EnhancedNotificationsPanel() {
 						};
 
 						if (data.data.actionUrl) {
-							toastOptions.action = {
-								label: 'View',
-								onClick: () => window.location.href = data.data.actionUrl,
-							};
+							// Security: Validate action URL before using in toast
+							const safeUrl = validateSafeUrl(data.data.actionUrl);
+							if (safeUrl) {
+								toastOptions.action = {
+									label: 'View',
+									onClick: () => {
+										if (safeUrl.startsWith('/')) {
+											router.push(safeUrl);
+										} else {
+											window.location.href = safeUrl;
+										}
+									},
+								};
+							}
 						}
 
 						toast.info(data.data.title, toastOptions);
@@ -133,38 +166,32 @@ export function EnhancedNotificationsPanel() {
 				socket.close();
 			}
 		};
-	}, [queryClient]);
+	}, [queryClient, user?.id]);
 
 	const handleNotificationClick = (notification: Notification) => {
 		// Mark as read
-		if (!notification.read) {
+		if (!notification.isRead) {
 			markAsReadMutation.mutate(notification.id);
 		}
 
 		// Navigate to action URL if provided
 		if (notification.actionUrl) {
 			// Security: Validate URL to prevent open redirect vulnerability
-			// Only allow relative paths or same-origin URLs
-			const url = notification.actionUrl;
+			const safeUrl = validateSafeUrl(notification.actionUrl);
 			
-			// Allow relative paths
-			if (url.startsWith('/')) {
-				window.location.href = url;
+			if (!safeUrl) {
+				console.warn('Blocked redirect to unsafe URL:', notification.actionUrl);
+				toast.error('Invalid redirect URL');
 				return;
 			}
 			
-			// For absolute URLs, only allow same origin
-			try {
-				const urlObj = new URL(url, window.location.origin);
-				if (urlObj.origin === window.location.origin) {
-					window.location.href = url;
-				} else {
-					console.warn('Blocked redirect to external URL:', url);
-					toast.error('Invalid redirect URL');
-				}
-			} catch (error) {
-				console.error('Invalid URL format:', url, error);
-				toast.error('Invalid redirect URL');
+			// Use Next.js router for internal routes, window.location for same-origin absolute URLs
+			// Security: safeUrl is validated by validateSafeUrl() which ensures same-origin or relative paths
+			if (safeUrl.startsWith('/')) {
+				router.push(safeUrl);
+			} else {
+				// safeUrl is guaranteed to be same-origin by validateSafeUrl()
+				window.location.href = safeUrl;
 			}
 		}
 	};
@@ -189,15 +216,27 @@ export function EnhancedNotificationsPanel() {
 		return '📬';
 	};
 
+	// Don't render if user isn't loaded yet
+	if (!isLoaded) {
+		return (
+			<Button variant="ghost" size="icon" className="relative" disabled>
+				<Bell className="h-5 w-5 opacity-50" />
+			</Button>
+		);
+	}
+
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button variant="ghost" size="icon" className="relative">
+				<Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
 					<Bell className="h-5 w-5" />
 					{unreadCount > 0 && (
-						<span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-semibold text-white">
+						<span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-semibold text-white border-2 border-background z-10">
 							{unreadCount > 99 ? '99+' : unreadCount}
 						</span>
+					)}
+					{error && (
+						<span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-orange-500 z-10" title="Error loading notifications" />
 					)}
 				</Button>
 			</PopoverTrigger>
@@ -218,7 +257,17 @@ export function EnhancedNotificationsPanel() {
 				</div>
 
 				<ScrollArea className="h-[400px]">
-					{isLoading ? (
+					{error ? (
+						<div className="flex flex-col items-center justify-center p-8 text-center">
+							<Bell className="h-12 w-12 text-muted-foreground mb-4" />
+							<p className="text-sm text-muted-foreground mb-2">
+								Error loading notifications
+							</p>
+							<p className="text-xs text-muted-foreground">
+								{error instanceof Error ? error.message : 'Unknown error'}
+							</p>
+						</div>
+					) : isLoading ? (
 						<div className="flex items-center justify-center p-8">
 							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
 						</div>
@@ -250,7 +299,7 @@ export function EnhancedNotificationsPanel() {
 						variant="ghost"
 						className="w-full"
 						onClick={() => {
-							window.location.href = '/dashboard/notifications';
+							router.push('/dashboard/notifications');
 						}}
 					>
 						View all notifications
@@ -286,7 +335,7 @@ function NotificationItem({
 			type="button"
 			className={cn(
 				'w-full text-left p-4 hover:bg-accent cursor-pointer transition-colors',
-				!notification.read && 'bg-accent/50'
+				!notification.isRead && 'bg-accent/50'
 			)}
 			onClick={handleClick}
 		>
@@ -301,12 +350,12 @@ function NotificationItem({
 							<span className="text-sm">{getTypeIcon(notification.type)}</span>
 							<p className={cn(
 								'text-sm font-medium',
-								!notification.read && 'font-semibold'
+								!notification.isRead && 'font-semibold'
 							)}>
 								{notification.title}
 							</p>
 						</div>
-						{!notification.read && (
+						{!notification.isRead && (
 							<div className="h-2 w-2 rounded-full bg-blue-500" />
 						)}
 					</div>
@@ -333,7 +382,7 @@ function NotificationItem({
 				</div>
 
 				{/* Actions */}
-				{!notification.read && (
+				{!notification.isRead && (
 					<Button
 						variant="ghost"
 						size="icon"

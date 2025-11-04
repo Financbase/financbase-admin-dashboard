@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   ArrowLeft, 
@@ -272,7 +273,7 @@ export function ArticleViewer({ article, onBack, onRelatedArticle }: ArticleView
           <Card>
             <CardContent className="p-8">
               <div className="prose prose-gray max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.content) }} />
               </div>
             </CardContent>
           </Card>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { FinancbaseLogo } from "@/components/ui/financbase-logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AnimatedNavbar, navbarItems } from "@/components/ui/animated-navbar";
 import { SearchComponent } from "@/components/ui/search-component";
+import { EnhancedNotificationsPanel } from "@/components/core/enhanced-notifications-panel";
 import {
 	Sheet,
 	SheetContent,
@@ -27,7 +28,6 @@ import {
 import { motion } from "framer-motion";
 import {
 	Activity,
-	Bell,
 	BookOpen,
 	FileText,
 	HelpCircle,
@@ -50,57 +50,8 @@ interface EnhancedTopNavProps {
 		avatar?: string;
 		role?: string;
 	};
-	notifications?: number;
+	notifications?: number; // Kept for backwards compatibility but not used (EnhancedNotificationsPanel fetches its own data)
 }
-
-// Memoized notification items
-const NotificationItems = React.memo<{ notifications: number }>(() => {
-	const notificationData = useMemo(() => [
-		{
-			id: 1,
-			type: 'payment',
-			title: 'New Payment Received',
-			description: 'Payment of $2,500 received from Acme Corp',
-			time: '2m ago',
-			color: 'bg-blue-500',
-		},
-		{
-			id: 2,
-			type: 'overdue',
-			title: 'Invoice Overdue',
-			description: 'Invoice #INV-2024-001 is 5 days overdue',
-			time: '1h ago',
-			color: 'bg-green-500',
-		},
-		{
-			id: 3,
-			type: 'expense',
-			title: 'Expense Alert',
-			description: 'Monthly expenses exceeded budget by 15%',
-			time: '3h ago',
-			color: 'bg-orange-500',
-		},
-	], []);
-
-	return (
-		<div className="max-h-80 overflow-y-auto">
-			{notificationData.map((notification) => (
-				<DropdownMenuItem key={notification.id} className="flex flex-col items-start p-4">
-					<div className="flex items-center gap-2 w-full">
-						<div className={`w-2 h-2 ${notification.color} rounded-full`}></div>
-						<span className="text-sm font-medium">{notification.title}</span>
-						<span className="text-xs text-muted-foreground ml-auto">{notification.time}</span>
-					</div>
-					<p className="text-xs text-muted-foreground mt-1">
-						{notification.description}
-					</p>
-				</DropdownMenuItem>
-			))}
-		</div>
-	);
-});
-
-NotificationItems.displayName = 'NotificationItems';
 
 export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 	onMenuClick,
@@ -184,30 +135,7 @@ export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 						</Sheet>
 
 						{/* Notifications */}
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" size="icon" className="relative">
-									<Bell className="h-5 w-5" />
-									{notifications > 0 && (
-										<Badge
-											variant="destructive"
-											className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-										>
-											{notifications > 9 ? "9+" : notifications}
-										</Badge>
-									)}
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end" className="w-80">
-								<DropdownMenuLabel>Notifications</DropdownMenuLabel>
-								<DropdownMenuSeparator />
-								<NotificationItems notifications={notifications} />
-								<DropdownMenuSeparator />
-								<DropdownMenuItem className="text-center">
-									View All Notifications
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<EnhancedNotificationsPanel />
 
 						{/* Theme Toggle - Make it more prominent */}
 						<div className="flex items-center">

@@ -104,7 +104,16 @@ export function VideoUpload({
 			setUploadProgress(75);
 
 			if (!response.ok) {
-				throw new Error('Upload failed');
+				// Try to get error message from response
+				let errorMessage = 'Upload failed';
+				try {
+					const errorData = await response.json();
+					errorMessage = errorData?.error || errorData?.message || errorMessage;
+				} catch {
+					// If response is not JSON, use status text
+					errorMessage = response.statusText || `Server error (${response.status})`;
+				}
+				throw new Error(errorMessage);
 			}
 
 			const result = await response.json();
@@ -141,7 +150,12 @@ export function VideoUpload({
 			setPreviewUrl(null);
 			setThumbnailUrl(null);
 			setVideoMetadata(null);
-			toast.error('Failed to upload video. Please try again.');
+			
+			// Show more specific error message
+			const errorMessage = error instanceof Error 
+				? error.message 
+				: 'Failed to upload video. Please try again.';
+			toast.error(errorMessage);
 		} finally {
 			setIsUploading(false);
 			setUploadProgress(0);

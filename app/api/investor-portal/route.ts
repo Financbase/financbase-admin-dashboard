@@ -4,13 +4,15 @@ import { db } from '@/lib/db';
 import { investorPortals, customReports, investorAccessLogs } from '@/lib/db/schemas';
 import { eq, and, sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/investor-portal - List user's investor portals
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const portals = await db
@@ -46,23 +48,26 @@ export async function GET() {
 
 		return NextResponse.json(portalsWithStats);
 	} catch (error) {
-		console.error('Error fetching investor portals:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 // POST /api/investor-portal - Create new investor portal
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const {
 			name,
 			description,
@@ -74,7 +79,7 @@ export async function POST(request: NextRequest) {
 		} = body;
 
 		if (!name) {
-			return NextResponse.json({ error: 'Portal name is required' }, { status: 400 });
+			return ApiErrorHandler.badRequest('Portal name is required');
 		}
 
 		// Generate unique access token
@@ -91,7 +96,7 @@ export async function POST(request: NextRequest) {
 				));
 
 			if (validReports.length !== allowedReports.length) {
-				return NextResponse.json({ error: 'Invalid report IDs' }, { status: 400 });
+				return ApiErrorHandler.badRequest('Invalid report IDs');
 			}
 		}
 
@@ -110,10 +115,6 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json(newPortal[0], { status: 201 });
 	} catch (error) {
-		console.error('Error creating investor portal:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

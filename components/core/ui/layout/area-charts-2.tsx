@@ -71,6 +71,10 @@ function ChartContainer({
 }
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+	// Security: Validate chart ID to prevent CSS injection
+	// Only allow alphanumeric characters, hyphens, and underscores
+	const sanitizedId = id.replace(/[^a-zA-Z0-9-_]/g, '');
+	
 	const colorConfig = Object.entries(config).filter(
 		([, config]) => config.theme || config.color,
 	);
@@ -85,7 +89,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 				__html: Object.entries(THEMES)
 					.map(
 						([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+${prefix} [data-chart=${sanitizedId}] {
 ${colorConfig
 	.map(([key, itemConfig]) => {
 		const color =

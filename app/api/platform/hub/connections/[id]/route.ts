@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { integrationConnections, integrations } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
-import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * GET /api/platform/hub/connections/[id]
@@ -13,17 +13,18 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const { id } = await params;
     const connectionId = parseInt(id);
     
     if (Number.isNaN(connectionId)) {
-      return NextResponse.json({ error: 'Invalid connection ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid connection ID');
     }
 
     // Get connection with integration details
@@ -41,7 +42,7 @@ export async function GET(
       .limit(1);
 
     if (connection.length === 0) {
-      return NextResponse.json({ error: 'Connection not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Connection not found');
     }
 
     const { connection: conn, integration: integ } = connection[0];
@@ -51,8 +52,7 @@ export async function GET(
       integration: integ,
     });
   } catch (error) {
-    console.error('Error fetching integration connection:', error);
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
@@ -64,20 +64,26 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const { id } = await params;
     const connectionId = parseInt(id);
     
     if (Number.isNaN(connectionId)) {
-      return NextResponse.json({ error: 'Invalid connection ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid connection ID');
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const {
       name,
       status,
@@ -131,8 +137,7 @@ export async function PATCH(
       message: 'Connection updated successfully',
     });
   } catch (error) {
-    console.error('Error updating integration connection:', error);
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
@@ -144,17 +149,18 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const { id } = await params;
     const connectionId = parseInt(id);
     
     if (Number.isNaN(connectionId)) {
-      return NextResponse.json({ error: 'Invalid connection ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid connection ID');
     }
 
     // Verify connection exists and belongs to user
@@ -168,7 +174,7 @@ export async function DELETE(
       .limit(1);
 
     if (existingConnection.length === 0) {
-      return NextResponse.json({ error: 'Connection not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Connection not found');
     }
 
     // Delete connection
@@ -180,7 +186,6 @@ export async function DELETE(
       message: 'Connection deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting integration connection:', error);
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

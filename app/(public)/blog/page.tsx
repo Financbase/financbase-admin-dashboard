@@ -11,6 +11,7 @@ import {
 	Eye,
 	Heart,
 } from "lucide-react";
+import * as blogService from "@/lib/services/blog/blog-service";
 
 interface BlogPost {
 	id: number;
@@ -35,19 +36,12 @@ interface BlogCategory {
 
 async function getBlogPosts(): Promise<BlogPost[]> {
 	try {
-		const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-			(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-		const response = await fetch(`${baseUrl}/api/blog?status=published&limit=20`, {
-			cache: 'no-store', // Always fetch fresh data for public blog
+		const result = await blogService.getPosts({
+			status: 'published',
+			limit: 20,
+			offset: 0,
 		});
-		
-		if (!response.ok) {
-			console.error('Failed to fetch blog posts:', response.statusText);
-			return [];
-		}
-		
-		const data = await response.json();
-		return data.data || [];
+		return result.posts;
 	} catch (error) {
 		console.error('Error fetching blog posts:', error);
 		return [];
@@ -56,19 +50,7 @@ async function getBlogPosts(): Promise<BlogPost[]> {
 
 async function getCategories(): Promise<BlogCategory[]> {
 	try {
-		const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-			(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-		const response = await fetch(`${baseUrl}/api/blog/categories`, {
-			next: { revalidate: 3600 }, // Cache categories for 1 hour
-		});
-		
-		if (!response.ok) {
-			console.error('Failed to fetch categories:', response.statusText);
-			return [];
-		}
-		
-		const data = await response.json();
-		return data.data || [];
+		return await blogService.getCategories();
 	} catch (error) {
 		console.error('Error fetching categories:', error);
 		return [];

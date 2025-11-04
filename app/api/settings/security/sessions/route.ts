@@ -8,15 +8,17 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { userSecuritySettings } from '@/lib/db/schemas';
 import { eq } from 'drizzle-orm';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/settings/security/sessions
 // Get all active sessions for the authenticated user
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Get current user info from Clerk
@@ -65,29 +67,32 @@ export async function GET() {
 			maxAllowed: securitySettings.length > 0 ? securitySettings[0].maxConcurrentSessions : 5,
 		});
 	} catch (error) {
-		console.error('Error fetching sessions:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 // POST /api/settings/security/sessions/revoke
 // Revoke a specific session (logout from a device)
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const { sessionId } = body;
 
 		if (!sessionId) {
-			return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
+			return ApiErrorHandler.badRequest('Session ID is required');
 		}
 
 		// In a real implementation, you would revoke the session via Clerk
@@ -99,22 +104,19 @@ export async function POST(request: NextRequest) {
 			sessionId,
 		});
 	} catch (error) {
-		console.error('Error revoking session:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 // POST /api/settings/security/sessions/revoke-all
 // Revoke all sessions except current
 export async function DELETE() {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// In a real implementation, you would revoke all sessions via Clerk
@@ -124,10 +126,6 @@ export async function DELETE() {
 			message: 'All other sessions revoked successfully',
 		});
 	} catch (error) {
-		console.error('Error revoking all sessions:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

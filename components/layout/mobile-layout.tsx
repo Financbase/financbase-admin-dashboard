@@ -4,9 +4,9 @@ import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { PWAHead } from "@/components/pwa/pwa-head";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EnhancedNotificationsPanel } from "@/components/core/enhanced-notifications-panel";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import {
-	Bell,
 	Filter,
 	LayoutDashboard,
 	Menu,
@@ -98,12 +98,7 @@ export function MobileLayout({
 								</div>
 
 								{/* Notifications */}
-								<Button variant="ghost" size="sm" className="relative">
-									<Bell className="h-5 w-5" />
-									<Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs">
-										3
-									</Badge>
-								</Button>
+								<EnhancedNotificationsPanel />
 
 								{/* Action buttons */}
 								{actions && (

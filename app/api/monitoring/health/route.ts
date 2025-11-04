@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { MetricsCollector } from '@/lib/analytics/metrics-collector';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -62,10 +64,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(systemHealth);
   } catch (error) {
-    console.error('Error fetching system health:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch system health',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

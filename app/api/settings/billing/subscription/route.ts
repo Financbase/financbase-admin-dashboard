@@ -8,15 +8,17 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { subscriptionPlans, userSubscriptions } from '@/lib/db/schemas';
 import { eq } from 'drizzle-orm';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/settings/billing/subscription
 // Get user's current subscription
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Get current subscription
@@ -68,29 +70,32 @@ export async function GET() {
 			plan: plan[0] || null,
 		});
 	} catch (error) {
-		console.error('Error fetching subscription:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 // POST /api/settings/billing/subscription
 // Create or update subscription
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const { planId } = body;
 
 		if (!planId) {
-			return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 });
+			return ApiErrorHandler.badRequest('Plan ID is required');
 		}
 
 		// Verify plan exists
@@ -101,7 +106,7 @@ export async function POST(request: NextRequest) {
 			.limit(1);
 
 		if (!plan.length) {
-			return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+			return ApiErrorHandler.notFound('Plan not found');
 		}
 
 		// Check if user already has a subscription
@@ -150,10 +155,6 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ subscription: newSubscription[0] });
 		}
 	} catch (error) {
-		console.error('Error managing subscription:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

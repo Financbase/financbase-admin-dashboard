@@ -4,14 +4,16 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { invoices } from '@/lib/db/schemas/invoices.schema';
 import { createInvoiceSchema } from '@/lib/validation-schemas';
-import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { eq, count } from 'drizzle-orm';
 import { withRLS } from '@/lib/api/with-rls';
 
 export async function GET(req: NextRequest) {
+  const requestId = generateRequestId();
   // Using withRLS wrapper automatically sets RLS context
   // RLS policies will ensure users can only see their own invoices
   return withRLS(async (clerkUserId) => {
+    try {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -41,13 +43,23 @@ export async function GET(req: NextRequest) {
         pages: Math.ceil((totalCount[0]?.count || 0) / limit)
       }
     });
+    } catch (error) {
+      return ApiErrorHandler.handle(error, requestId);
+    }
   });
 }
 
 export async function POST(req: NextRequest) {
+  const requestId = generateRequestId();
   // Using withRLS wrapper automatically sets RLS context
   return withRLS(async (clerkUserId) => {
-    const body = await req.json();
+    try {
+      let body;
+      try {
+        body = await req.json();
+      } catch (error) {
+        return ApiErrorHandler.badRequest('Invalid JSON in request body');
+      }
     const validatedData = createInvoiceSchema.parse({
       ...body,
       userId: clerkUserId // Ensure userId comes from auth, not request body
@@ -64,5 +76,8 @@ export async function POST(req: NextRequest) {
       message: 'Invoice created successfully',
       data: newInvoice
     }, { status: 201 });
+    } catch (error) {
+      return ApiErrorHandler.handle(error, requestId);
+    }
   });
 }

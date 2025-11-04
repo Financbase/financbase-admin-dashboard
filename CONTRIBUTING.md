@@ -42,17 +42,35 @@ We are committed to maintaining a professional and collaborative development env
 - **PostgreSQL**: 14.0 or higher (or Neon account)
 - **Git**: Latest version
 
+### 📚 Understanding the Architecture
+
+**Before you start coding**, we highly recommend reading the architecture documentation:
+
+- **[Technical Deep Dive](../docs/architecture/TECHNICAL_DEEP_DIVE.md)** ⭐ - **START HERE** - Comprehensive overview of the entire system architecture with code references
+- **[Architecture Documentation](../docs/architecture/README.md)** - Complete suite of focused architecture documents
+
+This will help you understand:
+
+- Frontend architecture (Next.js 15 App Router, React Server Components)
+- Backend patterns (API routes, middleware, versioning)
+- Database structure (Drizzle ORM, RLS policies)
+- Security implementation (authentication, authorization)
+- Real-time features (Partykit WebSocket)
+- AI/ML integration (multi-provider system)
+
 ### Initial Setup
 
 1. **Clone the Repository**
+
    ```bash
    git clone https://github.com/your-org/financbase-admin-dashboard.git
    cd financbase-admin-dashboard
    ```
-   
+
    **Note**: This is a private repository. Ensure you have proper access credentials.
 
 2. **Install Dependencies**
+
    ```bash
    npm install
    # or
@@ -60,18 +78,21 @@ We are committed to maintaining a professional and collaborative development env
    ```
 
 3. **Set Up Environment Variables**
+
    ```bash
    cp .env.example .env.local
    # Fill in required variables (see docs/configuration/ENVIRONMENT_VARIABLES.md)
    ```
 
 4. **Set Up Database**
+
    ```bash
    npm run db:generate
    npm run db:push
    ```
 
 5. **Start Development Server**
+
    ```bash
    npm run dev
    ```
@@ -130,6 +151,7 @@ git push origin feature/your-feature-name
 - Export types/interfaces explicitly
 
 **Good:**
+
 ```typescript
 interface User {
   id: string;
@@ -143,6 +165,7 @@ export async function getUser(id: string): Promise<User> {
 ```
 
 **Bad:**
+
 ```typescript
 export async function getUser(id: any): Promise<any> {
   // implementation
@@ -207,6 +230,7 @@ export function MyComponent({ title, onSubmit }: ComponentProps) {
 - Document endpoints with JSDoc
 
 **Example:**
+
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -240,6 +264,7 @@ export async function POST(request: NextRequest) {
 - Add indexes for frequently queried columns
 
 **Good:**
+
 ```typescript
 const result = await db
   .select()
@@ -249,6 +274,7 @@ const result = await db
 ```
 
 **Bad:**
+
 ```typescript
 const result = await db.query(`SELECT * FROM users WHERE email = '${email}'`);
 ```
@@ -264,6 +290,7 @@ const result = await db.query(`SELECT * FROM users WHERE email = '${email}'`);
 ### Writing Tests
 
 1. **Unit Tests** (Jest)
+
    ```typescript
    describe('formatCurrency', () => {
      it('should format USD correctly', () => {
@@ -273,6 +300,7 @@ const result = await db.query(`SELECT * FROM users WHERE email = '${email}'`);
    ```
 
 2. **Integration Tests**
+
    ```typescript
    describe('POST /api/users', () => {
      it('should create a new user', async () => {
@@ -286,6 +314,7 @@ const result = await db.query(`SELECT * FROM users WHERE email = '${email}'`);
    ```
 
 3. **E2E Tests** (Playwright)
+
    ```typescript
    test('user can sign in', async ({ page }) => {
      await page.goto('/sign-in');
@@ -339,6 +368,7 @@ Use conventional commits format:
 - `chore:` Maintenance tasks
 
 **Examples:**
+
 - `feat: add user profile editing`
 - `fix: resolve invoice calculation error`
 - `docs: update API documentation`
@@ -436,6 +466,7 @@ Fixes #456
 - Document API endpoints with request/response examples
 
 **Example:**
+
 ```typescript
 /**
  * Formats a currency amount according to locale

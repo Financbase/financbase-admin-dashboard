@@ -38,8 +38,20 @@ export async function POST(req: NextRequest) {
 			return ApiErrorHandler.forbidden('Only administrators can create blog categories');
 		}
 
+		// Parse JSON body with proper error handling
+		let body;
 		try {
-			const body = await req.json();
+			body = await req.json();
+		} catch (error) {
+			// Handle JSON parse errors (malformed JSON)
+			if (error instanceof SyntaxError || error instanceof TypeError) {
+				return ApiErrorHandler.badRequest('Invalid JSON in request body');
+			}
+			// Re-throw other errors to be handled by outer catch
+			throw error;
+		}
+
+		try {
 			const validatedData = createBlogCategorySchema.parse(body);
 
 			const newCategory = await blogService.createCategory(validatedData);

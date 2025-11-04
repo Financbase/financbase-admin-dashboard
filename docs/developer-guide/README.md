@@ -855,13 +855,13 @@ useEffect(() => {
 
 ### Getting Help
 
-1. **Documentation**: Check the [API Documentation](https://docs.financbase.com)
+1. **Documentation**: Check the [API Documentation](../api/README.md) (external: docs.financbase.com - see [External Resources](../EXTERNAL_RESOURCES.md))
 2. **Community**: Join our [Discord Community](https://discord.gg/financbase)
 3. **Support**: Contact [support@financbase.com](mailto:support@financbase.com)
-4. **GitHub Issues**: Report bugs on [GitHub](https://github.com/financbase/financbase-admin-dashboard/issues)
+4. **GitHub Issues**: Report bugs on [GitHub](https://github.com/financbase/financbase-admin-dashboard/issues) (see [External Resources](../EXTERNAL_RESOURCES.md) for repository status)
 
 ---
 
 **Happy Coding!** 🚀
 
-For more information, visit our [Developer Portal](https://developers.financbase.com) or check out our [API Reference](https://api.financbase.com/docs).
+For more information, visit our [Developer Documentation](../developer/) or check out our [API Reference Page](/docs/api) with interactive documentation and OpenAPI spec.

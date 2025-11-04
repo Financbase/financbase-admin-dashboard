@@ -8,15 +8,17 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { billingHistory } from '@/lib/db/schemas';
 import { eq, desc } from 'drizzle-orm';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/settings/billing/history
 // Get user's billing history
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -57,10 +59,6 @@ export async function GET(request: NextRequest) {
 			},
 		});
 	} catch (error) {
-		console.error('Error fetching billing history:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

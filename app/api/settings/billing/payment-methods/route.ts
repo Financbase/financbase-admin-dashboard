@@ -8,15 +8,17 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { userPaymentMethods } from '@/lib/db/schemas';
 import { eq, desc } from 'drizzle-orm';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/settings/billing/payment-methods
 // Get user's payment methods
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const paymentMethods = await db
@@ -39,25 +41,28 @@ export async function GET() {
 
 		return NextResponse.json({ paymentMethods });
 	} catch (error) {
-		console.error('Error fetching payment methods:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 // POST /api/settings/billing/payment-methods
 // Add a new payment method
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const {
 			type,
 			stripePaymentMethodId,
@@ -70,10 +75,7 @@ export async function POST(request: NextRequest) {
 		} = body;
 
 		if (!type || !stripePaymentMethodId) {
-			return NextResponse.json(
-				{ error: 'Type and Stripe payment method ID are required' },
-				{ status: 400 }
-			);
+			return ApiErrorHandler.badRequest('Type and Stripe payment method ID are required');
 		}
 
 		// If this is set as default, unset other defaults
@@ -112,10 +114,6 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ paymentMethod: newPaymentMethod[0] });
 	} catch (error) {
-		console.error('Error adding payment method:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

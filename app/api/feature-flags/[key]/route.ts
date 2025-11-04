@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { FeatureFlagsService } from '@/lib/services/feature-flags-service';
 import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { isAdmin } from '@/lib/auth/financbase-rbac';
 import { z } from 'zod';
 
 const updateFlagSchema = z.object({
@@ -28,7 +29,7 @@ export async function GET(
   { params }: { params: Promise<{ key: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { userId, orgId } = await auth();
     if (!userId) {
       return ApiErrorHandler.unauthorized();
     }
@@ -42,9 +43,8 @@ export async function GET(
       return ApiErrorHandler.notFound(`Feature flag '${key}' not found`);
     }
 
-    // Get user's organization (if available)
-    // TODO: Get from user service
-    const organizationId = undefined; // await getUserOrganization(userId);
+    // Extract organization from Clerk auth
+    const organizationId = orgId || undefined;
 
     // Check if enabled for this user
     const isEnabled = await FeatureFlagsService.isEnabled(key, {
@@ -74,10 +74,11 @@ export async function PATCH(
       return ApiErrorHandler.unauthorized();
     }
 
-    // TODO: Add admin role check
-    // if (!await isAdmin(userId)) {
-    //   return ApiErrorHandler.forbidden('Admin access required');
-    // }
+    // Check admin access
+    const adminStatus = await isAdmin();
+    if (!adminStatus) {
+      return ApiErrorHandler.forbidden('Admin access required');
+    }
 
     const { key } = await params;
     const body = await request.json();
@@ -108,10 +109,11 @@ export async function DELETE(
       return ApiErrorHandler.unauthorized();
     }
 
-    // TODO: Add admin role check
-    // if (!await isAdmin(userId)) {
-    //   return ApiErrorHandler.forbidden('Admin access required');
-    // }
+    // Check admin access
+    const adminStatus = await isAdmin();
+    if (!adminStatus) {
+      return ApiErrorHandler.forbidden('Admin access required');
+    }
 
     const { key } = await params;
     const deleted = await FeatureFlagsService.deleteFlag(key);

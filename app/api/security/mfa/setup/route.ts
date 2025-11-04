@@ -1,21 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { MFAService } from '@/lib/security/mfa-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
+
     const { mfaType, phoneNumber } = body;
 
     if (!mfaType || !['totp', 'sms', 'email'].includes(mfaType)) {
-      return NextResponse.json({ 
-        error: 'Invalid MFA type. Must be totp, sms, or email' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid MFA type. Must be totp, sms, or email');
     }
 
     const mfaSetup = await MFAService.setupMFA(
@@ -26,10 +32,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(mfaSetup);
   } catch (error) {
-    console.error('Error setting up MFA:', error);
-    return NextResponse.json({ 
-      error: 'Failed to setup MFA',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

@@ -3,7 +3,7 @@
  * Tests for /api/support/public endpoint
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 const API_BASE_URL = process.env.TEST_API_URL || 'http://localhost:3000';
 

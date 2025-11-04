@@ -68,6 +68,55 @@
   --brand-primary-dark: 0.32 0.1423 271.13;
   --brand-secondary: 0.6270 0.1940 149.2140;
   --brand-accent: 0.8790 0.1690 91.6050;
+
+  /* HSL Color Definitions (for easier manipulation) */
+  /* Primary Colors */
+  --color-primary-hsl: 271 60% 50%;
+  --color-primary-hsl-light: 271 60% 60%;
+  --color-primary-hsl-dark: 271 60% 40%;
+  --color-primary-hsl-lighter: 271 55% 70%;
+  --color-primary-hsl-darker: 271 65% 30%;
+
+  /* Secondary Colors */
+  --color-secondary-hsl: 149 50% 55%;
+  --color-secondary-hsl-light: 149 50% 65%;
+  --color-secondary-hsl-dark: 149 50% 45%;
+
+  /* Accent Colors */
+  --color-accent-hsl: 271 70% 60%;
+  --color-accent-hsl-light: 271 70% 70%;
+  --color-accent-hsl-dark: 271 70% 50%;
+
+  /* Neutral Colors */
+  --color-neutral-50-hsl: 0 0% 98%;
+  --color-neutral-100-hsl: 0 0% 95%;
+  --color-neutral-200-hsl: 0 0% 90%;
+  --color-neutral-300-hsl: 0 0% 80%;
+  --color-neutral-400-hsl: 0 0% 65%;
+  --color-neutral-500-hsl: 0 0% 50%;
+  --color-neutral-600-hsl: 0 0% 40%;
+  --color-neutral-700-hsl: 0 0% 30%;
+  --color-neutral-800-hsl: 0 0% 20%;
+  --color-neutral-900-hsl: 0 0% 10%;
+
+  /* Semantic Colors */
+  --color-success-hsl: 142 70% 45%;
+  --color-warning-hsl: 38 92% 50%;
+  --color-error-hsl: 0 84% 60%;
+  --color-info-hsl: 217 91% 60%;
+
+  /* Depth/Hierarchy Colors - Raised Elements */
+  --color-raised-1-hsl: 0 0% 100%;
+  --color-raised-2-hsl: 0 0% 99%;
+  --color-raised-3-hsl: 0 0% 98%;
+
+  /* Breakpoint Variables */
+  --breakpoint-xs: 0px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
 }
 
 .dark {
@@ -128,6 +177,59 @@
   --brand-primary-dark: 0.32 0.1423 271.13;
   --brand-secondary: 0.7920 0.2090 151.7110;
   --brand-accent: 0.8790 0.1690 91.6050;
+
+  /* HSL Color Definitions - Dark Theme */
+  /* Primary Colors */
+  --color-primary-hsl: 271 50% 60%;
+  --color-primary-hsl-light: 271 50% 70%;
+  --color-primary-hsl-dark: 271 50% 50%;
+
+  /* Secondary Colors */
+  --color-secondary-hsl: 149 45% 65%;
+  --color-secondary-hsl-light: 149 45% 75%;
+  --color-secondary-hsl-dark: 149 45% 55%;
+
+  /* Accent Colors */
+  --color-accent-hsl: 271 65% 70%;
+  --color-accent-hsl-light: 271 65% 80%;
+  --color-accent-hsl-dark: 271 65% 60%;
+
+  /* Neutral Colors - Dark Theme */
+  --color-neutral-50-hsl: 0 0% 10%;
+  --color-neutral-100-hsl: 0 0% 15%;
+  --color-neutral-200-hsl: 0 0% 20%;
+  --color-neutral-300-hsl: 0 0% 30%;
+  --color-neutral-400-hsl: 0 0% 40%;
+  --color-neutral-500-hsl: 0 0% 50%;
+  --color-neutral-600-hsl: 0 0% 60%;
+  --color-neutral-700-hsl: 0 0% 70%;
+  --color-neutral-800-hsl: 0 0% 80%;
+  --color-neutral-900-hsl: 0 0% 90%;
+
+  /* Semantic Colors - Dark Theme */
+  --color-success-hsl: 142 60% 55%;
+  --color-warning-hsl: 38 85% 60%;
+  --color-error-hsl: 0 75% 70%;
+  --color-info-hsl: 217 85% 70%;
+
+  /* Depth/Hierarchy Colors - Dark Theme Raised Elements */
+  --color-raised-1-hsl: 0 0% 15%;
+  --color-raised-2-hsl: 0 0% 18%;
+  --color-raised-3-hsl: 0 0% 20%;
+}
+
+/* System Color Scheme Support */
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) {
+    /* Light mode colors are already defined in :root */
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.dark) {
+    /* Optional: Auto-adapt to system dark mode if not manually set */
+    /* This can be enabled if system preference should override */
+  }
 }
 
 @theme inline {

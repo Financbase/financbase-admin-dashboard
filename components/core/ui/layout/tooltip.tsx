@@ -36,4 +36,46 @@ const TooltipContent = React.forwardRef<
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
+/**
+ * Simple Tooltip Component
+ * Uses native title attribute with enhanced Radix UI fallback
+ */
+export interface SimpleTooltipProps {
+	children: React.ReactElement;
+	content: string;
+	/**
+	 * Use native title attribute (fallback for basic tooltips)
+	 */
+	useNative?: boolean;
+	/**
+	 * Additional props for Radix Tooltip
+	 */
+	tooltipProps?: React.ComponentPropsWithoutRef<typeof Tooltip>;
+}
+
+export function SimpleTooltip({
+	children,
+	content,
+	useNative = false,
+	tooltipProps,
+}: SimpleTooltipProps) {
+	if (useNative) {
+		return React.cloneElement(children, {
+			title: content,
+			...children.props,
+		});
+	}
+
+	return (
+		<TooltipProvider>
+			<Tooltip {...tooltipProps}>
+				<TooltipTrigger asChild>{children}</TooltipTrigger>
+				<TooltipContent>
+					{content}
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
+	);
+}
+
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };

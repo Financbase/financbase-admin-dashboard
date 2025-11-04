@@ -64,7 +64,7 @@ export function ModernNavbar() {
                   <ProductItem
                     title="Analytics"
                     description="Advanced business analytics and reporting"
-                    href="/analytics"
+                    href="/products/analytics"
                     src="/images/products/analytics.svg"
                   />
                   <ProductItem
@@ -155,7 +155,7 @@ export function ModernNavbar() {
                   <Link href="/financial-intelligence" className="block text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" onClick={closeMobileMenu}>
                     Financial Intelligence
                   </Link>
-                  <Link href="/analytics" className="block text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" onClick={closeMobileMenu}>
+                  <Link href="/products/analytics" className="block text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" onClick={closeMobileMenu}>
                     Analytics
                   </Link>
                   <Link href="/integrations" className="block text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" onClick={closeMobileMenu}>

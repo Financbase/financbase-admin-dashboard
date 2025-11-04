@@ -7,6 +7,7 @@ import {
 	Trash2,
 	TrendingDown,
 } from "lucide-react";
+import { db } from "@/lib/db";
 import {
 	type Lease,
 	type MaintenanceRequest,
@@ -503,6 +504,8 @@ export class PropertyManagementService {
 			.where(and(eq(properties.userId, userId), propertyFilter));
 
 		// Get maintenance metrics
+		// Security: sql template uses column references only (maintenanceRequests.status), not user input
+		// This is safe from SQL injection as Drizzle ORM properly parameterizes column references
 		const maintenanceMetrics = await db
 			.select({
 				total: count(),

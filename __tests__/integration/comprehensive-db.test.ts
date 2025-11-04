@@ -3,31 +3,47 @@
  * Tests real database operations for all services
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { db } from '../lib/db';
-import { bills, vendors, billPayments, approvalWorkflows, billApprovals } from '../lib/db/schemas/bill-pay.schema';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { TestDatabase } from '../test-db';
+
+// Mock server-only
+vi.mock('server-only', () => ({}));
+
+// Import test database
+const { testDb } = await import('../test-db');
+import { bills, vendors, billPayments, approvalWorkflows, billApprovals } from '@/lib/db/schemas/bill-pay.schema';
 import { eq, and } from 'drizzle-orm';
 
 describe('Database Integration Tests', () => {
+  let testDatabase: ReturnType<typeof TestDatabase.getInstance>;
   const testUserId = 'test-user-12345';
   const testVendorId = 'test-vendor-12345';
 
   beforeAll(async () => {
+    testDatabase = TestDatabase.getInstance();
+    await testDatabase.setup();
+    
     // Clean up any existing test data
-    await db.delete(billApprovals).where(eq(billApprovals.billId, testUserId));
-    await db.delete(billPayments).where(eq(billPayments.userId, testUserId));
-    await db.delete(bills).where(eq(bills.userId, testUserId));
-    await db.delete(vendors).where(eq(vendors.userId, testUserId));
-    await db.delete(approvalWorkflows).where(eq(approvalWorkflows.userId, testUserId));
+    try {
+      await testDb.delete(billApprovals).where(eq(billApprovals.billId, testUserId));
+      await testDb.delete(billPayments).where(eq(billPayments.userId, testUserId));
+      await testDb.delete(bills).where(eq(bills.userId, testUserId));
+      await testDb.delete(vendors).where(eq(vendors.userId, testUserId));
+    } catch (error) {
+      // Ignore cleanup errors if tables don't exist
+      console.warn('Cleanup error (safe to ignore):', error);
+    }
+    await testDb.delete(approvalWorkflows).where(eq(approvalWorkflows.userId, testUserId));
   });
 
   afterAll(async () => {
+    await testDatabase?.teardown();
     // Clean up test data
-    await db.delete(billApprovals).where(eq(billApprovals.billId, testUserId));
-    await db.delete(billPayments).where(eq(billPayments.userId, testUserId));
-    await db.delete(bills).where(eq(bills.userId, testUserId));
-    await db.delete(vendors).where(eq(vendors.userId, testUserId));
-    await db.delete(approvalWorkflows).where(eq(approvalWorkflows.userId, testUserId));
+    await testDb.delete(billApprovals).where(eq(billApprovals.billId, testUserId));
+    await testDb.delete(billPayments).where(eq(billPayments.userId, testUserId));
+    await testDb.delete(bills).where(eq(bills.userId, testUserId));
+    await testDb.delete(vendors).where(eq(vendors.userId, testUserId));
+    await testDb.delete(approvalWorkflows).where(eq(approvalWorkflows.userId, testUserId));
   });
 
   describe('Vendor Operations', () => {

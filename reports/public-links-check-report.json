@@ -1,0 +1,108 @@
+{
+  "timestamp": "2025-11-04T03:19:19.473Z",
+  "baseUrl": "http://localhost:3003",
+  "summary": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0
+  },
+  "brokenLinks": [],
+  "pagesChecked": [
+    {
+      "url": "http://localhost:3003/",
+      "status": "error",
+      "error": "Failed to fetch http://localhost:3003/: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/\""
+    },
+    {
+      "url": "http://localhost:3003/home",
+      "status": "error",
+      "error": "Failed to fetch http://localhost:3003/home: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/home\""
+    },
+    {
+      "url": "http://localhost:3003/about",
+      "status": "error",
+      "error": "Failed to fetch http://localhost:3003/about: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/about\""
+    },
+    {
+      "url": "http://localhost:3003/contact",
+      "status": "error",
+      "error": "Failed to fetch http://localhost:3003/contact: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/contact\""
+    },
+    {
+      "url": "http://localhost:3003/pricing",
+      "status": "error",
+      "error": "Failed to fetch http://localhost:3003/pricing: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/pricing\""
+    },
+    {
+      "url": "http://localhost:3003/privacy",
+      "status": "error",
+      "error": "Failed to fetch http://localhost:3003/privacy: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/privacy\""
+    },
+    {
+      "url": "http://localhost:3003/terms",
+      "status": "error",
+      "error": "Failed to fetch http://localhost:3003/terms: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/terms\""
+    },
+    {
+      "url": "http://localhost:3003/legal",
+      "status": "error",
+      "error": "Failed to fetch http://localhost:3003/legal: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/legal\""
+    },
+    {
+      "url": "http://localhost:3003/security",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/support",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/blog",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/careers",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/analytics",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/adboard",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/cloud-platform",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/team-collaboration",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/docs",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/auth/sign-in",
+      "status": "error",
+      "error": "HTTP 500"
+    },
+    {
+      "url": "http://localhost:3003/auth/sign-up",
+      "status": "error",
+      "error": "HTTP 500"
+    }
+  ]
+}

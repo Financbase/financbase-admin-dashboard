@@ -46,6 +46,8 @@ import {
 	Puzzle,
 	BookOpen,
 	Clock,
+	Rocket,
+	Activity,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -112,6 +114,10 @@ const navigationData: NavigationItem[] = [
 	{ href: "/financial-intelligence", icon: Brain, label: "Financial Intelligence", section: "financial" },
 	{ href: "/financial-intelligence/agency", icon: Building2, label: "Agency Intelligence", section: "financial" },
 	{ href: "/financial-intelligence/ecommerce", icon: ShoppingBag, label: "E-commerce Intelligence", section: "financial" },
+	{ href: "/financial-intelligence/health", icon: Activity, label: "Financial Health", section: "financial" },
+	{ href: "/financial-intelligence/predictions", icon: TrendingUp, label: "AI Predictions", section: "financial" },
+	{ href: "/financial-intelligence/recommendations", icon: Target, label: "Recommendations", section: "financial" },
+	{ href: "/financial-intelligence/startup", icon: Rocket, label: "Startup Intelligence", section: "financial" },
 	
 	// Business Services
 	{ href: "/clients", icon: Users, label: "Clients", section: "business" },

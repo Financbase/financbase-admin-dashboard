@@ -1,37 +1,54 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { describe, it, expect, beforeEach, jest } from '@jest/globals'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WorkflowBuilder } from '@/components/workflows/workflow-builder'
 
 // Mock Next.js router
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
   }),
   usePathname: () => '/workflows',
 }))
 
 // Mock API calls
-global.fetch = jest.fn()
+global.fetch = vi.fn()
 
 // Mock workflow engine
-jest.mock('@/lib/services/workflow-engine', () => ({
-  WorkflowEngine: jest.fn().mockImplementation(() => ({
-    executeWorkflow: jest.fn(),
-    testWorkflow: jest.fn(),
+vi.mock('@/lib/services/workflow-engine', () => ({
+  WorkflowEngine: vi.fn().mockImplementation(() => ({
+    executeWorkflow: vi.fn(),
+    testWorkflow: vi.fn(),
   })),
 }))
 
 describe('WorkflowBuilder', () => {
+  let queryClient: QueryClient
+
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(global.fetch as jest.Mock).mockClear()
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    vi.clearAllMocks()
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockClear()
   })
 
+  const renderWithQueryClient = (component: React.ReactElement) => {
+    return render(
+      <QueryClientProvider client={queryClient}>
+        {component}
+      </QueryClientProvider>
+    )
+  }
+
   it('should render workflow builder interface', () => {
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     expect(screen.getByText('Workflow Builder')).toBeInTheDocument()
     expect(screen.getByText('Create New Workflow')).toBeInTheDocument()
@@ -58,12 +75,12 @@ describe('WorkflowBuilder', () => {
       },
     ]
 
-    ;(global.fetch as jest.Mock).mockResolvedValue({
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ workflows: mockWorkflows }),
     })
 
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     await waitFor(() => {
       expect(screen.getByText('Invoice Reminder')).toBeInTheDocument()
@@ -72,7 +89,7 @@ describe('WorkflowBuilder', () => {
   })
 
   it('should open create workflow dialog', async () => {
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     const createButton = screen.getByText('Create New Workflow')
     fireEvent.click(createButton)
@@ -92,7 +109,7 @@ describe('WorkflowBuilder', () => {
       isActive: true,
     }
 
-    ;(global.fetch as jest.Mock)
+    ;(global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ workflows: [] }),
@@ -102,7 +119,7 @@ describe('WorkflowBuilder', () => {
         json: () => Promise.resolve({ workflow: mockWorkflow }),
       })
 
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     // Open create dialog
     const createButton = screen.getByText('Create New Workflow')
@@ -156,12 +173,12 @@ describe('WorkflowBuilder', () => {
       },
     ]
 
-    ;(global.fetch as jest.Mock).mockResolvedValue({
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ templates: mockTemplates }),
     })
 
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     await waitFor(() => {
       expect(screen.getByText('Invoice Approval')).toBeInTheDocument()
@@ -176,7 +193,7 @@ describe('WorkflowBuilder', () => {
       isActive: true,
     }
 
-    ;(global.fetch as jest.Mock)
+    ;(global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ workflows: [mockWorkflow] }),
@@ -186,7 +203,7 @@ describe('WorkflowBuilder', () => {
         json: () => Promise.resolve({ success: true, executionId: 'exec-1' }),
       })
 
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     await waitFor(() => {
       expect(screen.getByText('Test Workflow')).toBeInTheDocument()
@@ -212,7 +229,7 @@ describe('WorkflowBuilder', () => {
       isActive: true,
     }
 
-    ;(global.fetch as jest.Mock)
+    ;(global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({ workflows: [mockWorkflow] }),
@@ -222,7 +239,7 @@ describe('WorkflowBuilder', () => {
         json: () => Promise.resolve({ success: true, dryRun: true }),
       })
 
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     await waitFor(() => {
       expect(screen.getByText('Test Workflow')).toBeInTheDocument()
@@ -265,12 +282,12 @@ describe('WorkflowBuilder', () => {
       },
     ]
 
-    ;(global.fetch as jest.Mock).mockResolvedValue({
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ executions: mockExecutions }),
     })
 
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     // Switch to execution history tab
     const historyTab = screen.getByText('Execution History')
@@ -285,9 +302,9 @@ describe('WorkflowBuilder', () => {
   })
 
   it('should handle error states gracefully', async () => {
-    ;(global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network error'))
 
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     await waitFor(() => {
       expect(screen.getByText(/error loading workflows/i)).toBeInTheDocument()
@@ -300,12 +317,12 @@ describe('WorkflowBuilder', () => {
       { id: '2', name: 'Inactive Workflow', isActive: false },
     ]
 
-    ;(global.fetch as jest.Mock).mockResolvedValue({
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ workflows: mockWorkflows }),
     })
 
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     await waitFor(() => {
       expect(screen.getByText('Active Workflow')).toBeInTheDocument()
@@ -328,12 +345,12 @@ describe('WorkflowBuilder', () => {
       { id: '2', name: 'Payment Workflow', isActive: true },
     ]
 
-    ;(global.fetch as jest.Mock).mockResolvedValue({
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ workflows: mockWorkflows }),
     })
 
-    render(<WorkflowBuilder />)
+    renderWithQueryClient(<WorkflowBuilder />)
 
     await waitFor(() => {
       expect(screen.getByText('Invoice Workflow')).toBeInTheDocument()

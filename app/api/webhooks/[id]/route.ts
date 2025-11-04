@@ -3,21 +3,23 @@ import { db } from '@/lib/db';
 import { webhooks } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
   const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const webhookId = parseInt(id);
     if (Number.isNaN(webhookId)) {
-      return NextResponse.json({ error: 'Invalid webhook ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid webhook ID');
     }
 
     const webhook = await db
@@ -27,14 +29,12 @@ export async function GET(
       .limit(1);
 
     if (webhook.length === 0) {
-      return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Webhook not found');
     }
 
     return NextResponse.json(webhook[0]);
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error fetching webhook:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
@@ -42,19 +42,26 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
   const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const webhookId = parseInt(id);
     if (Number.isNaN(webhookId)) {
-      return NextResponse.json({ error: 'Invalid webhook ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid webhook ID');
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
+
     const updateData: Record<string, unknown> = {};
 
     // Only update provided fields
@@ -66,7 +73,7 @@ export async function PATCH(
         new URL(body.url);
         updateData.url = body.url;
       } catch {
-        return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
+        return ApiErrorHandler.badRequest('Invalid URL format');
       }
     }
     if (body.events !== undefined) updateData.events = body.events;
@@ -86,14 +93,12 @@ export async function PATCH(
       .returning();
 
     if (updatedWebhook.length === 0) {
-      return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Webhook not found');
     }
 
     return NextResponse.json(updatedWebhook[0]);
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error updating webhook:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
@@ -101,16 +106,17 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
   const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const webhookId = parseInt(id);
     if (Number.isNaN(webhookId)) {
-      return NextResponse.json({ error: 'Invalid webhook ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid webhook ID');
     }
 
     const deletedWebhook = await db
@@ -119,13 +125,11 @@ export async function DELETE(
       .returning();
 
     if (deletedWebhook.length === 0) {
-      return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Webhook not found');
     }
 
     return NextResponse.json({ message: 'Webhook deleted successfully' });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error deleting webhook:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

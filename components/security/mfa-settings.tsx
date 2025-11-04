@@ -299,15 +299,20 @@ export function MFASettings() {
               </Button>
             </div>
 
-            {showQRCode && (
-              <div className="flex justify-center">
-                <img 
-                  src={setupMFAMutation.data.qrCodeUrl} 
-                  alt="QR Code for MFA setup"
-                  className="border rounded-lg"
-                />
-              </div>
-            )}
+            {showQRCode && setupMFAMutation.data?.qrCodeUrl && (() => {
+              // Security: Validate QR code URL before using in img src
+              const { validateSafeUrl } = require('@/lib/utils/security');
+              const safeUrl = validateSafeUrl(setupMFAMutation.data.qrCodeUrl);
+              return safeUrl ? (
+                <div className="flex justify-center">
+                  <img 
+                    src={safeUrl} 
+                    alt="QR Code for MFA setup"
+                    className="border rounded-lg"
+                  />
+                </div>
+              ) : null;
+            })()}
 
             <div className="space-y-2">
               <Label htmlFor="verification-code">Verification Code</Label>

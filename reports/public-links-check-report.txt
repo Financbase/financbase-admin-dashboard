@@ -1,0 +1,53 @@
+# Public Pages Link Check Report
+
+Generated: 2025-11-04T03:19:19.473Z
+Base URL: http://localhost:3003
+
+## Summary
+
+- Total Pages Checked: 19
+- Total Links Checked: 0
+- Passed: 0
+- Failed: 0
+- Skipped: 0
+
+## Pages Checked
+
+- http://localhost:3003/ - error
+  Error: Failed to fetch http://localhost:3003/: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/"
+- http://localhost:3003/home - error
+  Error: Failed to fetch http://localhost:3003/home: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/home"
+- http://localhost:3003/about - error
+  Error: Failed to fetch http://localhost:3003/about: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/about"
+- http://localhost:3003/contact - error
+  Error: Failed to fetch http://localhost:3003/contact: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/contact"
+- http://localhost:3003/pricing - error
+  Error: Failed to fetch http://localhost:3003/pricing: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/pricing"
+- http://localhost:3003/privacy - error
+  Error: Failed to fetch http://localhost:3003/privacy: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/privacy"
+- http://localhost:3003/terms - error
+  Error: Failed to fetch http://localhost:3003/terms: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/terms"
+- http://localhost:3003/legal - error
+  Error: Failed to fetch http://localhost:3003/legal: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/legal"
+- http://localhost:3003/security - error
+  Error: HTTP 500
+- http://localhost:3003/support - error
+  Error: HTTP 500
+- http://localhost:3003/blog - error
+  Error: HTTP 500
+- http://localhost:3003/careers - error
+  Error: HTTP 500
+- http://localhost:3003/analytics - error
+  Error: HTTP 500
+- http://localhost:3003/adboard - error
+  Error: HTTP 500
+- http://localhost:3003/cloud-platform - error
+  Error: HTTP 500
+- http://localhost:3003/team-collaboration - error
+  Error: HTTP 500
+- http://localhost:3003/docs - error
+  Error: HTTP 500
+- http://localhost:3003/auth/sign-in - error
+  Error: HTTP 500
+- http://localhost:3003/auth/sign-up - error
+  Error: HTTP 500

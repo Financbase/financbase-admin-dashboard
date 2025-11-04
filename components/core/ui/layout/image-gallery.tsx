@@ -112,8 +112,15 @@ export function ImageGallery({
 	};
 
 	const handleDownload = (image: UploadedImage) => {
+		// Security: Validate image URL before using in anchor href
+		const { validateSafeUrl } = require('@/lib/utils/security');
+		const safeUrl = validateSafeUrl(image.url) || (image.url.startsWith('blob:') ? image.url : null);
+		if (!safeUrl) {
+			toast.error('Invalid image URL');
+			return;
+		}
 		const link = document.createElement('a');
-		link.href = image.url;
+		link.href = safeUrl;
 		link.download = image.name;
 		document.body.appendChild(link);
 		link.click();
@@ -328,6 +335,12 @@ export function ImageGallery({
 										fill
 										className="object-cover"
 										sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+										onError={(e) => {
+											console.error('Failed to load image:', image.url);
+											// Replace with placeholder on error
+											const target = e.target as HTMLImageElement;
+											target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23ddd" width="400" height="300"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
+										}}
 									/>
 
 									{/* Overlay */}

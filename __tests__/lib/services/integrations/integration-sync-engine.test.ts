@@ -1,30 +1,30 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { IntegrationSyncEngine } from '@/lib/services/integrations/integration-sync-engine'
 import { db } from '@/lib/db'
 
 // Mock database
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   db: {
-    select: jest.fn(),
-    insert: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
 // Mock integration services
-jest.mock('@/lib/services/integrations/stripe-integration', () => ({
-  StripeIntegration: jest.fn().mockImplementation(() => ({
-    syncCustomers: jest.fn(),
-    syncInvoices: jest.fn(),
-    syncPayments: jest.fn(),
+vi.mock('@/lib/services/integrations/stripe-integration', () => ({
+  StripeIntegration: vi.fn().mockImplementation(() => ({
+    syncCustomers: vi.fn(),
+    syncInvoices: vi.fn(),
+    syncPayments: vi.fn(),
   })),
 }))
 
-jest.mock('@/lib/services/integrations/slack-integration', () => ({
-  SlackIntegration: jest.fn().mockImplementation(() => ({
-    sendMessage: jest.fn(),
-    getChannels: jest.fn(),
+vi.mock('@/lib/services/integrations/slack-integration', () => ({
+  SlackIntegration: vi.fn().mockImplementation(() => ({
+    sendMessage: vi.fn(),
+    getChannels: vi.fn(),
   })),
 }))
 
@@ -33,7 +33,7 @@ describe('IntegrationSyncEngine', () => {
   let mockDb: any
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     syncEngine = new IntegrationSyncEngine()
     mockDb = db as any
   })
@@ -52,13 +52,13 @@ describe('IntegrationSyncEngine', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockConnection]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockConnection]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'sync-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'sync-1' }),
       })
 
       const result = await syncEngine.syncIntegration(connectionId, syncType)
@@ -73,8 +73,8 @@ describe('IntegrationSyncEngine', () => {
       const syncType = 'full'
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockRejectedValue(new Error('Database error')),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockRejectedValue(new Error('Database error')),
         }),
       })
 
@@ -97,13 +97,13 @@ describe('IntegrationSyncEngine', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockConnection]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockConnection]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'sync-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'sync-1' }),
       })
 
       const result = await syncEngine.syncIntegration(connectionId, syncType)
@@ -245,8 +245,8 @@ describe('IntegrationSyncEngine', () => {
       const baseDelay = 1000
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([{
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([{
             id: syncId,
             status: 'failed',
             attempts: 1,
@@ -256,8 +256,8 @@ describe('IntegrationSyncEngine', () => {
       })
 
       mockDb.update.mockReturnValue({
-        set: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue({}),
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue({}),
         }),
       })
 
@@ -272,8 +272,8 @@ describe('IntegrationSyncEngine', () => {
       const maxRetries = 3
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([{
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([{
             id: syncId,
             status: 'failed',
             attempts: maxRetries,
@@ -304,9 +304,9 @@ describe('IntegrationSyncEngine', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue([mockSync]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue([mockSync]),
           }),
         }),
       })
@@ -321,9 +321,9 @@ describe('IntegrationSyncEngine', () => {
       const connectionId = 'non-existent-connection'
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue([]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue([]),
           }),
         }),
       })
@@ -342,7 +342,7 @@ describe('IntegrationSyncEngine', () => {
       const time = '09:00'
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'schedule-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'schedule-1' }),
       })
 
       const result = await syncEngine.scheduleSync(connectionId, interval, time)

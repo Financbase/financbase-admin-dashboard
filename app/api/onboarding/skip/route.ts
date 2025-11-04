@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { OnboardingService } from "@/lib/services/onboarding/onboarding-service";
 import { z } from "zod";
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // Validation schema
 const skipOnboardingSchema = z.object({
@@ -13,33 +14,31 @@ const skipOnboardingSchema = z.object({
  * POST /api/onboarding/skip - Skip entire onboarding process
  */
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = skipOnboardingSchema.parse(body);
 		const { reason, feedback } = validatedData;
 
 		// Check if user has onboarding to skip
 		const onboardingStatus = await OnboardingService.getOnboardingStatus(userId);
 		if (!onboardingStatus) {
-			return NextResponse.json(
-				{ error: "No onboarding found for user" },
-				{ status: 404 }
-			);
+			return ApiErrorHandler.notFound("No onboarding found for user");
 		}
 
 		// Skip the entire onboarding
 		const skippedOnboarding = await OnboardingService.skipOnboarding(userId);
-
-		// Log the skip reason for analytics
-		console.log(`User ${userId} skipped onboarding. Reason: ${reason || 'Not provided'}`);
-		if (feedback) {
-			console.log(`User feedback: ${feedback}`);
-		}
 
 		return NextResponse.json({
 			onboarding: skippedOnboarding,
@@ -48,17 +47,6 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: "Validation error", details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error("Error skipping onboarding:", error);
-		return NextResponse.json(
-			{ error: "Failed to skip onboarding" },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

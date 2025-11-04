@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import {
 	investorPortals,
 	investorAccessLogs,
@@ -17,12 +18,13 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ portalId: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { portalId } = await params;
 	try {
-		const { portalId } = params;
 		const accessToken = request.headers.get('authorization')?.replace('Bearer ', '');
 
 		if (!accessToken) {
-			return NextResponse.json({ error: 'Access token required' }, { status: 401 });
+			return ApiErrorHandler.unauthorized('Access token required');
 		}
 
 		// Verify portal access
@@ -37,14 +39,14 @@ export async function GET(
 			.limit(1);
 
 		if (portal.length === 0) {
-			return NextResponse.json({ error: 'Invalid or expired access token' }, { status: 401 });
+			return ApiErrorHandler.unauthorized('Invalid or expired access token');
 		}
 
 		const portalData = portal[0];
 
 		// Check if token is expired
 		if (portalData.expiresAt && new Date() > portalData.expiresAt) {
-			return NextResponse.json({ error: 'Access token expired' }, { status: 401 });
+			return ApiErrorHandler.unauthorized('Access token expired');
 		}
 
 		// Log access
@@ -205,12 +207,6 @@ export async function GET(
 
 		return NextResponse.json(portalResponse);
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error fetching investor portal:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

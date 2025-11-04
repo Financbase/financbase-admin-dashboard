@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { FeatureFlagsService } from '@/lib/services/feature-flags-service';
 import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { isAdmin } from '@/lib/auth/financbase-rbac';
 
 export async function POST(
   request: NextRequest,
@@ -18,10 +19,11 @@ export async function POST(
       return ApiErrorHandler.unauthorized();
     }
 
-    // TODO: Add admin role check
-    // if (!await isAdmin(userId)) {
-    //   return ApiErrorHandler.forbidden('Admin access required');
-    // }
+    // Check admin access
+    const adminStatus = await isAdmin();
+    if (!adminStatus) {
+      return ApiErrorHandler.forbidden('Admin access required');
+    }
 
     const { key } = await params;
     const flag = await FeatureFlagsService.enableFlag(key);

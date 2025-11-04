@@ -7,19 +7,21 @@ import { eq, desc } from 'drizzle-orm';
 import { checkPermission } from '@/lib/auth/financbase-rbac';
 import { FINANCIAL_PERMISSIONS } from '@/types/auth';
 import type { FinancbaseUserMetadata } from '@/types/auth';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/admin/users - Get all users with their permissions
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Check if user has permission to manage users
 		const hasPermission = await checkPermission(FINANCIAL_PERMISSIONS.USERS_MANAGE);
 		if (!hasPermission) {
-			return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+			return ApiErrorHandler.forbidden('You do not have permission to manage users');
 		}
 
 		// Get users from database
@@ -64,10 +66,6 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(usersWithMetadata);
 	} catch (error) {
-		console.error('Error fetching users:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch users' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

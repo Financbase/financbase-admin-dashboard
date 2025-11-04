@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AlertService } from '@/lib/services/alert-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -15,22 +17,25 @@ export async function GET(request: NextRequest) {
     const alertRules = await AlertService.getAlertRules(userId, organizationId || undefined);
     return NextResponse.json(alertRules);
   } catch (error) {
-    console.error('Error fetching alert rules:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch alert rules',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
+
     const { 
       name, 
       description, 
@@ -47,9 +52,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!name || !metricName || !condition || !threshold || !severity) {
-      return NextResponse.json({ 
-        error: 'Missing required fields: name, metricName, condition, threshold, severity' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest('Missing required fields: name, metricName, condition, threshold, severity');
     }
 
     const alertRule = await AlertService.createAlertRule(userId, organizationId, {
@@ -68,10 +71,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(alertRule, { status: 201 });
   } catch (error) {
-    console.error('Error creating alert rule:', error);
-    return NextResponse.json({ 
-      error: 'Failed to create alert rule',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

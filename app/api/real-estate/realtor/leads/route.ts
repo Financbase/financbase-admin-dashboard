@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
 
 		const { searchParams } = new URL(request.url);
 		const params = queryParamsSchema.parse({
-			limit: searchParams.get('limit'),
-			offset: searchParams.get('offset'),
+			limit: searchParams.get('limit') || undefined,
+			offset: searchParams.get('offset') || undefined,
 		});
 		const limit = params.limit || 50;
 		const offset = params.offset || 0;
