@@ -3,6 +3,16 @@
  * Business logic for project management, time tracking, and billing
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { db } from '@/lib/db';
 import { projects, type Project } from '@/lib/db/schemas/projects.schema';
 import { timeEntries, type TimeEntry } from '@/lib/db/schemas/time-entries.schema';

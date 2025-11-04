@@ -45,6 +45,9 @@
     "optimize:images": "node scripts/optimize-images.js",
     "optimize:images:public": "node scripts/optimize-images.js --input-dir=./public --output-dir=./public/optimized",
     "verify:responsive-ui": "node scripts/verify-responsive-ui.js",
+    "copyright:check": "node scripts/add-copyright-headers.js --check",
+    "copyright:add": "node scripts/add-copyright-headers.js",
+    "copyright:dry-run": "node scripts/add-copyright-headers.js --dry-run",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -145,7 +148,6 @@
     "@typescript-eslint/parser": "^7.18.0",
     "autoprefixer": "^10.4.21",
     "babel-jest": "^29.7.0",
-    "broken-link-checker": "^0.7.8",
     "chrome-launcher": "^1.2.1",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9.0.0",

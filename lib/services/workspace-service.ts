@@ -3,6 +3,16 @@
  * Handles CRUD operations for workspaces, clients, approvals, and collaboration features
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { Workspace, WorkspaceMember, Client, ApprovalWorkflow, ApprovalRequest, Comment, PracticeMetrics } from '@/types/auth';
 import { CollaborationPermission } from '@/types/auth';
 

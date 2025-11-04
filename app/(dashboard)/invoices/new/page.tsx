@@ -3,6 +3,16 @@
  * Create a new invoice
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { InvoiceForm } from '@/components/invoices/invoice-form';
 
 export default function NewInvoicePage() {

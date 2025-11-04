@@ -3,6 +3,16 @@
  * Service for aggregating and analyzing campaign performance data from the campaigns table
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { db } from "@/lib/db";
 import { campaigns } from "@/lib/db/schemas/campaigns.schema";
 import { eq, and, gte, lte, sql, desc, inArray } from "drizzle-orm";

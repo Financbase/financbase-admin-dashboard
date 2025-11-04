@@ -4,6 +4,16 @@
  * ML-powered categorization, bank reconciliation, and continuous learning
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { db } from '@/lib/db';
 import { transactions, accounts, invoices, expenses } from '@/lib/db/schemas/transactions.schema';
 import { eq, and, gte, lte, desc, sql, or } from 'drizzle-orm';

@@ -3,6 +3,16 @@
  * Business logic for report generation and management
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { db } from '@/lib/db';
 import { reports, reportHistory, reportTemplates, type NewReport, type Report } from '@/lib/db/schema/reports';
 import { eq, and, desc } from 'drizzle-orm';

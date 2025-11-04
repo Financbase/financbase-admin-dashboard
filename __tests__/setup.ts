@@ -95,9 +95,14 @@ vi.mock('@clerk/nextjs/server', () => ({
 // Create a shared mock verify function that tests can customize
 export const mockSvixVerify = vi.fn();
 vi.mock('svix', () => ({
-  Webhook: vi.fn().mockImplementation(() => ({
-    verify: (...args: any[]) => mockSvixVerify(...args),
-  })),
+  Webhook: class MockWebhook {
+    constructor(secret: string) {
+      // Store secret if needed for tests
+      this.secret = secret;
+    }
+    secret: string;
+    verify = (...args: any[]) => mockSvixVerify(...args);
+  },
 }));
 
 // Mock Clerk client components

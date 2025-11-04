@@ -314,6 +314,23 @@ For internal team members, please refer to [CONTRIBUTING.md](CONTRIBUTING.md) fo
 
 This is proprietary software. All rights reserved. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
 
+See [LICENSE](LICENSE) for full license terms.
+
+## 🔒 Repository Protection
+
+This repository is protected to safeguard proprietary code:
+
+- **Private Repository**: Access restricted to authorized team members only
+- **Branch Protection**: Main branches require code review and approval
+- **Secret Scanning**: Automated scanning for secrets and credentials
+- **Code Owners**: Automatic code review assignments
+- **License Compliance**: All contributors must acknowledge proprietary license
+- **Security Scanning**: Continuous security vulnerability scanning
+
+For detailed protection guidelines, see [GitHub Protection Documentation](docs/GITHUB_PROTECTION.md).
+
+**Security Issues**: Report security vulnerabilities to `<security@financbase.com>` (DO NOT create public issues).
+
 ## 📚 Documentation
 
 Comprehensive documentation is available in the [`docs/`](docs/) directory:

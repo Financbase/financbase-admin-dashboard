@@ -3,6 +3,16 @@
  * POST - Mark all notifications as read for the current user
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/services/notification-service';

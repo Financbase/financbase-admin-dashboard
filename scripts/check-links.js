@@ -1,4 +1,4 @@
-const { SiteChecker } = require('broken-link-checker');
+const { linkinator } = require('linkinator');
 const fs = require('fs');
 const path = require('path');
 
@@ -19,81 +19,64 @@ const IGNORED_DOMAINS = [
 // Track broken links
 const brokenLinks = [];
 
-// Create a new site checker instance
-const siteChecker = new SiteChecker(
-  {
-    // Options
-    excludeExternalLinks: false,
-    excludeInternalLinks: false,
-    excludeLinksToSamePage: true,
-    filterLevel: 1,
-    maxSockets: 10,
-    maxSocketsPerHost: 5,
-    rateLimit: 1000,
-    retryCount: 2,
-    retryDelay: 1000,
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-  },
-  {
-    // Event handlers
-    'html': (treeCache) => {
-      // Called for each HTML page processed
-    },
-    'queue': () => {
-      // Called when a URL is added to the queue
-    },
-    'junk': (result) => {
-      // Called for links that are not checked (e.g., mailto:)
-    },
-    'link': (result) => {
-      const { url, base, broken, brokenReason, http } = result;
-      
-      // Skip ignored domains
-      if (IGNORED_DOMAINS.some(domain => url.original.includes(domain))) {
-        return;
-      }
-      
+async function checkLinks() {
+  console.log('🔍 Starting link checker...');
+  console.log(`🌐 Scanning ${SITE_URL} and its internal links...\n`);
+
+  try {
+    const results = await linkinator.check({
+      path: SITE_URL,
+      recurse: true,
+      skip: IGNORED_DOMAINS.map(domain => `https?://${domain}.*`),
+      timeout: 10000,
+      verbosity: 'error',
+      markdown: false,
+      directoryListing: false,
+    });
+
+    // Process results
+    for (const link of results.links) {
       // Skip email and tel links
-      if (url.original.startsWith('mailto:') || url.original.startsWith('tel:')) {
-        return;
+      if (link.url.startsWith('mailto:') || link.url.startsWith('tel:')) {
+        continue;
       }
-      
-      if (broken) {
-        const message = `[${brokenReason || 'ERROR'}] ${url.original} (from: ${base.original})`;
+
+      // Skip ignored domains
+      if (IGNORED_DOMAINS.some(domain => link.url.includes(domain))) {
+        continue;
+      }
+
+      // Check if link is broken
+      if (link.state === 'BROKEN') {
+        const message = `[${link.status || 'ERROR'}] ${link.url} (from: ${link.parent || 'unknown'})`;
         console.error(`❌ ${message}`);
         brokenLinks.push(message);
-      } else if (http && http.response) {
-        console.log(`✅ [${http.response.statusCode}] ${url.original}`);
-      }
-    },
-    'page': (error, pageUrl) => {
-      if (error) {
-        console.error(`❌ Error checking ${pageUrl}:`, error);
-      }
-    },
-    'end': () => {
-      console.log('\n📊 Scan complete!');
-      
-      if (brokenLinks.length > 0) {
-        console.log(`\n❌ Found ${brokenLinks.length} broken links/redirects:\n`);
-        brokenLinks.forEach(link => console.log(`- ${link}`));
-        
-        // Ensure reports directory exists
-        const reportPath = path.join(__dirname, '../reports/broken-links.txt');
-        fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-        fs.writeFileSync(reportPath, brokenLinks.join('\n'));
-        
-        console.log(`\n📝 Full report saved to: ${reportPath}`);
-        process.exit(1); // Exit with error code if broken links found
-      } else {
-        console.log('🎉 No broken links found!');
+      } else if (link.status) {
+        console.log(`✅ [${link.status}] ${link.url}`);
       }
     }
+
+    console.log('\n📊 Scan complete!');
+
+    if (brokenLinks.length > 0) {
+      console.log(`\n❌ Found ${brokenLinks.length} broken links/redirects:\n`);
+      brokenLinks.forEach(link => console.log(`- ${link}`));
+
+      // Ensure reports directory exists
+      const reportPath = path.join(__dirname, '../reports/broken-links.txt');
+      fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+      fs.writeFileSync(reportPath, brokenLinks.join('\n'));
+
+      console.log(`\n📝 Full report saved to: ${reportPath}`);
+      process.exit(1); // Exit with error code if broken links found
+    } else {
+      console.log('🎉 No broken links found!');
+    }
+  } catch (error) {
+    console.error('❌ Error during link checking:', error);
+    process.exit(1);
   }
-);
+}
 
-console.log('🔍 Starting link checker...');
-console.log(`🌐 Scanning ${SITE_URL} and its internal links...\n`);
-
-// Start the link checking process
-siteChecker.enqueue(SITE_URL);
+// Run the check
+checkLinks();

@@ -3,6 +3,16 @@
  * Business logic for financial account management
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { db } from '@/lib/db';
 import { accounts, type Account } from '@/lib/db/schemas/accounts.schema';
 import { transactions } from '@/lib/db/schemas/transactions.schema';

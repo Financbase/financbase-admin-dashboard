@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
 import { and, desc, eq, gte, lte, sql, sum } from "drizzle-orm";
 import { Briefcase, Clock, Key, Save, TrendingDown } from "lucide-react";
 import { db } from "../db/connection";

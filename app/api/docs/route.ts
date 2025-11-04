@@ -3,6 +3,16 @@
  * Returns the OpenAPI 3.0 specification as JSON
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { NextResponse } from 'next/server';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { swaggerOptions } from '@/lib/openapi/config';

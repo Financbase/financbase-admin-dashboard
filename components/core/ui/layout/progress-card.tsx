@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
 import { type VariantProps, cva } from "class-variance-authority";
 import { motion } from "framer-motion";
 import { CheckCircle2, File, FileText, X, XCircle } from "lucide-react";

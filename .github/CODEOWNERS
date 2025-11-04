@@ -1,0 +1,62 @@
+# CODEOWNERS file
+# This file defines code owners for different parts of the repository
+# Each line is a file pattern followed by one or more owners
+# Owners are automatically requested for review when code is modified
+#
+# Order matters - the last matching pattern takes precedence
+# More specific patterns should be listed after more general ones
+#
+# Syntax: https://help.github.com/articles/about-codeowners/
+
+# Global owners - all files
+* @financbase/security-team @financbase/engineering-leads
+
+# Core application files
+/app/ @financbase/frontend-team @financbase/engineering-leads
+/components/ @financbase/frontend-team
+/lib/ @financbase/backend-team @financbase/engineering-leads
+
+# API routes
+/app/api/ @financbase/backend-team @financbase/api-team
+
+# Database and migrations
+/lib/db/ @financbase/backend-team @financbase/database-team
+/drizzle/ @financbase/database-team @financbase/backend-team
+
+# Security-related files
+/lib/security/ @financbase/security-team
+/lib/auth/ @financbase/security-team
+middleware.ts* @financbase/security-team @financbase/backend-team
+
+# Configuration files
+*.config.* @financbase/devops-team @financbase/engineering-leads
+package.json @financbase/engineering-leads
+tsconfig.json @financbase/engineering-leads
+
+# Documentation
+/docs/ @financbase/documentation-team @financbase/engineering-leads
+README.md @financbase/engineering-leads
+CONTRIBUTING.md @financbase/engineering-leads
+CHANGELOG.md @financbase/engineering-leads
+
+# GitHub configuration
+/.github/ @financbase/devops-team @financbase/engineering-leads
+
+# Testing
+/__tests__/ @financbase/qa-team @financbase/engineering-leads
+/e2e/ @financbase/qa-team
+*.test.ts @financbase/qa-team
+*.test.tsx @financbase/qa-team
+
+# Infrastructure and deployment
+/docker/ @financbase/devops-team
+docker-compose*.yml @financbase/devops-team
+Dockerfile @financbase/devops-team
+vercel.json @financbase/devops-team
+
+# Sensitive files - requires security team approval
+/.env* @financbase/security-team @financbase/devops-team
+*.key @financbase/security-team
+*.pem @financbase/security-team
+*.p12 @financbase/security-team
+

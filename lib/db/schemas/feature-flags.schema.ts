@@ -3,6 +3,16 @@
  * System-wide feature flags with rollout and targeting support
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { pgTable, serial, varchar, text, boolean, integer, jsonb, timestamp, check } from 'drizzle-orm/pg-core';
 
 export const featureFlags = pgTable('feature_flags', {

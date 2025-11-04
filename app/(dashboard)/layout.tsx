@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
 import { Suspense } from "react";
 import { EnhancedLayout } from "@/components/layout/enhanced-layout";
 import { currentUser } from "@clerk/nextjs/server";

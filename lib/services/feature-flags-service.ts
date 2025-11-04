@@ -3,6 +3,16 @@
  * Manages system-wide feature flags with rollout and targeting support
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { db } from '@/lib/db';
 import { featureFlags, type FeatureFlag, type FeatureFlagConditions } from '@/lib/db/schemas/feature-flags.schema';
 import { eq, and, sql } from 'drizzle-orm';
