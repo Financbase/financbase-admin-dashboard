@@ -160,3 +160,99 @@ e2e-results.log
 .cache/
 .swc/
 .turbo/
+
+# ===========================================
+# PROPRIETARY CODE PROTECTION
+# ===========================================
+
+# Secrets and credentials
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
+*.keystore
+*.token
+*.secret
+secrets/
+credentials/
+*.credentials
+
+# API keys and tokens
+*api-key*
+*api_key*
+*apikey*
+*token*
+*access-token*
+*access_token*
+*secret-key*
+*secret_key*
+*private-key*
+*private_key*
+
+# Database credentials and connection strings
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+database-*.sql
+*-backup.sql
+
+# Configuration files with sensitive data
+config.local.*
+config.production.*
+*.local.config.*
+*.prod.config.*
+secrets.json
+credentials.json
+
+# Backup files that might contain sensitive data
+*.backup
+*.bak
+*.old
+*.orig
+*.save
+*-backup*
+*-old*
+
+# Documentation that might leak proprietary info
+docs/internal/
+docs/private/
+docs/confidential/
+*.internal.*
+*.private.*
+
+# Business-sensitive files
+*business-plan*
+*financial-data*
+*revenue*
+*profit*
+*customer-data*
+*client-list*
+*contract*
+*nda*
+*agreement*
+
+# Source code backups (should not be in repo)
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# IDE workspace files that might contain paths
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files that might contain sensitive data
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.#*

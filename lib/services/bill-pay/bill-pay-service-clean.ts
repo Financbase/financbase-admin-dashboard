@@ -4,6 +4,16 @@
  * Integrates with payment processors and AI for intelligent bill processing
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { db } from '@/lib/db';
 import { bills, vendors, payments, approvalWorkflows } from '@/lib/db/schemas/bills.schema';
 import { eq, and, desc, sql } from 'drizzle-orm';

@@ -1,6 +1,10 @@
 const http = require('http');
+const https = require('https');
+const { URL } = require('url');
 
-const BASE_URL = 'http://localhost:3000';
+// Security: Use HTTPS for production, HTTP only for localhost testing
+// Set BASE_URL environment variable to override (e.g., BASE_URL=https://app.financbase.com)
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 // Routes that were fixed
 const fixedRoutes = [
@@ -32,8 +36,13 @@ const fixedRoutes = [
 function testRoute(route) {
   return new Promise((resolve) => {
     const url = `${BASE_URL}${route.path}`;
-    // Security: HTTP is intentional for localhost testing - this is a test script
-    const req = http.get(url, (res) => {
+    const urlObj = new URL(url);
+    const isHttps = urlObj.protocol === 'https:';
+    const client = isHttps ? https : http;
+    
+    // Security: HTTP is only used for localhost testing (http://localhost:3000)
+    // For production testing, use HTTPS via BASE_URL environment variable
+    const req = client.get(url, (res) => {
       let data = '';
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {

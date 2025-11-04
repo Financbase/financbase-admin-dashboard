@@ -1,0 +1,39 @@
+# Gitleaks configuration for proprietary code protection
+title = "Financbase Proprietary Code Protection"
+
+[extend]
+# Use default rules
+useDefault = true
+
+[extend.regexes]
+# Custom patterns for proprietary codebase
+description = "Custom secret patterns for Financbase"
+regex = '''(?i)(api[_-]?key|secret[_-]?key|access[_-]?token|private[_-]?key|password|credential)\s*[=:]\s*["']?([a-zA-Z0-9\-_]{20,})["']?'''
+
+[allowlist]
+description = "Allowlist for false positives"
+paths = [
+  '''\.test\.''',
+  '''\.spec\.''',
+  '''\.example\.''',
+  '''test.*\.ts''',
+  '''test.*\.tsx''',
+  '''test.*\.js''',
+  '''test.*\.jsx''',
+  '''__tests__''',
+  '''\.md$''',
+  '''\.json$''',
+  '''\.toml$''',
+  '''\.config\.''',
+]
+
+[allowlist.regexes]
+description = "Allowlist regex patterns"
+regexes = [
+  '''example.*api.*key''',
+  '''test.*secret''',
+  '''placeholder''',
+  '''your.*key.*here''',
+  '''TODO.*replace''',
+]
+

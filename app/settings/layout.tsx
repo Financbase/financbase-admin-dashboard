@@ -3,6 +3,16 @@
  * Provides tabbed navigation for all settings pages
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, User, Shield, Bell, CreditCard, Users, Eye, Palette, Key } from 'lucide-react';
 import Link from 'next/link';

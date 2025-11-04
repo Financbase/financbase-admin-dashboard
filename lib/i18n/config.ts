@@ -2,6 +2,16 @@
  * Internationalization configuration
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 export const i18nConfig = {
   defaultLocale: 'en',
   locales: ['en', 'es', 'fr', 'de', 'pt', 'ja', 'ko', 'zh'],

@@ -15,7 +15,7 @@ const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
 
 describe('Plugin Submission System', () => {
   describe('POST /api/marketplace/plugins/submit', () => {
-    it('should return 401 for unauthenticated requests', async () => {
+    it('should return 401 for unauthenticated requests', { timeout: 6000 }, async () => {
       // Skip if server is not running (for unit testing)
       try {
         const response = await fetch(`${API_BASE_URL}/api/marketplace/plugins/submit`, {
@@ -39,7 +39,7 @@ describe('Plugin Submission System', () => {
         // Server not running - skip test or verify logic without HTTP call
         expect(error).toBeDefined();
       }
-    }, { timeout: 6000 });
+    });
 
     it('should return 400 for missing required fields', async () => {
       // This would require authentication, but we test the validation logic
@@ -102,7 +102,7 @@ describe('Plugin Submission System', () => {
   });
 
   describe('GET /api/marketplace/plugins/pending', () => {
-    it('should return 401 for unauthenticated requests', async () => {
+    it('should return 401 for unauthenticated requests', { timeout: 6000 }, async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/marketplace/plugins/pending`, {
           method: 'GET',
@@ -114,7 +114,7 @@ describe('Plugin Submission System', () => {
         // Server not running - verify endpoint structure instead
         expect(typeof `${API_BASE_URL}/api/marketplace/plugins/pending`).toBe('string');
       }
-    }, { timeout: 6000 });
+    });
 
     it('should return 403 for non-admin users', async () => {
       // Note: Actual test would require authenticated non-admin user
@@ -147,7 +147,7 @@ describe('Plugin Submission System', () => {
   });
 
   describe('POST /api/marketplace/plugins/[id]/approve', () => {
-    it('should return 401 for unauthenticated requests', async () => {
+    it('should return 401 for unauthenticated requests', { timeout: 6000 }, async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/marketplace/plugins/1/approve`, {
           method: 'POST',
@@ -159,7 +159,7 @@ describe('Plugin Submission System', () => {
         // Server not running - verify endpoint structure instead
         expect(typeof `${API_BASE_URL}/api/marketplace/plugins/[id]/approve`).toBe('string');
       }
-    }, { timeout: 6000 });
+    });
 
     it('should return 403 for non-admin users', async () => {
       // Tests authorization check
@@ -185,7 +185,7 @@ describe('Plugin Submission System', () => {
   });
 
   describe('POST /api/marketplace/plugins/[id]/reject', () => {
-    it('should return 401 for unauthenticated requests', async () => {
+    it('should return 401 for unauthenticated requests', { timeout: 6000 }, async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/marketplace/plugins/1/reject`, {
           method: 'POST',
@@ -199,7 +199,7 @@ describe('Plugin Submission System', () => {
         // Server not running - verify endpoint structure instead
         expect(typeof `${API_BASE_URL}/api/marketplace/plugins/[id]/reject`).toBe('string');
       }
-    }, { timeout: 6000 });
+    });
 
     it('should require rejection reason in request body', () => {
       const payloadWithReason: { reason?: string } = { reason: 'Security concerns' };
@@ -211,7 +211,7 @@ describe('Plugin Submission System', () => {
   });
 
   describe('GET /api/marketplace/plugins/my-plugins', () => {
-    it('should return 401 for unauthenticated requests', async () => {
+    it('should return 401 for unauthenticated requests', { timeout: 6000 }, async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/marketplace/plugins/my-plugins`, {
           method: 'GET',
@@ -223,7 +223,7 @@ describe('Plugin Submission System', () => {
         // Server not running - verify endpoint structure instead
         expect(typeof `${API_BASE_URL}/api/marketplace/plugins/my-plugins`).toBe('string');
       }
-    }, { timeout: 6000 });
+    });
 
     it('should support status filtering query params', () => {
       const statusOptions = ['pending', 'approved', 'rejected', 'all'];
@@ -243,7 +243,7 @@ describe('Plugin Submission System', () => {
   });
 
   describe('GET /api/marketplace/plugins (with approval filtering)', () => {
-    it('should return 401 for unauthenticated requests', async () => {
+    it('should return 401 for unauthenticated requests', { timeout: 6000 }, async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/marketplace/plugins`, {
           method: 'GET',
@@ -255,7 +255,7 @@ describe('Plugin Submission System', () => {
         // Server not running - verify endpoint structure instead
         expect(typeof `${API_BASE_URL}/api/marketplace/plugins`).toBe('string');
       }
-    }, { timeout: 6000 });
+    });
 
     it('should filter by approval status for regular users', () => {
       // Regular users should only see approved plugins

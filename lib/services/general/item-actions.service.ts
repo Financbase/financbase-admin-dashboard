@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
 import { and, desc, eq, sql } from "drizzle-orm";
 import { CheckCircle, MessageCircle, Trash2, XCircle } from "lucide-react";
 import { getDbOrThrow } from "../db";

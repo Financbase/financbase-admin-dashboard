@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
 import { getDbOrThrow } from "@/lib/db";
 import { alerts } from "@/lib/db/schemas/alerts.schema";
 import type { Alert, NewAlert } from "@/lib/db/schemas/alerts.schema";

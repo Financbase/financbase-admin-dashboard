@@ -17,7 +17,17 @@ export default function FeedbackWidgetDemo() {
 		<div className="flex min-h-[350px] w-full items-center justify-center rounded-lg border border-dashed bg-background p-8">
 			<Button onClick={() => setIsOpen(true)}>Leave Feedback</Button>
 
-			{/* Required for toast notifications */}
+			{/* Required for toast notifications */
+
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+}
 			<Toaster richColors />
 
 			{/* AnimatePresence handles the exit animation */}

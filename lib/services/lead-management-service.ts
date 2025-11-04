@@ -3,6 +3,16 @@
  * Business logic for lead tracking, conversion pipeline, and CRM functionality
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { db } from '@/lib/db';
 import { leads, type Lead } from '@/lib/db/schemas/leads.schema';
 import { leadActivities, type LeadActivity } from '@/lib/db/schemas/lead-activities.schema';

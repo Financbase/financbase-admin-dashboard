@@ -151,8 +151,8 @@ function checkUrl(url) {
         },
       };
       
-      // Security: HTTP is intentional for localhost testing/development
-      // This script tests external links and may use HTTP for localhost connections
+      // Security: HTTP is only used for localhost/testing URLs (http://localhost, http://127.0.0.1)
+      // All external URLs should use HTTPS. This script automatically uses HTTPS when URL protocol is https:
       const req = client.request(options, (res) => {
         pendingRequests--;
         const status = res.statusCode;

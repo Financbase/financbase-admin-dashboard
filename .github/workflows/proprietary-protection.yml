@@ -1,0 +1,206 @@
+name: Proprietary Code Protection
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+  schedule:
+    # Run protection checks daily
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8'
+
+jobs:
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for secret scanning
+
+      - name: Run Gitleaks (Secret Detection)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          config-path: .gitleaks.toml
+          no-git: false
+          verbose: true
+          redact: true
+
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "🔍 Scanning for potential secrets..."
+          
+          # Check for common secret patterns
+          if grep -r -E "(api[_-]?key|secret[_-]?key|access[_-]?token|private[_-]?key|password|credential)" \
+            --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist \
+            -i | grep -v "\.test\." | grep -v "\.spec\." | grep -v "//.*example" | grep -v "//.*test"; then
+            echo "❌ Potential secrets found in code!"
+            exit 1
+          else
+            echo "✅ No obvious secrets found in code"
+          fi
+
+      - name: Upload secret scan results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: secret-scan-results
+          path: |
+            gitleaks-report.json
+            trufflehog-report.json
+          retention-days: 30
+
+  copyright-check:
+    name: Copyright Header Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check copyright headers
+        run: |
+          npm run copyright:check
+        continue-on-error: true
+
+  license-compliance:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify LICENSE file exists
+        run: |
+          if [ ! -f "LICENSE" ]; then
+            echo "❌ LICENSE file is missing!"
+            exit 1
+          else
+            echo "✅ LICENSE file found"
+          fi
+
+      - name: Check for proprietary license notice
+        run: |
+          if grep -q "PROPRIETARY\|All Rights Reserved\|Copyright" LICENSE; then
+            echo "✅ Proprietary license properly configured"
+          else
+            echo "⚠️  LICENSE file may not be proprietary"
+          fi
+
+      - name: Verify package.json private flag
+        run: |
+          if grep -q '"private": true' package.json; then
+            echo "✅ Package marked as private"
+          else
+            echo "❌ Package is not marked as private!"
+            exit 1
+          fi
+
+  repository-settings-check:
+    name: Repository Settings Verification
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check repository visibility
+        run: |
+          echo "🔍 Verifying repository settings..."
+          echo "Note: Repository visibility must be set to 'Private' in GitHub settings"
+          echo "This check verifies files are configured correctly for private repository"
+
+      - name: Verify SECURITY.md exists
+        run: |
+          if [ ! -f "SECURITY.md" ]; then
+            echo "⚠️  SECURITY.md file is missing"
+          else
+            echo "✅ SECURITY.md found"
+          fi
+
+      - name: Verify CODEOWNERS exists
+        run: |
+          if [ ! -f ".github/CODEOWNERS" ]; then
+            echo "⚠️  CODEOWNERS file is missing"
+          else
+            echo "✅ CODEOWNERS file found"
+          fi
+
+      - name: Verify pull request template
+        run: |
+          if [ ! -f ".github/pull_request_template.md" ]; then
+            echo "⚠️  Pull request template is missing"
+          else
+            echo "✅ Pull request template found"
+          fi
+
+  file-exclusion-check:
+    name: Sensitive File Exclusion Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for sensitive files in repository
+        run: |
+          echo "🔍 Checking for sensitive files..."
+          
+          # Check for common sensitive file patterns
+          SENSITIVE_FILES=(
+            "*.key"
+            "*.pem"
+            "*.p12"
+            ".env"
+            "secrets.json"
+            "credentials.json"
+            "*.db"
+            "*.sqlite"
+          )
+          
+          FOUND_SENSITIVE=false
+          
+          for pattern in "${SENSITIVE_FILES[@]}"; do
+            if find . -name "$pattern" -not -path "./node_modules/*" -not -path "./.git/*" | grep -q .; then
+              echo "⚠️  Found sensitive file pattern: $pattern"
+              find . -name "$pattern" -not -path "./node_modules/*" -not -path "./.git/*"
+              FOUND_SENSITIVE=true
+            fi
+          done
+          
+          if [ "$FOUND_SENSITIVE" = true ]; then
+            echo "❌ Sensitive files detected in repository!"
+            echo "Please ensure these files are in .gitignore"
+            exit 1
+          else
+            echo "✅ No sensitive files found in tracked files"
+          fi
+
+      - name: Verify .gitignore includes sensitive patterns
+        run: |
+          if grep -q "# PROPRIETARY CODE PROTECTION" .gitignore; then
+            echo "✅ .gitignore includes proprietary protection section"
+          else
+            echo "⚠️  .gitignore may not have proprietary protection patterns"
+          fi
+

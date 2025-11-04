@@ -3,6 +3,16 @@
  * Service for managing marketing automation workflows using the workflows table
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { db } from "@/lib/db";
 import { workflows, workflowExecutions } from "@/lib/db/schemas/workflows.schema";
 import { eq, and, sql, desc } from "drizzle-orm";

@@ -18,3 +18,32 @@ ignore:
 # 3. Static analysis tools can't always track validation through function calls
 # All user-controlled inputs are properly sanitized before use.
 
+# False Positives Documented (To ignore, run: snyk ignore --id=<ISSUE_ID>)
+# 
+# XSS False Positives (URL validation protects these):
+# - components/core/enhanced-notifications-panel.tsx:194 (Open Redirect)
+#   Reason: Uses validateSafeUrl() which validates URLs before redirect
+# - app/(dashboard)/alerts/page.tsx:363 (XSS)
+#   Reason: Uses validateSafeUrl() before setting href attribute
+# - components/analytics/report-builder.tsx:307 (XSS)
+#   Reason: Uses blob URLs from createObjectURL() which are browser-generated and safe
+# - components/settings/privacy-settings-manager.tsx:117 (XSS)
+#   Reason: Uses blob URLs from createObjectURL() which are browser-generated and safe
+# - components/core/ui/layout/image-gallery.tsx:125 (XSS)
+#   Reason: Uses blob URLs from createObjectURL() which are browser-generated and safe
+# - components/security/mfa-settings.tsx:309 (XSS)
+#   Reason: QR code URL from trusted MFA service (otplib)
+# - app/(dashboard)/editor/page.tsx:357 (XSS)
+#   Reason: Script src uses validated blob URLs
+#
+# HTTP Usage in Test Scripts (Low Risk):
+# - scripts/check-external-links.js:156
+#   Reason: Development/test script, uses HTTPS when URL protocol is https:
+# - scripts/test-fixed-routes.js:36
+#   Reason: Test script for localhost, supports HTTPS via BASE_URL env var
+# - scripts/test-new-routes.js:34
+#   Reason: Test script for localhost, supports HTTPS via BASE_URL env var
+#
+# To add ignore rules, run: snyk code test --json to get issue IDs, then:
+# snyk ignore --id=<ISSUE_ID> --reason="<reason>" --expiry=<date>
+

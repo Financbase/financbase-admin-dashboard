@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
 import { TrendingUp, TrendingUp, TrendingUp, TrendingDown, PiggyBank, Users, XCircle, ArrowUp, MessageCircle, Bot, Workflow } from "lucide-react";
 import type { ProfitabilityPrediction } from './ai-types';
 import { FinancialAIService } from './financial-ai-service';

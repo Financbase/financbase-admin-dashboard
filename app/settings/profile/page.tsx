@@ -3,6 +3,16 @@
  * Integrates with Clerk for user profile management and custom avatar upload
  */
 
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
+
 import { currentUser } from '@clerk/nextjs/server';
 import { UserProfile } from '@clerk/nextjs';
 import { AvatarUpload } from '@/components/core/ui/layout/avatar-upload';

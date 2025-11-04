@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
 import { FeatureFlagsTable } from '@/components/admin/feature-flags-table';
 import { checkPermission } from '@/lib/auth/financbase-rbac';
 import { FINANCIAL_PERMISSIONS } from '@/types/auth';

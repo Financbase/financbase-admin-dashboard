@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
 "use client";
 
 import React, { useState } from 'react';
@@ -42,54 +51,79 @@ export default function BuyerDashboard() {
   const [monthlyDebt, setMonthlyDebt] = useState(500);
   const [downPaymentPercent, setDownPaymentPercent] = useState(20);
 
-  // Mock data for now - will be replaced with actual API calls
-  const stats: BuyerStats = {
-    preApprovedAmount: 500000,
-    monthlyBudget: 2500,
-    downPaymentSaved: 75000,
-    savedProperties: 12,
-    propertiesViewed: 8,
-    offersSubmitted: 2,
+  // Fetch buyer stats from API
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['buyer-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/real-estate/buyer/stats');
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      const data = await response.json();
+      return data.stats;
+    },
+  });
+
+  // Fetch saved properties from API
+  const { data: propertiesData, isLoading: propertiesLoading } = useQuery({
+    queryKey: ['saved-properties'],
+    queryFn: async () => {
+      const response = await fetch('/api/real-estate/buyer/saved-properties?limit=50');
+      if (!response.ok) throw new Error('Failed to fetch saved properties');
+      const data = await response.json();
+      return data;
+    },
+  });
+
+  // Helper function to calculate monthly payment
+  const calculateMonthlyPayment = (price: number, downPaymentPercent: number): number => {
+    const loanAmount = price * (1 - downPaymentPercent / 100);
+    const monthlyRate = 0.07 / 12; // 7% annual rate
+    const termMonths = 30 * 12;
+    
+    if (monthlyRate === 0) return loanAmount / termMonths;
+    
+    const monthlyPayment = loanAmount * 
+      (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) /
+      (Math.pow(1 + monthlyRate, termMonths) - 1);
+    
+    return Math.round(monthlyPayment);
   };
 
-  const savedProperties: PropertyCardData[] = [
-    {
-      id: '1',
-      name: 'Charming Family Home',
-      address: '123 Oak Street',
-      city: 'Springfield',
-      state: 'IL',
-      zipCode: '62701',
-      price: 365000,
-      bedrooms: 3,
-      bathrooms: 2,
-      squareFootage: 1800,
-      propertyType: 'single_family',
-      status: 'active',
-      monthlyPayment: 1943,
-      savedDate: '2024-01-09',
-      notes: 'Great neighborhood, good schools',
-      rating: 4.5,
-    },
-    {
-      id: '2',
-      name: 'Modern Downtown Condo',
-      address: '456 Main Street',
-      city: 'Springfield',
-      state: 'IL',
-      zipCode: '62701',
-      price: 295000,
-      bedrooms: 2,
-      bathrooms: 2,
-      squareFootage: 1200,
-      propertyType: 'condo',
-      status: 'active',
-      monthlyPayment: 1570,
-      savedDate: '2024-01-07',
-      notes: 'Close to work, modern amenities',
-      rating: 4.2,
-    },
-  ];
+  // Map API stats to component format
+  const stats: BuyerStats = statsData ? {
+    preApprovedAmount: statsData.preApprovedAmount || 0,
+    monthlyBudget: statsData.monthlyBudget || 0,
+    downPaymentSaved: statsData.downPaymentSaved || 0,
+    savedProperties: statsData.savedProperties || 0,
+    propertiesViewed: statsData.viewedProperties || 0,
+    offersSubmitted: statsData.offersSubmitted || 0,
+  } : {
+    preApprovedAmount: 0,
+    monthlyBudget: 0,
+    downPaymentSaved: 0,
+    savedProperties: 0,
+    propertiesViewed: 0,
+    offersSubmitted: 0,
+  };
+
+  // Map API properties to component format
+  const savedProperties: PropertyCardData[] = propertiesData?.savedProperties?.map((prop: any) => ({
+    id: prop.id || prop.propertyId,
+    name: prop.name,
+    address: prop.address,
+    city: prop.city,
+    state: prop.state,
+    zipCode: prop.zipCode,
+    price: prop.purchasePrice || 0,
+    bedrooms: prop.bedrooms || 0,
+    bathrooms: prop.bathrooms || 0,
+    squareFootage: prop.squareFootage || 0,
+    propertyType: prop.propertyType,
+    status: prop.status === 'saved' ? 'active' : prop.status,
+    monthlyPayment: prop.purchasePrice ? calculateMonthlyPayment(prop.purchasePrice, downPaymentPercent) : undefined,
+    savedDate: prop.savedDate,
+    notes: prop.notes || undefined,
+    rating: prop.rating || undefined,
+  })) || [];
 
   const kpiMetrics: MetricCardData[] = [
     {
@@ -182,11 +216,24 @@ export default function BuyerDashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpiMetrics.map((metric, index) => (
-          <MetricCard key={index} metric={metric} />
-        ))}
-      </div>
+      {statsLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {kpiMetrics.map((metric, index) => (
+            <MetricCard key={index} metric={metric} />
+          ))}
+        </div>
+      )}
 
       {/* Activity Overview */}
       <div className="grid gap-4 md:grid-cols-2">
@@ -275,24 +322,44 @@ export default function BuyerDashboard() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {savedProperties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              variant="detailed"
-              onView={(property) => {
-                console.log('View property:', property.id);
-              }}
-              onSchedule={(property) => {
-                console.log('Schedule tour:', property.id);
-              }}
-              onSave={(property) => {
-                console.log('Save property:', property.id);
-              }}
-            />
-          ))}
-        </div>
+        {propertiesLoading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-6">
+                  <div className="h-48 bg-gray-200 rounded mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : savedProperties.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <p className="text-muted-foreground">No saved properties yet. Start searching to save your favorites!</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {savedProperties.map((property) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                variant="detailed"
+                onView={(property) => {
+                  console.log('View property:', property.id);
+                }}
+                onSchedule={(property) => {
+                  console.log('Schedule tour:', property.id);
+                }}
+                onSave={(property) => {
+                  console.log('Save property:', property.id);
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}

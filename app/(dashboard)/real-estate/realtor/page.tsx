@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2025 Financbase. All Rights Reserved.
+ * 
+ * PROPRIETARY SOFTWARE - Unauthorized copying, modification, distribution,
+ * or use of this software, via any medium, is strictly prohibited.
+ * 
+ * @see LICENSE file in the root directory for full license terms.
+ */
+
 "use client";
 
 import React from 'react';
@@ -52,87 +61,106 @@ interface Lead {
 export default function RealtorDashboard() {
   const { role, updateRole } = useRealEstateRole();
 
-  // Mock data for now - will be replaced with actual API calls
-  const stats: RealtorStats = {
-    activeListings: 12,
-    totalCommissions: 125000,
-    monthlyCommissions: 8500,
-    averageDaysOnMarket: 45,
-    conversionRate: 15.2,
-    totalLeads: 48,
-    newLeads: 8,
-    scheduledShowings: 6,
-    closedDeals: 3,
+  // Fetch realtor stats from API
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['realtor-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/real-estate/realtor/stats');
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      const data = await response.json();
+      return data.stats;
+    },
+  });
+
+  // Fetch leads from API
+  const { data: leadsData, isLoading: leadsLoading } = useQuery({
+    queryKey: ['realtor-leads'],
+    queryFn: async () => {
+      const response = await fetch('/api/real-estate/realtor/leads?limit=50');
+      if (!response.ok) throw new Error('Failed to fetch leads');
+      const data = await response.json();
+      return data;
+    },
+  });
+
+  // Fetch listings from API
+  const { data: listingsData, isLoading: listingsLoading } = useQuery({
+    queryKey: ['realtor-listings'],
+    queryFn: async () => {
+      const response = await fetch('/api/real-estate/realtor/listings?limit=50');
+      if (!response.ok) throw new Error('Failed to fetch listings');
+      const data = await response.json();
+      return data;
+    },
+  });
+
+  // Map API stats to component format
+  const stats: RealtorStats = statsData ? {
+    activeListings: statsData.activeListings || 0,
+    totalCommissions: statsData.totalCommissions || 0,
+    monthlyCommissions: statsData.monthlyCommissions || 0,
+    averageDaysOnMarket: Math.round(statsData.averageDaysOnMarket || 0),
+    conversionRate: statsData.conversionRate || 0,
+    totalLeads: statsData.totalLeads || 0,
+    newLeads: statsData.newLeads || 0,
+    scheduledShowings: statsData.scheduledShowings || 0,
+    closedDeals: statsData.closedDeals || 0,
+  } : {
+    activeListings: 0,
+    totalCommissions: 0,
+    monthlyCommissions: 0,
+    averageDaysOnMarket: 0,
+    conversionRate: 0,
+    totalLeads: 0,
+    newLeads: 0,
+    scheduledShowings: 0,
+    closedDeals: 0,
   };
 
-  const leads: Lead[] = [
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      email: 'sarah.j@email.com',
-      phone: '(555) 123-4567',
-      status: 'new',
-      propertyInterest: '3BR Single Family',
-      budget: 450000,
-      lastContact: '2024-01-15',
-      source: 'Website',
-    },
-    {
-      id: '2',
-      name: 'Mike Chen',
-      email: 'mike.chen@email.com',
-      phone: '(555) 987-6543',
-      status: 'viewing',
-      propertyInterest: '2BR Condo',
-      budget: 320000,
-      lastContact: '2024-01-14',
-      source: 'Referral',
-    },
-    {
-      id: '3',
-      name: 'Emily Rodriguez',
-      email: 'emily.r@email.com',
-      phone: '(555) 456-7890',
-      status: 'offer',
-      propertyInterest: '4BR Single Family',
-      budget: 550000,
-      lastContact: '2024-01-13',
-      source: 'Social Media',
-    },
-  ];
+  // Map API leads to component format
+  const leads: Lead[] = leadsData?.leads?.map((lead: any) => ({
+    id: String(lead.id),
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone || '',
+    status: lead.status || 'new',
+    propertyInterest: lead.propertyInterest || undefined,
+    budget: lead.budget || undefined,
+    lastContact: typeof lead.lastContact === 'string' ? lead.lastContact : (lead.lastContact?.toISOString?.().split('T')[0] || new Date().toISOString().split('T')[0]),
+    source: lead.source || 'Unknown',
+  })) || [];
 
-  const listings: PropertyCardData[] = [
-    {
-      id: '1',
-      name: 'Modern Downtown Condo',
-      address: '123 Main St',
-      city: 'Springfield',
-      state: 'IL',
-      zipCode: '62701',
-      price: 295000,
-      bedrooms: 2,
-      bathrooms: 2,
-      squareFootage: 1200,
-      propertyType: 'condo',
-      status: 'active',
-      monthlyPayment: 1570,
-    },
-    {
-      id: '2',
-      name: 'Charming Family Home',
-      address: '456 Oak Ave',
-      city: 'Springfield',
-      state: 'IL',
-      zipCode: '62702',
-      price: 365000,
-      bedrooms: 3,
-      bathrooms: 2,
-      squareFootage: 1800,
-      propertyType: 'single_family',
-      status: 'active',
-      monthlyPayment: 1943,
-    },
-  ];
+  // Helper function to calculate monthly payment
+  const calculateMonthlyPayment = (price: number): number => {
+    const loanAmount = price * 0.8; // 20% down payment
+    const monthlyRate = 0.07 / 12; // 7% annual rate
+    const termMonths = 30 * 12;
+    
+    if (monthlyRate === 0) return loanAmount / termMonths;
+    
+    const monthlyPayment = loanAmount * 
+      (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) /
+      (Math.pow(1 + monthlyRate, termMonths) - 1);
+    
+    return Math.round(monthlyPayment);
+  };
+
+  // Map API listings to component format
+  const listings: PropertyCardData[] = listingsData?.listings?.map((listing: any) => ({
+    id: String(listing.id),
+    name: listing.name,
+    address: listing.address,
+    city: listing.city,
+    state: listing.state,
+    zipCode: listing.zipCode,
+    price: listing.purchasePrice || 0,
+    bedrooms: listing.bedrooms || 0,
+    bathrooms: listing.bathrooms || 0,
+    squareFootage: listing.squareFootage || 0,
+    propertyType: listing.propertyType,
+    status: listing.status === 'active' ? 'active' : listing.status || 'active',
+    monthlyPayment: listing.purchasePrice ? calculateMonthlyPayment(listing.purchasePrice) : undefined,
+  })) || [];
 
   const kpiMetrics: MetricCardData[] = [
     {
@@ -238,11 +266,24 @@ export default function RealtorDashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpiMetrics.map((metric, index) => (
-          <MetricCard key={index} metric={metric} />
-        ))}
-      </div>
+      {statsLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {kpiMetrics.map((metric, index) => (
+            <MetricCard key={index} metric={metric} />
+          ))}
+        </div>
+      )}
 
       {/* Activity Overview */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -262,21 +303,41 @@ export default function RealtorDashboard() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {listings.map((listing) => (
-            <PropertyCard
-              key={listing.id}
-              property={listing}
-              variant="detailed"
-              onView={(property) => {
-                console.log('View listing:', property.id);
-              }}
-              onEdit={(property) => {
-                console.log('Edit listing:', property.id);
-              }}
-            />
-          ))}
-        </div>
+        {listingsLoading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-6">
+                  <div className="h-48 bg-gray-200 rounded mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : listings.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <p className="text-muted-foreground">No active listings yet. Create your first listing to get started!</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {listings.map((listing) => (
+              <PropertyCard
+                key={listing.id}
+                property={listing}
+                variant="detailed"
+                onView={(property) => {
+                  console.log('View listing:', property.id);
+                }}
+                onEdit={(property) => {
+                  console.log('Edit listing:', property.id);
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Lead Pipeline */}
@@ -285,40 +346,55 @@ export default function RealtorDashboard() {
           <CardTitle>Lead Pipeline</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {leads.map((lead) => (
-              <div key={lead.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold">{lead.name}</h3>
-                    <Badge className={getStatusColor(lead.status)}>
-                      {lead.status}
-                    </Badge>
+          {leadsLoading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="animate-pulse p-4 border rounded-lg">
+                  <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                </div>
+              ))}
+            </div>
+          ) : leads.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No leads yet. Start connecting with potential clients!</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {leads.map((lead) => (
+                <div key={lead.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold">{lead.name}</h3>
+                      <Badge className={getStatusColor(lead.status)}>
+                        {lead.status}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                      <div>
+                        <p>{lead.email}</p>
+                        <p>{lead.phone}</p>
+                      </div>
+                      <div>
+                        <p>Interest: {lead.propertyInterest || 'Not specified'}</p>
+                        <p>Budget: {lead.budget ? formatCurrency(lead.budget) : 'Not specified'}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-                    <div>
-                      <p>{lead.email}</p>
-                      <p>{lead.phone}</p>
-                    </div>
-                    <div>
-                      <p>Interest: {lead.propertyInterest}</p>
-                      <p>Budget: {lead.budget ? formatCurrency(lead.budget) : 'Not specified'}</p>
-                    </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Phone className="h-4 w-4 mr-1" />
+                      Call
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Mail className="h-4 w-4 mr-1" />
+                      Email
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <Phone className="h-4 w-4 mr-1" />
-                    Call
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Mail className="h-4 w-4 mr-1" />
-                    Email
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
