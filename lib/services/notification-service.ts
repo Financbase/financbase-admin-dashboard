@@ -30,38 +30,50 @@ export class NotificationService {
  * Create a new notification
  */
 	static async create(input: CreateNotificationInput) {
-	try {
+		try {
 			const notification = await db
 				.insert(notifications)
 				.values({
-			userId: input.userId,
-			type: input.type,
+					userId: input.userId,
+					type: input.type,
 					category: input.category || 'general',
-			priority: input.priority || 'normal',
-			title: input.title,
-			message: input.message,
+					priority: input.priority || 'normal',
+					title: input.title,
+					message: input.message,
 					data: input.data || {},
-			actionUrl: input.actionUrl,
-			expiresAt: input.expiresAt,
+					actionUrl: input.actionUrl,
+					expiresAt: input.expiresAt,
 				})
 				.returning();
 
 			const createdNotification = notification[0];
 
-			// Send real-time update via PartyKit
-			await this.sendRealTimeUpdate(input.userId, createdNotification);
+			if (!createdNotification) {
+				throw new Error('Failed to create notification: no notification returned');
+			}
 
-			// Check if user wants email notifications
-			await this.checkEmailNotification(input.userId, createdNotification);
+			// Send real-time update via PartyKit (non-blocking)
+			this.sendRealTimeUpdate(input.userId, createdNotification).catch((error) => {
+				console.error('[NotificationService] Error sending real-time update:', error);
+			});
+
+			// Check if user wants email notifications (non-blocking)
+			this.checkEmailNotification(input.userId, createdNotification).catch((error) => {
+				console.error('[NotificationService] Error checking email notification:', error);
+			});
 
 			return createdNotification;
-	} catch (error) {
-		console.error('Error creating notification:', error);
-			throw new Error('Failed to create notification');
+		} catch (error) {
+			console.error('[NotificationService] Error creating notification:', {
+				input: { userId: input.userId, type: input.type, title: input.title },
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+			throw new Error(`Failed to create notification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		}
 	}
-}
 
-/**
+	/**
 	 * Get notifications for a user
 	 */
 	static async getForUser(userId: string, filters: NotificationFilters = {}) {
@@ -74,30 +86,38 @@ export class NotificationService {
 				priority,
 			} = filters;
 
-			let query = db
+			// Build where conditions array
+			const conditions = [eq(notifications.userId, userId)];
+			
+			if (unreadOnly) {
+				conditions.push(eq(notifications.isRead, false));
+			}
+			
+			if (type) {
+				conditions.push(eq(notifications.type, type));
+			}
+			
+			if (priority) {
+				conditions.push(eq(notifications.priority, priority));
+			}
+
+			const result = await db
 				.select()
 				.from(notifications)
-				.where(eq(notifications.userId, userId))
+				.where(conditions.length > 1 ? and(...conditions) : conditions[0])
 				.orderBy(desc(notifications.createdAt))
 				.limit(limit)
 				.offset(offset);
 
-			if (unreadOnly) {
-				query = query.where(eq(notifications.read, false));
-			}
-
-			if (type) {
-				query = query.where(eq(notifications.type, type));
-			}
-
-			if (priority) {
-				query = query.where(eq(notifications.priority, priority));
-			}
-
-			return await query;
+			return result;
 		} catch (error) {
-			console.error('Error fetching notifications:', error);
-			throw new Error('Failed to fetch notifications');
+			console.error('[NotificationService] Error fetching notifications:', {
+				userId,
+				filters,
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+			throw new Error(`Failed to fetch notifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 	}
 
@@ -107,72 +127,102 @@ export class NotificationService {
 	static async getUnreadCount(userId: string): Promise<number> {
 		try {
 			const result = await db
-				.select({ count: sql<number>`count(*)` })
+				.select({ count: sql<number>`count(*)::int` })
 				.from(notifications)
-				.where(and(eq(notifications.userId, userId), eq(notifications.read, false)));
+				.where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
 
-			return result[0]?.count || 0;
+			// Handle both number and bigint return types
+			const count = result[0]?.count;
+			if (count === undefined || count === null) {
+				return 0;
+			}
+			// Convert bigint to number if needed
+			return typeof count === 'bigint' ? Number(count) : count;
 		} catch (error) {
-			console.error('Error getting unread count:', error);
+			console.error('[NotificationService] Error getting unread count:', {
+				userId,
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
 			return 0;
 		}
 	}
 
 	/**
 	 * Mark a notification as read
+	 * @param notificationId - The notification ID (integer, serial type)
+	 * @param userId - The user ID
 	 */
 	static async markAsRead(notificationId: number, userId: string): Promise<boolean> {
 		try {
 			const result = await db
 				.update(notifications)
-			.set({
-				read: true,
-					updatedAt: sql`NOW()`,
-			})
-				.where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)))
-			.returning();
-
-			return result.length > 0;
-		} catch (error) {
-			console.error('Error marking notification as read:', error);
-			return false;
-		}
-}
-
-/**
- * Mark all notifications as read for a user
- */
-	static async markAllAsRead(userId: string): Promise<boolean> {
-		try {
-			const result = await db
-				.update(notifications)
-			.set({
-				read: true,
+				.set({
+					isRead: true,
+					readAt: sql`NOW()`,
 					updatedAt: sql`NOW()`,
 				})
-				.where(and(eq(notifications.userId, userId), eq(notifications.read, false)))
+				.where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)))
 				.returning();
 
 			return result.length > 0;
 		} catch (error) {
-			console.error('Error marking all notifications as read:', error);
+			console.error('[NotificationService] Error marking notification as read:', {
+				notificationId,
+				userId,
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+			return false;
+		}
+	}
+
+	/**
+	 * Mark all notifications as read for a user
+	 */
+	static async markAllAsRead(userId: string): Promise<boolean> {
+		try {
+			const result = await db
+				.update(notifications)
+				.set({
+					isRead: true,
+					readAt: sql`NOW()`,
+					updatedAt: sql`NOW()`,
+				})
+				.where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)))
+				.returning();
+
+			return result.length > 0;
+		} catch (error) {
+			console.error('[NotificationService] Error marking all notifications as read:', {
+				userId,
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
 			return false;
 		}
 	}
 
 	/**
 	 * Delete a notification
+	 * @param notificationId - The notification ID (integer, serial type)
+	 * @param userId - The user ID
 	 */
 	static async delete(notificationId: number, userId: string): Promise<boolean> {
 		try {
 			const result = await db
 				.delete(notifications)
 				.where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)))
-			.returning();
+				.returning();
 
 			return result.length > 0;
 		} catch (error) {
-			console.error('Error deleting notification:', error);
+			console.error('[NotificationService] Error deleting notification:', {
+				notificationId,
+				userId,
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
 			return false;
 		}
 	}

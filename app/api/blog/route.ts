@@ -61,6 +61,7 @@ export async function GET(req: NextRequest) {
  * Create a new blog post (admin only)
  */
 export async function POST(req: NextRequest) {
+	const requestId = generateRequestId();
 	return withRLS(async (clerkUserId) => {
 		// Check if user is admin
 		const isAdmin = await checkAdminStatus();
@@ -68,8 +69,20 @@ export async function POST(req: NextRequest) {
 			return ApiErrorHandler.forbidden('Only administrators can create blog posts');
 		}
 
+		// Parse JSON body with proper error handling
+		let body;
 		try {
-			const body = await req.json();
+			body = await req.json();
+		} catch (error) {
+			// Handle JSON parse errors (malformed JSON)
+			if (error instanceof SyntaxError || error instanceof TypeError) {
+				return ApiErrorHandler.badRequest('Invalid JSON in request body');
+			}
+			// Re-throw other errors to be handled by outer catch
+			throw error;
+		}
+
+		try {
 			const validatedData = createBlogPostSchema.parse({
 				...body,
 				userId: clerkUserId, // Ensure userId comes from auth, not request body
@@ -83,7 +96,6 @@ export async function POST(req: NextRequest) {
 				data: newPost,
 			}, { status: 201 });
 		} catch (error) {
-			const requestId = generateRequestId();
 			return ApiErrorHandler.handle(error, requestId);
 		}
 	});

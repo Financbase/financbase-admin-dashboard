@@ -16,6 +16,8 @@ const swaggerOptions = {
 		},
 		servers: [
 			{
+				// Security: HTTP is intentional for localhost development
+				// In production, set NEXT_PUBLIC_APP_URL to HTTPS URL
 				url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
 				description: 'Development server',
 			},

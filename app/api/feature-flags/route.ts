@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { FeatureFlagsService } from '@/lib/services/feature-flags-service';
 import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { isAdmin } from '@/lib/auth/financbase-rbac';
 import { z } from 'zod';
 
 const createFlagSchema = z.object({
@@ -30,10 +31,11 @@ export async function GET(request: NextRequest) {
       return ApiErrorHandler.unauthorized();
     }
 
-    // TODO: Add admin role check
-    // if (!await isAdmin(userId)) {
-    //   return ApiErrorHandler.forbidden('Admin access required');
-    // }
+    // Check admin access
+    const adminStatus = await isAdmin();
+    if (!adminStatus) {
+      return ApiErrorHandler.forbidden('Admin access required');
+    }
 
     const flags = await FeatureFlagsService.getAllFlags();
 
@@ -53,10 +55,11 @@ export async function POST(request: NextRequest) {
       return ApiErrorHandler.unauthorized();
     }
 
-    // TODO: Add admin role check
-    // if (!await isAdmin(userId)) {
-    //   return ApiErrorHandler.forbidden('Admin access required');
-    // }
+    // Check admin access
+    const adminStatus = await isAdmin();
+    if (!adminStatus) {
+      return ApiErrorHandler.forbidden('Admin access required');
+    }
 
     const body = await request.json();
     const data = createFlagSchema.parse(body);

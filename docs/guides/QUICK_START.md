@@ -349,17 +349,20 @@ financbase-admin-dashboard/
 
 | Technology | Purpose | Status |
 |------------|---------|--------|
-| **Next.js 14** | Framework (App Router) | ✅ |
-| **TypeScript** | Type safety | ✅ |
-| **Clerk** | Authentication | ✅ |
-| **TanStack Query** | Data fetching | ✅ |
-| **Drizzle ORM** | Database ORM | ✅ |
-| **Neon PostgreSQL** | Database | ✅ |
+| **Next.js 15.4.7** | Framework (App Router) | ✅ |
+| **React 18.3.1** | UI Library (Server Components) | ✅ |
+| **TypeScript 5.9.3** | Type safety | ✅ |
+| **Clerk v6.34.1** | Authentication | ✅ |
+| **TanStack Query v5.90.5** | Data fetching & caching | ✅ |
+| **Drizzle ORM 0.36.4** | Database ORM | ✅ |
+| **Neon PostgreSQL** | Database (Serverless) | ✅ |
 | **shadcn/ui** | UI components | ✅ |
-| **Tailwind CSS** | Styling | ✅ |
-| **OpenAI** | AI assistant | ✅ |
-| **PartyKit** | Real-time (placeholder) | ⏳ |
-| **Resend** | Email delivery | ⏳ |
+| **Tailwind CSS 3.4.18** | Styling | ✅ |
+| **Multi-Provider AI** | OpenAI, Claude, Google AI | ✅ |
+| **PartyKit** | Real-time WebSocket | ✅ |
+
+> **📚 Want to understand the architecture in detail?**  
+> See **[Technical Deep Dive](../architecture/TECHNICAL_DEEP_DIVE.md)** for comprehensive architecture documentation with code references.
 
 ---
 

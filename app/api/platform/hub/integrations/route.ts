@@ -3,17 +3,19 @@ import { db } from '@/lib/db';
 import { integrations } from '@/lib/db/schemas';
 import { eq, and, desc, like, or, sql } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
-import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { isAdmin } from '@/lib/auth/financbase-rbac';
 
 /**
  * GET /api/platform/hub/integrations
  * Get available integrations for Platform Hub
  */
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -84,8 +86,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching Platform Hub integrations:', error);
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
@@ -94,16 +95,25 @@ export async function GET(request: NextRequest) {
  * Create a new integration (admin only)
  */
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    // TODO: Add admin role check
-    // For now, allow any authenticated user to create integrations
+    // Check admin access
+    const adminStatus = await isAdmin();
+    if (!adminStatus) {
+      return ApiErrorHandler.forbidden('Admin access required');
+    }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const {
       name,
       slug,
@@ -122,9 +132,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!name || !slug || !category) {
-      return NextResponse.json({ 
-        error: 'Name, slug, and category are required' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest('Name, slug, and category are required');
     }
 
     // Check if slug already exists
@@ -135,9 +143,7 @@ export async function POST(request: NextRequest) {
       .limit(1);
 
     if (existingIntegration.length > 0) {
-      return NextResponse.json({ 
-        error: 'Integration with this slug already exists' 
-      }, { status: 409 });
+      return ApiErrorHandler.conflict('Integration with this slug already exists');
     }
 
     // Create new integration
@@ -163,7 +169,6 @@ export async function POST(request: NextRequest) {
       message: 'Integration created successfully',
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating integration:', error);
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

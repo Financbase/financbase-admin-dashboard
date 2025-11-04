@@ -1,24 +1,19 @@
 import { ArrowLeft, Filter } from "lucide-react";
-import { useTheme } from "next-themes";
 import React from "react";
 import styled from "styled-components";
+import { useThemeManager } from "@/hooks/use-theme-manager";
 
 const Switch = () => {
-	const { theme, setTheme } = useTheme();
-	const [mounted, setMounted] = React.useState(false);
+	const { resolved, toggleTheme, isMounted } = useThemeManager();
 
-	React.useEffect(() => {
-		setMounted(true);
-	}, []);
-
-	if (!mounted) {
+	if (!isMounted) {
 		return null;
 	}
 
-	const isDark = theme === "dark";
+	const isDark = resolved === "dark";
 
 	const handleToggle = () => {
-		setTheme(isDark ? "light" : "dark");
+		toggleTheme();
 	};
 
 	return (

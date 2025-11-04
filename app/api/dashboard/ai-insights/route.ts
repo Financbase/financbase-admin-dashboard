@@ -2,10 +2,11 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 // import { headers } from 'next/headers'; // Temporarily disabled
-import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { aiInsightsResponseSchema } from '@/lib/validation-schemas';
 
 export async function GET() {
+  const requestId = generateRequestId();
   try {
     // TEMPORARILY DISABLED FOR TESTING
     // const headersList = await headers();
@@ -45,6 +46,6 @@ export async function GET() {
       insights: validatedInsights
     });
   } catch (error) {
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

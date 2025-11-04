@@ -14,7 +14,7 @@ Welcome to Financbase v2.0! This guide will help you get up and running with you
 
 ### 1. Create Your Account
 
-1. Visit [app.financbase.com](https://app.financbase.com)
+1. Visit the application (external: [app.financbase.com](https://app.financbase.com) - see [External Resources](../EXTERNAL_RESOURCES.md) for deployment status, or use `http://localhost:3000` for local development)
 2. Click "Sign Up" and choose your preferred method:
    - Email and password
    - Google account

@@ -4,24 +4,32 @@ import { integrationConnections } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { IntegrationSyncEngine } from '@/lib/services/integrations/integration-sync-engine';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const { id } = await params;
     const connectionId = parseInt(id);
     if (Number.isNaN(connectionId)) {
-      return NextResponse.json({ error: 'Invalid connection ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid connection ID');
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
+
     const { entityTypes, direction, filters, forceFullSync } = body;
 
     // Verify connection exists and belongs to user
@@ -35,59 +43,33 @@ export async function POST(
       .limit(1);
 
     if (connection.length === 0) {
-      return NextResponse.json({ error: 'Connection not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Connection not found');
     }
 
     if (!connection[0].isActive) {
-      return NextResponse.json({ error: 'Connection is not active' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Connection is not active');
     }
 
-    try {
-      // Start sync process
-      const syncId = await IntegrationSyncEngine.startSync(connectionId, userId, {
-        entityTypes,
-        direction,
-        filters,
-        forceFullSync,
-      });
+    // Start sync process
+    const syncId = await IntegrationSyncEngine.startSync(connectionId, userId, {
+      entityTypes,
+      direction,
+      filters,
+      forceFullSync,
+    });
 
-      return NextResponse.json({
-        success: true,
-        syncId,
-        message: 'Sync started successfully',
-      });
-    } catch (error) {
-      return NextResponse.json({
-        success: false,
-        error: 'Failed to start sync',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      }, { status: 500 });
-    }
+    return NextResponse.json({
+      success: true,
+      syncId,
+      message: 'Sync started successfully',
+    });
   } catch (error) {
-    console.error('Error starting sync:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    // Check if it's a database connection error
-    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Database connection error',
-          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
-          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-        },
-        { status: 503 }
+    if (error instanceof Error && (error.message.includes('DATABASE_URL') || error.message.includes('connection'))) {
+      return ApiErrorHandler.databaseError(
+        'Unable to connect to database. Please check your DATABASE_URL configuration.',
+        requestId
       );
     }
-    
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Failed to start sync',
-        message: 'An error occurred while starting the sync',
-        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

@@ -925,4 +925,4 @@ financbase plugin publish
 
 Plugin development for Financbase allows you to extend the platform's functionality and integrate with your specific business needs. Start with simple plugins and gradually add complexity as you become more familiar with the system.
 
-For more information, check out our [API documentation](../api/workflows.md) and [plugin examples](https://github.com/financbase/plugin-examples).
+For more information, check out our [API documentation](../api/workflows.md) and [plugin examples](https://github.com/financbase/plugin-examples) (see [External Resources](../EXTERNAL_RESOURCES.md) for repository status - repository not yet created).

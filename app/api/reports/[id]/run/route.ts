@@ -16,26 +16,25 @@ export async function POST(
 	_req: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id: idParam } = await params;
 	try {
 		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id: idParam } = await params;
 		const id = parseInt(idParam, 10);
+		if (Number.isNaN(id)) {
+			return ApiErrorHandler.badRequest('Invalid report ID');
+		}
+
 		const history = await ReportService.run(id, userId);
 
 		return NextResponse.json(history);
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error running report:', error);
-		return NextResponse.json(
-			{ error: 'Failed to run report' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 

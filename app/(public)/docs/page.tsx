@@ -221,9 +221,9 @@ function filterSections<T extends { title: string; description: string; items: A
 		.filter((section): section is T => section !== null);
 }
 
-export default async function DocsPage({ searchParams }: DocsPageProps) {
+export default async function DocsPage({ searchParams }: { searchParams: { search?: string } }) {
 	const data = await getDocsPageData();
-	const searchQuery = searchParams.search || "";
+	const searchQuery = searchParams?.search || "";
 
 	// Filter data based on search query
 	const filteredQuickLinks = filterItems(data.quickLinks, searchQuery);

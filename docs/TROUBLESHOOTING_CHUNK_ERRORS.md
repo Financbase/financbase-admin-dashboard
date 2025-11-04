@@ -39,6 +39,44 @@ Stale browser cache can:
 - Cache 404 responses as HTML
 - Prevent fresh chunk loading
 
+## Automatic Error Recovery
+
+The application now includes automatic chunk error recovery mechanisms:
+
+### Built-in Error Handling
+
+1. **Global Chunk Error Handler** (`lib/utils/chunk-error-handler.ts`)
+   - Automatically detects ChunkLoadError
+   - Implements retry with exponential backoff (3 attempts)
+   - Automatically reloads the page if recovery fails
+   - Handles both unhandled promise rejections and regular errors
+
+2. **Chunk Error Boundary** (`components/errors/chunk-error-boundary.tsx`)
+   - React error boundary specifically for chunk errors
+   - Displays user-friendly error messages
+   - Provides manual recovery options
+   - Automatically attempts recovery when enabled
+
+3. **Automatic Integration**
+   - Error handler is automatically set up in `app/providers.tsx`
+   - ChunkErrorBoundary wraps the application
+   - No manual intervention required in most cases
+
+### How It Works
+
+When a ChunkLoadError occurs:
+1. The global error handler catches it
+2. Attempts to retry loading the chunk (with delays)
+3. If retries fail, automatically reloads the page with cache busting
+4. If automatic recovery fails, the error boundary displays a user-friendly message
+
+### Manual Recovery Options
+
+If automatic recovery doesn't work, users can:
+- Click "Reload Page" to force a full page reload
+- Click "Try Again" to retry without reloading
+- Hard refresh the browser (Cmd/Ctrl + Shift + R)
+
 ## Solutions
 
 ### Solution 1: Clean Build & Restart (Recommended First Step)
@@ -188,10 +226,56 @@ If problems persist after trying all solutions:
 4. **Check for TypeScript Errors**: Run `npm run type-check`
 5. **Review Recent Changes**: Check git history for recent middleware/config changes
 
+## Implementation Details
+
+### Error Handler Configuration
+
+The chunk error handler is configured in `app/providers.tsx`:
+
+```typescript
+setupChunkErrorHandler({
+  maxRetries: 3,
+  initialDelay: 1000,
+  maxDelay: 10000,
+  autoReload: true,
+});
+```
+
+### Error Boundary Usage
+
+The ChunkErrorBoundary is automatically wrapping the application:
+
+```typescript
+<ChunkErrorBoundary autoRecover={true}>
+  <DashboardProvider>
+    {children}
+  </DashboardProvider>
+</ChunkErrorBoundary>
+```
+
+### Webpack Configuration
+
+Enhanced chunk loading in `next.config.mjs`:
+- Consistent chunk IDs for better loading
+- Named chunks in development for debugging
+- Deterministic chunks in production for stable hashes
+- Proper chunk loading global variable configuration
+
+### Middleware Exclusions
+
+The middleware (`middleware.ts`) now explicitly excludes:
+- All `/_next/` paths
+- Webpack chunks (`/_next/static/chunks/`)
+- All static file extensions
+- Webpack runtime files
+
 ## Related Files
 
-- `middleware.ts` - Authentication middleware
-- `next.config.mjs` - Next.js configuration
+- `lib/utils/chunk-error-handler.ts` - Chunk error handler utility
+- `components/errors/chunk-error-boundary.tsx` - React error boundary for chunks
+- `app/providers.tsx` - Error handler integration
+- `middleware.ts` - Authentication middleware with chunk exclusions
+- `next.config.mjs` - Next.js configuration with enhanced chunk loading
 - `package.json` - Dependencies and scripts
 - `.next/` - Build output directory (should be gitignored)
 

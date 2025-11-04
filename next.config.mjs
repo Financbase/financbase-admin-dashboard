@@ -115,7 +115,27 @@ const nextConfig = {
 			};
 		}
 
-		// Let Next.js handle chunk optimization - don't override
+		// Enhanced chunk loading configuration for better error handling
+		if (!isServer) {
+			// Configure chunk loading with better error handling
+			config.optimization = {
+				...config.optimization,
+				// Ensure consistent chunk IDs for better loading and cache busting
+				// 'named' in dev provides better debugging, 'deterministic' in prod for stable hashes
+				moduleIds: dev ? 'named' : 'deterministic',
+				chunkIds: dev ? 'named' : 'deterministic',
+			};
+
+			// Ensure output configuration exists for chunk loading
+			if (!config.output) {
+				config.output = {};
+			}
+			
+			// Set chunk loading global variable name for better error tracking
+			// This helps identify chunk loading errors in the console
+			config.output.chunkLoadingGlobal = 'webpackChunkLoad';
+		}
+
 		return config;
 	},
 	headers: async () => {

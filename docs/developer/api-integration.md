@@ -898,4 +898,4 @@ const webhook = await api.createWebhook({
 
 The Financbase API provides powerful tools for integrating with your business processes. Start with simple API calls and gradually add complexity as you become more familiar with the system.
 
-For more information, check out our [API documentation](../api/workflows.md) and [SDK documentation](https://github.com/financbase/sdk).
+For more information, check out our [API documentation](../api/workflows.md) and [SDK documentation](https://github.com/financbase/sdk) (see [External Resources](../EXTERNAL_RESOURCES.md) for repository status - repository not yet created).

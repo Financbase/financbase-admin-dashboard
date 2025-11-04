@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Palette, Globe, Calendar, BarChart3, Bell, Shield, Monitor, Moon, Sun, Laptop } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useThemeManager } from '@/hooks/use-theme-manager';
 
 interface UserPreferences {
 	id: string;
@@ -61,6 +62,7 @@ interface PreferencesData {
 }
 
 export function UserPreferencesManager() {
+	const { setTheme, mode } = useThemeManager();
 	const [data, setData] = useState<PreferencesData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
@@ -127,6 +129,16 @@ export function UserPreferencesManager() {
 	const updatePreference = async (key: keyof UserPreferences, value: any) => {
 		const updatedPreferences = { ...preferences, [key]: value };
 		setPreferences(updatedPreferences);
+
+		// If updating theme, use ThemeManager for immediate UI update
+		if (key === 'theme') {
+			try {
+				await setTheme(value as 'light' | 'dark' | 'system');
+			} catch (error) {
+				console.error('Failed to update theme:', error);
+				// Continue with API sync even if ThemeManager fails
+			}
+		}
 
 		// Debounced save to avoid too many API calls
 		setTimeout(async () => {
@@ -261,7 +273,7 @@ export function UserPreferencesManager() {
 						<div className="grid gap-2">
 							<Label>Theme</Label>
 							<Select
-								value={preferences.theme}
+								value={preferences.theme || mode}
 								onValueChange={(value: 'light' | 'dark' | 'system') => updatePreference('theme', value)}
 							>
 								<SelectTrigger>

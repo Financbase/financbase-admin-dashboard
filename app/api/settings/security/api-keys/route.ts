@@ -10,15 +10,17 @@ import { userApiKeys } from '@/lib/db/schemas';
 import { eq, desc } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import crypto from 'crypto';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/settings/security/api-keys
 // List all API keys for the authenticated user
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const keys = await db
@@ -47,30 +49,33 @@ export async function GET() {
 
 		return NextResponse.json({ keys });
 	} catch (error) {
-		console.error('Error fetching API keys:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 // POST /api/settings/security/api-keys
 // Create a new API key for the authenticated user
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const { name, description, type, scopes, expiresAt, rateLimitPerMinute, rateLimitPerHour } = body;
 
 		// Validate required fields
 		if (!name) {
-			return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+			return ApiErrorHandler.badRequest('Name is required');
 		}
 
 		// Generate API key
@@ -124,10 +129,6 @@ export async function POST(request: NextRequest) {
 			apiKey: fullKey, // Only returned on creation for security
 		});
 	} catch (error) {
-		console.error('Error creating API key:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

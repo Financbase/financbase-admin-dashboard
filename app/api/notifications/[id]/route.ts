@@ -1,35 +1,41 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/services/notification-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const notificationId = parseInt(id);
-		if (Number.Number.isNaN(notificationId)) {
-			return NextResponse.json({ error: 'Invalid notification ID' }, { status: 400 });
+		const notificationId = parseInt(id, 10);
+		if (Number.isNaN(notificationId)) {
+			return ApiErrorHandler.badRequest('Invalid notification ID format');
 		}
 
 		// Mark notification as read
 		const success = await NotificationService.markAsRead(notificationId, userId);
 
 		if (!success) {
-			return NextResponse.json({ error: 'Notification not found or access denied' }, { status: 404 });
+			return ApiErrorHandler.notFound('Notification not found or access denied');
 		}
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error marking notification as read:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		console.error('[API] Error in POST /api/notifications/[id]:', {
+			notificationId: id,
+			requestId,
+			error: error instanceof Error ? error.message : String(error),
+			stack: error instanceof Error ? error.stack : undefined,
+		});
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -37,29 +43,34 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const notificationId = parseInt(id);
-		if (Number.Number.isNaN(notificationId)) {
-			return NextResponse.json({ error: 'Invalid notification ID' }, { status: 400 });
+		const notificationId = parseInt(id, 10);
+		if (Number.isNaN(notificationId)) {
+			return ApiErrorHandler.badRequest('Invalid notification ID format');
 		}
 
 		// Delete notification (or mark as archived)
 		const success = await NotificationService.delete(notificationId, userId);
 
 		if (!success) {
-			return NextResponse.json({ error: 'Notification not found or access denied' }, { status: 404 });
+			return ApiErrorHandler.notFound('Notification not found or access denied');
 		}
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error deleting notification:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		console.error('[API] Error in DELETE /api/notifications/[id]:', {
+			notificationId: id,
+			requestId,
+			error: error instanceof Error ? error.message : String(error),
+			stack: error instanceof Error ? error.stack : undefined,
+		});
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

@@ -1,26 +1,26 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { WebhookService } from '@/lib/services/webhook-service'
 import { db } from '@/lib/db'
 
 // Mock database
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   db: {
-    select: jest.fn(),
-    insert: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
 // Mock fetch
-global.fetch = jest.fn()
+global.fetch = vi.fn()
 
 describe('WebhookService', () => {
   let webhookService: WebhookService
   let mockDb: any
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     webhookService = new WebhookService()
     mockDb = db as any
   })
@@ -36,7 +36,7 @@ describe('WebhookService', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'webhook-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'webhook-1' }),
       })
 
       const result = await webhookService.createWebhook(webhookData)
@@ -79,17 +79,17 @@ describe('WebhookService', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWebhook]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWebhook]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'delivery-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'delivery-1' }),
       })
 
       // Mock successful HTTP response
-      ;(global.fetch as jest.Mock).mockResolvedValue({
+      ;(global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         status: 200,
         statusText: 'OK',
@@ -126,17 +126,17 @@ describe('WebhookService', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWebhook]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWebhook]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'delivery-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'delivery-1' }),
       })
 
       // Mock failed HTTP response
-      ;(global.fetch as jest.Mock).mockResolvedValue({
+      ;(global.fetch as vi.Mock).mockResolvedValue({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
@@ -162,13 +162,13 @@ describe('WebhookService', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWebhook]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWebhook]),
         }),
       })
 
       // Mock successful HTTP response
-      ;(global.fetch as jest.Mock).mockResolvedValue({
+      ;(global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         status: 200,
         statusText: 'OK',
@@ -194,19 +194,19 @@ describe('WebhookService', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockDelivery]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockDelivery]),
         }),
       })
 
       mockDb.update.mockReturnValue({
-        set: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue({}),
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue({}),
         }),
       })
 
       // Mock successful retry
-      ;(global.fetch as jest.Mock).mockResolvedValue({
+      ;(global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         status: 200,
         statusText: 'OK',

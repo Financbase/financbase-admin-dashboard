@@ -10,29 +10,32 @@ import { userApiKeys } from '@/lib/db/schemas';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import crypto from 'crypto';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // POST /api/settings/security/api-keys/[id]/regenerate
 // Regenerate an API key (creates new key with same settings)
 export async function POST(
 	request: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Check if user owns this API key
 		const existingKey = await db
 			.select()
 			.from(userApiKeys)
-			.where(eq(userApiKeys.id, params.id))
+			.where(eq(userApiKeys.id, id))
 			.limit(1);
 
 		if (!existingKey.length || existingKey[0].userId !== userId) {
-			return NextResponse.json({ error: 'API key not found' }, { status: 404 });
+			return ApiErrorHandler.notFound('API key not found');
 		}
 
 		// Generate new API key
@@ -64,7 +67,7 @@ export async function POST(
 				lastUsedIp: null,
 				lastUsedUserAgent: null,
 			})
-			.where(eq(userApiKeys.id, params.id))
+			.where(eq(userApiKeys.id, id))
 			.returning({
 				id: userApiKeys.id,
 				name: userApiKeys.name,
@@ -87,10 +90,6 @@ export async function POST(
 			apiKey: fullKey, // Only returned on regeneration for security
 		});
 	} catch (error) {
-		console.error('Error regenerating API key:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

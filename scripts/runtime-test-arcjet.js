@@ -7,17 +7,24 @@
 
 require('dotenv').config({ path: '.env.local' });
 const http = require('http');
+const https = require('https');
+const { URL } = require('url');
 
+// Security: Use HTTPS in production, HTTP only for localhost development
+// This is safe because localhost is not accessible over the network
 const API_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const isLocalhost = API_URL.includes('localhost') || API_URL.includes('127.0.0.1');
+const useHttps = !isLocalhost || process.env.FORCE_HTTPS === 'true';
 
 function makeRequest(endpoint, data) {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify(data);
+    const url = new URL(endpoint, API_URL);
     
     const options = {
-      hostname: 'localhost',
-      port: 3000,
-      path: endpoint,
+      hostname: url.hostname,
+      port: url.port || (useHttps ? 443 : 80),
+      path: url.pathname + url.search,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -26,7 +33,9 @@ function makeRequest(endpoint, data) {
       },
     };
 
-    const req = http.request(options, (res) => {
+    // Security: Use HTTPS for non-localhost, HTTP only for localhost development
+    const requestModule = useHttps ? https : http;
+    const req = requestModule.request(options, (res) => {
       let body = '';
       
       res.on('data', (chunk) => {

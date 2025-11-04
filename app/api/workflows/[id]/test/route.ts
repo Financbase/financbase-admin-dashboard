@@ -9,16 +9,17 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const resolvedParams = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const resolvedParams = await params;
     const workflowId = parseInt(resolvedParams.id);
     if (Number.isNaN(workflowId)) {
-      return NextResponse.json({ error: 'Invalid workflow ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid workflow ID');
     }
 
     // Get workflow
@@ -29,20 +30,23 @@ export async function POST(
       .limit(1);
 
     if (workflow.length === 0) {
-      return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Workflow not found');
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const testData = body.testData || {};
 
     // Validate workflow configuration
     const validation = validateWorkflow(workflow[0] as any);
     if (!validation.valid) {
-      return NextResponse.json({
-        success: false,
-        error: 'Workflow validation failed',
-        details: validation.errors,
-      });
+      return ApiErrorHandler.badRequest(
+        `Workflow validation failed: ${validation.errors.join(', ')}`
+      );
     }
 
     try {
@@ -59,17 +63,10 @@ export async function POST(
         message: 'Workflow test completed successfully',
       });
     } catch (error) {
-      return NextResponse.json({
-        success: false,
-        error: 'Workflow test failed',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      });
+      return ApiErrorHandler.handle(error, requestId);
     }
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to test workflow',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 

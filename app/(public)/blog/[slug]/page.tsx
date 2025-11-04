@@ -11,6 +11,7 @@ import {
 	Share2,
 	User,
 } from "lucide-react";
+import * as blogService from "@/lib/services/blog/blog-service";
 
 interface BlogPost {
 	id: number;
@@ -37,18 +38,7 @@ interface BlogCategory {
 
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
 	try {
-		const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-			(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-		const response = await fetch(`${baseUrl}/api/blog/${slug}`, {
-			cache: 'no-store', // Always fetch fresh data
-		});
-		
-		if (!response.ok || response.status === 404) {
-			return null;
-		}
-		
-		const data = await response.json();
-		return data.data || null;
+		return await blogService.getPostBySlug(slug, false);
 	} catch (error) {
 		console.error('Error fetching blog post:', error);
 		return null;
@@ -57,19 +47,7 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
 
 async function getCategory(id: number): Promise<BlogCategory | null> {
 	try {
-		const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-			(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-		const response = await fetch(`${baseUrl}/api/blog/categories`, {
-			next: { revalidate: 3600 }, // Cache for 1 hour
-		});
-		
-		if (!response.ok) {
-			return null;
-		}
-		
-		const data = await response.json();
-		const categories = data.data || [];
-		return categories.find((c: BlogCategory) => c.id === id) || null;
+		return await blogService.getCategoryById(id);
 	} catch (error) {
 		console.error('Error fetching category:', error);
 		return null;
@@ -104,6 +82,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 	if (!post || post.status !== 'published') {
 		notFound();
 	}
+
+	// Increment view count asynchronously (fire and forget)
+	blogService.incrementViewCount(post.id).catch((err) => {
+		console.error('Error incrementing view count:', err);
+	});
 
 	const category = post.categoryId ? await getCategory(post.categoryId) : null;
 	const imageUrl = post.featuredImage || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop";

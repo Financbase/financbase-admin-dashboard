@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { 
   Search, 
   HelpCircle, 
@@ -291,7 +292,7 @@ export function FAQSection() {
                   {expandedItems.has(item.id) && (
                     <div className="border-t bg-muted/25 p-4">
                       <div className="prose prose-sm max-w-none">
-                        <div dangerouslySetInnerHTML={{ __html: item.answer }} />
+                        <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.answer) }} />
                       </div>
                       
                       {/* Feedback Section */}

@@ -7,6 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { ReportService } from '@/lib/services/report-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * GET /api/reports/[id]
@@ -16,30 +17,29 @@ export async function GET(
 	_req: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id: idParam } = await params;
 	try {
 		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id: idParam } = await params;
 		const id = parseInt(idParam, 10);
+		if (Number.isNaN(id)) {
+			return ApiErrorHandler.badRequest('Invalid report ID');
+		}
+
 		const report = await ReportService.getById(id, userId);
 
 		if (!report) {
-			return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+			return ApiErrorHandler.notFound('Report not found');
 		}
 
 		return NextResponse.json(report);
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error fetching report:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch report' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -49,30 +49,34 @@ export async function GET(
  */
 export async function PUT(
 	_req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id: idParam } = await params;
 	try {
 		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id: idParam } = await params;
 		const id = parseInt(idParam, 10);
-		const body = await _req.json();
+		if (Number.isNaN(id)) {
+			return ApiErrorHandler.badRequest('Invalid report ID');
+		}
+
+		let body;
+		try {
+			body = await _req.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 
 		const report = await ReportService.update(id, userId, body);
 
 		return NextResponse.json(report);
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error updating report:', error);
-		return NextResponse.json(
-			{ error: 'Failed to update report' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -82,28 +86,27 @@ export async function PUT(
  */
 export async function DELETE(
 	_req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id: idParam } = await params;
 	try {
 		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id: idParam } = await params;
 		const id = parseInt(idParam, 10);
+		if (Number.isNaN(id)) {
+			return ApiErrorHandler.badRequest('Invalid report ID');
+		}
+
 		await ReportService.delete(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error deleting report:', error);
-		return NextResponse.json(
-			{ error: 'Failed to delete report' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 

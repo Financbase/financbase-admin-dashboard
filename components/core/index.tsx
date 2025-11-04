@@ -1,84 +1,76 @@
 "use client";
 
-import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useCallback } from "react";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
+import { BentoGrid } from "@/components/ui/bento-grid";
 import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Users, 
-  ShoppingCart, 
-  CreditCard,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { 
+  DollarSign as DollarSignIcon,
+  Users,
+  ShoppingCart,
   BarChart3,
   PieChart,
   Activity,
-  ArrowUpRight,
-  ArrowDownRight,
-  Plus,
-  Eye,
-  MoreHorizontal,
-  Calendar,
-  Clock,
-  Star,
-  Target,
-  Zap,
-  Lightbulb,
-  TrendingUp as TrendingUpIcon,
-  BarChart3 as BarChart3Icon,
   Wallet,
-  Receipt,
-  FileText,
-  PieChart as PieChartIcon,
-  LineChart,
-  BarChart,
-  TrendingUp as TrendingUpChart,
-  DollarSign as DollarSignIcon,
-  Users as UsersIcon,
-  ShoppingCart as ShoppingCartIcon,
-  CreditCard as CreditCardIcon,
-  Activity as ActivityIcon,
-  Calendar as CalendarIcon,
-  Clock as ClockIcon,
-  Star as StarIcon,
-  Target as TargetIcon,
   Zap as ZapIcon,
   Brain as BrainIcon,
-  Lightbulb as LightbulbIcon,
-  Eye as EyeIcon,
-  Plus as PlusIcon,
-  MoreHorizontal as MoreHorizontalIcon,
-  ArrowUpRight as ArrowUpRightIcon,
-  ArrowDownRight as ArrowDownRightIcon
+  Star as StarIcon,
+  FileText,
+  Settings,
+  Eye,
+  Plus,
+  LayoutGrid
 } from "lucide-react";
-import OverviewStats from "./overview-stats";
-import { SalesChart, RevenueChart } from "./sales-chart";
-import RecentOrders from "./recent-orders";
-import TopProducts from "./top-products";
-import CustomerAnalytics from "./customer-analytics";
-import { SupportWidget } from "./support-widget";
-import ActivityFeed from "./activity-feed";
-import FinancialWidgets from "./financial-widgets";
 import { DashboardSearch } from "./dashboard-search";
-import { useCounter, useLocalStorage } from "@/hooks";
+import { useDashboardLayout } from "@/hooks/use-dashboard-layout";
+import { SortableWidgetItem } from "./widget-sortable-item";
+import { WidgetLibraryPanel } from "./widget-library-panel";
+import { cn } from "@/lib/utils";
 
 export default function DashboardContent() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [dashboardPreferences, setDashboardPreferences] = useLocalStorage('dashboard-preferences', {
-    showQuickActions: true,
-    showAIInsights: true,
-    showSupportTickets: true
-  })
-  const { count: refreshCount, increment: refreshDashboard } = useCounter(0)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [showWidgetLibrary, setShowWidgetLibrary] = useState(false)
+  const {
+    visibleWidgets,
+    availableWidgets,
+    layout,
+    reorderWidgets,
+    updateWidgetSize,
+    addWidget,
+    removeWidget,
+  } = useDashboardLayout()
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
     // Here you would typically filter your dashboard data based on the search query
     console.log('Searching for:', query)
   }
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = layout.widgetOrder.indexOf(active.id as string);
+      const newIndex = layout.widgetOrder.indexOf(over.id as string);
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newOrder = [...layout.widgetOrder];
+        const [removed] = newOrder.splice(oldIndex, 1);
+        newOrder.splice(newIndex, 0, removed);
+        reorderWidgets(newOrder);
+      }
+    }
+  }, [layout.widgetOrder, reorderWidgets]);
 
 	return (
     <div className="space-y-6 w-full">
@@ -91,14 +83,39 @@ export default function DashboardContent() {
           </p>
 				</div>
         <div className="flex items-center space-x-2">
+          {isEditMode && (
+            <Button
+              variant="outline"
+              onClick={() => setShowWidgetLibrary(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Widget
+              {availableWidgets.length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {availableWidgets.length}
+                </Badge>
+              )}
+            </Button>
+          )}
+          <Button
+            variant={isEditMode ? "default" : "outline"}
+            onClick={() => setIsEditMode(!isEditMode)}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            {isEditMode ? "Done Editing" : "Customize Dashboard"}
+          </Button>
+          {!isEditMode && (
+            <>
           <Button>
-            <PlusIcon className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
             Create Invoice
           </Button>
           <Button variant="outline">
-            <EyeIcon className="mr-2 h-4 w-4" />
+            <Eye className="mr-2 h-4 w-4" />
             View Reports
           </Button>
+            </>
+          )}
 				</div>
 			</div>
 
@@ -110,219 +127,180 @@ export default function DashboardContent() {
         />
       </div>
 
-      {/* Bento Grid Layout */}
-      <BentoGrid className="max-w-7xl mx-auto">
-        {/* Financial Overview - Large */}
-        <BentoGridItem
-          title="Financial Overview"
-          description="Your business performance at a glance"
-          header={
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <DollarSignIcon className="h-5 w-5 text-green-500" />
-                <span className="text-sm font-medium">Portfolio Value</span>
+      {/* Edit Mode Info Banner */}
+      {isEditMode && (
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <LayoutGrid className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  Edit Mode Active
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Drag widgets to reorder • Use resize controls to adjust size • Click remove to delete widgets
+                </p>
               </div>
-              <Badge variant="secondary" className="text-green-600">
-                +8.5%
+              <Badge variant="secondary" className="text-blue-700 dark:text-blue-300">
+                {visibleWidgets.length} widget{visibleWidgets.length !== 1 ? 's' : ''}
               </Badge>
             </div>
-          }
-          className="md:col-span-2 md:row-span-2"
-        >
-          <OverviewStats />
-        </BentoGridItem>
-
-        {/* Quick Actions */}
-        {dashboardPreferences.showQuickActions && (
-          <BentoGridItem
-            title="Quick Actions"
-            description="Common tasks and shortcuts"
-            header={
-              <div className="flex items-center space-x-2">
-                <ZapIcon className="h-5 w-5 text-blue-500" />
-                <span className="text-sm font-medium">Actions</span>
-              </div>
-            }
-            className="md:col-span-1"
-          >
-            <div className="space-y-2">
-              <Button className="w-full justify-start" variant="outline" size="sm">
-                <PlusIcon className="mr-2 h-4 w-4" />
-                Add Expense
-              </Button>
-              <Button className="w-full justify-start" variant="outline" size="sm">
-                <UsersIcon className="mr-2 h-4 w-4" />
-                Add Client
-              </Button>
-              <Button className="w-full justify-start" variant="outline" size="sm">
-                <Receipt className="mr-2 h-4 w-4" />
-                Create Invoice
-              </Button>
-            </div>
-          </BentoGridItem>
-        )}
-
-        {/* AI Insights */}
-        <BentoGridItem
-          title="AI Insights"
-          description="Smart recommendations and trends"
-          header={
-            <div className="flex items-center space-x-2">
-              <BrainIcon className="h-5 w-5 text-purple-500" />
-              <span className="text-sm font-medium">AI Analysis</span>
-            </div>
-          }
-          className="md:col-span-1"
-        >
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <LightbulbIcon className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm">Revenue up 12% this month</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <TargetIcon className="h-4 w-4 text-green-500" />
-              <span className="text-sm">On track for Q4 goals</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <TrendingUpIcon className="h-4 w-4 text-blue-500" />
-              <span className="text-sm">Customer satisfaction: 94%</span>
-            </div>
           </div>
-        </BentoGridItem>
+        </div>
+      )}
 
-        {/* Sales Performance */}
-        <BentoGridItem
-          title="Sales Performance"
-          description="Monthly sales trends and analysis"
-          header={
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="h-5 w-5 text-blue-500" />
-              <span className="text-sm font-medium">Sales Chart</span>
-            </div>
-          }
-          className="md:col-span-2"
-        >
-          <SalesChart />
-        </BentoGridItem>
+      {/* Bento Grid Layout */}
+      <div className={cn("max-w-7xl mx-auto", isEditMode && "ring-2 ring-blue-500 ring-offset-2 rounded-lg p-2")}>
+        {visibleWidgets.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <LayoutGrid className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No widgets yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Add widgets to customize your dashboard
+            </p>
+            {isEditMode && (
+              <Button onClick={() => setShowWidgetLibrary(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Widget
+              </Button>
+            )}
+          </div>
+        ) : (
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext
+            items={visibleWidgets.map(w => w.id)}
+            strategy={rectSortingStrategy}
+          >
+            <BentoGrid>
+              {visibleWidgets.map((widget) => {
+                const WidgetComponent = widget.component;
+                const widgetSize = layout.widgetSizes[widget.id] || {
+                  colSpan: widget.defaultColSpan,
+                  rowSpan: widget.defaultRowSpan,
+                };
 
-        {/* Top Products */}
-        <BentoGridItem
-          title="Top Products"
-          description="Best performing products and services"
-          header={
-            <div className="flex items-center space-x-2">
-              <StarIcon className="h-5 w-5 text-yellow-500" />
-              <span className="text-sm font-medium">Top Performers</span>
-            </div>
-          }
-          className="md:col-span-2"
-        >
-					<TopProducts />
-        </BentoGridItem>
+                // Generate header based on widget configuration or use default
+                let widgetHeader = widget.header;
+                if (!widgetHeader) {
+                  // Default headers based on widget ID for backwards compatibility
+                  const headerMap: Record<string, React.ReactNode> = {
+                    "financial-overview": (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <DollarSignIcon className="h-5 w-5 text-green-500" />
+                          <span className="text-sm font-medium">Portfolio Value</span>
+                        </div>
+                        <Badge variant="secondary" className="text-green-600">
+                          +8.5%
+                        </Badge>
+                      </div>
+                    ),
+                    "quick-actions": (
+                      <div className="flex items-center space-x-2">
+                        <ZapIcon className="h-5 w-5 text-blue-500" />
+                        <span className="text-sm font-medium">Actions</span>
+                      </div>
+                    ),
+                    "ai-insights": (
+                      <div className="flex items-center space-x-2">
+                        <BrainIcon className="h-5 w-5 text-purple-500" />
+                        <span className="text-sm font-medium">AI Analysis</span>
+                      </div>
+                    ),
+                    "sales-performance": (
+                      <div className="flex items-center space-x-2">
+                        <BarChart3 className="h-5 w-5 text-blue-500" />
+                        <span className="text-sm font-medium">Sales Chart</span>
+                      </div>
+                    ),
+                    "top-products": (
+                      <div className="flex items-center space-x-2">
+                        <StarIcon className="h-5 w-5 text-yellow-500" />
+                        <span className="text-sm font-medium">Top Performers</span>
+                      </div>
+                    ),
+                    "revenue-analysis": (
+                      <div className="flex items-center space-x-2">
+                        <PieChart className="h-5 w-5 text-green-500" />
+                        <span className="text-sm font-medium">Revenue Chart</span>
+                      </div>
+                    ),
+                    "customer-analytics": (
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-5 w-5 text-indigo-500" />
+                        <span className="text-sm font-medium">Customer Data</span>
+                      </div>
+                    ),
+                    "recent-activity": (
+                      <div className="flex items-center space-x-2">
+                        <Activity className="h-5 w-5 text-orange-500" />
+                        <span className="text-sm font-medium">Activity Feed</span>
+                      </div>
+                    ),
+                    "support-tickets": (
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-5 w-5 text-red-500" />
+                        <span className="text-sm font-medium">Support</span>
+                      </div>
+                    ),
+                    "recent-orders": (
+                      <div className="flex items-center space-x-2">
+                        <ShoppingCart className="h-5 w-5 text-green-500" />
+                        <span className="text-sm font-medium">Order History</span>
+                      </div>
+                    ),
+                    "financial-widgets": (
+                      <div className="flex items-center space-x-2">
+                        <Wallet className="h-5 w-5 text-blue-500" />
+                        <span className="text-sm font-medium">Financial Tools</span>
+                      </div>
+                    ),
+                  };
+                  widgetHeader = headerMap[widget.id];
+                }
 
-        {/* Revenue Analysis */}
-        <BentoGridItem
-          title="Revenue Analysis"
-          description="Revenue breakdown by category"
-          header={
-            <div className="flex items-center space-x-2">
-              <PieChart className="h-5 w-5 text-green-500" />
-              <span className="text-sm font-medium">Revenue Chart</span>
-				</div>
-          }
-          className="md:col-span-2"
-        >
-          <RevenueChart />
-        </BentoGridItem>
+                return (
+                  <SortableWidgetItem
+                    key={widget.id}
+                    widget={widget}
+                    isEditMode={isEditMode}
+                    colSpan={widgetSize.colSpan}
+                    rowSpan={widgetSize.rowSpan}
+                    header={widgetHeader}
+                    onResize={(newColSpan, newRowSpan) =>
+                      updateWidgetSize(widget.id, newColSpan, newRowSpan)
+                    }
+                      onRemove={removeWidget}
+                  >
+                    <WidgetComponent />
+                  </SortableWidgetItem>
+                );
+              })}
+            </BentoGrid>
+          </SortableContext>
+        </DndContext>
+        )}
+      </div>
 
-        {/* Customer Analytics */}
-        <BentoGridItem
-          title="Customer Analytics"
-          description="Customer insights and demographics"
-          header={
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-indigo-500" />
-              <span className="text-sm font-medium">Customer Data</span>
-            </div>
-          }
-          className="md:col-span-1"
-        >
-					<CustomerAnalytics />
-        </BentoGridItem>
-
-        {/* Recent Activity */}
-        <BentoGridItem
-          title="Recent Activity"
-          description="Latest updates and notifications"
-          header={
-            <div className="flex items-center space-x-2">
-              <Activity className="h-5 w-5 text-orange-500" />
-              <span className="text-sm font-medium">Activity Feed</span>
-            </div>
-          }
-          className="md:col-span-1"
-        >
-					<ActivityFeed />
-        </BentoGridItem>
-
-        {/* Support Tickets */}
-        <BentoGridItem
-          title="Support Tickets"
-          description="Customer support and help desk"
-          header={
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-red-500" />
-              <span className="text-sm font-medium">Support</span>
-            </div>
-          }
-          className="md:col-span-1"
-        >
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Open Tickets</span>
-              <Badge variant="destructive">3</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Resolved Today</span>
-              <Badge variant="secondary">7</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Avg Response Time</span>
-              <Badge variant="outline">2.4h</Badge>
-				</div>
-			</div>
-        </BentoGridItem>
-
-        {/* Recent Orders - Full Width */}
-        <BentoGridItem
-          title="Recent Orders"
-          description="Latest customer orders and transactions"
-          header={
-            <div className="flex items-center space-x-2">
-              <ShoppingCart className="h-5 w-5 text-green-500" />
-              <span className="text-sm font-medium">Order History</span>
-            </div>
-          }
-          className="md:col-span-3"
-        >
-          <RecentOrders />
-        </BentoGridItem>
-
-        {/* Financial Widgets - Full Width */}
-        <BentoGridItem
-          title="Financial Widgets"
-          description="Additional financial metrics and tools"
-          header={
-            <div className="flex items-center space-x-2">
-              <Wallet className="h-5 w-5 text-blue-500" />
-              <span className="text-sm font-medium">Financial Tools</span>
-            </div>
-          }
-          className="md:col-span-3"
-        >
-				<FinancialWidgets />
-        </BentoGridItem>
-      </BentoGrid>
+      {/* Widget Library Dialog */}
+      <Dialog open={showWidgetLibrary} onOpenChange={setShowWidgetLibrary}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Widget Library</DialogTitle>
+            <DialogDescription>
+              Add widgets to customize your dashboard layout
+            </DialogDescription>
+          </DialogHeader>
+          <WidgetLibraryPanel
+            availableWidgets={availableWidgets}
+            onAddWidget={(widgetId) => {
+              addWidget(widgetId);
+              setShowWidgetLibrary(false);
+            }}
+            onClose={() => setShowWidgetLibrary(false)}
+          />
+        </DialogContent>
+      </Dialog>
 		</div>
 	);
 }

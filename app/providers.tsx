@@ -1,10 +1,13 @@
 "use client";
 
+import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { ThemeProvider } from 'next-themes';
 import { ClerkProvider } from '@clerk/nextjs';
 import { DashboardProvider } from '@/contexts/dashboard-context';
+import { setupChunkErrorHandler } from '@/lib/utils/chunk-error-handler';
+import { ChunkErrorBoundary } from '@/components/errors/chunk-error-boundary';
 
 // Dynamically import ReactQueryDevtools to avoid SSR issues
 const ReactQueryDevtoolsDevelopment = dynamic(
@@ -34,9 +37,34 @@ const queryClient = new QueryClient({
 });
 
 export function Providers({ children }: ProvidersProps) {
+	// Set up global chunk error handler on mount
+	useEffect(() => {
+		// Initialize chunk error handler with automatic recovery
+		const cleanup = setupChunkErrorHandler({
+			maxRetries: 3,
+			initialDelay: 1000,
+			maxDelay: 10000,
+			autoReload: true,
+			onBeforeReload: () => {
+				// Optional: Show a notification before reload
+				if (typeof window !== 'undefined' && window.console) {
+					console.info('[ChunkErrorHandler] Reloading page to recover from chunk load error...');
+				}
+			},
+		});
+
+		// Cleanup on unmount
+		return cleanup;
+	}, []);
+
 	return (
 		<ClerkProvider>
 			<QueryClientProvider client={queryClient}>
+				{/* 
+					ThemeProvider from next-themes integrates with ThemeManager service.
+					ThemeManager (via useThemeManager hook) automatically syncs with this provider
+					and handles theme persistence, user preferences sync, and CSS variable management.
+				*/}
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="light"
@@ -45,9 +73,12 @@ export function Providers({ children }: ProvidersProps) {
 					storageKey="financbase-theme"
 					suppressHydrationWarning
 				>
-					<DashboardProvider>
-						{children}
-					</DashboardProvider>
+					{/* Wrap with ChunkErrorBoundary to catch React-level chunk errors */}
+					<ChunkErrorBoundary autoRecover={true}>
+						<DashboardProvider>
+							{children}
+						</DashboardProvider>
+					</ChunkErrorBoundary>
 				</ThemeProvider>
 				{process.env.NODE_ENV === 'development' && (
 					<ReactQueryDevtoolsDevelopment initialIsOpen={false} />

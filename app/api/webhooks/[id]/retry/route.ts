@@ -4,28 +4,36 @@ import { webhooks, webhookDeliveries } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { WebhookService } from '@/lib/services/webhook-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const resolvedParams = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const resolvedParams = await params;
     const webhookId = parseInt(resolvedParams.id);
     if (Number.isNaN(webhookId)) {
-      return NextResponse.json({ error: 'Invalid webhook ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid webhook ID');
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
+
     const { deliveryId } = body;
 
     if (!deliveryId) {
-      return NextResponse.json({ error: 'Delivery ID is required' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Delivery ID is required');
     }
 
     // Verify webhook ownership
@@ -36,7 +44,7 @@ export async function POST(
       .limit(1);
 
     if (webhook.length === 0) {
-      return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Webhook not found');
     }
 
     // Verify delivery ownership
@@ -51,7 +59,7 @@ export async function POST(
       .limit(1);
 
     if (delivery.length === 0) {
-      return NextResponse.json({ error: 'Delivery not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Delivery not found');
     }
 
     try {
@@ -63,16 +71,9 @@ export async function POST(
         message: 'Webhook delivery retry initiated',
       });
     } catch (error) {
-      return NextResponse.json({
-        success: false,
-        error: 'Failed to retry webhook delivery',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      }, { status: 500 });
+      return ApiErrorHandler.handle(error, requestId);
     }
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to retry webhook delivery',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

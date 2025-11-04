@@ -4,21 +4,23 @@ import { webhooks } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { WebhookService } from '@/lib/services/webhook-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const resolvedParams = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const resolvedParams = await params;
     const webhookId = parseInt(resolvedParams.id);
     if (Number.isNaN(webhookId)) {
-      return NextResponse.json({ error: 'Invalid webhook ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid webhook ID');
     }
 
     // Get webhook
@@ -29,10 +31,15 @@ export async function POST(
       .limit(1);
 
     if (webhook.length === 0) {
-      return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Webhook not found');
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const testPayload = body.testPayload || {
       test: true,
       message: 'This is a test webhook payload',
@@ -52,16 +59,9 @@ export async function POST(
         errorMessage: result.errorMessage,
       });
     } catch (error) {
-      return NextResponse.json({
-        success: false,
-        error: 'Webhook test failed',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      }, { status: 500 });
+      return ApiErrorHandler.handle(error, requestId);
     }
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to test webhook',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

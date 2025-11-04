@@ -685,20 +685,20 @@ console.log('Debug info:', {
 ### Support
 
 #### 1. Documentation
-- [API Documentation](https://docs.financbase.com/api)
-- [Component Documentation](https://docs.financbase.com/components)
-- [Deployment Guide](https://docs.financbase.com/deployment)
+- [API Documentation](../api/README.md) (external: docs.financbase.com/api - see [External Resources](../EXTERNAL_RESOURCES.md))
+- [Component Documentation](../architecture/README.md) (external: docs.financbase.com/components - see [External Resources](../EXTERNAL_RESOURCES.md))
+- [Deployment Guide](./README.md) (external: docs.financbase.com/deployment - see [External Resources](../EXTERNAL_RESOURCES.md))
 
 #### 2. Community
 - [Discord Community](https://discord.gg/financbase)
-- [GitHub Discussions](https://github.com/financbase/financbase-admin-dashboard/discussions)
+- [GitHub Discussions](https://github.com/financbase/financbase-admin-dashboard/discussions) (see [External Resources](../EXTERNAL_RESOURCES.md) for repository status)
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/financbase)
 
 #### 3. Professional Support
-- [Enterprise Support](https://financbase.com/enterprise)
-- [Consulting Services](https://financbase.com/consulting)
-- [Training Programs](https://financbase.com/training)
+- [Enterprise Support](/enterprise) - Enterprise solutions and sales contact
+- [Consulting Services](/consulting) - Consulting services and offerings
+- [Training Programs](/training) - Comprehensive training materials
 
 ---
 
-**Need Help?** Contact our support team at [support@financbase.com](mailto:support@financbase.com) or visit our [Help Center](https://help.financbase.com).
+**Need Help?** Contact our support team at [support@financbase.com](mailto:support@financbase.com) or visit our [Help Center](../user-guides/) (external: help.financbase.com - see [External Resources](../EXTERNAL_RESOURCES.md)).

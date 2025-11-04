@@ -14,18 +14,17 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const CRON_SECRET = process.env.CRON_SECRET || process.env.CRON_SECRET_KEY;
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     // Verify cron secret for security
     const providedSecret = request.headers.get('x-cron-secret');
     if (CRON_SECRET && providedSecret !== CRON_SECRET) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Invalid cron secret' },
-        { status: 401 }
-      );
+      return ApiErrorHandler.unauthorized('Invalid cron secret');
     }
 
     // Get parameters from query string or body
@@ -55,15 +54,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[Snapshot API] Error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to capture snapshot',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
@@ -73,6 +64,7 @@ export async function POST(request: NextRequest) {
  * Returns recent snapshot statistics
  */
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { searchParams } = new URL(request.url);
     const days = parseInt(searchParams.get('days') || '7', 10);
@@ -108,15 +100,7 @@ export async function GET(request: NextRequest) {
       recent_slow_queries: recentQueries,
     });
   } catch (error) {
-    console.error('[Snapshot API] Error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch snapshot statistics',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 

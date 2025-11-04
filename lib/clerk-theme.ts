@@ -113,6 +113,10 @@ export const clerkTheme: Appearance = {
     formFieldSuccessText: "text-green-600 text-sm",
     
     // Form field input show password button
+    // Security: This is a CSS class name (formFieldInputShowPasswordButton), not a hardcoded password
+    // False positive from security scanners - this is Clerk's component prop name for styling
+    // The word "password" in the property name refers to the password input field, not an actual password value
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     formFieldInputShowPasswordButton:
       "text-gray-400 hover:text-blue-600 hover:bg-gray-100 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3",
   },

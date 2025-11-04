@@ -2,16 +2,18 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { sql } from '@/lib/db';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * GET /api/developer/api-keys
  * Get all API keys for the current user
  */
 export async function GET(_request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Get API keys with usage statistics
@@ -32,8 +34,7 @@ export async function GET(_request: NextRequest) {
 
 		return NextResponse.json(result);
 	} catch (error) {
-		console.error('Error fetching API keys:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -42,17 +43,24 @@ export async function GET(_request: NextRequest) {
  * Create a new API key
  */
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const { name, permissions, monthlyLimit = 10000 } = body;
 
 		if (!name || !permissions || !Array.isArray(permissions)) {
-			return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+			return ApiErrorHandler.badRequest('Missing required fields: name and permissions are required');
 		}
 
 		// Generate API key
@@ -77,8 +85,7 @@ export async function POST(request: NextRequest) {
 		}, { status: 201 });
 
 	} catch (error) {
-		console.error('Error creating API key:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -87,10 +94,11 @@ export async function POST(request: NextRequest) {
  * Get API usage statistics
  */
 export async function PATCH(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -114,8 +122,7 @@ export async function PATCH(request: NextRequest) {
 		return NextResponse.json(result);
 
 	} catch (error) {
-		console.error('Error fetching usage data:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -124,12 +131,19 @@ export async function PATCH(request: NextRequest) {
  * Record API usage (called by API middleware)
  */
 export async function PUT(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
-		const body = await request.json();
-		const { apiKey, endpoint, method, statusCode, responseTime, error } = body;
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
+		const { apiKey, endpoint, method, statusCode, responseTime, error: errorData } = body;
 
 		if (!apiKey || !endpoint) {
-			return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+			return ApiErrorHandler.badRequest('Missing required fields: apiKey and endpoint are required');
 		}
 
 		// Find API key
@@ -139,7 +153,7 @@ export async function PUT(request: NextRequest) {
 		`;
 
 		if (keyResult.length === 0) {
-			return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
+			return ApiErrorHandler.unauthorized('Invalid API key');
 		}
 
 		const keyId = keyResult[0].id;
@@ -148,7 +162,7 @@ export async function PUT(request: NextRequest) {
 		await sql`
 			INSERT INTO developer.api_usage
 			(api_key_id, endpoint, method, status_code, response_time, error, created_at, completed_at)
-			VALUES (${keyId}, ${endpoint}, ${method}, ${statusCode}, ${responseTime}, ${error || null}, NOW(), NOW())
+			VALUES (${keyId}, ${endpoint}, ${method}, ${statusCode}, ${responseTime}, ${errorData || null}, NOW(), NOW())
 		`;
 
 		// Check rate limits (simplified)
@@ -159,14 +173,13 @@ export async function PUT(request: NextRequest) {
 		`;
 
 		if (parseInt(dailyUsage[0].count, 10) > 1000) { // Example daily limit
-			return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+			return ApiErrorHandler.rateLimitExceeded('Rate limit exceeded');
 		}
 
 		return NextResponse.json({ success: true });
 
 	} catch (error) {
-		console.error('Error recording usage:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 

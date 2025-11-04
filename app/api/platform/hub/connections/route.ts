@@ -72,8 +72,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching integration connections:', error);
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
@@ -82,13 +81,19 @@ export async function GET(request: NextRequest) {
  * Create a new integration connection
  */
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const { 
       integrationId, 
       name, 
@@ -106,9 +111,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!integrationId || !name || !accessToken) {
-      return NextResponse.json({ 
-        error: 'Integration ID, name, and access token are required' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest('Integration ID, name, and access token are required');
     }
 
     // Verify integration exists and is active
@@ -122,9 +125,7 @@ export async function POST(request: NextRequest) {
       .limit(1);
 
     if (integration.length === 0) {
-      return NextResponse.json({ 
-        error: 'Integration not found or inactive' 
-      }, { status: 404 });
+      return ApiErrorHandler.notFound('Integration not found or inactive');
     }
 
     // Create new connection
@@ -152,7 +153,6 @@ export async function POST(request: NextRequest) {
       message: 'Integration connection created successfully',
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating integration connection:', error);
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

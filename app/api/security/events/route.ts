@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AuditService } from '@/lib/services/audit-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 interface SecurityEvent {
   id: number;
@@ -18,10 +19,11 @@ interface SecurityEvent {
 }
 
 export async function GET() {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     // Get security events from audit service
@@ -48,8 +50,6 @@ export async function GET() {
 
     return NextResponse.json(events);
   } catch (error) {
-    console.error('Error fetching security events:', error);
-    // Return empty array instead of error to prevent frontend crashes
-    return NextResponse.json([]);
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

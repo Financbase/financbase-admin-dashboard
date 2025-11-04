@@ -16,30 +16,29 @@ export async function GET(
 	_req: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id: idParam } = await params;
 	try {
 		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id: idParam } = await params;
 		const id = parseInt(idParam, 10);
+		if (Number.isNaN(id)) {
+			return ApiErrorHandler.badRequest('Invalid expense ID');
+		}
+
 		const expense = await ExpenseService.getById(id, userId);
 
 		if (!expense) {
-			return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
+			return ApiErrorHandler.notFound('Expense not found');
 		}
 
 		return NextResponse.json(expense);
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error fetching expense:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch expense' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -49,18 +48,28 @@ export async function GET(
  */
 export async function PUT(
 	_req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id: idParam } = await params;
 	try {
 		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id: idParam } = await params;
 		const id = parseInt(idParam, 10);
-		const body = await _req.json();
+		if (Number.isNaN(id)) {
+			return ApiErrorHandler.badRequest('Invalid expense ID');
+		}
+
+		let body;
+		try {
+			body = await _req.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 
 		const expense = await ExpenseService.update({
 			id,
@@ -72,13 +81,7 @@ export async function PUT(
 
 		return NextResponse.json(expense);
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error updating expense:', error);
-		return NextResponse.json(
-			{ error: 'Failed to update expense' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -88,28 +91,27 @@ export async function PUT(
  */
 export async function DELETE(
 	_req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id: idParam } = await params;
 	try {
 		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { id: idParam } = await params;
 		const id = parseInt(idParam, 10);
+		if (Number.isNaN(id)) {
+			return ApiErrorHandler.badRequest('Invalid expense ID');
+		}
+
 		await ExpenseService.delete(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error deleting expense:', error);
-		return NextResponse.json(
-			{ error: 'Failed to delete expense' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 

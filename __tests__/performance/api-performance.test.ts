@@ -1,20 +1,20 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 import { GET, POST } from '@/app/api/workflows/route'
 import { db } from '@/lib/db'
 
 // Mock database
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   db: {
-    select: jest.fn(),
-    insert: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
 // Mock authentication
-jest.mock('@clerk/nextjs/server', () => ({
+vi.mock('@clerk/nextjs/server', () => ({
   auth: () => Promise.resolve({ userId: 'user-123' }),
 }))
 
@@ -22,7 +22,7 @@ describe('API Performance Tests', () => {
   let mockDb: any
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockDb = db as any
   })
 
@@ -38,9 +38,9 @@ describe('API Performance Tests', () => {
       }))
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue(mockWorkflows),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue(mockWorkflows),
           }),
         }),
       })
@@ -64,7 +64,7 @@ describe('API Performance Tests', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'workflow-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'workflow-1' }),
       })
 
       const request = new NextRequest('http://localhost:3000/api/workflows', {
@@ -94,9 +94,9 @@ describe('API Performance Tests', () => {
       ]
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue(mockWorkflows),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue(mockWorkflows),
           }),
         }),
       })
@@ -132,9 +132,9 @@ describe('API Performance Tests', () => {
       mockDb.select.mockImplementation(() => {
         queryCount++
         return {
-          from: jest.fn().mockReturnValue({
-            where: jest.fn().mockReturnValue({
-              orderBy: jest.fn().mockResolvedValue(largeDataset),
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockResolvedValue(largeDataset),
             }),
           }),
         }
@@ -161,11 +161,11 @@ describe('API Performance Tests', () => {
       }))
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockReturnValue({
-              limit: jest.fn().mockReturnValue({
-                offset: jest.fn().mockResolvedValue(mockWorkflows),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockResolvedValue(mockWorkflows),
               }),
             }),
           }),
@@ -202,7 +202,7 @@ describe('API Performance Tests', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'workflow-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'workflow-1' }),
       })
 
       const initialMemory = process.memoryUsage()
@@ -226,9 +226,9 @@ describe('API Performance Tests', () => {
   describe('Error Handling Performance', () => {
     it('should handle errors efficiently without performance degradation', async () => {
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockRejectedValue(new Error('Database error')),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockRejectedValue(new Error('Database error')),
           }),
         }),
       })
@@ -280,9 +280,9 @@ describe('API Performance Tests', () => {
       mockDb.select.mockImplementation(() => {
         queryCount++
         return {
-          from: jest.fn().mockReturnValue({
-            where: jest.fn().mockReturnValue({
-              orderBy: jest.fn().mockResolvedValue(mockWorkflows),
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockResolvedValue(mockWorkflows),
             }),
           }),
         }
@@ -320,9 +320,9 @@ describe('API Performance Tests', () => {
       }))
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue(largeDataset),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue(largeDataset),
           }),
         }),
       })

@@ -1,12 +1,14 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/services/notification-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const preferences = await NotificationService.getUserPreferences(userId);
@@ -31,24 +33,28 @@ export async function GET(request: NextRequest) {
 			autoArchiveDays: 30,
 		});
 	} catch (error) {
-		console.error('Error fetching notification preferences:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 export async function PUT(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 		const preferences = await NotificationService.updateUserPreferences(userId, body);
 
 		return NextResponse.json(preferences);
 	} catch (error) {
-		console.error('Error updating notification preferences:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

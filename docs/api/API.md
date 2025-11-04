@@ -519,10 +519,10 @@ if (!isValidSignature) {
 
 For API support and questions:
 
-- **Documentation**: <https://docs.financbase.com>
+- **Documentation**: [Documentation Index](../README.md) (see [External Resources](../EXTERNAL_RESOURCES.md) for external docs)
 - **Support Email**: <support@financbase.com>
-- **Community Forum**: <https://community.financbase.com>
-- **Status Page**: <https://status.financbase.com>
+- **Community Forum**: See [External Resources](../EXTERNAL_RESOURCES.md) (community.financbase.com - not yet deployed)
+- **Status Page**: [System Status Page](/status) - Real-time system health monitoring
 
 ## Changelog
 

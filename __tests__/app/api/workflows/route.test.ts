@@ -1,38 +1,38 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 import { GET, POST } from '@/app/api/workflows/route'
 import { db } from '@/lib/db'
 
 // Mock database
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   db: {
-    select: jest.fn(),
-    insert: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
 // Mock authentication
-jest.mock('@clerk/nextjs/server', () => ({
+vi.mock('@clerk/nextjs/server', () => ({
   auth: () => Promise.resolve({ userId: 'user-123' }),
 }))
 
 describe('/api/workflows', () => {
   let mockDb: {
-    select: jest.MockedFunction<any>;
-    insert: jest.MockedFunction<any>;
-    update: jest.MockedFunction<any>;
-    delete: jest.MockedFunction<any>;
+    select: ReturnType<typeof vi.fn>;
+    insert: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockDb = db as {
-      select: jest.MockedFunction<any>;
-      insert: jest.MockedFunction<any>;
-      update: jest.MockedFunction<any>;
-      delete: jest.MockedFunction<any>;
+      select: ReturnType<typeof vi.fn>;
+      insert: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
+      delete: ReturnType<typeof vi.fn>;
     }
   })
 
@@ -58,9 +58,9 @@ describe('/api/workflows', () => {
       ]
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockReturnValue(mockWorkflows),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue(mockWorkflows),
           }),
         }),
       })
@@ -76,9 +76,9 @@ describe('/api/workflows', () => {
 
     it('should handle database errors gracefully', async () => {
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockRejectedValue(new Error('Database error')),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockRejectedValue(new Error('Database error')),
           }),
         }),
       })
@@ -104,9 +104,9 @@ describe('/api/workflows', () => {
       ]
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue(mockWorkflows),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue(mockWorkflows),
           }),
         }),
       })
@@ -131,7 +131,7 @@ describe('/api/workflows', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'workflow-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'workflow-1' }),
       })
 
       const request = new NextRequest('http://localhost:3000/api/workflows', {
@@ -224,7 +224,7 @@ describe('/api/workflows', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockRejectedValue(new Error('Database error')),
+        values: vi.fn().mockRejectedValue(new Error('Database error')),
       })
 
       const request = new NextRequest('http://localhost:3000/api/workflows', {

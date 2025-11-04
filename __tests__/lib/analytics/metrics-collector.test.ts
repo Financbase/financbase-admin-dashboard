@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { MetricsCollector } from '@/lib/analytics/metrics-collector'
 import { db } from '@/lib/db'
 
 // Mock database
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   db: {
-    select: jest.fn(),
-    insert: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
@@ -17,7 +17,7 @@ describe('MetricsCollector', () => {
   let mockDb: any
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     metricsCollector = new MetricsCollector()
     mockDb = db as any
   })
@@ -33,7 +33,7 @@ describe('MetricsCollector', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'metric-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'metric-1' }),
       })
 
       const result = await metricsCollector.recordMetric(metricData)
@@ -68,7 +68,7 @@ describe('MetricsCollector', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockRejectedValue(new Error('Database error')),
+        values: vi.fn().mockRejectedValue(new Error('Database error')),
       })
 
       const result = await metricsCollector.recordMetric(metricData)
@@ -89,7 +89,7 @@ describe('MetricsCollector', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'business-metric-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'business-metric-1' }),
       })
 
       const result = await metricsCollector.recordBusinessMetric(businessMetric)
@@ -125,7 +125,7 @@ describe('MetricsCollector', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'system-metric-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'system-metric-1' }),
       })
 
       const result = await metricsCollector.recordSystemMetric(systemMetric)
@@ -142,7 +142,7 @@ describe('MetricsCollector', () => {
       ]
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'aggregated-metric-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'aggregated-metric-1' }),
       })
 
       const result = await metricsCollector.aggregateSystemMetrics(systemMetrics)
@@ -181,9 +181,9 @@ describe('MetricsCollector', () => {
       ]
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue(mockMetrics),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue(mockMetrics),
           }),
         }),
       })
@@ -202,9 +202,9 @@ describe('MetricsCollector', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue([]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue([]),
           }),
         }),
       })
@@ -230,9 +230,9 @@ describe('MetricsCollector', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            groupBy: jest.fn().mockResolvedValue([mockStats]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            groupBy: vi.fn().mockResolvedValue([mockStats]),
           }),
         }),
       })
@@ -256,10 +256,10 @@ describe('MetricsCollector', () => {
       ]
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            groupBy: jest.fn().mockReturnValue({
-              orderBy: jest.fn().mockResolvedValue(mockTimeSeriesData),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            groupBy: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockResolvedValue(mockTimeSeriesData),
             }),
           }),
         }),
@@ -285,7 +285,7 @@ describe('MetricsCollector', () => {
       }
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'event-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'event-1' }),
       })
 
       const result = await metricsCollector.recordEvent(eventData)
@@ -329,9 +329,9 @@ describe('MetricsCollector', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            groupBy: jest.fn().mockResolvedValue([mockAnalytics]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            groupBy: vi.fn().mockResolvedValue([mockAnalytics]),
           }),
         }),
       })

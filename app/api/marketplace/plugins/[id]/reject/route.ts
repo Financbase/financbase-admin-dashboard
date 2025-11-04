@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { marketplacePlugins } from '@/lib/db/schemas';
 import { eq } from 'drizzle-orm';
 import { isAdmin } from '@/lib/auth/financbase-rbac';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * POST /api/marketplace/plugins/[id]/reject
@@ -14,12 +15,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const requestId = generateRequestId();
-  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
       return ApiErrorHandler.unauthorized();
     }
+    
+    const { id } = await params;
 
     // Check if user is admin
     const adminStatus = await isAdmin();

@@ -3,10 +3,18 @@
  * Tests the fixed approval workflows API with real database operations
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../../app/api/approval-workflows/route';
 import { TestDatabase } from '../test-db';
+
+// Mock server-only
+vi.mock('server-only', () => ({}));
+
+// Mock Clerk auth
+vi.mock('@clerk/nextjs/server', () => ({
+  auth: vi.fn(),
+}));
 
 describe('Approval Workflows API - Real Database Integration', () => {
   let testDb: TestDatabase;
@@ -21,6 +29,11 @@ describe('Approval Workflows API - Real Database Integration', () => {
   });
 
   it('should handle GET requests to approval workflows API', async () => {
+    const { auth } = await import('@clerk/nextjs/server');
+    vi.mocked(auth).mockResolvedValue({
+      userId: null,
+    } as any);
+
     const request = new NextRequest('http://localhost:3000/api/approval-workflows');
     const response = await GET(request);
 
@@ -28,10 +41,15 @@ describe('Approval Workflows API - Real Database Integration', () => {
     expect(response.status).toBe(401);
     
     const data = await response.json();
-    expect(data.error).toBe('Unauthorized');
+    expect(data.error?.message || data.error || data.message).toContain('Unauthorized');
   });
 
   it('should handle POST requests to approval workflows API', async () => {
+    const { auth } = await import('@clerk/nextjs/server');
+    vi.mocked(auth).mockResolvedValue({
+      userId: null,
+    } as any);
+
     const workflowData = {
       name: 'Test Approval Workflow',
       description: 'Test workflow for integration testing',
@@ -66,13 +84,16 @@ describe('Approval Workflows API - Real Database Integration', () => {
       body: JSON.stringify(workflowData),
     });
 
+    // Mock request.json() method
+    request.json = vi.fn().mockResolvedValue(workflowData);
+
     const response = await POST(request);
 
     // Should return 401 (unauthorized) since we don't have auth
     expect(response.status).toBe(401);
     
     const data = await response.json();
-    expect(data.error).toBe('Unauthorized');
+    expect(data.error?.message || data.error || data.message).toContain('Unauthorized');
   });
 
   it('should validate API route structure', async () => {
@@ -81,6 +102,11 @@ describe('Approval Workflows API - Real Database Integration', () => {
   });
 
   it('should handle query parameters correctly', async () => {
+    const { auth } = await import('@clerk/nextjs/server');
+    vi.mocked(auth).mockResolvedValue({
+      userId: null,
+    } as any);
+
     const request = new NextRequest('http://localhost:3000/api/approval-workflows?status=active&limit=10&offset=0');
     const response = await GET(request);
 

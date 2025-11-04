@@ -3,12 +3,14 @@ import { db } from '@/lib/db';
 import { workflowTemplates } from '@/lib/db/schemas';
 import { eq, desc, and, like, or } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -50,25 +52,29 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(templates);
   } catch (error) {
-    console.error('Error fetching workflow templates:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
+
     const { name, description, category, templateConfig, tags } = body;
 
     if (!name || !description || !category || !templateConfig) {
-      return NextResponse.json({ 
-        error: 'Name, description, category, and templateConfig are required' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest('Name, description, category, and templateConfig are required');
     }
 
     const newTemplate = await db.insert(workflowTemplates).values({

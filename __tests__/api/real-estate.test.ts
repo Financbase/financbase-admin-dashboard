@@ -1,69 +1,146 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
+// Mock server-only
+vi.mock('server-only', () => ({}));
+
 // Mock the database connection
+// The sql function needs to work as a template tag function: sql`query`
+// Create a function that can be called as a template tag and stores mock data
+let mockSqlCallCount = 0;
+let mockSqlResponses: any[][] = [];
+let mockSqlError: Error | null = null;
+
+const createMockSql = () => {
+  const sqlFunction = ((strings: TemplateStringsArray, ...values: any[]) => {
+    // If error is set, throw it
+    if (mockSqlError) {
+      const error = mockSqlError;
+      mockSqlError = null; // Reset after throwing
+      return Promise.reject(error);
+    }
+    // Return data based on call count
+    const response = mockSqlResponses[mockSqlCallCount] || [];
+    mockSqlCallCount++;
+    return Promise.resolve(response);
+  }) as any;
+  
+  // Make it work as a template tag function
+  Object.assign(sqlFunction, {
+    [Symbol.for('__neon_sql_tag__')]: true,
+  });
+  
+  return sqlFunction;
+};
+
+// Create a shared mock SQL instance
+const sharedMockSql = createMockSql();
+
+// Mock neon to return a function that creates a new sql function
+const mockNeon = vi.fn(() => sharedMockSql);
+
 vi.mock('@neondatabase/serverless', () => ({
-  neon: vi.fn(() => ({
-    sql: vi.fn(),
-  })),
+  neon: mockNeon,
+}));
+
+// Mock the database instance
+vi.mock('@/lib/db', () => ({
+  db: {
+    select: vi.fn().mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([]),
+        limit: vi.fn().mockResolvedValue([]),
+      }),
+    }),
+    insert: vi.fn().mockReturnValue({
+      values: vi.fn().mockResolvedValue([{ id: 1 }]),
+    }),
+    update: vi.fn().mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([{ id: 1 }]),
+      }),
+    }),
+    delete: vi.fn().mockReturnValue({
+      where: vi.fn().mockResolvedValue([]),
+    }),
+    execute: vi.fn().mockResolvedValue([]),
+  },
+  getRawSqlConnection: () => ({
+    sql: sharedMockSql,
+  }),
 }));
 
 // Mock Clerk auth
 vi.mock('@clerk/nextjs/server', () => ({
-  auth: vi.fn(),
+  auth: vi.fn().mockResolvedValue({
+    userId: 'test-user-123',
+    orgId: 'test-org-123',
+  }),
 }));
 
 describe('Real Estate API Endpoints', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSqlCallCount = 0;
+    mockSqlResponses = [];
+    mockSqlError = null;
   });
 
   describe('GET /api/real-estate/stats', () => {
     it('should return property statistics', async () => {
       const { GET } = await import('@/app/api/real-estate/stats/route');
       
-      const mockSql = vi.fn().mockResolvedValue([
-        {
+      // Set up mock data for the sql template tag calls
+      // The route makes multiple sql calls in sequence:
+      // 1. stats query
+      // 2. income query
+      // 3. expenses query
+      // 4. occupancy query
+      // 5. roi query
+      mockSqlResponses = [
+        [{
           total_properties: 5,
           total_value: 2500000,
           total_invested: 2000000,
           active_properties: 4,
           vacant_properties: 1,
           maintenance_properties: 0,
-        }
-      ]);
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+        }],
+        [{ monthly_income: 5000 }],
+        [{ monthly_expenses: 2000 }],
+        [{ occupied_units: 8, total_units: 10 }],
+        [{ average_roi: 5.5 }],
+      ];
 
       const request = new NextRequest('http://localhost:3000/api/real-estate/stats');
-      const response = await GET();
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.stats).toEqual({
         totalProperties: 5,
-        totalValue: 2500000,
-        monthlyIncome: 0,
-        occupancyRate: 0,
-        averageROI: 0,
+        totalPortfolioValue: 2500000,
+        totalInvested: 2000000,
+        monthlyCashFlow: 3000, // 5000 - 2000
+        monthlyIncome: 5000,
+        monthlyExpenses: 2000,
+        occupancyRate: 80, // (8/10) * 100
+        averageRoi: 5.5,
         portfolioGrowth: 0,
         activeProperties: 4,
         vacantProperties: 1,
         maintenanceProperties: 0,
-        occupiedUnits: 0,
+        occupiedUnits: 8,
+        totalUnits: 10,
       });
     });
 
     it('should handle database errors gracefully', async () => {
       const { GET } = await import('@/app/api/real-estate/stats/route');
       
-      const mockSql = vi.fn().mockRejectedValue(new Error('Database connection failed'));
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+      // Set error to be thrown on next SQL call
+      mockSqlError = new Error('Database connection failed');
+      mockSqlCallCount = 0;
 
       const request = new NextRequest('http://localhost:3000/api/real-estate/stats');
       const response = await GET();
@@ -74,11 +151,9 @@ describe('Real Estate API Endpoints', () => {
     it('should return empty stats when no properties exist', async () => {
       const { GET } = await import('@/app/api/real-estate/stats/route');
       
-      const mockSql = vi.fn().mockResolvedValue([]);
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+      // Set up mock to return empty array for stats query
+      mockSqlResponses = [[]];
+      mockSqlCallCount = 0;
 
       const request = new NextRequest('http://localhost:3000/api/real-estate/stats');
       const response = await GET();
@@ -87,11 +162,16 @@ describe('Real Estate API Endpoints', () => {
       expect(response.status).toBe(200);
       expect(data.stats).toEqual({
         totalProperties: 0,
-        totalValue: 0,
-        monthlyIncome: 0,
+        totalPortfolioValue: 0,
+        totalInvested: 0,
+        monthlyCashFlow: 0,
         occupancyRate: 0,
-        averageROI: 0,
+        averageRoi: 0,
         portfolioGrowth: 0,
+        activeProperties: 0,
+        vacantProperties: 0,
+        maintenanceProperties: 0,
+        occupiedUnits: 0,
       });
     });
   });
@@ -100,9 +180,10 @@ describe('Real Estate API Endpoints', () => {
     it('should return properties with pagination', async () => {
       const { GET } = await import('@/app/api/real-estate/properties/route');
       
-      const mockCountSql = vi.fn().mockResolvedValue([{ total: 10 }]);
-      const mockPropertiesSql = vi.fn().mockResolvedValue([
-        {
+      // Set up mock responses for count query and properties query
+      mockSqlResponses = [
+        [{ total: 10 }],
+        [{
           id: 1,
           name: 'Test Property',
           address: '123 Test St',
@@ -118,16 +199,9 @@ describe('Real Estate API Endpoints', () => {
           status: 'active',
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:00:00Z',
-        }
-      ]);
-
-      const mockSql = vi.fn()
-        .mockImplementationOnce(() => mockCountSql())
-        .mockImplementationOnce(() => mockPropertiesSql());
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+        }]
+      ];
+      mockSqlCallCount = 0;
 
       const request = new NextRequest('http://localhost:3000/api/real-estate/properties?limit=10&offset=0');
       const response = await GET(request);
@@ -144,11 +218,8 @@ describe('Real Estate API Endpoints', () => {
     it('should handle invalid pagination parameters', async () => {
       const { GET } = await import('@/app/api/real-estate/properties/route');
       
-      const mockSql = vi.fn().mockResolvedValue([]);
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+      mockSqlResponses = [[{ total: 0 }, []]];
+      mockSqlCallCount = 0;
 
       const request = new NextRequest('http://localhost:3000/api/real-estate/properties?limit=invalid&offset=invalid');
       const response = await GET(request);
@@ -164,7 +235,7 @@ describe('Real Estate API Endpoints', () => {
     it('should return realtor statistics', async () => {
       const { GET } = await import('@/app/api/real-estate/realtor/stats/route');
       
-      const mockSql = vi.fn().mockResolvedValue([
+      mockSqlResponses = [[
         {
           active_listings: 3,
           total_commissions: 15000,
@@ -175,11 +246,8 @@ describe('Real Estate API Endpoints', () => {
           scheduled_showings: 2,
           closed_deals: 1,
         }
-      ]);
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+      ]];
+      mockSqlCallCount = 0;
 
       const response = await GET();
       const data = await response.json();
@@ -203,9 +271,9 @@ describe('Real Estate API Endpoints', () => {
     it('should return leads with pagination', async () => {
       const { GET } = await import('@/app/api/real-estate/realtor/leads/route');
       
-      const mockCountSql = vi.fn().mockResolvedValue([{ total: 5 }]);
-      const mockLeadsSql = vi.fn().mockResolvedValue([
-        {
+      mockSqlResponses = [
+        [{ total: 5 }],
+        [{
           id: 1,
           name: 'John Doe',
           email: 'john@example.com',
@@ -217,16 +285,9 @@ describe('Real Estate API Endpoints', () => {
           source: 'Website',
           created_at: '2024-01-15T00:00:00Z',
           updated_at: '2024-01-15T00:00:00Z',
-        }
-      ]);
-
-      const mockSql = vi.fn()
-        .mockImplementationOnce(() => mockCountSql())
-        .mockImplementationOnce(() => mockLeadsSql());
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+        }]
+      ];
+      mockSqlCallCount = 0;
 
       const request = new NextRequest('http://localhost:3000/api/real-estate/realtor/leads');
       const response = await GET(request);
@@ -255,7 +316,7 @@ describe('Real Estate API Endpoints', () => {
     it('should create a new lead', async () => {
       const { POST } = await import('@/app/api/real-estate/realtor/leads/route');
       
-      const mockSql = vi.fn().mockResolvedValue([
+      mockSqlResponses = [[
         {
           id: 1,
           name: 'Jane Smith',
@@ -269,11 +330,8 @@ describe('Real Estate API Endpoints', () => {
           created_at: '2024-01-16T00:00:00Z',
           updated_at: '2024-01-16T00:00:00Z',
         }
-      ]);
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+      ]];
+      mockSqlCallCount = 0;
 
       const requestBody = {
         name: 'Jane Smith',
@@ -332,7 +390,7 @@ describe('Real Estate API Endpoints', () => {
     it('should return buyer statistics', async () => {
       const { GET } = await import('@/app/api/real-estate/buyer/stats/route');
       
-      const mockSql = vi.fn().mockResolvedValue([
+      mockSqlResponses = [[
         {
           saved_properties: 8,
           viewed_properties: 12,
@@ -341,11 +399,8 @@ describe('Real Estate API Endpoints', () => {
           monthly_budget: 2500,
           down_payment_saved: 75000,
         }
-      ]);
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+      ]];
+      mockSqlCallCount = 0;
 
       const response = await GET();
       const data = await response.json();
@@ -366,9 +421,11 @@ describe('Real Estate API Endpoints', () => {
     it('should return saved properties', async () => {
       const { GET } = await import('@/app/api/real-estate/buyer/saved-properties/route');
       
-      const mockSql = vi.fn().mockResolvedValue([
-        {
+      // The route makes two SQL calls: one for properties and one for count
+      mockSqlResponses = [
+        [{
           id: 1,
+          property_id: 'prop-123',
           name: 'Charming Family Home',
           address: '123 Oak Street',
           city: 'Springfield',
@@ -384,12 +441,11 @@ describe('Real Estate API Endpoints', () => {
           saved_date: '2024-01-10',
           notes: 'Great neighborhood, good schools',
           rating: 4,
-        }
-      ]);
-
-      vi.mocked(await import('@neondatabase/serverless')).neon.mockReturnValue({
-        sql: mockSql,
-      });
+          created_at: '2024-01-10T00:00:00Z',
+        }],
+        [{ total: 1 }],
+      ];
+      mockSqlCallCount = 0;
 
       const request = new NextRequest('http://localhost:3000/api/real-estate/buyer/saved-properties');
       const response = await GET(request);
@@ -399,6 +455,7 @@ describe('Real Estate API Endpoints', () => {
       expect(data.savedProperties).toHaveLength(1);
       expect(data.savedProperties[0]).toEqual({
         id: 1,
+        propertyId: 'prop-123',
         name: 'Charming Family Home',
         address: '123 Oak Street',
         city: 'Springfield',
@@ -414,6 +471,7 @@ describe('Real Estate API Endpoints', () => {
         savedDate: '2024-01-10',
         notes: 'Great neighborhood, good schools',
         rating: 4,
+        createdAt: '2024-01-10T00:00:00Z',
       });
     });
   });

@@ -73,13 +73,19 @@ export async function GET(request: NextRequest) {
  * Get search suggestions/autocomplete
  */
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 		const partialQuery = body.query || '';
 		const limit = body.limit || 10;
 
@@ -97,14 +103,7 @@ export async function POST(request: NextRequest) {
 			data: suggestions,
 		});
 	} catch (error) {
-		console.error('Search Suggestions API Error:', error);
-		return NextResponse.json(
-			{
-				error: 'Failed to get suggestions',
-				details: error instanceof Error ? error.message : 'Unknown error',
-			},
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 

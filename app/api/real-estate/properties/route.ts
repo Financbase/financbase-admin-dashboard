@@ -89,10 +89,6 @@ export async function GET(request: NextRequest) {
 		});
 
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return ApiErrorHandler.validationError(error, requestId);
-		}
-		console.error('Failed to fetch properties:', error);
-		return ApiErrorHandler.databaseError(error, requestId);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

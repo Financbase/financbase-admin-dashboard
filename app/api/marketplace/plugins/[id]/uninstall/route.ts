@@ -1,28 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { PluginSystem } from '@/lib/plugins/plugin-system';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+  const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const pluginId = parseInt(params.id);
+    const pluginId = parseInt(id);
     if (Number.isNaN(pluginId)) {
-      return NextResponse.json({ error: 'Invalid plugin ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid plugin ID');
     }
 
     // Get installation ID from query params or request body
     const { searchParams } = new URL(request.url);
     const installationId = parseInt(searchParams.get('installationId') || '0');
     
-    if (Number.isNaN(installationId)) {
-      return NextResponse.json({ error: 'Invalid installation ID' }, { status: 400 });
+    if (Number.isNaN(installationId) || installationId === 0) {
+      return ApiErrorHandler.badRequest('Installation ID is required');
     }
 
     // Uninstall the plugin
@@ -33,42 +36,21 @@ export async function DELETE(
       message: 'Plugin uninstalled successfully'
     });
   } catch (error) {
-    console.error('Error uninstalling plugin:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    // Installation not found
-    if (errorMessage.includes('not found')) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Uninstall failed',
-          message: errorMessage
-        },
-        { status: 404 }
-      );
+    if (error instanceof Error) {
+      // Installation not found
+      if (error.message.includes('not found')) {
+        return ApiErrorHandler.notFound(error.message);
+      }
+      
+      // Database errors
+      if (error.message.includes('DATABASE_URL') || error.message.includes('connection')) {
+        return ApiErrorHandler.databaseError(
+          'Unable to connect to database. Please check your DATABASE_URL configuration.',
+          requestId
+        );
+      }
     }
     
-    // Database errors
-    if (errorMessage.includes('DATABASE_URL') || errorMessage.includes('connection')) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Database connection error',
-          message: 'Unable to connect to database. Please check your DATABASE_URL configuration.',
-          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-        },
-        { status: 503 }
-      );
-    }
-    
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Failed to uninstall plugin',
-        message: 'An error occurred while uninstalling the plugin',
-        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-      },
-      { status: 500 }
-    );
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

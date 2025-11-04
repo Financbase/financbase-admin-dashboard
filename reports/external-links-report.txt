@@ -1,0 +1,33 @@
+External Link Check Report
+==================================================
+
+Generated: 2025-11-04T03:38:40.436Z
+Total URLs found: 90
+Valid links: 80
+Broken links: 0
+Skipped links: 20
+
+
+SKIPPED LINKS
+--------------------------------------------------
+
+https://nextjs.org/docs/app/building-your-application/routing/error-handling - Domain/URL in skip list
+https://github.com/your-org/financbase-admin-dashboard/issues - Domain/URL in skip list
+https://github.com/financbase/financbase-admin-dashboard/discussions - Domain/URL in skip list
+https://github.com/financbase/sdk - Domain/URL in skip list
+https://github.com/financbase/plugin-examples - Domain/URL in skip list
+https://github.com/financbase/financbase-admin-dashboard/issues - Domain/URL in skip list
+http://localhost:3000 - Domain/URL in skip list
+https://github.com/your-org/financbase-admin-dashboard/discussions - Domain/URL in skip list
+https://app.financbase.com - Domain/URL in skip list
+https://help.financbase.com - Domain/URL in skip list
+https://nextjs.org/docs/app/building-your-application/routing/error-handling - Domain/URL in skip list
+https://github.com/your-org/financbase-admin-dashboard/issues - Domain/URL in skip list
+https://github.com/financbase/financbase-admin-dashboard/discussions - Domain/URL in skip list
+https://github.com/financbase/sdk - Domain/URL in skip list
+https://github.com/financbase/plugin-examples - Domain/URL in skip list
+https://github.com/financbase/financbase-admin-dashboard/issues - Domain/URL in skip list
+http://localhost:3000 - Domain/URL in skip list
+https://github.com/your-org/financbase-admin-dashboard/discussions - Domain/URL in skip list
+https://app.financbase.com - Domain/URL in skip list
+https://help.financbase.com - Domain/URL in skip list

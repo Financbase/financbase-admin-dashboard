@@ -3,10 +3,18 @@
  * Tests the fixed vendors API with real database operations
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../../app/api/vendors/route';
 import { TestDatabase } from '../test-db';
+
+// Mock server-only
+vi.mock('server-only', () => ({}));
+
+// Mock Clerk auth
+vi.mock('@clerk/nextjs/server', () => ({
+  auth: vi.fn(),
+}));
 
 describe('Vendors API - Real Database Integration', () => {
   let testDb: TestDatabase;
@@ -21,6 +29,11 @@ describe('Vendors API - Real Database Integration', () => {
   });
 
   it('should handle GET requests to vendors API', async () => {
+    const { auth } = await import('@clerk/nextjs/server');
+    vi.mocked(auth).mockResolvedValue({
+      userId: null,
+    } as any);
+
     const request = new NextRequest('http://localhost:3000/api/vendors');
     const response = await GET(request);
 
@@ -28,10 +41,15 @@ describe('Vendors API - Real Database Integration', () => {
     expect(response.status).toBe(401);
     
     const data = await response.json();
-    expect(data.error).toBe('Unauthorized');
+    expect(data.error?.message || data.error || data.message).toContain('Unauthorized');
   });
 
   it('should handle POST requests to vendors API', async () => {
+    const { auth } = await import('@clerk/nextjs/server');
+    vi.mocked(auth).mockResolvedValue({
+      userId: null,
+    } as any);
+
     const vendorData = {
       name: 'Test Vendor Company',
       email: 'billing@testvendor.com',
@@ -72,13 +90,16 @@ describe('Vendors API - Real Database Integration', () => {
       body: JSON.stringify(vendorData),
     });
 
+    // Mock request.json() method
+    request.json = vi.fn().mockResolvedValue(vendorData);
+
     const response = await POST(request);
 
     // Should return 401 (unauthorized) since we don't have auth
     expect(response.status).toBe(401);
     
     const data = await response.json();
-    expect(data.error).toBe('Unauthorized');
+    expect(data.error?.message || data.error || data.message).toContain('Unauthorized');
   });
 
   it('should validate API route structure', async () => {
@@ -87,6 +108,11 @@ describe('Vendors API - Real Database Integration', () => {
   });
 
   it('should handle query parameters correctly', async () => {
+    const { auth } = await import('@clerk/nextjs/server');
+    vi.mocked(auth).mockResolvedValue({
+      userId: null,
+    } as any);
+
     const request = new NextRequest('http://localhost:3000/api/vendors?status=active&category=office_supplies&limit=10&offset=0');
     const response = await GET(request);
 

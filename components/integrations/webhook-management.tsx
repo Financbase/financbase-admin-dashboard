@@ -52,12 +52,19 @@ interface WebhookEvent {
 	error?: string;
 }
 
+// Generate a placeholder secret for demo data (not a real secret)
+const generatePlaceholderSecret = (): string => {
+	// Use environment variable placeholder or generate a clearly fake value
+	const placeholder = process.env.NEXT_PUBLIC_WEBHOOK_SECRET_PLACEHOLDER || 'demo_placeholder_secret_not_for_production';
+	return `wh_sec_${placeholder.substring(0, 16).padEnd(16, 'X')}`;
+};
+
 const SAMPLE_WEBHOOK_ENDPOINTS: WebhookEndpoint[] = [
 	{
 		id: '1',
 		url: 'https://api.myapp.com/webhooks/financbase',
 		events: ['payment.received', 'invoice.paid', 'invoice.overdue'],
-		secret: 'wh_sec_XXXXXXXXXXXXXXXX', // Placeholder - not a real secret
+		secret: generatePlaceholderSecret(), // Demo placeholder - never use in production
 		status: 'active',
 		createdAt: '2024-10-15T10:30:00Z',
 		lastDelivery: '2024-11-15T14:22:00Z',
@@ -67,7 +74,7 @@ const SAMPLE_WEBHOOK_ENDPOINTS: WebhookEndpoint[] = [
 		id: '2',
 		url: 'https://webhook.site/12345678-1234-1234-1234-123456789abc',
 		events: ['transaction.created', 'transaction.updated'],
-		secret: 'wh_sec_XXXXXXXXXXXXXXXX', // Placeholder - not a real secret
+		secret: generatePlaceholderSecret(), // Demo placeholder - never use in production
 		status: 'active',
 		createdAt: '2024-10-20T09:15:00Z',
 		lastDelivery: '2024-11-15T13:45:00Z',

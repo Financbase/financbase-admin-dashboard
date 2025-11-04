@@ -3,21 +3,23 @@ import { db } from '@/lib/db';
 import { workflows } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
   const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const workflowId = parseInt(id);
     if (isNaN(workflowId)) {
-      return NextResponse.json({ error: 'Invalid workflow ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid workflow ID');
     }
 
     const workflow = await db
@@ -27,13 +29,12 @@ export async function GET(
       .limit(1);
 
     if (workflow.length === 0) {
-      return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Workflow not found');
     }
 
     return NextResponse.json(workflow[0]);
   } catch (error) {
-    console.error('Error fetching workflow:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
@@ -41,19 +42,25 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
   const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const workflowId = parseInt(id);
     if (isNaN(workflowId)) {
-      return NextResponse.json({ error: 'Invalid workflow ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid workflow ID');
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
     const updateData: Partial<{
       name: string;
       description: string;
@@ -89,13 +96,12 @@ export async function PATCH(
       .returning();
 
     if (updatedWorkflow.length === 0) {
-      return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Workflow not found');
     }
 
     return NextResponse.json(updatedWorkflow[0]);
   } catch (error) {
-    console.error('Error updating workflow:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
@@ -103,16 +109,17 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
   const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const workflowId = parseInt(id);
     if (isNaN(workflowId)) {
-      return NextResponse.json({ error: 'Invalid workflow ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid workflow ID');
     }
 
     const deletedWorkflow = await db
@@ -121,12 +128,11 @@ export async function DELETE(
       .returning();
 
     if (deletedWorkflow.length === 0) {
-      return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Workflow not found');
     }
 
     return NextResponse.json({ message: 'Workflow deleted successfully' });
   } catch (error) {
-    console.error('Error deleting workflow:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

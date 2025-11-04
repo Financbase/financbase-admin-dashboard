@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { OnboardingService } from "@/lib/services/onboarding/onboarding-service";
 import { EmailService } from "@/lib/email/service";
 import { z } from "zod";
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // Validation schemas
 const completeStepSchema = z.object({
@@ -25,14 +26,21 @@ export async function POST(
 	request: NextRequest,
 	{ params }: RouteParams
 ) {
+	const requestId = generateRequestId();
+	const { stepId } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { stepId } = await params;
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = completeStepSchema.parse(body);
 		const { stepData = {}, timeSpent } = validatedData;
 
@@ -57,7 +65,6 @@ export async function POST(
 					persona as any
 				);
 			} catch (emailError) {
-				console.error("Error sending milestone email:", emailError);
 				// Don't fail the step completion if email fails
 			}
 		}
@@ -70,18 +77,7 @@ export async function POST(
 		});
 
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: "Validation error", details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error("Error completing step:", error);
-		return NextResponse.json(
-			{ error: "Failed to complete step" },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -92,14 +88,21 @@ export async function PATCH(
 	request: NextRequest,
 	{ params }: RouteParams
 ) {
+	const requestId = generateRequestId();
+	const { stepId } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const { stepId } = await params;
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = skipStepSchema.parse(body);
 		const { reason } = validatedData;
 
@@ -117,18 +120,7 @@ export async function PATCH(
 		});
 
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: "Validation error", details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		console.error("Error skipping step:", error);
-		return NextResponse.json(
-			{ error: "Failed to skip step" },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -139,30 +131,24 @@ export async function GET(
 	request: NextRequest,
 	{ params }: RouteParams
 ) {
+	const requestId = generateRequestId();
+	const { stepId } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
-
-		const { stepId } = await params;
 
 		// Get onboarding status to find the step
 		const onboardingStatus = await OnboardingService.getOnboardingStatus(userId);
 		if (!onboardingStatus) {
-			return NextResponse.json(
-				{ error: "No onboarding found for user" },
-				{ status: 404 }
-			);
+			return ApiErrorHandler.notFound("No onboarding found for user");
 		}
 
 		// Find the specific step
 		const step = onboardingStatus.steps.find(s => s.stepId === stepId);
 		if (!step) {
-			return NextResponse.json(
-				{ error: "Step not found" },
-				{ status: 404 }
-			);
+			return ApiErrorHandler.notFound("Step not found");
 		}
 
 		// Get step configuration from flow
@@ -176,11 +162,7 @@ export async function GET(
 		});
 
 	} catch (error) {
-		console.error("Error getting step details:", error);
-		return NextResponse.json(
-			{ error: "Failed to get step details" },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 

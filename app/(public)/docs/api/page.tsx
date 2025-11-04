@@ -156,6 +156,11 @@ export default function APIDocumentationPage() {
 							View Documentation
 								</Link>
 						</Button>
+							<Button variant="outline" size="lg" className="text-lg px-8" asChild>
+								<Link href="/docs/api/openapi.yaml" target="_blank">
+							OpenAPI Spec
+								</Link>
+						</Button>
 					</div>
 					<p className="text-sm text-muted-foreground mt-4">
 						Free developer plan • No credit card required
@@ -319,6 +324,12 @@ export default function APIDocumentationPage() {
 										<Link href="/docs/help">
 											<BookOpen className="h-4 w-4 mr-2" />
 											Browse Help Center
+										</Link>
+									</Button>
+									<Button variant="outline" asChild>
+										<Link href="/docs/api/openapi.yaml" target="_blank">
+											<Code className="h-4 w-4 mr-2" />
+											OpenAPI Spec
 										</Link>
 									</Button>
 								</div>

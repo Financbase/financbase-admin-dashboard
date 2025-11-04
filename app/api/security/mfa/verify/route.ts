@@ -1,30 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { MFAService } from '@/lib/security/mfa-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
+
     const { token } = body;
 
     if (!token) {
-      return NextResponse.json({ 
-        error: 'Verification token is required' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest('Verification token is required');
     }
 
     const verification = await MFAService.verifyMFA(userId, token);
 
     if (!verification.isValid) {
-      return NextResponse.json({ 
-        error: 'Invalid verification token',
-        remainingAttempts: verification.remainingAttempts
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest(
+        `Invalid verification token. ${verification.remainingAttempts !== undefined ? `Remaining attempts: ${verification.remainingAttempts}` : ''}`
+      );
     }
 
     return NextResponse.json({
@@ -32,10 +37,6 @@ export async function POST(request: NextRequest) {
       isBackupCode: verification.isBackupCode
     });
   } catch (error) {
-    console.error('Error verifying MFA:', error);
-    return NextResponse.json({ 
-      error: 'Failed to verify MFA',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

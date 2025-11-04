@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { DashboardBuilderService } from '@/lib/services/dashboard-builder-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -19,22 +21,25 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(dashboards);
   } catch (error) {
-    console.error('Error fetching dashboards:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch dashboards',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return ApiErrorHandler.badRequest('Invalid JSON in request body');
+    }
+
     const {
       name,
       description,
@@ -46,9 +51,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!name) {
-      return NextResponse.json({ 
-        error: 'Dashboard name is required' 
-      }, { status: 400 });
+      return ApiErrorHandler.badRequest('Dashboard name is required');
     }
 
     const dashboard = await DashboardBuilderService.createDashboard(
@@ -61,10 +64,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(dashboard);
   } catch (error) {
-    console.error('Error creating dashboard:', error);
-    return NextResponse.json({ 
-      error: 'Failed to create dashboard',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

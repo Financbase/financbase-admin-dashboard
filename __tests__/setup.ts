@@ -8,6 +8,9 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import dotenv from 'dotenv';
 
+// Mock server-only module
+vi.mock('server-only', () => ({}));
+
 // Load environment variables for tests
 dotenv.config({ path: '.env.local' });
 
@@ -34,22 +37,37 @@ vi.mock('next/navigation', () => ({
 vi.mock('next/server', () => ({
   NextRequest: class MockNextRequest {
     public headers: Headers;
-    constructor(public url: string, public init?: RequestInit) {
+    public url: string;
+    public nextUrl: URL;
+    
+    constructor(url: string, public init?: RequestInit) {
+      this.url = url;
       this.headers = new Headers(init?.headers);
-      this.nextUrl = {
-        searchParams: new URLSearchParams(),
-      };
+      // Parse URL to extract searchParams - URL already has searchParams as a getter
+      this.nextUrl = new URL(url);
     }
-    nextUrl = {
-      searchParams: new URLSearchParams(),
-    };
-    json = vi.fn();
+    
+    json = vi.fn(async () => {
+      if (this.init?.body) {
+        if (typeof this.init.body === 'string') {
+          try {
+            return JSON.parse(this.init.body);
+          } catch {
+            throw new Error('Invalid JSON');
+          }
+        }
+        return this.init.body;
+      }
+      return {};
+    });
+    
     text = vi.fn(async () => {
       if (this.init?.body) {
         return typeof this.init.body === 'string' ? this.init.body : JSON.stringify(this.init.body);
       }
       return '';
     });
+    
     formData = vi.fn();
   },
   NextResponse: {

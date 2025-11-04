@@ -25,7 +25,7 @@ export async function POST(
 		try {
 			const id = parseInt(params.id);
 			if (isNaN(id)) {
-				return ApiErrorHandler.validationError(new Error('Invalid blog post ID') as any);
+				return ApiErrorHandler.badRequest('Invalid blog post ID');
 			}
 
 			const publishedPost = await blogService.publishPost(id);

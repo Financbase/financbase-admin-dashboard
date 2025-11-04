@@ -3,21 +3,23 @@ import { db } from '@/lib/db';
 import { webhooks, webhookDeliveries } from '@/lib/db/schemas';
 import { eq, and, desc } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
   const { id } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     const webhookId = parseInt(id);
     if (Number.isNaN(webhookId)) {
-      return NextResponse.json({ error: 'Invalid webhook ID' }, { status: 400 });
+      return ApiErrorHandler.badRequest('Invalid webhook ID');
     }
 
     // Verify webhook ownership
@@ -28,7 +30,7 @@ export async function GET(
       .limit(1);
 
     if (webhook.length === 0) {
-      return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
+      return ApiErrorHandler.notFound('Webhook not found');
     }
 
     const { searchParams } = new URL(request.url);
@@ -63,8 +65,6 @@ export async function GET(
 
     return NextResponse.json(deliveries);
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error fetching webhook deliveries:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

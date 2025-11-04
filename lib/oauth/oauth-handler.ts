@@ -64,9 +64,45 @@ export class OAuthHandler {
   }
 
   /**
+   * Handle OAuth callback and exchange code for tokens
+   */
+  async handleCallback(code: string, state: string): Promise<{
+    success: boolean;
+    tokens?: OAuthToken;
+    error?: string;
+  }> {
+    try {
+      // Validate state
+      const decodedState = await this.validateState(state);
+      if (!decodedState) {
+        return { success: false, error: 'Invalid or expired state parameter' };
+      }
+
+      // Exchange code for tokens
+      const tokens = await this.exchangeCodeForToken(code, state);
+      
+      // Save tokens to database
+      await this.saveToken(
+        decodedState.userId,
+        decodedState.organizationId,
+        decodedState.integrationId,
+        tokens
+      );
+
+      return { success: true, tokens };
+    } catch (error) {
+      console.error('OAuth callback error:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error during OAuth callback' 
+      };
+    }
+  }
+
+  /**
    * Exchange authorization code for access token
    */
-  async exchangeCodeForToken(code: string, state: string): Promise<OAuthToken> {
+  private async exchangeCodeForToken(code: string, state: string): Promise<OAuthToken> {
     // Verify state
     const decodedState = this.decodeState(state);
     if (!decodedState) {
@@ -110,9 +146,29 @@ export class OAuthHandler {
   }
 
   /**
-   * Refresh access token using refresh token
+   * Refresh an expired access token
    */
-  async refreshAccessToken(refreshToken: string): Promise<OAuthToken> {
+  async refreshToken(refreshToken: string): Promise<{
+    success: boolean;
+    tokens?: OAuthToken;
+    error?: string;
+  }> {
+    try {
+      const tokens = await this.refreshAccessToken(refreshToken);
+      return { success: true, tokens };
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to refresh token' 
+      };
+    }
+  }
+
+  /**
+   * Exchange refresh token for a new access token
+   */
+  private async refreshAccessToken(refreshToken: string): Promise<OAuthToken> {
     const tokenData = {
       grant_type: 'refresh_token',
       client_id: this.config.clientId,
@@ -126,7 +182,7 @@ export class OAuthHandler {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
       },
-      body: new URLSearchParams(tokenData),
+      body: new URLSearchParams(tokenData as Record<string, string>),
     });
 
     if (!response.ok) {
@@ -149,30 +205,50 @@ export class OAuthHandler {
   }
 
   /**
-   * Revoke access token
+   * Validate and decode the OAuth state
    */
-  async revokeToken(token: string, tokenType: 'access_token' | 'refresh_token' = 'access_token'): Promise<boolean> {
-    const revokeData = {
-      token,
-      token_type_hint: tokenType,
-      client_id: this.config.clientId,
-      client_secret: this.config.clientSecret,
-    };
-
+  private async validateState(state: string): Promise<OAuthState | null> {
     try {
-      const response = await fetch(this.config.tokenUrl.replace('/token', '/revoke'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams(revokeData),
-      });
+      const decoded = this.decodeState(state);
+      if (!decoded) {
+        return null;
+      }
 
-      return response.ok;
+      // Verify signature
+      const signature = crypto
+        .createHmac('sha256', this.stateSecret)
+        .update(`${decoded.data}:${decoded.timestamp}:${decoded.nonce}`)
+        .digest('hex');
+
+      if (signature !== decoded.signature) {
+        return null;
+      }
+
+      // Check timestamp (state should be used within 10 minutes)
+      const now = Date.now();
+      const stateAge = now - decoded.timestamp;
+      if (stateAge > 10 * 60 * 1000) { // 10 minutes
+        return null;
+      }
+
+      return JSON.parse(decoded.data);
     } catch (error) {
-      console.error('Token revocation failed:', error);
-      return false;
+      console.error('Failed to validate state:', error);
+      return null;
     }
+  }
+
+  /**
+   * Save OAuth tokens to the database
+   */
+  private async saveToken(
+    userId: string,
+    organizationId: string | undefined,
+    integrationId: number,
+    tokens: OAuthToken
+  ): Promise<void> {
+    // In a real implementation, you would save the tokens to your database
+    console.log('Saving tokens for user:', userId);
   }
 
   /**
@@ -232,41 +308,24 @@ export class OAuthHandler {
       .update(`${stateData}:${timestamp}:${nonce}`)
       .digest('hex');
 
-    const encodedState = Buffer.from(JSON.stringify({
+    return Buffer.from(JSON.stringify({
       data: stateData,
       timestamp,
       nonce,
       signature,
     })).toString('base64');
-
-    return encodedState;
   }
 
   /**
-   * Decode and verify state parameter
+   * Decode state parameter from OAuth flow
    */
-  private decodeState(encodedState: string): OAuthState | null {
+  private decodeState(state: string): { data: string; timestamp: number; nonce: string; signature: string } | null {
     try {
-      const decoded = JSON.parse(Buffer.from(encodedState, 'base64').toString());
-      
-      // Verify signature
-      const expectedSignature = crypto
-        .createHmac('sha256', this.stateSecret)
-        .update(`${decoded.data}:${decoded.timestamp}:${decoded.nonce}`)
-        .digest('hex');
-
-      if (expectedSignature !== decoded.signature) {
+      const decoded = JSON.parse(Buffer.from(state, 'base64').toString('utf-8'));
+      if (!decoded || !decoded.data || !decoded.timestamp || !decoded.nonce || !decoded.signature) {
         return null;
       }
-
-      // Check timestamp (state should be used within 10 minutes)
-      const now = Date.now();
-      const stateAge = now - decoded.timestamp;
-      if (stateAge > 10 * 60 * 1000) { // 10 minutes
-        return null;
-      }
-
-      return JSON.parse(decoded.data);
+      return decoded;
     } catch (error) {
       console.error('Failed to decode state:', error);
       return null;

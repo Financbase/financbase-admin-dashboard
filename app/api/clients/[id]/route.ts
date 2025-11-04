@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ClientService } from '@/lib/services/client-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const updateClientSchema = z.object({
 	companyName: z.string().min(1).optional(),
@@ -25,27 +26,22 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
-		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const client = await ClientService.getById(id, userId);
 		if (!client) {
-			return NextResponse.json({ error: 'Client not found' }, { status: 404 });
+			return ApiErrorHandler.notFound('Client not found');
 		}
 
 		return NextResponse.json({ client });
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error fetching client:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch client' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -53,14 +49,21 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
-		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = updateClientSchema.parse(body);
 
 		const client = await ClientService.update({
@@ -71,20 +74,7 @@ export async function PUT(
 
 		return NextResponse.json({ client });
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error updating client:', error);
-		return NextResponse.json(
-			{ error: 'Failed to update client' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -92,23 +82,18 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
-		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		await ClientService.delete(id, userId);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error deleting client:', error);
-		return NextResponse.json(
-			{ error: 'Failed to delete client' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

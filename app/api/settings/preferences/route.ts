@@ -8,15 +8,17 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { userPreferences } from '@/lib/db/schemas';
 import { eq } from 'drizzle-orm';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // GET /api/settings/preferences
 // Get user's current preferences
 export async function GET() {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Get user preferences
@@ -106,25 +108,27 @@ export async function GET() {
 
 		return NextResponse.json({ preferences: preferences[0] });
 	} catch (error) {
-		console.error('Error fetching user preferences:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
 // PUT /api/settings/preferences
 // Update user's preferences
 export async function PUT(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 
 		// Validate required fields if any
 		const allowedFields = [
@@ -146,7 +150,7 @@ export async function PUT(request: NextRequest) {
 		});
 
 		if (Object.keys(updateData).length === 0) {
-			return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+			return ApiErrorHandler.badRequest('No valid fields to update');
 		}
 
 		// Check if preferences exist
@@ -255,10 +259,6 @@ export async function PUT(request: NextRequest) {
 			return NextResponse.json({ preferences: newPreferences[0] });
 		}
 	} catch (error) {
-		console.error('Error updating user preferences:', error);
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

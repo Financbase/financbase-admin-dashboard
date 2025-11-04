@@ -61,6 +61,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -949,9 +950,11 @@ function TableWidget({ widget, data }: { widget: DashboardWidget; data: any }) {
 }
 
 function TextWidget({ widget, data }: { widget: DashboardWidget; data: any }) {
+  const content = data.content || widget.config.content || 'No content';
+  const sanitizedContent = sanitizeHtml(content);
   return (
     <div className="prose prose-sm max-w-none">
-      <div dangerouslySetInnerHTML={{ __html: data.content || widget.config.content || 'No content' }} />
+      <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
     </div>
   );
 }

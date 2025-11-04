@@ -1,26 +1,26 @@
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { WorkflowEngine } from '@/lib/services/workflow-engine'
 import { WebhookService } from '@/lib/services/webhook-service'
 import { db } from '@/lib/db'
 
 // Mock database
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   db: {
-    select: jest.fn(),
-    insert: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
 // Mock email service
-jest.mock('@/lib/services/email-service', () => ({
-  sendEmail: jest.fn(),
+vi.mock('@/lib/services/email-service', () => ({
+  sendEmail: vi.fn(),
 }))
 
 // Mock webhook service
-jest.mock('@/lib/services/webhook-service', () => ({
-  WebhookService: jest.fn(),
+vi.mock('@/lib/services/webhook-service', () => ({
+  WebhookService: vi.fn(),
 }))
 
 describe('Workflow Execution Integration', () => {
@@ -29,14 +29,14 @@ describe('Workflow Execution Integration', () => {
   let mockDb: any
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     workflowEngine = new WorkflowEngine()
     webhookService = new WebhookService()
     mockDb = db as any
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   describe('End-to-End Workflow Execution', () => {
@@ -105,13 +105,13 @@ describe('Workflow Execution Integration', () => {
 
       // Mock database responses
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       // Mock email service
@@ -120,9 +120,9 @@ describe('Workflow Execution Integration', () => {
 
       // Mock webhook service
       const mockWebhookService = {
-        deliverEvent: jest.fn().mockResolvedValue({ success: true }),
+        deliverEvent: vi.fn().mockResolvedValue({ success: true }),
       }
-      ;(WebhookService as jest.Mock).mockImplementation(() => mockWebhookService)
+      ;(WebhookService as vi.Mock).mockImplementation(() => mockWebhookService)
 
       // Execute workflow with test data
       const testData = {
@@ -178,13 +178,13 @@ describe('Workflow Execution Integration', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       // Mock email service failure
@@ -232,13 +232,13 @@ describe('Workflow Execution Integration', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       const { sendEmail } = require('@/lib/services/email-service')
@@ -262,15 +262,15 @@ describe('Workflow Execution Integration', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWebhook]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWebhook]),
         }),
       })
 
       const mockWebhookService = {
-        deliverEvent: jest.fn().mockResolvedValue({ success: true }),
+        deliverEvent: vi.fn().mockResolvedValue({ success: true }),
       }
-      ;(WebhookService as jest.Mock).mockImplementation(() => mockWebhookService)
+      ;(WebhookService as vi.Mock).mockImplementation(() => mockWebhookService)
 
       // Simulate workflow start event
       await webhookService.deliverEvent('webhook-1', {
@@ -317,23 +317,23 @@ describe('Workflow Execution Integration', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       // Mock webhook service with retry logic
       const mockWebhookService = {
-        deliverEvent: jest.fn()
+        deliverEvent: vi.fn()
           .mockRejectedValueOnce(new Error('Network error'))
           .mockRejectedValueOnce(new Error('Network error'))
           .mockResolvedValue({ success: true }),
       }
-      ;(WebhookService as jest.Mock).mockImplementation(() => mockWebhookService)
+      ;(WebhookService as vi.Mock).mockImplementation(() => mockWebhookService)
 
       const result = await workflowEngine.executeWorkflow('retry-workflow', {})
 
@@ -383,22 +383,22 @@ describe('Workflow Execution Integration', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       const { sendEmail } = require('@/lib/services/email-service')
       sendEmail.mockResolvedValue({ success: true })
 
       const mockWebhookService = {
-        deliverEvent: jest.fn().mockRejectedValue(new Error('Webhook failed')),
+        deliverEvent: vi.fn().mockRejectedValue(new Error('Webhook failed')),
       }
-      ;(WebhookService as jest.Mock).mockImplementation(() => mockWebhookService)
+      ;(WebhookService as vi.Mock).mockImplementation(() => mockWebhookService)
 
       const result = await workflowEngine.executeWorkflow('partial-failure-workflow', {})
 
@@ -432,13 +432,13 @@ describe('Workflow Execution Integration', () => {
       }
 
       mockDb.select.mockReturnValue({
-        from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([mockWorkflow]),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockWorkflow]),
         }),
       })
 
       mockDb.insert.mockReturnValue({
-        values: jest.fn().mockResolvedValue({ insertId: 'execution-1' }),
+        values: vi.fn().mockResolvedValue({ insertId: 'execution-1' }),
       })
 
       const { sendEmail } = require('@/lib/services/email-service')

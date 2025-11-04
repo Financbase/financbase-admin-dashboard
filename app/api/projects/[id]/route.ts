@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { FreelanceHubService } from '@/lib/services/freelance-hub-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const updateProjectSchema = z.object({
 	name: z.string().min(1).optional(),
@@ -27,28 +28,23 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
-		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const project = await FreelanceHubService.getProjectById(id, userId);
 
 		if (!project) {
-			return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+			return ApiErrorHandler.notFound('Project not found');
 		}
 
 		return NextResponse.json({ project });
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error fetching project:', error);
-		return NextResponse.json(
-			{ error: 'Failed to fetch project' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -56,14 +52,21 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
-		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
+
 		const validatedData = updateProjectSchema.parse(body);
 
 		// Convert date strings to Date objects
@@ -77,19 +80,6 @@ export async function PUT(
 
 		return NextResponse.json({ project });
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Validation error', details: error.issues },
-				{ status: 400 }
-			);
-		}
-
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error updating project:', error);
-		return NextResponse.json(
-			{ error: 'Failed to update project' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

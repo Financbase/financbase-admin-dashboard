@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { checkPermission } from '@/lib/auth/financbase-rbac';
 import { FINANCIAL_PERMISSIONS } from '@/types/auth';
 import type { FinancbaseUserMetadata } from '@/types/auth';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const updatePermissionsSchema = z.object({
 	permissions: z.array(z.string()).optional(),
@@ -16,20 +17,26 @@ export async function PUT(
 	request: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id: targetUserId } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		// Check if user has permission to manage roles
 		const hasPermission = await checkPermission(FINANCIAL_PERMISSIONS.ROLES_MANAGE);
 		if (!hasPermission) {
-			return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+			return ApiErrorHandler.forbidden('You do not have permission to manage user roles');
 		}
 
-		const { id: targetUserId } = await params;
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 		const validatedData = updatePermissionsSchema.parse(body);
 
 		// Get Clerk client
@@ -62,17 +69,6 @@ export async function PUT(
 			},
 		});
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'Invalid request data', details: error.errors },
-				{ status: 400 }
-			);
-		}
-
-		console.error('Error updating user permissions:', error);
-		return NextResponse.json(
-			{ error: 'Failed to update user permissions' },
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

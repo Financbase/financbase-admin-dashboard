@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AuditService } from '@/lib/services/audit-service';
 import { MFAService } from '@/lib/security/mfa-service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return ApiErrorHandler.unauthorized();
     }
 
     // Get MFA status
@@ -51,10 +53,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(overview);
   } catch (error) {
-    console.error('Error fetching security overview:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch security overview',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return ApiErrorHandler.handle(error, requestId);
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { sql } from '@/lib/db';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * GET /api/developer/api-keys/[id]
@@ -10,11 +11,12 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
-		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const keyId = id;
@@ -35,16 +37,13 @@ export async function GET(
 		`, [keyId, userId]);
 
 		if (result.rows.length === 0) {
-			return NextResponse.json({ error: 'API key not found' }, { status: 404 });
+			return ApiErrorHandler.notFound('API key not found');
 		}
 
 		return NextResponse.json(result.rows[0]);
 
 	} catch (error) {
-		 
-    // eslint-disable-next-line no-console
-    console.error('Error fetching API key:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -56,15 +55,21 @@ export async function PATCH(
   request: NextRequest,
   { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await routeParams;
 	try {
-		const { id } = await routeParams;
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const keyId = id;
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+		}
 		const { name, permissions, monthlyLimit, status } = body;
 
 		// Verify ownership
@@ -140,10 +145,7 @@ export async function PATCH(
 		return NextResponse.json(updatedResult.rows[0]);
 
 	} catch (error) {
-
-    // eslint-disable-next-line no-console
-    console.error('Error updating API key:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -155,10 +157,12 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const keyId = id;
@@ -170,7 +174,7 @@ export async function DELETE(
 		`, [keyId, userId]);
 
 		if (keyResult.rows.length === 0) {
-			return NextResponse.json({ error: 'API key not found' }, { status: 404 });
+			return ApiErrorHandler.notFound('API key not found');
 		}
 
 		// Soft delete
@@ -183,10 +187,7 @@ export async function DELETE(
 		return NextResponse.json({ message: 'API key deleted successfully' });
 
 	} catch (error) {
-
-    // eslint-disable-next-line no-console
-    console.error('Error deleting API key:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }
 
@@ -198,11 +199,12 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+	const requestId = generateRequestId();
+	const { id } = await params;
 	try {
-		const { id } = await params;
 		const { userId } = await auth();
 		if (!userId) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return ApiErrorHandler.unauthorized();
 		}
 
 		const keyId = id;
@@ -214,7 +216,7 @@ export async function POST(
 		`, [keyId, userId]);
 
 		if (keyResult.rows.length === 0) {
-			return NextResponse.json({ error: 'API key not found or already revoked' }, { status: 404 });
+			return ApiErrorHandler.notFound('API key not found or already revoked');
 		}
 
 		// Revoke key
@@ -227,7 +229,6 @@ export async function POST(
 		return NextResponse.json({ message: 'API key revoked successfully' });
 
 	} catch (error) {
-		console.error('Error revoking API key:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

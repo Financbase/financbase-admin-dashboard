@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { jobOpenings } from "./jobs-data";
 
 export default function CareersPage() {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -49,112 +50,6 @@ export default function CareersPage() {
 		"Sales",
 		"Marketing",
 		"Operations",
-	];
-
-	const jobOpenings = [
-		{
-			id: 1,
-			title: "Senior Full Stack Engineer",
-			department: "Engineering",
-			location: "San Francisco, CA",
-			type: "Full-time",
-			experience: "5+ years",
-			description:
-				"Join our engineering team to build scalable financial applications using modern technologies.",
-			requirements: [
-				"React, Node.js, TypeScript",
-				"Financial services experience",
-				"AWS/Cloud infrastructure",
-			],
-			posted: "2 days ago",
-			applicants: 24,
-			featured: true,
-		},
-		{
-			id: 2,
-			title: "Product Designer",
-			department: "Design",
-			location: "Remote",
-			type: "Full-time",
-			experience: "3+ years",
-			description:
-				"Design intuitive user experiences for our financial platform and mobile applications.",
-			requirements: [
-				"Figma, Sketch",
-				"Financial UX experience",
-				"Prototyping skills",
-			],
-			posted: "1 week ago",
-			applicants: 18,
-		},
-		{
-			id: 3,
-			title: "Product Manager",
-			department: "Product",
-			location: "New York, NY",
-			type: "Full-time",
-			experience: "4+ years",
-			description:
-				"Lead product strategy and roadmap for our core financial services platform.",
-			requirements: [
-				"Product management experience",
-				"Financial services background",
-				"Analytics skills",
-			],
-			posted: "3 days ago",
-			applicants: 31,
-		},
-		{
-			id: 4,
-			title: "Sales Engineer",
-			department: "Sales",
-			location: "Austin, TX",
-			type: "Full-time",
-			experience: "3+ years",
-			description:
-				"Help enterprise customers integrate our financial APIs and solutions.",
-			requirements: [
-				"Technical sales experience",
-				"API integration knowledge",
-				"Customer-facing skills",
-			],
-			posted: "5 days ago",
-			applicants: 12,
-		},
-		{
-			id: 5,
-			title: "Marketing Manager",
-			department: "Marketing",
-			location: "Remote",
-			type: "Full-time",
-			experience: "4+ years",
-			description:
-				"Drive growth through digital marketing campaigns and content strategy.",
-			requirements: [
-				"Digital marketing experience",
-				"Content creation",
-				"Analytics proficiency",
-			],
-			posted: "1 week ago",
-			applicants: 22,
-		},
-		{
-			id: 6,
-			title: "DevOps Engineer",
-			department: "Engineering",
-			location: "Seattle, WA",
-			type: "Full-time",
-			experience: "4+ years",
-			description:
-				"Build and maintain our cloud infrastructure and deployment pipelines.",
-			requirements: [
-				"AWS, Kubernetes",
-				"CI/CD experience",
-				"Infrastructure as Code",
-			],
-			posted: "4 days ago",
-			applicants: 15,
-		},
 	];
 
 	const companyValues = [

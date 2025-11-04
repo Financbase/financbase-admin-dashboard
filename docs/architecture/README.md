@@ -1,434 +1,270 @@
-# Financbase Architecture Documentation
+# Architecture Documentation
 
-This document provides a comprehensive overview of the Financbase platform architecture, including system design, component relationships, and technical implementation details.
+This directory contains comprehensive technical architecture documentation for the Financbase Admin Dashboard. Each document provides deep technical details about specific architectural areas.
 
-## Table of Contents
+## 🚀 Quick Start
 
-1. [System Overview](#system-overview)
-2. [Architecture Principles](#architecture-principles)
-3. [Component Architecture](#component-architecture)
-4. [Data Flow](#data-flow)
-5. [Security Architecture](#security-architecture)
-6. [Scalability Considerations](#scalability-considerations)
-7. [Technology Stack](#technology-stack)
-8. [Deployment Architecture](#deployment-architecture)
+**New to the architecture?** Start with the **[Technical Deep Dive](./TECHNICAL_DEEP_DIVE.md)** - a consolidated document covering all major architectural areas with code references and implementation details.
 
-## System Overview
+## Quick Navigation
 
-Financbase is a comprehensive financial management platform built with modern web technologies. The system is designed to be scalable, maintainable, and extensible.
+### 📖 Consolidated Document
 
-### High-Level Architecture
+0. **[Technical Deep Dive](./TECHNICAL_DEEP_DIVE.md)** ⭐ **START HERE**
+   - Comprehensive overview of all architectural areas
+   - Code references with file paths and line numbers
+   - Key metrics and statistics
+   - Quick reference for the entire system
+   - Perfect for onboarding new developers
+
+### Core Architecture Documents
+
+1. **[Frontend Architecture](./FRONTEND_ARCHITECTURE.md)**
+   - Next.js 15 App Router structure
+   - React Server Components
+   - State management (TanStack Query, Zustand)
+   - Component architecture
+   - Styling system (Tailwind CSS, shadcn/ui)
+
+2. **[Backend Architecture](./BACKEND_ARCHITECTURE.md)**
+   - Next.js Route Handlers
+   - API versioning system
+   - Middleware implementation
+   - Error handling patterns
+   - Service layer architecture
+
+3. **[Database Architecture](./DATABASE_ARCHITECTURE.md)**
+   - PostgreSQL with Neon Serverless
+   - Drizzle ORM patterns
+   - Row Level Security (RLS) - 221 secured tables
+   - Migration management
+   - Query optimization strategies
+
+4. **[Security Architecture](./SECURITY_ARCHITECTURE.md)**
+   - Clerk authentication integration
+   - Row Level Security policies
+   - API security (rate limiting, validation)
+   - HTTP security headers
+   - Vulnerability management
+
+### Feature-Specific Architecture
+
+5. **[Real-time Collaboration](./REALTIME_COLLABORATION.md)**
+   - PartyKit WebSocket server
+   - Room-based architecture
+   - Message types and routing
+   - State synchronization patterns
+   - Collaboration features
+
+6. **[AI/ML Integration](./AI_ML_INTEGRATION.md)**
+   - Multi-provider AI orchestration
+   - BYOK (Bring Your Own Key) system
+   - Transaction categorization (97%+ accuracy)
+   - Provider routing and cost optimization
+   - Usage tracking and analytics
+
+### Operations & Quality
+
+7. **[Performance Optimization](./PERFORMANCE_OPTIMIZATION.md)**
+   - Frontend optimizations (code splitting, image optimization)
+   - Backend query optimization
+   - Caching strategies
+   - Bundle size optimization
+   - Monitoring and metrics
+
+8. **[Testing Infrastructure](./TESTING_INFRASTRUCTURE.md)**
+   - Jest unit tests (80% coverage requirement)
+   - Playwright E2E tests
+   - K6 load testing
+   - Test organization and best practices
+   - CI/CD integration
+
+9. **[Deployment & DevOps](./DEPLOYMENT_DEVOPS.md)**
+   - Vercel deployment configuration
+   - CI/CD pipeline
+   - Database migration strategy
+   - Monitoring and observability
+   - Backup and recovery procedures
+
+## Architecture Overview
+
+### Technology Stack
+
+**Frontend:**
+- Next.js 15.4.7 with App Router
+- React 18.3.1 (Server Components)
+- TypeScript 5.9.3
+- TanStack Query v5.90.5
+- Tailwind CSS 3.4.18
+- shadcn/ui components
+
+**Backend:**
+- Next.js API Routes
+- Drizzle ORM 0.36.4
+- Clerk Authentication v6.34.1
+- PartyKit (WebSocket)
+
+**Database:**
+- PostgreSQL (Neon Serverless)
+- Row Level Security (221 tables secured)
+- Drizzle Kit migrations
+
+**Infrastructure:**
+- Vercel (hosting & CDN)
+- Sentry (error tracking)
+- GitHub Actions (CI/CD)
+
+### System Architecture Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Client Layer                            │
-├─────────────────────────────────────────────────────────────────┤
-│  Web Browser  │  Mobile App  │  Desktop App  │  Third-party   │
-│  (Next.js)    │  (React)     │  (Electron)   │  (API)        │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      API Gateway Layer                         │
-├─────────────────────────────────────────────────────────────────┤
-│  Load Balancer  │  CDN  │  Rate Limiting  │  Authentication    │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      Application Layer                         │
-├─────────────────────────────────────────────────────────────────┤
-│  Next.js App  │  API Routes  │  Middleware  │  Services        │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       Data Layer                               │
-├─────────────────────────────────────────────────────────────────┤
-│  PostgreSQL  │  Redis Cache  │  File Storage  │  External APIs  │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Client Layer (Browser)                  │
+│  Next.js 15 App Router │ React Server Components │ RSC     │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Middleware Layer                          │
+│  Clerk Auth │ API Versioning │ Rate Limiting │ RLS Context  │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    API Layer (Route Handlers)               │
+│  RESTful APIs │ WebSocket (Partykit) │ Error Handling      │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Service Layer                            │
+│  Business Logic │ AI Orchestration │ Data Processing       │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Database Layer                           │
+│  PostgreSQL (Neon) │ Drizzle ORM │ RLS Policies (221)     │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Architecture Principles
+## Key Architectural Decisions
 
-### 1. Modular Design
-- **Component-based architecture**: Each feature is a self-contained module
-- **Plugin system**: Extensible through plugins and integrations
-- **Service-oriented**: Business logic is encapsulated in services
+### 1. Next.js App Router
+- **Rationale**: Modern React Server Components, improved performance, better SEO
+- **Benefits**: Reduced JavaScript bundle size, faster initial page loads, better caching
 
-### 2. Scalability
-- **Horizontal scaling**: Stateless application design
-- **Database optimization**: Efficient queries and indexing
-- **Caching strategy**: Multi-level caching for performance
+### 2. Row Level Security (RLS)
+- **Rationale**: Database-level data isolation, multi-tenant security
+- **Implementation**: 221 tables with RLS policies, automatic user context filtering
+- **Benefits**: Secure by default, reduced application-level security bugs
 
-### 3. Security
-- **Defense in depth**: Multiple security layers
-- **Authentication**: Multi-factor authentication support
-- **Authorization**: Role-based access control
-- **Data encryption**: End-to-end encryption for sensitive data
+### 3. Multi-Provider AI System
+- **Rationale**: Flexibility, cost optimization, provider redundancy
+- **Implementation**: BYOK system with encrypted key storage
+- **Benefits**: User control over costs, provider selection, automatic failover
 
-### 4. Maintainability
-- **Type safety**: TypeScript throughout the codebase
-- **Testing**: Comprehensive test coverage
-- **Documentation**: Extensive documentation and comments
-- **Code standards**: Consistent coding patterns and practices
+### 4. API Versioning
+- **Rationale**: Backward compatibility, gradual migration path
+- **Implementation**: URL-based versioning (`/api/v1/`, `/api/v2/`)
+- **Benefits**: Non-breaking changes, deprecation warnings, migration flexibility
 
-## Component Architecture
+### 5. PartyKit for Real-time
+- **Rationale**: Serverless WebSocket, no infrastructure management
+- **Benefits**: Scalable, cost-effective, built-in room management
 
-### Frontend Components
+## Design Principles
 
-#### 1. Next.js Application
-```
-app/
-├── (dashboard)/           # Dashboard pages
-│   ├── workflows/        # Workflow management
-│   ├── integrations/     # Integration management
-│   ├── monitoring/       # System monitoring
-│   └── settings/         # User settings
-├── api/                  # API routes
-│   ├── workflows/        # Workflow API
-│   ├── webhooks/         # Webhook API
-│   └── integrations/     # Integration API
-└── globals.css          # Global styles
-```
+### 1. Security First
+- Authentication required for all protected routes
+- Row Level Security at database level
+- Input validation and sanitization
+- Comprehensive security headers
+- Regular security audits
 
-#### 2. Component Hierarchy
-```
-components/
-├── ui/                   # Base UI components
-│   ├── button.tsx       # Button component
-│   ├── input.tsx        # Input component
-│   └── dialog.tsx       # Dialog component
-├── workflows/           # Workflow-specific components
-│   ├── workflow-builder.tsx
-│   ├── workflow-canvas.tsx
-│   └── execution-history.tsx
-├── integrations/        # Integration components
-│   ├── integration-list.tsx
-│   └── sync-status.tsx
-└── monitoring/          # Monitoring components
-    ├── monitoring-dashboard.tsx
-    └── alert-configuration.tsx
-```
+### 2. Performance
+- Server Components for reduced bundle size
+- Image optimization and lazy loading
+- Query optimization and caching
+- Code splitting and tree shaking
 
-### Backend Components
+### 3. Type Safety
+- TypeScript strict mode enabled
+- Type-safe database queries (Drizzle ORM)
+- Zod validation schemas
+- Comprehensive type definitions
 
-#### 1. Service Layer
-```
-lib/services/
-├── workflow-engine.ts    # Workflow execution engine
-├── webhook-service.ts    # Webhook management
-├── integration-sync-engine.ts  # Data synchronization
-├── alert-service.ts     # Alert management
-└── performance-service.ts # Performance monitoring
-```
+### 4. Developer Experience
+- Clear code organization
+- Comprehensive documentation
+- Testing infrastructure (80% coverage)
+- Error handling patterns
+- Development tools (React Query DevTools)
 
-#### 2. Database Layer
-```
-lib/db/
-├── schemas/              # Database schemas
-│   ├── workflows.schema.ts
-│   ├── webhooks.schema.ts
-│   ├── integrations.schema.ts
-│   └── metrics.schema.ts
-├── connection.ts         # Database connection
-└── migrations/           # Database migrations
-```
+### 5. Scalability
+- Stateless application design
+- Database connection pooling
+- CDN for static assets
+- Horizontal scaling support
 
-#### 3. API Layer
-```
-app/api/
-├── workflows/            # Workflow API endpoints
-│   ├── route.ts         # List/create workflows
-│   ├── [id]/            # Individual workflow operations
-│   └── [id]/execute/    # Workflow execution
-├── webhooks/             # Webhook API endpoints
-├── integrations/         # Integration API endpoints
-└── monitoring/           # Monitoring API endpoints
-```
+## Getting Started
 
-## Data Flow
+### For Developers
 
-### 1. User Interaction Flow
-```
-User Action → UI Component → API Route → Service → Database
-     ↓              ↓           ↓         ↓         ↓
-  Validation → State Update → Business Logic → Data Persistence
-```
+1. **New to the codebase?** Start with [Frontend Architecture](./FRONTEND_ARCHITECTURE.md) and [Backend Architecture](./BACKEND_ARCHITECTURE.md)
+2. **Working on database?** Read [Database Architecture](./DATABASE_ARCHITECTURE.md) and [Security Architecture](./SECURITY_ARCHITECTURE.md)
+3. **Adding features?** Check relevant feature-specific documents (Real-time, AI/ML)
+4. **Deploying?** Review [Deployment & DevOps](./DEPLOYMENT_DEVOPS.md)
 
-### 2. Workflow Execution Flow
-```
-Trigger Event → Workflow Engine → Step Execution → Result Storage
-     ↓              ↓               ↓              ↓
-  Event Data → Workflow Logic → Action Processing → Logging
-```
+### For Architects
 
-### 3. Integration Data Flow
-```
-External API → OAuth Handler → Data Sync → Transformation → Storage
-     ↓              ↓            ↓           ↓            ↓
-  Raw Data → Authentication → Sync Engine → Data Mapping → Database
-```
+1. Review all architecture documents for complete understanding
+2. Check [Performance Optimization](./PERFORMANCE_OPTIMIZATION.md) for scaling considerations
+3. Review [Testing Infrastructure](./TESTING_INFRASTRUCTURE.md) for quality standards
+4. See [Security Architecture](./SECURITY_ARCHITECTURE.md) for security requirements
 
-## Security Architecture
+## Related Documentation
 
-### 1. Authentication Flow
-```
-User Login → Clerk Authentication → JWT Token → API Authorization
-     ↓              ↓                  ↓            ↓
-  Credentials → Identity Verification → Token Generation → Request Validation
-```
+### Configuration
+- [Environment Variables](../configuration/ENVIRONMENT_VARIABLES.md)
+- [Clerk Configuration](../configuration/CLERK_CONFIGURATION.md)
+- [BYOK Multi-Provider Setup](../configuration/BYOK_MULTI_PROVIDER_README.md)
 
-### 2. Authorization Model
-```
-User Request → Role Check → Permission Check → Resource Access
-     ↓            ↓            ↓               ↓
-  API Call → User Role → Permission Matrix → Data Access
-```
+### API Documentation
+- [API Overview](../api/API.md)
+- [API Versioning](../api/API_VERSIONING.md)
+- [Webhooks](../api/webhooks.md)
 
-### 3. Data Security
-```
-Sensitive Data → Encryption → Secure Storage → Decryption → Access
-     ↓              ↓            ↓             ↓          ↓
-  User Input → AES Encryption → Database → Key Management → User Access
-```
+### Database
+- [Database Security Guidelines](../database/security-guidelines.md)
+- [RLS Integration Guide](../rls-integration-guide.md)
+- [Database Quick Reference](../database/quick-reference.md)
 
-## Scalability Considerations
+### Deployment
+- [Production Deployment Guide](../deployment/PRODUCTION_DEPLOYMENT_GUIDE.md)
+- [Schema Migration Guide](../deployment/SCHEMA_MIGRATION_GUIDE.md)
+- [Deployment Readiness Checklist](../deployment/DEPLOYMENT_READINESS_CHECKLIST.md)
 
-### 1. Horizontal Scaling
-- **Stateless design**: No server-side session storage
-- **Load balancing**: Multiple application instances
-- **Database scaling**: Read replicas and connection pooling
-- **CDN integration**: Static asset delivery
+## Contributing
 
-### 2. Performance Optimization
-- **Caching strategy**: Redis for session and data caching
-- **Database optimization**: Indexes and query optimization
-- **Asset optimization**: Image compression and lazy loading
-- **Code splitting**: Dynamic imports and bundle optimization
+When adding new features or making architectural changes:
 
-### 3. Monitoring and Alerting
-- **Performance metrics**: Response times and throughput
-- **Error tracking**: Sentry integration for error monitoring
-- **Health checks**: System health monitoring
-- **Alerting**: Automated alert system for critical issues
+1. **Update relevant architecture documents** if patterns change
+2. **Follow existing patterns** documented in these guides
+3. **Maintain security standards** outlined in Security Architecture
+4. **Keep performance in mind** - see Performance Optimization
+5. **Add tests** as per Testing Infrastructure requirements
+6. **Update this README** if adding new architecture documents
 
-## Technology Stack
+## Document Maintenance
 
-### Frontend Technologies
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Next.js | 14.2.3 | React framework with SSR |
-| TypeScript | 5.4.5 | Type safety and development experience |
-| Tailwind CSS | 3.4.3 | Utility-first CSS framework |
-| Radix UI | Latest | Accessible component library |
-| React Hook Form | 7.51.4 | Form management |
-| Zod | 3.23.8 | Schema validation |
-
-### Backend Technologies
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Node.js | 18+ | JavaScript runtime |
-| Next.js API Routes | 14.2.3 | Serverless API endpoints |
-| Drizzle ORM | 0.30.9 | Type-safe database operations |
-| PostgreSQL | 14+ | Primary database |
-| Redis | 7+ | Caching and session storage |
-
-### Development Tools
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Jest | 29.7.0 | Unit testing framework |
-| Playwright | 1.44.0 | End-to-end testing |
-| ESLint | 8.57.0 | Code linting |
-| Prettier | 3.2.5 | Code formatting |
-| TypeScript | 5.4.5 | Type checking |
-
-### External Services
-| Service | Purpose |
-|---------|---------|
-| Clerk | Authentication and user management |
-| Neon | PostgreSQL database hosting |
-| Vercel | Application hosting and deployment |
-| Sentry | Error tracking and monitoring |
-| Stripe | Payment processing |
-| Slack | Team communication |
-
-## Deployment Architecture
-
-### 1. Development Environment
-```
-Local Development → Git Repository → CI/CD Pipeline → Staging → Production
-       ↓                ↓              ↓              ↓         ↓
-   Code Changes → Version Control → Automated Tests → Testing → Deployment
-```
-
-### 2. Production Environment
-```
-Internet → CDN → Load Balancer → Application Servers → Database
-   ↓        ↓         ↓              ↓                ↓
-User → Cloudflare → Vercel → Next.js App → PostgreSQL
-```
-
-### 3. CI/CD Pipeline
-```
-Code Push → GitHub Actions → Tests → Build → Deploy → Monitor
-    ↓           ↓           ↓       ↓       ↓        ↓
-  Git Hook → Automated → Quality → Bundle → Release → Health Check
-```
-
-## Database Architecture
-
-### 1. Schema Design
-```
-Database Schema
-├── Core Tables
-│   ├── users              # User accounts
-│   ├── organizations      # Organization data
-│   └── roles              # User roles and permissions
-├── Workflow Tables
-│   ├── workflows          # Workflow definitions
-│   ├── workflow_steps     # Workflow step definitions
-│   ├── workflow_executions # Workflow execution records
-│   └── workflow_logs      # Workflow execution logs
-├── Integration Tables
-│   ├── integration_services # Available integrations
-│   ├── integration_connections # User connections
-│   └── integration_syncs   # Sync operations
-└── Monitoring Tables
-    ├── metrics            # Custom metrics
-    ├── alerts             # Alert definitions
-    └── audit_logs         # Audit trail
-```
-
-### 2. Data Relationships
-```
-Users (1) ←→ (N) Organizations
-Users (1) ←→ (N) Workflows
-Workflows (1) ←→ (N) Workflow Steps
-Workflows (1) ←→ (N) Workflow Executions
-Organizations (1) ←→ (N) Integration Connections
-```
-
-## API Architecture
-
-### 1. RESTful API Design
-```
-API Endpoints
-├── /api/workflows
-│   ├── GET    /workflows           # List workflows
-│   ├── POST   /workflows           # Create workflow
-│   ├── GET    /workflows/{id}      # Get workflow
-│   ├── PUT    /workflows/{id}      # Update workflow
-│   ├── DELETE /workflows/{id}      # Delete workflow
-│   └── POST   /workflows/{id}/execute # Execute workflow
-├── /api/webhooks
-│   ├── GET    /webhooks            # List webhooks
-│   ├── POST   /webhooks            # Create webhook
-│   └── POST   /webhooks/{id}/test  # Test webhook
-└── /api/integrations
-    ├── GET    /integrations         # List available integrations
-    └── POST   /integrations/connections # Create connection
-```
-
-### 2. API Response Format
-```typescript
-// Success Response
-{
-  "success": true,
-  "data": { /* response data */ },
-  "message": "Operation completed successfully",
-  "timestamp": "2024-01-01T00:00:00Z"
-}
-
-// Error Response
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid input data",
-    "details": { /* error details */ }
-  },
-  "timestamp": "2024-01-01T00:00:00Z"
-}
-```
-
-## Security Architecture
-
-### 1. Authentication
-- **Clerk Integration**: OAuth 2.0 and OpenID Connect
-- **JWT Tokens**: Secure token-based authentication
-- **Session Management**: Secure session handling
-- **Multi-Factor Authentication**: TOTP, SMS, and email MFA
-
-### 2. Authorization
-- **Role-Based Access Control**: Granular permission system
-- **Resource-Level Permissions**: Fine-grained access control
-- **API Key Management**: Secure API key handling
-- **OAuth Scopes**: Limited access to external services
-
-### 3. Data Protection
-- **Encryption at Rest**: Database encryption
-- **Encryption in Transit**: HTTPS/TLS encryption
-- **Data Anonymization**: PII protection
-- **Audit Logging**: Comprehensive activity tracking
-
-## Performance Architecture
-
-### 1. Caching Strategy
-```
-Multi-Level Caching
-├── Browser Cache        # Static assets
-├── CDN Cache           # Global content delivery
-├── Application Cache    # In-memory caching
-└── Database Cache      # Query result caching
-```
-
-### 2. Database Optimization
-- **Indexing Strategy**: Optimized database indexes
-- **Query Optimization**: Efficient SQL queries
-- **Connection Pooling**: Database connection management
-- **Read Replicas**: Database scaling
-
-### 3. Asset Optimization
-- **Image Optimization**: Next.js image optimization
-- **Code Splitting**: Dynamic imports and lazy loading
-- **Bundle Optimization**: Webpack optimization
-- **Compression**: Gzip and Brotli compression
-
-## Monitoring Architecture
-
-### 1. Application Monitoring
-- **Sentry Integration**: Error tracking and performance monitoring
-- **Custom Metrics**: Business-specific metrics
-- **Health Checks**: System health monitoring
-- **Alert System**: Automated alerting
-
-### 2. Infrastructure Monitoring
-- **Server Metrics**: CPU, memory, and disk usage
-- **Database Metrics**: Query performance and connection stats
-- **Network Metrics**: Bandwidth and latency monitoring
-- **Log Aggregation**: Centralized logging
-
-## Future Architecture Considerations
-
-### 1. Microservices Migration
-- **Service Decomposition**: Break down monolithic application
-- **API Gateway**: Centralized API management
-- **Service Mesh**: Inter-service communication
-- **Event-Driven Architecture**: Asynchronous communication
-
-### 2. Advanced Features
-- **Machine Learning**: AI-powered insights
-- **Real-time Collaboration**: WebSocket integration
-- **Advanced Analytics**: Data warehouse integration
-- **Mobile Applications**: Native mobile apps
-
-### 3. Scalability Improvements
-- **Kubernetes**: Container orchestration
-- **Service Discovery**: Dynamic service registration
-- **Circuit Breakers**: Fault tolerance
-- **Rate Limiting**: API protection
+Architecture documents should be updated when:
+- Major technology stack changes occur
+- New architectural patterns are introduced
+- Security requirements change
+- Performance optimizations are implemented
+- Deployment processes are modified
 
 ---
 
-This architecture documentation provides a comprehensive overview of the Financbase platform. For more detailed information about specific components, refer to the individual documentation files in the `/docs` directory.
+**Last Updated**: December 2024  
+**Architecture Version**: 2.0
