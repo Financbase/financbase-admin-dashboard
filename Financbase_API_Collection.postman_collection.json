@@ -1,9 +1,9 @@
 {
   "info": {
     "name": "Financbase API Collection",
-    "description": "Complete collection of Financbase API endpoints for financial management, AI services, and collaboration features",
+    "description": "Complete collection of Financbase API endpoints for financial management, AI services, and collaboration features. Includes dashboard, transactions, invoices, clients, workflows, webhooks, and analytics endpoints.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "auth": {
     "type": "bearer",
@@ -548,6 +548,1027 @@
       ]
     },
     {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "overview"]
+            },
+            "description": "Get comprehensive dashboard overview with revenue, expenses, clients, and net income metrics"
+          }
+        },
+        {
+          "name": "Get AI Insights",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/ai-insights",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "ai-insights"]
+            },
+            "description": "Get AI-powered financial insights and recommendations"
+          }
+        },
+        {
+          "name": "Get Recent Activity",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/recent-activity?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "recent-activity"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get recent activity feed for dashboard"
+          }
+        },
+        {
+          "name": "Get Top Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/top-products",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "top-products"]
+            },
+            "description": "Get top revenue-generating products/services"
+          }
+        },
+        {
+          "name": "Get Executive Metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/executive-metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "executive-metrics"]
+            },
+            "description": "Get executive-level financial metrics and KPIs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Get Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transactions?page=1&limit=20&type=expense",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "type",
+                  "value": "expense",
+                  "description": "Filter by type: income, expense, transfer, payment"
+                }
+              ]
+            },
+            "description": "Get paginated list of transactions with optional filtering by type, status, category, and date range"
+          }
+        },
+        {
+          "name": "Create Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"expense\",\n  \"amount\": 299.99,\n  \"currency\": \"USD\",\n  \"description\": \"Office supplies purchase\",\n  \"category\": \"office_expenses\",\n  \"paymentMethod\": \"credit_card\",\n  \"transactionDate\": \"2024-01-15T00:00:00Z\",\n  \"accountId\": \"account-uuid-here\",\n  \"notes\": \"Monthly office supplies\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions"]
+            },
+            "description": "Create a new financial transaction"
+          }
+        },
+        {
+          "name": "Get Transaction Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transactions/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions", "stats"]
+            },
+            "description": "Get transaction statistics and summaries"
+          }
+        },
+        {
+          "name": "Get Transaction by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transactions/{{transaction_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions", "{{transaction_id}}"]
+            },
+            "description": "Get a specific transaction by ID"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "item": [
+        {
+          "name": "Get Invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices?page=1&limit=20&status=pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "description": "Filter by status: draft, pending, paid, overdue, cancelled"
+                }
+              ]
+            },
+            "description": "Get paginated list of invoices with optional filtering"
+          }
+        },
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"client-uuid-here\",\n  \"invoiceNumber\": \"INV-2024-001\",\n  \"amount\": 2500.00,\n  \"currency\": \"USD\",\n  \"dueDate\": \"2024-02-15T00:00:00Z\",\n  \"issueDate\": \"2024-01-15T00:00:00Z\",\n  \"description\": \"Monthly consulting services\",\n  \"items\": [\n    {\n      \"description\": \"Consulting Services - January 2024\",\n      \"quantity\": 40,\n      \"unitPrice\": 62.50,\n      \"amount\": 2500.00\n    }\n  ],\n  \"notes\": \"Payment due within 30 days\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices"]
+            },
+            "description": "Create a new invoice"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "Get Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients?page=1&limit=20&search=acme",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "acme",
+                  "description": "Search by name, email, or company"
+                }
+              ]
+            },
+            "description": "Get paginated list of clients with optional search and filtering"
+          }
+        },
+        {
+          "name": "Create Client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corporation\",\n  \"email\": \"contact@acme.com\",\n  \"phone\": \"+1-555-0123\",\n  \"company\": \"Acme Corporation\",\n  \"address\": {\n    \"street\": \"123 Business Street\",\n    \"city\": \"San Francisco\",\n    \"state\": \"CA\",\n    \"zipCode\": \"94105\",\n    \"country\": \"USA\"\n  },\n  \"taxId\": \"12-3456789\",\n  \"notes\": \"Preferred client with monthly retainer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clients",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients"]
+            },
+            "description": "Create a new client"
+          }
+        },
+        {
+          "name": "Get Client Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients", "stats"]
+            },
+            "description": "Get client statistics and metrics"
+          }
+        },
+        {
+          "name": "Get Client by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{client_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients", "{{client_id}}"]
+            },
+            "description": "Get a specific client by ID"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "item": [
+        {
+          "name": "Get Expenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses?page=1&limit=20&category=travel",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "category",
+                  "value": "travel"
+                }
+              ]
+            },
+            "description": "Get paginated list of expenses with optional filtering"
+          }
+        },
+        {
+          "name": "Create Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 150.00,\n  \"currency\": \"USD\",\n  \"description\": \"Business lunch with client\",\n  \"category\": \"meals\",\n  \"date\": \"2024-01-15T00:00:00Z\",\n  \"paymentMethod\": \"credit_card\",\n  \"receiptUrl\": \"https://example.com/receipt.pdf\",\n  \"notes\": \"Client meeting expense\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/expenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses"]
+            },
+            "description": "Create a new expense"
+          }
+        },
+        {
+          "name": "Get Expense Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "categories"]
+            },
+            "description": "Get list of expense categories"
+          }
+        },
+        {
+          "name": "Get Expense Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expenses/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["expenses", "stats"]
+            },
+            "description": "Get expense statistics and summaries"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Workflows",
+      "item": [
+        {
+          "name": "Get Workflows",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/workflows?status=active&category=automation",
+              "host": ["{{baseUrl}}"],
+              "path": ["workflows"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "category",
+                  "value": "automation"
+                }
+              ]
+            },
+            "description": "Get list of workflows with optional filtering by status and category"
+          }
+        },
+        {
+          "name": "Create Workflow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Invoice Automation Workflow\",\n  \"description\": \"Automated invoice processing workflow\",\n  \"category\": \"automation\",\n  \"trigger\": {\n    \"type\": \"webhook\",\n    \"config\": {\n      \"event\": \"invoice.created\"\n    }\n  },\n  \"steps\": [\n    {\n      \"type\": \"log\",\n      \"config\": {\n        \"message\": \"Processing invoice\"\n      }\n    },\n    {\n      \"type\": \"email\",\n      \"config\": {\n        \"to\": \"finance@example.com\",\n        \"subject\": \"New Invoice Created\",\n        \"template\": \"invoice-notification\"\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workflows",
+              "host": ["{{baseUrl}}"],
+              "path": ["workflows"]
+            },
+            "description": "Create a new workflow"
+          }
+        },
+        {
+          "name": "Execute Workflow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payload\": {\n    \"invoiceId\": \"inv_123\",\n    \"amount\": 2500.00,\n    \"clientId\": \"client_456\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workflows/{{workflow_id}}/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["workflows", "{{workflow_id}}", "execute"]
+            },
+            "description": "Execute a workflow with a payload"
+          }
+        },
+        {
+          "name": "Test Workflow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payload\": {\n    \"testData\": \"value\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workflows/{{workflow_id}}/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["workflows", "{{workflow_id}}", "test"]
+            },
+            "description": "Test a workflow with sample data"
+          }
+        },
+        {
+          "name": "Get Workflow Templates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/workflows/templates",
+              "host": ["{{baseUrl}}"],
+              "path": ["workflows", "templates"]
+            },
+            "description": "Get available workflow templates"
+          }
+        },
+        {
+          "name": "Get Workflow by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/workflows/{{workflow_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["workflows", "{{workflow_id}}"]
+            },
+            "description": "Get a specific workflow by ID"
+          }
+        },
+        {
+          "name": "Get Workflow Executions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/workflows/{{workflow_id}}/executions",
+              "host": ["{{baseUrl}}"],
+              "path": ["workflows", "{{workflow_id}}", "executions"]
+            },
+            "description": "Get execution history for a workflow"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Get Webhooks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/webhooks",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhooks"]
+            },
+            "description": "Get list of webhook endpoints"
+          }
+        },
+        {
+          "name": "Create Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Invoice Webhook\",\n  \"url\": \"https://your-app.com/webhook\",\n  \"eventType\": \"invoice.created\",\n  \"secret\": \"your-secret-key\",\n  \"enabled\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhooks"]
+            },
+            "description": "Create a new webhook endpoint"
+          }
+        },
+        {
+          "name": "Test Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payload\": {\n    \"test\": \"data\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/{{webhook_id}}/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhooks", "{{webhook_id}}", "test"]
+            },
+            "description": "Test a webhook with sample payload"
+          }
+        },
+        {
+          "name": "Retry Webhook Delivery",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/{{webhook_id}}/retry",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhooks", "{{webhook_id}}", "retry"]
+            },
+            "description": "Retry a failed webhook delivery"
+          }
+        },
+        {
+          "name": "Get Webhook Deliveries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/{{webhook_id}}/deliveries",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhooks", "{{webhook_id}}", "deliveries"]
+            },
+            "description": "Get delivery history for a webhook"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Analytics Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics"]
+            },
+            "description": "Get comprehensive financial analytics and overview metrics"
+          }
+        },
+        {
+          "name": "Get Revenue Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/revenue?period=monthly",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "revenue"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "monthly",
+                  "description": "Time period: daily, weekly, monthly, yearly"
+                }
+              ]
+            },
+            "description": "Get revenue analytics and trends"
+          }
+        },
+        {
+          "name": "Get Expense Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/expenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "expenses"]
+            },
+            "description": "Get expense analytics and breakdown by category"
+          }
+        },
+        {
+          "name": "Get Client Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/clients",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "clients"]
+            },
+            "description": "Get client analytics and metrics"
+          }
+        },
+        {
+          "name": "Get Performance Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/performance",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "performance"]
+            },
+            "description": "Get performance analytics and KPIs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Accounts",
+      "item": [
+        {
+          "name": "Get Accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts"]
+            },
+            "description": "Get list of financial accounts"
+          }
+        },
+        {
+          "name": "Get Account Balances",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/accounts/balances",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "balances"]
+            },
+            "description": "Get account balances across all accounts"
+          }
+        },
+        {
+          "name": "Get Account Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/accounts/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "stats"]
+            },
+            "description": "Get account statistics"
+          }
+        },
+        {
+          "name": "Get Account by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/accounts/{{account_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "{{account_id}}"]
+            },
+            "description": "Get a specific account by ID"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Platform Hub",
+      "item": [
+        {
+          "name": "Get Platform Hub Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/platform/hub",
+              "host": ["{{baseUrl}}"],
+              "path": ["platform", "hub"]
+            },
+            "description": "Get platform hub overview with integrations and connections"
+          }
+        },
+        {
+          "name": "Get Integrations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/integrations",
+              "host": ["{{baseUrl}}"],
+              "path": ["integrations"]
+            },
+            "description": "Get list of available integrations"
+          }
+        },
+        {
+          "name": "Get Integration Connections",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clerk_session_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/platform/hub/connections",
+              "host": ["{{baseUrl}}"],
+              "path": ["platform", "hub", "connections"]
+            },
+            "description": "Get list of integration connections"
+          }
+        }
+      ]
+    },
+    {
       "name": "Real-time Collaboration",
       "item": [
         {
@@ -593,7 +1614,7 @@
         "exec": [
           "// Set default base URL if not set",
           "if (!pm.variables.get(\"baseUrl\")) {",
-          "    pm.variables.set(\"baseUrl\", \"http://localhost:3000/api\");",
+          "    pm.variables.set(\"baseUrl\", \"http://localhost:3010/api\");",
           "}",
           "",
           "// Add timestamp to requests to avoid caching",
