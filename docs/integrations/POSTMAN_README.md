@@ -2,6 +2,10 @@
 
 Complete Postman collection for testing the Financbase API endpoints, including AI services, financial management, OCR processing, and real-time collaboration features.
 
+**Version**: 2.0.0  
+**Workspace**: [My-Workspace](https://financbase-3341048.postman.co/workspace/My-Workspace~575ca6dd-3dec-4f0c-9e4f-db44d2d9dda7)  
+**Workspace ID**: `575ca6dd-3dec-4f0c-9e4f-db44d2d9dda7`
+
 ## 📁 Files Included
 
 - **`Financbase_API_Collection.postman_collection.json`** - Main API collection with all endpoints
@@ -9,7 +13,18 @@ Complete Postman collection for testing the Financbase API endpoints, including 
 
 ## 🛠️ Setup Instructions
 
-### 1. Import into Postman
+### Option 1: Import from Workspace (Recommended)
+
+1. **Access Workspace**:
+   - Navigate to: <https://financbase-3341048.postman.co/workspace/My-Workspace~575ca6dd-3dec-4f0c-9e4f-db44d2d9dda7>
+   - The collection and environment should already be available in the workspace
+   - Click on the collection to open it
+
+2. **Fork or Use Directly**:
+   - You can use the collection directly if you have access
+   - Or fork it to create your own copy for customization
+
+### Option 2: Import from Files
 
 1. **Open Postman** (Desktop or Web version)
 2. **Import Collection**:
@@ -20,6 +35,44 @@ Complete Postman collection for testing the Financbase API endpoints, including 
    - Click "Import" button again
    - Choose `Financbase_Environment.postman_environment.json`
    - Select the environment in the top-right dropdown
+
+### Option 3: Upload to Workspace via Postman API
+
+If you need to upload the collection to the workspace programmatically:
+
+1. **Get Postman API Key**:
+   - Go to <https://postman.com/api-keys/>
+   - Sign in to your Postman account
+   - Click "Generate API Key"
+   - Copy the API key (starts with `PMAK-`)
+
+2. **Set Environment Variable**:
+
+   ```bash
+   export POSTMAN_API_KEY="PMAK-your-api-key-here"
+   ```
+
+3. **Upload Collection** (using curl or Postman MCP):
+
+   ```bash
+   curl -X POST "https://api.getpostman.com/collections" \
+     -H "X-Api-Key: $POSTMAN_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d @Financbase_API_Collection.postman_collection.json \
+     --data-urlencode "workspace=575ca6dd-3dec-4f0c-9e4f-db44d2d9dda7"
+   ```
+
+4. **Upload Environment**:
+
+   ```bash
+   curl -X POST "https://api.getpostman.com/environments" \
+     -H "X-Api-Key: $POSTMAN_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d @Financbase_Environment.postman_environment.json \
+     --data-urlencode "workspace=575ca6dd-3dec-4f0c-9e4f-db44d2d9dda7"
+   ```
+
+**Note**: Postman MCP server requires API key authentication for programmatic access. If you don't have an API key, use Option 1 or Option 2 to import manually.
 
 ### 2. Configure Authentication
 
@@ -48,6 +101,79 @@ Complete Postman collection for testing the Financbase API endpoints, including 
 ### 🔍 **Health Check**
 
 - **System Health**: Check API availability and service status
+
+### 📊 **Dashboard** (NEW in v2.0)
+
+- **Get Dashboard Overview**: Comprehensive dashboard metrics
+- **Get AI Insights**: AI-powered financial insights
+- **Get Recent Activity**: Recent activity feed
+- **Get Top Products**: Top revenue-generating products
+- **Get Executive Metrics**: Executive-level KPIs
+
+### 💸 **Transactions** (NEW in v2.0)
+
+- **Get Transactions**: List transactions with filtering
+- **Create Transaction**: Create new financial transaction
+- **Get Transaction Stats**: Transaction statistics
+- **Get Transaction by ID**: Retrieve specific transaction
+
+### 🧾 **Invoices** (NEW in v2.0)
+
+- **Get Invoices**: List invoices with filtering
+- **Create Invoice**: Create new invoice
+
+### 👥 **Clients** (NEW in v2.0)
+
+- **Get Clients**: List clients with search
+- **Create Client**: Add new client
+- **Get Client Stats**: Client statistics
+- **Get Client by ID**: Retrieve specific client
+
+### 💰 **Expenses** (NEW in v2.0)
+
+- **Get Expenses**: List expenses with filtering
+- **Create Expense**: Create new expense
+- **Get Expense Categories**: List expense categories
+- **Get Expense Stats**: Expense statistics
+
+### 🔄 **Workflows** (NEW in v2.0)
+
+- **Get Workflows**: List workflows with filtering
+- **Create Workflow**: Create automation workflow
+- **Execute Workflow**: Execute workflow with payload
+- **Test Workflow**: Test workflow with sample data
+- **Get Workflow Templates**: Available workflow templates
+- **Get Workflow by ID**: Retrieve specific workflow
+- **Get Workflow Executions**: Execution history
+
+### 🔔 **Webhooks** (NEW in v2.0)
+
+- **Get Webhooks**: List webhook endpoints
+- **Create Webhook**: Create new webhook
+- **Test Webhook**: Test webhook with sample payload
+- **Retry Webhook Delivery**: Retry failed delivery
+- **Get Webhook Deliveries**: Delivery history
+
+### 📈 **Analytics** (NEW in v2.0)
+
+- **Get Analytics Overview**: Comprehensive analytics
+- **Get Revenue Analytics**: Revenue trends
+- **Get Expense Analytics**: Expense breakdown
+- **Get Client Analytics**: Client metrics
+- **Get Performance Analytics**: Performance KPIs
+
+### 🏦 **Accounts** (NEW in v2.0)
+
+- **Get Accounts**: List financial accounts
+- **Get Account Balances**: Account balances
+- **Get Account Stats**: Account statistics
+- **Get Account by ID**: Retrieve specific account
+
+### 🔌 **Platform Hub** (NEW in v2.0)
+
+- **Get Platform Hub Overview**: Hub overview
+- **Get Integrations**: Available integrations
+- **Get Integration Connections**: Integration connections
 
 ### 🤖 **AI Services**
 
@@ -199,6 +325,14 @@ curl -X POST http://localhost:3010/api/uploadthing \\
 | `clerk_session_token` | Authentication token | `eyJ...` |
 | `workspace_id` | Workspace for collaboration | `ws_123` |
 | `user_id` | User ID for requests | `user_456` |
+| `bill_id` | Sample bill ID for testing | `bill_123` |
+| `vendor_id` | Sample vendor ID for testing | `vendor_456` |
+| `approval_id` | Sample approval ID for testing | `approval_789` |
+| `transaction_id` | Sample transaction ID for testing | `txn_123` |
+| `client_id` | Sample client ID for testing | `client_456` |
+| `workflow_id` | Sample workflow ID for testing | `workflow_789` |
+| `webhook_id` | Sample webhook ID for testing | `webhook_123` |
+| `account_id` | Sample account ID for testing | `account_456` |
 
 ## 🚨 Common Issues
 
