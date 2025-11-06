@@ -18,9 +18,11 @@ import NumberFlow from "@number-flow/react"
 import { motion } from "framer-motion"
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function PricingPreview() {
   const [isYearly, setIsYearly] = useState(false)
+  const router = useRouter()
 
   const plans = [
     {
@@ -198,7 +200,7 @@ export default function PricingPreview() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-4 py-6">
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
@@ -266,29 +268,59 @@ export default function PricingPreview() {
                 </CardHeader>
 
                 <CardContent className="pt-0">
-                  <Button
-                    asChild
-                    className={`w-full mb-6 p-4 text-xl rounded-xl ${
-                      plan.popular
-                        ? "text-white shadow-lg border"
-                        : plan.buttonVariant === "outline"
-                          ? "bg-gradient-to-t from-neutral-900 to-neutral-600 shadow-lg shadow-neutral-900 border border-neutral-700 text-white"
-                          : ""
-                    }`}
-                    style={plan.popular ? {
-                      background: `linear-gradient(to bottom, var(--brand-primary-light), var(--brand-primary))`,
-                      borderColor: 'var(--brand-primary)',
-                      boxShadow: '0 10px 15px -3px var(--brand-primary)',
-                    } : {}}
-                  >
-                    <Link href={plan.name === "Enterprise" ? "/contact" : "/auth/sign-up"}>
+                  {plan.name === "Enterprise" ? (
+                    <Button
+                      asChild
+                      className={`w-full mb-6 p-4 text-xl rounded-xl ${
+                        plan.popular
+                          ? "text-white border"
+                          : plan.buttonVariant === "outline"
+                            ? "bg-gradient-to-t from-neutral-900 to-neutral-600 border border-neutral-700 text-white"
+                            : ""
+                      }`}
+                      style={plan.popular ? {
+                        background: `linear-gradient(to bottom, var(--brand-primary-light), var(--brand-primary))`,
+                        borderColor: 'var(--brand-primary)',
+                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)',
+                      } : {
+                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)',
+                      }}
+                    >
+                      <Link href="/contact" prefetch={false}>
+                        {plan.buttonText}
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => {
+                        // Use router.push to navigate directly to sign-up page
+                        router.push('/auth/sign-up');
+                      }}
+                      className={`w-full mb-6 p-4 text-xl rounded-xl ${
+                        plan.popular
+                          ? "text-white border"
+                          : plan.buttonVariant === "outline"
+                            ? "bg-gradient-to-t from-neutral-900 to-neutral-600 border border-neutral-700 text-white"
+                            : ""
+                      }`}
+                      style={plan.popular ? {
+                        background: `linear-gradient(to bottom, var(--brand-primary-light), var(--brand-primary))`,
+                        borderColor: 'var(--brand-primary)',
+                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)',
+                      } : {
+                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)',
+                      }}
+                    >
                       {plan.buttonText}
-                    </Link>
-                  </Button>
+                    </Button>
+                  )}
                   <Button
                     asChild
                     variant="outline"
-                    className="w-full mb-6 p-4 text-xl rounded-xl bg-white text-black border border-gray-200 shadow-lg shadow-gray-200 hover:bg-gray-50"
+                    className="w-full mb-6 p-4 text-xl rounded-xl bg-white text-black border border-gray-200 hover:bg-gray-50"
+                    style={{
+                      boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    }}
                   >
                     <Link href="/contact">
                       Click to Sale
@@ -327,7 +359,7 @@ export default function PricingPreview() {
 
         {/* Additional Info */}
         <motion.div
-          className="text-center"
+          className="text-center mt-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -339,7 +371,7 @@ export default function PricingPreview() {
               background: `linear-gradient(to right, var(--brand-primary), var(--brand-primary-dark))`,
             }}
           >
-            <h3 className="text-2xl font-bold mb-4">
+            <h3 className="text-2xl font-bold mb-8">
               All Plans Include
             </h3>
             <div className="grid md:grid-cols-3 gap-8">
@@ -348,8 +380,8 @@ export default function PricingPreview() {
                 { id: "no-fees", icon: <Shield className="h-6 w-6" />, text: "No setup fees" },
                 { id: "cancel-anytime", icon: <Users className="h-6 w-6" />, text: "Cancel anytime" }
               ].map((item) => (
-                <div key={item.id} className="flex flex-col items-center group">
-                  <div className="text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                <div key={item.id} className="flex flex-col items-center justify-center group">
+                  <div className="text-white mb-3 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     {item.icon}
                   </div>
                   <span className="font-medium" style={{ color: 'oklch(0.9 0.05 271.13)' }}>{item.text}</span>

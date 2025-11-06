@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FinancbaseLogo } from "@/components/ui/financbase-logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { LanguageSelector } from "@/components/i18n/language-selector";
 import {
 	BookOpen,
 	ChevronDown,
@@ -58,7 +59,7 @@ export function PublicHeader() {
 	const pathname = usePathname();
 
 	return (
-		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+		<header className="sticky top-0 z-50 w-full border-b bg-background">
 			<div className="container mx-auto px-4">
 				<div className="flex h-16 items-center justify-between">
 					{/* Logo */}
@@ -107,6 +108,7 @@ export function PublicHeader() {
 					{/* Right side */}
 					<div className="flex items-center space-x-4">
 						<ThemeToggle />
+						<LanguageSelector variant="minimal" />
 
 						<div className="hidden md:flex items-center space-x-2">
 							<Button variant="ghost" asChild>

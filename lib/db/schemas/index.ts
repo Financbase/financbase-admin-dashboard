@@ -133,6 +133,9 @@ export * from "./feature-flags.schema";
 // Blog CMS System
 export * from "./blog.schema";
 
+// Careers & Job Postings System
+export * from "./careers.schema";
+
 // Business Entities
 export * from "./employees.schema";
 export * from "./orders.schema";
@@ -149,3 +152,6 @@ export * from "./chat.schema";
 
 // Gallery
 export * from "./gallery.schema";
+
+// Training System
+export * from "./training.schema";

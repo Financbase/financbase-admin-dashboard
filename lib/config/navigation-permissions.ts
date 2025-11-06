@@ -218,6 +218,10 @@ export const NAVIGATION_PERMISSIONS: Record<string, AccessRequirement> = {
 	'/admin': {
 		roles: ['admin'],
 	},
+	'/admin/careers': {
+		permissions: [FINANCIAL_PERMISSIONS.CAREERS_MANAGE],
+		roles: ['admin', 'manager'],
+	},
 	'/settings': {
 		roles: ['admin', 'manager'],
 	},

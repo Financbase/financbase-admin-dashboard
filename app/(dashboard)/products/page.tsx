@@ -36,6 +36,26 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { ProductForm } from "@/components/products/product-form";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 interface Product {
 	id: string;
@@ -67,6 +87,10 @@ export default function ProductsPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [categoryFilter, setCategoryFilter] = useState<string>("all");
 	const [statusFilter, setStatusFilter] = useState<string>("all");
+	const [isFormOpen, setIsFormOpen] = useState(false);
+	const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+	const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
+	const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
 	const { data: userData } = useCurrentUser();
 
 	// Fetch products
@@ -132,6 +156,37 @@ export default function ProductsPage() {
 		}, 300);
 		return () => clearTimeout(timer);
 	}, [searchQuery, categoryFilter, statusFilter]);
+
+	const handleFormSuccess = () => {
+		fetchProducts();
+		fetchAnalytics();
+		setIsFormOpen(false);
+		setEditingProduct(null);
+	};
+
+	const handleDelete = async (productId: string) => {
+		try {
+			const response = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
+			if (!response.ok) throw new Error('Failed to delete product');
+			toast.success('Product deleted successfully');
+			fetchProducts();
+			fetchAnalytics();
+		} catch (error) {
+			toast.error('Failed to delete product');
+		} finally {
+			setDeletingProductId(null);
+		}
+	};
+
+	const handleAddProduct = () => {
+		setEditingProduct(null);
+		setIsFormOpen(true);
+	};
+
+	const handleEditProduct = (product: Product) => {
+		setEditingProduct(product);
+		setIsFormOpen(true);
+	};
 
 	const featuredProducts = products
 		.filter((p) => p.status === "active")
@@ -203,6 +258,30 @@ export default function ProductsPage() {
 		(p) => p.status === "low_stock" || (p.stockQuantity <= p.lowStockThreshold && p.status === "active")
 	);
 
+	// Calculate inventory stats
+	const totalInventoryValue = products.reduce((sum, p) => {
+		const price = parseFloat(p.price || "0");
+		const stock = p.stockQuantity || 0;
+		return sum + price * stock;
+	}, 0);
+
+	const totalItemsInStock = products.reduce((sum, p) => sum + (p.stockQuantity || 0), 0);
+
+	// Calculate average price
+	const averagePrice =
+		products.length > 0
+			? products.reduce((sum, p) => sum + parseFloat(p.price || "0"), 0) /
+			  products.length
+			: 0;
+
+	// Count products with discounts (has compareAtPrice or special pricing)
+	const activeDiscounts = products.filter((p) => {
+		// For now, we'll count products that are marked as having discounts
+		// In a real implementation, you'd check for compareAtPrice field
+		return false; // Placeholder - would check actual discount logic
+	}).length;
+
+
 	return (
 		<div className="space-y-8">
 			{/* Header */}
@@ -218,7 +297,7 @@ export default function ProductsPage() {
 						<Filter className="h-4 w-4 mr-2" />
 						Filter
 					</Button>
-					<Button>
+					<Button onClick={handleAddProduct}>
 						<Plus className="h-4 w-4 mr-2" />
 						Add Product
 					</Button>
@@ -284,22 +363,37 @@ export default function ProductsPage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-3">
-						{lowStockAlerts.map((alert, index) => (
-							<div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-								<div className="space-y-1">
-									<h4 className="font-medium">{alert.product}</h4>
-									<p className="text-sm text-muted-foreground">
-										SKU: {alert.sku} • Current: {alert.currentStock} • Reorder: {alert.reorderPoint}
-									</p>
+						{lowStockAlerts.map((alert, index) => {
+							const suggestedOrder = Math.max(
+								alert.lowStockThreshold - alert.stockQuantity,
+								0
+							);
+							return (
+								<div
+									key={alert.id || index}
+									className="flex items-center justify-between p-3 rounded-lg border"
+								>
+									<div className="space-y-1">
+										<h4 className="font-medium">{alert.name}</h4>
+										<p className="text-sm text-muted-foreground">
+											SKU: {alert.sku} • Current: {alert.stockQuantity} • Reorder: {alert.lowStockThreshold}
+										</p>
+									</div>
+									<div className="text-right space-y-1">
+										<p className="text-sm">Suggested Order: {suggestedOrder}</p>
+										<Button
+											size="sm"
+											onClick={() => {
+												setEditingProduct(alert);
+												setIsFormOpen(true);
+											}}
+										>
+											Update Stock
+										</Button>
+									</div>
 								</div>
-								<div className="text-right space-y-1">
-									<p className="text-sm">Order: {alert.suggestedOrder}</p>
-									<Button size="sm" onClick={() => toast.info(`Reorder request for ${alert.product} will be processed`)}>
-										Reorder
-									</Button>
-								</div>
-							</div>
-						))}
+							);
+						})}
 					</CardContent>
 				</Card>
 			)}
@@ -378,7 +472,7 @@ export default function ProductsPage() {
 														<Button
 															variant="ghost"
 															size="sm"
-															onClick={() => toast.info(`Editing ${product.name}`)}
+															onClick={() => handleEditProduct(product)}
 														>
 															<Edit className="h-3 w-3 mr-1" />
 															Edit
@@ -386,10 +480,42 @@ export default function ProductsPage() {
 														<Button
 															variant="ghost"
 															size="sm"
-															onClick={() => toast.info(`Viewing analytics for ${product.name}`)}
+															disabled
+															title="Product analytics coming soon"
 														>
 															<BarChart3 className="h-3 w-3 mr-1" />
 															Analytics
+															<Badge variant="secondary" className="ml-1 text-xs">Soon</Badge>
+														</Button>
+														<AlertDialog open={deletingProductId === product.id} onOpenChange={(open) => {
+															if (!open) setDeletingProductId(null);
+														}}>
+															<AlertDialogContent>
+																<AlertDialogHeader>
+																	<AlertDialogTitle>Delete Product</AlertDialogTitle>
+																	<AlertDialogDescription>
+																		Are you sure you want to delete "{product.name}"? This action cannot be undone.
+																	</AlertDialogDescription>
+																</AlertDialogHeader>
+																<AlertDialogFooter>
+																	<AlertDialogCancel>Cancel</AlertDialogCancel>
+																	<AlertDialogAction
+																		onClick={() => handleDelete(product.id)}
+																		className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+																	>
+																		Delete
+																	</AlertDialogAction>
+																</AlertDialogFooter>
+															</AlertDialogContent>
+														</AlertDialog>
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={() => setDeletingProductId(product.id)}
+															className="text-destructive hover:text-destructive"
+														>
+															<Trash2 className="h-3 w-3 mr-1" />
+															Delete
 														</Button>
 													</div>
 												</div>
@@ -502,16 +628,46 @@ export default function ProductsPage() {
 														<Button
 															variant="ghost"
 															size="sm"
-															onClick={() => toast.info(`Viewing details for ${product.name}`)}
+															onClick={() => setViewingProduct(product)}
 														>
 															View
 														</Button>
 														<Button
 															variant="ghost"
 															size="sm"
-															onClick={() => toast.info(`Editing ${product.name}`)}
+															onClick={() => handleEditProduct(product)}
 														>
 															Edit
+														</Button>
+														<AlertDialog open={deletingProductId === product.id} onOpenChange={(open) => {
+															if (!open) setDeletingProductId(null);
+														}}>
+															<AlertDialogContent>
+																<AlertDialogHeader>
+																	<AlertDialogTitle>Delete Product</AlertDialogTitle>
+																	<AlertDialogDescription>
+																		Are you sure you want to delete "{product.name}"? This action cannot be undone.
+																	</AlertDialogDescription>
+																</AlertDialogHeader>
+																<AlertDialogFooter>
+																	<AlertDialogCancel>Cancel</AlertDialogCancel>
+																	<AlertDialogAction
+																		onClick={() => handleDelete(product.id)}
+																		className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+																	>
+																		Delete
+																	</AlertDialogAction>
+																</AlertDialogFooter>
+															</AlertDialogContent>
+														</AlertDialog>
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={() => setDeletingProductId(product.id)}
+															className="text-destructive hover:text-destructive"
+														>
+															<Trash2 className="h-3 w-3" />
+															Delete
 														</Button>
 													</div>
 												</div>
@@ -537,18 +693,48 @@ export default function ProductsPage() {
 								<div className="grid gap-4 md:grid-cols-3">
 									<div className="space-y-2">
 										<h4 className="font-medium">Total Inventory Value</h4>
-										<p className="text-2xl font-bold">$245,680</p>
-										<p className="text-sm text-muted-foreground">Current stock value</p>
+										<p className="text-2xl font-bold">
+											${totalInventoryValue.toLocaleString(undefined, {
+												minimumFractionDigits: 2,
+												maximumFractionDigits: 2,
+											})}
+										</p>
+										<p className="text-sm text-muted-foreground">
+											Current stock value
+										</p>
 									</div>
 									<div className="space-y-2">
 										<h4 className="font-medium">Items in Stock</h4>
-										<p className="text-2xl font-bold">1,847</p>
-										<p className="text-sm text-muted-foreground">Physical inventory</p>
+										<p className="text-2xl font-bold">
+											{totalItemsInStock.toLocaleString()}
+										</p>
+										<p className="text-sm text-muted-foreground">
+											Physical inventory
+										</p>
 									</div>
 									<div className="space-y-2">
 										<h4 className="font-medium">Turnover Rate</h4>
-										<p className="text-2xl font-bold">4.2x</p>
-										<p className="text-sm text-muted-foreground">Annual turnover</p>
+										<p className="text-2xl font-bold">
+											{products.length > 0
+												? (
+														totalInventoryValue /
+														Math.max(
+															products.reduce(
+																(sum, p) =>
+																	sum +
+																	parseFloat(p.cost || p.price || "0") *
+																		(p.stockQuantity || 0),
+																0
+															),
+															1
+														)
+												  ).toFixed(1)
+												: "0.0"}
+											x
+										</p>
+										<p className="text-sm text-muted-foreground">
+											Annual turnover
+										</p>
 									</div>
 								</div>
 							</div>
@@ -569,13 +755,22 @@ export default function ProductsPage() {
 								<div className="grid gap-4 md:grid-cols-2">
 									<div className="space-y-2">
 										<h4 className="font-medium">Average Price</h4>
-										<p className="text-2xl font-bold">$347</p>
-										<p className="text-sm text-muted-foreground">Across all products</p>
+										<p className="text-2xl font-bold">
+											${averagePrice.toLocaleString(undefined, {
+												minimumFractionDigits: 2,
+												maximumFractionDigits: 2,
+											})}
+										</p>
+										<p className="text-sm text-muted-foreground">
+											Across all products
+										</p>
 									</div>
 									<div className="space-y-2">
 										<h4 className="font-medium">Active Discounts</h4>
-										<p className="text-2xl font-bold">12</p>
-										<p className="text-sm text-muted-foreground">Promotional offers</p>
+										<p className="text-2xl font-bold">{activeDiscounts}</p>
+										<p className="text-sm text-muted-foreground">
+											Promotional offers
+										</p>
 									</div>
 								</div>
 								<Separator />
@@ -588,6 +783,84 @@ export default function ProductsPage() {
 					</Card>
 				</TabsContent>
 			</Tabs>
+
+			{/* Product Form Dialog */}
+			<ProductForm
+				open={isFormOpen}
+				onOpenChange={setIsFormOpen}
+				product={editingProduct || undefined}
+				onSuccess={handleFormSuccess}
+			/>
+
+			{/* Product Detail Dialog */}
+			{viewingProduct && (
+				<Dialog open={!!viewingProduct} onOpenChange={(open) => !open && setViewingProduct(null)}>
+					<DialogContent className="max-w-2xl">
+						<DialogHeader>
+							<DialogTitle>{viewingProduct.name}</DialogTitle>
+							<DialogDescription>Product Details</DialogDescription>
+						</DialogHeader>
+						<div className="space-y-4">
+							<div className="grid grid-cols-2 gap-4">
+								<div>
+									<Label className="text-sm font-medium text-muted-foreground">SKU</Label>
+									<p className="text-sm">{viewingProduct.sku}</p>
+								</div>
+								<div>
+									<Label className="text-sm font-medium text-muted-foreground">Category</Label>
+									<p className="text-sm">{viewingProduct.category}</p>
+								</div>
+								<div>
+									<Label className="text-sm font-medium text-muted-foreground">Price</Label>
+									<p className="text-sm">${parseFloat(viewingProduct.price || "0").toLocaleString()}</p>
+								</div>
+								<div>
+									<Label className="text-sm font-medium text-muted-foreground">Stock Quantity</Label>
+									<p className="text-sm">{viewingProduct.stockQuantity}</p>
+								</div>
+								<div>
+									<Label className="text-sm font-medium text-muted-foreground">Status</Label>
+									<Badge variant={
+										viewingProduct.status === "active"
+											? "default"
+											: viewingProduct.status === "low_stock"
+												? "secondary"
+												: "destructive"
+									}>
+										{viewingProduct.status.replace("_", " ")}
+									</Badge>
+								</div>
+								<div>
+									<Label className="text-sm font-medium text-muted-foreground">Low Stock Threshold</Label>
+									<p className="text-sm">{viewingProduct.lowStockThreshold}</p>
+								</div>
+							</div>
+							{viewingProduct.description && (
+								<div>
+									<Label className="text-sm font-medium text-muted-foreground">Description</Label>
+									<p className="text-sm">{viewingProduct.description}</p>
+								</div>
+							)}
+							<div>
+								<Label className="text-sm font-medium text-muted-foreground">Created</Label>
+								<p className="text-sm">{new Date(viewingProduct.createdAt).toLocaleDateString()}</p>
+							</div>
+						</div>
+						<DialogFooter>
+							<Button variant="outline" onClick={() => setViewingProduct(null)}>
+								Close
+							</Button>
+							<Button onClick={() => {
+								setViewingProduct(null);
+								setEditingProduct(viewingProduct);
+								setIsFormOpen(true);
+							}}>
+								Edit Product
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			)}
 		</div>
 	);
 }

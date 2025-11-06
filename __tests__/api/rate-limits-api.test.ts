@@ -19,6 +19,9 @@ import { NextRequest } from 'next/server';
 
 // Mock dependencies
 vi.mock('@clerk/nextjs/server');
+vi.mock('@/lib/db/neon-connection', () => ({
+	query: vi.fn(),
+}));
 vi.mock('@/lib/services/integration/rate-limiting.service', () => {
 	const mockServiceInstance = {
 		getApiEvents: vi.fn(),
@@ -66,10 +69,12 @@ describe('Rate Limits API', () => {
 			userId: mockClerkId,
 		} as any);
 
-		vi.mocked(mockServiceInstance.getApiEvents).mockResolvedValue(mockEvents);
-		vi.mocked(mockServiceInstance.getRateLimitViolations).mockResolvedValue(mockViolations);
-		vi.mocked(mockServiceInstance.getSummary).mockResolvedValue(mockSummary);
-		vi.mocked(mockServiceInstance.getActiveRateLimits).mockResolvedValue(mockActiveRateLimits);
+		const { RateLimitingService } = await import('@/lib/services/integration/rate-limiting.service');
+		const serviceInstance = new RateLimitingService();
+		vi.mocked(serviceInstance.getApiEvents).mockResolvedValue(mockEvents);
+		vi.mocked(serviceInstance.getRateLimitViolations).mockResolvedValue(mockViolations);
+		vi.mocked(serviceInstance.getSummary).mockResolvedValue(mockSummary);
+		vi.mocked(serviceInstance.getActiveRateLimits).mockResolvedValue(mockActiveRateLimits);
 
 		const request = new NextRequest('http://localhost:3000/api/monitoring/rate-limits?hours=24');
 		const response = await GET(request);
@@ -90,7 +95,7 @@ describe('Rate Limits API', () => {
 				uniqueIps: 1,
 			},
 		});
-		expect(mockServiceInstance.getApiEvents).toHaveBeenCalledWith({
+		expect(serviceInstance.getApiEvents).toHaveBeenCalledWith({
 			hours: 24,
 			clerkUserId: mockClerkId,
 			limit: 1000,
@@ -151,10 +156,12 @@ describe('Rate Limits API', () => {
 			userId: mockClerkId,
 		} as any);
 
-		vi.mocked(mockServiceInstance.getApiEvents).mockResolvedValue(mockEvents);
-		vi.mocked(mockServiceInstance.getRateLimitViolations).mockResolvedValue(mockViolations);
-		vi.mocked(mockServiceInstance.getSummary).mockResolvedValue(mockSummary);
-		vi.mocked(mockServiceInstance.getActiveRateLimits).mockResolvedValue(mockActiveRateLimits);
+		const { RateLimitingService } = await import('@/lib/services/integration/rate-limiting.service');
+		const serviceInstance = new RateLimitingService();
+		vi.mocked(serviceInstance.getApiEvents).mockResolvedValue(mockEvents);
+		vi.mocked(serviceInstance.getRateLimitViolations).mockResolvedValue(mockViolations);
+		vi.mocked(serviceInstance.getSummary).mockResolvedValue(mockSummary);
+		vi.mocked(serviceInstance.getActiveRateLimits).mockResolvedValue(mockActiveRateLimits);
 
 		const request = new NextRequest('http://localhost:3000/api/monitoring/rate-limits?hours=24');
 		const response = await GET(request);
@@ -193,7 +200,7 @@ describe('Rate Limits API', () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
-		expect(mockServiceInstance.getApiEvents).toHaveBeenCalledWith({
+		expect(serviceInstance.getApiEvents).toHaveBeenCalledWith({
 			hours: 24,
 			clerkUserId: mockClerkId,
 			limit: 1000,

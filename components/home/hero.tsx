@@ -55,9 +55,9 @@ export default function Hero() {
   ]
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-background">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-primary)]/5 via-white to-[var(--brand-primary)]/10" />
+      <div className="absolute inset-0 bg-primary/5" />
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
 
       {/* Floating Elements */}
@@ -77,7 +77,7 @@ export default function Hero() {
         {/* Main Heading */}
         <div className="text-center max-w-5xl mx-auto mb-8">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-            <span className="bg-gradient-to-r from-[var(--brand-primary)] via-[var(--brand-primary-light)] to-[var(--brand-secondary)] bg-clip-text text-transparent">
+            <span className="text-primary">
               Transform Your
             </span>
             <br />

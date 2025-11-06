@@ -40,6 +40,15 @@ const contactFormSchema = z.object({
 		.trim(),
 	// Honeypot field for spam protection
 	website: z.string().max(0, 'Bot detected').optional().default(''),
+	// Optional fields for source tracking and metadata
+	source: z
+		.string()
+		.max(50, 'Source must be less than 50 characters')
+		.trim()
+		.optional(),
+	metadata: z
+		.record(z.unknown())
+		.optional(),
 });
 
 // Email validation regex (more comprehensive than basic email check)
@@ -121,7 +130,7 @@ export async function POST(request: NextRequest) {
 			return ApiErrorHandler.validationError(validationResult.error, requestId);
 		}
 
-		const { name, email, company, message, website } = validationResult.data;
+		const { name, email, company, message, website, source, metadata } = validationResult.data;
 
 		// Additional honeypot check (should be empty)
 		if (website && website.length > 0) {
@@ -156,6 +165,33 @@ export async function POST(request: NextRequest) {
 		const userAgent = request.headers.get('user-agent') || 'unknown';
 		const referrer = request.headers.get('referer') || 'unknown';
 
+		// Determine source - use provided source, detect from referrer, or default to 'contact_page'
+		let submissionSource = source || 'contact_page';
+		if (!source && referrer !== 'unknown') {
+			try {
+				const referrerUrl = new URL(referrer);
+				if (referrerUrl.pathname.includes('/consulting')) {
+					submissionSource = 'consulting_page';
+				} else if (referrerUrl.pathname.includes('/enterprise')) {
+					submissionSource = 'enterprise_page';
+				} else if (referrerUrl.pathname.includes('/support')) {
+					submissionSource = 'support_page';
+				}
+			} catch {
+				// If referrer is not a valid URL, check if it contains the path
+				if (referrer.includes('/consulting')) {
+					submissionSource = 'consulting_page';
+				} else if (referrer.includes('/enterprise')) {
+					submissionSource = 'enterprise_page';
+				} else if (referrer.includes('/support')) {
+					submissionSource = 'support_page';
+				}
+			}
+		}
+
+		// Prepare metadata JSON string if provided
+		const metadataJson = metadata ? JSON.stringify(metadata) : null;
+
 		// Store submission in database
 		const db = getDbOrThrow();
 		
@@ -171,36 +207,69 @@ export async function POST(request: NextRequest) {
 				ipAddress,
 				userAgent,
 				referrer,
-				source: 'contact_page',
+				source: submissionSource,
+				metadata: metadataJson,
 			})
 			.returning();
+
+		// Prepare email content with metadata if available
+		let emailSubject = `New Contact Form Submission from ${sanitizedName}`;
+		if (submissionSource === 'consulting_page') {
+			emailSubject = `New Consulting Inquiry from ${sanitizedName}`;
+		} else if (submissionSource === 'enterprise_page') {
+			emailSubject = `New Enterprise Inquiry from ${sanitizedName}`;
+		}
+
+		let metadataHtml = '';
+		let metadataText = '';
+		if (metadata) {
+			const metadataEntries = Object.entries(metadata)
+				.filter(([key]) => key !== 'website') // Exclude honeypot
+				.map(([key, value]) => {
+					const displayKey = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+					return { key: displayKey, value: String(value) };
+				});
+
+			if (metadataEntries.length > 0) {
+				metadataHtml = '<p><strong>Additional Information:</strong></p><ul>';
+				metadataText = '\n\nAdditional Information:\n';
+				metadataEntries.forEach(({ key, value }) => {
+					metadataHtml += `<li><strong>${key}:</strong> ${value}</li>`;
+					metadataText += `${key}: ${value}\n`;
+				});
+				metadataHtml += '</ul>';
+			}
+		}
 
 		// Send notification email (async - don't wait for it)
 		EmailService.sendEmail({
 			to: { email: process.env.CONTACT_NOTIFICATION_EMAIL || 'hello@financbase.com' },
-			subject: `New Contact Form Submission from ${sanitizedName}`,
+			subject: emailSubject,
 			html: `
-				<h2>New Contact Form Submission</h2>
+				<h2>New ${submissionSource === 'consulting_page' ? 'Consulting' : submissionSource === 'enterprise_page' ? 'Enterprise' : 'Contact'} Form Submission</h2>
 				<p><strong>Name:</strong> ${sanitizedName}</p>
 				<p><strong>Email:</strong> ${sanitizedEmail}</p>
 				${sanitizedCompany ? `<p><strong>Company:</strong> ${sanitizedCompany}</p>` : ''}
+				${metadataHtml}
 				<p><strong>Message:</strong></p>
 				<p>${sanitizedMessage.replace(/\n/g, '<br>')}</p>
 				<hr>
+				<p><small>Source: ${submissionSource}</small></p>
 				<p><small>Submitted at: ${new Date().toISOString()}</small></p>
 				<p><small>IP Address: ${ipAddress}</small></p>
 			`,
 			text: `
-New Contact Form Submission
+New ${submissionSource === 'consulting_page' ? 'Consulting' : submissionSource === 'enterprise_page' ? 'Enterprise' : 'Contact'} Form Submission
 
 Name: ${sanitizedName}
 Email: ${sanitizedEmail}
-${sanitizedCompany ? `Company: ${sanitizedCompany}` : ''}
+${sanitizedCompany ? `Company: ${sanitizedCompany}` : ''}${metadataText}
 
 Message:
 ${sanitizedMessage}
 
 ---
+Source: ${submissionSource}
 Submitted at: ${new Date().toISOString()}
 IP Address: ${ipAddress}
 			`,

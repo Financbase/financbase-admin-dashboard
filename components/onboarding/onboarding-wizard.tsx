@@ -38,10 +38,21 @@ import { AgencyDashboardStep } from "./steps/agency-dashboard-step";
 import { InviteTeamStep } from "./steps/invite-team-step";
 import { RealEstateWelcomeStep } from "./steps/real-estate-welcome-step";
 import { RealEstatePropertyStep } from "./steps/real-estate-property-step";
+import { RealEstateRentalDetailsStep } from "./steps/real-estate-rental-details-step";
+import { RealEstateOwnerStatementStep } from "./steps/real-estate-owner-statement-step";
+import { RealEstatePortfolioDashboardStep } from "./steps/real-estate-portfolio-dashboard-step";
+import { InviteStakeholdersStep } from "./steps/invite-stakeholders-step";
 import { StartupWelcomeStep } from "./steps/startup-welcome-step";
 import { StartupDataImportStep } from "./steps/startup-data-import-step";
+import { ConnectStripeStep } from "./steps/connect-stripe-step";
+import { BurnRateDashboardStep } from "./steps/burn-rate-dashboard-step";
+import { SetupWorkflowsStep } from "./steps/setup-workflows-step";
+import { InviteAdvisorsStep } from "./steps/invite-advisors-step";
 import { FreelancerWelcomeStep } from "./steps/freelancer-welcome-step";
 import { FreelancerProfileStep } from "./steps/freelancer-profile-step";
+import { CreateInvoiceStep } from "./steps/create-invoice-step";
+import { ExpenseTrackingStep } from "./steps/expense-tracking-step";
+import { BusinessHealthStep } from "./steps/business-health-step";
 
 interface OnboardingWizardProps {
 	onboarding: OnboardingProgress;
@@ -64,14 +75,25 @@ const stepComponents: Record<string, React.ComponentType<any>> = {
 	// Real Estate steps
 	RealEstateWelcomeStep,
 	RealEstatePropertyStep,
+	RealEstateRentalDetailsStep,
+	RealEstateOwnerStatementStep,
+	RealEstatePortfolioDashboardStep,
+	InviteStakeholdersStep,
 	
 	// Tech Startup steps
 	StartupWelcomeStep,
 	StartupDataImportStep,
+	ConnectStripeStep,
+	BurnRateDashboardStep,
+	SetupWorkflowsStep,
+	InviteAdvisorsStep,
 	
 	// Freelancer steps
 	FreelancerWelcomeStep,
 	FreelancerProfileStep,
+	CreateInvoiceStep,
+	ExpenseTrackingStep,
+	BusinessHealthStep,
 };
 
 export function OnboardingWizard({ 
@@ -94,20 +116,31 @@ export function OnboardingWizard({
 
 	// Render the appropriate step component
 	const renderStepComponent = () => {
-		// Map step IDs to components
+		// Map step IDs to components (matching flow definitions)
 		const stepIdToComponent: Record<string, string> = {
-			'agency_welcome': 'AgencyWelcomeStep',
-			'agency_import': 'AgencyImportDataStep',
-			'agency_slack': 'ConnectSlackStep',
-			'agency_invoice': 'AgencyInvoiceExpenseStep',
-			'agency_dashboard': 'AgencyDashboardStep',
-			'agency_invite': 'InviteTeamStep',
-			'realestate_welcome': 'RealEstateWelcomeStep',
-			'realestate_property': 'RealEstatePropertyStep',
-			'startup_welcome': 'StartupWelcomeStep',
-			'startup_import': 'StartupDataImportStep',
-			'freelancer_welcome': 'FreelancerWelcomeStep',
-			'freelancer_profile': 'FreelancerProfileStep',
+			// Digital Agency steps
+			'import_clients': 'AgencyImportDataStep',
+			'setup_slack': 'ConnectSlackStep',
+			'invoice_demo': 'AgencyInvoiceExpenseStep',
+			'profitability_dashboard': 'AgencyDashboardStep',
+			'invite_team': 'InviteTeamStep',
+			// Real Estate steps
+			'add_property': 'RealEstatePropertyStep',
+			'rental_details': 'RealEstateRentalDetailsStep',
+			'owner_statement': 'RealEstateOwnerStatementStep',
+			'portfolio_dashboard': 'RealEstatePortfolioDashboardStep',
+			'invite_stakeholders': 'InviteStakeholdersStep',
+			// Tech Startup steps
+			'import_financials': 'StartupDataImportStep',
+			'connect_stripe': 'ConnectStripeStep',
+			'burn_rate_dashboard': 'BurnRateDashboardStep',
+			'setup_workflows': 'SetupWorkflowsStep',
+			'invite_advisors': 'InviteAdvisorsStep',
+			// Freelancer steps
+			'setup_profile': 'FreelancerProfileStep',
+			'create_invoice': 'CreateInvoiceStep',
+			'expense_tracking': 'ExpenseTrackingStep',
+			'business_health': 'BusinessHealthStep',
 		};
 		
 		const componentName = stepIdToComponent[currentStep.stepId] || currentStep.stepId;

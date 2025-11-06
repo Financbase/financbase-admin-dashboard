@@ -64,77 +64,130 @@ export default function AIAssistantPage() {
 	const queryClient = useQueryClient();
 
 	// Fetch conversations
-	const { data: conversationsData, isLoading: conversationsLoading } = useQuery({
+	const { data: conversationsData, isLoading: conversationsLoading, error: conversationsError } = useQuery({
 		queryKey: ['ai-conversations'],
 		queryFn: async () => {
-			const response = await fetch('/api/ai/chat/conversations');
-			if (!response.ok) throw new Error('Failed to fetch conversations');
-			return response.json();
+			try {
+				const response = await fetch('/api/ai/chat/conversations');
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({}));
+					throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch conversations`);
+				}
+				return response.json();
+			} catch (error) {
+				if (error instanceof Error) {
+					throw error;
+				}
+				throw new Error('Network error: Failed to fetch conversations');
+			}
 		},
+		retry: 1,
 	});
 
 	// Fetch messages for selected conversation
-	const { data: messagesData, isLoading: messagesLoading } = useQuery({
+	const { data: messagesData, isLoading: messagesLoading, error: messagesError } = useQuery({
 		queryKey: ['ai-messages', selectedConversation],
 		queryFn: async () => {
 			if (!selectedConversation) return { messages: [] };
-			const response = await fetch(`/api/ai/chat/conversations/${selectedConversation}`);
-			if (!response.ok) throw new Error('Failed to fetch messages');
-			return response.json();
+			try {
+				const response = await fetch(`/api/ai/chat/conversations/${selectedConversation}`);
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({}));
+					throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch messages`);
+				}
+				return response.json();
+			} catch (error) {
+				if (error instanceof Error) {
+					throw error;
+				}
+				throw new Error('Network error: Failed to fetch messages');
+			}
 		},
 		enabled: !!selectedConversation,
+		retry: 1,
 	});
 
 	// Fetch conversation suggestions
-	const { data: suggestionsData } = useQuery({
+	const { data: suggestionsData, error: suggestionsError } = useQuery({
 		queryKey: ['ai-suggestions'],
 		queryFn: async () => {
-			const response = await fetch('/api/ai/chat/suggestions');
-			if (!response.ok) throw new Error('Failed to fetch suggestions');
-			return response.json();
+			try {
+				const response = await fetch('/api/ai/chat/suggestions');
+				if (!response.ok) {
+					// Suggestions are optional, so we don't throw on error
+					return { suggestions: [] };
+				}
+				return response.json();
+			} catch (error) {
+				// Return empty suggestions on error
+				return { suggestions: [] };
+			}
 		},
+		retry: 1,
 	});
 
 	// Send message mutation
 	const sendMessageMutation = useMutation({
 		mutationFn: async (message: string) => {
-			if (!selectedConversation) {
-				// Create new conversation
-				const convResponse = await fetch('/api/ai/chat/conversations', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ title: message.slice(0, 50) }),
-				});
-				const { conversation } = await convResponse.json();
-				setSelectedConversation(conversation.id);
-				
-				// Send message to new conversation
-				const response = await fetch('/api/ai/chat/messages', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						conversationId: conversation.id,
-						message,
-					}),
-				});
-				return response.json();
-			} else {
-				// Send message to existing conversation
-				const response = await fetch('/api/ai/chat/messages', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						conversationId: selectedConversation,
-						message,
-					}),
-				});
-				return response.json();
+			try {
+				if (!selectedConversation) {
+					// Create new conversation
+					const convResponse = await fetch('/api/ai/chat/conversations', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ title: message.slice(0, 50) }),
+					});
+					if (!convResponse.ok) {
+						const errorData = await convResponse.json().catch(() => ({}));
+						throw new Error(errorData.message || 'Failed to create conversation');
+					}
+					const { conversation } = await convResponse.json();
+					setSelectedConversation(conversation.id);
+					
+					// Send message to new conversation
+					const response = await fetch('/api/ai/chat/messages', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							conversationId: conversation.id,
+							message,
+						}),
+					});
+					if (!response.ok) {
+						const errorData = await response.json().catch(() => ({}));
+						throw new Error(errorData.message || 'Failed to send message');
+					}
+					return response.json();
+				} else {
+					// Send message to existing conversation
+					const response = await fetch('/api/ai/chat/messages', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							conversationId: selectedConversation,
+							message,
+						}),
+					});
+					if (!response.ok) {
+						const errorData = await response.json().catch(() => ({}));
+						throw new Error(errorData.message || 'Failed to send message');
+					}
+					return response.json();
+				}
+			} catch (error) {
+				if (error instanceof Error) {
+					throw error;
+				}
+				throw new Error('Network error: Failed to send message');
 			}
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['ai-messages', selectedConversation] });
 			queryClient.invalidateQueries({ queryKey: ['ai-conversations'] });
 			setInputMessage("");
+		},
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to send message. Please try again.');
 		},
 	});
 
@@ -228,6 +281,15 @@ export default function AIAssistantPage() {
 						</Button>
 					))}
 				</div>
+					</div>
+				)}
+				{/* Error Display */}
+				{(conversationsError || messagesError) && (
+					<div className="p-4 border-b">
+						<div className="bg-destructive/10 border border-destructive text-destructive px-3 py-2 rounded text-sm">
+							<AlertCircle className="h-4 w-4 inline mr-2" />
+							{conversationsError?.message || messagesError?.message || 'Failed to load data'}
+						</div>
 					</div>
 				)}
 			</div>

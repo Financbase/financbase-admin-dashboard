@@ -24,6 +24,18 @@ vi.mock('@/lib/db', () => ({
 		insert: vi.fn(),
 	},
 }));
+vi.mock('@/drizzle/schema/folder-sharing', () => ({
+	folderInvitations: {},
+	folderPermissions: {},
+	folders: {},
+}));
+vi.mock('@/drizzle/schema/workspaces', () => ({
+	workspaces: {},
+}));
+vi.mock('@/lib/services/business/folder-sharing.service', async () => {
+	const actual = await vi.importActual('@/lib/services/business/folder-sharing.service');
+	return actual;
+});
 vi.mock('@/lib/email/service', () => ({
 	resend: {
 		emails: {

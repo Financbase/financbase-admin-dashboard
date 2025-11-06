@@ -21,7 +21,7 @@ import {
 	Globe,
 	Clock,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +44,8 @@ export default function StatusPage() {
 	const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 	const [autoRefresh, setAutoRefresh] = useState(true);
 
-	const fetchHealthStatus = async () => {
+	const fetchHealthStatus = useCallback(async () => {
+		setIsLoading(true);
 		try {
 			const response = await fetch('/api/v1/health');
 			const data = await response.json();
@@ -60,7 +61,7 @@ export default function StatusPage() {
 		} finally {
 			setIsLoading(false);
 		}
-	};
+	}, []);
 
 	useEffect(() => {
 		fetchHealthStatus();
@@ -69,7 +70,7 @@ export default function StatusPage() {
 			const interval = setInterval(fetchHealthStatus, 60000); // Refresh every minute
 			return () => clearInterval(interval);
 		}
-	}, [autoRefresh]);
+	}, [autoRefresh, fetchHealthStatus]);
 
 	const getStatusIcon = (status: string) => {
 		switch (status?.toLowerCase()) {

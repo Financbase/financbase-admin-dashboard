@@ -161,13 +161,23 @@ export default function AiAssistPage() {
 	// Send chat message
 	const sendMessageMutation = useMutation({
 		mutationFn: async (message: string) => {
-			const response = await fetch('/api/ai/chat', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ message }),
-			});
-			if (!response.ok) throw new Error('Failed to send message');
-			return response.json();
+			try {
+				const response = await fetch('/api/ai/chat', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ message }),
+				});
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({}));
+					throw new Error(errorData.message || `HTTP ${response.status}: Failed to send message`);
+				}
+				return response.json();
+			} catch (error) {
+				if (error instanceof Error) {
+					throw error;
+				}
+				throw new Error('Network error: Failed to send message');
+			}
 		},
 		onSuccess: (data) => {
 			const userMessage: ChatMessage = {
@@ -185,8 +195,8 @@ export default function AiAssistPage() {
 			setChatMessages((prev) => [...prev, userMessage, assistantMessage]);
 			setChatInput("");
 		},
-		onError: () => {
-			toast.error('Failed to send message. Please try again.');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to send message. Please try again.');
 		},
 	});
 

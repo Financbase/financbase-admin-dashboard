@@ -263,11 +263,16 @@ export default function ChatPage() {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button variant="outline">
+					<Button 
+						variant="outline"
+						onClick={() => toast.info("Meeting feature coming soon")}
+					>
 						<Video className="h-4 w-4 mr-2" />
 						Start Meeting
 					</Button>
-					<Button>
+					<Button
+						onClick={() => toast.info("Channel creation feature coming soon")}
+					>
 						<Plus className="h-4 w-4 mr-2" />
 						New Channel
 					</Button>
@@ -403,16 +408,34 @@ export default function ChatPage() {
 								</div>
 								{selectedChannel && (
 									<div className="flex items-center gap-2">
-										<Button variant="outline" size="sm">
+										<Button 
+											variant="outline" 
+											size="sm"
+											disabled
+											title="Voice call feature coming soon"
+										>
 											<Phone className="h-4 w-4 mr-1" />
 											Call
+											<Badge variant="secondary" className="ml-1 text-xs">Soon</Badge>
 										</Button>
-										<Button variant="outline" size="sm">
+										<Button 
+											variant="outline" 
+											size="sm"
+											disabled
+											title="Video call feature coming soon"
+										>
 											<Video className="h-4 w-4 mr-1" />
 											Video
+											<Badge variant="secondary" className="ml-1 text-xs">Soon</Badge>
 										</Button>
-										<Button variant="outline" size="sm">
+										<Button 
+											variant="outline" 
+											size="sm"
+											disabled
+											title="Channel settings coming soon"
+										>
 											<Settings className="h-4 w-4" />
+											<Badge variant="secondary" className="ml-1 text-xs">Soon</Badge>
 										</Button>
 									</div>
 								)}

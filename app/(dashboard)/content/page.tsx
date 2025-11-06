@@ -409,9 +409,15 @@ export default function ContentManagerPage() {
                   <p className="text-muted-foreground">
                     Create and manage static pages for your site
                   </p>
-                  <Button size="sm" onClick={() => toast.info('Page creation feature will be available soon')}>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    disabled
+                    title="Page creation feature coming soon"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Create Page
+                    <Badge variant="secondary" className="ml-2 text-xs">Soon</Badge>
                   </Button>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">

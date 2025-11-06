@@ -229,7 +229,7 @@ export const marketingStats = pgTable(
 
 // User Feedback Table - User feedback and ratings
 export const userFeedback = pgTable(
-	"financbase_user_feedback",
+	"financbase.financbase_user_feedback",
 	{
 		id: uuid("id").primaryKey().defaultRandom(),
 		userId: uuid("user_id"),

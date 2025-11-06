@@ -24,6 +24,7 @@ import {
 import { FinancbaseLogo } from "@/components/ui/financbase-logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AnimatedNavbar, navbarItems } from "@/components/ui/animated-navbar";
+import { LanguageSelector } from "@/components/i18n/language-selector";
 import { SearchComponent } from "@/components/ui/search-component";
 import { EnhancedNotificationsPanel } from "@/components/core/enhanced-notifications-panel";
 import {
@@ -150,6 +151,9 @@ export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 						<div className="flex items-center">
 							<ThemeToggle />
 						</div>
+
+						{/* Language Selector */}
+						<LanguageSelector variant="minimal" />
 
 						{/* Help */}
 						<DropdownMenu>

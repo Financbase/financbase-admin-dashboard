@@ -131,23 +131,36 @@ export default function DeveloperPortalPage() {
 			setLoading(true);
 			setError(null);
 			try {
-				// Simulate API call
-				await new Promise(resolve => setTimeout(resolve, 1000));
-				setApiKeys(sampleAPIKeys);
+				// Try to fetch real API keys, fallback to sample data
+				let keysToUse = sampleAPIKeys;
+				try {
+					const response = await fetch('/api/developer/api-keys');
+					if (response.ok) {
+						const data = await response.json();
+						keysToUse = Array.isArray(data) ? data : data.apiKeys || sampleAPIKeys;
+					}
+				} catch {
+					// Use sample data on error
+				}
+				
+				setApiKeys(keysToUse);
 				
 				// Calculate stats
 				const calculatedStats = {
-					totalAPIKeys: sampleAPIKeys.length,
-					activeAPIKeys: sampleAPIKeys.filter(key => key.status === 'active').length,
-					totalRequests: sampleAPIKeys.reduce((sum, key) => sum + key.usageCount, 0),
+					totalAPIKeys: keysToUse.length,
+					activeAPIKeys: keysToUse.filter((key: APIKey) => key.status === 'active').length,
+					totalRequests: keysToUse.reduce((sum: number, key: APIKey) => sum + key.usageCount, 0),
 					successRate: 99.8,
 					averageResponseTime: 120,
 					uptime: 99.98
 				};
 				setStats(calculatedStats);
 			} catch (err) {
-				setError('Failed to load developer portal data. Please try again.');
+				const errorMessage = err instanceof Error ? err.message : 'Failed to load developer portal data. Please try again.';
+				setError(errorMessage);
 				console.error('Error loading developer portal data:', err);
+				// Use sample data as fallback
+				setApiKeys(sampleAPIKeys);
 			} finally {
 				setLoading(false);
 			}

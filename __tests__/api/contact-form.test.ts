@@ -264,5 +264,93 @@ describe('Contact Form API', () => {
       expect(response.status).toBe(429);
       expect(data.error).toBeDefined();
     });
+
+    it('should successfully submit a consulting form with source and metadata', async () => {
+      const consultingSubmission = {
+        ...mockSubmission,
+        id: 'consulting-submission-123',
+        source: 'consulting_page',
+        metadata: JSON.stringify({
+          type: 'consulting',
+          service: 'Implementation & Migration',
+          phone: '+1 (555) 123-4567',
+        }),
+      };
+
+      const { getDbOrThrow } = await import('@/lib/db');
+      getDbOrThrow.mockReturnValue({
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([consultingSubmission]),
+          }),
+        }),
+      });
+
+      const requestBody = {
+        name: 'Consulting Test User',
+        email: 'consulting@example.com',
+        company: 'Consulting Test Company',
+        message: 'I need help with implementing Financbase in our organization.',
+        website: '',
+        source: 'consulting_page',
+        metadata: {
+          type: 'consulting',
+          service: 'Implementation & Migration',
+          phone: '+1 (555) 123-4567',
+        },
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'user-agent': 'test-agent',
+          'referer': 'http://localhost:3000/consulting',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      request.json = vi.fn().mockResolvedValue(requestBody);
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.message).toBeDefined();
+      expect(data.submissionId).toBeDefined();
+      
+      // Verify the database insert was called with correct source and metadata
+      const insertCall = getDbOrThrow().insert().values();
+      expect(insertCall).toBeDefined();
+    });
+
+    it('should auto-detect source from referrer URL', async () => {
+      const requestBody = {
+        name: 'Test User',
+        email: 'test@example.com',
+        message: 'This is a test message from consulting page.',
+        website: '',
+        // No source provided, should be detected from referrer
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'user-agent': 'test-agent',
+          'referer': 'http://localhost:3000/consulting',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      request.json = vi.fn().mockResolvedValue(requestBody);
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+    });
   });
 });

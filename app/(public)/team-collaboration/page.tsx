@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Users, MessageSquare, Calendar, FileText, Video, ArrowRight, Share2 } from "lucide-react";
-import Link from "next/link";
 
 export const metadata: Metadata = {
 	title: "Team Collaboration | Financbase",
@@ -146,21 +145,24 @@ export default function TeamCollaborationPage() {
 				</div>
 				
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-					{features.map((feature, index) => (
-						<Card key={index} className="text-center hover:shadow-lg transition-shadow">
-							<CardHeader>
-								<div className="mx-auto w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
-									<feature.icon className="h-6 w-6 text-green-600 dark:text-green-400" />
-								</div>
-								<CardTitle className="text-xl">{feature.title}</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<CardDescription className="text-base">
-									{feature.description}
-								</CardDescription>
-							</CardContent>
-						</Card>
-					))}
+					{features.map((feature, index) => {
+						const Icon = feature.icon;
+						return (
+							<Card key={index} className="text-center hover:shadow-lg transition-shadow">
+								<CardHeader>
+									<div className="mx-auto w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
+										<Icon className="h-6 w-6 text-green-600 dark:text-green-400" />
+									</div>
+									<CardTitle className="text-xl">{feature.title}</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<CardDescription className="text-base">
+										{feature.description}
+									</CardDescription>
+								</CardContent>
+							</Card>
+						);
+					})}
 				</div>
 			</section>
 

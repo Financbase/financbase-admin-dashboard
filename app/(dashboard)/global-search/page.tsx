@@ -321,9 +321,14 @@ export default function SearchPage() {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button variant="outline">
+					<Button 
+						variant="outline"
+						disabled
+						title="Search settings feature coming soon"
+					>
 						<Settings className="h-4 w-4 mr-2" />
 						Search Settings
+						<Badge variant="secondary" className="ml-2 text-xs">Soon</Badge>
 					</Button>
 				</div>
 			</div>

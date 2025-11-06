@@ -299,20 +299,31 @@ export default function SupportPage() {
 						{/* Categories Tab */}
 						<TabsContent value="categories" className="space-y-4">
 							<BentoGrid className="md:auto-rows-[20rem]">
-								{supportCategories.map((category) => (
-									<BentoCard
-										key={`category-${category.title.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '').replace(/--+/g, '-')}`}
-										name={category.title}
-										description={`${category.description}. ${category.articles} articles available.`}
-										Icon={category.icon}
-										href={`/support/category/${category.title.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "").replace(/--+/g, "-")}`}
-										cta="Browse Articles"
-										className="md:col-span-1"
-										background={
-											<div className={`absolute inset-0 ${category.color} group-hover:opacity-15 transition-opacity`} />
-										}
-									/>
-								))}
+								{supportCategories.map((category) => {
+									// Generate slug that matches category page expectations
+									const slug = category.title
+										.toLowerCase()
+										.replace(/\s+/g, '-')
+										.replace(/&/g, '')
+										.replace(/[^\w-]/g, '')
+										.replace(/-+/g, '-')
+										.replace(/^-|-$/g, '');
+									
+									return (
+										<BentoCard
+											key={`category-${slug}`}
+											name={category.title}
+											description={`${category.description}. ${category.articles} articles available.`}
+											Icon={category.icon}
+											href={`/support/category/${slug}`}
+											cta="Browse Articles"
+											className="md:col-span-1"
+											background={
+												<div className={`absolute inset-0 ${category.color} group-hover:opacity-15 transition-opacity`} />
+											}
+										/>
+									);
+								})}
 							</BentoGrid>
 						</TabsContent>
 
@@ -437,13 +448,13 @@ export default function SupportPage() {
 												<SelectTrigger id={categoryId}>
 													<SelectValue placeholder="Select a category" />
 												</SelectTrigger>
-												<SelectContent>
-													<SelectItem value="general">General Inquiry</SelectItem>
-													<SelectItem value="technical">Technical Support</SelectItem>
-													<SelectItem value="billing">Billing & Account</SelectItem>
-													<SelectItem value="feature">Feature Request</SelectItem>
-													<SelectItem value="bug">Bug Report</SelectItem>
-												</SelectContent>
+											<SelectContent>
+												<SelectItem value="general">General Inquiry</SelectItem>
+												<SelectItem value="technical">Technical Support</SelectItem>
+												<SelectItem value="billing">Billing & Account</SelectItem>
+												<SelectItem value="feature_request">Feature Request</SelectItem>
+												<SelectItem value="bug_report">Bug Report</SelectItem>
+											</SelectContent>
 											</Select>
 										</div>
 									</div>

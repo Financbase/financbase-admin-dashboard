@@ -63,6 +63,11 @@ export const FINANCIAL_PERMISSIONS = {
 	SETTINGS_MANAGE: 'settings:manage',
 	USERS_MANAGE: 'users:manage',
 	ROLES_MANAGE: 'roles:manage',
+	CAREERS_VIEW: 'careers:view',
+	CAREERS_CREATE: 'careers:create',
+	CAREERS_EDIT: 'careers:edit',
+	CAREERS_DELETE: 'careers:delete',
+	CAREERS_MANAGE: 'careers:manage',
 } as const;
 
 export type FinancialPermission = typeof FINANCIAL_PERMISSIONS[keyof typeof FINANCIAL_PERMISSIONS];

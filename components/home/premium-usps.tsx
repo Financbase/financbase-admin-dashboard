@@ -26,6 +26,7 @@ import {
   Lock,
   Smartphone
 } from "lucide-react"
+import Link from "next/link"
 
 export default function PremiumUSPs() {
   const [activeFeature, setActiveFeature] = useState(0)
@@ -52,7 +53,8 @@ export default function PremiumUSPs() {
         label: "Time Saved",
         change: "+23%"
       },
-      color: "from-blue-500 to-blue-600"
+      color: "bg-orange-500",
+      href: "/products/workflows-automations"
     },
     {
       id: "real-time-analytics",
@@ -70,7 +72,8 @@ export default function PremiumUSPs() {
         label: "Accuracy Rate",
         change: "+5%"
       },
-      color: "from-emerald-500 to-emerald-600"
+      color: "bg-indigo-500",
+      href: "/products/analytics"
     },
     {
       id: "enterprise-security",
@@ -88,7 +91,8 @@ export default function PremiumUSPs() {
         label: "Reliability",
         change: "+0.1%"
       },
-      color: "from-purple-500 to-purple-600"
+      color: "bg-teal-500",
+      href: "/security"
     }
   ]
 
@@ -116,7 +120,7 @@ export default function PremiumUSPs() {
   ]
 
   return (
-    <section className="py-24 bg-gradient-to-br from-slate-50 via-white to-slate-100 relative overflow-hidden">
+    <section className="py-24 bg-background relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -152,7 +156,7 @@ export default function PremiumUSPs() {
               <CardContent className="p-8">
                 {/* Icon and Title */}
                 <div className="flex items-center mb-6">
-                  <div className={`p-4 bg-gradient-to-br ${feature.color} rounded-xl text-white mr-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <div className={`p-4 ${feature.color} rounded-xl text-white mr-4 group-hover:scale-110 transition-transform duration-300`}>
                     {feature.icon}
                   </div>
                   <div>
@@ -179,9 +183,15 @@ export default function PremiumUSPs() {
                 </div>
 
                 {/* Learn More Button */}
-                <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button 
+                  variant="outline" 
+                  className="w-full group-hover:bg-primary group-hover:text-white transition-all duration-300"
+                  asChild
+                >
+                  <Link href={feature.href || "#"}>
+                    Learn More
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
               </CardContent>
             </Card>

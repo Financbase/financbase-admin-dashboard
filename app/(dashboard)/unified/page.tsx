@@ -82,10 +82,21 @@ export default function UnifiedDashboardPage() {
 	const { data: metricsData, isLoading: metricsLoading, error: metricsError } = useQuery({
 		queryKey: ['unified-metrics'],
 		queryFn: async () => {
-			const response = await fetch('/api/unified-dashboard/metrics');
-			if (!response.ok) throw new Error('Failed to fetch unified metrics');
-			return response.json();
+			try {
+				const response = await fetch('/api/unified-dashboard/metrics');
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({}));
+					throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch unified metrics`);
+				}
+				return response.json();
+			} catch (error) {
+				if (error instanceof Error) {
+					throw error;
+				}
+				throw new Error('Network error: Failed to fetch unified metrics');
+			}
 		},
+		retry: 1,
 	});
 
 	const metrics: UnifiedMetrics = metricsData?.metrics || {

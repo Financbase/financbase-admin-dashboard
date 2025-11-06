@@ -464,9 +464,15 @@ export default function LeaveManagementPage() {
 									<p className="text-sm text-muted-foreground">
 										Showing {leaveRequests.length} leave requests
 									</p>
-									<Button size="sm" variant="outline" onClick={() => toast.info('Calendar view feature will be available soon')}>
+									<Button 
+										size="sm" 
+										variant="outline" 
+										disabled
+										title="Calendar view feature coming soon"
+									>
 										<Calendar className="h-4 w-4 mr-2" />
 										View Calendar
+										<Badge variant="secondary" className="ml-2 text-xs">Soon</Badge>
 									</Button>
 								</div>
 								<div className="grid grid-cols-7 gap-2 mb-4">

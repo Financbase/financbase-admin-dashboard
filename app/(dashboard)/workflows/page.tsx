@@ -10,15 +10,17 @@
 "use client";
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'sonner';
 import { 
   Plus, 
   Search, 
@@ -67,20 +69,36 @@ export default function WorkflowsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [selectedExecution, setSelectedExecution] = useState<any>(null);
+  const [executionDialogOpen, setExecutionDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   // Fetch workflows
-  const { data: workflows = [], isLoading, refetch } = useQuery({
+  const { data: workflows = [], isLoading, error: workflowsError, refetch } = useQuery({
     queryKey: ['workflows', searchTerm, statusFilter, categoryFilter],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(categoryFilter !== 'all' && { category: categoryFilter }),
-      });
-      
-      const response = await fetch(`/api/workflows?${params}`);
-      return response.json();
+      try {
+        const params = new URLSearchParams({
+          ...(searchTerm && { search: searchTerm }),
+          ...(statusFilter !== 'all' && { status: statusFilter }),
+          ...(categoryFilter !== 'all' && { category: categoryFilter }),
+        });
+        
+        const response = await fetch(`/api/workflows?${params}`);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch workflows`);
+        }
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error('Network error: Failed to fetch workflows');
+      }
     },
+    retry: 1,
   });
 
   const getStatusIcon = (status: string) => {
@@ -113,22 +131,133 @@ export default function WorkflowsPage() {
     setActiveTab('builder');
   };
 
+  // Duplicate workflow mutation
+  const duplicateWorkflowMutation = useMutation({
+    mutationFn: async (workflowId: number) => {
+      const response = await fetch(`/api/workflows/${workflowId}/duplicate`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to duplicate workflow');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      toast.success('Workflow duplicated successfully');
+    },
+    onError: () => {
+      toast.error('Failed to duplicate workflow');
+    },
+  });
+
+  // Delete workflow mutation
+  const deleteWorkflowMutation = useMutation({
+    mutationFn: async (workflowId: number) => {
+      const response = await fetch(`/api/workflows/${workflowId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete workflow');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      toast.success('Workflow deleted successfully');
+      if (selectedWorkflow) {
+        setSelectedWorkflow(null);
+      }
+    },
+    onError: () => {
+      toast.error('Failed to delete workflow');
+    },
+  });
+
+  // Rerun execution mutation
+  const rerunExecutionMutation = useMutation({
+    mutationFn: async (executionId: string) => {
+      const response = await fetch(`/api/workflows/executions/${executionId}/rerun`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to rerun execution');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      toast.success('Execution rerun initiated');
+    },
+    onError: () => {
+      toast.error('Failed to rerun execution');
+    },
+  });
+
   const handleViewExecution = (execution: any) => {
-    console.log('View execution:', execution);
+    setSelectedExecution(execution);
+    setExecutionDialogOpen(true);
   };
 
   const handleRerunExecution = (execution: any) => {
-    console.log('Rerun execution:', execution);
+    if (confirm('Are you sure you want to rerun this execution?')) {
+      rerunExecutionMutation.mutate(execution.id || execution.executionId);
+    }
   };
 
   const handleUseTemplate = (template: any) => {
-    console.log('Use template:', template);
+    // Load template into builder
+    setSelectedWorkflow({
+      id: 0,
+      name: template.name || 'New Workflow',
+      description: template.description || '',
+      category: template.category || 'automation',
+      type: 'template',
+      status: 'draft',
+      isActive: false,
+      steps: template.templateConfig?.steps || [],
+      triggers: template.templateConfig?.triggers || [],
+      executionCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      lastExecutionAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
     setActiveTab('builder');
+    toast.success('Template loaded into builder');
   };
 
-  const handleCreateFromTemplate = (template: any) => {
-    console.log('Create from template:', template);
-    setActiveTab('builder');
+  const handleCreateFromTemplate = async (template: any) => {
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${template.name} (Copy)`,
+          description: template.description,
+          category: template.category,
+          type: 'template',
+          status: 'draft',
+          steps: template.templateConfig?.steps || [],
+          triggers: template.templateConfig?.triggers || [],
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to create workflow from template');
+      const newWorkflow = await response.json();
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      setSelectedWorkflow(newWorkflow);
+      setActiveTab('builder');
+      toast.success('Workflow created from template');
+    } catch (error) {
+      toast.error('Failed to create workflow from template');
+    }
+  };
+
+  const handleDuplicateWorkflow = (workflow: Workflow) => {
+    if (confirm(`Duplicate workflow "${workflow.name}"?`)) {
+      duplicateWorkflowMutation.mutate(workflow.id);
+    }
+  };
+
+  const handleDeleteWorkflow = (workflow: Workflow) => {
+    if (confirm(`Are you sure you want to delete "${workflow.name}"? This action cannot be undone.`)) {
+      deleteWorkflowMutation.mutate(workflow.id);
+    }
   };
 
   return (
@@ -298,8 +427,9 @@ export default function WorkflowsPage() {
                           variant="outline"
                           onClick={(e) => {
                             e.stopPropagation();
-                            // Handle duplicate
+                            handleDuplicateWorkflow(workflow);
                           }}
+                          disabled={duplicateWorkflowMutation.isPending}
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -308,8 +438,9 @@ export default function WorkflowsPage() {
                           variant="outline"
                           onClick={(e) => {
                             e.stopPropagation();
-                            // Handle delete
+                            handleDeleteWorkflow(workflow);
                           }}
+                          disabled={deleteWorkflowMutation.isPending}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -392,6 +523,70 @@ export default function WorkflowsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Execution Details Dialog */}
+      <Dialog open={executionDialogOpen} onOpenChange={setExecutionDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Execution Details</DialogTitle>
+            <DialogDescription>
+              View detailed information about this workflow execution
+            </DialogDescription>
+          </DialogHeader>
+          {selectedExecution && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">Execution ID</h4>
+                <p className="text-sm text-muted-foreground font-mono">
+                  {selectedExecution.executionId || selectedExecution.id}
+                </p>
+              </div>
+              <div>
+                <h4 className="font-medium mb-2">Status</h4>
+                <Badge variant={
+                  selectedExecution.status === 'completed' ? 'default' :
+                  selectedExecution.status === 'failed' ? 'destructive' :
+                  'secondary'
+                }>
+                  {selectedExecution.status}
+                </Badge>
+              </div>
+              {selectedExecution.startedAt && (
+                <div>
+                  <h4 className="font-medium mb-2">Started</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(selectedExecution.startedAt).toLocaleString()}
+                  </p>
+                </div>
+              )}
+              {selectedExecution.completedAt && (
+                <div>
+                  <h4 className="font-medium mb-2">Completed</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(selectedExecution.completedAt).toLocaleString()}
+                  </p>
+                </div>
+              )}
+              {selectedExecution.duration && (
+                <div>
+                  <h4 className="font-medium mb-2">Duration</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedExecution.duration}
+                  </p>
+                </div>
+              )}
+              {selectedExecution.errorData && (
+                <div>
+                  <h4 className="font-medium mb-2 text-destructive">Error</h4>
+                  <pre className="text-sm bg-destructive/10 p-3 rounded overflow-auto">
+                    {JSON.stringify(selectedExecution.errorData, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

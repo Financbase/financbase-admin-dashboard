@@ -44,12 +44,73 @@ import {
 	Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { jobOpenings } from "./jobs-data";
+import { useState, useEffect } from "react";
+
+interface JobOpening {
+	id: number;
+	title: string;
+	department: string;
+	location: string;
+	type: string;
+	experience: string;
+	description: string;
+	requirements: string[];
+	posted: string;
+	applicants: number;
+	featured?: boolean;
+	fullDescription?: string;
+	responsibilities?: string[];
+	qualifications?: string[];
+	salary?: string;
+	benefits?: string[];
+	postedAt?: string;
+}
 
 export default function CareersPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedDepartment, setSelectedDepartment] = useState("All");
+	const [jobOpenings, setJobOpenings] = useState<JobOpening[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		fetchJobs();
+	}, []);
+
+	const fetchJobs = async () => {
+		try {
+			setLoading(true);
+			const response = await fetch('/api/careers');
+			if (response.ok) {
+				const data = await response.json();
+				// Transform API data to match expected format
+				const transformedJobs = (data.jobs || []).map((job: any) => ({
+					...job,
+					posted: job.postedAt 
+						? formatPostedDate(job.postedAt) 
+						: 'Recently',
+				}));
+				setJobOpenings(transformedJobs);
+			}
+		} catch (error) {
+			console.error('Error fetching jobs:', error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const formatPostedDate = (dateString: string) => {
+		const date = new Date(dateString);
+		const now = new Date();
+		const diffTime = Math.abs(now.getTime() - date.getTime());
+		const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+		
+		if (diffDays === 0) return 'Today';
+		if (diffDays === 1) return '1 day ago';
+		if (diffDays < 7) return `${diffDays} days ago`;
+		if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+		if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+		return `${Math.floor(diffDays / 365)} years ago`;
+	};
 
 	const departments = [
 		"All",
@@ -142,10 +203,14 @@ export default function CareersPage() {
 		{ label: "Employee Satisfaction", value: "4.8/5" },
 	];
 
-	const filteredJobs =
-		selectedDepartment === "All"
-			? jobOpenings
-			: jobOpenings.filter((job) => job.department === selectedDepartment);
+	const filteredJobs = jobOpenings
+		.filter((job) => {
+			const matchesDepartment = selectedDepartment === "All" || job.department === selectedDepartment;
+			const matchesSearch = searchQuery === "" || 
+				job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				job.description.toLowerCase().includes(searchQuery.toLowerCase());
+			return matchesDepartment && matchesSearch;
+		});
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -221,8 +286,17 @@ export default function CareersPage() {
 
 					{/* Job Openings */}
 					<div className="mb-16">
-						<div className="space-y-6">
-							{filteredJobs.map((job) => (
+						{loading ? (
+							<div className="text-center py-12">
+								<p className="text-muted-foreground">Loading job openings...</p>
+							</div>
+						) : filteredJobs.length === 0 ? (
+							<div className="text-center py-12">
+								<p className="text-muted-foreground">No job openings found.</p>
+							</div>
+						) : (
+							<div className="space-y-6">
+								{filteredJobs.map((job) => (
 								<Card
 									key={`job-${job.id}`}
 									className={`group hover:shadow-lg transition-all duration-200 ${job.featured ? "border-primary/20 bg-primary/5" : ""}`}
@@ -288,7 +362,8 @@ export default function CareersPage() {
 									</CardContent>
 								</Card>
 							))}
-						</div>
+							</div>
+						)}
 					</div>
 
 					{/* Company Values */}

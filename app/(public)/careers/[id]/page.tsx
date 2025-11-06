@@ -10,6 +10,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,15 +24,85 @@ import {
 	ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
-import { getJobById } from "../jobs-data";
 import { PublicHero } from "@/components/layout/public-hero";
-import { notFound } from "next/navigation";
+
+interface JobOpening {
+	id: number;
+	title: string;
+	department: string;
+	location: string;
+	type: string;
+	experience: string;
+	description: string;
+	requirements: string[];
+	posted: string;
+	applicants: number;
+	featured?: boolean;
+	fullDescription?: string;
+	responsibilities?: string[];
+	qualifications?: string[];
+	salary?: string;
+	benefits?: string[];
+	postedAt?: string;
+}
 
 export default function CareerDetailPage() {
 	const params = useParams();
 	const router = useRouter();
 	const jobId = params?.id ? parseInt(params.id as string, 10) : null;
-	const job = jobId ? getJobById(jobId) : null;
+	const [job, setJob] = useState<JobOpening | null>(null);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		if (jobId) {
+			fetchJob();
+		}
+	}, [jobId]);
+
+	const fetchJob = async () => {
+		if (!jobId) return;
+		
+		try {
+			setLoading(true);
+			const response = await fetch(`/api/careers/${jobId}`);
+			if (response.ok) {
+				const data = await response.json();
+				const jobData = data.job;
+				setJob({
+					...jobData,
+					posted: jobData.postedAt 
+						? formatPostedDate(jobData.postedAt) 
+						: 'Recently',
+				});
+			}
+		} catch (error) {
+			console.error('Error fetching job:', error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const formatPostedDate = (dateString: string) => {
+		const date = new Date(dateString);
+		const now = new Date();
+		const diffTime = Math.abs(now.getTime() - date.getTime());
+		const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+		
+		if (diffDays === 0) return 'Today';
+		if (diffDays === 1) return '1 day ago';
+		if (diffDays < 7) return `${diffDays} days ago`;
+		if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+		if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+		return `${Math.floor(diffDays / 365)} years ago`;
+	};
+
+	if (loading) {
+		return (
+			<div className="min-h-screen bg-background flex items-center justify-center">
+				<p className="text-muted-foreground">Loading job details...</p>
+			</div>
+		);
+	}
 
 	if (!job) {
 		return (

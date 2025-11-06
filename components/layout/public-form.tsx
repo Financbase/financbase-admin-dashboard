@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 interface PublicFormProps {
@@ -172,7 +173,7 @@ export function PublicCTA({
         {(primaryAction || secondaryAction) && (
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {primaryAction && (
-              <a 
+              <Link 
                 href={primaryAction.href}
                 className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 bg-white hover:bg-gray-100 shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
                 style={{
@@ -181,10 +182,10 @@ export function PublicCTA({
                 }}
               >
                 {primaryAction.text}
-              </a>
+              </Link>
             )}
             {secondaryAction && (
-              <a 
+              <Link 
                 href={secondaryAction.href}
                 className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 border-2 bg-transparent text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer hover:bg-white [&:hover]:text-[oklch(var(--primary))]"
                 style={{
@@ -193,7 +194,7 @@ export function PublicCTA({
                 }}
               >
                 {secondaryAction.text}
-              </a>
+              </Link>
             )}
           </div>
         )}

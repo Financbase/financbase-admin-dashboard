@@ -7,7 +7,9 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import type { Metadata } from "next";
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,13 +31,10 @@ import {
   ArrowRight,
   Settings
 } from "lucide-react";
-
-export const metadata: Metadata = {
-  title: "Help Center - Support & Documentation",
-  description: "Get help, find answers, and access support resources",
-};
+import { toast } from "sonner";
 
 export default function HelpCenterPage() {
+  const [searchQuery, setSearchQuery] = useState("");
   const helpCategories = [
     {
       id: 1,
@@ -184,14 +183,66 @@ export default function HelpCenterPage() {
               <Input
                 placeholder="Search help articles, guides, and FAQs..."
                 className="h-12 pl-12 pr-4 text-lg"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value.length >= 2) {
+                    toast.info(`Searching for "${e.target.value}"...`);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.length >= 2) {
+                    toast.info(`Searching for "${searchQuery}"...`);
+                  }
+                }}
               />
             </div>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm text-muted-foreground">
               <span>Popular searches:</span>
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">invoice creation</Button>
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">payment setup</Button>
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">API integration</Button>
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">billing questions</Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs"
+                onClick={() => {
+                  setSearchQuery("invoice creation");
+                  toast.info("Searching for 'invoice creation'...");
+                }}
+              >
+                invoice creation
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs"
+                onClick={() => {
+                  setSearchQuery("payment setup");
+                  toast.info("Searching for 'payment setup'...");
+                }}
+              >
+                payment setup
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs"
+                onClick={() => {
+                  setSearchQuery("API integration");
+                  toast.info("Searching for 'API integration'...");
+                }}
+              >
+                API integration
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs"
+                onClick={() => {
+                  setSearchQuery("billing questions");
+                  toast.info("Searching for 'billing questions'...");
+                }}
+              >
+                billing questions
+              </Button>
             </div>
           </div>
         </div>
@@ -255,7 +306,11 @@ export default function HelpCenterPage() {
           
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {helpCategories.map((category) => (
-              <Card key={category.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-background to-muted/20 hover:from-muted/30 hover:to-muted/40">
+              <Card 
+                key={category.id} 
+                className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-background to-muted/20 hover:from-muted/30 hover:to-muted/40"
+                onClick={() => toast.info(`Browsing ${category.title} articles...`)}
+              >
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-xl ${category.color} text-white group-hover:scale-110 transition-transform duration-300`}>
@@ -270,7 +325,15 @@ export default function HelpCenterPage() {
                 <CardContent className="pt-0">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">{category.articles} articles</span>
-                    <Button variant="ghost" size="sm" className="group-hover:bg-primary/10 group-hover:text-primary">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="group-hover:bg-primary/10 group-hover:text-primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toast.info(`Browsing ${category.title} articles...`);
+                      }}
+                    >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -302,7 +365,10 @@ export default function HelpCenterPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <Button className="w-full group-hover:bg-primary/90 transition-colors">
+                  <Button 
+                    className="w-full group-hover:bg-primary/90 transition-colors"
+                    onClick={() => toast.info(`${action.title} feature coming soon`)}
+                  >
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -322,7 +388,11 @@ export default function HelpCenterPage() {
                   Most viewed and highest-rated help articles
                 </CardDescription>
               </div>
-              <Button variant="outline" className="hidden sm:flex">
+              <Button 
+                variant="outline" 
+                className="hidden sm:flex"
+                onClick={() => toast.info("Viewing all articles...")}
+              >
                 View All Articles
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -353,7 +423,12 @@ export default function HelpCenterPage() {
                       </span>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => toast.info(`Reading article: ${article.title}`)}
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Read
                   </Button>
@@ -361,7 +436,11 @@ export default function HelpCenterPage() {
               ))}
             </div>
             <div className="mt-6 flex justify-center sm:hidden">
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => toast.info("Viewing all articles...")}
+              >
                 View All Articles
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -386,7 +465,10 @@ export default function HelpCenterPage() {
                 <CardDescription>Chat with our support team in real-time</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={() => toast.info("Live chat feature coming soon")}
+                >
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Start Chat
                 </Button>
@@ -405,7 +487,13 @@ export default function HelpCenterPage() {
                 <CardDescription>Send us an email and we'll respond within 2 hours</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full border-green-200 text-green-700 hover:bg-green-50">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-green-200 text-green-700 hover:bg-green-50"
+                  onClick={() => {
+                    window.location.href = "mailto:support@financbase.com";
+                  }}
+                >
                   <Mail className="h-4 w-4 mr-2" />
                   Send Email
                 </Button>
@@ -424,7 +512,13 @@ export default function HelpCenterPage() {
                 <CardDescription>Call us for urgent issues and complex problems</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
+                  onClick={() => {
+                    window.location.href = "tel:+15551234567";
+                  }}
+                >
                   <Phone className="h-4 w-4 mr-2" />
                   Call Now
                 </Button>

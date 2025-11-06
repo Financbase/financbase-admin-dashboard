@@ -76,6 +76,20 @@ module.exports = {
 					DEFAULT: "oklch(var(--card))",
 					foreground: "oklch(var(--card-foreground))",
 				},
+				sidebar: {
+					DEFAULT: "oklch(var(--sidebar))",
+					foreground: "oklch(var(--sidebar-foreground))",
+					primary: {
+						DEFAULT: "oklch(var(--sidebar-primary))",
+						foreground: "oklch(var(--sidebar-primary-foreground))",
+					},
+					accent: {
+						DEFAULT: "oklch(var(--sidebar-accent))",
+						foreground: "oklch(var(--sidebar-accent-foreground))",
+					},
+					border: "oklch(var(--sidebar-border))",
+					ring: "oklch(var(--sidebar-ring))",
+				},
 				// HSL Semantic Colors
 				success: {
 					hsl: "hsl(var(--color-success-hsl))",

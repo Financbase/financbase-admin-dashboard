@@ -24,8 +24,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function PersonaShowcase() {
+  const router = useRouter()
+  // Map persona IDs to their corresponding Persona enum values
+  const getPersonaParam = (personaId: string): string => {
+    const personaMap: Record<string, string> = {
+      "digital-agencies": "digital_agency",
+      "real-estate": "real_estate",
+      "tech-startups": "tech_startup",
+      "freelancers": "freelancer",
+      "marketing-teams": "digital_agency" // Marketing teams use digital_agency persona
+    };
+    return personaMap[personaId] || "freelancer";
+  };
+
   const personas = [
     {
       id: "digital-agencies",
@@ -182,11 +196,13 @@ export default function PersonaShowcase() {
                       <TrendingUp className="h-5 w-5 text-gray-600 mr-2" />
                       <span className="font-medium text-gray-800">{persona.cta}</span>
                     </div>
-                    <Button asChild size="sm" className={`bg-gradient-to-r ${persona.color} hover:opacity-90`}>
-                      <Link href="/auth/sign-up">
-                        Get Started
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
+                    <Button 
+                      size="sm" 
+                      className={`bg-gradient-to-r ${persona.color} hover:opacity-90 flex items-center`}
+                      onClick={() => router.push(`/auth/sign-up?persona=${getPersonaParam(persona.id)}`)}
+                    >
+                      Get Started
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -215,8 +231,8 @@ export default function PersonaShowcase() {
                 { id: "freelancers", icon: <User className="h-6 w-6" />, label: "2,500+ Freelancers", color: "text-primary" },
                 { id: "marketers", icon: <Target className="h-6 w-6" />, label: "800+ Marketers", color: "text-primary" }
               ].map((stat) => (
-                <div key={stat.id} className="text-center group">
-                  <div className={`${stat.color} mb-2 group-hover:scale-110 transition-transform duration-300`}>
+                <div key={stat.id} className="flex flex-col items-center justify-center text-center group">
+                  <div className={`${stat.color} mb-3 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                     {stat.icon}
                   </div>
                   <div className="font-semibold text-gray-900">{stat.label}</div>
