@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { Component } from "@/components/ui/api-rate-limiting-card";
+import { Component } from "@/components/core/ui/layout/api-rate-limiting-card";
 import { Code } from "lucide-react";
 
 export default function DemoOne() {

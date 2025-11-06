@@ -14,7 +14,27 @@ import { Button } from "@/components/ui/button";
 import { Play, Pause, Volume2 } from "lucide-react";
 import { useState } from "react";
 
-export function AudioPlayback() {
+interface AudioPlaybackProps {
+  audioUrl?: string;
+  duration?: number;
+  transcript?: string;
+  showTranscript?: boolean;
+  showControls?: boolean;
+  showProgress?: boolean;
+  showVolume?: boolean;
+  className?: string;
+}
+
+export function AudioPlayback({
+  audioUrl,
+  duration,
+  transcript,
+  showTranscript = false,
+  showControls = true,
+  showProgress = true,
+  showVolume = false,
+  className,
+}: AudioPlaybackProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(50);
 

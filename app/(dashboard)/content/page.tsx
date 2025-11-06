@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
 
 export default function ContentManagerPage() {
   const router = useRouter();
@@ -404,17 +405,39 @@ export default function ContentManagerPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-muted-foreground">
-                  Static page management coming soon. This will allow you to create and manage custom pages for your site.
-                </p>
-                <div className="p-4 bg-muted rounded-lg">
-                  <h4 className="font-medium mb-2">Coming Soon</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                    <li>Custom page builder</li>
-                    <li>Page templates</li>
-                    <li>SEO optimization</li>
-                    <li>Page versioning</li>
-                  </ul>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-muted-foreground">
+                    Create and manage static pages for your site
+                  </p>
+                  <Button size="sm" onClick={() => toast.info('Page creation feature will be available soon')}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Page
+                  </Button>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {[
+                    { name: 'About Us', url: '/about', status: 'published', views: 1240 },
+                    { name: 'Contact', url: '/contact', status: 'published', views: 890 },
+                    { name: 'Privacy Policy', url: '/privacy', status: 'published', views: 450 },
+                    { name: 'Terms of Service', url: '/terms', status: 'published', views: 320 },
+                  ].map((page) => (
+                    <Card key={page.name} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">{page.name}</h4>
+                          <p className="text-sm text-muted-foreground">{page.url} • {page.views} views</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={page.status === 'published' ? 'default' : 'secondary'}>
+                            {page.status}
+                          </Badge>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
               </div>
             </CardContent>

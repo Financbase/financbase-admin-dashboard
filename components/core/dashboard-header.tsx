@@ -14,10 +14,11 @@ import {
 	useDashboardLastUpdated,
 	useDashboardRefresh,
 } from "@/contexts/dashboard-context";
-import { formatDateTime } from "@/lib/format-utils";
+import { format } from "date-fns";
+import { toast } from "@/lib/toast";
 import { Clock, Download, LayoutDashboard, RefreshCw } from "lucide-react";
 import { memo, useCallback } from "react";
-import DateRangePicker from "./date-range-picker.tsx";
+import DateRangePicker from "./date-range-picker";
 
 interface DashboardHeaderProps {
 	className?: string;
@@ -33,8 +34,40 @@ const DashboardHeader = memo(function DashboardHeader({
 		triggerRefresh();
 	}, [triggerRefresh]);
 
-	const handleExport = useCallback(() => {
-		// TODO: Implement logic
+	const handleExport = useCallback(async () => {
+		try {
+			// Fetch dashboard data for export
+			const response = await fetch('/api/dashboard/export');
+			
+			if (!response.ok) {
+				throw new Error('Failed to export dashboard data');
+			}
+
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			
+			// Generate filename with current date
+			const dateStr = new Date().toISOString().split('T')[0];
+			a.download = `dashboard-export-${dateStr}.csv`;
+			
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(url);
+			
+			toast.success(
+				'Dashboard exported',
+				'Your dashboard data has been exported successfully.'
+			);
+		} catch (error) {
+			console.error('Error exporting dashboard:', error);
+			toast.error(
+				'Export failed',
+				'Unable to export dashboard data. Please try again.'
+			);
+		}
 	}, []);
 
 	return (
@@ -48,7 +81,7 @@ const DashboardHeader = memo(function DashboardHeader({
 				{lastUpdated && (
 					<div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
 						<Clock className="mr-1 h-3 w-3" />
-						Last updated: {formatDateTime(lastUpdated)}
+						Last updated: {format(lastUpdated, 'MMM d, yyyy h:mm a')}
 					</div>
 				)}
 			</div>

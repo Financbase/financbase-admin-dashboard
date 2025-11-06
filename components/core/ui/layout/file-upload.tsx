@@ -77,21 +77,21 @@ const FileUpload = ({
 
 	const maxFileSizeBytes = maxFileSize * 1024 * 1024;
 
-	const getFileIcon = (_type: string) => {
-		if (type.startsWith("image/")) {
+	const getFileIcon = (fileType: string) => {
+		if (fileType.startsWith("image/")) {
 			return <ImageIcon className="h-4 w-4" />;
 		}
-		if (type === "application/pdf") {
+		if (fileType === "application/pdf") {
 			return <FileText className="h-4 w-4" />;
 		}
 		return <File className="h-4 w-4" />;
 	};
 
 	const formatFileSize = (_bytes: number) => {
-		const bytes = _bytes === 0;
-		if (bytes) {
+		if (_bytes === 0) {
 			return "0 Bytes";
 		}
+		const bytes = _bytes;
 		const k = 1024;
 		const sizes = ["Bytes", "KB", "MB", "GB"];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));

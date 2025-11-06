@@ -35,6 +35,8 @@ import { useQuery } from '@tanstack/react-query';
 import { formatCurrency, formatPercentage } from '@/lib/utils/real-estate-formatting';
 import { RoleSwitcher } from '@/components/real-estate/role-switcher';
 import { useRealEstateRole } from '@/lib/hooks/use-real-estate-role';
+import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
 
 interface BuyerStats {
   preApprovedAmount: number;
@@ -46,6 +48,7 @@ interface BuyerStats {
 }
 
 export default function BuyerDashboard() {
+  const router = useRouter();
   const { role, updateRole } = useRealEstateRole();
   const [monthlyIncome, setMonthlyIncome] = useState(8000);
   const [monthlyDebt, setMonthlyDebt] = useState(500);
@@ -369,19 +372,41 @@ export default function BuyerDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => router.push('/real-estate/buyer?action=search')}
+            >
               <Search className="h-6 w-6" />
               <span>Search Properties</span>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => {
+                toast.info('Mortgage calculator will open in a new window');
+              }}
+            >
               <Calculator className="h-6 w-6" />
               <span>Mortgage Calculator</span>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => {
+                toast.info('Pre-approval application will be available soon');
+              }}
+            >
               <CreditCard className="h-6 w-6" />
               <span>Pre-Approval</span>
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => {
+                toast.info('Tour scheduling feature will be available soon');
+              }}
+            >
               <Calendar className="h-6 w-6" />
               <span>Schedule Tours</span>
             </Button>

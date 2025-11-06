@@ -8,6 +8,10 @@
  */
 
 import { useState, useCallback } from 'react';
+import { AnalyticsEvents } from './events';
+
+// Export events for convenience
+export const events = AnalyticsEvents;
 
 // Analytics utilities
 export const trackEvent = (event: string, properties?: Record<string, any>) => {
@@ -48,5 +52,11 @@ export function useAnalytics() {
     trackPage,
     identify,
     isTracking,
+    events,
   };
+}
+
+// Hybrid analytics hook (alias for useAnalytics with events)
+export function useHybridAnalytics() {
+  return useAnalytics();
 }

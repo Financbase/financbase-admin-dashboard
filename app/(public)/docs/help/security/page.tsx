@@ -168,8 +168,8 @@ export default function HelpSecurityPage() {
 												Use unique, complex passwords for your Financbase account and enable two-factor authentication.
 											</p>
 											<Button variant="outline" size="sm" asChild>
-												<Link href="/dashboard/settings">
-													Manage Password
+												<Link href="/auth/sign-up">
+													Get Started
 													<ArrowRight className="h-4 w-4 ml-2" />
 												</Link>
 											</Button>
@@ -186,8 +186,8 @@ export default function HelpSecurityPage() {
 												Regularly review and manage team member access permissions and remove inactive users.
 											</p>
 											<Button variant="outline" size="sm" asChild>
-												<Link href="/dashboard/team">
-													Manage Team
+												<Link href="/auth/sign-up">
+													Get Started
 													<ArrowRight className="h-4 w-4 ml-2" />
 												</Link>
 											</Button>

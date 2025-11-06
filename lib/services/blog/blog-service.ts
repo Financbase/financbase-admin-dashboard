@@ -360,6 +360,39 @@ export async function incrementViewCount(id: number): Promise<void> {
 }
 
 /**
+ * Increment like count for a blog post
+ */
+export async function incrementLikeCount(id: number): Promise<number> {
+	// Get post first to get slug for cache invalidation
+	const post = await getPostById(id, true);
+	if (!post) {
+		throw new Error('Blog post not found');
+	}
+
+	await db
+		.update(blogPosts)
+		.set({
+			likeCount: sql`${blogPosts.likeCount} + 1`,
+		})
+		.where(eq(blogPosts.id, id));
+
+	// Invalidate cache for this post
+	await cache.blog.set(`post:${id}`, null);
+	if (post.slug) {
+		await cache.blog.set(`post:slug:${post.slug}`, null);
+	}
+
+	// Get updated like count
+	const updatedPost = await db
+		.select({ likeCount: blogPosts.likeCount })
+		.from(blogPosts)
+		.where(eq(blogPosts.id, id))
+		.limit(1);
+
+	return updatedPost[0]?.likeCount ?? post.likeCount + 1;
+}
+
+/**
  * Get all blog categories
  */
 export async function getCategories(): Promise<BlogCategory[]> {

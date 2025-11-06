@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import {
 	CreditCard,
 	FileText,
-	Image,
+	Image as ImageIcon,
 	Key,
 	Link2,
 	LogOut,

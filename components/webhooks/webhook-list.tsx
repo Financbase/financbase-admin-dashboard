@@ -89,7 +89,7 @@ export function WebhookList({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['webhooks']);
+      queryClient.invalidateQueries({ queryKey: ['webhooks'] });
     },
   });
 
@@ -102,7 +102,7 @@ export function WebhookList({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['webhooks']);
+      queryClient.invalidateQueries({ queryKey: ['webhooks'] });
     },
   });
 

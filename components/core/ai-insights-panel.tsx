@@ -31,7 +31,15 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import type { FinancialInsight } from "../../lib/services/ai-financial-insights.service";
+// Define local FinancialInsight type based on component usage
+interface FinancialInsight {
+	id: string;
+	severity: 'warning' | 'critical' | 'info';
+	title: string;
+	insight: string;
+	category: string;
+	recommendation?: string;
+}
 
 export function AIInsightsPanel() {
 	const [insights, setInsights] = useState<FinancialInsight[]>([]);
@@ -82,10 +90,10 @@ export function AIInsightsPanel() {
 		}
 	};
 
-	const getSeverityBadgeVariant = (severity: FinancialInsight["severity"]) => {
+	const getSeverityBadgeVariant = (severity: FinancialInsight["severity"]): "default" | "secondary" | "destructive" | "outline" => {
 		switch (severity) {
 			case "warning":
-				return "yellow";
+				return "secondary";
 			case "critical":
 				return "destructive";
 			default:

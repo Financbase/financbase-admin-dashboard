@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import {
 	type Project,
 	ProjectDataTable,
-} from "@/components/ui/project-data-table";
+} from "@/components/core/ui/data-display/project-data-table";
 import {
 	CheckCircle,
 	Code,
@@ -219,12 +219,12 @@ const Demo = () => {
 						<DropdownMenuSeparator />
 						{allColumns.map((column) => (
 							<DropdownMenuCheckboxItem
-								key={column}
+								key={String(column)}
 								className="capitalize"
 								checked={visibleColumns.has(column)}
 								onCheckedChange={() => toggleColumn(column)}
 							>
-								{column}
+								{String(column)}
 							</DropdownMenuCheckboxItem>
 						))}
 					</DropdownMenuContent>
@@ -232,7 +232,7 @@ const Demo = () => {
 			</div>
 
 			<ProjectDataTable
-				projects={filteredProjects}
+				projects={filteredProjects as unknown as Project[]}
 				visibleColumns={visibleColumns}
 			/>
 		</div>

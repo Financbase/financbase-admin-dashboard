@@ -16,14 +16,15 @@ import { Card } from '@/components/ui/card'
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import { cn } from "@/lib/utils"
+import Link from 'next/link'
 
 export default function CombinedFeaturedSection() {
   const featuredCasestudy = {
-    logo: '/ruixen_dark.png',
-    company: 'Ruixen',
-    tags: 'Enterprise',
-    title: 'How we scaled to 1M+ users',
-    subtitle: 'without a single second of downtime, using smart architecture and real-time monitoring',
+    logo: '/financbase_logo.png',
+    company: 'Financbase',
+    tags: 'Financial Platform',
+    title: 'How we scaled to 1M+ transactions',
+    subtitle: 'without a single second of downtime, using smart architecture and real-time financial monitoring',
   }
 
   return (
@@ -34,16 +35,16 @@ export default function CombinedFeaturedSection() {
         <div className="relative rounded-none overflow-hidden bg-muted border border-gray-200 dark:border-gray-800 p-4">
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
             <MapPin className="w-4 h-4" />
-            Ruixen Analytics
+            Financbase Analytics
           </div>
           <h3 className="text-xl font-normal text-gray-900 dark:text-white">
-            Visualize user activity across regions.{" "}
-            <span className="text-gray-500 dark:text-gray-400">Track, analyze, and optimize geographically.</span>
+            Visualize financial activity across regions.{" "}
+            <span className="text-gray-500 dark:text-gray-400">Track transactions, analyze patterns, and optimize globally.</span>
           </h3>
 
           <div className="relative mt-4">
             <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-white dark:bg-black text-black dark:text-white rounded-md text-xs font-medium shadow flex items-center gap-2">
-              🌍 Last connection from US
+              🌍 Last transaction from US
             </div>
             <DottedMapVisualization />
           </div>
@@ -61,7 +62,7 @@ export default function CombinedFeaturedSection() {
             </h3>
           </div>
           <div className="flex justify-center items-center w-full">
-            <RuixenFeaturedMessageCard />
+            <FinancbaseFeaturedMessageCard />
           </div>
         </div>
 
@@ -69,11 +70,11 @@ export default function CombinedFeaturedSection() {
         <div className="rounded-none border border-gray-200 dark:border-gray-800 bg-muted p-6 space-y-4">
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
             <Activity className="w-4 h-4" />
-            Ruixen Analytics
+            Financbase Analytics
           </div>
           <h3 className="text-xl font-normal text-gray-900 dark:text-white">
-            Real-time performance tracking for Ruixen.{" "}
-            <span className="text-gray-500 dark:text-gray-400">Optimize your UI decisions instantly.</span>
+            Real-time financial performance tracking.{" "}
+            <span className="text-gray-500 dark:text-gray-400">Monitor transactions, revenue, and expenses instantly.</span>
           </h3>
           <MonitoringChart />
         </div>
@@ -82,15 +83,17 @@ export default function CombinedFeaturedSection() {
         <div className="grid sm:grid-cols-2 rounded-none bg-card">
           <FeatureCard
             icon={<Files className="w-4 h-4" />}
-            title="Ready to use blocks"
-            subtitle="Copy & Paste"
-            description="Plug-n-play UI blocks you can drop right into any project."
+            title="Automated Financial Reports"
+            subtitle="Smart Reporting"
+            description="Generate comprehensive financial reports with a single click. Export to PDF, Excel, or CSV."
+            href="/auth/sign-up"
           />
           <FeatureCard
             icon={<Flower className="w-4 h-4" />}
-            title="Customize with ease"
-            subtitle="Easy to Use"
-            description="Design your layout exactly the way you want with full flexibility."
+            title="Real-time Budget Tracking"
+            subtitle="Stay on Budget"
+            description="Monitor your spending in real-time and receive alerts when you're approaching budget limits."
+            href="/auth/sign-up"
           />
         </div>
       </div>
@@ -99,9 +102,14 @@ export default function CombinedFeaturedSection() {
 }
 
 // ----------------- Feature Card Component -------------------
-function FeatureCard({ icon, title, subtitle, description }: { icon: React.ReactNode, title: string, subtitle: string, description: string }) {
+function FeatureCard({ icon, title, subtitle, description, href }: { icon: React.ReactNode, title: string, subtitle: string, description: string, href?: string }) {
+  const linkHref = href || '#'
+  
   return (
-    <div className="relative flex flex-col gap-3 p-4 border border-gray-200 dark:border-gray-800 bg-background transition">
+    <Link 
+      href={linkHref}
+      className="relative flex flex-col gap-3 p-4 border border-gray-200 dark:border-gray-800 bg-background transition hover:shadow-md hover:border-primary/20 group block"
+    >
       <div className="flex items-center gap-4">
         <div>
           <span className="text-sm flex items-center gap-2 text-gray-500 mb-4">
@@ -116,15 +124,14 @@ function FeatureCard({ icon, title, subtitle, description }: { icon: React.React
       </div>
 
       {/* Card pinned to bottom right */}
-      <Card className="absolute bottom-0 right-0 w-24 h-20 sm:w-32 sm:h-28 md:w-40 md:h-32 border-8 border-r-0 border-b-0 rounded-tl-xl rounded-br-none rounded-tr-none rounded-bl-none overflow-hidden">
+      <Card className="absolute bottom-0 right-0 w-24 h-20 sm:w-32 sm:h-28 md:w-40 md:h-32 border-8 border-r-0 border-b-0 rounded-tl-xl rounded-br-none rounded-tr-none rounded-bl-none overflow-hidden pointer-events-none">
       </Card>
 
-      {/* Arrow icon on top of Card (optional) */}
-      <div className="absolute bottom-2 right-2 p-3 flex items-center gap-2 border border-gray-200 dark:border-gray-800 rounded-full hover:-rotate-45 transition z-10 bg-background">
-        <ArrowRight className="w-4 h-4 text-primary" />
+      {/* Arrow icon on top of Card - pointer-events-none ensures clicks pass through to Link */}
+      <div className="absolute bottom-2 right-2 p-3 flex items-center gap-2 border border-gray-200 dark:border-gray-800 rounded-full group-hover:-rotate-45 group-hover:bg-primary group-hover:border-primary transition z-10 bg-background pointer-events-none">
+        <ArrowRight className="w-4 h-4 text-primary group-hover:text-primary-foreground transition" />
       </div>
-    </div>
-
+    </Link>
   )
 }
 
@@ -133,8 +140,8 @@ const dottedMapInstance = new DottedMap({ height: 55, grid: 'diagonal' })
 const points = dottedMapInstance.getPoints()
 
 const DottedMapVisualization = () => (
-  <svg viewBox="0 0 120 60" className="w-full h-auto text-primary/70 dark:text-white/30" aria-label="World map showing user activity regions">
-    <title>World map visualization showing user activity across regions</title>
+  <svg viewBox="0 0 120 60" className="w-full h-auto text-primary/70 dark:text-white/30" aria-label="World map showing financial activity regions">
+    <title>World map visualization showing financial activity across regions</title>
     {points.map((point) => (
       <circle key={`${point.x}-${point.y}`} cx={point.x} cy={point.y} r={0.15} fill="currentColor" />
     ))}
@@ -143,12 +150,12 @@ const DottedMapVisualization = () => (
 
 // ----------------- Chart -------------------
 const chartData = [
-  { month: 'May', desktop: 56, mobile: 224 },
-  { month: 'June', desktop: 90, mobile: 300 },
-  { month: 'July', desktop: 126, mobile: 252 },
-  { month: 'Aug', desktop: 205, mobile: 410 },
-  { month: 'Sep', desktop: 200, mobile: 126 },
-  { month: 'Oct', desktop: 400, mobile: 800 },
+  { month: 'May', desktop: 125000, mobile: 95000 },
+  { month: 'June', desktop: 180000, mobile: 140000 },
+  { month: 'July', desktop: 220000, mobile: 195000 },
+  { month: 'Aug', desktop: 310000, mobile: 265000 },
+  { month: 'Sep', desktop: 285000, mobile: 240000 },
+  { month: 'Oct', desktop: 425000, mobile: 380000 },
 ]
 
 function MonitoringChart() {
@@ -160,11 +167,11 @@ function MonitoringChart() {
   // Import theme colors dynamically for client-side
   const [chartConfig, setChartConfig] = React.useState<ChartConfig>({
     desktop: {
-      label: 'Ruixen Dashboard (Desktop)',
+      label: 'Revenue (Desktop)',
       color: '#2563eb', // Fallback
     },
     mobile: {
-      label: 'Ruixen App (Mobile)',
+      label: 'Revenue (Mobile)',
       color: '#60a5fa', // Fallback
     },
   });
@@ -174,11 +181,11 @@ function MonitoringChart() {
     import('@/lib/utils/theme-colors').then(({ getChartColor }) => {
       setChartConfig({
         desktop: {
-          label: 'Ruixen Dashboard (Desktop)',
+          label: 'Revenue (Desktop)',
           color: getChartColor(1), // chart-1 (primary blue) for desktop
         },
         mobile: {
-          label: 'Ruixen App (Mobile)',
+          label: 'Revenue (Mobile)',
           color: getChartColor(1), // chart-1 with same color (or use chart-2 for variation)
         },
       });
@@ -219,59 +226,71 @@ interface Message {
 
 const messages: Message[] = [
     {
-      title: "Ruixen Design",
+      title: "Transaction Processed",
       time: "1m ago",
-      content: "New components added to your team workspace.",
+      content: "Payment of $2,450.00 received from Acme Corp.",
       color: "from-pink-400 to-indigo-500",
     },
     {
-      title: "Pro User Feedback",
+      title: "Budget Alert",
       time: "3m ago",
-      content: "You've received 8 new user reviews this week.",
+      content: "Marketing budget is at 85% of monthly limit.",
       color: "from-orange-500 to-pink-500",
     },
     {
-      title: "Billing Alert",
+      title: "Invoice Generated",
       time: "6m ago",
-      content: "Your subscription was successfully renewed.",
+      content: "Invoice #INV-2025-0123 has been sent to client.",
       color: "from-yellow-400 to-red-400",
     },
     {
-      title: "Integration Hub",
+      title: "Bank Integration",
       time: "10m ago",
-      content: "Figma plugin connected to your dashboard.",
+      content: "Successfully synced 42 new transactions from Chase.",
       color: "from-sky-400 to-blue-700",
     },
     {
-      title: "Product Analytics",
+      title: "Financial Report",
       time: "12m ago",
-      content: "Dashboard insights updated with latest metrics.",
+      content: "Monthly revenue report generated and ready for review.",
       color: "from-orange-300 to-fuchsia-500",
     },
     {
-      title: "Weekly Recap",
+      title: "Weekly Summary",
       time: "15m ago",
-      content: "Here's what your team accomplished this week.",
+      content: "Your weekly financial summary is ready. Revenue up 12%.",
       color: "from-green-400 to-blue-500",
     },
   ];
 
-const RuixenFeaturedMessageCard = () => {
+const FinancbaseFeaturedMessageCard = () => {
+  const [visibleMessages, setVisibleMessages] = React.useState<boolean[]>([])
+
+  React.useEffect(() => {
+    // Show messages one by one with delay
+    messages.forEach((_, index) => {
+      setTimeout(() => {
+        setVisibleMessages((prev) => {
+          const newState = [...prev]
+          newState[index] = true
+          return newState
+        })
+      }, index * 300)
+    })
+  }, [])
+
   return (
     <div className="w-full max-w-sm h-[280px] bg-white dark:bg-gray-900 p-2 overflow-hidden font-sans relative">
       {/* Fade shadow overlay */}
       <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white dark:from-gray-900 to-transparent z-10"></div>
       
       <div className="space-y-2 relative z-0">
-        {messages.map((msg) => (
+        {messages.map((msg, index) => (
           <div
             key={`${msg.title}-${msg.time}`}
-            className="flex gap-3 items-start p-3 border border-gray-200 dark:border-gray-700 rounded-lg transform transition duration-300 ease-in-out cursor-pointer animate-scaleUp"
-            style={{
-              animationDelay: `${messages.indexOf(msg) * 300}ms`,
-              animationFillMode: "forwards",
-              opacity: 0,
-            }}
+            className={`flex gap-3 items-start p-3 border border-gray-200 dark:border-gray-700 rounded-lg transform transition-all duration-300 ease-in-out cursor-pointer ${
+              visibleMessages[index] ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            }`}
           >
             <div
               className={`w-8 h-8 min-w-[2rem] min-h-[2rem] rounded-lg bg-gradient-to-br ${msg.color}`}
@@ -400,7 +419,7 @@ type TooltipPayload = {
   fill?: string
 }
 
-const ChartTooltip = RechartsPrimitive.Tooltip as React.FC<RechartsPrimitive.TooltipProps<TooltipPayload, string | number>>
+const ChartTooltip = RechartsPrimitive.Tooltip as unknown as React.FC<RechartsPrimitive.TooltipProps<string | number, string | number>>
 
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
@@ -494,7 +513,7 @@ const ChartTooltipContent = React.forwardRef<
           {payload.map((item, index) => {
             const key = `${nameKey || item.name || item.dataKey || "value"}`
             const itemConfig = getPayloadConfigFromPayload(config, item, key)
-            const indicatorColor = color || item.payload.fill || item.color
+            const indicatorColor = color || item.payload?.fill || item.color
 
             return (
               <div
@@ -505,7 +524,7 @@ const ChartTooltipContent = React.forwardRef<
                 )}
               >
                 {formatter && item?.value !== undefined && item.name ? (
-                  formatter(item.value, item.name, item, index, item.payload)
+                  formatter(item.value, item.name, item, index, item.payload || {})
                 ) : (
                   <>
                     {itemConfig?.icon ? (

@@ -140,7 +140,7 @@ export const AccessManagerCard = ({
 								onChange={(e) => setEmail(e.target.value)}
 								className="flex-grow"
 							/>
-							<Select value={role} onValueChange={setRole}>
+							<Select value={role as string} onValueChange={(val) => setRole(val as Omit<Member["role"], "Owner">)}>
 								<SelectTrigger className="sm:w-[120px] whitespace-nowrap truncate">
 									<SelectValue placeholder="Select role" />
 								</SelectTrigger>

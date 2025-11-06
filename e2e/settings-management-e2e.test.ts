@@ -20,7 +20,7 @@ test.describe('Settings Management E2E', () => {
     await page.waitForLoadState('networkidle');
     
     // Check for settings page elements
-    await expect(page.locator('text=/setting/i)).toBeVisible();
+    await expect(page.locator('text=/setting/i')).toBeVisible();
   });
 
   test('should display settings tabs', async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe('Settings Management E2E', () => {
       if (await saveButton.count() > 0) {
         await saveButton.first().click();
         await page.waitForTimeout(500);
-        await expect(page.locator('text=/saved|updated/i)).toBeVisible({ timeout: 3000 });
+        await expect(page.locator('text=/saved|updated/i')).toBeVisible({ timeout: 3000 });
       }
     }
   });
@@ -80,7 +80,7 @@ test.describe('Settings Management E2E', () => {
     await page.waitForLoadState('networkidle');
     
     // Check for security settings
-    await expect(page.locator('text=/password|security|mfa/i)).toBeVisible();
+    await expect(page.locator('text=/password|security|mfa/i')).toBeVisible();
   });
 
   test('should display billing information', async ({ page }) => {
@@ -90,7 +90,7 @@ test.describe('Settings Management E2E', () => {
     await page.waitForLoadState('networkidle');
     
     // Check for billing section
-    await expect(page.locator('text=/billing|subscription|payment/i)).toBeVisible();
+    await expect(page.locator('text=/billing|subscription|payment/i')).toBeVisible();
   });
 });
 

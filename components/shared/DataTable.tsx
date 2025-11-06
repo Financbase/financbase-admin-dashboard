@@ -27,7 +27,6 @@ import {
 	Search,
 } from "lucide-react";
 import { memo, useMemo, useState } from "react";
-import { useState } from "react";
 
 interface Column<T> {
 	key: keyof T;

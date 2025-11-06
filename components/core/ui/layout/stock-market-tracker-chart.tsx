@@ -8,7 +8,6 @@
  */
 
 import { BarChart3, Clock } from "lucide-react";
-stock - market - tracker - chart.tsx;
 import React from "react";
 
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
@@ -101,7 +100,7 @@ export const Component = () => {
 				</CardTitle>
 
 				<Select value={selectedCompany} onValueChange={setSelectedCompany}>
-					<SelectTrigger size="sm" className="w-full md:w-[150px]">
+					<SelectTrigger className="w-full md:w-[150px] h-9">
 						<SelectValue placeholder="Select" />
 					</SelectTrigger>
 					<SelectContent>

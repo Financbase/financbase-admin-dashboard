@@ -219,7 +219,7 @@ export function SyncStatus({ connectionId, onStartSync, onStopSync }: SyncStatus
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-red-600">Errors ({syncStatus.errors.length})</p>
                   <div className="space-y-1">
-                    {syncStatus.errors.slice(0, 3).map((error, index) => (
+                    {syncStatus.errors.slice(0, 3).map((error: any, index: number) => (
                       <div key={index} className="bg-red-50 p-2 rounded text-sm">
                         <p className="font-medium text-red-800">{error.type}</p>
                         <p className="text-red-600">{error.message}</p>

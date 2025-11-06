@@ -19,15 +19,17 @@ export function useFeedback() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const submitFeedback = async (data: FeedbackData) => {
+  const submitFeedback = async (data: FeedbackData): Promise<boolean> => {
     setIsSubmitting(true);
     try {
       // Placeholder feedback submission
       console.log('Submitting feedback:', data);
       await new Promise(resolve => setTimeout(resolve, 1000));
       setIsSubmitted(true);
+      return true;
     } catch (error) {
       console.error('Error submitting feedback:', error);
+      return false;
     } finally {
       setIsSubmitting(false);
     }
@@ -36,6 +38,7 @@ export function useFeedback() {
   return {
     isSubmitting,
     isSubmitted,
+    error: null, // Add error property for compatibility
     submitFeedback,
   };
 }

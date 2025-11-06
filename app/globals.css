@@ -41,9 +41,9 @@
   --sidebar-accent-foreground: 0.3880 0.1423 271.1300;
   --sidebar-border: 0.9271 0.0101 238.5177;
   --sidebar-ring: 0.3880 0.1423 271.1300;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
-  --font-serif: ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  --font-sans: var(--font-roboto-flex), ui-sans-serif, sans-serif, system-ui;
+  --font-serif: var(--font-roboto-slab), ui-serif, serif;
+  --font-mono: var(--font-roboto-mono), ui-monospace, monospace;
   --radius: 0.275rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
@@ -61,7 +61,27 @@
   --shadow-2xl: 0px 1px 9px 1.5px hsl(231.5993 53.7486% 36.4689% / 0.28);
   --tracking-normal: 0em;
   --spacing: 0.3rem;
-  
+
+  /* Spacing System - 4px base unit converted to REM */
+  /* Based on: 4px = 0.25rem, 8px = 0.5rem, etc. */
+  --spacing-1: 0.25rem;   /* 4px */
+  --spacing-2: 0.5rem;    /* 8px */
+  --spacing-3: 0.75rem;   /* 12px */
+  --spacing-4: 1rem;      /* 16px */
+  --spacing-5: 1.25rem;   /* 20px */
+  --spacing-6: 1.5rem;    /* 24px */
+  --spacing-8: 2rem;      /* 32px */
+  --spacing-10: 2.5rem;   /* 40px */
+  --spacing-12: 3rem;     /* 48px */
+  --spacing-16: 4rem;     /* 64px */
+
+  /* Typography Line Height System */
+  /* Smaller text requires greater line-height for readability */
+  --line-height-tight: 1.25;      /* For large headings */
+  --line-height-normal: 1.5;      /* For body text */
+  --line-height-relaxed: 1.75;    /* For smaller text */
+  --line-height-loose: 2;         /* For very small text */
+
   /* Financbase Brand Colors */
   --brand-primary: 0.388 0.1423 271.13;
   --brand-primary-light: 0.45 0.1423 271.13;
@@ -87,7 +107,8 @@
   --color-accent-hsl-light: 271 70% 70%;
   --color-accent-hsl-dark: 271 70% 50%;
 
-  /* Neutral Colors */
+  /* Neutral Colors - Light Theme */
+  /* Refined for better hierarchy and readability */
   --color-neutral-50-hsl: 0 0% 98%;
   --color-neutral-100-hsl: 0 0% 95%;
   --color-neutral-200-hsl: 0 0% 90%;
@@ -105,10 +126,16 @@
   --color-error-hsl: 0 84% 60%;
   --color-info-hsl: 217 91% 60%;
 
-  /* Depth/Hierarchy Colors - Raised Elements */
+  /* Depth/Hierarchy Colors - Light Theme Raised Elements */
+  /* Using lighter shades for elevation in light theme */
   --color-raised-1-hsl: 0 0% 100%;
   --color-raised-2-hsl: 0 0% 99%;
   --color-raised-3-hsl: 0 0% 98%;
+
+  /* Text Colors - Light Theme (refined for readability) */
+  --color-text-heading-hsl: 0 0% 5%;   /* Headings - not pure black */
+  --color-text-body-hsl: 0 0% 8%;      /* Body text - slightly lighter */
+  --color-text-muted-hsl: 0 0% 30%;    /* Muted/secondary text */
 
   /* Breakpoint Variables */
   --breakpoint-xs: 0px;
@@ -152,16 +179,17 @@
   --sidebar-accent-foreground: 0.5560 0 0;
   --sidebar-border: 0.3795 0.0220 240.5943;
   --sidebar-ring: 0.3880 0.1423 271.1300;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
-  --font-serif: ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  --font-sans: var(--font-roboto-flex), ui-sans-serif, sans-serif, system-ui;
+  --font-serif: var(--font-roboto-slab), ui-serif, serif;
+  --font-mono: var(--font-roboto-mono), ui-monospace, monospace;
   --radius: 0.275rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
   --shadow-blur: 9px;
   --shadow-spread: 1.5px;
   --shadow-opacity: 0.11;
-  --shadow-color: oklch(0 0 0); /* Use foreground color in dark mode - matches theme */
+		--shadow-color: #000000;
+  /* Legacy Shadow System (kept for compatibility) */
   --shadow-2xs: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.06);
   --shadow-xs: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.06);
   --shadow-sm: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.11), 0px 1px 2px 0.5px hsl(0 0% 0% / 0.11);
@@ -170,7 +198,29 @@
   --shadow-lg: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.11), 0px 4px 6px 0.5px hsl(0 0% 0% / 0.11);
   --shadow-xl: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.11), 0px 8px 10px 0.5px hsl(0 0% 0% / 0.11);
   --shadow-2xl: 0px 1px 9px 1.5px hsl(0 0% 0% / 0.28);
+
+  /* Two-Part Realistic Shadow System */
+  /* Combines top light shadow (inset or border) + bottom dark shadow */
+  /* Creates realistic depth by simulating light from above */
   
+  /* Card Shadow - Subtle elevation */
+  --shadow-card: 
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.1),
+    0 1px 3px 0 hsl(0 0% 0% / 0.12),
+    0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  
+  /* Elevated Shadow - Medium elevation */
+  --shadow-elevated:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.15),
+    0 4px 6px -1px hsl(0 0% 0% / 0.1),
+    0 2px 4px -2px hsl(0 0% 0% / 0.1);
+  
+  /* Floating Shadow - High elevation */
+  --shadow-floating:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.2),
+    0 10px 15px -3px hsl(0 0% 0% / 0.1),
+    0 4px 6px -4px hsl(0 0% 0% / 0.1);
+
   /* Financbase Brand Colors - Dark Theme */
   --brand-primary: 0.388 0.1423 271.13;
   --brand-primary-light: 0.45 0.1423 271.13;
@@ -195,6 +245,7 @@
   --color-accent-hsl-dark: 271 65% 60%;
 
   /* Neutral Colors - Dark Theme */
+  /* Refined following design principles: base=0%, surface=5%, elevated=10% */
   --color-neutral-50-hsl: 0 0% 10%;
   --color-neutral-100-hsl: 0 0% 15%;
   --color-neutral-200-hsl: 0 0% 20%;
@@ -213,9 +264,33 @@
   --color-info-hsl: 217 85% 70%;
 
   /* Depth/Hierarchy Colors - Dark Theme Raised Elements */
-  --color-raised-1-hsl: 0 0% 15%;
-  --color-raised-2-hsl: 0 0% 18%;
-  --color-raised-3-hsl: 0 0% 20%;
+  /* Following design principles: base=0%, card/surface=5%, elevated/highlighted=10% */
+  /* Headings use 95% lightness (not pure white), body text uses 90-92% */
+  --color-raised-1-hsl: 0 0% 5%;   /* Surface/card - slightly lighter than base */
+  --color-raised-2-hsl: 0 0% 10%;  /* Elevated/highlighted elements */
+  --color-raised-3-hsl: 0 0% 15%;  /* Maximum elevation */
+  
+  /* Text Colors - Dark Theme (refined for readability) */
+  --color-text-heading-hsl: 0 0% 95%;  /* Headings - not pure white */
+  --color-text-body-hsl: 0 0% 92%;     /* Body text - slightly muted */
+  --color-text-muted-hsl: 0 0% 70%;   /* Muted/secondary text */
+
+  /* Two-Part Realistic Shadow System - Dark Theme */
+  /* Adjusted for dark backgrounds - top shadow is more subtle */
+  --shadow-card: 
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.05),
+    0 1px 3px 0 hsl(0 0% 0% / 0.3),
+    0 1px 2px -1px hsl(0 0% 0% / 0.2);
+  
+  --shadow-elevated:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.08),
+    0 4px 6px -1px hsl(0 0% 0% / 0.4),
+    0 2px 4px -2px hsl(0 0% 0% / 0.3);
+  
+  --shadow-floating:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.1),
+    0 10px 15px -3px hsl(0 0% 0% / 0.5),
+    0 4px 6px -4px hsl(0 0% 0% / 0.4);
 }
 
 /* System Color Scheme Support */
@@ -232,7 +307,8 @@
   }
 }
 
-@theme inline {
+/* Theme color aliases - these map existing CSS variables to color-* names for Tailwind compatibility */
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -283,6 +359,11 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+  
+  /* Two-Part Shadow System Aliases */
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+  --shadow-floating: var(--shadow-floating);
 }
 
 @layer base {
@@ -312,9 +393,47 @@
 		background-color: oklch(var(--background));
 		color: oklch(var(--foreground));
 		font-family: var(--font-sans);
-		/* Ensure proper inheritance */
-		background-color: inherit;
-		color: inherit;
+		/* Ensure body inherits from html but with explicit fallback */
+		min-height: 100vh;
+    letter-spacing: var(--tracking-normal);
+		line-height: var(--line-height-normal);
+	}
+
+	/* Typography Improvements */
+	/* Avoid centering text for paragraphs - left alignment improves scannability */
+	p {
+		text-align: left;
+		line-height: var(--line-height-relaxed);
+	}
+
+	/* Smaller text requires greater line-height for better legibility */
+	.text-xs, .text-sm {
+		line-height: var(--line-height-relaxed);
+	}
+
+	.text-xs {
+		line-height: var(--line-height-loose);
+	}
+
+	/* Headings use tighter line-height */
+	h1, h2, h3, h4, h5, h6 {
+		line-height: var(--line-height-tight);
+		font-weight: 600;
+	}
+
+	/* Ensure all root-level containers inherit theme colors */
+	#__next,
+	[data-nextjs-scroll-focus-boundary],
+	main {
+		background-color: oklch(var(--background));
+		color: oklch(var(--foreground));
+	}
+
+	/* Ensure dashboard and public layouts get theme colors */
+	.dashboard-container,
+	.min-h-screen {
+		background-color: oklch(var(--background));
+		color: oklch(var(--foreground));
 	}
 
 	/* Debug: Add visible borders to test theme application */

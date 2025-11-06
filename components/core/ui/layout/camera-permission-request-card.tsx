@@ -65,11 +65,11 @@ export const Component = ({
 		requestPermission,
 		resetError,
 	} = useCameraPermission({
-		onPermissionChange: (newStatus) => {
+		onPermissionChange: (newStatus: PermissionState) => {
 			const granted = newStatus === "granted";
 			onPermissionChange?.(granted);
 		},
-		onError: (errorMessage) => {
+		onError: (errorMessage: string) => {
 			console.error("Camera permission error:", errorMessage);
 		},
 	});
@@ -264,7 +264,6 @@ export const Component = ({
 					{showInstructions && (
 						<Accordion
 							type="single"
-							variant="solid"
 							collapsible
 							className="w-full"
 							defaultValue="item-1"

@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface Project {
 	id: string;
@@ -467,8 +468,20 @@ export default function FreelancerHubPage() {
 										</div>
 									</div>
 									<div className="flex items-center gap-2">
-										<Button variant="outline" size="sm">View</Button>
-										<Button variant="outline" size="sm">Edit</Button>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => toast.info('Viewing project details')}
+										>
+											View
+										</Button>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => toast.info('Editing project information')}
+										>
+											Edit
+										</Button>
 									</div>
 								</div>
 							))}

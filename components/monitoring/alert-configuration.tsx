@@ -83,7 +83,7 @@ export function AlertConfiguration({ onViewAlerts }: AlertConfigurationProps) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['alertRules']);
+      queryClient.invalidateQueries({ queryKey: ['alertRules'] });
       setShowCreateDialog(false);
     },
   });
@@ -99,7 +99,7 @@ export function AlertConfiguration({ onViewAlerts }: AlertConfigurationProps) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['alertRules']);
+      queryClient.invalidateQueries({ queryKey: ['alertRules'] });
       setEditingRule(null);
     },
   });
@@ -113,7 +113,7 @@ export function AlertConfiguration({ onViewAlerts }: AlertConfigurationProps) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['alertRules']);
+      queryClient.invalidateQueries({ queryKey: ['alertRules'] });
     },
   });
 
@@ -128,7 +128,7 @@ export function AlertConfiguration({ onViewAlerts }: AlertConfigurationProps) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['alertRules']);
+      queryClient.invalidateQueries({ queryKey: ['alertRules'] });
     },
   });
 
@@ -429,7 +429,7 @@ function AlertRuleForm({
           <Label htmlFor="severity">Severity</Label>
           <Select
             value={formData.severity}
-            onValueChange={(value) => setFormData({ ...formData, severity: value })}
+            onValueChange={(value) => setFormData({ ...formData, severity: value as 'low' | 'medium' | 'high' | 'critical' })}
           >
             <SelectTrigger>
               <SelectValue />

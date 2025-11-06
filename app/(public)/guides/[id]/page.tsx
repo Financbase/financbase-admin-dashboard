@@ -209,11 +209,36 @@ export default function GuideDetailPage() {
 				>
 					<Card>
 						<CardContent className="p-8">
+							{guide.content ? (
 							<div className="prose dark:prose-invert max-w-none">
 								<div className="whitespace-pre-line text-gray-700 dark:text-gray-300">
-									{guide.content || "Content coming soon..."}
+										{guide.content}
+									</div>
 								</div>
-							</div>
+							) : (
+								<div className="text-center py-12">
+									<BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+									<h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+										Content Not Available
+									</h3>
+									<p className="text-gray-600 dark:text-gray-400 mb-6">
+										This guide content is not currently available. Please explore our other guides or contact support for assistance.
+									</p>
+									<div className="flex flex-col sm:flex-row gap-3 justify-center">
+										<Button asChild>
+											<Link href="/guides">
+												<ArrowLeft className="mr-2 h-4 w-4" />
+												Back to Guides
+											</Link>
+										</Button>
+										<Button variant="outline" asChild>
+											<Link href="/support">
+												Contact Support
+											</Link>
+										</Button>
+									</div>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				</motion.div>

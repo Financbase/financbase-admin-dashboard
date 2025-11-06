@@ -123,35 +123,48 @@ export default function RecentOrders() {
 					</button>
 				</div>
 				<div className="space-y-4" data-testid="orders-list">
-					{orders.map((order) => (
-						<div
-							key={order.id}
-							className="flex items-center justify-between gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors"
-							data-testid="order-item"
-						>
-							<div className="flex items-center space-x-4 min-w-0 flex-1">
-								<UserAvatar name={order.customerName} size={40} className="flex-shrink-0" />
-								<div className="min-w-0 flex-1">
-									<div className="flex items-center gap-2">
-										<p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-											{order.customerName}
+					{orders.map((orderItem) => {
+						// Map RecentOrder to Order format
+						const order: Order = {
+							id: orderItem.id,
+							orderNumber: `ORD-${orderItem.id.slice(0, 8)}`,
+							customerName: orderItem.customer,
+							customerEmail: '',
+							total: orderItem.amount,
+							status: orderItem.status as Order["status"] || 'pending',
+							createdAt: orderItem.date,
+							items: [{ name: 'Order items', quantity: 1, price: orderItem.amount }],
+						};
+
+						return (
+							<div
+								key={order.id}
+								className="flex items-center justify-between gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors"
+								data-testid="order-item"
+							>
+								<div className="flex items-center space-x-4 min-w-0 flex-1">
+									<UserAvatar name={order.customerName} size={40} className="flex-shrink-0" />
+									<div className="min-w-0 flex-1">
+										<div className="flex items-center gap-2">
+											<p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+												{order.customerName}
+											</p>
+											<span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+												{order.orderNumber}
+											</span>
+										</div>
+										<p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+											{order.items.length > 0
+												? order.items[0].name
+												: "Multiple items"}
+											{order.items.length > 1 &&
+												` +${order.items.length - 1} more`}
 										</p>
-										<span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
-											{order.orderNumber}
-										</span>
 									</div>
-									<p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-										{order.items.length > 0
-											? order.items[0].name
-											: "Multiple items"}
-										{order.items.length > 1 &&
-											` +${order.items.length - 1} more`}
-									</p>
 								</div>
-							</div>
-							<div className="flex items-center space-x-4 flex-shrink-0 ml-2">
-								<Badge className={`${statusColors[order.status]} border-0 whitespace-nowrap`}>
-									{order.status}
+								<div className="flex items-center space-x-4 flex-shrink-0 ml-2">
+									<Badge className={`${statusColors[order.status]} border-0 whitespace-nowrap`}>
+										{order.status}
 								</Badge>
 								<div className="text-right">
 									<p className="text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">
@@ -163,7 +176,8 @@ export default function RecentOrders() {
 								</div>
 							</div>
 						</div>
-					))}
+					);
+					})}
 				</div>
 				
 				{/* Pagination Controls */}

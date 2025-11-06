@@ -13,9 +13,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
-export function StatisticsCard5() {
+interface StatisticsCard5Props {
+  data?: any;
+  animated?: boolean;
+  showDetails?: boolean;
+  className?: string;
+  [key: string]: any;
+}
+
+export function StatisticsCard5({ data, animated, showDetails, className, ...props }: StatisticsCard5Props = {} as StatisticsCard5Props) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Statistics Card 5</CardTitle>
       </CardHeader>
@@ -23,7 +31,7 @@ export function StatisticsCard5() {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Value</span>
-            <span className="text-2xl font-bold">$12,345</span>
+            <span className="text-2xl font-bold">${data?.balance?.toLocaleString() || "12,345"}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Change</span>

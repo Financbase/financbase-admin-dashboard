@@ -29,6 +29,102 @@ const createTransactionSchema = z.object({
 	metadata: z.record(z.unknown()).optional(),
 });
 
+/**
+ * @swagger
+ * /api/transactions:
+ *   get:
+ *     summary: Get list of transactions
+ *     description: Retrieves a paginated list of financial transactions with filtering by type, status, category, and date range
+ *     tags:
+ *       - Financial
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [income, expense, transfer, payment]
+ *         description: Filter transactions by type
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Filter transactions by status
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter transactions by category
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date for filtering (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date for filtering (YYYY-MM-DD)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for transaction description
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *         description: Maximum number of transactions to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of transactions to skip
+ *     responses:
+ *       200:
+ *         description: Transactions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 transactions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: trans_123
+ *                       type:
+ *                         type: string
+ *                         enum: [income, expense, transfer, payment]
+ *                       amount:
+ *                         type: number
+ *                         example: 1250.00
+ *                       currency:
+ *                         type: string
+ *                         example: USD
+ *                       description:
+ *                         type: string
+ *                       category:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                         enum: [pending, completed, failed, cancelled]
+ *                       transactionDate:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(request: NextRequest) {
 	const requestId = generateRequestId();
 	try {
@@ -66,6 +162,84 @@ export async function GET(request: NextRequest) {
 	}
 }
 
+/**
+ * @swagger
+ * /api/transactions:
+ *   post:
+ *     summary: Create a new transaction
+ *     description: Creates a new financial transaction record (income, expense, transfer, or payment)
+ *     tags:
+ *       - Financial
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - type
+ *               - amount
+ *               - transactionDate
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [income, expense, transfer, payment]
+ *                 example: expense
+ *               amount:
+ *                 type: number
+ *                 example: 1250.00
+ *               currency:
+ *                 type: string
+ *                 default: USD
+ *               description:
+ *                 type: string
+ *                 example: Monthly subscription payment
+ *               category:
+ *                 type: string
+ *                 example: Software
+ *               paymentMethod:
+ *                 type: string
+ *                 example: credit_card
+ *               referenceId:
+ *                 type: string
+ *               referenceType:
+ *                 type: string
+ *               accountId:
+ *                 type: string
+ *               transactionDate:
+ *                 type: string
+ *                 format: date-time
+ *               notes:
+ *                 type: string
+ *               metadata:
+ *                 type: object
+ *     responses:
+ *       201:
+ *         description: Transaction created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 transaction:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: trans_123
+ *                     type:
+ *                       type: string
+ *                     amount:
+ *                       type: number
+ *       400:
+ *         description: Bad request - Invalid input data
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(request: NextRequest) {
 	const requestId = generateRequestId();
 	try {

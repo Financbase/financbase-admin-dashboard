@@ -39,19 +39,19 @@ async function seedUsers() {
 
   for (let i = 0; i < SEED_CONFIG.users; i++) {
     const userData = {
-      id: `user_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       email: `test${i}@example.com`,
-      name: `Test User ${i}`,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=test${i}`,
+      clerkId: `clerk_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      organizationId: `org_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      firstName: `Test`,
+      lastName: `User ${i}`,
       role: ['admin', 'user', 'viewer'][Math.floor(Math.random() * 3)] as 'admin' | 'user' | 'viewer',
       isActive: true,
-      lastLogin: new Date(),
       createdAt: generateRecentDate(180),
       updatedAt: new Date(),
     };
 
-    await db.insert(schema.users).values(userData);
-    users.push(userData);
+    const [insertedUser] = await db.insert(schema.users).values(userData).returning();
+    users.push(insertedUser);
   }
 
   console.log(`✅ Created ${users.length} users`);
@@ -65,10 +65,9 @@ async function seedClients(userId: string) {
 
   for (let i = 0; i < SEED_CONFIG.clients; i++) {
     const clientData = {
-      id: `client_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId,
-      companyName: `Test Company ${i}`,
-      contactName: `John Doe ${i}`,
+      name: `Test Company ${i}`,
+      company: `Test Company ${i}`,
       email: `client${i}@example.com`,
       phone: `+1${Math.floor(Math.random() * 9000000000) + 1000000000}`,
       address: `123 Test St, Test City, TS 12345`,
@@ -77,19 +76,16 @@ async function seedClients(userId: string) {
       zipCode: '12345',
       country: 'US',
       currency: 'USD',
-      paymentTerms: ['15', '30', '45', '60'][Math.floor(Math.random() * 4)],
+      paymentTerms: ['net15', 'net30', 'net45', 'net60'][Math.floor(Math.random() * 4)],
       taxId: `${Math.floor(Math.random() * 90) + 10}-${Math.floor(Math.random() * 900000) + 100000}`,
-      website: `https://example${i}.com`,
-      industry: ['technology', 'healthcare', 'finance', 'retail', 'consulting'][Math.floor(Math.random() * 5)],
-      status: ['active', 'inactive', 'prospect'][Math.floor(Math.random() * 3)] as 'active' | 'inactive' | 'prospect',
+      status: ['active', 'inactive', 'suspended'][Math.floor(Math.random() * 3)] as 'active' | 'inactive' | 'suspended',
       notes: `Test client ${i} notes`,
-      isActive: Math.random() > 0.2,
       createdAt: generateRecentDate(365),
       updatedAt: new Date(),
     };
 
-    await db.insert(schema.clients).values(clientData);
-    clients.push(clientData);
+    const [insertedClient] = await db.insert(schema.clients).values(clientData).returning();
+    clients.push(insertedClient);
   }
 
   console.log(`✅ Created ${clients.length} clients`);
@@ -134,7 +130,7 @@ async function seedTransactions(userId: string) {
   return transactions;
 }
 
-async function seedProjects(userId: string, clients: Array<{id: string}>) {
+async function seedProjects(userId: string, clients: Array<{id: number}>) {
   console.log('🌱 Seeding projects...');
 
   const projects = [];
@@ -144,27 +140,25 @@ async function seedProjects(userId: string, clients: Array<{id: string}>) {
     const budget = generateRealisticAmount(5000, 100000);
 
     const projectData = {
-      id: `project_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId,
-      clientId: client.id,
+      clientId: undefined, // Note: Schema mismatch - projects.clientId is UUID but clients.id is serial
       name: `Test Project ${i}`,
       description: `Test project ${i} description`,
-      status: ['active', 'completed', 'on-hold', 'cancelled'][Math.floor(Math.random() * 4)] as 'active' | 'completed' | 'on-hold' | 'cancelled',
+      status: ['planning', 'active', 'on_hold', 'completed', 'cancelled'][Math.floor(Math.random() * 5)] as 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled',
       priority: ['low', 'medium', 'high', 'urgent'][Math.floor(Math.random() * 4)] as 'low' | 'medium' | 'high' | 'urgent',
       budget,
-      spent: generateRealisticAmount(0, parseFloat(budget) * 0.8),
+      currency: 'USD',
+      progress: String(Math.floor(Math.random() * 101)),
       startDate: generateRecentDate(180),
-      endDate: new Date(Date.now() + Math.random() * 365 * 24 * 60 * 60 * 1000),
       dueDate: new Date(Date.now() + Math.random() * 180 * 24 * 60 * 60 * 1000),
-      completionPercentage: Math.floor(Math.random() * 101),
-      tags: ['web-design', 'development', 'consulting', 'maintenance'][Math.floor(Math.random() * 4)],
+      tags: JSON.stringify(['web-design', 'development', 'consulting', 'maintenance']),
       notes: `Project notes ${i}`,
       createdAt: generateRecentDate(180),
       updatedAt: new Date(),
     };
 
-    await db.insert(schema.projects).values(projectData);
-    projects.push(projectData);
+    const [insertedProject] = await db.insert(schema.projects).values(projectData).returning();
+    projects.push(insertedProject);
   }
 
   console.log(`✅ Created ${projects.length} projects`);
@@ -180,7 +174,6 @@ async function seedLeads(userId: string) {
 
   for (let i = 0; i < SEED_CONFIG.leads; i++) {
     const leadData = {
-      id: `lead_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId,
       firstName: `Lead${i}`,
       lastName: `Person${i}`,
@@ -188,20 +181,20 @@ async function seedLeads(userId: string) {
       phone: `+1${Math.floor(Math.random() * 9000000000) + 1000000000}`,
       company: `Lead Company ${i}`,
       jobTitle: `Manager${i}`,
-      source: sources[Math.floor(Math.random() * sources.length)],
-      priority: priorities[Math.floor(Math.random() * priorities.length)],
-      status: ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost'][Math.floor(Math.random() * 7)] as 'new' | 'contacted' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost',
+      source: ['website', 'referral', 'social_media', 'email_campaign', 'cold_call', 'trade_show', 'advertisement', 'partner', 'other'][Math.floor(Math.random() * 9)] as any,
+      priority: ['low', 'medium', 'high', 'urgent'][Math.floor(Math.random() * 4)] as 'low' | 'medium' | 'high' | 'urgent',
+      status: ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost', 'nurturing'][Math.floor(Math.random() * 8)] as any,
       estimatedValue: generateRealisticAmount(10000, 200000),
-      probability: Math.floor(Math.random() * 90) + 10,
+      probability: String(Math.floor(Math.random() * 90) + 10),
       expectedCloseDate: new Date(Date.now() + Math.random() * 90 * 24 * 60 * 60 * 1000),
       notes: `Lead notes ${i}`,
-      tags: ['enterprise', 'small-business', 'startup', 'non-profit'][Math.floor(Math.random() * 4)],
+      tags: JSON.stringify(['enterprise', 'small-business', 'startup', 'non-profit']),
       createdAt: generateRecentDate(180),
       updatedAt: new Date(),
     };
 
-    await db.insert(schema.leads).values(leadData);
-    leads.push(leadData);
+    const [insertedLead] = await db.insert(schema.leads).values(leadData).returning();
+    leads.push(insertedLead);
   }
 
   console.log(`✅ Created ${leads.length} leads`);
@@ -219,7 +212,6 @@ async function seedExpenses(userId: string) {
 
   for (let i = 0; i < SEED_CONFIG.expenses; i++) {
     const expenseData = {
-      id: `expense_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId,
       description: `Test expense ${i}`,
       amount: generateRealisticAmount(50, 5000),
@@ -227,22 +219,23 @@ async function seedExpenses(userId: string) {
       category: expenseCategories[Math.floor(Math.random() * expenseCategories.length)],
       vendor: `Vendor ${i}`,
       date: generateRecentDate(90),
-      receipt: `https://example.com/receipt${i}.jpg`,
+      receiptUrl: `https://example.com/receipt${i}.jpg`,
       paymentMethod: ['credit-card', 'bank-transfer', 'cash', 'check'][Math.floor(Math.random() * 4)],
+      status: ['pending', 'approved', 'rejected'][Math.floor(Math.random() * 3)] as 'pending' | 'approved' | 'rejected',
       notes: `Expense notes ${i}`,
       createdAt: generateRecentDate(90),
       updatedAt: new Date(),
     };
 
-    await db.insert(schema.expenses).values(expenseData);
-    expenses.push(expenseData);
+    const [insertedExpense] = await db.insert(schema.expenses).values(expenseData).returning();
+    expenses.push(insertedExpense);
   }
 
   console.log(`✅ Created ${expenses.length} expenses`);
   return expenses;
 }
 
-async function seedInvoices(userId: string, clients: Array<{id: string}>) {
+async function seedInvoices(userId: string, clients: Array<{id: number}>) {
   console.log('🌱 Seeding invoices...');
 
   const invoices = [];
@@ -250,32 +243,43 @@ async function seedInvoices(userId: string, clients: Array<{id: string}>) {
   for (let i = 0; i < SEED_CONFIG.invoices; i++) {
     const client = clients[Math.floor(Math.random() * clients.length)];
     const amount = generateRealisticAmount(1000, 25000);
+    const subtotal = parseFloat(amount);
+    const taxAmount = subtotal * 0.08;
+    const discountAmount = subtotal * 0.1;
+    const total = subtotal + taxAmount - discountAmount;
 
     const invoiceData = {
-      id: `invoice_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId,
       clientId: client.id,
       invoiceNumber: `INV-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      clientName: (client as any).name || `Client ${i}`,
+      clientEmail: `client${i}@example.com`,
       status: ['draft', 'sent', 'viewed', 'paid', 'overdue', 'cancelled'][Math.floor(Math.random() * 6)] as 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue' | 'cancelled',
       issueDate: generateRecentDate(60),
       dueDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000),
       paidDate: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
-      subtotal: amount,
+      subtotal: String(subtotal),
       taxRate: '0.08',
-      taxAmount: generateRealisticAmount(0, parseFloat(amount) * 0.15),
-      discountAmount: generateRealisticAmount(0, parseFloat(amount) * 0.1),
-      total: amount,
+      taxAmount: String(taxAmount),
+      discountAmount: String(discountAmount),
+      total: String(total),
       currency: 'USD',
+      items: JSON.stringify([
+        {
+          description: `Item ${i}`,
+          quantity: '1',
+          unitPrice: amount,
+          total: amount
+        }
+      ]),
       notes: `Invoice notes ${i}`,
       terms: 'Net 30 days',
-      metadata: JSON.stringify({ test: true }),
       createdAt: generateRecentDate(60),
       updatedAt: new Date(),
-      contractorId: null,
     };
 
-    await db.insert(schema.invoices).values(invoiceData);
-    invoices.push(invoiceData);
+    const [insertedInvoice] = await db.insert(schema.invoices).values(invoiceData).returning();
+    invoices.push(insertedInvoice);
   }
 
   console.log(`✅ Created ${invoices.length} invoices`);
@@ -304,6 +308,8 @@ async function seedTestData() {
 
     const clients = await seedClients(primaryUser.id);
     await seedTransactions(primaryUser.id);
+    // Note: projects.clientId is UUID but clients.id is serial - this is a schema mismatch
+    // For now, we'll pass clients but projects won't have valid foreign keys
     await seedProjects(primaryUser.id, clients);
     await seedLeads(primaryUser.id);
     await seedExpenses(primaryUser.id);

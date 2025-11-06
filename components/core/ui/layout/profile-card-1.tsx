@@ -94,6 +94,27 @@ const ProfileCardDemo = () => {
  * @param {SocialLink[]} props.socialLinks - An array of social link objects.
  * @param {ActionButtonProps} props.actionButton - Props for the main call-to-action button.
  */
+interface SocialLink {
+	id: string;
+	icon: React.ComponentType<{ className?: string }>;
+	label: string;
+	href: string;
+}
+
+interface ActionButtonProps {
+	text: string;
+	href: string;
+}
+
+interface GlassmorphismProfileCardProps {
+	avatarUrl: string;
+	name: string;
+	title: string;
+	bio: string;
+	socialLinks?: SocialLink[];
+	actionButton: ActionButtonProps;
+}
+
 const GlassmorphismProfileCard = ({
 	avatarUrl,
 	name,
@@ -101,8 +122,8 @@ const GlassmorphismProfileCard = ({
 	bio,
 	socialLinks = [],
 	actionButton,
-}) => {
-	const [hoveredItem, setHoveredItem] = useState(null);
+}: GlassmorphismProfileCardProps) => {
+	const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
 	return (
 		<div className="relative w-full max-w-sm">
@@ -117,9 +138,10 @@ const GlassmorphismProfileCard = ({
 						src={avatarUrl}
 						alt={`${name}'s Avatar`}
 						className="w-full h-full rounded-full object-cover"
-						onError={(e) => {
-							e.target.onerror = null;
-							e.target.src =
+						onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+							const target = e.target as HTMLImageElement;
+							target.onerror = null;
+							target.src =
 								"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=96&h=96&fit=crop&crop=face&auto=format";
 						}}
 					/>
@@ -154,7 +176,15 @@ const GlassmorphismProfileCard = ({
 
 // --- Sub-components (Internal to GlassmorphismProfileCard) ---
 
-const SocialButton = ({ item, setHoveredItem, hoveredItem }) => (
+const SocialButton = ({ 
+	item, 
+	setHoveredItem, 
+	hoveredItem 
+}: { 
+	item: SocialLink; 
+	setHoveredItem: (id: string | null) => void; 
+	hoveredItem: string | null;
+}) => (
 	<div className="relative">
 		<a
 			href={item.href}
@@ -166,8 +196,7 @@ const SocialButton = ({ item, setHoveredItem, hoveredItem }) => (
 		>
 			<div className="relative z-10 flex items-center justify-center">
 				<item.icon
-					size={20}
-					className="transition-all duration-200 ease-out text-secondary-foreground/70 group-hover:text-secondary-foreground"
+					className="h-5 w-5 transition-all duration-200 ease-out text-secondary-foreground/70 group-hover:text-secondary-foreground"
 				/>
 			</div>
 		</a>
@@ -175,7 +204,7 @@ const SocialButton = ({ item, setHoveredItem, hoveredItem }) => (
 	</div>
 );
 
-const ActionButton = ({ action }) => (
+const ActionButton = ({ action }: { action: ActionButtonProps }) => (
 	<a
 		href={action.href}
 		onClick={(e) => e.preventDefault()}
@@ -190,7 +219,7 @@ const ActionButton = ({ action }) => (
 	</a>
 );
 
-const Tooltip = ({ item, hoveredItem }) => (
+const Tooltip = ({ item, hoveredItem }: { item: SocialLink; hoveredItem: string | null }) => (
 	<div
 		role="tooltip"
 		className={`absolute -top-12 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 rounded-lg backdrop-blur-md border text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out pointer-events-none bg-popover text-popover-foreground border-border ${hoveredItem === item.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}

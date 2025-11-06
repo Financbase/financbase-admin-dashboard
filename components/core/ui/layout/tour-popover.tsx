@@ -190,7 +190,7 @@ function TourPopover() {
 						<div className="text-xs text-muted-foreground">
 							<p>Current step: {currentStep}</p>
 							<p>
-								Completed: {completedSteps.length}/{tourSteps.length}
+								Completed: {completedSteps.size}/{tourSteps.length}
 							</p>
 							<p>Loading: {isLoading ? "Yes" : "No"}</p>
 							{error && <p className="text-red-500">Error: {error}</p>}

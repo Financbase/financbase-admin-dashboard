@@ -27,8 +27,18 @@ import {
 	TooltipTrigger,
 } from "@/components/core/ui/layout/tooltip";
 import { useExpandable } from "@/hooks/use-expandable";
-import { AnimatePresence, motion } from "framer-motion";
-import {} from "lucide-react";
+import { AnimatePresence, motion, useMotionValue } from "framer-motion";
+import {
+	AlertCircle,
+	Github,
+	Loader2,
+	Clock,
+	Star,
+	GitBranch,
+	Users,
+	CheckCircle2,
+	MessageSquare,
+} from "lucide-react";
 import React, { useRef, useEffect, useState } from "react";
 
 interface ProjectStatusCardProps {
@@ -75,8 +85,9 @@ export function ProjectStatusCard({
 	onRefresh,
 	className,
 }: ProjectStatusCardProps) {
-	const { isExpanded, toggleExpand, animatedHeight } = useExpandable();
+	const { isExpanded, toggleExpand } = useExpandable();
 	const contentRef = useRef<HTMLDivElement>(null);
+	const animatedHeight = useMotionValue<number | "auto">("auto");
 	const [data, setData] = useState<ProjectData | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -123,8 +134,10 @@ export function ProjectStatusCard({
 	}, [projectId]);
 
 	useEffect(() => {
-		if (contentRef.current) {
-			animatedHeight.set(isExpanded ? contentRef.current.scrollHeight : 0);
+		if (contentRef.current && isExpanded) {
+			animatedHeight.set(contentRef.current.scrollHeight);
+		} else {
+			animatedHeight.set(0);
 		}
 	}, [isExpanded, animatedHeight, data, loading, error]);
 
@@ -223,7 +236,7 @@ export function ProjectStatusCard({
 					)}
 
 					<motion.div
-						style={{ height: animatedHeight }}
+						animate={{ height: isExpanded ? (contentRef.current?.scrollHeight ?? "auto") : 0 }}
 						transition={{ type: "spring", stiffness: 300, damping: 30 }}
 						className="overflow-hidden"
 					>

@@ -121,7 +121,7 @@ export default function CookiePreferencesModal({
 				<CardContent className="space-y-6">
 					{error && (
 						<div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
-							{error}
+							{error?.message || String(error)}
 						</div>
 					)}
 
@@ -148,7 +148,7 @@ export default function CookiePreferencesModal({
 										</div>
 									) : (
 										<Switch
-											checked={localPreferences[cookie.type]}
+											checked={localPreferences[cookie.type as keyof typeof localPreferences]}
 											onCheckedChange={(checked) =>
 												setLocalPreferences((prev) => ({
 													...prev,

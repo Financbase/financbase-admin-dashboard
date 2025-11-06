@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
 
+    // Note: supportTickets.userId stores Clerk ID (text), not database UUID
     const tickets = await DocumentationService.getUserTickets(
       userId,
       status || undefined,

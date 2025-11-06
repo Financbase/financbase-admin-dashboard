@@ -7,8 +7,9 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { EmailClientCard } from "@/components/ui/email-client-card";
-import { Key, MessageCircle, Plus, Send, Trash } from "lucide-react";
+import { EmailClientCard } from "@/components/core/ui/layout/email-client-card";
+import { Heart, ThumbsUp, Zap, Flame, Star, Send, Trash } from "lucide-react";
+import React from "react";
 
 const EmailClientCardDemo = () => {
 	// Sample data to populate the component
@@ -21,11 +22,17 @@ const EmailClientCardDemo = () => {
 		timestamp: "Yesterday, 10:12 am",
 		message:
 			"Yes, they've introduced new APIs for smoother and more dynamic animations. The enhancements to the core animation framework will make it easier to create more engaging user experiences.",
-		reactions: ["😍", "❤️", "🔥", "⚡️", "👍"],
+		reactions: [
+			<Star className="h-4 w-4" key="star" />,
+			<Heart className="h-4 w-4" key="heart" />,
+			<Flame className="h-4 w-4" key="flame" />,
+			<Zap className="h-4 w-4" key="zap" />,
+			<ThumbsUp className="h-4 w-4" key="thumbsup" />,
+		],
 	};
 
-	const handleReaction = (reaction: string) => {
-		console.log(`Reacted with: ${reaction}`);
+	const handleReaction = (reaction: React.ReactNode, index: number) => {
+		console.log(`Reacted with reaction at index: ${index}`);
 		// Add logic to handle the reaction
 	};
 

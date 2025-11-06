@@ -111,7 +111,7 @@ export const FreelancerProfileCard = React.forwardRef<
         initial="initial"
         animate="animate"
         whileHover="hover"
-        {...props}
+        {...(props as any)}
       >
         {/* Banner Image */}
         <div className="h-32 w-full">

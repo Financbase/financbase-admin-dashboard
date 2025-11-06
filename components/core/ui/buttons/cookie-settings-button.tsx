@@ -10,7 +10,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import CookiePreferencesModal from "@/components/ui/cookie-preferences-modal";
+import { CookiePreferencesModal } from "@/components/ui/cookie-preferences-modal";
 import { useState } from "react";
 
 interface CookieSettingsButtonProps {
@@ -19,7 +19,7 @@ interface CookieSettingsButtonProps {
 	className?: string;
 }
 
-export default function CookieSettingsButton({
+export function CookieSettingsButton({
 	variant = "outline",
 	size = "sm",
 	className,

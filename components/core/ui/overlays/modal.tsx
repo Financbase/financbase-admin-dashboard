@@ -28,8 +28,8 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 	DrawerTrigger,
-} from "@/components/ui/drawer";
-import { useIsMobile } from "@/hooks/use-mobile";
+} from "@/components/core/ui/layout/drawer";
+import { useMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -59,7 +59,7 @@ const Modal = ({
 	drawerProps,
 	children,
 }: ModalProps) => {
-	const isMobile = useIsMobile();
+	const isMobile = useMobile();
 	const Component = isMobile ? Drawer : Dialog;
 	const props = isMobile ? drawerProps : dialogProps;
 

@@ -70,7 +70,7 @@ const stats = [
 
 export default function AdboardPage() {
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-50 to-purple-50">
 			{/* Hero Section */}
 			<section className="relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8">
 				<div className="max-w-7xl mx-auto">
@@ -78,10 +78,10 @@ export default function AdboardPage() {
 						<Badge className="mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
 							Campaign Management Platform
 						</Badge>
-						<h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+						<h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 drop-shadow-sm">
 							Adboard
 						</h1>
-						<p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+						<p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto font-medium">
 							Professional campaign management and advertising analytics platform. 
 							Optimize your ad spend, track performance, and maximize ROI across all channels.
 						</p>
@@ -118,10 +118,10 @@ export default function AdboardPage() {
 			<section className="py-20 px-4 sm:px-6 lg:px-8">
 				<div className="max-w-7xl mx-auto">
 					<div className="text-center mb-16">
-						<h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+						<h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 drop-shadow-sm">
 							Powerful Advertising Features
 						</h2>
-						<p className="text-xl text-gray-600 max-w-3xl mx-auto">
+						<p className="text-xl text-gray-700 max-w-3xl mx-auto font-medium">
 							Everything you need to manage successful advertising campaigns
 						</p>
 					</div>
@@ -151,10 +151,10 @@ export default function AdboardPage() {
 			<section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
 				<div className="max-w-7xl mx-auto">
 					<div className="text-center mb-16">
-						<h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+						<h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 drop-shadow-sm">
 							Connect All Your Ad Platforms
 						</h2>
-						<p className="text-xl text-gray-600 max-w-3xl mx-auto">
+						<p className="text-xl text-gray-700 max-w-3xl mx-auto font-medium">
 							Manage campaigns across all major advertising platforms from one dashboard
 						</p>
 					</div>

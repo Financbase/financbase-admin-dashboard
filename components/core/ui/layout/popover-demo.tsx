@@ -222,7 +222,7 @@ export default function SharePopoverDemo({
 							{error ? (
 								<>
 									<AlertCircle className="h-3 w-3 text-destructive" />
-									<span className="text-destructive">{error}</span>
+									<span className="text-destructive">{error.message || String(error)}</span>
 								</>
 							) : (
 								<>

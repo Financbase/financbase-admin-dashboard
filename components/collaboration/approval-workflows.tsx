@@ -154,10 +154,14 @@ export function ApprovalWorkflowManager({ workspaceId }: ApprovalWorkflowManager
 
 		try {
 			const request = await workspaceService.createApprovalRequest({
-				...newRequest,
+				title: newRequest.title,
+				description: newRequest.description,
+				priority: newRequest.priority,
+				dueDate: newRequest.dueDate ? new Date(newRequest.dueDate) : undefined,
 				workflowId: selectedWorkflowId || workflows[0]?.id || '',
 				workspaceId,
 				requestedBy: user.id,
+				status: 'pending',
 				metadata: {},
 			});
 

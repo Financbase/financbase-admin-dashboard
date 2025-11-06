@@ -20,7 +20,7 @@ test.describe('Expense Tracking E2E', () => {
     await page.waitForLoadState('networkidle');
     
     // Check for expense page elements
-    await expect(page.locator('text=/expense/i)).toBeVisible();
+    await expect(page.locator('text=/expense/i')).toBeVisible();
   });
 
   test('should display expense creation form', async ({ page }) => {
@@ -50,8 +50,8 @@ test.describe('Expense Tracking E2E', () => {
     // Wait for success message or redirect
     await page.waitForLoadState('networkidle');
     
-    // Check for success indicator
-    await expect(page.locator('text=/success|created/i)).toBeVisible({ timeout: 5000 });
+      // Check for success indicator
+    await expect(page.locator('text=/success|created/i')).toBeVisible({ timeout: 5000 });
   });
 
   test('should display expense list', async ({ page }) => {
@@ -75,7 +75,7 @@ test.describe('Expense Tracking E2E', () => {
     if (await approveButton.count() > 0) {
       await approveButton.first().click();
       await page.waitForTimeout(500);
-      await expect(page.locator('text=/approved/i)).toBeVisible({ timeout: 3000 });
+      await expect(page.locator('text=/approved/i')).toBeVisible({ timeout: 3000 });
     }
   });
 

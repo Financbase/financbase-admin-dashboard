@@ -44,6 +44,7 @@ import {
 	cardVariants,
 	fadeInUpVariants,
 	smoothTransition,
+	staggerContainerVariants,
 } from "@/lib/animations";
 
 // Note: This component requires 'framer-motion'.
@@ -86,6 +87,7 @@ const DashboardLayoutConfigurator: React.FC<
 	availableWidgets,
 	visibleWidgetIds,
 	onVisibilityChange,
+	onOrderChange,
 	onLayoutReset,
 	className,
 }) => {
@@ -245,7 +247,11 @@ const DashboardLayoutConfigurator: React.FC<
 									strategy={verticalListSortingStrategy}
 								>
 									<AnimatePresence initial={false}>
-										<StaggeredContainer delay={0.1}>
+										<StaggeredContainer
+											initial="hidden"
+											animate="visible"
+											variants={staggerContainerVariants}
+										>
 											{availableWidgets
 												.sort((a, b) => {
 													const aIndex = visibleWidgetIds.indexOf(a.id);
@@ -267,7 +273,11 @@ const DashboardLayoutConfigurator: React.FC<
 							</DndContext>
 						) : (
 							<AnimatePresence initial={false}>
-								<StaggeredContainer delay={0.1}>
+								<StaggeredContainer
+									initial="hidden"
+									animate="visible"
+									variants={staggerContainerVariants}
+								>
 									{availableWidgets.map((widget) => (
 										<motion.div
 											key={widget.id}

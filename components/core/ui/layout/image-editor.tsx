@@ -71,13 +71,13 @@ interface FilterPreset {
 
 const FILTER_PRESETS: FilterPreset[] = [
 	{ name: 'Original', brightness: 0, contrast: 0, saturation: 0, blur: 0 },
-	{ name: 'Vintage', brightness: -10, contrast: 20, saturation: -20, sepia: 30 },
-	{ name: 'Black & White', brightness: 0, contrast: 10, saturation: -100, grayscale: 100 },
-	{ name: 'Sepia', brightness: -5, contrast: 15, saturation: -10, sepia: 60 },
-	{ name: 'High Contrast', brightness: 0, contrast: 40, saturation: 0 },
+	{ name: 'Vintage', brightness: -10, contrast: 20, saturation: -20, sepia: 30, blur: 0 },
+	{ name: 'Black & White', brightness: 0, contrast: 10, saturation: -100, grayscale: 100, blur: 0 },
+	{ name: 'Sepia', brightness: -5, contrast: 15, saturation: -10, sepia: 60, blur: 0 },
+	{ name: 'High Contrast', brightness: 0, contrast: 40, saturation: 0, blur: 0 },
 	{ name: 'Soft Focus', brightness: 5, contrast: -10, saturation: 10, blur: 1 },
-	{ name: 'Vivid', brightness: 0, contrast: 20, saturation: 30 },
-	{ name: 'Matte', brightness: -5, contrast: 10, saturation: -15, grayscale: 20 },
+	{ name: 'Vivid', brightness: 0, contrast: 20, saturation: 30, blur: 0 },
+	{ name: 'Matte', brightness: -5, contrast: 10, saturation: -15, grayscale: 20, blur: 0 },
 ];
 
 export function ImageEditor({
@@ -262,7 +262,7 @@ export function ImageEditor({
 					setBlur(operation.params.previousBlur || 0);
 					break;
 				case 'crop':
-					setCropArea(operation.params.previousCrop);
+					setCropArea(null); // Reset crop on undo
 					break;
 			}
 
@@ -294,7 +294,7 @@ export function ImageEditor({
 					setBlur(operation.params.blur);
 					break;
 				case 'crop':
-					setCropArea(operation.params.crop);
+					setCropArea(operation.params); // Restore crop on redo
 					break;
 			}
 
@@ -647,16 +647,188 @@ export function ImageEditor({
 
 				{/* Crop Controls */}
 				{activeTool === 'crop' && (
-					<div className="p-4 border rounded-lg">
-						<p className="text-sm text-muted-foreground mb-3">
-							Crop functionality coming soon. Use rotation and flip tools for now.
-						</p>
+					<div className="p-4 border rounded-lg space-y-4">
+						<div>
+							<p className="text-sm font-medium mb-2">Crop Area</p>
+							<p className="text-xs text-muted-foreground mb-4">
+								Click and drag on the image to select crop area, or use the controls below.
+							</p>
+							<div className="grid grid-cols-2 gap-4">
+								<div className="space-y-2">
+									<label className="text-xs text-muted-foreground">X Position</label>
+									<Slider
+										value={[cropArea?.x || 0]}
+										onValueChange={([value]) => {
+											if (image && cropArea) {
+												setCropArea({
+													...cropArea,
+													x: Math.min(value, image.width - cropArea.width),
+												});
+											} else if (image) {
+												setCropArea({
+													x: value,
+													y: 0,
+													width: image.width - value,
+													height: image.height,
+												});
+											}
+										}}
+										min={0}
+										max={image ? image.width - (cropArea?.width || 100) : 100}
+										step={1}
+										className="w-full"
+									/>
+								</div>
+								<div className="space-y-2">
+									<label className="text-xs text-muted-foreground">Y Position</label>
+									<Slider
+										value={[cropArea?.y || 0]}
+										onValueChange={([value]) => {
+											if (image && cropArea) {
+												setCropArea({
+													...cropArea,
+													y: Math.min(value, image.height - cropArea.height),
+												});
+											} else if (image) {
+												setCropArea({
+													x: 0,
+													y: value,
+													width: image.width,
+													height: image.height - value,
+												});
+											}
+										}}
+										min={0}
+										max={image ? image.height - (cropArea?.height || 100) : 100}
+										step={1}
+										className="w-full"
+									/>
+								</div>
+								<div className="space-y-2">
+									<label className="text-xs text-muted-foreground">Width</label>
+									<Slider
+										value={[cropArea?.width || (image?.width || 100)]}
+										onValueChange={([value]) => {
+											if (image && cropArea) {
+												setCropArea({
+													...cropArea,
+													width: Math.min(value, image.width - cropArea.x),
+												});
+											} else if (image) {
+												setCropArea({
+													x: 0,
+													y: 0,
+													width: value,
+													height: image.height,
+												});
+											}
+										}}
+										min={10}
+										max={image ? image.width - (cropArea?.x || 0) : 100}
+										step={1}
+										className="w-full"
+									/>
+								</div>
+								<div className="space-y-2">
+									<label className="text-xs text-muted-foreground">Height</label>
+									<Slider
+										value={[cropArea?.height || (image?.height || 100)]}
+										onValueChange={([value]) => {
+											if (image && cropArea) {
+												setCropArea({
+													...cropArea,
+													height: Math.min(value, image.height - cropArea.y),
+												});
+											} else if (image) {
+												setCropArea({
+													x: 0,
+													y: 0,
+													width: image.width,
+													height: value,
+												});
+											}
+										}}
+										min={10}
+										max={image ? image.height - (cropArea?.y || 0) : 100}
+										step={1}
+										className="w-full"
+									/>
+								</div>
+							</div>
+						</div>
 						<div className="flex gap-2">
-							<Button variant="outline" size="sm" disabled>
+							<Button 
+								variant="default" 
+								size="sm"
+								onClick={() => {
+									if (image && cropArea) {
+										const previousCrop = null; // Store previous state for undo
+										addToHistory({
+											type: 'crop',
+											params: { ...cropArea, previousCrop },
+											timestamp: Date.now(),
+										});
+										// Apply crop by updating canvas size to crop dimensions
+										if (canvasRef.current && image) {
+											const canvas = canvasRef.current;
+											const ctx = canvas.getContext('2d');
+											if (ctx) {
+												canvas.width = cropArea.width;
+												canvas.height = cropArea.height;
+												ctx.drawImage(
+													image,
+													cropArea.x,
+													cropArea.y,
+													cropArea.width,
+													cropArea.height,
+													0,
+													0,
+													cropArea.width,
+													cropArea.height
+												);
+												// Update image reference to cropped version
+												const croppedImage = new Image();
+												croppedImage.src = canvas.toDataURL();
+												croppedImage.onload = () => {
+													setImage(croppedImage);
+													setOriginalImage(croppedImage);
+													setCropArea(null);
+													applyEdits();
+												};
+											}
+										}
+										toast.success('Crop applied');
+									}
+								}}
+								disabled={!cropArea || !image}
+							>
 								Apply Crop
 							</Button>
-							<Button variant="outline" size="sm" onClick={() => setActiveTool(null)}>
+							<Button 
+								variant="outline" 
+								size="sm"
+								onClick={() => {
+									setCropArea(null);
+									setActiveTool(null);
+								}}
+							>
 								Cancel
+							</Button>
+							<Button 
+								variant="outline" 
+								size="sm"
+								onClick={() => {
+									if (image) {
+										setCropArea({
+											x: 0,
+											y: 0,
+											width: image.width,
+											height: image.height,
+										});
+									}
+								}}
+							>
+								Reset
 							</Button>
 						</div>
 					</div>

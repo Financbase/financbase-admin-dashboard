@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Plus, Download, Filter, CheckCircle, Clock, XCircle, Loader2, CreditCard, Building, DollarSign, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface PaymentMethod {
 	id: string;
@@ -482,7 +483,13 @@ export default function PaymentsPage() {
 											</div>
 										</td>
 										<td className="p-4">
-											<Button variant="ghost" size="sm">View</Button>
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => toast.info('Viewing payment details')}
+											>
+												View
+											</Button>
 										</td>
 									</tr>
 								))

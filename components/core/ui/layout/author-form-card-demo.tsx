@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { AuthorFormCard } from "@/components/ui/author-form-card";
+import { AuthorFormCard } from "@/components/core/ui/layout/author-form-card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { type Author, useAuthors } from "@/hooks/use-authors";
@@ -108,75 +108,12 @@ export default function AuthorFormCardDemo() {
 		}
 	};
 
-	const handleFormSubmit = async (data: {
-		name: string;
-		title?: string;
-		email?: string;
-		bio?: string;
-		avatar?: string;
-		website?: string;
-		status?: string;
-		isFeatured?: boolean;
-	}) => {
-		try {
-			if (editingAuthor) {
-				// Update existing author
-				const result = await updateAuthor(editingAuthor.id, data);
-				if (result.success) {
-					setEditingAuthor(null);
-					setIsOpen(false);
-					// Refresh authors list
-					const refreshResult = await getAuthors({ limit: 10 });
-					if (refreshResult.success && refreshResult.data) {
-						setAuthors(refreshResult.data.authors || []);
-					}
-				}
-			} else {
-				// Create new author
-				const result = await createAuthor(data);
-				if (result.success) {
-					setIsOpen(false);
-					// Refresh authors list
-					const refreshResult = await getAuthors({ limit: 10 });
-					if (refreshResult.success && refreshResult.data) {
-						setAuthors(refreshResult.data.authors || []);
-					}
-				}
-			}
-		} catch (err) {
-			console.error("Error saving author:", err);
-		}
-	};
-
-	const handleCancel = () => {
-		setEditingAuthor(null);
-		setIsOpen(false);
-	};
-
-	const handleEdit = (author: Author) => {
-		setEditingAuthor(author);
-		setIsOpen(true);
-	};
-
-	const handleDelete = async (authorId: string) => {
-		if (confirm("Are you sure you want to delete this author?")) {
-			const result = await useAuthors().deleteAuthor(authorId);
-			if (result.success) {
-				// Refresh authors list
-				const refreshResult = await getAuthors({ limit: 10 });
-				if (refreshResult.success && refreshResult.data) {
-					setAuthors(refreshResult.data.authors || []);
-				}
-			}
-		}
-	};
-
 	// Example of initial data for an "edit" scenario
 	const existingAuthor = editingAuthor
 		? {
 				id: editingAuthor.id,
 				name: editingAuthor.name,
-				title: editingAuthor.title,
+				title: editingAuthor.title || "",
 				email: editingAuthor.email,
 				bio: editingAuthor.bio,
 				avatar: editingAuthor.avatar,

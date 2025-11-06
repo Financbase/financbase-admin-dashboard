@@ -78,7 +78,7 @@ export function ArticleViewer({ article, onBack, onRelatedArticle }: ArticleView
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['helpArticles']);
+      queryClient.invalidateQueries({ queryKey: ['helpArticles'] });
       setShowFeedback(false);
       setFeedbackComment('');
       setFeedbackRating(null);

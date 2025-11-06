@@ -7,9 +7,9 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import ExampleUsage from "@/components/ui/dashboard-activities";
+import { DashboardActivities } from "@/components/ui/dashboard-activities";
 import { LayoutDashboard } from "lucide-react";
 
 export default function DemoOne() {
-	return <ExampleUsage />;
+	return <DashboardActivities />;
 }

@@ -34,6 +34,86 @@ const createProjectSchema = z.object({
 	notes: z.string().optional(),
 });
 
+/**
+ * @swagger
+ * /api/projects:
+ *   get:
+ *     summary: Get list of projects
+ *     description: Retrieves a paginated list of projects with optional filtering by status, priority, and client
+ *     tags:
+ *       - Workflows
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Number of items per page
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for project name or description
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [planning, active, on_hold, completed, cancelled]
+ *         description: Filter projects by status
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [low, medium, high, urgent]
+ *         description: Filter projects by priority
+ *       - in: query
+ *         name: clientId
+ *         schema:
+ *           type: string
+ *         description: Filter projects by client ID
+ *     responses:
+ *       200:
+ *         description: Projects retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         example: Website Redesign
+ *                       status:
+ *                         type: string
+ *                         enum: [planning, active, on_hold, completed, cancelled]
+ *                       priority:
+ *                         type: string
+ *                         enum: [low, medium, high, urgent]
+ *                       budget:
+ *                         type: number
+ *                         example: 50000.00
+ *                 pagination:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(request: NextRequest) {
 	const requestId = generateRequestId();
 	try {
@@ -65,6 +145,91 @@ export async function GET(request: NextRequest) {
 	}
 }
 
+/**
+ * @swagger
+ * /api/projects:
+ *   post:
+ *     summary: Create a new project
+ *     description: Creates a new project for time tracking, billing, and task management
+ *     tags:
+ *       - Workflows
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Website Redesign Project
+ *               description:
+ *                 type: string
+ *                 example: Complete redesign of company website
+ *               clientId:
+ *                 type: string
+ *                 example: client_123
+ *               status:
+ *                 type: string
+ *                 enum: [planning, active, on_hold, completed, cancelled]
+ *                 default: planning
+ *               priority:
+ *                 type: string
+ *                 enum: [low, medium, high, urgent]
+ *                 default: medium
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               dueDate:
+ *                 type: string
+ *                 format: date-time
+ *               budget:
+ *                 type: number
+ *                 example: 50000.00
+ *               hourlyRate:
+ *                 type: number
+ *                 example: 150.00
+ *               currency:
+ *                 type: string
+ *                 default: USD
+ *               isBillable:
+ *                 type: boolean
+ *                 default: true
+ *               estimatedHours:
+ *                 type: number
+ *                 example: 200
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: [web-design, frontend, backend]
+ *     responses:
+ *       201:
+ *         description: Project created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 project:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     name:
+ *                       type: string
+ *       400:
+ *         description: Bad request - Invalid input data
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(request: NextRequest) {
 	const requestId = generateRequestId();
 	try {

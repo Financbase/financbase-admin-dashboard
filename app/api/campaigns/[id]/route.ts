@@ -13,6 +13,7 @@ import { auth } from '@clerk/nextjs/server';
 import { AdboardService } from '@/lib/services/adboard-service';
 import { z } from 'zod';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { getCurrentUserId } from '@/lib/api/with-rls';
 
 const updateCampaignSchema = z.object({
 	name: z.string().min(1).optional(),
@@ -48,12 +49,18 @@ export async function GET(
 	const requestId = generateRequestId();
 	const { id } = await params;
 	try {
-		const { userId } = await auth();
-		if (!userId) {
+		const { userId: clerkId } = await auth();
+		if (!clerkId) {
 			return ApiErrorHandler.unauthorized();
 		}
 
-		const campaign = await AdboardService.getCampaignById(id, userId);
+		// Convert Clerk ID to database user ID (UUID)
+		const dbUserId = await getCurrentUserId();
+		if (!dbUserId) {
+			return ApiErrorHandler.badRequest('User not found in database');
+		}
+
+		const campaign = await AdboardService.getCampaignById(id, dbUserId);
 
 		if (!campaign) {
 			return ApiErrorHandler.notFound('Campaign not found');
@@ -72,9 +79,15 @@ export async function PUT(
 	const requestId = generateRequestId();
 	const { id } = await params;
 	try {
-		const { userId } = await auth();
-		if (!userId) {
+		const { userId: clerkId } = await auth();
+		if (!clerkId) {
 			return ApiErrorHandler.unauthorized();
+		}
+
+		// Convert Clerk ID to database user ID (UUID)
+		const dbUserId = await getCurrentUserId();
+		if (!dbUserId) {
+			return ApiErrorHandler.badRequest('User not found in database');
 		}
 
 		let body;
@@ -88,7 +101,7 @@ export async function PUT(
 		if (action === 'update_metrics') {
 			// Update campaign metrics
 			const validatedData = updateMetricsSchema.parse(body);
-			const campaign = await AdboardService.updateCampaignMetrics(id, userId, validatedData);
+			const campaign = await AdboardService.updateCampaignMetrics(id, dbUserId, validatedData);
 			return NextResponse.json({ campaign });
 		} else {
 			// Update campaign details
@@ -101,7 +114,7 @@ export async function PUT(
 				endDate: validatedData.endDate ? new Date(validatedData.endDate) : undefined,
 			};
 
-			const campaign = await AdboardService.updateCampaign(id, userId, processedData);
+			const campaign = await AdboardService.updateCampaign(id, dbUserId, processedData);
 			return NextResponse.json({ campaign });
 		}
 	} catch (error) {
@@ -116,12 +129,18 @@ export async function DELETE(
 	const requestId = generateRequestId();
 	const { id } = await params;
 	try {
-		const { userId } = await auth();
-		if (!userId) {
+		const { userId: clerkId } = await auth();
+		if (!clerkId) {
 			return ApiErrorHandler.unauthorized();
 		}
 
-		const campaign = await AdboardService.getCampaignById(id, userId);
+		// Convert Clerk ID to database user ID (UUID)
+		const dbUserId = await getCurrentUserId();
+		if (!dbUserId) {
+			return ApiErrorHandler.badRequest('User not found in database');
+		}
+
+		const campaign = await AdboardService.getCampaignById(id, dbUserId);
 
 		if (!campaign) {
 			return ApiErrorHandler.notFound('Campaign not found');
@@ -129,7 +148,7 @@ export async function DELETE(
 
 		// Update campaign status to cancelled (soft delete)
 		// In production, you might want to implement soft delete with a deleted_at field
-		await AdboardService.updateCampaign(id, userId, {
+		await AdboardService.updateCampaign(id, dbUserId, {
 			status: 'cancelled',
 		});
 

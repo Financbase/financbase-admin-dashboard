@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { ActionSearchBar } from "@/components/ui/action-search-bar";
+import { ActionSearchBar } from "@/components/core/ui/layout/action-search-bar";
 import {
 	AudioLines,
 	BarChart2,

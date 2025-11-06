@@ -158,12 +158,12 @@ export default function WorkflowsHelpPage() {
 						<h2 className="text-2xl font-semibold mb-6">Quick Actions</h2>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<Button asChild variant="outline" className="justify-start h-auto py-4">
-								<Link href="/workflows">
+								<Link href="/auth/sign-up">
 									<Workflow className="h-4 w-4 mr-2" />
 									<div className="text-left">
-										<div className="font-semibold">Manage Workflows</div>
+										<div className="font-semibold">Get Started</div>
 										<div className="text-xs text-muted-foreground">
-											Create and manage your workflows
+											Create your account to manage workflows
 										</div>
 									</div>
 									<ArrowRight className="h-4 w-4 ml-auto" />

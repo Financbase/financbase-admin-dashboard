@@ -11,8 +11,10 @@
 // Server-side email sending is handled in API routes
 
 export async function sendNotificationEmail(userId: string, notification: any) {
-	// Placeholder function - in production, this would send actual emails
-	console.log('Sending notification email to user:', userId, notification);
+	// This function is a template helper - actual email sending is handled by EmailService
+	// in lib/email/service.ts using Resend API
+	// For server-side email sending, use: EmailService.sendEmail()
+	console.log('Email template prepared for user:', userId, notification);
 	return true;
 }
 

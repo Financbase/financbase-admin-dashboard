@@ -127,7 +127,7 @@ export function DataTable<T extends Record<string, unknown>>({
 						) : (
 							data.map((item, index) => (
 								<tr
-									key={item.id || `row-${index}`}
+									key={(item.id as string | number | undefined) || `row-${index}`}
 									className="border-b hover:bg-muted/50"
 								>
 									{columns.map((column) => (

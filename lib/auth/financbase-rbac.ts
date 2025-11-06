@@ -16,6 +16,7 @@
 import { auth } from '@clerk/nextjs/server';
 import type { FinancbaseUserMetadata, FinancialPermission } from '@/types/auth';
 import { FINANCIAL_PERMISSIONS } from '@/types/auth';
+import { canAccessRoute as canAccessRouteConfig, getRoutePermissions } from '@/lib/config/navigation-permissions';
 
 /**
  * Check if the current user has a specific permission
@@ -110,27 +111,64 @@ export async function checkFinancialAccess(
 
 /**
  * Check permissions for a specific route
+ * Uses the comprehensive navigation permissions configuration
+ * 
+ * @param pathname - The route pathname to check
+ * @param authResult - Optional auth result from middleware (to avoid calling auth() again)
  */
-export async function checkRoutePermissions(pathname: string): Promise<boolean> {
-	const routePermissions: Record<string, FinancialPermission[]> = {
-		'/dashboard/invoices': [FINANCIAL_PERMISSIONS.INVOICES_VIEW],
-		'/dashboard/invoices/new': [FINANCIAL_PERMISSIONS.INVOICES_CREATE],
-		'/dashboard/expenses': [FINANCIAL_PERMISSIONS.EXPENSES_VIEW],
-		'/dashboard/expenses/new': [FINANCIAL_PERMISSIONS.EXPENSES_CREATE],
-		'/dashboard/reports': [FINANCIAL_PERMISSIONS.REPORTS_VIEW],
-		'/settings/roles': [FINANCIAL_PERMISSIONS.ROLES_MANAGE],
-		'/settings/team': [FINANCIAL_PERMISSIONS.USERS_MANAGE],
-	};
-
-	// Find matching route pattern
-	for (const [route, permissions] of Object.entries(routePermissions)) {
-		if (pathname.startsWith(route)) {
-			return checkAnyPermission(permissions);
+export async function checkRoutePermissions(
+	pathname: string,
+	authResult?: Awaited<ReturnType<typeof auth>>
+): Promise<boolean> {
+	try {
+		// Use provided auth result if available (from middleware), otherwise call auth()
+		const authData = authResult || await auth();
+		const { userId, sessionClaims } = authData;
+		
+		if (!userId) {
+			return false;
 		}
+
+		// Get user metadata from Clerk session claims
+		const metadata = sessionClaims?.publicMetadata as FinancbaseUserMetadata | undefined;
+
+		if (!metadata) {
+			return false;
+		}
+
+		const userRole = metadata.role ?? null;
+		const userPermissions = (metadata.permissions ?? []) as FinancialPermission[];
+
+		// Use the navigation permissions configuration
+		return canAccessRouteConfig(pathname, userRole, userPermissions);
+	} catch (error) {
+		console.error('Error checking route permissions:', error);
+		return false;
+	}
+}
+
+/**
+ * Get required permissions for a route
+ */
+export function getRouteRequiredPermissions(pathname: string): FinancialPermission[] {
+	return getRoutePermissions(pathname);
+}
+
+/**
+ * Check if user can access a route based on role and permissions
+ * Server-side version that works with auth context
+ */
+export async function canAccessRoute(
+	pathname: string,
+	userRole: FinancbaseUserMetadata['role'] | null,
+	userPermissions: FinancialPermission[]
+): Promise<boolean> {
+	// Admin has access to everything
+	if (userRole === 'admin') {
+		return true;
 	}
 
-	// Default: allow access if no specific permissions required
-	return true;
+	return canAccessRouteConfig(pathname, userRole, userPermissions);
 }
 
 /**

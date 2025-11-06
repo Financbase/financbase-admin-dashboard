@@ -23,7 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle } from "lucide-react";
 import { useState } from "react";
-import StatisticsCard5 from "./statistics-card-5";
+import { StatisticsCard5 } from "@/components/ui/statistics-card-5";
 
 // Sample data for different scenarios
 const demoScenarios = {
@@ -265,7 +265,7 @@ export default function StatisticsCardDemo() {
 										</span>
 										<Badge
 											variant={
-												currentData.delta >= 0 ? "success" : "destructive"
+												currentData.delta >= 0 ? "default" : "destructive"
 											}
 											className="text-xs"
 										>

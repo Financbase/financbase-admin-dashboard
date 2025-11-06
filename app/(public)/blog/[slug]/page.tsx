@@ -17,10 +17,9 @@ import {
 	Calendar,
 	Eye,
 	Heart,
-	Share2,
-	User,
 } from "lucide-react";
 import * as blogService from "@/lib/services/blog/blog-service";
+import { BlogPostActions } from "./blog-post-actions";
 
 interface BlogPost {
 	id: number;
@@ -168,25 +167,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
 				{/* Post Footer */}
 				<footer className="border-t pt-8">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-4">
-							<Button variant="outline" size="sm">
-								<Heart className="h-4 w-4 mr-2" />
-								Like ({post.likeCount})
-							</Button>
-							<Button variant="outline" size="sm">
-								<Share2 className="h-4 w-4 mr-2" />
-								Share
-							</Button>
-						</div>
-					</div>
+					<BlogPostActions postId={post.id} initialLikeCount={post.likeCount} slug={post.slug} title={post.title} />
 				</footer>
 			</article>
 
-			{/* Related Posts Section (placeholder for future implementation) */}
+			{/* Related Posts Section */}
 			<section className="max-w-6xl mx-auto px-6 py-12 border-t">
 				<div className="text-center">
 					<h2 className="text-2xl font-bold mb-4">More Articles</h2>
+					<p className="text-muted-foreground mb-6">
+						Explore more content from our blog
+					</p>
 					<Link href="/blog">
 						<Button variant="outline">View All Posts</Button>
 					</Link>

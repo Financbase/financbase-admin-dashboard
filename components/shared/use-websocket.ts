@@ -77,9 +77,7 @@ export interface UseWebSocketReturn {
  */
 export function useWebSocket(
 	ticketId: string | null,
-	options: UseWebSocketOptions = {
-		// TODO: Implement logic
-	},
+	options: UseWebSocketOptions = {},
 ): UseWebSocketReturn {
 	const {
 		enabled = true,
@@ -108,8 +106,9 @@ export function useWebSocket(
 		(ticketId: string, token: string): string => {
 			const isDev = process.env.NODE_ENV === "development";
 			const baseUrl = isDev
-				? "ws://localhost:8787"
-				: "wss://financbase-websocket.tight-queen-09af.workers.dev";
+				? process.env.NEXT_PUBLIC_WEBSOCKET_URL_DEV || "ws://localhost:8787"
+				: process.env.NEXT_PUBLIC_CLOUDFLARE_WEBSOCKET_URL ||
+					"wss://financbase-websocket.tight-queen-09af.workers.dev";
 
 			return `${baseUrl}/ws?ticketId=${ticketId}&token=${token}`;
 		},
@@ -181,22 +180,23 @@ export function useWebSocket(
 						case "user_joined":
 							if (message.userId) {
 								setActiveUsers(
-									(prev) => new Set(Array.from(prev).concat(message.userId)),
+									(prev) => new Set(Array.from(prev).concat(message.userId as string)),
 								);
 							}
 							break;
 
 						case "user_left":
 							if (message.userId) {
+								const userIdToRemove = message.userId;
 								setActiveUsers((prev) => {
 									const next = new Set(prev);
-									next.delete(message.userId);
+									next.delete(userIdToRemove);
 									return next;
 								});
 								// Clear typing indicator if user left
 								setTypingUsers((prev) => {
 									const next = new Set(prev);
-									next.delete(message.userId);
+									next.delete(userIdToRemove);
 									return next;
 								});
 							}
@@ -204,9 +204,10 @@ export function useWebSocket(
 
 						case "typing":
 							if (message.userId && message.userId !== userId) {
+								const typingUserId = message.userId;
 								// Clear existing timeout for this user
 								const existingTimeout = typingTimeouts.current.get(
-									message.userId,
+									typingUserId,
 								);
 								if (existingTimeout) {
 									clearTimeout(existingTimeout);
@@ -215,28 +216,28 @@ export function useWebSocket(
 								if (message.isTyping) {
 									// Add to typing users
 									setTypingUsers(
-										(prev) => new Set(Array.from(prev).concat(message.userId)),
+										(prev) => new Set(Array.from(prev).concat(typingUserId)),
 									);
 
 									// Auto-clear after 3 seconds
 									const timeout = setTimeout(() => {
 										setTypingUsers((prev) => {
 											const next = new Set(prev);
-											next.delete(message.userId);
+											next.delete(typingUserId);
 											return next;
 										});
-										typingTimeouts.current.delete(message.userId);
+										typingTimeouts.current.delete(typingUserId);
 									}, 3000);
 
-									typingTimeouts.current.set(message.userId, timeout);
+									typingTimeouts.current.set(typingUserId, timeout);
 								} else {
 									// Remove from typing users
 									setTypingUsers((prev) => {
 										const next = new Set(prev);
-										next.delete(message.userId);
+										next.delete(typingUserId);
 										return next;
 									});
-									typingTimeouts.current.delete(message.userId);
+									typingTimeouts.current.delete(typingUserId);
 								}
 							}
 							break;
@@ -246,8 +247,23 @@ export function useWebSocket(
 							break;
 						}
 					}
-				} catch (_error) {
-					// TODO: Implement logic
+				} catch (error) {
+					// Handle message parsing errors
+					console.error('Error parsing WebSocket message:', error);
+					setError(new Error('Failed to parse message from server'));
+					
+					// Send error acknowledgment to server if connection is still open
+					if (ws.current?.readyState === WebSocket.OPEN) {
+						try {
+							ws.current.send(JSON.stringify({
+								type: 'error',
+								message: 'Failed to parse message',
+								timestamp: Date.now(),
+							}));
+						} catch (sendError) {
+							console.error('Error sending error acknowledgment:', sendError);
+						}
+					}
 				}
 			};
 
@@ -336,8 +352,17 @@ export function useWebSocket(
 
 			try {
 				ws.current.send(JSON.stringify(fullMessage));
-			} catch (_error) {
-				// TODO: Implement logic
+			} catch (error) {
+				// Handle send errors (e.g., connection closed, message too large)
+				console.error('Error sending WebSocket message:', error);
+				setError(new Error('Failed to send message. Connection may be closed.'));
+				
+				// If send fails, the connection is likely closed
+				// Attempt to reconnect if auto-reconnect is enabled
+				if (ws.current) {
+					setIsConnected(false);
+					ws.current = null;
+				}
 			}
 		},
 		[],
@@ -360,7 +385,7 @@ export function useWebSocket(
 		return () => {
 			disconnect();
 			// Clear all typing timeouts
-			for (const timeout of typingTimeouts.current) {
+			for (const timeout of typingTimeouts.current.values()) {
 				clearTimeout(timeout);
 			}
 			typingTimeouts.current.clear();

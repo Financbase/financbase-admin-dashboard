@@ -12,6 +12,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { marketplacePlugins } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(
   request: NextRequest,

@@ -44,7 +44,7 @@ interface WorkspaceContextValue<T extends WorkspaceInterface> {
 	getWorkspaceId: (workspace: T) => string;
 	getWorkspaceName: (workspace: T) => string;
 	loading: boolean;
-	error: string | null;
+	error: Error | null;
 	createWorkspace?: (data: {
 		name: string;
 		slug: string;
@@ -400,7 +400,7 @@ function WorkspaceContent({
 				<div className="p-4">
 					<div className="flex items-center gap-2 text-sm text-destructive">
 						<XCircle className="h-4 w-4" />
-						<span>{error}</span>
+						<span>{error?.message || String(error)}</span>
 					</div>
 				</div>
 			</PopoverContent>

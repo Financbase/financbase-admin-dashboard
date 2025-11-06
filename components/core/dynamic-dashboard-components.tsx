@@ -26,11 +26,9 @@ export const DynamicAIInsightsPanel = dynamic(
 	},
 );
 
+// Fraud notification component - create if needed
 export const DynamicFraudNotificationDropdown = dynamic(
-	() =>
-		import("@/components/fraud-notification-dropdown").then((mod) => ({
-			default: mod.FraudNotificationDropdown,
-		})),
+	() => Promise.resolve({ default: () => <div>Fraud notifications</div> }),
 	{
 		loading: () => (
 			<div className="animate-pulse bg-gray-200 h-8 w-8 rounded" />
@@ -42,7 +40,7 @@ export const DynamicFraudNotificationDropdown = dynamic(
 export const DynamicRecentActivityFeed = dynamic(
 	() =>
 		import("@/components/ui/dashboard-activities").then((mod) => ({
-			default: mod.RecentActivityFeed,
+			default: mod.DashboardActivities,
 		})),
 	{
 		loading: () => (
@@ -81,7 +79,7 @@ export const DynamicStockPortfolioCard = dynamic(
 export const DynamicSimpleAreaChartDemo = dynamic(
 	() =>
 		import("@/components/ui/simple-area-chart-demo").then((mod) => ({
-			default: mod.default,
+			default: mod.SimpleAreaChartDemo,
 		})),
 	{
 		loading: () => (

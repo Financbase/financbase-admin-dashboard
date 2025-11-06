@@ -25,6 +25,14 @@ module.exports = {
 			"2xl": "1536px",
 		},
 		extend: {
+			// Note: Tailwind's default spacing scale already uses 4px increments
+			// CSS variables are available for direct use: --spacing-1 through --spacing-16
+			boxShadow: {
+				// Two-part realistic shadow system
+				"card": "var(--shadow-card)",
+				"elevated": "var(--shadow-elevated)",
+				"floating": "var(--shadow-floating)",
+			},
 			colors: {
 				border: "oklch(var(--border))",
 				input: "oklch(var(--input))",
@@ -106,6 +114,12 @@ module.exports = {
 				md: "calc(var(--radius) - 2px)",
 				sm: "calc(var(--radius) - 4px)",
 			},
+			lineHeight: {
+				tight: "var(--line-height-tight)",
+				normal: "var(--line-height-normal)",
+				relaxed: "var(--line-height-relaxed)",
+				loose: "var(--line-height-loose)",
+			},
 			keyframes: {
 				"accordion-down": {
 					from: { height: "0" },
@@ -115,10 +129,15 @@ module.exports = {
 					from: { height: "var(--radix-accordion-content-height)" },
 					to: { height: "0" },
 				},
+				"scaleUp": {
+					from: { opacity: "0", transform: "scale(0.95)" },
+					to: { opacity: "1", transform: "scale(1)" },
+				},
 			},
 			animation: {
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
+				"scaleUp": "scaleUp 0.3s ease-out forwards",
 			},
 		},
 	},

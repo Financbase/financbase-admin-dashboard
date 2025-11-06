@@ -7,14 +7,13 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { Component } from "@/components/ui/notifications-menu";
-import { Menu } from "lucide-react";
+import { NotificationsMenu } from "@/components/ui/notifications-menu";
 
 export default function NotificationsDemo() {
 	return (
 		<div className="p-8 bg-background">
 			<div className="max-w-md mx-auto">
-				<Component />
+				<NotificationsMenu />
 			</div>
 		</div>
 	);

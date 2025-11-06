@@ -20,7 +20,7 @@ import {
 	Construction,
 	Key,
 	LayoutDashboard,
-	Link,
+	Link as LinkIcon,
 	Link2,
 } from "lucide-react";
 import Link from "next/link";

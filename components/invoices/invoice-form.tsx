@@ -29,6 +29,7 @@ import {
 	X,
 	Calculator
 } from 'lucide-react';
+import { toast } from '@/lib/toast';
 import { Separator } from '@/components/ui/separator';
 import {
 	Select,

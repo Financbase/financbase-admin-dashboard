@@ -155,7 +155,7 @@ export default function APIDocumentationPage() {
 					</p>
 					<div className="flex flex-col sm:flex-row gap-4 justify-center">
 							<Button size="lg" className="text-lg px-8" asChild>
-								<Link href="/developer">
+								<Link href="/auth/sign-up">
 							Get API Key
 							<ArrowRight className="ml-2 h-5 w-5" />
 								</Link>
@@ -294,7 +294,7 @@ export default function APIDocumentationPage() {
 										className="text-lg px-8 bg-white text-primary hover:bg-white/90 border-white" 
 										asChild
 									>
-										<Link href="/developer">
+										<Link href="/auth/sign-up">
 											Get Your API Key
 										</Link>
 									</Button>

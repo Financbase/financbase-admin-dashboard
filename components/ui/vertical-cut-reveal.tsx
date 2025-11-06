@@ -9,7 +9,7 @@
 
 "use client";
 
-import { motion, type Variants } from "framer-motion";
+import { motion, type Variants, type Transition } from "framer-motion";
 import { type ReactNode } from "react";
 
 interface VerticalCutRevealProps {
@@ -19,7 +19,7 @@ interface VerticalCutRevealProps {
   staggerFrom?: "first" | "last";
   reverse?: boolean;
   containerClassName?: string;
-  transition?: Variants["visible"];
+  transition?: Transition;
 }
 
 export const VerticalCutReveal = ({

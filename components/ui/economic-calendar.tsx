@@ -11,7 +11,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export function EconomicCalendar() {
+interface EconomicCalendarProps {
+	title?: string;
+	limit?: number;
+	country?: string;
+	impact?: string;
+}
+
+export function EconomicCalendar({ title = "Economic Calendar", limit = 20, country = "US", impact = "high" }: EconomicCalendarProps = {}) {
   const events = [
     { date: "2024-01-15", event: "GDP Release", impact: "High" },
     { date: "2024-01-16", event: "Inflation Data", impact: "Medium" },

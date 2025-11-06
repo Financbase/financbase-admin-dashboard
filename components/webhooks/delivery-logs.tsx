@@ -20,6 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow, format } from 'date-fns';
+import { Label } from '@/components/ui/label';
 import { 
   Search, 
   RefreshCw, 
@@ -43,6 +44,7 @@ interface WebhookDelivery {
   httpStatus?: number;
   responseBody?: string;
   responseHeaders?: Record<string, string>;
+  payload?: any;
   attemptCount: number;
   maxAttempts: number;
   nextRetryAt?: string;
@@ -63,7 +65,7 @@ interface DeliveryLogsProps {
 export function DeliveryLogs({ webhookId, onViewDelivery, onRetryDelivery }: DeliveryLogsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedDelivery, setSelectedDelivery] = useState<WebflowDelivery | null>(null);
+  const [selectedDelivery, setSelectedDelivery] = useState<WebhookDelivery | null>(null);
 
   const { data: deliveries = [], isLoading, refetch } = useQuery({
     queryKey: ['webhookDeliveries', webhookId, searchTerm, statusFilter],
@@ -378,7 +380,7 @@ export function DeliveryLogs({ webhookId, onViewDelivery, onRetryDelivery }: Del
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Webhook Payload</Label>
                   <pre className="bg-muted p-3 rounded-lg text-xs overflow-x-auto">
-                    {JSON.stringify(selectedDelivery.payload, null, 2)}
+                    {selectedDelivery.payload ? JSON.stringify(selectedDelivery.payload, null, 2) : 'No payload data'}
                   </pre>
                 </div>
               </TabsContent>

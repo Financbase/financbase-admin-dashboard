@@ -21,6 +21,7 @@ export * from "./organizations.schema";
 // Financial entities
 export * from "./invoices.schema";
 export * from "./expenses.schema";
+export * from "./budgets.schema";
 export * from "./clients.schema";
 export * from "./transactions.schema";
 export * from "./accounts.schema";
@@ -131,3 +132,20 @@ export * from "./feature-flags.schema";
 
 // Blog CMS System
 export * from "./blog.schema";
+
+// Business Entities
+export * from "./employees.schema";
+export * from "./orders.schema";
+export * from "./products.schema";
+
+// HR & People Management
+export * from "./hr-contractors.schema";
+export * from "./payroll.schema";
+export * from "./leave-management.schema";
+export * from "./attendance.schema";
+
+// Communication
+export * from "./chat.schema";
+
+// Gallery
+export * from "./gallery.schema";

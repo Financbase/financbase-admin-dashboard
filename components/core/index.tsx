@@ -10,7 +10,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,11 +44,13 @@ import { useDashboardLayout } from "@/hooks/use-dashboard-layout";
 import { SortableWidgetItem } from "./widget-sortable-item";
 import { WidgetLibraryPanel } from "./widget-library-panel";
 import { cn } from "@/lib/utils";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
 
 export default function DashboardContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isEditMode, setIsEditMode] = useState(false)
   const [showWidgetLibrary, setShowWidgetLibrary] = useState(false)
+  const { role, permissions } = useUserPermissions()
   const {
     visibleWidgets,
     availableWidgets,
@@ -57,7 +59,24 @@ export default function DashboardContent() {
     updateWidgetSize,
     addWidget,
     removeWidget,
-  } = useDashboardLayout()
+  } = useDashboardLayout({
+    userRole: role,
+    userPermissions: permissions,
+  })
+
+  // Configure sensors for drag and drop
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8, // Require 8px of movement before drag starts
+    },
+  });
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 250, // 250ms delay before drag starts on touch
+      tolerance: 8, // 8px movement tolerance
+    },
+  });
+  const sensors = useSensors(pointerSensor, touchSensor);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -66,6 +85,8 @@ export default function DashboardContent() {
   }
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
+    if (!isEditMode) return; // Prevent dragging when not in edit mode
+    
     const { active, over } = event;
     
     if (over && active.id !== over.id) {
@@ -79,7 +100,7 @@ export default function DashboardContent() {
         reorderWidgets(newOrder);
       }
     }
-  }, [layout.widgetOrder, reorderWidgets]);
+  }, [layout.widgetOrder, reorderWidgets, isEditMode]);
 
 	return (
     <div className="space-y-6 w-full">
@@ -175,12 +196,17 @@ export default function DashboardContent() {
             )}
           </div>
         ) : (
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext 
+          sensors={sensors}
+          collisionDetection={closestCenter} 
+          onDragEnd={handleDragEnd}
+        >
           <SortableContext
             items={visibleWidgets.map(w => w.id)}
             strategy={rectSortingStrategy}
+            disabled={!isEditMode}
           >
-            <BentoGrid>
+            <BentoGrid columns={12}>
               {visibleWidgets.map((widget) => {
                 const WidgetComponent = widget.component;
                 const widgetSize = layout.widgetSizes[widget.id] || {
@@ -279,7 +305,7 @@ export default function DashboardContent() {
                     onResize={(newColSpan, newRowSpan) =>
                       updateWidgetSize(widget.id, newColSpan, newRowSpan)
                     }
-                      onRemove={removeWidget}
+                    onRemove={removeWidget}
                   >
                     <WidgetComponent />
                   </SortableWidgetItem>

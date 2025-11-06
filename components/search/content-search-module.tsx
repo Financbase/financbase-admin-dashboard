@@ -56,6 +56,9 @@ interface SearchFilters {
   categories?: string[];
   dateFrom?: Date;
   dateTo?: Date;
+  limit?: number;
+  offset?: number;
+  tags?: string[];
 }
 
 const entityTypeIcons = {
@@ -417,7 +420,7 @@ export function ContentSearchModule() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {searchResults.results.map((result, index) => (
+                    {searchResults.results.map((result: any, index: number) => (
                       <div
                         key={`${result.entityType}-${result.entityId}-${result.title}`}
                         className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
@@ -501,7 +504,7 @@ export function ContentSearchModule() {
             <CardContent>
               {searchSuggestions && searchSuggestions.length > 0 ? (
                 <div className="grid gap-2">
-                  {searchSuggestions.map((suggestion) => (
+                  {searchSuggestions.map((suggestion: any) => (
                     <Button
                       key={suggestion.query}
                       variant="ghost"
@@ -605,7 +608,7 @@ export function ContentSearchModule() {
             <CardContent>
               {popularQueries && popularQueries.length > 0 ? (
                 <div className="grid gap-2">
-                  {popularQueries.map((query, index) => (
+                  {popularQueries.map((query: any, index: number) => (
                     <Button
                       key={query.query}
                       variant="ghost"

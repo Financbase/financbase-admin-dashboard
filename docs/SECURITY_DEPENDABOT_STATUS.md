@@ -45,7 +45,7 @@ This confirms that all fixable vulnerabilities are properly mitigated via pnpm o
 
 ### Step 1: Access Dependabot Alerts
 
-1. Navigate to: https://github.com/Financbase/financbase-admin-dashboard/security/dependabot
+1. Navigate to: <https://github.com/Financbase/financbase-admin-dashboard/security/dependabot>
 2. Review all 7 alerts
 
 ### Step 2: Verify Resolved Alerts
@@ -66,11 +66,13 @@ For the 2 false positives (`request` and `useragent`):
 2. Click **"Dismiss alert"**
 3. Select reason: **"Vulnerable code is not actually used"** or **"Package is deprecated"**
 4. Add note:
+
    ```
    Package is deprecated with no patch available. 
    Dev dependency only (broken-link-checker → robot-directives → useragent → request).
    Not used in production code. Override not possible as package is deprecated.
    ```
+
 5. Click **"Dismiss alert"**
 
 #### Dismiss `useragent` Alert
@@ -79,11 +81,13 @@ For the 2 false positives (`request` and `useragent`):
 2. Click **"Dismiss alert"**
 3. Select reason: **"Vulnerable code is not actually used"** or **"Package is unmaintained"**
 4. Add note:
+
    ```
    Package is unmaintained with no patch available. 
    Dev dependency only (broken-link-checker → robot-directives → useragent).
    Not used in production code. Override not possible as package is unmaintained.
    ```
+
 5. Click **"Dismiss alert"**
 
 ---
@@ -155,4 +159,3 @@ git status pnpm-lock.yaml
 
 **Last Updated**: January 2025  
 **Next Review**: February 2025
-

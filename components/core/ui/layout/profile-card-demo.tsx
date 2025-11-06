@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { Component } from "@/components/ui/profile-card-1";
+import { Component } from "@/components/core/ui/layout/profile-card-1";
 
 export default function DemoOne() {
 	return <Component />;

@@ -19,7 +19,7 @@ import {
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Home, Key, Link, Link2 } from "lucide-react";
+import { ChevronRight, Home, Key, Link as LinkIcon, Link2 } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
 import { memo } from "react";

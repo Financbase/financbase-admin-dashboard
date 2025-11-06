@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import type { Action } from "@/drizzle/schema/actions";
 import { useActions } from "@/hooks/use-actions";
 import { AnimatePresence, motion } from "framer-motion";
-import {} from "lucide-react";
+import { AlertCircle, AudioLines, BarChart2, Globe, Loader2, PlaneTakeoff, Search, Send, Video } from "lucide-react";
 import { useEffect, useState } from "react";
 
 function useDebounce<T>(value: T, delay = 500): T {
@@ -41,14 +41,25 @@ const iconMap: Record<string, React.ReactNode> = {
 	Globe: <Globe className="h-4 w-4 text-blue-500" />,
 };
 
-function ActionSearchBar() {
+interface ActionSearchBarProps {
+	actions?: Array<{
+		id: string;
+		label: string;
+		icon?: React.ReactNode;
+		description?: string;
+		short?: string;
+		end?: string;
+	}>;
+}
+
+export function ActionSearchBar({ actions: providedActions }: ActionSearchBarProps = {} as ActionSearchBarProps) {
 	const [query, setQuery] = useState("");
 	const [isFocused, setIsFocused] = useState(false);
 	const [isTyping, setIsTyping] = useState(false);
 	const [selectedAction, setSelectedAction] = useState<Action | null>(null);
 	const debouncedQuery = useDebounce(query, 200);
 
-	// Fetch actions from API
+	// Fetch actions from API if not provided
 	const {
 		data: actionsData,
 		isLoading,
@@ -57,10 +68,10 @@ function ActionSearchBar() {
 	} = useActions({
 		query: debouncedQuery || undefined,
 		limit: 20,
-		enabled: isFocused,
+		enabled: isFocused && !providedActions,
 	});
 
-	const actions = actionsData?.actions || [];
+	const actions = providedActions || actionsData?.actions || [];
 
 	useEffect(() => {
 		if (!isFocused) {
@@ -92,26 +103,32 @@ function ActionSearchBar() {
 		console.log("Action selected:", action);
 
 		// Example: Execute different actions based on type
-		switch (action.actionType) {
-			case "link":
-				if (action.actionData?.url) {
-					window.open(action.actionData.url, "_blank");
-				}
-				break;
-			case "function":
-				if (action.actionData?.functionName) {
-					// Execute custom function
-					console.log("Executing function:", action.actionData.functionName);
-				}
-				break;
-			case "api":
-				if (action.actionData?.endpoint) {
-					// Make API call
-					console.log("Calling API:", action.actionData.endpoint);
-				}
-				break;
-			default:
-				console.log("Command action:", action.label);
+		const actionAny = action as any;
+		const actionType = actionAny.actionType;
+		if (actionType) {
+			switch (actionType) {
+				case "link":
+					if (actionAny.actionData?.url) {
+						window.open(actionAny.actionData.url, "_blank");
+					}
+					break;
+				case "function":
+					if (actionAny.actionData?.functionName) {
+						// Execute custom function
+						console.log("Executing function:", actionAny.actionData.functionName);
+					}
+					break;
+				case "api":
+					if (actionAny.actionData?.endpoint) {
+						// Make API call
+						console.log("Calling API:", actionAny.actionData.endpoint);
+					}
+					break;
+				default:
+					console.log("Command action:", actionAny.label || action.name);
+			}
+		} else {
+			console.log("Command action:", actionAny.label || action.name);
 		}
 	};
 
@@ -302,4 +319,3 @@ function ActionSearchBar() {
 	);
 }
 
-export { ActionSearchBar };

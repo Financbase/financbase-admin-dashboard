@@ -74,40 +74,44 @@ export default function UploadAnalyticsDashboard() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
 
-	// Mock data - in real implementation, this would come from API
+	// Fetch real data from API
 	useEffect(() => {
-		const mockMetrics: UploadMetrics = {
-			totalUploads: 1247,
-			totalImages: 1156,
-			totalVideos: 91,
-			totalSize: 2847290000, // ~2.8GB
-			averageFileSize: 2284000, // ~2.3MB
-			aiAnalysisCount: 892,
-			aiAnalysisSuccessRate: 94.7,
-			uploadSuccessRate: 98.2,
-			averageProcessingTime: 2.4,
-			popularCategories: [
-				{ category: 'Receipts', count: 456 },
-				{ category: 'Invoices', count: 289 },
-				{ category: 'Documents', count: 198 },
-				{ category: 'Profile Photos', count: 156 },
-				{ category: 'Meeting Notes', count: 87 },
-				{ category: 'Other', count: 61 }
-			],
-			recentActivity: [
-				{ timestamp: new Date(Date.now() - 300000), type: 'image', size: 2048000, success: true },
-				{ timestamp: new Date(Date.now() - 600000), type: 'video', size: 15728640, success: true },
-				{ timestamp: new Date(Date.now() - 900000), type: 'ai_analysis', size: 0, success: false },
-				{ timestamp: new Date(Date.now() - 1200000), type: 'image', size: 1536000, success: true },
-				{ timestamp: new Date(Date.now() - 1500000), type: 'image', size: 3072000, success: true },
-			]
-		};
-
-		// Simulate loading
-		setTimeout(() => {
-			setMetrics(mockMetrics);
-			setIsLoading(false);
-		}, 1000);
+		async function fetchMetrics() {
+			setIsLoading(true);
+			try {
+				const response = await fetch(`/api/analytics/upload?timeRange=${timeRange}`);
+				if (!response.ok) throw new Error('Failed to fetch upload analytics');
+				const data = await response.json();
+				
+				// Format the data
+				const formattedMetrics: UploadMetrics = {
+					totalUploads: data.metrics.totalUploads || 0,
+					totalImages: data.metrics.totalImages || 0,
+					totalVideos: data.metrics.totalVideos || 0,
+					totalSize: data.metrics.totalSize || 0,
+					averageFileSize: data.metrics.averageFileSize || 0,
+					aiAnalysisCount: data.metrics.aiAnalysisCount || 0,
+					aiAnalysisSuccessRate: data.metrics.aiAnalysisSuccessRate || 0,
+					uploadSuccessRate: data.metrics.uploadSuccessRate || 0,
+					averageProcessingTime: data.metrics.averageProcessingTime || 0,
+					popularCategories: data.metrics.popularCategories || [],
+					recentActivity: (data.metrics.recentActivity || []).map((activity: any) => ({
+						timestamp: new Date(activity.timestamp),
+						type: activity.type,
+						size: activity.size,
+						success: activity.success,
+					})),
+				};
+				
+				setMetrics(formattedMetrics);
+			} catch (error) {
+				console.error('Error fetching upload analytics:', error);
+			} finally {
+				setIsLoading(false);
+			}
+		}
+		
+		fetchMetrics();
 	}, [timeRange]);
 
 	const formatFileSize = (bytes: number) => {
@@ -165,7 +169,18 @@ export default function UploadAnalyticsDashboard() {
 						))}
 					</div>
 
-					<Button variant="outline" size="sm" disabled={isLoading}>
+					<Button 
+						variant="outline" 
+						size="sm" 
+						disabled={isLoading}
+						onClick={() => {
+							setIsLoading(true);
+							// Trigger refetch by changing timeRange and back
+							const current = timeRange;
+							setTimeRange(current === '7d' ? '30d' : '7d');
+							setTimeout(() => setTimeRange(current), 10);
+						}}
+					>
 						<RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
 						Refresh
 					</Button>

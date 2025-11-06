@@ -99,7 +99,7 @@ export function AvatarUpload({
 
 	const clearAvatar = () => {
 		setPreviewUrl(null);
-		onAvatarUpdate?.(null);
+		onAvatarUpdate?.("");
 	};
 
 	const displayUrl = previewUrl || currentAvatarUrl;

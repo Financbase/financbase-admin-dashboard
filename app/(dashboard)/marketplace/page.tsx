@@ -938,7 +938,7 @@ function MarketplaceCard({ item, onInstall, onViewDetails }: MarketplaceCardProp
 						) : (
 							<>
 								<Clock className="h-4 w-4 mr-2" />
-								Coming Soon
+								{isPlugin ? "Not Available" : "Unavailable"}
 							</>
 						)}
 					</Button>

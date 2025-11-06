@@ -7,9 +7,11 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { WIDGET_REGISTRY, DEFAULT_WIDGET_ORDER, type WidgetConfig } from "@/lib/widget-registry";
+import { canAccessWidget } from "@/lib/config/navigation-permissions";
+import type { FinancialPermission } from "@/types/auth";
 
 export interface DashboardLayoutState {
   widgetOrder: string[];
@@ -33,7 +35,13 @@ const DEFAULT_LAYOUT: DashboardLayoutState = {
   }, {} as Record<string, { colSpan: number; rowSpan?: number }>),
 };
 
-export function useDashboardLayout() {
+export interface UseDashboardLayoutOptions {
+  userRole?: 'admin' | 'manager' | 'user' | 'viewer' | null;
+  userPermissions?: FinancialPermission[];
+}
+
+export function useDashboardLayout(options: UseDashboardLayoutOptions = {}) {
+  const { userRole = null, userPermissions = [] } = options;
   const [layout, setLayout] = useLocalStorage<DashboardLayoutState>(
     "dashboard-layout",
     DEFAULT_LAYOUT
@@ -176,17 +184,41 @@ export function useDashboardLayout() {
     return layout.widgetOrder
       .filter((id) => layout.widgetVisibility[id] !== false)
       .map((id) => WIDGET_REGISTRY[id])
-      .filter((widget): widget is WidgetConfig => widget !== undefined);
-  }, [layout.widgetOrder, layout.widgetVisibility]);
+      .filter((widget): widget is WidgetConfig => widget !== undefined)
+      .filter((widget) => {
+        // Check if user has access to this widget
+        return canAccessWidget(widget.id, userRole, userPermissions);
+      });
+  }, [layout.widgetOrder, layout.widgetVisibility, userRole, userPermissions]);
 
   const getAvailableWidgets = useCallback((): WidgetConfig[] => {
+    // Get all widget IDs that are currently visible
     const visibleIds = new Set(
       layout.widgetOrder.filter((id) => layout.widgetVisibility[id] !== false)
     );
-    return Object.values(WIDGET_REGISTRY).filter(
-      (widget) => !visibleIds.has(widget.id)
-    );
-  }, [layout.widgetOrder, layout.widgetVisibility]);
+    
+    // Return all widgets that are either:
+    // 1. Not in widgetOrder at all, OR
+    // 2. In widgetOrder but have visibility set to false
+    // AND user has permission to access them
+    return Object.values(WIDGET_REGISTRY).filter((widget) => {
+      // First check if user has permission to access this widget
+      if (!canAccessWidget(widget.id, userRole, userPermissions)) {
+        return false;
+      }
+
+      // If widget is not in widgetOrder, it's available
+      if (!layout.widgetOrder.includes(widget.id)) {
+        return true;
+      }
+      // If widget is in widgetOrder but visibility is false, it's available
+      if (layout.widgetVisibility[widget.id] === false) {
+        return true;
+      }
+      // Otherwise, it's visible and not available
+      return false;
+    });
+  }, [layout.widgetOrder, layout.widgetVisibility, userRole, userPermissions]);
 
   return {
     layout,

@@ -27,13 +27,13 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { isSafeRedirectUrl, validateSafeUrl } from '@/lib/utils/security';
+import { validateSafeUrl } from '@/lib/utils/security';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
 interface Notification {
-	id: string; // UUID from database
+	id: string | number; // Serial ID from database (integer, but can be string in JS)
 	userId: string;
 	type: string;
 	category?: string;
@@ -58,18 +58,52 @@ export function EnhancedNotificationsPanel() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ['notifications'],
 		queryFn: async () => {
-			const response = await fetch('/api/notifications');
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				console.error('[Notifications] API Error:', response.status, errorData);
-				throw new Error(errorData.error || `Failed to fetch notifications: ${response.status}`);
+			try {
+				const response = await fetch('/api/notifications');
+				
+				if (!response.ok) {
+					let errorData: { error?: { message?: string; code?: string }; message?: string } = {};
+					let errorMessage = `Failed to fetch notifications: ${response.status}`;
+					
+					try {
+						errorData = await response.json();
+						// ApiErrorHandler returns { error: { message, code, ... } }
+						if (errorData?.error) {
+							errorMessage = errorData.error.message || errorData.error.code || errorMessage;
+						} else if (errorData?.message) {
+							errorMessage = errorData.message;
+						}
+					} catch (jsonError) {
+						// If JSON parsing fails, use status text or default message
+						console.error('[Notifications] Failed to parse error response:', jsonError);
+						errorMessage = response.statusText || `Server error (${response.status})`;
+					}
+					
+					console.error('[Notifications] API Error:', {
+						status: response.status,
+						statusText: response.statusText,
+						errorData,
+						errorMessage,
+					});
+					
+					throw new Error(errorMessage);
+				}
+				
+				const result = await response.json();
+				console.log('[Notifications] Fetched:', result);
+				return result;
+			} catch (fetchError) {
+				// Handle network errors or other fetch failures
+				if (fetchError instanceof Error) {
+					throw fetchError;
+				}
+				throw new Error('Network error: Unable to fetch notifications');
 			}
-			const result = await response.json();
-			console.log('[Notifications] Fetched:', result);
-			return result;
 		},
 		refetchInterval: 30000, // Refetch every 30 seconds
 		enabled: isLoaded && !!user?.id, // Only fetch when user is loaded and available
+		retry: 2, // Retry failed requests up to 2 times
+		retryDelay: 1000, // Wait 1 second between retries
 	});
 
 	const notifications: Notification[] = data?.notifications || [];
@@ -89,11 +123,15 @@ export function EnhancedNotificationsPanel() {
 
 	// Mark as read mutation
 	const markAsReadMutation = useMutation({
-		mutationFn: async (id: string) => {
+		mutationFn: async (id: string | number) => {
 			const response = await fetch(`/api/notifications/${id}/read`, {
 				method: 'POST',
 			});
-			if (!response.ok) throw new Error('Failed to mark as read');
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				const errorMessage = errorData?.error?.message || errorData?.message || 'Failed to mark as read';
+				throw new Error(errorMessage);
+			}
 			return response.json();
 		},
 		onSuccess: () => {
@@ -120,62 +158,146 @@ export function EnhancedNotificationsPanel() {
 	useEffect(() => {
 		if (!user?.id) return;
 
-		// Use PartySocket for real-time notifications
-		let socket: WebSocket | null = null;
-
-		try {
-			const wsUrl = `${process.env.NEXT_PUBLIC_PARTYKIT_HOST}/party/notifications-${user.id}`;
-			socket = new WebSocket(wsUrl);
-
-			socket.onmessage = (event) => {
-				try {
-					const data = JSON.parse(event.data);
-					if (data.type === 'notification') {
-						queryClient.invalidateQueries({ queryKey: ['notifications'] });
-
-						// Show toast for new notification
-						const toastOptions: any = {
-							description: data.data.message,
-						};
-
-						if (data.data.actionUrl) {
-							// Security: Validate action URL before using in toast
-							const safeUrl = validateSafeUrl(data.data.actionUrl);
-							if (safeUrl) {
-								toastOptions.action = {
-									label: 'View',
-									onClick: () => {
-										if (safeUrl.startsWith('/')) {
-											router.push(safeUrl);
-										} else {
-											window.location.href = safeUrl;
-										}
-									},
-								};
-							}
-						}
-
-						toast.info(data.data.title, toastOptions);
-					}
-				} catch (error) {
-					console.error('Error parsing notification data:', error);
-				}
-			};
-
-			socket.onerror = (error) => {
-				console.error('WebSocket error:', error);
-			};
-
-		} catch (error) {
-			console.error('Error setting up WebSocket:', error);
+		// Check if PartyKit host is configured
+		const partyKitHost = process.env.NEXT_PUBLIC_PARTYKIT_HOST;
+		if (!partyKitHost) {
+			console.warn('[Notifications] NEXT_PUBLIC_PARTYKIT_HOST is not configured. Real-time notifications disabled.');
+			return;
 		}
 
-		return () => {
-			if (socket) {
-				socket.close();
+		// Use WebSocket for real-time notifications
+		let socket: WebSocket | null = null;
+		let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+		let reconnectAttempts = 0;
+		let isMounted = true; // Track if component is still mounted
+		const MAX_RECONNECT_ATTEMPTS = 5;
+		const RECONNECT_DELAY = 3000; // 3 seconds
+
+		const connect = () => {
+			// Don't connect if component is unmounted
+			if (!isMounted) return;
+
+			try {
+				const wsUrl = `${partyKitHost}/party/notifications-${user.id}`;
+				socket = new WebSocket(wsUrl);
+
+				socket.onopen = () => {
+					if (!isMounted) {
+						socket?.close();
+						return;
+					}
+					console.log('[Notifications] WebSocket connected');
+					reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+				};
+
+				socket.onmessage = (event) => {
+					if (!isMounted) return;
+					
+					try {
+						const data = JSON.parse(event.data);
+						if (data.type === 'notification') {
+							queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+							// Show toast for new notification
+							const toastOptions: {
+								description: string;
+								action?: { label: string; onClick: () => void };
+							} = {
+								description: data.data.message,
+							};
+
+							if (data.data.actionUrl) {
+								// Security: Validate action URL before using in toast
+								const safeUrl = validateSafeUrl(data.data.actionUrl);
+								if (safeUrl) {
+									toastOptions.action = {
+										label: 'View',
+										onClick: () => {
+											if (safeUrl.startsWith('/')) {
+												router.push(safeUrl);
+											} else {
+												window.location.href = safeUrl;
+											}
+										},
+									};
+								}
+							}
+
+							toast.info(data.data.title, toastOptions);
+						}
+					} catch (error) {
+						console.error('[Notifications] Error parsing notification data:', error);
+					}
+				};
+
+				socket.onerror = () => {
+					// WebSocket error events don't provide detailed error information
+					// Log what we can - the error object itself is empty, so we log context
+					console.error('[Notifications] WebSocket error occurred', {
+						url: wsUrl,
+						readyState: socket?.readyState,
+						reconnectAttempts,
+					});
+				};
+
+				socket.onclose = (event) => {
+					if (!isMounted) return;
+
+					console.log('[Notifications] WebSocket closed', {
+						code: event.code,
+						reason: event.reason || 'No reason provided',
+						wasClean: event.wasClean,
+					});
+
+					// Attempt reconnection if not a clean close and we haven't exceeded max attempts
+					if (event.code !== 1000 && reconnectAttempts < MAX_RECONNECT_ATTEMPTS && isMounted) {
+						reconnectAttempts++;
+						console.log(`[Notifications] Attempting to reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+						
+						reconnectTimeout = setTimeout(() => {
+							if (isMounted) {
+								connect();
+							}
+						}, RECONNECT_DELAY);
+					} else if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+						console.error('[Notifications] Max reconnection attempts reached. WebSocket connection failed.');
+					}
+				};
+
+			} catch (error) {
+				console.error('[Notifications] Error setting up WebSocket:', error);
+				if (error instanceof Error) {
+					console.error('[Notifications] Error details:', {
+						message: error.message,
+						stack: error.stack,
+					});
+				}
 			}
 		};
-	}, [queryClient, user?.id]);
+
+		// Initial connection
+		connect();
+
+		return () => {
+			isMounted = false; // Mark as unmounted to prevent reconnection attempts
+			
+			if (reconnectTimeout) {
+				clearTimeout(reconnectTimeout);
+				reconnectTimeout = null;
+			}
+			
+			if (socket) {
+				// Remove event listeners to prevent reconnection attempts
+				socket.onclose = null;
+				socket.onerror = null;
+				// Close with code 1000 (normal closure) to indicate intentional disconnect
+				if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+					socket.close(1000, 'Component unmounted');
+				}
+				socket = null;
+			}
+		};
+	}, [queryClient, user?.id, router]);
 
 	const handleNotificationClick = (notification: Notification) => {
 		// Mark as read
@@ -220,10 +342,10 @@ export function EnhancedNotificationsPanel() {
 		}
 	};
 
-	const getTypeIcon = (type: string) => {
-		// This can be expanded based on notification types
-		return '📬';
-	};
+		const getTypeIcon = (_type: string) => {
+			// This can be expanded based on notification types
+			return '📬';
+		};
 
 	// Don't render if user isn't loaded yet
 	if (!isLoaded) {
@@ -272,9 +394,16 @@ export function EnhancedNotificationsPanel() {
 							<p className="text-sm text-muted-foreground mb-2">
 								Error loading notifications
 							</p>
-							<p className="text-xs text-muted-foreground">
-								{error instanceof Error ? error.message : 'Unknown error'}
+							<p className="text-xs text-muted-foreground mb-4">
+								{error instanceof Error ? error.message : 'Unknown error occurred'}
 							</p>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => queryClient.invalidateQueries({ queryKey: ['notifications'] })}
+							>
+								Retry
+							</Button>
 						</div>
 					) : isLoading ? (
 						<div className="flex items-center justify-center p-8">

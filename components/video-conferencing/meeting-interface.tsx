@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 import {
 	Calendar,
 	Clock,
@@ -53,6 +54,9 @@ import {
 	Lock,
 	Zap
 } from 'lucide-react';
+import { format } from 'date-fns';
+import { ZoomService } from '@/lib/services/integrations/zoom-service';
+import { GoogleMeetService } from '@/lib/services/integrations/google-meet-service';
 import { AdvancedMeetingInterface } from './advanced-meeting-interface';
 
 interface Meeting {
@@ -147,7 +151,7 @@ export function VideoMeetingInterface() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['video-meetings']);
+			queryClient.invalidateQueries({ queryKey: ['video-meetings'] });
 			setShowCreateDialog(false);
 			setNewMeeting({
 				title: '',
@@ -358,7 +362,7 @@ export function VideoMeetingInterface() {
 								</div>
 							) : (
 								<div className="space-y-4">
-									{meetings.map((meeting) => (
+									{meetings.map((meeting: Meeting) => (
 										<div key={meeting.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
 											<div className="flex items-center gap-4">
 												<div className="flex items-center gap-2">

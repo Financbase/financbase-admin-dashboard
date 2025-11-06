@@ -15,7 +15,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import {} from "lucide-react";
+import {
+  Clock,
+  RotateCcw,
+  Pause,
+  Play,
+  Download,
+  Trash2,
+  VolumeX,
+  Volume2,
+} from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -54,6 +63,7 @@ export const AudioPlayback: React.FC<AudioPlaybackProps> = ({
 	const [isMuted, setIsMuted] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string>("");
+	const [audioDuration, setAudioDuration] = useState(duration || 0);
 
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const progressRef = useRef<HTMLDivElement>(null);
@@ -66,7 +76,7 @@ export const AudioPlayback: React.FC<AudioPlaybackProps> = ({
 			setIsLoading(false);
 			if (duration === undefined) {
 				// Update duration from audio metadata if not provided
-				setDuration(audio.duration);
+				setAudioDuration(audio.duration);
 			}
 		};
 
@@ -172,17 +182,18 @@ export const AudioPlayback: React.FC<AudioPlaybackProps> = ({
 		return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 	};
 
-	const progressPercentage = duration ? (currentTime / duration) * 100 : 0;
+	const effectiveDuration = duration || audioDuration;
+	const progressPercentage = effectiveDuration ? (currentTime / effectiveDuration) * 100 : 0;
 
 	return (
 		<Card className={cn("w-full", className)}>
 			<CardHeader className="pb-3">
 				<CardTitle className="flex items-center justify-between text-lg">
 					<span>{title || "Audio Recording"}</span>
-					{duration && (
+					{effectiveDuration > 0 && (
 						<Badge variant="outline" className="text-xs">
 							<Clock className="mr-1 h-3 w-3" />
-							{formatTime(duration)}
+							{formatTime(effectiveDuration)}
 						</Badge>
 					)}
 				</CardTitle>
@@ -203,7 +214,7 @@ export const AudioPlayback: React.FC<AudioPlaybackProps> = ({
 					<div className="space-y-2">
 						<div className="flex justify-between text-sm text-gray-600">
 							<span>{formatTime(currentTime)}</span>
-							<span>{formatTime(duration || 0)}</span>
+							<span>{formatTime(effectiveDuration)}</span>
 						</div>
 						<div className="relative">
 							<Progress

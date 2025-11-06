@@ -7,7 +7,21 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { BarChart3, Bell, File, FileText, Key } from "lucide-react";
+import { 
+	BarChart3, 
+	Bell, 
+	File, 
+	FileText, 
+	Key,
+	MessageCircle,
+	Users,
+	Mail,
+	Folder,
+	AtSign,
+	Heart,
+	CheckCircle,
+	Settings
+} from "lucide-react";
 import React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -173,25 +187,26 @@ const notifications: Array<Notification> = [
 
 function NotificationItem({ notification }: { notification: Notification }) {
 	const getNotificationIcon = (type: string) => {
+		const iconClass = "h-4 w-4 text-muted-foreground";
 		switch (type) {
 			case "comment":
-				return "💬";
+				return <MessageCircle className={iconClass} />;
 			case "follow":
-				return "👥";
+				return <Users className={iconClass} />;
 			case "invitation":
-				return "📧";
+				return <Mail className={iconClass} />;
 			case "file_share":
-				return "📁";
+				return <Folder className={iconClass} />;
 			case "mention":
-				return "@";
+				return <AtSign className={iconClass} />;
 			case "like":
-				return "❤️";
+				return <Heart className={iconClass} />;
 			case "task_completed":
-				return "✅";
+				return <CheckCircle className={iconClass} />;
 			case "system":
-				return "⚙️";
+				return <Settings className={iconClass} />;
 			default:
-				return "🔔";
+				return <Bell className={iconClass} />;
 		}
 	};
 
@@ -248,8 +263,8 @@ function NotificationItem({ notification }: { notification: Notification }) {
 
 					{notification.file && (
 						<div className="flex items-center gap-2 rounded-lg bg-muted p-2">
-							<div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-xs">
-								📁
+							<div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
+								<Folder className="h-4 w-4 text-primary" />
 							</div>
 							<div className="flex-1">
 								<div className="text-sm font-medium">

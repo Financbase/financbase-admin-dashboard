@@ -70,7 +70,8 @@ export const FeedbackWidget = ({
 }: FeedbackWidgetProps) => {
 	const [rating, setRating] = useState<"helpful" | "not-helpful" | null>(null);
 	const [comment, setComment] = useState("");
-	const { submitFeedback, isSubmitting, error } = useFeedback();
+	const { submitFeedback, isSubmitting } = useFeedback();
+	const [error, setError] = useState<string | null>(null);
 
 	// Handle rating selection
 	const handleRatingClick = (selectedRating: "helpful" | "not-helpful") => {
@@ -92,9 +93,9 @@ export const FeedbackWidget = ({
 			feedbackData.category = category;
 		}
 
-		const success = await submitFeedback(feedbackData);
-
-		if (success) {
+		try {
+			await submitFeedback(feedbackData as any);
+			setError(null);
 			// Reset form
 			setRating(null);
 			setComment("");
@@ -112,6 +113,8 @@ export const FeedbackWidget = ({
 			if (variant === "widget" && onClose) {
 				onClose();
 			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Failed to submit feedback');
 		}
 	};
 

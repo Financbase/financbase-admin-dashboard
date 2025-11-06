@@ -18,6 +18,70 @@ import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
 import { auditLogger, AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
 
+/**
+ * @swagger
+ * /api/approval-workflows:
+ *   get:
+ *     summary: Get list of approval workflows
+ *     description: Retrieves a paginated list of bill approval workflows configured for the authenticated user
+ *     tags:
+ *       - Workflows
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive]
+ *         description: Filter workflows by status
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *         description: Maximum number of workflows to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of workflows to skip
+ *     responses:
+ *       200:
+ *         description: Approval workflows retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 workflows:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: workflow_123
+ *                       name:
+ *                         type: string
+ *                         example: High Value Approval Workflow
+ *                       description:
+ *                         type: string
+ *                       steps:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                       status:
+ *                         type: string
+ *                         enum: [active, inactive]
+ *                 total:
+ *                   type: integer
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 // GET /api/approval-workflows - Get approval workflows
 export async function GET(request: NextRequest) {
   try {
@@ -54,6 +118,78 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * @swagger
+ * /api/approval-workflows:
+ *   post:
+ *     summary: Create a new approval workflow
+ *     description: Creates a new bill approval workflow with configurable steps, thresholds, and conditions
+ *     tags:
+ *       - Workflows
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - steps
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: High Value Approval Workflow
+ *               description:
+ *                 type: string
+ *                 example: Multi-step approval for bills over $10,000
+ *               amountThreshold:
+ *                 type: number
+ *                 example: 10000.00
+ *                 description: Minimum bill amount to trigger this workflow
+ *               vendorCategories:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: [supplier, contractor]
+ *               steps:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     approverId:
+ *                       type: string
+ *                     order:
+ *                       type: integer
+ *                     required:
+ *                       type: boolean
+ *                 description: Array of approval steps with approvers
+ *     responses:
+ *       201:
+ *         description: Approval workflow created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 workflow:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: workflow_123
+ *                     name:
+ *                       type: string
+ *                     steps:
+ *                       type: array
+ *       400:
+ *         description: Bad request - Invalid input data
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 // POST /api/approval-workflows - Create new workflow
 export async function POST(request: NextRequest) {
   try {

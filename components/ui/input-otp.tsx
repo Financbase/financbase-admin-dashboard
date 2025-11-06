@@ -44,7 +44,12 @@ const InputOTPSlot = React.forwardRef<
   React.ComponentPropsWithoutRef<"div"> & { index: number }
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
-  const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
+  if (!inputOTPContext) {
+    throw new Error('InputOTPSlot must be used within InputOTP')
+  }
+  // Type assertion needed due to Next.js context serialization
+  const context = inputOTPContext as { slots: Array<{ char: string | null; hasFakeCaret: boolean; isActive: boolean }> }
+  const { char, hasFakeCaret, isActive } = context.slots[index] || { char: null, hasFakeCaret: false, isActive: false }
 
   return (
     <div

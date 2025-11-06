@@ -47,3 +47,34 @@ export function useDashboard() {
 	}
 	return context;
 }
+
+// Additional hooks for dashboard header
+export function useDashboardRefresh() {
+	const [autoRefresh, setAutoRefresh] = React.useState(false);
+	const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+
+	const triggerRefresh = React.useCallback(() => {
+		setRefreshTrigger(prev => prev + 1);
+	}, []);
+
+	return {
+		triggerRefresh,
+		autoRefresh,
+		setAutoRefresh,
+		refreshTrigger,
+	};
+}
+
+export function useDashboardLastUpdated() {
+	const [lastUpdated, setLastUpdated] = React.useState<Date | null>(new Date());
+
+	React.useEffect(() => {
+		const interval = setInterval(() => {
+			setLastUpdated(new Date());
+		}, 60000); // Update every minute
+
+		return () => clearInterval(interval);
+	}, []);
+
+	return { lastUpdated };
+}

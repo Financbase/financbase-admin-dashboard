@@ -7,10 +7,17 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import SocialPostCard from "@/components/ui/social-post-card";
+import { SocialPostCard } from "@/components/ui/social-post-card";
 
 const DemoOne = () => {
-	return <SocialPostCard />;
+	return <SocialPostCard 
+		author={{ name: "John Doe", handle: "@johndoe" }}
+		content="This is a sample social media post"
+		timestamp="2 hours ago"
+		likes={42}
+		comments={5}
+		shares={3}
+	/>;
 };
 
 export { DemoOne };

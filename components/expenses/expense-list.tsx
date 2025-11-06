@@ -394,7 +394,7 @@ export function ExpenseList() {
 										</TableCell>
 										<TableCell>{expense.vendor || '-'}</TableCell>
 										<TableCell className="font-semibold">
-											${parseFloat(expense.amount).toLocaleString()}
+											${typeof expense.amount === 'string' ? parseFloat(expense.amount).toLocaleString() : expense.amount.toLocaleString()}
 										</TableCell>
 										<TableCell>{getStatusBadge(expense.status)}</TableCell>
 										<TableCell className="text-right">

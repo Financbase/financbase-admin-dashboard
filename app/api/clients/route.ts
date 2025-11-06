@@ -16,6 +16,91 @@ import { createClientSchema } from '@/lib/validation-schemas';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { eq, count, and, like, or } from 'drizzle-orm';
 
+/**
+ * @swagger
+ * /api/clients:
+ *   get:
+ *     summary: Get list of clients
+ *     description: Retrieves a paginated list of clients for the authenticated user with optional filtering and search
+ *     tags:
+ *       - Clients
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term to filter clients by name, email, or company
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         description: Filter clients by status
+ *     responses:
+ *       200:
+ *         description: Clients retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: client_123
+ *                       name:
+ *                         type: string
+ *                         example: Acme Corporation
+ *                       email:
+ *                         type: string
+ *                         example: contact@acme.com
+ *                       company:
+ *                         type: string
+ *                         example: Acme Corp
+ *                       status:
+ *                         type: string
+ *                         enum: [active, inactive, suspended]
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 10
+ *                     total:
+ *                       type: integer
+ *                       example: 45
+ *                     pages:
+ *                       type: integer
+ *                       example: 5
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(req: NextRequest) {
   const requestId = generateRequestId();
   try {
@@ -84,6 +169,83 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * @swagger
+ * /api/clients:
+ *   post:
+ *     summary: Create a new client
+ *     description: Creates a new client for the authenticated user
+ *     tags:
+ *       - Clients
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Acme Corporation
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: contact@acme.com
+ *               company:
+ *                 type: string
+ *                 example: Acme Corp
+ *               phone:
+ *                 type: string
+ *                 example: +1-555-0123
+ *               address:
+ *                 type: string
+ *                 example: 123 Main St
+ *               city:
+ *                 type: string
+ *                 example: New York
+ *               state:
+ *                 type: string
+ *                 example: NY
+ *               zipCode:
+ *                 type: string
+ *                 example: "10001"
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive, suspended]
+ *                 default: active
+ *     responses:
+ *       201:
+ *         description: Client created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: client_123
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *       400:
+ *         description: Bad request - Invalid input data
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId();
   try {

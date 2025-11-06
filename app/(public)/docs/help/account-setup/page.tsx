@@ -179,22 +179,22 @@ export default function AccountSetupPage() {
 						<h2 className="text-2xl font-semibold mb-6">Quick Actions</h2>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<Button asChild variant="outline" className="justify-start h-auto py-4">
-								<Link href="/settings/profile">
+								<Link href="/auth/sign-up">
 									<Settings className="h-4 w-4 mr-2" />
 									<div className="text-left">
-										<div className="font-semibold">Account Settings</div>
+										<div className="font-semibold">Get Started</div>
 										<div className="text-xs text-muted-foreground">
-											Update your profile and preferences
+											Create your account to manage settings
 										</div>
 									</div>
 									<ArrowRight className="h-4 w-4 ml-auto" />
 								</Link>
 							</Button>
 							<Button asChild variant="outline" className="justify-start h-auto py-4">
-								<Link href="/settings/security">
+								<Link href="/auth/sign-up">
 									<Shield className="h-4 w-4 mr-2" />
 									<div className="text-left">
-										<div className="font-semibold">Security Settings</div>
+										<div className="font-semibold">Get Started</div>
 										<div className="text-xs text-muted-foreground">
 											Configure security and authentication
 										</div>

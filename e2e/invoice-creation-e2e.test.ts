@@ -20,7 +20,7 @@ test.describe('Invoice Creation E2E', () => {
     await page.waitForLoadState('networkidle');
     
     // Check for invoice page elements
-    await expect(page.locator('text=/invoice/i)).toBeVisible();
+    await expect(page.locator('text=/invoice/i')).toBeVisible();
   });
 
   test('should display invoice creation form', async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe('Invoice Creation E2E', () => {
     await page.click('button[type="submit"]');
     
     // Check for validation errors
-    await expect(page.locator('text=/required/i)).toBeVisible();
+    await expect(page.locator('text=/required/i')).toBeVisible();
   });
 
   test('should create invoice successfully', async ({ page }) => {
@@ -61,7 +61,7 @@ test.describe('Invoice Creation E2E', () => {
     await page.waitForLoadState('networkidle');
     
     // Check for success indicator
-    await expect(page.locator('text=/success|created/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=/success|created/i')).toBeVisible({ timeout: 5000 });
   });
 
   test('should display invoice list', async ({ page }) => {

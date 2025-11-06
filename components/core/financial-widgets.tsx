@@ -21,7 +21,7 @@ export default function FinancialWidgets() {
 	const [widgetPreferences, setWidgetPreferences] = useLocalStorage('widget-preferences', {
 		autoRefresh: true,
 		showDetailedMetrics: true,
-		lastRefresh: null
+		lastRefresh: null as string | null
 	});
 
 	// Auto-refresh every 30 seconds if enabled

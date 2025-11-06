@@ -172,6 +172,14 @@ const testimonials = [
 const FinancbaseLandingPage = () => {
 	// Use custom hooks for better maintainability
 	const [currentFeature, setCurrentFeature] = useAutoRotate(features);
+	const [currentFeatureIndex, setCurrentFeatureIndex] = React.useState(0);
+	
+	React.useEffect(() => {
+		const index = features.findIndex(f => f?.id === currentFeature?.id);
+		if (index !== -1) {
+			setCurrentFeatureIndex(index);
+		}
+	}, [currentFeature, features]);
 	const [isNewsExpanded, toggleNewsExpansion] = useExpandableContent();
 	const [email, , handleEmailChange] = useEmailInput();
 	const [isFloatingNavVisible] = useScrollVisibility(300);
@@ -411,11 +419,11 @@ const FinancbaseLandingPage = () => {
 										<motion.div
 											key={features[index]?.id}
 											className={`h-2 w-8 rounded-full transition-all duration-300 ${
-												currentFeature === index ? "bg-blue-600" : "bg-gray-300"
+												currentFeatureIndex === index ? "bg-blue-600" : "bg-gray-300"
 											}`}
 											animate={{
-												scale: currentFeature === index ? 1.2 : 1,
-												opacity: currentFeature === index ? 1 : 0.5,
+												scale: currentFeatureIndex === index ? 1.2 : 1,
+												opacity: currentFeatureIndex === index ? 1 : 0.5,
 											}}
 										/>
 									))}
@@ -431,7 +439,7 @@ const FinancbaseLandingPage = () => {
 										transition={{ delay: index * 0.1, duration: 0.6 }}
 										whileHover={{ y: -5, scale: 1.02 }}
 										className={`group relative p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-xl ring-1 ring-white/20 transition-all duration-500 ${
-											currentFeature === index
+											currentFeatureIndex === index
 												? "ring-2 ring-blue-500 scale-105 shadow-2xl bg-blue-50"
 												: "hover:shadow-2xl hover:bg-white/90"
 										}`}
@@ -443,7 +451,7 @@ const FinancbaseLandingPage = () => {
 										<div className="relative">
 											<motion.div
 												className={`inline-flex p-4 rounded-2xl mb-6 ${
-													currentFeature === index
+													currentFeatureIndex === index
 														? "bg-blue-600 text-white shadow-lg"
 														: `bg-${feature.color}-100 text-${feature.color}-600`
 												}`}
@@ -466,7 +474,7 @@ const FinancbaseLandingPage = () => {
 													className="h-full bg-blue-500 rounded-full"
 													initial={{ width: 0 }}
 													animate={{
-														width: currentFeature === index ? "100%" : "0%",
+														width: currentFeatureIndex === index ? "100%" : "0%",
 													}}
 													transition={{ duration: 0.5 }}
 												/>
@@ -829,7 +837,7 @@ const FinancbaseLandingPage = () => {
 											<input
 												type="email"
 												value={email}
-												onChange={handleEmailChange}
+												onChange={(e) => handleEmailChange(e.target.value)}
 												placeholder="Enter your email address"
 												className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm text-lg transition-all duration-300"
 											/>
@@ -871,11 +879,14 @@ const FinancbaseLandingPage = () => {
 								{features.slice(0, 4).map((feature, index) => (
 									<motion.button
 										key={feature.id}
-										onClick={() => setCurrentFeature(index)}
+										onClick={() => {
+											const feature = features[index];
+											if (feature) setCurrentFeature(feature);
+										}}
 										whileHover={{ scale: 1.1, y: -2 }}
 										whileTap={{ scale: 0.95 }}
 										className={`relative p-4 rounded-xl transition-all duration-300 ${
-											currentFeature === index
+											currentFeatureIndex === index
 												? "bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary-dark)] text-white shadow-lg"
 												: "text-gray-600 hover:bg-white/60 hover:text-blue-600"
 										}`}
@@ -886,8 +897,8 @@ const FinancbaseLandingPage = () => {
 										<motion.div
 											initial={{ opacity: 0, y: 10 }}
 											animate={{
-												opacity: currentFeature === index ? 1 : 0,
-												y: currentFeature === index ? 0 : 10,
+												opacity: currentFeatureIndex === index ? 1 : 0,
+												y: currentFeatureIndex === index ? 0 : 10,
 											}}
 											className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap"
 										>

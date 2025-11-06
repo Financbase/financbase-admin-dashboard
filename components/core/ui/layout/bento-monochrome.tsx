@@ -113,7 +113,7 @@ function FeaturesSectionMinimal() {
 			attributeFilter: ["class", "data-theme"],
 		});
 
-		const handleStorage = (event) => {
+		const handleStorage = (event: StorageEvent) => {
 			if (event.key === "bento-theme") syncTheme();
 		};
 
@@ -322,6 +322,12 @@ function BentoItem({
 	theme = "light",
 	index = 0,
 	isVisible = false,
+}: {
+	feature: any;
+	span?: string;
+	theme?: string;
+	index?: number;
+	isVisible?: boolean;
 }) {
 	const { icon: Icon, animation, title, blurb, meta } = feature;
 	const gradientFill =

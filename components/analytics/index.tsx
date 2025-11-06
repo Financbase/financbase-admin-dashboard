@@ -25,6 +25,9 @@ export {
 	RevenueChart,
 	ExpenseBreakdownChart,
 	KPIOverviewCards,
+} from './advanced-charts';
+
+export type {
 	ChartConfig,
 	ChartDataPoint
 } from './advanced-charts';

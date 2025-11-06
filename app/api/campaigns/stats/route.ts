@@ -10,15 +10,25 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AdboardService } from '@/lib/services/adboard-service';
+import { getCurrentUserId } from '@/lib/api/with-rls';
 
 export async function GET() {
 	try {
-		const { userId } = await auth();
-		if (!userId) {
+		const { userId: clerkId } = await auth();
+		if (!clerkId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const stats = await AdboardService.getCampaignStats(userId);
+		// Convert Clerk ID to database user ID (UUID)
+		const dbUserId = await getCurrentUserId();
+		if (!dbUserId) {
+			return NextResponse.json(
+				{ error: 'User not found in database' },
+				{ status: 400 }
+			);
+		}
+
+		const stats = await AdboardService.getCampaignStats(dbUserId);
 
 		return NextResponse.json({ stats });
 	} catch (error) {

@@ -26,6 +26,7 @@ import {
 	proposals,
 } from "../db/schema-proposals";
 import { uploadFile } from "../upload-utils";
+import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 export interface DocumentUploadData {
 	proposalId: string;
@@ -184,8 +185,10 @@ export class ProposalDocumentService {
 			);
 
 		if (result.rowCount > 0) {
-			// TODO: Delete from storage service as well
-			// await deleteFile(document.url);
+			// Delete from storage service
+			if (document.url) {
+				await this.deleteFileFromStorage(document.url);
+			}
 
 			// Clear proposal document reference if it was the main document
 			await this.clearProposalDocumentReference(
@@ -195,6 +198,76 @@ export class ProposalDocumentService {
 		}
 
 		return result.rowCount > 0;
+	}
+
+	/**
+	 * Delete file from storage service (R2/S3 or other)
+	 */
+	private async deleteFileFromStorage(fileUrl: string): Promise<void> {
+		try {
+			// Check if URL is from R2/Cloudflare storage
+			if (fileUrl.includes(process.env.R2_PUBLIC_DOMAIN || '') || fileUrl.includes('.r2.cloudflarestorage.com')) {
+				// Extract file key from URL
+				const urlParts = new URL(fileUrl);
+				const fileKey = urlParts.pathname.startsWith('/') 
+					? urlParts.pathname.substring(1) 
+					: urlParts.pathname;
+
+				// Initialize R2 client if needed
+				if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
+					const r2Client = new S3Client({
+						region: "auto",
+						endpoint: process.env.R2_ENDPOINT || 
+							`https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+						credentials: {
+							accessKeyId: process.env.R2_ACCESS_KEY_ID,
+							secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+						},
+					});
+
+					await r2Client.send(
+						new DeleteObjectCommand({
+							Bucket: process.env.R2_BUCKET || "cms-admin-files",
+							Key: fileKey,
+						})
+					);
+				}
+			} else if (fileUrl.includes('uploadthing.com') || fileUrl.includes('utfs.io')) {
+				// UploadThing files - use UploadThing API to delete
+				try {
+					const { UTApi } = await import('uploadthing/server');
+					
+					if (!process.env.UPLOADTHING_SECRET) {
+						console.warn('UPLOADTHING_SECRET not configured, skipping file deletion');
+						return;
+					}
+
+					const utapi = new UTApi({ 
+						token: process.env.UPLOADTHING_SECRET 
+					});
+
+					// Extract file key from URL
+					// UploadThing URLs format: https://uploadthing.com/f/{fileKey} or https://utfs.io/f/{fileKey}
+					const urlMatch = fileUrl.match(/\/(f|file)\/([^/?]+)/);
+					if (urlMatch && urlMatch[2]) {
+						const fileKey = urlMatch[2];
+						await utapi.deleteFiles(fileKey);
+						console.log(`Successfully deleted UploadThing file: ${fileKey}`);
+					} else {
+						console.warn(`Could not extract file key from UploadThing URL: ${fileUrl}`);
+					}
+				} catch (uploadthingError) {
+					console.error('Error deleting UploadThing file:', uploadthingError);
+					// Don't throw - continue with database deletion even if storage deletion fails
+				}
+			} else {
+				// Other storage providers - log for manual cleanup if needed
+				console.log(`File deletion needed for: ${fileUrl}`);
+			}
+		} catch (storageError) {
+			console.error('Error deleting file from storage:', storageError);
+			// Don't throw - continue with database deletion even if storage deletion fails
+		}
 	}
 
 	/**

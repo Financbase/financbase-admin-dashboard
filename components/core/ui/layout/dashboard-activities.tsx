@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useActivities } from "@/hooks/use-activities";
 import { cn } from "@/lib/utils"; // Assumes shadcn's utility for class merging
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, Variants } from "framer-motion";
 import {
 	AlertCircle,
 	Bell,
@@ -106,6 +106,13 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
 	// Use prop activities if provided, otherwise use API activities
 	const activities = propActivities || apiActivities;
 
+	// Animation variants for activity items
+	const itemVariants: Variants = {
+		hidden: { opacity: 0, y: 10 },
+		visible: { opacity: 1, y: 0 },
+		exit: { opacity: 0, y: -10 },
+	};
+
 	return (
 		<Card className={cn("h-full", className)}>
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -148,7 +155,7 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
 				) : (
 					<motion.div layout className="divide-y divide-border">
 						<AnimatePresence initial={false}>
-							{activities.map((activity) => (
+							{activities.map((activity: ActivityItem) => (
 								<motion.div
 									key={activity.id}
 									variants={itemVariants}

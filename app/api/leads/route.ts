@@ -33,6 +33,99 @@ const createLeadSchema = z.object({
 	metadata: z.record(z.unknown()).optional(),
 });
 
+/**
+ * @swagger
+ * /api/leads:
+ *   get:
+ *     summary: Get list of leads
+ *     description: Retrieves a paginated list of sales leads with optional filtering by status, source, priority, and assignment
+ *     tags:
+ *       - Analytics
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Number of items per page
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for lead name, email, or company
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [new, contacted, qualified, proposal, negotiation, closed_won, closed_lost, nurturing]
+ *         description: Filter leads by status
+ *       - in: query
+ *         name: source
+ *         schema:
+ *           type: string
+ *           enum: [website, referral, social_media, email_campaign, cold_call, trade_show, advertisement, partner, other]
+ *         description: Filter leads by source
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [low, medium, high, urgent]
+ *         description: Filter leads by priority
+ *       - in: query
+ *         name: assignedTo
+ *         schema:
+ *           type: string
+ *         description: Filter leads by assigned user ID
+ *     responses:
+ *       200:
+ *         description: Leads retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: lead_123
+ *                       firstName:
+ *                         type: string
+ *                         example: John
+ *                       lastName:
+ *                         type: string
+ *                         example: Doe
+ *                       email:
+ *                         type: string
+ *                         format: email
+ *                       company:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                         enum: [new, contacted, qualified, proposal, negotiation, closed_won, closed_lost, nurturing]
+ *                       source:
+ *                         type: string
+ *                       estimatedValue:
+ *                         type: number
+ *                         example: 50000.00
+ *                 pagination:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(request: NextRequest) {
 	const requestId = generateRequestId();
 	try {
@@ -67,6 +160,102 @@ export async function GET(request: NextRequest) {
 	}
 }
 
+/**
+ * @swagger
+ * /api/leads:
+ *   post:
+ *     summary: Create a new lead
+ *     description: Creates a new sales lead with contact information, source tracking, and pipeline management
+ *     tags:
+ *       - Analytics
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - source
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 example: John
+ *               lastName:
+ *                 type: string
+ *                 example: Doe
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john.doe@example.com
+ *               phone:
+ *                 type: string
+ *                 example: +1-555-0123
+ *               company:
+ *                 type: string
+ *                 example: Acme Corp
+ *               jobTitle:
+ *                 type: string
+ *                 example: CEO
+ *               website:
+ *                 type: string
+ *                 format: uri
+ *               source:
+ *                 type: string
+ *                 enum: [website, referral, social_media, email_campaign, cold_call, trade_show, advertisement, partner, other]
+ *                 example: website
+ *               priority:
+ *                 type: string
+ *                 enum: [low, medium, high, urgent]
+ *                 default: medium
+ *               estimatedValue:
+ *                 type: number
+ *                 example: 50000.00
+ *               probability:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 100
+ *                 example: 75
+ *               expectedCloseDate:
+ *                 type: string
+ *                 format: date-time
+ *               assignedTo:
+ *                 type: string
+ *                 description: User ID to assign the lead to
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: [enterprise, saas]
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Lead created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 lead:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: lead_123
+ *                     firstName:
+ *                       type: string
+ *       400:
+ *         description: Bad request - Invalid input data
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(request: NextRequest) {
 	try {
 		// Authenticate user

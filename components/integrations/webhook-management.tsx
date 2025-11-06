@@ -37,6 +37,7 @@ import {
 	Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DeliveryLogs } from '@/components/webhooks/delivery-logs';
 
 interface WebhookEndpoint {
 	id: string;
@@ -61,11 +62,28 @@ interface WebhookEvent {
 	error?: string;
 }
 
-// Generate a placeholder secret for demo data (not a real secret)
+// Generate a real cryptographic secret for webhooks (client-side compatible)
+const generateWebhookSecret = (): string => {
+	// Use Web Crypto API for secure random generation (available in modern browsers and Node.js 15+)
+	if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+		const array = new Uint8Array(32);
+		crypto.getRandomValues(array);
+		return `wh_sec_${Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')}`;
+	} else {
+		// Fallback: generate a pseudo-random string (less secure but better than placeholder)
+		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		let result = 'wh_sec_';
+		for (let i = 0; i < 64; i++) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return result;
+	}
+};
+
+// Generate a placeholder secret for demo data only (not for production)
 const generatePlaceholderSecret = (): string => {
-	// Use environment variable placeholder or generate a clearly fake value
-	const placeholder = process.env.NEXT_PUBLIC_WEBHOOK_SECRET_PLACEHOLDER || 'demo_placeholder_secret_not_for_production';
-	return `wh_sec_${placeholder.substring(0, 16).padEnd(16, 'X')}`;
+	// Only use for clearly marked demo/sample data
+	return `wh_sec_demo_${Math.random().toString(36).substring(2, 18).padEnd(16, 'X')}`;
 };
 
 const SAMPLE_WEBHOOK_ENDPOINTS: WebhookEndpoint[] = [
@@ -238,7 +256,7 @@ export function WebhookManagement() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['webhook-endpoints']);
+			queryClient.invalidateQueries({ queryKey: ['webhook-endpoints'] });
 			setShowCreateDialog(false);
 		},
 	});
@@ -263,7 +281,7 @@ export function WebhookManagement() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['webhook-endpoints']);
+			queryClient.invalidateQueries({ queryKey: ['webhook-endpoints'] });
 		},
 	});
 
@@ -287,8 +305,8 @@ export function WebhookManagement() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['webhook-events']);
-			queryClient.invalidateQueries(['webhook-endpoints']);
+			queryClient.invalidateQueries({ queryKey: ['webhook-events'] });
+			queryClient.invalidateQueries({ queryKey: ['webhook-endpoints'] });
 		},
 	});
 
@@ -337,7 +355,7 @@ export function WebhookManagement() {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button variant="outline" onClick={() => queryClient.invalidateQueries(['webhook-events'])}>
+					<Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ['webhook-events'] })}>
 						<RefreshCw className="mr-2 h-4 w-4" />
 						Refresh
 					</Button>
@@ -575,7 +593,7 @@ export function WebhookManagement() {
 												variant="ghost"
 												size="sm"
 												onClick={() => {
-													setSelectedEndpoint(endpoint);
+													setSelectedEndpoint(endpoint as WebhookEndpoint);
 													setShowEventDetails(true);
 												}}
 											>
@@ -664,26 +682,48 @@ export function WebhookManagement() {
 
 				{/* Logs Tab */}
 				<TabsContent value="logs" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center">
-								<Shield className="mr-2 h-5 w-5" />
-								Delivery Logs
-							</CardTitle>
-							<CardDescription>
-								Detailed logs of webhook delivery attempts and responses
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<div className="text-center py-8">
-								<Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-								<p className="text-muted-foreground">Detailed delivery logs coming soon</p>
-								<p className="text-sm text-muted-foreground mt-2">
-									Advanced logging and debugging features will be available in the next update.
-								</p>
-							</div>
-						</CardContent>
-					</Card>
+					{selectedEndpoint ? (
+						<DeliveryLogs
+							webhookId={parseInt(selectedEndpoint.id)}
+							onViewDelivery={(delivery) => {
+								// Handle viewing delivery details
+								console.log('View delivery:', delivery);
+							}}
+							onRetryDelivery={async (deliveryId) => {
+								try {
+									const response = await fetch(`/api/webhooks/${selectedEndpoint.id}/retry`, {
+										method: 'POST',
+										headers: { 'Content-Type': 'application/json' },
+										body: JSON.stringify({ deliveryId }),
+									});
+									if (response.ok) {
+										// Refresh deliveries
+										queryClient.invalidateQueries({ queryKey: ['webhookDeliveries'] });
+									}
+								} catch (error) {
+									console.error('Failed to retry delivery:', error);
+								}
+							}}
+						/>
+					) : (
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center">
+									<Shield className="mr-2 h-5 w-5" />
+									Delivery Logs
+								</CardTitle>
+								<CardDescription>
+									Select a webhook to view its delivery logs
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="text-center py-8">
+									<Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+									<p className="text-muted-foreground">Select a webhook to view delivery logs</p>
+								</div>
+							</CardContent>
+						</Card>
+					)}
 				</TabsContent>
 			</Tabs>
 

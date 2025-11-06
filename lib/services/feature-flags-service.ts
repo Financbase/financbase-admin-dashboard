@@ -165,7 +165,7 @@ export class FeatureFlagsService {
 				rolloutPercentage: input.rolloutPercentage ?? 0,
 				targetOrganizations: input.targetOrganizations || [],
 				targetUsers: input.targetUsers || [],
-				conditions: input.conditions || {},
+				conditions: (input.conditions || {}) as Record<string, unknown>,
 				metadata: input.metadata || {},
 				updatedAt: new Date(),
 			})
@@ -188,7 +188,7 @@ export class FeatureFlagsService {
 		if (input.rolloutPercentage !== undefined) updateData.rolloutPercentage = input.rolloutPercentage;
 		if (input.targetOrganizations !== undefined) updateData.targetOrganizations = input.targetOrganizations;
 		if (input.targetUsers !== undefined) updateData.targetUsers = input.targetUsers;
-		if (input.conditions !== undefined) updateData.conditions = input.conditions;
+		if (input.conditions !== undefined) updateData.conditions = input.conditions as Record<string, unknown>;
 		if (input.metadata !== undefined) updateData.metadata = input.metadata;
 
 		const result = await db
@@ -233,6 +233,36 @@ export class FeatureFlagsService {
 		// For now, return flags without stats. Can be enhanced later with analytics
 		const flags = await this.getAll();
 		return flags.map(flag => ({ ...flag, usageCount: 0 }));
+	}
+
+	// Wrapper methods for API compatibility
+	static async getAllFlags(): Promise<FeatureFlag[]> {
+		return this.getAll();
+	}
+
+	static async getFlag(key: string): Promise<FeatureFlag | null> {
+		return this.getByKey(key);
+	}
+
+	static async createFlag(input: CreateFeatureFlagInput): Promise<FeatureFlag> {
+		return this.create(input);
+	}
+
+	static async updateFlag(key: string, input: UpdateFeatureFlagInput): Promise<FeatureFlag> {
+		return this.update(key, input);
+	}
+
+	static async deleteFlag(key: string): Promise<boolean> {
+		await this.delete(key);
+		return true;
+	}
+
+	static async enableFlag(key: string): Promise<FeatureFlag> {
+		return this.update(key, { enabled: true });
+	}
+
+	static async disableFlag(key: string): Promise<FeatureFlag> {
+		return this.update(key, { enabled: false });
 	}
 }
 

@@ -97,13 +97,26 @@ interface PublicGridProps {
   columns?: 1 | 2 | 3 | 4;
   gap?: "sm" | "md" | "lg";
   className?: string;
+  /**
+   * Use auto-fit pattern for responsive grids.
+   * When true, uses `repeat(auto-fit, minmax(minWidth, 1fr))` pattern.
+   * minWidth defaults to 250px, but can be customized via className.
+   */
+  autoFit?: boolean;
+  /**
+   * Minimum width for auto-fit pattern (in pixels).
+   * Only used when autoFit is true. Defaults to 250px.
+   */
+  minWidth?: number;
 }
 
 export function PublicGrid({ 
   children, 
   columns = 3, 
   gap = "md", 
-  className 
+  className,
+  autoFit = false,
+  minWidth = 250,
 }: PublicGridProps) {
   const gridClasses = {
     1: "grid-cols-1",
@@ -118,6 +131,25 @@ export function PublicGrid({
     lg: "gap-8",
   };
 
+  // Auto-fit pattern for responsive grids
+  if (autoFit) {
+    return (
+      <div 
+        className={cn(
+          "grid",
+          gapClasses[gap],
+          className
+        )}
+        style={{
+          gridTemplateColumns: `repeat(auto-fit, minmax(${minWidth}px, 1fr))`,
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
+
+  // Breakpoint-based grid (default)
   return (
     <div className={cn(
       "grid",

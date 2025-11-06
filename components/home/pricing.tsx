@@ -157,8 +157,7 @@ export default function Pricing() {
               )}
 
               <Card 
-                className={`h-full transition-all duration-300 hover:shadow-xl border-0 bg-white/70 backdrop-blur-sm ${plan.popular ? 'ring-2' : ''}`}
-                style={plan.popular ? { ringColor: 'var(--brand-primary)' } : {}}
+                className={`h-full transition-all duration-300 hover:shadow-xl border-0 bg-white/70 backdrop-blur-sm ${plan.popular ? 'ring-2 ring-[var(--brand-primary)]' : ''}`}
               >
                 <CardHeader className="text-center pb-8">
                   <div className="flex items-center justify-center mb-4">

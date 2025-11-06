@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import RuixenMenuOptions from "@/components/ui/ruixen-menu-options";
+import { RuixenMenuOptions } from "@/components/ui/ruixen-menu-options";
 
 export default function DemoOne() {
 	return (

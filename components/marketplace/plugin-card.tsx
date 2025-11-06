@@ -87,7 +87,7 @@ export function PluginCard({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['installedPlugins']);
+      queryClient.invalidateQueries({ queryKey: ['installedPlugins'] });
       setShowInstallDialog(false);
     },
   });
@@ -100,7 +100,7 @@ export function PluginCard({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['installedPlugins']);
+      queryClient.invalidateQueries({ queryKey: ['installedPlugins'] });
     },
   });
 

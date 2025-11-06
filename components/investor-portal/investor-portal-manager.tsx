@@ -10,6 +10,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { toast } from "@/lib/toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -177,10 +178,21 @@ export function InvestorPortalManager() {
 		}
 	};
 
-	const copyAccessUrl = (portal: InvestorPortal) => {
+	const copyAccessUrl = async (portal: InvestorPortal) => {
 		const url = `${window.location.origin}/investor/${portal.id}?token=${portal.accessToken}`;
-		navigator.clipboard.writeText(url);
-		// TODO: Show toast notification
+		try {
+			await navigator.clipboard.writeText(url);
+			toast.success(
+				'Access URL copied',
+				'The investor portal access URL has been copied to your clipboard.'
+			);
+		} catch (error) {
+			console.error('Failed to copy URL:', error);
+			toast.error(
+				'Failed to copy URL',
+				'Please copy the URL manually from the address bar.'
+			);
+		}
 	};
 
 	const getStatusBadge = (portal: InvestorPortal) => {

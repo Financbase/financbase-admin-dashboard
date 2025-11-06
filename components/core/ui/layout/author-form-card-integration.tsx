@@ -15,6 +15,16 @@ import {
 	Plus,
 	Save,
 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+	Dialog,
+	DialogContent,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { AuthorFormCard } from "@/components/core/ui/layout/author-form-card";
 /**
  * AuthorFormCard Integration Example
  *
@@ -39,12 +49,12 @@ import {
 // Example 1: Modal Integration (Most Common)
 export function AuthorManagementModal() {
 	const [isOpen, setIsOpen] = useState(false);
-	const [authors, setAuthors] = useState([]);
+	const [authors, setAuthors] = useState<any[]>([]);
 
-	const handleCreateAuthor = (data) => {
+	const handleCreateAuthor = (data: any) => {
 		// Here you would typically make an API call to save the author
 		console.log("Creating author:", data);
-		setAuthors((prev) => [...prev, { id: Date.now(), ...data }]);
+		setAuthors((prev: any[]) => [...prev, { id: Date.now(), ...data }]);
 		setIsOpen(false);
 		toast.success(`Author "${data.name}" has been created!`);
 	};
@@ -65,8 +75,8 @@ export function AuthorManagementModal() {
 }
 
 // Example 2: Edit Existing Author
-export function EditAuthorModal({ author, onUpdate }) {
-	const handleUpdateAuthor = (data) => {
+export function EditAuthorModal({ author, onUpdate }: { author: any; onUpdate: (id: string, data: any) => void }) {
+	const handleUpdateAuthor = (data: any) => {
 		onUpdate(author.id, data);
 		toast.success(`Author "${data.name}" has been updated!`);
 	};
@@ -91,7 +101,7 @@ export function EditAuthorModal({ author, onUpdate }) {
 
 // Example 3: Page-level Integration
 export function CreateAuthorPage() {
-	const handleCreateAuthor = (data) => {
+	const handleCreateAuthor = (data: any) => {
 		// API call to create author
 		console.log("Creating author:", data);
 		// Redirect or show success message
@@ -114,7 +124,7 @@ export function CreateAuthorPage() {
 export function AuthorQuickAdd() {
 	const [showForm, setShowForm] = useState(false);
 
-	const handleQuickAdd = (data) => {
+	const handleQuickAdd = (data: any) => {
 		console.log("Quick add author:", data);
 		setShowForm(false);
 		toast.success("Author added successfully!");

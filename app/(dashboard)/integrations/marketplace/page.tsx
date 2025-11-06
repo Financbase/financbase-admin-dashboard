@@ -48,6 +48,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
 interface Plugin {
   id: number;
@@ -88,6 +90,8 @@ export default function PluginMarketplacePage() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [installingPlugins, setInstallingPlugins] = useState<Set<number>>(new Set());
+  const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
   const [marketplaceStats, setMarketplaceStats] = useState<MarketplaceStats>({
     totalPlugins: 0,
@@ -914,7 +918,14 @@ export default function PluginMarketplacePage() {
                         <Trash2 className="h-4 w-4 mr-2" />
                         Uninstall
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPlugin(plugin);
+                          setViewDialogOpen(true);
+                        }}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1020,6 +1031,131 @@ export default function PluginMarketplacePage() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Plugin Details Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {selectedPlugin && (
+                <>
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <selectedPlugin.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <div>{selectedPlugin.name}</div>
+                    <p className="text-sm font-normal text-muted-foreground">
+                      by {selectedPlugin.developer}
+                    </p>
+                  </div>
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedPlugin?.description}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedPlugin && (
+            <div className="space-y-6 py-4">
+              <div className="flex items-center gap-4">
+                <Badge className={getStatusColor(selectedPlugin.status)}>
+                  {selectedPlugin.status}
+                </Badge>
+                <Badge className={getPriceColor(selectedPlugin.price)}>
+                  {selectedPlugin.price}
+                </Badge>
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                  <span className="text-sm font-semibold">{selectedPlugin.rating}</span>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  {selectedPlugin.downloads.toLocaleString()} downloads
+                </Badge>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Version</h4>
+                  <p className="text-sm text-muted-foreground">{selectedPlugin.version}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Last Updated</h4>
+                  <p className="text-sm text-muted-foreground">{selectedPlugin.lastUpdated}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Category</h4>
+                  <p className="text-sm text-muted-foreground">{selectedPlugin.category}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Compatibility</h4>
+                  <p className="text-sm text-muted-foreground">{selectedPlugin.compatibility}</p>
+                </div>
+              </div>
+
+              {selectedPlugin.features && selectedPlugin.features.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Features</h4>
+                    <ul className="list-disc list-inside space-y-1">
+                      {selectedPlugin.features.map((feature, index) => (
+                        <li key={index} className="text-sm text-muted-foreground">
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+
+              <Separator />
+
+              <div className="flex gap-2">
+                {selectedPlugin.status === "installed" ? (
+                  <>
+                    <Button variant="outline" className="flex-1">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Configure
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => handleUninstallPlugin(selectedPlugin.id)}
+                      disabled={loading}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Uninstall
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    className="flex-1"
+                    onClick={() => {
+                      handleInstallPlugin(selectedPlugin.id);
+                      setViewDialogOpen(false);
+                    }}
+                    disabled={installingPlugins.has(selectedPlugin.id) || loading}
+                  >
+                    {installingPlugins.has(selectedPlugin.id) ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Installing...
+                      </>
+                    ) : (
+                      <>
+                        <DownloadIcon className="h-4 w-4 mr-2" />
+                        Install
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

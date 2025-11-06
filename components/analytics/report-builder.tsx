@@ -76,7 +76,10 @@ interface ReportConfig {
 	category: string;
 	isPublic: boolean;
 	isTemplate: boolean;
-	filters: any[];
+	filters?: {
+		dateRange?: { start: Date | string; end: Date | string };
+		[key: string]: any;
+	};
 	layout: "grid" | "masonry" | "single";
 	refreshInterval?: number;
 }
@@ -161,7 +164,6 @@ export function ReportBuilder() {
 		category: "",
 		isPublic: false,
 		isTemplate: false,
-		filters: [],
 		layout: "grid",
 	});
 	const [widgets, setWidgets] = useState<Widget[]>([]);
@@ -321,7 +323,6 @@ export function ReportBuilder() {
 			category: template.category,
 			isPublic: template.isPublic,
 			isTemplate: false,
-			filters: [],
 			layout: "grid",
 		});
 	}, []);

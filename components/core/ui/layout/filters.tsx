@@ -32,7 +32,24 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import {} from "lucide-react";
+import {
+	CircleDashed,
+	Circle,
+	UserCircle,
+	Tag,
+	SignalHigh,
+	SignalMedium,
+	Calendar,
+	CalendarCheck,
+	FileText,
+	User,
+	UserCheck,
+	UserX,
+	X,
+	CheckCircle,
+	XCircle,
+	Check,
+} from "lucide-react";
 import {
 	type Dispatch,
 	type SetStateAction,
@@ -201,15 +218,15 @@ const FilterIcon = ({
 		case Status.SUBMITTED:
 			return <Circle className="size-3.5 text-yellow-400" />;
 		case Status.APPROVED:
-			return <CircleCheck className="size-3.5 text-green-400" />;
+			return <CheckCircle className="size-3.5 text-green-400" />;
 		case Status.REJECTED:
-			return <CircleX className="size-3.5 text-red-400" />;
+			return <XCircle className="size-3.5 text-red-400" />;
 		case Status.PAID:
-			return <CircleCheck className="size-3.5 text-blue-400" />;
+			return <CheckCircle className="size-3.5 text-blue-400" />;
 		case Billable.YES:
-			return <CircleCheck className="size-3.5 text-green-400" />;
+			return <CheckCircle className="size-3.5 text-green-400" />;
 		case Billable.NO:
-			return <CircleX className="size-3.5 text-muted-foreground" />;
+			return <XCircle className="size-3.5 text-muted-foreground" />;
 		case AmountRange.UNDER_100:
 			return <div className="bg-green-400 rounded-full size-2.5" />;
 		case AmountRange._100_500:
@@ -342,6 +359,12 @@ export const filterViewToFilterOptions: Record<FilterType, FilterOption[]> = {
 	[FilterType.SUBMITTED_DATE]: dateFilterOptions,
 	[FilterType.APPROVED_DATE]: dateFilterOptions,
 	[FilterType.CREATED_DATE]: dateFilterOptions,
+	[FilterType.TASK_NAME]: [], // Will be populated from API
+	[FilterType.DESCRIPTION]: [], // Will be populated from API
+	[FilterType.USER]: [], // Will be populated from API
+	[FilterType.APPROVED_BY]: [], // Will be populated from API
+	[FilterType.REJECTED_BY]: [], // Will be populated from API
+	[FilterType.REJECTION_REASON]: [], // Will be populated from API
 };
 
 const filterOperators = ({

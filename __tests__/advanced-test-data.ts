@@ -29,8 +29,10 @@ export class AdvancedTestDataManager {
     // Create users
     const users = [];
     for (let i = 0; i < userCount; i++) {
+      const fullName = faker.person.fullName().split(' ');
       const user = await TestDataFactory.createTestUser({
-        name: faker.person.fullName(),
+        firstName: fullName[0] || 'Test',
+        lastName: fullName.slice(1).join(' ') || 'User',
         email: faker.internet.email(),
         role: i === 0 ? 'admin' : faker.helpers.arrayElement(['user', 'viewer']),
       });
@@ -43,8 +45,8 @@ export class AdvancedTestDataManager {
       const userClientCount = Math.floor(clientCount / userCount) + (clients.length % userCount === 0 ? 1 : 0);
       for (let i = 0; i < userClientCount && clients.length < clientCount; i++) {
         const client = await TestDataFactory.createTestClient(user.id, {
-          companyName: faker.company.name(),
-          contactName: faker.person.fullName(),
+          name: faker.company.name(),
+          company: faker.company.name(),
           email: faker.internet.email(),
           phone: faker.phone.number(),
           currency: faker.helpers.arrayElement(['USD', 'EUR', 'GBP']),
@@ -75,7 +77,7 @@ export class AdvancedTestDataManager {
     const projects = [];
     for (let i = 0; i < projectCount; i++) {
       const client = faker.helpers.arrayElement(clients);
-      const project = await TestDataFactory.createTestProject(client.userId, client.id, {
+      const project = await TestDataFactory.createTestProject(client.userId, String(client.id), {
         name: faker.company.buzzPhrase(),
         description: faker.lorem.sentences(2),
         status: faker.helpers.arrayElement(['planning', 'active', 'on_hold', 'completed']),
@@ -168,8 +170,8 @@ export class AdvancedTestDataManager {
 
     // Create data with old schema patterns (if applicable)
     const client = await TestDataFactory.createTestClient(user.id, {
-      companyName: 'Migration Test Company',
-      contactName: 'Migration User',
+      name: 'Migration Test Company',
+      company: 'Migration Test Company',
     });
 
     // Add more migration-specific test data as needed
@@ -179,8 +181,8 @@ export class AdvancedTestDataManager {
 
   static async validateDataIntegrity(data: {
     users?: Array<{id: string}>;
-    clients?: Array<{id: string; userId: string}>;
-    projects?: Array<{id: string; clientId: string; userId: string}>;
+    clients?: Array<{id: string | number; userId: string}>;
+    projects?: Array<{id: string; clientId: string | number; userId: string}>;
   }) {
     console.log('🔍 Validating data integrity');
 
@@ -204,7 +206,7 @@ export class AdvancedTestDataManager {
     // Check that all projects have valid clients and users
     if (data.projects && data.clients && data.users) {
       for (const project of data.projects) {
-        const clientExists = data.clients.some((c) => c.id === project.clientId);
+        const clientExists = data.clients.some((c) => String(c.id) === String(project.clientId));
         const userExists = data.users.some((u) => u.id === project.userId);
         validations.push({
           type: 'foreign_key',
@@ -256,10 +258,10 @@ export class AdvancedTestDataManager {
         totalCampaigns: data.campaigns?.length || 0,
       },
       metrics: {
-        clientsPerUser: data.clients?.length / data.users?.length || 0,
-        projectsPerClient: data.projects?.length / data.clients?.length || 0,
-        transactionsPerClient: data.transactions?.length / data.clients?.length || 0,
-        leadsPerUser: data.leads?.length / data.users?.length || 0,
+        clientsPerUser: (data.clients?.length ?? 0) / (data.users?.length ?? 1) || 0,
+        projectsPerClient: (data.projects?.length ?? 0) / (data.clients?.length ?? 1) || 0,
+        transactionsPerClient: (data.transactions?.length ?? 0) / (data.clients?.length ?? 1) || 0,
+        leadsPerUser: (data.leads?.length ?? 0) / (data.users?.length ?? 1) || 0,
       },
       dataQuality: {
         hasRealisticEmails: data.users?.every((u) => u.email?.includes('@')) || false,

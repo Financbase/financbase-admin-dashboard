@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { PlayStoreButton } from "@/components/ui/play-store-button";
+import { PlayStoreButton } from "@/components/core/ui/buttons/play-store-button";
 import { cn } from "@/lib/utils";
 
 export default function DemoOne() {

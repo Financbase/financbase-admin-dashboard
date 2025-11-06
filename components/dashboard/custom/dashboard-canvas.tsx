@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { 
   Move, 
-  Resize, 
+  Maximize2, 
   Settings, 
   Trash2, 
   Lock, 

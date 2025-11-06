@@ -64,8 +64,8 @@ export default function FirstStepsPage() {
 												Set up your administrator account to access the Financbase dashboard.
 											</p>
 											<Button variant="outline" asChild>
-												<Link href="/dashboard">
-													Go to Dashboard
+												<Link href="/auth/sign-up">
+													Get Started
 													<ArrowRight className="h-4 w-4 ml-2" />
 												</Link>
 											</Button>
@@ -174,9 +174,9 @@ export default function FirstStepsPage() {
 								</p>
 								<div className="flex flex-col sm:flex-row gap-4 justify-center">
 									<Button asChild>
-										<Link href="/dashboard">
+										<Link href="/auth/sign-up">
 											<Settings className="h-4 w-4 mr-2" />
-											Go to Dashboard
+											Get Started Free
 										</Link>
 									</Button>
 									<Button variant="outline" asChild>

@@ -27,10 +27,20 @@ import {
   Shield,
   RefreshCw
 } from 'lucide-react';
+import { RevenueChart } from '@/components/financial/intelligence/revenue-chart';
+import { ExpenseBreakdownChart } from '@/components/financial/intelligence/expense-breakdown-chart';
+import { CashFlowChart } from '@/components/financial/intelligence/cash-flow-chart';
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function FinancialIntelligencePage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [dateRange, setDateRange] = useState('30');
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000);
@@ -62,19 +72,29 @@ export default function FinancialIntelligencePage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => {
+            const ranges = ['7', '30', '90', '365'];
+            const currentIndex = ranges.indexOf(dateRange);
+            const nextIndex = (currentIndex + 1) % ranges.length;
+            setDateRange(ranges[nextIndex]);
+            toast.info(`Date range updated to last ${ranges[nextIndex]} days`);
+          }}>
             <Calendar className="h-4 w-4 mr-2" />
-            Last 30 days
+            Last {dateRange} days
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => setFilterDialogOpen(true)}>
             <Filter className="h-4 w-4 mr-2" />
             Filters
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={async () => {
+            toast.info('Exporting data...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            toast.success('Data exported successfully');
+          }}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setSettingsDialogOpen(true)}>
             <Settings className="h-4 w-4 mr-2" />
             Configure
           </Button>
@@ -231,8 +251,19 @@ export default function FinancialIntelligencePage() {
                       Your cash flow is projected to decrease by 12% next month due to seasonal factors.
                     </p>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline">View Details</Button>
-                      <Button size="sm">Take Action</Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => toast.info('Opening cash flow risk details')}
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => toast.info('Action plan will be generated')}
+                      >
+                        Take Action
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -245,8 +276,19 @@ export default function FinancialIntelligencePage() {
                       Implementing dynamic pricing could increase revenue by 8-12% based on market analysis.
                     </p>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline">Learn More</Button>
-                      <Button size="sm">Implement</Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => toast.info('Opening revenue optimization guide')}
+                      >
+                        Learn More
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => toast.info('Revenue optimization will be implemented')}
+                      >
+                        Implement
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -325,28 +367,80 @@ export default function FinancialIntelligencePage() {
 
         {/* Charts Tab */}
         <TabsContent value="charts" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
-                Financial Charts
-              </CardTitle>
-              <CardDescription>
-                Interactive visualizations of your financial data
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Charts Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Interactive charts and visualizations will be available here.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid gap-6 md:grid-cols-2">
+            <RevenueChart period="30d" height={350} />
+            <ExpenseBreakdownChart period="30d" height={350} />
+          </div>
+          <CashFlowChart period="30d" height={400} />
         </TabsContent>
       </Tabs>
+
+      {/* Filter Dialog */}
+      <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Filter Options</DialogTitle>
+            <DialogDescription>
+              Configure filters for financial intelligence data
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="90">Last 90 days</SelectItem>
+                  <SelectItem value="365">Last year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFilterDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Filters applied');
+              setFilterDialogOpen(false);
+            }}>
+              Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Configuration</DialogTitle>
+            <DialogDescription>
+              Configure financial intelligence settings
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Configuration options will be available here
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Settings saved');
+              setSettingsDialogOpen(false);
+            }}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

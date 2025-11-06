@@ -14,7 +14,10 @@ import type React from "react"
 import { useState } from "react"
 import { BarChart3, Users, Briefcase, Package, CreditCard, Flag, Bell, FileText, Settings, Shield, X, Menu, User, LogOut } from "lucide-react"
 import Link from "next/link"
-import { Button, Avatar, AvatarFallback, AvatarImage, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, cn } from "../src/design-system"
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: BarChart3, current: true },

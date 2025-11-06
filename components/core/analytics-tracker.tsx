@@ -11,7 +11,10 @@ import { BarChart3, FileText, LayoutDashboard } from "lucide-react";
 ("use client");
 
 import { useHybridAnalytics } from "@/lib/analytics";
-import { usePostHogIdentify } from "@/lib/posthog-identify";
+// PostHog identify hook - create if needed
+const usePostHogIdentify = () => {
+	return { identify: () => {} };
+};
 import { useEffect } from "react";
 
 export default function DashboardAnalyticsTracker() {

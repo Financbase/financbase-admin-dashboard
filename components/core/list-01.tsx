@@ -97,7 +97,39 @@ export default function List01({ className }: List01Props) {
 		);
 	}
 
-	if (!financialData?.accounts || financialData.accounts.length === 0) {
+	// Transform AccountBalances to accounts array
+	const accounts: AccountItem[] = financialData ? [
+		{
+			id: 'checking',
+			title: 'Checking Account',
+			description: 'Primary checking account',
+			balance: financialData.checking?.balance ?? 0,
+			type: 'checking' as const,
+		},
+		{
+			id: 'savings',
+			title: 'Savings Account',
+			description: 'Personal savings',
+			balance: financialData.savings?.balance ?? 0,
+			type: 'savings' as const,
+		},
+		{
+			id: 'investment',
+			title: 'Investment Account',
+			description: 'Investment portfolio',
+			balance: financialData.investment?.balance ?? 0,
+			type: 'investment' as const,
+		},
+		{
+			id: 'credit',
+			title: 'Credit Account',
+			description: 'Credit card balance',
+			balance: financialData.credit?.balance ?? 0,
+			type: 'debt' as const,
+		},
+	].filter(acc => acc.balance !== 0) : [];
+
+	if (!accounts || accounts.length === 0) {
 		return (
 			<div
 				className={cn(
@@ -122,24 +154,24 @@ export default function List01({ className }: List01Props) {
 		}).format(amount);
 	};
 
-	const totalBalance = financialData.accounts.reduce(
-		(sum, account) => sum + account.balance,
+	const totalBalance = accounts.reduce(
+		(sum: number, account: AccountItem) => sum + account.balance,
 		0,
 	);
-	const accounts: AccountItem[] = financialData.accounts.map((account) => ({
-		id: account.id,
-		title: account.name,
-		description:
-			account.type === "savings"
-				? "Personal savings"
-				: account.type === "checking"
-					? "Daily expenses"
-					: account.type === "investment"
-						? "Stock & ETFs"
-						: "Pending charges",
-		balance: account.balance,
-		type: account.type as "savings" | "checking" | "investment" | "debt",
-	}));
+	const mappedAccounts: AccountItem[] = accounts.map((account) => ({
+			id: account.id,
+			title: account.title,
+			description: account.description ||
+				(account.type === "savings"
+					? "Personal savings"
+					: account.type === "checking"
+						? "Daily expenses"
+						: account.type === "investment"
+							? "Stock & ETFs"
+							: "Pending charges"),
+			balance: account.balance,
+			type: account.type as "savings" | "checking" | "investment" | "debt",
+		}));
 	return (
 		<DashboardErrorBoundary>
 			<div
@@ -170,7 +202,7 @@ export default function List01({ className }: List01Props) {
 					</div>
 
 					<div className="space-y-1">
-						{accounts.map((account) => (
+						{mappedAccounts.map((account) => (
 							<div
 								key={account.id}
 								className={cn(

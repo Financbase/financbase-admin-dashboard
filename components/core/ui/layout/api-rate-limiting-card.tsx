@@ -37,7 +37,8 @@ export const Component = ({
 	hours = 24,
 }: ComponentProps) => {
 	const controls = useAnimation();
-	const { data, loading, error } = useRateLimitingData(hours);
+	const rateLimitingResult = useRateLimitingData(hours);
+	const { data, loading, error } = rateLimitingResult;
 
 	useEffect(() => {
 		const sequence = async () => {

@@ -191,12 +191,12 @@ export default function TwoFactorAuthPage() {
 						<h2 className="text-2xl font-semibold mb-6">Quick Actions</h2>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<Button asChild variant="outline" className="justify-start h-auto py-4">
-								<Link href="/settings/security">
+								<Link href="/auth/sign-up">
 									<Shield className="h-4 w-4 mr-2" />
 									<div className="text-left">
-										<div className="font-semibold">Security Settings</div>
+										<div className="font-semibold">Get Started</div>
 										<div className="text-xs text-muted-foreground">
-											Enable or manage 2FA
+											Create your account to enable 2FA
 										</div>
 									</div>
 									<ArrowRight className="h-4 w-4 ml-auto" />

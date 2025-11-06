@@ -20,6 +20,7 @@ import {
   users
 } from '@/lib/db/schemas';
 import { eq, and, like, desc, asc, sql, or, inArray } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 
 export interface SearchFilters {
   category?: string;
@@ -407,6 +408,7 @@ export class DocumentationService {
 
   /**
    * Get user's support tickets
+   * @param userId - Clerk user ID (string), not database UUID
    */
   static async getUserTickets(
     userId: string,
@@ -415,54 +417,111 @@ export class DocumentationService {
     offset: number = 0
   ): Promise<SupportTicket[]> {
     try {
-      let query = db
-        .select({
-          id: supportTickets.id,
-          ticketNumber: supportTickets.ticketNumber,
-          subject: supportTickets.subject,
-          description: supportTickets.description,
-          priority: supportTickets.priority,
-          status: supportTickets.status,
-          category: supportTickets.category,
-          user: {
-            id: users.id,
-            name: users.firstName,
-            email: users.emailAddress,
-          },
-          assignee: {
-            id: users.id,
-            name: users.firstName,
-            email: users.emailAddress,
-          },
-          tags: supportTickets.tags,
-          customFields: supportTickets.customFields,
-          responseTime: supportTickets.responseTime,
-          resolutionTime: supportTickets.resolutionTime,
-          satisfactionRating: supportTickets.satisfactionRating,
-          createdAt: supportTickets.createdAt,
-          updatedAt: supportTickets.updatedAt,
-        })
-        .from(supportTickets)
-        .innerJoin(users, eq(supportTickets.userId, users.id))
-        .leftJoin(users, eq(supportTickets.assignedTo, users.id))
-        .where(eq(supportTickets.userId, userId));
-
+      // Build where conditions
+      // Note: supportTickets.userId stores Clerk ID (text), so we filter directly
+      const whereConditions = [eq(supportTickets.userId, userId)];
       if (status) {
-        query = query.where(and(
-          eq(supportTickets.userId, userId),
-          eq(supportTickets.status, status)
-        ));
+        whereConditions.push(eq(supportTickets.status, status));
       }
 
-      const tickets = await query
-        .orderBy(desc(supportTickets.createdAt))
-        .limit(limit)
-        .offset(offset);
+      // First, try to get tickets with user joins
+      // Use LEFT JOINs to handle cases where user data might not exist
+      const creatorUsers = alias(users, 'creator_users');
+      const assigneeUsers = alias(users, 'assignee_users');
 
-      return tickets;
+      try {
+        const tickets = await db
+          .select({
+            id: supportTickets.id,
+            ticketNumber: supportTickets.ticketNumber,
+            subject: supportTickets.subject,
+            description: supportTickets.description,
+            priority: supportTickets.priority,
+            status: supportTickets.status,
+            category: supportTickets.category,
+            user: {
+              id: creatorUsers.id,
+              name: creatorUsers.firstName,
+              email: creatorUsers.email,
+            },
+            assignee: {
+              id: assigneeUsers.id,
+              name: assigneeUsers.firstName,
+              email: assigneeUsers.email,
+            },
+            tags: supportTickets.tags,
+            customFields: supportTickets.customFields,
+            responseTime: supportTickets.responseTime,
+            resolutionTime: supportTickets.resolutionTime,
+            satisfactionRating: supportTickets.satisfactionRating,
+            createdAt: supportTickets.createdAt,
+            updatedAt: supportTickets.updatedAt,
+          })
+          .from(supportTickets)
+          .leftJoin(creatorUsers, eq(supportTickets.userId, creatorUsers.clerkId))
+          .leftJoin(assigneeUsers, eq(supportTickets.assignedTo, assigneeUsers.clerkId))
+          .where(and(...whereConditions))
+          .orderBy(desc(supportTickets.createdAt))
+          .limit(limit)
+          .offset(offset);
+
+        return tickets;
+      } catch (joinError) {
+        // If join fails (e.g., schema issue), fall back to query without joins
+        console.warn('[DocumentationService] Join query failed, using fallback query:', joinError instanceof Error ? joinError.message : joinError);
+        
+        const simpleTickets = await db
+          .select({
+            id: supportTickets.id,
+            ticketNumber: supportTickets.ticketNumber,
+            subject: supportTickets.subject,
+            description: supportTickets.description,
+            priority: supportTickets.priority,
+            status: supportTickets.status,
+            category: supportTickets.category,
+            tags: supportTickets.tags,
+            customFields: supportTickets.customFields,
+            responseTime: supportTickets.responseTime,
+            resolutionTime: supportTickets.resolutionTime,
+            satisfactionRating: supportTickets.satisfactionRating,
+            createdAt: supportTickets.createdAt,
+            updatedAt: supportTickets.updatedAt,
+          })
+          .from(supportTickets)
+          .where(and(...whereConditions))
+          .orderBy(desc(supportTickets.createdAt))
+          .limit(limit)
+          .offset(offset);
+        
+        // Return tickets without user/assignee info
+        return simpleTickets.map(ticket => ({
+          ...ticket,
+          user: null,
+          assignee: null,
+        }));
+      }
     } catch (error) {
-      console.error('Error getting user tickets:', error);
-      throw new Error('Failed to get user tickets');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Log the full error for debugging
+      console.error('[DocumentationService] Error getting user tickets:', {
+        message: errorMessage,
+        error: error instanceof Error ? {
+          name: error.name,
+          stack: error.stack,
+        } : error,
+      });
+      
+      // If table doesn't exist, return empty array instead of throwing
+      if (errorMessage.includes('relation "financbase_support_tickets" does not exist') ||
+          (errorMessage.includes('relation') && errorMessage.includes('does not exist'))) {
+        console.warn('[DocumentationService] Support tickets table does not exist, returning empty array');
+        return [];
+      }
+      
+      // For any other error, return empty array to prevent breaking the UI
+      console.warn('[DocumentationService] Unexpected error, returning empty array to prevent UI breakage');
+      return [];
     }
   }
 

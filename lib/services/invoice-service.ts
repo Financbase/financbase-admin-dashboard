@@ -17,6 +17,7 @@ import { db } from '@/lib/db';
 import { invoices, invoicePayments, type Invoice } from '@/lib/db/schema/invoices';
 import { eq, and, desc, gte, lte, or } from 'drizzle-orm';
 import { NotificationHelpers } from './notification-service';
+import { EmailService } from '@/lib/email/service';
 
 interface CreateInvoiceInput {
 	userId: string;
@@ -232,7 +233,23 @@ export async function markInvoiceAsSent(id: string, userId: string): Promise<Inv
 		))
 		.returning();
 
-	// TODO: Send invoice email to client
+	// Send invoice email to client
+	if (updated && updated.clientEmail) {
+		try {
+			await EmailService.sendInvoiceEmail(
+				updated.clientEmail,
+				{
+					invoiceNumber: updated.invoiceNumber,
+					amount: Number(updated.total),
+					dueDate: updated.dueDate.toISOString(),
+					description: updated.notes || undefined,
+				}
+			);
+		} catch (error) {
+			console.error('Failed to send invoice email:', error);
+			// Don't throw - email failure shouldn't prevent invoice from being marked as sent
+		}
+	}
 
 	return updated;
 }

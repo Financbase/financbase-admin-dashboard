@@ -96,13 +96,49 @@ PAYPAL_CLIENT_ID=...
 PAYPAL_CLIENT_SECRET=...
 ```
 
-### Real-time Features
+### Real-time Features (PartyKit)
 
 ```env
-# PartyKit (for real-time collaboration)
-NEXT_PUBLIC_PARTYKIT_HOST=...
-PARTYKIT_ROOM_ID=...
+# PartyKit - Required for real-time collaboration, notifications, and WebSocket connections
+# For Cloudflare-hosted deployments: your-project.your-subdomain.partykit.dev
+# For local development: localhost:1999
+NEXT_PUBLIC_PARTYKIT_HOST=your-project.your-subdomain.partykit.dev
+
+# Optional: PartyKit secret for authenticated API calls
+PARTYKIT_SECRET=your-partykit-secret-token
+
+# Optional: Default room ID for WebSocket connections
+PARTYKIT_ROOM_ID=financbase-main
 ```
+
+**PartyKit Setup (Cloudflare):**
+1. Deploy PartyKit server: `npx partykit deploy`
+2. Get your PartyKit host URL from Cloudflare dashboard
+3. Set `NEXT_PUBLIC_PARTYKIT_HOST` to your deployed PartyKit URL
+4. The server file is located at `partykit/server.ts`
+5. Party name: `financbase-partykit` (defined in `partykit.json`)
+
+### Cloudflare R2 Storage
+
+```env
+# Cloudflare R2 Storage - Required for file uploads, audio recordings, and document storage
+CLOUDFLARE_ACCOUNT_ID=your-account-id
+R2_ACCESS_KEY_ID=your-r2-access-key-id
+R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
+R2_BUCKET=cms-admin-files
+R2_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com  # Optional, defaults to account-based URL
+R2_PUBLIC_DOMAIN=https://cdn.financbase.com  # Optional, for public file URLs via CDN
+
+# Cloudflare Workers WebSocket (optional, for real-time features)
+NEXT_PUBLIC_CLOUDFLARE_WEBSOCKET_URL=wss://your-worker.workers.dev
+NEXT_PUBLIC_WEBSOCKET_URL_DEV=ws://localhost:8787  # Development WebSocket URL
+```
+
+**Note:** 
+- Get your Cloudflare Account ID from the Cloudflare dashboard
+- Create R2 API tokens in Cloudflare Dashboard → R2 → Manage R2 API Tokens
+- `R2_PUBLIC_DOMAIN` should be set to your CDN custom domain when configured
+- WebSocket URL should point to your deployed Cloudflare Worker
 
 ### Caching & Performance
 

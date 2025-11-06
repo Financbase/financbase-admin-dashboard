@@ -24,7 +24,12 @@ import {
 	startOfToday,
 	startOfWeek,
 } from "date-fns";
-import {} from "lucide-react";
+import {
+	Search,
+	ChevronLeft,
+	ChevronRight,
+	PlusCircle,
+} from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -114,7 +119,7 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
 
 				<div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
 					<Button variant="outline" size="icon" className="hidden lg:flex">
-						<SearchIcon size={16} strokeWidth={2} aria-hidden="true" />
+						<Search size={16} strokeWidth={2} aria-hidden="true" />
 					</Button>
 
 					<Separator orientation="vertical" className="hidden h-6 lg:block" />
@@ -127,7 +132,7 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
 							size="icon"
 							aria-label="Navigate to previous month"
 						>
-							<ChevronLeftIcon size={16} strokeWidth={2} aria-hidden="true" />
+							<ChevronLeft size={16} strokeWidth={2} aria-hidden="true" />
 						</Button>
 						<Button
 							onClick={goToToday}
@@ -143,7 +148,7 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
 							size="icon"
 							aria-label="Navigate to next month"
 						>
-							<ChevronRightIcon size={16} strokeWidth={2} aria-hidden="true" />
+							<ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
 						</Button>
 					</div>
 
@@ -154,7 +159,7 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
 					/>
 
 					<Button className="w-full gap-2 md:w-auto">
-						<PlusCircleIcon size={16} strokeWidth={2} aria-hidden="true" />
+						<PlusCircle size={16} strokeWidth={2} aria-hidden="true" />
 						<span>New Event</span>
 					</Button>
 				</div>

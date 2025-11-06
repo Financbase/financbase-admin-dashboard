@@ -122,7 +122,7 @@ export function PluginDetails({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['installedPlugins']);
+      queryClient.invalidateQueries({ queryKey: ['installedPlugins'] });
     },
   });
 
@@ -134,7 +134,7 @@ export function PluginDetails({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['installedPlugins']);
+      queryClient.invalidateQueries({ queryKey: ['installedPlugins'] });
     },
   });
 
