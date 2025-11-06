@@ -22,12 +22,12 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-	Template,
 	FileText,
 	Copy,
 	Edit,
 	Trash2,
 	Plus,
+	LayoutTemplate,
 	Search,
 	Star,
 	Clock,
@@ -138,7 +138,7 @@ export function AlertsTemplates() {
 			case "security":
 				return <span className="text-purple-500">🔒</span>;
 			default:
-				return <Template className="h-4 w-4 text-gray-500" />;
+				return <LayoutTemplate className="h-4 w-4 text-gray-500" />;
 		}
 	};
 
@@ -206,7 +206,7 @@ export function AlertsTemplates() {
 			{filteredTemplates.length === 0 ? (
 				<Card>
 					<CardContent className="p-8 text-center">
-						<Template className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+						<LayoutTemplate className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
 						<h3 className="text-lg font-semibold mb-2">No templates found</h3>
 						<p className="text-muted-foreground mb-4">
 							Try adjusting your search criteria or create a new template.

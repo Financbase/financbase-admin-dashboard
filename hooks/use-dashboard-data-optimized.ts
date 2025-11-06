@@ -276,7 +276,7 @@ export function useAccountBalances() {
 	});
 
 	return {
-		data: balances?.balances || {},
+		data: (balances?.balances || null) as AccountBalances | null,
 		loading: isLoading,
 		error: error?.message || null
 	};

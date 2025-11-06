@@ -89,6 +89,35 @@ export const updateExpenseSchema = createExpenseSchema.partial().extend({
   id: z.number().positive('Valid expense ID is required')
 });
 
+// Budget validation schemas
+export const createBudgetSchema = z.object({
+  userId: z.string().min(1, 'User ID is required'),
+  name: z.string().min(1, 'Budget name is required').max(200, 'Budget name must be less than 200 characters'),
+  category: z.string().min(1, 'Category is required'),
+  description: z.string().optional(),
+  budgetedAmount: z.number().positive('Budgeted amount must be positive'),
+  currency: z.string().default('USD'),
+  periodType: z.enum(['monthly', 'yearly']).default('monthly'),
+  startDate: z.string().datetime('Valid start date is required'),
+  endDate: z.string().datetime('Valid end date is required'),
+  alertThresholds: z.array(z.number().min(0).max(200)).default([80, 90, 100]),
+  status: z.enum(['active', 'archived', 'paused']).default('active'),
+  notes: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.any()).optional()
+}).refine((data) => {
+  const start = new Date(data.startDate);
+  const end = new Date(data.endDate);
+  return end > start;
+}, {
+  message: 'End date must be after start date',
+  path: ['endDate']
+});
+
+export const updateBudgetSchema = createBudgetSchema.partial().extend({
+  id: z.number().positive('Valid budget ID is required')
+});
+
 // Client validation schemas
 export const createClientSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
@@ -171,3 +200,186 @@ export type CreateBlogPostInput = z.infer<typeof createBlogPostSchema>;
 export type UpdateBlogPostInput = z.infer<typeof updateBlogPostSchema>;
 export type CreateBlogCategoryInput = z.infer<typeof createBlogCategorySchema>;
 export type UpdateBlogCategoryInput = z.infer<typeof updateBlogCategorySchema>;
+export type CreateBudgetInput = z.infer<typeof createBudgetSchema>;
+export type UpdateBudgetInput = z.infer<typeof updateBudgetSchema>;
+
+// HR Contractors validation schemas
+export const createContractorSchema = z.object({
+  userId: z.string().min(1, 'User ID is required'),
+  organizationId: z.string().uuid('Valid organization ID is required'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Valid email is required'),
+  phone: z.string().optional(),
+  contractorType: z.enum(['1099', 'w2', 'c2c', 'other']).default('1099'),
+  companyName: z.string().optional(),
+  hourlyRate: z.string().optional(),
+  monthlyRate: z.string().optional(),
+  annualRate: z.string().optional(),
+  currency: z.string().default('USD'),
+  paymentTerms: z.enum(['net_15', 'net_30', 'net_45', 'net_60', 'due_on_receipt', 'custom']).default('net_30'),
+  customPaymentTerms: z.string().optional(),
+  contractStartDate: z.string().datetime('Valid contract start date is required'),
+  contractEndDate: z.string().datetime().optional(),
+  status: z.enum(['active', 'inactive', 'terminated', 'pending']).default('active'),
+  location: z.string().optional(),
+  timezone: z.string().default('UTC'),
+  notes: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+export const updateContractorSchema = createContractorSchema.partial().extend({
+  id: z.string().uuid('Valid contractor ID is required'),
+});
+
+// Payroll validation schemas
+export const createPayrollRunSchema = z.object({
+  organizationId: z.string().uuid('Valid organization ID is required'),
+  payPeriodStart: z.string().datetime('Valid pay period start date is required'),
+  payPeriodEnd: z.string().datetime('Valid pay period end date is required'),
+  payDate: z.string().datetime('Valid pay date is required'),
+  payFrequency: z.enum(['weekly', 'biweekly', 'semimonthly', 'monthly']),
+  notes: z.string().optional(),
+});
+
+export const processPayrollSchema = z.object({
+  payrollRunId: z.string().uuid('Valid payroll run ID is required'),
+  employeeIds: z.array(z.string().uuid()).optional(),
+  contractorIds: z.array(z.string().uuid()).optional(),
+});
+
+export const createPayrollDeductionSchema = z.object({
+  organizationId: z.string().uuid('Valid organization ID is required'),
+  employeeId: z.string().uuid().optional(),
+  contractorId: z.string().uuid().optional(),
+  name: z.string().min(1, 'Deduction name is required'),
+  type: z.enum(['401k', '403b', 'health_insurance', 'dental_insurance', 'vision_insurance', 'life_insurance', 'disability_insurance', 'hsa', 'fsa', 'parking', 'transit', 'union_dues', 'garnishment', 'loan', 'other']),
+  amountType: z.enum(['fixed', 'percentage']),
+  amount: z.string().optional(),
+  percentage: z.string().optional(),
+  frequency: z.enum(['per_paycheck', 'monthly', 'yearly', 'one_time']).default('per_paycheck'),
+  maxAmount: z.string().optional(),
+  minAmount: z.string().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+});
+
+export const createPayrollTaxSchema = z.object({
+  organizationId: z.string().uuid('Valid organization ID is required'),
+  name: z.string().min(1, 'Tax name is required'),
+  type: z.enum(['federal_income', 'state_income', 'local_income', 'social_security', 'medicare', 'federal_unemployment', 'state_unemployment', 'other']),
+  jurisdiction: z.string().optional(),
+  rate: z.string().optional(),
+  flatAmount: z.string().optional(),
+  wageBase: z.string().optional(),
+  maxTax: z.string().optional(),
+  effectiveDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+});
+
+export const createPayrollBenefitSchema = z.object({
+  organizationId: z.string().uuid('Valid organization ID is required'),
+  employeeId: z.string().uuid().optional(),
+  contractorId: z.string().uuid().optional(),
+  name: z.string().min(1, 'Benefit name is required'),
+  type: z.enum(['health_insurance', 'dental_insurance', 'vision_insurance', 'life_insurance', 'disability_insurance', 'retirement', 'stock_options', 'tuition', 'wellness', 'other']),
+  coverageType: z.enum(['individual', 'family', 'employee_plus_one']).default('individual'),
+  employerCost: z.string().default('0'),
+  employeeCost: z.string().default('0'),
+  frequency: z.enum(['per_paycheck', 'monthly', 'yearly']).default('per_paycheck'),
+  enrollmentDate: z.string().datetime().optional(),
+  effectiveDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+});
+
+// Leave management validation schemas
+export const createLeaveTypeSchema = z.object({
+  organizationId: z.string().uuid('Valid organization ID is required'),
+  name: z.string().min(1, 'Leave type name is required'),
+  category: z.enum(['vacation', 'sick_leave', 'personal', 'fmla', 'bereavement', 'jury_duty', 'military', 'unpaid', 'other']),
+  accrualMethod: z.enum(['none', 'fixed', 'per_hour', 'per_week', 'per_month', 'per_year', 'proportional']).default('none'),
+  accrualRate: z.string().optional(),
+  accrualPeriod: z.enum(['hourly', 'daily', 'weekly', 'biweekly', 'monthly', 'yearly']).optional(),
+  maxAccrual: z.string().optional(),
+  initialBalance: z.string().default('0'),
+  allowCarryover: z.boolean().default(false),
+  maxCarryover: z.string().optional(),
+  requiresApproval: z.boolean().default(true),
+  advanceNoticeDays: z.number().optional(),
+});
+
+export const requestLeaveSchema = z.object({
+  employeeId: z.string().uuid('Valid employee ID is required'),
+  leaveTypeId: z.string().uuid('Valid leave type ID is required'),
+  organizationId: z.string().uuid('Valid organization ID is required'),
+  startDate: z.string().datetime('Valid start date is required'),
+  endDate: z.string().datetime('Valid end date is required'),
+  duration: z.string(),
+  durationUnit: z.enum(['hours', 'days']).default('hours'),
+  reason: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export const approveLeaveSchema = z.object({
+  requestId: z.string().uuid('Valid leave request ID is required'),
+  approved: z.boolean(),
+  rejectionReason: z.string().optional(),
+});
+
+// Attendance validation schemas
+export const clockInSchema = z.object({
+  employeeId: z.string().uuid().optional(),
+  contractorId: z.string().uuid().optional(),
+  organizationId: z.string().uuid('Valid organization ID is required'),
+  location: z.object({
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
+    address: z.string().optional(),
+    ip: z.string().optional(),
+  }).optional(),
+  method: z.enum(['web', 'mobile', 'kiosk', 'biometric', 'api', 'manual']).default('web'),
+  notes: z.string().optional(),
+});
+
+export const clockOutSchema = z.object({
+  attendanceRecordId: z.string().uuid('Valid attendance record ID is required'),
+  location: z.object({
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
+    address: z.string().optional(),
+    ip: z.string().optional(),
+  }).optional(),
+  method: z.enum(['web', 'mobile', 'kiosk', 'biometric', 'api', 'manual']).default('web'),
+  notes: z.string().optional(),
+});
+
+export const createTimeCardSchema = z.object({
+  employeeId: z.string().uuid().optional(),
+  contractorId: z.string().uuid().optional(),
+  organizationId: z.string().uuid('Valid organization ID is required'),
+  payPeriodStart: z.string().datetime('Valid pay period start date is required'),
+  payPeriodEnd: z.string().datetime('Valid pay period end date is required'),
+  payFrequency: z.enum(['weekly', 'biweekly', 'semimonthly', 'monthly']),
+  notes: z.string().optional(),
+});
+
+export const updateTimeCardSchema = createTimeCardSchema.partial().extend({
+  id: z.string().uuid('Valid time card ID is required'),
+  status: z.enum(['draft', 'submitted', 'approved', 'rejected', 'paid']).optional(),
+});
+
+// Type exports
+export type CreateContractorInput = z.infer<typeof createContractorSchema>;
+export type UpdateContractorInput = z.infer<typeof updateContractorSchema>;
+export type CreatePayrollRunInput = z.infer<typeof createPayrollRunSchema>;
+export type ProcessPayrollInput = z.infer<typeof processPayrollSchema>;
+export type CreatePayrollDeductionInput = z.infer<typeof createPayrollDeductionSchema>;
+export type CreatePayrollTaxInput = z.infer<typeof createPayrollTaxSchema>;
+export type CreatePayrollBenefitInput = z.infer<typeof createPayrollBenefitSchema>;
+export type CreateLeaveTypeInput = z.infer<typeof createLeaveTypeSchema>;
+export type RequestLeaveInput = z.infer<typeof requestLeaveSchema>;
+export type ApproveLeaveInput = z.infer<typeof approveLeaveSchema>;
+export type ClockInInput = z.infer<typeof clockInSchema>;
+export type ClockOutInput = z.infer<typeof clockOutSchema>;
+export type CreateTimeCardInput = z.infer<typeof createTimeCardSchema>;
+export type UpdateTimeCardInput = z.infer<typeof updateTimeCardSchema>;

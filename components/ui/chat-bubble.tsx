@@ -37,3 +37,24 @@ export function ChatBubble({ message, sender, timestamp, isOwn = false }: ChatBu
     </div>
   );
 }
+
+interface VoiceChatProps {
+  users: Array<{ id: string; name: string; avatarUrl?: string; isSpeaking?: boolean }>;
+  onJoin?: () => void;
+}
+
+export function VoiceChat({ users, onJoin }: VoiceChatProps) {
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className="flex gap-2">
+        {users.map((user) => (
+          <Avatar key={user.id} className="h-12 w-12">
+            <AvatarImage src={user.avatarUrl} />
+            <AvatarFallback>{user.name[0]}</AvatarFallback>
+          </Avatar>
+        ))}
+      </div>
+      {onJoin && <button onClick={onJoin}>Join Chat</button>}
+    </div>
+  );
+}

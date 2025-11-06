@@ -42,7 +42,9 @@ import {
 	Settings,
 	Eye,
 	Edit,
-	Trash2
+	Trash2,
+	ExternalLink,
+	AlertTriangle,
 } from 'lucide-react';
 import { FinancbaseGPTService } from '@/lib/services/business/financbase-gpt-service';
 import { NotificationService } from '@/lib/services/notification-service';
@@ -137,7 +139,7 @@ export function EnhancedReportsSystem() {
 			return response.json();
 		},
 		onSuccess: (data, reportId) => {
-			queryClient.invalidateQueries(['reports']);
+			queryClient.invalidateQueries({ queryKey: ['reports'] });
 
 			// Send notification
 			NotificationService.createFinancialNotification(
@@ -179,7 +181,7 @@ export function EnhancedReportsSystem() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['reports']);
+			queryClient.invalidateQueries({ queryKey: ['reports'] });
 		},
 	});
 
@@ -193,6 +195,63 @@ export function EnhancedReportsSystem() {
 				return 'bg-gray-100 text-gray-800 border-gray-200';
 			case 'archived':
 				return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+			default:
+				return 'bg-gray-100 text-gray-800 border-gray-200';
+		}
+	};
+
+	// Helper functions for insights
+	const getInsightIcon = (type: string) => {
+		switch (type) {
+			case 'trend':
+				return <TrendingUp className="h-4 w-4" />;
+			case 'anomaly':
+				return <AlertTriangle className="h-4 w-4" />;
+			case 'opportunity':
+				return <Lightbulb className="h-4 w-4" />;
+			case 'risk':
+				return <TrendingDown className="h-4 w-4" />;
+			default:
+				return <Brain className="h-4 w-4" />;
+		}
+	};
+
+	const getInsightColor = (type: string) => {
+		switch (type) {
+			case 'trend':
+				return 'bg-blue-50 border-blue-200 text-blue-800';
+			case 'anomaly':
+				return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+			case 'opportunity':
+				return 'bg-green-50 border-green-200 text-green-800';
+			case 'risk':
+				return 'bg-red-50 border-red-200 text-red-800';
+			default:
+				return 'bg-gray-50 border-gray-200 text-gray-800';
+		}
+	};
+
+	const getRecommendationIcon = (category: string) => {
+		switch (category) {
+			case 'optimization':
+				return <Target className="h-4 w-4 text-blue-600" />;
+			case 'savings':
+				return <DollarSign className="h-4 w-4 text-green-600" />;
+			case 'efficiency':
+				return <TrendingUp className="h-4 w-4 text-purple-600" />;
+			default:
+				return <Lightbulb className="h-4 w-4 text-yellow-600" />;
+		}
+	};
+
+	const getPriorityColor = (priority: string) => {
+		switch (priority?.toLowerCase()) {
+			case 'high':
+				return 'bg-red-100 text-red-800 border-red-200';
+			case 'medium':
+				return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+			case 'low':
+				return 'bg-blue-100 text-blue-800 border-blue-200';
 			default:
 				return 'bg-gray-100 text-gray-800 border-gray-200';
 		}
@@ -262,7 +321,7 @@ export function EnhancedReportsSystem() {
 							<div>
 								<p className="text-sm text-muted-foreground">This Month</p>
 								<p className="text-xl font-bold">
-									{reports.filter(r => r.status === 'generated').length}
+									{reports.filter((r: any) => r.status === 'generated').length}
 								</p>
 							</div>
 						</div>
@@ -276,7 +335,7 @@ export function EnhancedReportsSystem() {
 							<div>
 								<p className="text-sm text-muted-foreground">Automated</p>
 								<p className="text-xl font-bold">
-									{reports.filter(r => r.automated).length}
+									{reports.filter((r: any) => r.automated).length}
 								</p>
 							</div>
 						</div>
@@ -290,7 +349,7 @@ export function EnhancedReportsSystem() {
 							<div>
 								<p className="text-sm text-muted-foreground">Scheduled</p>
 								<p className="text-xl font-bold">
-									{reports.filter(r => r.status === 'scheduled').length}
+									{reports.filter((r: any) => r.status === 'scheduled').length}
 								</p>
 							</div>
 						</div>
@@ -375,7 +434,7 @@ export function EnhancedReportsSystem() {
 										</TableRow>
 									</TableHeader>
 									<TableBody>
-										{reports.map((report) => (
+										{reports.map((report: any) => (
 											<TableRow key={report.id}>
 												<TableCell>
 													<div>
@@ -474,51 +533,83 @@ export function EnhancedReportsSystem() {
 					</CardHeader>
 					<CardContent className="space-y-4">
 						{/* Insights */}
-						{getReportInsightsMutation.data.analysis?.insights.map((insight, index) => (
-							<div key={index} className={cn(
-								"flex items-start gap-3 p-3 rounded-lg border",
-								getInsightColor(insight.type)
-							)}>
-								{getInsightIcon(insight.type)}
-								<div className="flex-1">
-									<p className="font-medium text-sm">{insight.title}</p>
-									<p className="text-sm text-muted-foreground mt-1">
-										{insight.description}
-									</p>
+						{getReportInsightsMutation.data?.analysis?.insights?.map((insight: any, index: number) => {
+							if (typeof insight === 'string') {
+								return (
+									<div key={index} className="p-3 rounded-lg border bg-gray-50">
+										<p className="text-sm">{insight}</p>
+									</div>
+								);
+							}
+							return (
+								<div key={index} className={cn(
+									"flex items-start gap-3 p-3 rounded-lg border",
+									getInsightColor(insight.type || 'trend')
+								)}>
+									{getInsightIcon(insight.type || 'trend')}
+									<div className="flex-1">
+										<p className="font-medium text-sm">{insight.title || insight}</p>
+										{insight.description && (
+											<p className="text-sm text-muted-foreground mt-1">
+												{insight.description}
+											</p>
+										)}
+									</div>
+									{insight.impact && (
+										<Badge variant="outline" className="text-xs">
+											{insight.impact} impact
+										</Badge>
+									)}
 								</div>
-								<Badge variant="outline" className="text-xs">
-									{insight.impact} impact
-								</Badge>
-							</div>
-						))}
+							);
+						})}
 
 						{/* Recommendations */}
-						{getReportInsightsMutation.data.analysis?.recommendations.map((rec, index) => (
-							<div key={index} className="p-3 border rounded-lg">
-								<div className="flex items-start gap-3">
-									{getRecommendationIcon(rec.category)}
-									<div className="flex-1">
-										<div className="flex items-center gap-2 mb-1">
-											<p className="font-medium text-sm">{rec.title}</p>
-											<Badge className={cn("text-xs", getPriorityColor(rec.priority))}>
-												{rec.priority}
-											</Badge>
-										</div>
-										<p className="text-sm text-muted-foreground mb-2">
-											{rec.description}
-										</p>
-										<div className="flex gap-2">
-											<Badge variant="outline" className="text-xs">
-												{rec.effort} effort
-											</Badge>
-											<Badge variant="outline" className="text-xs">
-												{rec.impact} impact
-											</Badge>
+						{getReportInsightsMutation.data?.analysis?.recommendations?.map((rec: any, index: number) => {
+							if (typeof rec === 'string') {
+								return (
+									<div key={index} className="p-3 border rounded-lg">
+										<p className="text-sm">{rec}</p>
+									</div>
+								);
+							}
+							return (
+								<div key={index} className="p-3 border rounded-lg">
+									<div className="flex items-start gap-3">
+										{getRecommendationIcon(rec.category || 'optimization')}
+										<div className="flex-1">
+											<div className="flex items-center gap-2 mb-1">
+												<p className="font-medium text-sm">{rec.title || rec}</p>
+												{rec.priority && (
+													<Badge className={cn("text-xs", getPriorityColor(rec.priority))}>
+														{rec.priority}
+													</Badge>
+												)}
+											</div>
+											{rec.description && (
+												<p className="text-sm text-muted-foreground mb-2">
+													{rec.description}
+												</p>
+											)}
+											{(rec.effort || rec.impact) && (
+												<div className="flex gap-2">
+													{rec.effort && (
+														<Badge variant="outline" className="text-xs">
+															{rec.effort} effort
+														</Badge>
+													)}
+													{rec.impact && (
+														<Badge variant="outline" className="text-xs">
+															{rec.impact} impact
+														</Badge>
+													)}
+												</div>
+											)}
 										</div>
 									</div>
 								</div>
-							</div>
-						))}
+							);
+						})}
 
 						{/* Actions */}
 						{getReportInsightsMutation.data.analysis?.actions.map((action, index) => (
@@ -530,11 +621,11 @@ export function EnhancedReportsSystem() {
 							>
 								{action.url ? (
 									<a href={action.url} className="flex items-center gap-2">
-										{action.title}
+										{action.description || (action as any).title}
 										<ExternalLink className="h-3 w-3" />
 									</a>
 								) : (
-									<span>{action.title}</span>
+									<span>{action.description || (action as any).title}</span>
 								)}
 							</Button>
 						))}

@@ -17,6 +17,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Mail, Volume2, VolumeX, Smartphone, Monitor, Clock } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface NotificationPreferences {
 	id: string;
@@ -39,6 +45,7 @@ interface NotificationPreferences {
 	inAppUpdates: boolean;
 	inAppComments: boolean;
 	inAppMentions: boolean;
+	notificationSounds: boolean;
 	quietHoursEnabled: boolean;
 	quietHoursStart: string;
 	quietHoursEnd: string;
@@ -48,6 +55,7 @@ interface NotificationPreferences {
 }
 
 export function NotificationPreferencesManager() {
+	const [loading, setLoading] = useState(true);
 	const [preferences, setPreferences] = useState<Partial<NotificationPreferences>>({
 		emailInvoices: true,
 		emailPayments: true,
@@ -67,6 +75,7 @@ export function NotificationPreferencesManager() {
 		inAppUpdates: true,
 		inAppComments: true,
 		inAppMentions: true,
+		notificationSounds: true,
 		quietHoursEnabled: false,
 		quietHoursStart: '22:00',
 		quietHoursEnd: '08:00',
@@ -74,6 +83,7 @@ export function NotificationPreferencesManager() {
 	});
 
 	const loadPreferences = useCallback(async () => {
+		setLoading(true);
 		try {
 			const response = await fetch('/api/settings/preferences/notifications');
 			if (response.ok) {
@@ -87,6 +97,8 @@ export function NotificationPreferencesManager() {
 		} catch (error) {
 			console.error('Error loading notification preferences:', error);
 			toast.error('Failed to load notification preferences');
+		} finally {
+			setLoading(false);
 		}
 	}, []);
 
@@ -186,7 +198,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.emailInvoices}
-								onCheckedChange={(checked) => updatePreference('emailInvoices', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('emailInvoices', checked)}
 							/>
 						</div>
 
@@ -199,7 +211,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.emailPayments}
-								onCheckedChange={(checked) => updatePreference('emailPayments', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('emailPayments', checked)}
 							/>
 						</div>
 
@@ -212,7 +224,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.emailReports}
-								onCheckedChange={(checked) => updatePreference('emailReports', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('emailReports', checked)}
 							/>
 						</div>
 
@@ -225,7 +237,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.emailSecurity}
-								onCheckedChange={(checked) => updatePreference('emailSecurity', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('emailSecurity', checked)}
 							/>
 						</div>
 
@@ -238,7 +250,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.emailUpdates}
-								onCheckedChange={(checked) => updatePreference('emailUpdates', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('emailUpdates', checked)}
 							/>
 						</div>
 
@@ -251,7 +263,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.emailMarketing}
-								onCheckedChange={(checked) => updatePreference('emailMarketing', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('emailMarketing', checked)}
 							/>
 						</div>
 					</div>
@@ -280,7 +292,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.pushInvoices}
-								onCheckedChange={(checked) => updatePreference('pushInvoices', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('pushInvoices', checked)}
 							/>
 						</div>
 
@@ -293,7 +305,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.pushPayments}
-								onCheckedChange={(checked) => updatePreference('pushPayments', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('pushPayments', checked)}
 							/>
 						</div>
 
@@ -306,7 +318,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.pushReports}
-								onCheckedChange={(checked) => updatePreference('pushReports', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('pushReports', checked)}
 							/>
 						</div>
 
@@ -319,7 +331,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.pushSecurity}
-								onCheckedChange={(checked) => updatePreference('pushSecurity', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('pushSecurity', checked)}
 							/>
 						</div>
 
@@ -332,7 +344,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.pushUpdates}
-								onCheckedChange={(checked) => updatePreference('pushUpdates', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('pushUpdates', checked)}
 							/>
 						</div>
 					</div>
@@ -361,7 +373,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.inAppInvoices}
-								onCheckedChange={(checked) => updatePreference('inAppInvoices', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('inAppInvoices', checked)}
 							/>
 						</div>
 
@@ -374,7 +386,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.inAppPayments}
-								onCheckedChange={(checked) => updatePreference('inAppPayments', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('inAppPayments', checked)}
 							/>
 						</div>
 
@@ -387,7 +399,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.inAppReports}
-								onCheckedChange={(checked) => updatePreference('inAppReports', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('inAppReports', checked)}
 							/>
 						</div>
 
@@ -400,7 +412,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.inAppSecurity}
-								onCheckedChange={(checked) => updatePreference('inAppSecurity', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('inAppSecurity', checked)}
 							/>
 						</div>
 
@@ -413,7 +425,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.inAppUpdates}
-								onCheckedChange={(checked) => updatePreference('inAppUpdates', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('inAppUpdates', checked)}
 							/>
 						</div>
 
@@ -428,7 +440,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.inAppComments}
-								onCheckedChange={(checked) => updatePreference('inAppComments', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('inAppComments', checked)}
 							/>
 						</div>
 
@@ -441,7 +453,7 @@ export function NotificationPreferencesManager() {
 							</div>
 							<Switch
 								checked={preferences.inAppMentions}
-								onCheckedChange={(checked) => updatePreference('inAppMentions', checked)}
+								onCheckedChange={(checked: boolean) => updatePreference('inAppMentions', checked)}
 							/>
 						</div>
 					</div>
@@ -469,7 +481,7 @@ export function NotificationPreferencesManager() {
 						</div>
 						<Switch
 							checked={preferences.quietHoursEnabled}
-							onCheckedChange={(checked) => updatePreference('quietHoursEnabled', checked)}
+							onCheckedChange={(checked: boolean) => updatePreference('quietHoursEnabled', checked)}
 						/>
 					</div>
 
@@ -557,7 +569,7 @@ export function NotificationPreferencesManager() {
 						</div>
 						<Switch
 							checked={preferences.notificationSounds}
-							onCheckedChange={(checked) => updatePreference('notificationSounds', checked)}
+							onCheckedChange={(checked: boolean) => updatePreference('notificationSounds', checked)}
 						/>
 					</div>
 				</CardContent>

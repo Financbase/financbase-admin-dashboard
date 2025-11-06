@@ -12,6 +12,7 @@
 import { cn } from "@/lib/utils";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import * as React from "react";
+import type { LucideIcon } from "lucide-react";
 
 const RadioGroup = React.forwardRef<
 	React.ElementRef<typeof RadioGroupPrimitive.Root>,
@@ -28,11 +29,11 @@ RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;
 const SentimentCard = React.forwardRef<
 	React.ElementRef<typeof RadioGroupPrimitive.Item>,
 	React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item> & {
-		emoji: string;
+		icon: LucideIcon;
 		title: string;
 		description?: string;
 	}
->(({ className, emoji, title, description, ...props }, ref) => (
+>(({ className, icon: Icon, title, description, ...props }, ref) => (
 	<RadioGroupPrimitive.Item
 		ref={ref}
 		className={cn(
@@ -45,7 +46,7 @@ const SentimentCard = React.forwardRef<
 		)}
 		{...props}
 	>
-		<span className="text-2xl">{emoji}</span>
+		<Icon className="h-6 w-6 text-muted-foreground" />
 		<div className="flex flex-col">
 			<span className="font-medium">{title}</span>
 			{description && (

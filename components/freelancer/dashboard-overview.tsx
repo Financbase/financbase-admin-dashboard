@@ -61,82 +61,31 @@ export function FreelancerDashboardOverview() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Initialize with mock data for the migration
-    setTopFreelancers([
-      {
-        id: "1",
-        name: "Sarah Ahmed",
-        skill: "Web Development",
-        rating: 4.9,
-        earnings: "$12,450",
-        projects: 23,
-        avatar: "/placeholder.svg?height=40&width=40"
-      },
-      {
-        id: "2",
-        name: "Rahul Sharma",
-        skill: "Mobile Development",
-        rating: 4.8,
-        earnings: "$9,820",
-        projects: 18,
-        avatar: "/placeholder.svg?height=40&width=40"
-      },
-      {
-        id: "3",
-        name: "Fatima Khan",
-        skill: "UI/UX Design",
-        rating: 4.9,
-        earnings: "$8,650",
-        projects: 15,
-        avatar: "/placeholder.svg?height=40&width=40"
+    async function fetchDashboardData() {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await fetch('/api/freelancers/dashboard');
+        if (!response.ok) throw new Error('Failed to fetch dashboard data');
+        
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          setTopFreelancers(data.data.topFreelancers || []);
+          setDashboardStats(data.data.dashboardStats || null);
+          setRecentJobs(data.data.recentJobs || []);
+          setRecentActivities(data.data.recentActivities || []);
+        }
+      } catch (err) {
+        console.error('Error fetching freelancer dashboard:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
       }
-    ])
+    }
 
-    setDashboardStats({
-      total_users: 1247,
-      active_jobs: 89,
-      completed_projects: 456,
-      platform_earnings: 23450,
-      total_revenue: 156780
-    })
-
-    // Generate mock activities
-    setRecentActivities([
-      {
-        id: "1",
-        user: "Sarah Ahmed",
-        action: "completed project",
-        project: "Website Development",
-        time: "2 minutes ago",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      {
-        id: "2",
-        user: "Rahul Sharma",
-        action: "posted new job",
-        project: "Mobile App Design",
-        time: "15 minutes ago",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      {
-        id: "3",
-        user: "Fatima Khan",
-        action: "received payment",
-        project: "Logo Design",
-        time: "1 hour ago",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      {
-        id: "4",
-        user: "Arjun Patel",
-        action: "submitted proposal",
-        project: "Content Writing",
-        time: "2 hours ago",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-    ])
-
-    setLoading(false)
+    fetchDashboardData();
   }, [])
 
   const metrics = dashboardStats ? [

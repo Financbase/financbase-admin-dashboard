@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
-	BanknoteArrowUp,
+	ArrowUpCircle,
 	CheckCircle,
 	Eye,
 	EyeOff,
@@ -152,7 +152,7 @@ export default function StatisticsCard5({
 								)}
 							</Button>
 							<Button className="bg-zinc-800 text-zinc-100 border-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 shadow-lg">
-								<BanknoteArrowUp className="w-4 h-4 mr-2" />
+								<ArrowUpCircle className="w-4 h-4 mr-2" />
 								Top Up
 							</Button>
 						</CardToolbar>
@@ -185,7 +185,7 @@ export default function StatisticsCard5({
 
 						{/* Delta Badge */}
 						<Badge
-							variant={isPositive ? "success" : "destructive"}
+							variant={isPositive ? "default" : "destructive"}
 							className={cn(
 								"px-2 py-1 text-sm font-medium transition-all duration-300 hover:scale-105",
 								isVisible ? "opacity-100 scale-100" : "opacity-0 scale-90",

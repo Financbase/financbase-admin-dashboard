@@ -65,15 +65,20 @@ interface Plugin {
   shortDescription: string;
   version: string;
   author: string;
+  authorEmail?: string;
+  authorWebsite?: string;
   category: string;
   tags: string[];
   icon: string;
   screenshots: string[];
   features: string[];
+  requirements?: Record<string, any>;
+  compatibility?: Record<string, any>;
   isFree: boolean;
   price?: number;
   currency: string;
   license: string;
+  permissions?: string[];
   downloadCount: number;
   installCount: number;
   rating: number;
@@ -250,7 +255,7 @@ export function MarketplaceSystem() {
   if (selectedPlugin) {
     return (
       <PluginDetails
-        plugin={selectedPlugin}
+        plugin={selectedPlugin as any}
         isInstalled={getInstalledPluginIds().includes(selectedPlugin.id)}
         onInstall={handleInstall}
         onUninstall={handleUninstall}

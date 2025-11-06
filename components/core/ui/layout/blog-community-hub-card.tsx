@@ -124,13 +124,28 @@ export function BlogCommunityHubCard({
 				style={{ willChange: "transform, opacity" }}
 			>
 				<CardHeader className="text-center p-6">
-					<FadeInUp delay={0.1}>
+					<FadeInUp
+						initial="hidden"
+						animate="visible"
+						variants={fadeInUpVariants}
+						transition={{ delay: 0.1 }}
+					>
 						<h1 className="text-2xl font-bold tracking-tight">{title}</h1>
 					</FadeInUp>
-					<FadeInUp delay={0.2}>
+					<FadeInUp
+						initial="hidden"
+						animate="visible"
+						variants={fadeInUpVariants}
+						transition={{ delay: 0.2 }}
+					>
 						<p className="text-sm text-muted-foreground">{subtitle}</p>
 					</FadeInUp>
-					<FadeInUp delay={0.3}>
+					<FadeInUp
+						initial="hidden"
+						animate="visible"
+						variants={fadeInUpVariants}
+						transition={{ delay: 0.3 }}
+					>
 						<div className="flex justify-center -space-x-2 my-4">
 							{topAuthors.map((author, index) => (
 								<div key={index} className="relative group">
@@ -145,7 +160,12 @@ export function BlogCommunityHubCard({
 							))}
 						</div>
 					</FadeInUp>
-					<FadeInUp delay={0.4}>
+					<FadeInUp
+						initial="hidden"
+						animate="visible"
+						variants={fadeInUpVariants}
+						transition={{ delay: 0.4 }}
+					>
 						<p className="text-sm font-medium">
 							Total Subscribers: {subscriberCount.toLocaleString()}
 						</p>
@@ -156,7 +176,12 @@ export function BlogCommunityHubCard({
 					<Separator />
 
 					{/* Newsletter Subscription Section */}
-					<FadeInUp delay={0.5}>
+					<FadeInUp
+						initial="hidden"
+						animate="visible"
+						variants={fadeInUpVariants}
+						transition={{ delay: 0.5 }}
+					>
 						<div className="space-y-3">
 							<h2 className="font-semibold">Join Our Newsletter</h2>
 							<p className="text-sm text-muted-foreground">
@@ -189,13 +214,27 @@ export function BlogCommunityHubCard({
 					<Separator />
 
 					{/* Newsletter Growth Progress Section */}
-					<FadeInUp delay={0.6}>
+					<FadeInUp
+						initial="hidden"
+						animate="visible"
+						variants={fadeInUpVariants}
+						transition={{ delay: 0.6 }}
+					>
 						<div className="space-y-3">
 							<h2 className="font-semibold">Newsletter Growth Progress</h2>
 							<AnimatedProgressBar
-								progress={currentGrowth.progress}
-								delay={0.8}
-							/>
+								initial="hidden"
+								animate="visible"
+								variants={fadeInUpVariants}
+								transition={{ delay: 0.8 }}
+							>
+								<div className="w-full bg-muted rounded-full h-2">
+									<div
+										className="bg-primary h-2 rounded-full transition-all"
+										style={{ width: `${currentGrowth.progress}%` }}
+									/>
+								</div>
+							</AnimatedProgressBar>
 							<div className="flex justify-between text-sm">
 								<span className="font-medium text-foreground">
 									{currentGrowth.title}
@@ -210,7 +249,12 @@ export function BlogCommunityHubCard({
 					<Separator />
 
 					{/* Featured Articles Section */}
-					<FadeInUp delay={0.7}>
+					<FadeInUp
+						initial="hidden"
+						animate="visible"
+						variants={fadeInUpVariants}
+						transition={{ delay: 0.7 }}
+					>
 						<div className="space-y-4">
 							<h2 className="font-semibold">Featured Articles</h2>
 							<div className="space-y-3">

@@ -43,7 +43,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-interface UploadedImage {
+export interface UploadedImage {
 	id: string;
 	url: string;
 	name: string;

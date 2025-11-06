@@ -130,8 +130,8 @@ export function PropertyCard({
                 <MapPin className="h-4 w-4 mr-1" />
                 <span>{property.city}, {property.state}</span>
               </div>
-              <Badge className={getStatusColor(property.status)}>
-                {property.status.replace('_', ' ')}
+              <Badge className={getStatusColor(property.status || 'available')}>
+                {(property.status || 'available').replace('_', ' ')}
               </Badge>
             </div>
             {property.rating && (

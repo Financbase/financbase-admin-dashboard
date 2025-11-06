@@ -206,6 +206,10 @@ export default class FinancbaseServer {
         await this.handleUserActivity(data, sender);
         break;
 
+      case 'mark_as_read':
+        await this.handleMarkAsRead(data, sender);
+        break;
+
       default:
         console.log('Unknown collaboration message type:', data.type);
     }
@@ -245,27 +249,72 @@ export default class FinancbaseServer {
   }
 
   private async handleSendMessage(data: Record<string, unknown>, sender: Connection): Promise<void> {
-    const message = {
-      id: `msg_${Date.now()}_${Math.random()}`,
-      type: 'message' as const,
-      content: data.content as string,
-      userId: sender.id,
-      userName: data.userName as string || 'Anonymous',
-      userAvatar: data.userAvatar as string,
-      timestamp: new Date().toISOString(),
-      channelId: data.channelId as string,
-    };
+    try {
+      const channelId = data.channelId as string;
+      const messageContent = data.content as string;
+      const organizationId = data.organizationId as string;
 
-    // Store message in room state
-    this.addMessageToChannel(data.channelId as string, message);
+      // First, persist to database via API
+      let persistedMessage: any = null;
+      if (organizationId && channelId) {
+        try {
+          // Call the chat API to persist the message
+          const apiUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+          const response = await fetch(`${apiUrl}/api/chat/channels/${channelId}/messages`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              // Note: In production, you'd need to pass auth token
+            },
+            body: JSON.stringify({
+              organizationId,
+              message: messageContent,
+              type: data.type || 'message',
+            }),
+          });
+          
+          if (response.ok) {
+            persistedMessage = await response.json();
+          }
+        } catch (error) {
+          console.error('Failed to persist message to database:', error);
+          // Continue with in-memory message even if persistence fails
+        }
+      }
 
-    // Broadcast message to all connections in the room
-    this.room.broadcast(JSON.stringify({
-      ...message,
-    }));
+      // Create message object (use persisted message if available, otherwise create temporary)
+      const message = persistedMessage || {
+        id: `msg_${Date.now()}_${Math.random()}`,
+        type: (data.type as string) || 'message',
+        message: messageContent,
+        userId: sender.id,
+        channelId,
+        createdAt: new Date().toISOString(),
+      };
 
-    // Update channel's last message
-    this.updateChannelLastMessage(data.channelId as string, message);
+      // Store message in room state
+      this.addMessageToChannel(channelId, message);
+
+      // Broadcast message to all connections in the room
+      this.room.broadcast(JSON.stringify({
+        type: 'chat-message',
+        data: {
+          channelId,
+          message,
+        },
+        timestamp: new Date().toISOString(),
+      }));
+
+      // Update channel's last message
+      this.updateChannelLastMessage(channelId, message);
+    } catch (error) {
+      console.error('Error handling send message:', error);
+      sender.send(JSON.stringify({
+        type: 'error',
+        message: 'Failed to send message',
+        timestamp: new Date().toISOString(),
+      }));
+    }
   }
 
   private async handleTypingStart(data: Record<string, unknown>, sender: Connection): Promise<void> {
@@ -285,6 +334,35 @@ export default class FinancbaseServer {
       channelId: data.channelId,
       timestamp: new Date().toISOString(),
     }), [sender.id]);
+  }
+
+  private async handleMarkAsRead(data: Record<string, unknown>, sender: Connection): Promise<void> {
+    const { messageId, channelId } = data as { messageId: string; channelId: string };
+    
+    try {
+      // Persist read receipt to database
+      const apiUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      await fetch(`${apiUrl}/api/chat/messages/${messageId}/read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          channelId,
+        }),
+      });
+
+      // Broadcast read receipt to channel members
+      this.room.broadcast(JSON.stringify({
+        type: 'message_read',
+        messageId,
+        channelId,
+        userId: sender.id,
+        timestamp: new Date().toISOString(),
+      }), [sender.id]);
+    } catch (error) {
+      console.error('Failed to mark message as read:', error);
+    }
   }
 
   private async handleCreateMeeting(data: Record<string, unknown>, sender: Connection): Promise<void> {

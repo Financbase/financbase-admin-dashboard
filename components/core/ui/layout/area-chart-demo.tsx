@@ -13,7 +13,7 @@ import {
 	type ChartConfig,
 	ChartContainer,
 	ChartTooltip,
-} from "@/components/ui/area-charts-2";
+} from "@/components/core/ui/layout/area-charts-2";
 import {
 	Card,
 	CardContent,
@@ -425,8 +425,7 @@ export default function AreaChart2() {
 															<TrendingUp className="size-4" />
 														) : (
 															<TrendingDown className="size-4" />
-														)}{" "}
-														{/* TODO: Add icon */}
+														)}
 														{Math.abs(change)}%
 													</span>
 												</div>

@@ -34,6 +34,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { useFormSubmission } from '@/hooks/use-form-submission';
+import { toast } from 'sonner';
 
 interface ClientFormData {
 	name: string;
@@ -106,7 +107,7 @@ export function ClientForm({ initialData, clientId, onCancel }: ClientFormProps)
 	});
 
 	// Form submission hook
-	const { submit, isLoading, error } = useFormSubmission(
+	const { submit, isSubmitting, generalError } = useFormSubmission(
 		async (data: ClientFormData) => {
 			const url = clientId ? `/api/clients/${clientId}` : '/api/clients';
 			const method = clientId ? 'PUT' : 'POST';
@@ -132,7 +133,7 @@ export function ClientForm({ initialData, clientId, onCancel }: ClientFormProps)
 				router.push('/clients');
 			},
 			successMessage: clientId ? 'Client updated successfully' : 'Client created successfully',
-			errorMessage: 'Failed to save client',
+			showErrorToast: true,
 		}
 	);
 
@@ -141,14 +142,14 @@ export function ClientForm({ initialData, clientId, onCancel }: ClientFormProps)
 
 		// Validation
 		if (!formData.name || !formData.email) {
-			toast.error('Validation Error', 'Name and email are required');
+			toast.error('Name and email are required');
 			return;
 		}
 
 		// Email validation
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(formData.email)) {
-			toast.error('Validation Error', 'Please enter a valid email address');
+			toast.error('Please enter a valid email address');
 			return;
 		}
 
@@ -161,10 +162,10 @@ export function ClientForm({ initialData, clientId, onCancel }: ClientFormProps)
 
 	return (
 		<div className="space-y-6">
-			{error && (
+			{generalError && (
 				<Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
 					<CardContent className="pt-6">
-						<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+						<p className="text-sm text-red-600 dark:text-red-400">{generalError}</p>
 					</CardContent>
 				</Card>
 			)}
@@ -395,10 +396,10 @@ export function ClientForm({ initialData, clientId, onCancel }: ClientFormProps)
 						</Button>
 						<Button
 							type="submit"
-							disabled={isLoading}
+							disabled={isSubmitting}
 						>
 							<Save className="h-4 w-4 mr-2" />
-							{isLoading ? 'Saving...' : 'Save Client'}
+							{isSubmitting ? 'Saving...' : 'Save Client'}
 						</Button>
 					</CardFooter>
 				</Card>

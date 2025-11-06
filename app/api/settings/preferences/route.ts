@@ -32,48 +32,116 @@ export async function GET() {
 		}
 
 		// Get user preferences
-		const preferences = await db
-			.select({
-				id: userPreferences.id,
-				userId: userPreferences.userId,
-				theme: userPreferences.theme,
-				sidebarCollapsed: userPreferences.sidebarCollapsed,
-				compactMode: userPreferences.compactMode,
-				highContrast: userPreferences.highContrast,
-				fontSize: userPreferences.fontSize,
-				language: userPreferences.language,
-				timezone: userPreferences.timezone,
-				dateFormat: userPreferences.dateFormat,
-				timeFormat: userPreferences.timeFormat,
-				currency: userPreferences.currency,
-				numberFormat: userPreferences.numberFormat,
-				defaultDashboard: userPreferences.defaultDashboard,
-				chartsEnabled: userPreferences.chartsEnabled,
-				analyticsEnabled: userPreferences.analyticsEnabled,
-				autoRefresh: userPreferences.autoRefresh,
-				refreshInterval: userPreferences.refreshInterval,
-				emailNotifications: userPreferences.emailNotifications,
-				pushNotifications: userPreferences.pushNotifications,
-				desktopNotifications: userPreferences.desktopNotifications,
-				notificationSounds: userPreferences.notificationSounds,
-				weeklyDigest: userPreferences.weeklyDigest,
-				monthlyReport: userPreferences.monthlyReport,
-				analyticsTracking: userPreferences.analyticsTracking,
-				errorReporting: userPreferences.errorReporting,
-				usageStats: userPreferences.usageStats,
-				marketingEmails: userPreferences.marketingEmails,
-				dataExport: userPreferences.dataExport,
-				betaFeatures: userPreferences.betaFeatures,
-				experimentalFeatures: userPreferences.experimentalFeatures,
-				developerMode: userPreferences.developerMode,
-				apiAccess: userPreferences.apiAccess,
-				customPreferences: userPreferences.customPreferences,
-				createdAt: userPreferences.createdAt,
-				updatedAt: userPreferences.updatedAt,
-			})
-			.from(userPreferences)
-			.where(eq(userPreferences.userId, userId))
-			.limit(1);
+		// Note: Some columns may not exist in the database yet (e.g., sidebarCollapsed, compact_mode)
+		// We'll select them conditionally and handle missing columns gracefully
+		let preferences;
+		try {
+			preferences = await db
+				.select({
+					id: userPreferences.id,
+					userId: userPreferences.userId,
+					theme: userPreferences.theme,
+					sidebarCollapsed: userPreferences.sidebarCollapsed,
+					compactMode: userPreferences.compactMode,
+					highContrast: userPreferences.highContrast,
+					fontSize: userPreferences.fontSize,
+					language: userPreferences.language,
+					timezone: userPreferences.timezone,
+					dateFormat: userPreferences.dateFormat,
+					timeFormat: userPreferences.timeFormat,
+					currency: userPreferences.currency,
+					numberFormat: userPreferences.numberFormat,
+					defaultDashboard: userPreferences.defaultDashboard,
+					chartsEnabled: userPreferences.chartsEnabled,
+					analyticsEnabled: userPreferences.analyticsEnabled,
+					autoRefresh: userPreferences.autoRefresh,
+					refreshInterval: userPreferences.refreshInterval,
+					emailNotifications: userPreferences.emailNotifications,
+					pushNotifications: userPreferences.pushNotifications,
+					desktopNotifications: userPreferences.desktopNotifications,
+					notificationSounds: userPreferences.notificationSounds,
+					weeklyDigest: userPreferences.weeklyDigest,
+					monthlyReport: userPreferences.monthlyReport,
+					analyticsTracking: userPreferences.analyticsTracking,
+					errorReporting: userPreferences.errorReporting,
+					usageStats: userPreferences.usageStats,
+					marketingEmails: userPreferences.marketingEmails,
+					dataExport: userPreferences.dataExport,
+					betaFeatures: userPreferences.betaFeatures,
+					experimentalFeatures: userPreferences.experimentalFeatures,
+					developerMode: userPreferences.developerMode,
+					apiAccess: userPreferences.apiAccess,
+					customPreferences: userPreferences.customPreferences,
+					createdAt: userPreferences.createdAt,
+					updatedAt: userPreferences.updatedAt,
+				})
+				.from(userPreferences)
+				.where(eq(userPreferences.userId, userId))
+				.limit(1);
+		} catch (selectError) {
+			// If error is about missing columns, retry without them
+			const errorMessage = selectError instanceof Error ? selectError.message : String(selectError);
+			if (errorMessage.includes('column "sidebar_collapsed" does not exist') || 
+			    errorMessage.includes('column "compact_mode" does not exist') ||
+			    errorMessage.includes('column "time_format" does not exist') ||
+			    errorMessage.includes('column "currency" does not exist')) {
+				console.warn('[Preferences API] Retrying without problematic columns due to missing columns');
+				// Retry with a minimal select that excludes problematic columns
+				preferences = await db
+					.select({
+						id: userPreferences.id,
+						userId: userPreferences.userId,
+						theme: userPreferences.theme,
+						// sidebarCollapsed, compactMode, timeFormat, and currency excluded
+						language: userPreferences.language,
+						timezone: userPreferences.timezone,
+						dateFormat: userPreferences.dateFormat,
+						numberFormat: userPreferences.numberFormat,
+						defaultDashboard: userPreferences.defaultDashboard,
+						createdAt: userPreferences.createdAt,
+						updatedAt: userPreferences.updatedAt,
+					})
+					.from(userPreferences)
+					.where(eq(userPreferences.userId, userId))
+					.limit(1);
+				
+				// Add default values for missing columns
+				if (preferences.length > 0) {
+					preferences[0] = {
+						...preferences[0],
+						sidebarCollapsed: false,
+						compactMode: false,
+						highContrast: false,
+						fontSize: 'medium',
+						timeFormat: '12h',
+						currency: 'USD',
+						chartsEnabled: true,
+						analyticsEnabled: true,
+						autoRefresh: true,
+						refreshInterval: '5m',
+						emailNotifications: true,
+						pushNotifications: true,
+						desktopNotifications: false,
+						notificationSounds: true,
+						weeklyDigest: true,
+						monthlyReport: true,
+						analyticsTracking: true,
+						errorReporting: true,
+						usageStats: false,
+						marketingEmails: false,
+						dataExport: true,
+						betaFeatures: false,
+						experimentalFeatures: false,
+						developerMode: false,
+						apiAccess: false,
+						customPreferences: {},
+					};
+				}
+			} else {
+				// Re-throw if it's a different error
+				throw selectError;
+			}
+		}
 
 		if (!preferences.length) {
 			// Return default preferences if none exist

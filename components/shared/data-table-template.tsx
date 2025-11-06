@@ -22,7 +22,7 @@ import {
 	Filter,
 	Key,
 	Layout,
-	Link,
+	Link as LinkIcon,
 	Link2,
 	Plus,
 	Search,
@@ -193,30 +193,32 @@ export function DataTableTemplate({
 									</tr>
 								</thead>
 								<tbody>
-									{data.map((row, rowIndex) => (
+									{data.map((row, rowIndex) => {
+										const typedRow = row as Record<string, any>;
+										return (
 										<tr key={rowIndex} className="border-b hover:bg-muted/50">
 											{columns.map((column) => {
 												const cellContent =
-													typeof row[column.key] === "object" &&
-													row[column.key]?.badge ? (
+													typeof typedRow[column.key] === "object" &&
+													typedRow[column.key]?.badge ? (
 														<Badge
-															variant={row[column.key].variant || "default"}
+															variant={typedRow[column.key].variant || "default"}
 														>
-															{row[column.key].value}
+															{typedRow[column.key].value}
 														</Badge>
 													) : (
-														row[column.key]
+														typedRow[column.key]
 													);
 												const cellText = String(
-													typeof row[column.key] === "object" && row[column.key]?.value
-														? row[column.key].value
-														: row[column.key] || ""
+													typeof typedRow[column.key] === "object" && typedRow[column.key]?.value
+														? typedRow[column.key].value
+														: typedRow[column.key] || ""
 												);
 												
 												return (
 													<td key={column.key} className="px-4 py-3 text-sm min-w-0">
-														{typeof row[column.key] === "object" &&
-														row[column.key]?.badge ? (
+														{typeof typedRow[column.key] === "object" &&
+														typedRow[column.key]?.badge ? (
 															cellContent
 														) : (
 															<div className="break-words" title={cellText}>
@@ -227,7 +229,8 @@ export function DataTableTemplate({
 												);
 											})}
 										</tr>
-									))}
+									);
+									})}
 								</tbody>
 							</table>
 						</div>

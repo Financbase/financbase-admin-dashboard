@@ -75,22 +75,22 @@ const integrations = [
   {
     name: "QuickBooks",
     desc: "Sync your accounting data seamlessly with automated reconciliation",
-    icon: "📊",
+    logo: "/integrations/quickbooks.svg",
   },
   {
     name: "Stripe",
     desc: "Track payments and revenue streams in real-time",
-    icon: "💳",
+    logo: "/integrations/stripe.svg",
   },
   {
     name: "Xero",
     desc: "Connect your accounting software for unified financial management",
-    icon: "📈",
+    logo: "/integrations/xero.svg",
   },
   {
     name: "Bank APIs",
     desc: "Direct bank connectivity for instant transaction updates",
-    icon: "🏦",
+    logo: "/integrations/bank.svg",
   }
 ];
 
@@ -136,8 +136,15 @@ export default function PremiumFeaturesShowcase() {
                   className="flex items-center justify-between p-2 sm:p-3 border border-gray-200 dark:border-gray-700 rounded-xl sm:rounded-2xl hover:bg-muted/50 transition"
                 >
                   <div className="flex items-center gap-2 sm:gap-3 flex-1">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-muted flex items-center justify-center text-sm sm:text-lg flex-shrink-0">
-                      {item.icon}
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <Image
+                        src={item.logo}
+                        alt={item.name}
+                        width={32}
+                        height={32}
+                        className="w-full h-full object-contain"
+                        unoptimized={item.logo.endsWith('.svg')}
+                      />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-medium text-foreground truncate">{item.name}</p>

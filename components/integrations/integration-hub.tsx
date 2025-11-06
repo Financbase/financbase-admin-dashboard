@@ -10,10 +10,12 @@
 "use client";
 
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Image from 'next/image';
 import {
 	Plug,
 	Webhook,
@@ -53,7 +55,7 @@ const SAMPLE_INTEGRATIONS: Integration[] = [
 		category: 'payments',
 		status: 'active',
 		lastSync: '2024-11-15T14:22:00Z',
-		logo: '/logos/stripe.png',
+		logo: '/logos/stripe-official.svg',
 		features: ['Payment Processing', 'Subscription Management', 'Webhook Support'],
 	},
 	{
@@ -72,7 +74,7 @@ const SAMPLE_INTEGRATIONS: Integration[] = [
 		description: 'Accounting and financial management',
 		category: 'accounting',
 		status: 'inactive',
-		logo: '/logos/quickbooks.png',
+		logo: '/logos/quickbooks.svg',
 		features: ['Invoice Sync', 'Expense Tracking', 'Financial Reports'],
 	},
 	{
@@ -82,7 +84,7 @@ const SAMPLE_INTEGRATIONS: Integration[] = [
 		category: 'accounting',
 		status: 'error',
 		lastSync: '2024-11-15T12:00:00Z',
-		logo: '/logos/xero.png',
+		logo: '/logos/xero.svg',
 		features: ['Bank Reconciliation', 'Invoice Management', 'Multi-currency'],
 	},
 	{
@@ -230,8 +232,19 @@ export function IntegrationHub() {
 									{SAMPLE_INTEGRATIONS.filter(i => i.status === 'active').map((integration) => (
 										<div key={integration.id} className="flex items-center justify-between p-3 border rounded-lg">
 											<div className="flex items-center gap-3">
-												<div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-													<Plug className="h-4 w-4 text-primary" />
+												<div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+													{integration.logo ? (
+														<Image
+															src={integration.logo}
+															alt={integration.name}
+															width={32}
+															height={32}
+															className="w-full h-full object-contain"
+															unoptimized={integration.logo.endsWith('.svg')}
+														/>
+													) : (
+														<Plug className="h-4 w-4 text-primary" />
+													)}
 												</div>
 												<div>
 													<p className="font-medium">{integration.name}</p>
@@ -268,8 +281,19 @@ export function IntegrationHub() {
 									{SAMPLE_INTEGRATIONS.filter(i => i.status !== 'active').map((integration) => (
 										<div key={integration.id} className="flex items-center justify-between p-3 border rounded-lg opacity-75">
 											<div className="flex items-center gap-3">
-												<div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-													<Plug className="h-4 w-4 text-gray-400" />
+												<div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+													{integration.logo ? (
+														<Image
+															src={integration.logo}
+															alt={integration.name}
+															width={32}
+															height={32}
+															className="w-full h-full object-contain"
+															unoptimized={integration.logo.endsWith('.svg')}
+														/>
+													) : (
+														<Plug className="h-4 w-4 text-gray-400" />
+													)}
 												</div>
 												<div>
 													<p className="font-medium">{integration.name}</p>
@@ -362,8 +386,19 @@ export function IntegrationHub() {
 									<Card key={integration.id} className="cursor-pointer hover:shadow-md transition-shadow">
 										<CardContent className="p-4">
 											<div className="flex items-start gap-3">
-												<div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-													<Plug className="h-6 w-6 text-primary" />
+												<div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+													{integration.logo ? (
+														<Image
+															src={integration.logo}
+															alt={integration.name}
+															width={48}
+															height={48}
+															className="w-full h-full object-contain"
+															unoptimized={integration.logo.endsWith('.svg')}
+														/>
+													) : (
+														<Plug className="h-6 w-6 text-primary" />
+													)}
 												</div>
 												<div className="flex-1">
 													<div className="flex items-center gap-2 mb-1">

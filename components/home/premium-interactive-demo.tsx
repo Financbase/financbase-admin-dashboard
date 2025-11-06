@@ -186,8 +186,8 @@ export default function PremiumInteractiveDemo() {
             {/* CTA */}
             <div className="pt-8">
               <Button asChild size="lg" className="w-full">
-                <Link href="/demo">
-                  Try Interactive Demo
+                <Link href="/auth/sign-up">
+                  Get Started Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

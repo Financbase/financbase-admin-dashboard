@@ -121,7 +121,7 @@ export function VideoMeetingSettings() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['video-settings']);
+			queryClient.invalidateQueries({ queryKey: ['video-settings'] });
 		},
 	});
 
@@ -177,7 +177,7 @@ export function VideoMeetingSettings() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['video-integrations']);
+			queryClient.invalidateQueries({ queryKey: ['video-integrations'] });
 		},
 	});
 
@@ -254,7 +254,7 @@ export function VideoMeetingSettings() {
 								</span>
 							</div>
 							<Badge className={cn("text-xs", getProviderColor('zoom'))}>
-								{integrations.find(i => i.provider === 'zoom')?.isActive ? 'Active' : 'Inactive'}
+								{integrations.find((i: IntegrationConfig) => i.provider === 'zoom')?.isActive ? 'Active' : 'Inactive'}
 							</Badge>
 						</div>
 
@@ -328,7 +328,7 @@ export function VideoMeetingSettings() {
 								</span>
 							</div>
 							<Badge className={cn("text-xs", getProviderColor('google_meet'))}>
-								{integrations.find(i => i.provider === 'google_meet')?.isActive ? 'Active' : 'Inactive'}
+								{integrations.find((i: IntegrationConfig) => i.provider === 'google_meet')?.isActive ? 'Active' : 'Inactive'}
 							</Badge>
 						</div>
 

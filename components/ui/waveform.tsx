@@ -9,38 +9,100 @@
 
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useEffect, useRef } from "react";
 
-export function Waveform() {
+interface MicrophoneWaveformProps {
+  active?: boolean;
+  processing?: boolean;
+  height?: number;
+  barWidth?: number;
+  barGap?: number;
+  barRadius?: number;
+  fadeEdges?: boolean;
+  sensitivity?: number;
+  onError?: (error: Error) => void;
+  className?: string;
+}
+
+export function MicrophoneWaveform({
+  active = false,
+  processing = false,
+  height = 120,
+  barWidth = 3,
+  barGap = 2,
+  barRadius = 2,
+  fadeEdges = true,
+  sensitivity = 1.5,
+  onError,
+  className,
+}: MicrophoneWaveformProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number>();
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const bars = 50;
+    const totalWidth = bars * (barWidth + barGap) - barGap;
+
+    canvas.width = totalWidth;
+    canvas.height = height;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = active ? "#3b82f6" : "#e5e7eb";
+
+      for (let i = 0; i < bars; i++) {
+        const amplitude = active
+          ? Math.random() * (height * 0.8) * sensitivity
+          : height * 0.1;
+
+        const x = i * (barWidth + barGap);
+        const barHeight = Math.max(4, amplitude);
+
+        if (fadeEdges) {
+          const fade = Math.min(
+            1,
+            Math.min(i / 5, (bars - i) / 5)
+          );
+          ctx.globalAlpha = fade;
+        } else {
+          ctx.globalAlpha = 1;
+        }
+
+        ctx.fillRect(x, height - barHeight, barWidth, barHeight);
+      }
+
+      ctx.globalAlpha = 1;
+
+      if (active || processing) {
+        animationRef.current = requestAnimationFrame(draw);
+      }
+    };
+
+    if (active || processing) {
+      draw();
+    } else {
+      draw(); // Draw once when inactive
+    }
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [active, processing, height, barWidth, barGap, barRadius, sensitivity, fadeEdges]);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Activity className="h-5 w-5" />
-          Audio Waveform
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-32 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-          <div className="flex items-end space-x-1 h-20">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-blue-500 rounded-sm"
-                style={{
-                  width: '4px',
-                  height: `${Math.random() * 60 + 20}px`,
-                  animationDelay: `${i * 0.1}s`
-                }}
-              />
-            ))}
-          </div>
-        </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Audio waveform visualization
-        </p>
-      </CardContent>
-    </Card>
+    <canvas
+      ref={canvasRef}
+      className={cn("w-full rounded-lg", className)}
+      style={{ height }}
+    />
   );
 }

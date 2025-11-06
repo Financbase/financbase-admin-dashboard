@@ -293,14 +293,19 @@ export function CollaborationProvider({ children, roomId = 'financbase-main' }: 
 
   // WebSocket connection management
   const connect = useCallback((roomIdToConnect?: string) => {
-    // Get PartyKit host from environment or use default
+    // Get PartyKit host from environment
+    // For Cloudflare-hosted PartyKit, use: your-project.your-subdomain.partykit.dev
+    // For local development, use: localhost:1999
     const partykitHost = process.env.NEXT_PUBLIC_PARTYKIT_HOST || 'localhost:1999';
-    const protocol = partykitHost.includes('localhost') ? 'ws' : 'wss';
+    
+    // Use wss (secure WebSocket) for production, ws for localhost
+    const protocol = partykitHost.includes('localhost') || partykitHost.includes('127.0.0.1') ? 'ws' : 'wss';
     const connectionRoomId = roomIdToConnect || roomId;
 
+    // PartyKit URL format: wss://host/parties/party-name/room-id
     const websocketUrl = `${protocol}://${partykitHost}/parties/financbase-partykit/${connectionRoomId}`;
 
-    console.log('Connecting to:', websocketUrl);
+    console.log('Connecting to PartyKit:', websocketUrl);
 
     const websocket = new WebSocket(websocketUrl);
 

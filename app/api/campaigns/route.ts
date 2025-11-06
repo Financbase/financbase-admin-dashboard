@@ -13,6 +13,7 @@ import { auth } from '@clerk/nextjs/server';
 import { AdboardService } from '@/lib/services/adboard-service';
 import { z } from 'zod';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { getCurrentUserId } from '@/lib/api/with-rls';
 
 const createCampaignSchema = z.object({
 	name: z.string().min(1, 'Campaign name is required'),
@@ -36,9 +37,15 @@ const createCampaignSchema = z.object({
 export async function GET(request: NextRequest) {
 	const requestId = generateRequestId();
 	try {
-		const { userId } = await auth();
-		if (!userId) {
+		const { userId: clerkId } = await auth();
+		if (!clerkId) {
 			return ApiErrorHandler.unauthorized();
+		}
+
+		// Convert Clerk ID to database user ID (UUID)
+		const dbUserId = await getCurrentUserId();
+		if (!dbUserId) {
+			return ApiErrorHandler.badRequest('User not found in database');
 		}
 
 		const { searchParams } = new URL(request.url);
@@ -49,7 +56,7 @@ export async function GET(request: NextRequest) {
 		const type = searchParams.get('type') || undefined;
 		const platform = searchParams.get('platform') || undefined;
 
-		const result = await AdboardService.getPaginatedCampaigns(userId, {
+		const result = await AdboardService.getPaginatedCampaigns(dbUserId, {
 			page,
 			limit,
 			search,
@@ -67,9 +74,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
 	const requestId = generateRequestId();
 	try {
-		const { userId } = await auth();
-		if (!userId) {
+		const { userId: clerkId } = await auth();
+		if (!clerkId) {
 			return ApiErrorHandler.unauthorized();
+		}
+
+		// Convert Clerk ID to database user ID (UUID)
+		const dbUserId = await getCurrentUserId();
+		if (!dbUserId) {
+			return ApiErrorHandler.badRequest('User not found in database');
 		}
 
 		let body;
@@ -90,7 +103,7 @@ export async function POST(request: NextRequest) {
 
 		const campaign = await AdboardService.createCampaign({
 			...processedData,
-			userId,
+			userId: dbUserId,
 		});
 
 		return NextResponse.json({ campaign }, { status: 201 });

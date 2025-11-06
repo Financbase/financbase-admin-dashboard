@@ -22,13 +22,51 @@ import {
   Zap,
   ChevronDown,
   DollarSign,
-  BarChart3
+  BarChart3,
+  Loader2
 } from "lucide-react"
 import Link from "next/link"
+import { useQuery } from "@tanstack/react-query"
+
+interface HomeMetrics {
+  revenue: {
+    total: number
+    thisMonth: number
+    lastMonth: number
+    growth: number
+    formatted: string
+  }
+  efficiency: {
+    timeSaved: number
+    change: number
+    formatted: string
+  }
+  accuracy: {
+    rate: number
+    change: number
+    formatted: string
+  }
+  totalUsers: number
+  totalClients: number
+  totalInvoices: number
+  platformUptime: number
+}
 
 export default function PremiumHero() {
   const [activeMetric, setActiveMetric] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
+
+  // Fetch real metrics from API
+  const { data: metricsData, isLoading, error } = useQuery<{ success: boolean; data: HomeMetrics }>({
+    queryKey: ['home-metrics'],
+    queryFn: async () => {
+      const response = await fetch('/api/home/metrics')
+      if (!response.ok) throw new Error('Failed to fetch metrics')
+      return response.json()
+    },
+    refetchInterval: 300000, // Refetch every 5 minutes
+    staleTime: 60000, // Consider data fresh for 1 minute
+  })
 
   useEffect(() => {
     setIsVisible(true)
@@ -38,7 +76,33 @@ export default function PremiumHero() {
     return () => clearInterval(interval)
   }, [])
 
-  const metrics = [
+  // Use real data or fallback to defaults
+  const metrics = metricsData?.data ? [
+    { 
+      id: "revenue", 
+      value: metricsData.data.revenue.formatted, 
+      label: "Revenue Processed", 
+      change: metricsData.data.revenue.growth > 0 ? `+${metricsData.data.revenue.growth.toFixed(1)}%` : `${metricsData.data.revenue.growth.toFixed(1)}%`, 
+      icon: <DollarSign className="h-4 w-4" />,
+      color: "text-emerald-600"
+    },
+    { 
+      id: "efficiency", 
+      value: metricsData.data.efficiency.formatted, 
+      label: "Time Saved", 
+      change: `+${metricsData.data.efficiency.change}%`, 
+      icon: <TrendingUp className="h-4 w-4" />,
+      color: "text-blue-600"
+    },
+    { 
+      id: "accuracy", 
+      value: metricsData.data.accuracy.formatted, 
+      label: "Accuracy Rate", 
+      change: `+${metricsData.data.accuracy.change}%`, 
+      icon: <BarChart3 className="h-4 w-4" />,
+      color: "text-purple-600"
+    }
+  ] : [
     { 
       id: "revenue", 
       value: "$2.4M", 
@@ -114,7 +178,12 @@ export default function PremiumHero() {
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
                 <span className="text-slate-900">Financial Operations</span>
                 <br />
-                <span className="bg-gradient-to-r from-primary via-primary to-primary/80 bg-clip-text text-transparent">
+                <span 
+                  className="bg-clip-text text-transparent"
+                  style={{
+                    backgroundImage: 'linear-gradient(to right, oklch(var(--primary)), oklch(var(--brand-primary-dark)))'
+                  }}
+                >
                   Reimagined
                 </span>
               </h1>

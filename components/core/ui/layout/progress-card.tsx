@@ -76,15 +76,19 @@ const UploadProgressCard = React.forwardRef<
 		const uploadedSize = (fileSize * progress) / 100;
 		const isComplete = progress === 100;
 
+		const motionProps = {
+			initial: { opacity: 0, y: 20 },
+			animate: { opacity: 1, y: 0 },
+			exit: { opacity: 0, transition: { duration: 0.2 } },
+			transition: { duration: 0.3, ease: "easeInOut" },
+		};
+
 		return (
 			<motion.div
 				ref={ref}
 				className={cn(cardVariants({ status }), className)}
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				exit={{ opacity: 0, transition: { duration: 0.2 } }}
-				transition={{ duration: 0.3, ease: "easeInOut" }}
-				{...props}
+				{...motionProps}
+				{...(props as any)}
 			>
 				{/* File Icon */}
 				<div className="shrink-0 text-muted-foreground">

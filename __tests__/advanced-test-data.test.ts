@@ -42,7 +42,11 @@ describe('AdvancedTestDataManager', () => {
       expect(result.leads).toHaveLength(5);
 
       // Validate data integrity
-      const validations = await AdvancedTestDataManager.validateDataIntegrity(result);
+      const validations = await AdvancedTestDataManager.validateDataIntegrity({
+        users: result.users,
+        clients: result.clients,
+        projects: result.projects.map(p => ({ id: p.id, clientId: p.clientId || '', userId: p.userId })),
+      });
       const failedValidations = validations.filter(v => !v.valid);
       expect(failedValidations).toHaveLength(0);
     });

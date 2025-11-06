@@ -180,7 +180,7 @@ export function PaymentMethodsManager() {
 	const getBrandIcon = (brand: string) => {
 		// In a real implementation, you'd use actual card brand icons
 		// For now, return a generic credit card icon with brand info
-		return <CreditCard className="h-4 w-4" title={`Card brand: ${brand}`} />;
+		return <CreditCard className="h-4 w-4" />;
 	};
 
 	if (loading) {

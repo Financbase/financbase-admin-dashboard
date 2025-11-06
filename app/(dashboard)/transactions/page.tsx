@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Download, Filter, Plus, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface Transaction {
 	id: string;
@@ -255,7 +256,13 @@ export default function TransactionsPage() {
 										</Badge>
 									</td>
 									<td className="p-4">
-										<Button variant="ghost" size="sm">View</Button>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => toast.info('Viewing transaction details')}
+										>
+											View
+										</Button>
 									</td>
 								</tr>
 								))

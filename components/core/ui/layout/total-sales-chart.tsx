@@ -8,7 +8,6 @@
  */
 
 import { BarChart3, Clock, TrendingUp } from "lucide-react";
-total - sales - chart.tsx;
 import React from "react";
 
 import { cn } from "@/lib/utils";

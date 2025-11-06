@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EnhancedNotificationsPanel } from "@/components/core/enhanced-notifications-panel";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useMobile } from "@/hooks/use-mobile";
 import {
 	Filter,
 	LayoutDashboard,
@@ -22,7 +23,7 @@ import {
 	Wifi,
 	WifiOff,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 interface MobileLayoutProps {
 	children: React.ReactNode;
@@ -37,20 +38,9 @@ export function MobileLayout({
 	subtitle,
 	actions,
 }: MobileLayoutProps) {
-	const [isMobile, setIsMobile] = useState(false);
 	const [showMobileMenu, setShowMobileMenu] = useState(false);
 	const isOnline = useOnlineStatus();
-
-	useEffect(() => {
-		const checkMobile = () => {
-			setIsMobile(window.innerWidth < 768);
-		};
-
-		checkMobile();
-		window.addEventListener("resize", checkMobile);
-
-		return () => window.removeEventListener("resize", checkMobile);
-	}, []);
+	const isMobile = useMobile();
 
 	return (
 		<>

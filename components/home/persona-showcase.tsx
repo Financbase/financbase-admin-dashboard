@@ -148,7 +148,7 @@ export default function PersonaShowcase() {
             >
               <CardHeader className="pb-4">
                 <div className="flex items-center mb-4">
-                  <div className={`p-3 bg-gradient-to-br ${persona.color} rounded-xl text-white mr-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <div className="p-3 bg-gray-100 rounded-xl text-gray-700 mr-4 group-hover:scale-110 transition-transform duration-300">
                     {persona.icon}
                   </div>
                   <div>

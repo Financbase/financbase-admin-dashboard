@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { AnimatedTestimonialGrid } from "@/components/ui/testimonial-2";
+import { AnimatedTestimonialGrid } from "@/components/core/ui/layout/testimonial-2";
 import { User } from "lucide-react";
 
 // --- SAMPLE DATA ---

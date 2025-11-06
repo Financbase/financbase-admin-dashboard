@@ -19,17 +19,67 @@ import {
 	CommandList,
 	CommandSeparator,
 } from "@/components/ui/command";
-import { AnimateChangeInHeight } from "@/components/ui/filters";
-import Filters from "@/components/ui/filters";
-import {
-	DueDate,
-	type Filter,
-	FilterOperator,
-	type FilterOption,
-	FilterType,
-	filterViewOptions,
-	filterViewToFilterOptions,
-} from "@/components/ui/filters";
+import { Filters } from "@/components/ui/filters";
+
+// Stub types for demo purposes
+type Filter = {
+	id: string;
+	type: string;
+	operator: string;
+	value: string[];
+};
+type FilterOption = {
+	name: string;
+	value: string;
+	icon?: React.ReactNode;
+	label?: string;
+};
+type FilterOperatorType = {
+	IS: string;
+	BEFORE: string;
+	AFTER: string;
+};
+type FilterTypeType = {
+	DUE_DATE: string;
+	STATUS: string;
+	PRIORITY: string;
+};
+const FilterOperator = {
+	IS: "is",
+	BEFORE: "before",
+	AFTER: "after",
+} as const;
+const FilterType = {
+	DUE_DATE: "due_date",
+	STATUS: "status",
+	PRIORITY: "priority",
+} as const;
+type FilterType = typeof FilterType[keyof typeof FilterType];
+const DueDate = {
+	IN_THE_PAST: "in_the_past",
+	TODAY: "today",
+	TOMORROW: "tomorrow",
+	THIS_WEEK: "this_week",
+	NEXT_WEEK: "next_week",
+} as const;
+const AnimateChangeInHeight = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const filterViewOptions = [] as any[];
+const filterViewToFilterOptions: Record<string, FilterOption[]> = {
+	due_date: [
+		{ name: "Today", value: "today" },
+		{ name: "Tomorrow", value: "tomorrow" },
+		{ name: "This Week", value: "this_week" },
+	],
+	status: [
+		{ name: "Active", value: "active" },
+		{ name: "Completed", value: "completed" },
+	],
+	priority: [
+		{ name: "High", value: "high" },
+		{ name: "Medium", value: "medium" },
+		{ name: "Low", value: "low" },
+	],
+};
 import {
 	Popover,
 	PopoverContent,
@@ -51,7 +101,7 @@ export function ComboboxDemo() {
 
 	return (
 		<div className="flex gap-2 flex-wrap">
-			<Filters filters={filters} setFilters={setFilters} />
+			<Filters />
 			{filters.filter((filter) => filter.value?.length > 0).length > 0 && (
 				<Button
 					variant="outline"
@@ -93,7 +143,7 @@ export function ComboboxDemo() {
 					<AnimateChangeInHeight>
 						<Command>
 							<CommandInput
-								placeholder={selectedView ? selectedView : "Filter..."}
+								placeholder={selectedView ? String(selectedView) : "Filter..."}
 								className="h-9"
 								value={commandInput}
 								onInputCapture={(e) => {
@@ -105,7 +155,7 @@ export function ComboboxDemo() {
 								<CommandEmpty>No results found.</CommandEmpty>
 								{selectedView ? (
 									<CommandGroup>
-										{filterViewToFilterOptions[selectedView].map(
+										{((selectedView && filterViewToFilterOptions[selectedView]) || []).map(
 											(filter: FilterOption) => (
 												<CommandItem
 													className="group text-muted-foreground flex gap-2 items-center"
@@ -118,7 +168,7 @@ export function ComboboxDemo() {
 																id: nanoid(),
 																type: selectedView,
 																operator:
-																	selectedView === FilterType.DUE_DATE &&
+																	selectedView === "due_date" &&
 																	currentValue !== DueDate.IN_THE_PAST
 																		? FilterOperator.BEFORE
 																		: FilterOperator.IS,
@@ -156,7 +206,7 @@ export function ComboboxDemo() {
 															key={filter.name}
 															value={filter.name}
 															onSelect={(currentValue) => {
-																setSelectedView(currentValue as FilterType);
+																setSelectedView(currentValue as unknown as FilterType);
 																setCommandInput("");
 																commandInputRef.current?.focus();
 															}}

@@ -189,15 +189,19 @@ export function FinancbaseIcon({
 		tabIndex: onClick && !disabled ? 0 : undefined,
 	};
 
-	return (
-		<IconComponent
-			size={iconSize}
-			className={classes}
-			onClick={disabled ? undefined : onClick}
-			{...accessibilityProps}
-			{...props}
-		/>
-	);
+	const svgProps: React.SVGProps<SVGSVGElement> = {
+		width: iconSize,
+		height: iconSize,
+		className: classes,
+		onClick: disabled ? undefined : onClick,
+		"aria-label": accessibilityProps["aria-label"],
+		"aria-hidden": accessibilityProps["aria-hidden"],
+		role: accessibilityProps.role,
+		tabIndex: accessibilityProps.tabIndex,
+		...props,
+	};
+
+	return <IconComponent {...svgProps} />;
 }
 
 // Specialized icon components for common use cases
@@ -216,7 +220,7 @@ export function BusinessIcon({
 }: Omit<FinancbaseIconProps, "category" | "categoryKey" | "operation"> & {
 	name: BusinessIconKey;
 }) {
-	return <FinancbaseIcon name={name} category="business" {...props} />;
+	return <FinancbaseIcon categoryKey={name} category="business" {...props} />;
 }
 
 export function StatusIcon({
@@ -225,7 +229,7 @@ export function StatusIcon({
 }: Omit<FinancbaseIconProps, "category" | "categoryKey" | "operation"> & {
 	name: StatusIconKey;
 }) {
-	return <FinancbaseIcon name={name} category="status" {...props} />;
+	return <FinancbaseIcon categoryKey={name} category="status" {...props} />;
 }
 
 export function ActionIcon({
@@ -234,7 +238,7 @@ export function ActionIcon({
 }: Omit<FinancbaseIconProps, "category" | "categoryKey" | "operation"> & {
 	name: ActionIconKey;
 }) {
-	return <FinancbaseIcon name={name} category="action" {...props} />;
+	return <FinancbaseIcon categoryKey={name} category="action" {...props} />;
 }
 
 // Icon with text component for better UX
@@ -296,4 +300,4 @@ export function IconWithText({
 }
 
 // Export types for external use
-export type { FinancbaseIconProps, IconWithTextProps, IconSize, IconColor };
+export type { FinancbaseIconProps, IconWithTextProps };

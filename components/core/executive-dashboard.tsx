@@ -33,12 +33,14 @@ import {
 	FileText,
 	Info,
 	Mail,
+	RefreshCw,
 	ShoppingCart,
 	Target,
 	TrendingDown,
 	TrendingUp,
 	Users,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import {
 	Area,
 	AreaChart,
@@ -85,65 +87,52 @@ interface DashboardMetrics {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
 export function ExecutiveDashboard() {
-	// Mock data - replace with real API calls
-	const metrics: DashboardMetrics = {
-		totalRevenue: 125000,
-		revenueChange: 12.5,
-		totalUsers: 15420,
-		usersChange: 8.2,
-		totalOrders: 3420,
-		ordersChange: -2.1,
-		conversionRate: 3.4,
-		avgOrderValue: 89.5,
-		topProducts: [
-			{ name: "Premium Plan", sales: 450, revenue: 45000 },
-			{ name: "Basic Plan", sales: 320, revenue: 19200 },
-			{ name: "Enterprise Plan", sales: 180, revenue: 36000 },
-			{ name: "Add-on Services", sales: 890, revenue: 26700 },
-		],
-		userGrowth: [
-			{ month: "Jan", users: 12000, newUsers: 800 },
-			{ month: "Feb", users: 12800, newUsers: 950 },
-			{ month: "Mar", users: 13900, newUsers: 1100 },
-			{ month: "Apr", users: 14500, newUsers: 600 },
-			{ month: "May", users: 15420, newUsers: 920 },
-		],
-		revenueByCategory: [
-			{ category: "Subscriptions", revenue: 85000, percentage: 68 },
-			{ category: "One-time", revenue: 25000, percentage: 20 },
-			{ category: "Services", revenue: 15000, percentage: 12 },
-		],
-		recentActivity: [
-			{
-				id: "1",
-				type: "order",
-				description: "New purchase order approved",
-				timestamp: "2 minutes ago",
-				status: "success",
-			},
-			{
-				id: "2",
-				type: "user",
-				description: "New user registration",
-				timestamp: "5 minutes ago",
-				status: "info",
-			},
-			{
-				id: "3",
-				type: "system",
-				description: "Database backup completed",
-				timestamp: "1 hour ago",
-				status: "success",
-			},
-			{
-				id: "4",
-				type: "alert",
-				description: "High memory usage detected",
-				timestamp: "2 hours ago",
-				status: "warning",
-			},
-		],
+	// Fetch real executive metrics from API
+	const { data: metricsData, isLoading, error } = useQuery({
+		queryKey: ['executive-metrics'],
+		queryFn: async () => {
+			const response = await fetch('/api/dashboard/executive-metrics');
+			if (!response.ok) throw new Error('Failed to fetch executive metrics');
+			return response.json();
+		},
+	});
+
+	const metrics: DashboardMetrics = metricsData || {
+		totalRevenue: 0,
+		revenueChange: 0,
+		totalUsers: 0,
+		usersChange: 0,
+		totalOrders: 0,
+		ordersChange: 0,
+		conversionRate: 0,
+		avgOrderValue: 0,
+		topProducts: [],
+		userGrowth: [],
+		revenueByCategory: [],
+		recentActivity: [],
 	};
+
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center min-h-[400px]">
+				<div className="flex items-center gap-2">
+					<RefreshCw className="h-6 w-6 animate-spin" />
+					<span>Loading executive dashboard...</span>
+				</div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="flex items-center justify-center min-h-[400px]">
+				<div className="text-center">
+					<AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
+					<p className="text-destructive">Failed to load executive metrics</p>
+				</div>
+			</div>
+		);
+	}
 
 	const MetricCard = ({
 		title,

@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useFeedback } from "@/hooks/use-feedback";
-import { useMarketingFeedback } from "@/lib/hooks/use-marketing-analytics";
 import { cn } from "@/lib/utils"; // Assuming you have a `cn` utility
 import { AnimatePresence, motion } from "framer-motion";
 import {

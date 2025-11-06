@@ -81,8 +81,8 @@ export default function HelpCancelPage() {
 												Navigate to your account settings and find the billing section.
 											</p>
 											<Button variant="outline" size="sm" asChild>
-												<Link href="/settings/billing">
-													Go to Billing Settings
+												<Link href="/auth/sign-up">
+													Get Started
 													<ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
 												</Link>
 											</Button>
@@ -212,9 +212,9 @@ export default function HelpCancelPage() {
 									You can reactivate your subscription at any time within 30 days of cancellation. All your data will be restored instantly.
 								</p>
 								<Button asChild>
-									<Link href="/settings/billing">
+									<Link href="/auth/sign-up">
 										<RefreshCw className="h-4 w-4 mr-2" />
-										Reactivate Subscription
+										Get Started
 									</Link>
 								</Button>
 							</CardContent>

@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, BarChart3, TrendingUp, PieChart, Target, Zap, ArrowRight, Eye } from "lucide-react";
 import Link from "next/link";
+import { CSSVariablesTest } from "@/components/dev/css-variables-test";
 
 export const metadata: Metadata = {
 	title: "Analytics | Financbase",
@@ -104,7 +105,7 @@ const pricingPlans = [
 
 export default function AnalyticsPage() {
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-gray-800">
+		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
 			{/* Hero Section */}
 			<section className="container mx-auto px-4 py-20">
 				<div className="text-center max-w-4xl mx-auto">
@@ -112,12 +113,12 @@ export default function AnalyticsPage() {
 						<BarChart3 className="h-4 w-4 mr-2" />
 						Analytics
 					</Badge>
-					<h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+					<h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent drop-shadow-sm">
 						Track & Analyze
 						<br />
 						<span className="text-4xl">Your Website Traffic</span>
 					</h1>
-					<p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+					<p className="text-xl text-foreground/90 mb-8 max-w-2xl mx-auto font-medium">
 						Get deep insights into your website performance with powerful analytics. 
 						Make data-driven decisions to grow your business.
 					</p>
@@ -130,7 +131,7 @@ export default function AnalyticsPage() {
 							View Live Demo
 						</Button>
 					</div>
-					<p className="text-sm text-muted-foreground mt-4">
+					<p className="text-sm text-foreground/80 mt-4 font-medium">
 						Free forever plan • No credit card required
 					</p>
 				</div>
@@ -139,8 +140,8 @@ export default function AnalyticsPage() {
 			{/* Features Section */}
 			<section className="container mx-auto px-4 py-20">
 				<div className="text-center mb-16">
-					<h2 className="text-3xl font-bold mb-4">Powerful Analytics Features</h2>
-					<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+					<h2 className="text-3xl font-bold mb-4 drop-shadow-sm text-foreground">Powerful Analytics Features</h2>
+					<p className="text-xl text-foreground/90 max-w-2xl mx-auto font-medium">
 						Everything you need to understand your audience and optimize your website performance.
 					</p>
 				</div>
@@ -149,13 +150,13 @@ export default function AnalyticsPage() {
 					{features.map((feature, index) => (
 						<Card key={index} className="text-center hover:shadow-lg transition-shadow">
 							<CardHeader>
-								<div className="mx-auto w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
-									<feature.icon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+								<div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+									<feature.icon className="h-6 w-6 text-primary" />
 								</div>
-								<CardTitle className="text-xl">{feature.title}</CardTitle>
+								<CardTitle className="text-xl text-foreground">{feature.title}</CardTitle>
 							</CardHeader>
 							<CardContent>
-								<CardDescription className="text-base">
+								<CardDescription className="text-base text-muted-foreground">
 									{feature.description}
 								</CardDescription>
 							</CardContent>
@@ -167,34 +168,34 @@ export default function AnalyticsPage() {
 			{/* Pricing Section */}
 			<section className="container mx-auto px-4 py-20">
 				<div className="text-center mb-16">
-					<h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
-					<p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+					<h2 className="text-3xl font-bold mb-4 drop-shadow-sm text-foreground">Simple, Transparent Pricing</h2>
+					<p className="text-xl text-foreground/90 max-w-2xl mx-auto font-medium">
 						Start free and upgrade as you grow. No hidden fees or long-term contracts.
 					</p>
 				</div>
 				
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
 					{pricingPlans.map((plan, index) => (
-						<Card key={index} className={`relative ${plan.popular ? 'border-purple-500 shadow-lg scale-105' : ''}`}>
+						<Card key={index} className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : ''}`}>
 							{plan.popular && (
 								<div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-									<Badge className="bg-purple-500">Most Popular</Badge>
+									<Badge className="bg-primary">Most Popular</Badge>
 								</div>
 							)}
 							<CardHeader className="text-center">
-								<CardTitle className="text-2xl">{plan.name}</CardTitle>
+								<CardTitle className="text-2xl text-foreground">{plan.name}</CardTitle>
 								<div className="mt-4">
-									<span className="text-4xl font-bold">{plan.price}</span>
+									<span className="text-4xl font-bold text-foreground">{plan.price}</span>
 									<span className="text-muted-foreground">{plan.period}</span>
 								</div>
-								<CardDescription className="mt-2">{plan.description}</CardDescription>
+								<CardDescription className="mt-2 text-muted-foreground">{plan.description}</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<ul className="space-y-3 mb-6">
 									{plan.features.map((feature, featureIndex) => (
 										<li key={featureIndex} className="flex items-center">
-											<CheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-											<span>{feature}</span>
+											<CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+											<span className="text-foreground">{feature}</span>
 										</li>
 									))}
 								</ul>
@@ -213,22 +214,27 @@ export default function AnalyticsPage() {
 
 			{/* CTA Section */}
 			<section className="container mx-auto px-4 py-20">
-				<Card className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0">
+				<Card className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0">
 					<CardContent className="text-center py-16">
-						<h2 className="text-3xl font-bold mb-4">Ready to Get Insights?</h2>
-						<p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+						<h2 className="text-3xl font-bold mb-4 text-primary-foreground">Ready to Get Insights?</h2>
+						<p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto text-primary-foreground">
 							Join thousands of websites using our analytics to make better decisions.
 						</p>
 						<div className="flex flex-col sm:flex-row gap-4 justify-center">
 							<Button size="lg" variant="secondary" className="text-lg px-8">
 								Start Your Free Trial
 							</Button>
-							<Button size="lg" variant="outline" className="text-lg px-8 border-white text-white hover:bg-white hover:text-purple-600">
+							<Button size="lg" variant="outline" className="text-lg px-8 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
 								Schedule a Demo
 							</Button>
 						</div>
 					</CardContent>
 				</Card>
+			</section>
+
+			{/* CSS Variables Test Section */}
+			<section className="container mx-auto px-4 py-8">
+				<CSSVariablesTest />
 			</section>
 		</div>
 	);

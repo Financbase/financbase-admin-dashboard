@@ -229,16 +229,16 @@ export function InvoiceList() {
 										</TableCell>
 										<TableCell>{invoice.clientName}</TableCell>
 										<TableCell>
-											<div>
-												<div className="font-semibold">
-													${parseFloat(invoice.total).toLocaleString()}
-												</div>
-												{parseFloat(invoice.amountPaid) > 0 && (
-													<div className="text-xs text-muted-foreground">
-														Paid: ${parseFloat(invoice.amountPaid).toLocaleString()}
-													</div>
-												)}
+										<div>
+											<div className="font-semibold">
+												${typeof invoice.total === 'string' ? parseFloat(invoice.total).toLocaleString() : invoice.total.toLocaleString()}
 											</div>
+											{(typeof invoice.amountPaid === 'string' ? parseFloat(invoice.amountPaid) : invoice.amountPaid) > 0 && (
+												<div className="text-xs text-muted-foreground">
+													Paid: ${typeof invoice.amountPaid === 'string' ? parseFloat(invoice.amountPaid).toLocaleString() : invoice.amountPaid.toLocaleString()}
+												</div>
+											)}
+										</div>
 										</TableCell>
 										<TableCell>{getStatusBadge(invoice.status)}</TableCell>
 										<TableCell>
@@ -257,11 +257,11 @@ export function InvoiceList() {
 													</Button>
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end">
-													<DropdownMenuItem onClick={() => router.push(`/invoices/${invoice.id}`)}>
+													<DropdownMenuItem onClick={() => router.push(`/invoices/${String(invoice.id)}`)}>
 														<Eye className="h-4 w-4 mr-2" />
 														View
 													</DropdownMenuItem>
-													<DropdownMenuItem onClick={() => router.push(`/invoices/${invoice.id}/edit`)}>
+													<DropdownMenuItem onClick={() => router.push(`/invoices/${String(invoice.id)}/edit`)}>
 														<Edit className="h-4 w-4 mr-2" />
 														Edit
 													</DropdownMenuItem>

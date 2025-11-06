@@ -10,16 +10,16 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../src/design-system"
-import { Button } from "../src/design-system"
-import { Input } from "../src/design-system"
-import { Textarea } from "../src/design-system"
-import { Label } from "../src/design-system"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../src/design-system"
-import { Badge } from "../src/design-system"
-import { Card, CardContent, CardHeader, CardTitle } from "../src/design-system"
-import { Separator } from "../src/design-system"
-import { Switch } from "../src/design-system"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { Calendar, DollarSign, MapPin, Clock, Users, Briefcase, Target, Award } from "lucide-react"
 
 interface JobPostingModalProps {
@@ -184,7 +184,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                         id="title"
                         placeholder="e.g., E-commerce Website Development"
                         value={formData.title}
-                        onChange={(e) => handleInputChange("title", e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("title", e.target.value)}
                       />
                     </div>
 
@@ -194,14 +194,14 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                         id="description"
                         placeholder="Describe your project requirements, goals, and expectations..."
                         value={formData.description}
-                        onChange={(e) => handleInputChange("description", e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange("description", e.target.value)}
                         rows={6}
                       />
                     </div>
 
                     <div>
                       <Label htmlFor="category">Category *</Label>
-                      <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                      <Select value={formData.category} onValueChange={(value: string) => handleInputChange("category", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
@@ -217,7 +217,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
 
                     <div>
                       <Label htmlFor="duration">Project Duration</Label>
-                      <Select value={formData.duration} onValueChange={(value) => handleInputChange("duration", value)}>
+                      <Select value={formData.duration} onValueChange={(value: string) => handleInputChange("duration", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select duration" />
                         </SelectTrigger>
@@ -236,7 +236,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                     <Switch
                       id="remote"
                       checked={formData.remote}
-                      onCheckedChange={(checked) => handleInputChange("remote", checked)}
+                      onCheckedChange={(checked: boolean) => handleInputChange("remote", checked)}
                     />
                     <Label htmlFor="remote">Remote work allowed</Label>
                   </div>
@@ -248,7 +248,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                         id="location"
                         placeholder="e.g., New York, NY or Remote"
                         value={formData.location}
-                        onChange={(e) => handleInputChange("location", e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("location", e.target.value)}
                       />
                     </div>
                   )}
@@ -304,8 +304,8 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                       <Input
                         placeholder="Add a skill..."
                         value={skillInput}
-                        onChange={(e) => setSkillInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSkillInput(e.target.value)}
+                        onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
                       />
                       <Button onClick={addSkill} variant="outline">Add</Button>
                     </div>
@@ -365,7 +365,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                             type="number"
                             placeholder="1000"
                             value={formData.minBudget}
-                            onChange={(e) => handleInputChange("minBudget", e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("minBudget", e.target.value)}
                           />
                         </div>
                         <div>
@@ -375,7 +375,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                             type="number"
                             placeholder="5000"
                             value={formData.maxBudget}
-                            onChange={(e) => handleInputChange("maxBudget", e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("maxBudget", e.target.value)}
                           />
                         </div>
                       </div>
@@ -393,7 +393,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                         type="number"
                         placeholder="50"
                         value={formData.hourlyRate}
-                        onChange={(e) => handleInputChange("hourlyRate", e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("hourlyRate", e.target.value)}
                       />
                       <p className="text-sm text-muted-foreground mt-1">
                         Rate per hour for this project
@@ -409,7 +409,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                         type="number"
                         placeholder="3000"
                         value={formData.budget}
-                        onChange={(e) => handleInputChange("budget", e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("budget", e.target.value)}
                       />
                       <p className="text-sm text-muted-foreground mt-1">
                         Total budget to be distributed across milestones
@@ -429,7 +429,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                         <div className="font-semibold">$49</div>
                         <Switch
                           checked={formData.featured}
-                          onCheckedChange={(checked) => handleInputChange("featured", checked)}
+                          onCheckedChange={(checked: boolean) => handleInputChange("featured", checked)}
                         />
                       </div>
                     </div>
@@ -443,7 +443,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                         <div className="font-semibold">$29</div>
                         <Switch
                           checked={formData.urgent}
-                          onCheckedChange={(checked) => handleInputChange("urgent", checked)}
+                          onCheckedChange={(checked: boolean) => handleInputChange("urgent", checked)}
                         />
                       </div>
                     </div>
@@ -455,7 +455,7 @@ export function JobPostingModal({ isOpen, onClose, onSubmit }: JobPostingModalPr
                       id="deadline"
                       type="date"
                       value={formData.deadline}
-                      onChange={(e) => handleInputChange("deadline", e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("deadline", e.target.value)}
                     />
                   </div>
                 </CardContent>

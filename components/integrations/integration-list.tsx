@@ -113,7 +113,7 @@ export function IntegrationList({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['integrationConnections']);
+      queryClient.invalidateQueries({ queryKey: ['integrationConnections'] });
     },
   });
 
@@ -126,7 +126,7 @@ export function IntegrationList({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['integrationConnections']);
+      queryClient.invalidateQueries({ queryKey: ['integrationConnections'] });
     },
   });
 

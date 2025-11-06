@@ -8,7 +8,7 @@
  */
 
 import { pgTable, text, integer, timestamp, boolean, uuid, jsonb } from "drizzle-orm/pg-core";
-import type { webhookEvents as WorkflowWebhookEvents } from "./webhooks.schema";
+import { webhookEvents } from "./webhooks.schema";
 
 // Reports table
 export const reports = pgTable("reports", {
@@ -58,3 +58,13 @@ export const reportTemplates = pgTable("report_templates", {
 export { webhookEvents as WorkflowWebhookEvents } from "./webhooks.schema";
 export type WebhookEvent = typeof webhookEvents.$inferSelect;
 export type NewWebhookEvent = typeof webhookEvents.$inferInsert;
+
+// Type exports for reports
+export type Report = typeof reports.$inferSelect;
+export type NewReport = typeof reports.$inferInsert;
+
+export type ReportHistory = typeof reportHistory.$inferSelect;
+export type NewReportHistory = typeof reportHistory.$inferInsert;
+
+export type ReportTemplate = typeof reportTemplates.$inferSelect;
+export type NewReportTemplate = typeof reportTemplates.$inferInsert;

@@ -35,6 +35,9 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
+import { RevenueChart } from '@/components/financial/intelligence/revenue-chart';
+import { ExpenseBreakdownChart } from '@/components/financial/intelligence/expense-breakdown-chart';
+import { CashFlowChart } from '@/components/financial/intelligence/cash-flow-chart';
 
 export default function PredictionsPage() {
   const [loading, setLoading] = useState(true);
@@ -211,13 +214,7 @@ export default function PredictionsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg mb-6">
-                <div className="text-center">
-                  <LineChart className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Revenue forecast visualization</p>
-                  <p className="text-sm text-gray-400">Chart integration coming soon</p>
-                </div>
-              </div>
+              <RevenueChart period={timeframe === '3m' ? '90d' : timeframe === '6m' ? '180d' : '365d'} height={300} showPrediction={true} />
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
@@ -320,13 +317,7 @@ export default function PredictionsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg mb-6">
-                <div className="text-center">
-                  <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Expense forecast visualization</p>
-                  <p className="text-sm text-gray-400">Chart integration coming soon</p>
-                </div>
-              </div>
+              <ExpenseBreakdownChart period={timeframe === '3m' ? '90d' : timeframe === '6m' ? '180d' : '365d'} height={300} />
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
@@ -391,13 +382,7 @@ export default function PredictionsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg mb-6">
-                <div className="text-center">
-                  <Activity className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Cash flow forecast visualization</p>
-                  <p className="text-sm text-gray-400">Chart integration coming soon</p>
-                </div>
-              </div>
+              <CashFlowChart period={timeframe === '3m' ? '90d' : timeframe === '6m' ? '180d' : '365d'} height={300} />
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">

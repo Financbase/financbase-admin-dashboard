@@ -66,8 +66,8 @@ export default function AnalyticsPage() {
 								</CardHeader>
 								<CardContent>
 									<Button variant="outline" size="sm" className="w-full" asChild>
-										<Link href="/dashboard/analytics">
-											View Revenue Analytics
+										<Link href="/products/analytics">
+											Learn More
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>
 									</Button>
@@ -88,8 +88,8 @@ export default function AnalyticsPage() {
 								</CardHeader>
 								<CardContent>
 									<Button variant="outline" size="sm" className="w-full" asChild>
-										<Link href="/dashboard/analytics">
-											Set Goals
+										<Link href="/products/analytics">
+											Learn More
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>
 									</Button>
@@ -110,8 +110,8 @@ export default function AnalyticsPage() {
 								</CardHeader>
 								<CardContent>
 									<Button variant="outline" size="sm" className="w-full" asChild>
-										<Link href="/dashboard/analytics">
-											Analyze Expenses
+										<Link href="/products/analytics">
+											Learn More
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>
 									</Button>
@@ -233,9 +233,9 @@ export default function AnalyticsPage() {
 									Access your personalized analytics dashboard to start tracking your financial performance.
 								</p>
 								<Button asChild>
-									<Link href="/dashboard/analytics">
+									<Link href="/auth/sign-up">
 										<BarChart3 className="h-4 w-4 mr-2" />
-										Open Analytics
+										Get Started Free
 									</Link>
 								</Button>
 							</CardContent>

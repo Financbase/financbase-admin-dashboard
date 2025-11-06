@@ -145,7 +145,7 @@ export function WebhookForm({ webhook, onSave, onCancel, onTest }: WebhookFormPr
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['webhooks']);
+      queryClient.invalidateQueries({ queryKey: ['webhooks'] });
       onSave(formData);
     },
   });

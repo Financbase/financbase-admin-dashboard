@@ -14,6 +14,71 @@ import { eq, desc, and, like, or } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
+/**
+ * @swagger
+ * /api/integrations:
+ *   get:
+ *     summary: Get available integrations
+ *     description: Retrieves a paginated list of available third-party integrations (accounting software, payment processors, etc.)
+ *     tags:
+ *       - Integrations
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter integrations by category (accounting, payment, crm, etc.)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for integration name or description
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *         description: Maximum number of integrations to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of integrations to skip
+ *     responses:
+ *       200:
+ *         description: Integrations retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: integration_123
+ *                   name:
+ *                     type: string
+ *                     example: QuickBooks
+ *                   description:
+ *                     type: string
+ *                   category:
+ *                     type: string
+ *                     example: accounting
+ *                   isOfficial:
+ *                     type: boolean
+ *                     example: true
+ *                   isActive:
+ *                     type: boolean
+ *                     example: true
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   try {

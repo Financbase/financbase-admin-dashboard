@@ -421,7 +421,7 @@ export function ExpenseBreakdownChart({ data, loading }: { data: ChartDataPoint[
 		data,
 		xAxisKey: "category",
 		yAxisKeys: ["amount"],
-		colors: Object.values(CHART_COLORS),
+		colors: Object.values(CHART_COLORS).flat(),
 		title: "Expense Breakdown",
 		description: "Distribution of expenses by category",
 		showTooltip: true,

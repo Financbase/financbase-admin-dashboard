@@ -46,6 +46,7 @@ interface VideoMetadata {
 	codec: string;
 	bitrate: number;
 	framerate: number;
+	fileName?: string;
 }
 
 export function VideoUpload({
@@ -261,7 +262,7 @@ export function VideoUpload({
 		setPreviewUrl(null);
 		setThumbnailUrl(null);
 		setVideoMetadata(null);
-		onVideoUpdate?.(null);
+		onVideoUpdate?.(null as any);
 	};
 
 	const downloadVideo = () => {

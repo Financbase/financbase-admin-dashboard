@@ -241,7 +241,7 @@ export function ImageUpload({
 			onImageUpdate?.(previewUrls.filter((_, i) => i !== index));
 		} else {
 			setPreviewUrls([]);
-			onImageUpdate?.(multiple ? [] : null);
+			onImageUpdate?.(multiple ? [] : "");
 		}
 	};
 

@@ -196,12 +196,12 @@ export default function PaymentIssuesPage() {
 						<h2 className="text-2xl font-semibold mb-6">Quick Actions</h2>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<Button asChild variant="outline" className="justify-start h-auto py-4">
-								<Link href="/settings/billing">
+								<Link href="/auth/sign-up">
 									<RefreshCw className="h-4 w-4 mr-2" />
 									<div className="text-left">
-										<div className="font-semibold">Update Payment Method</div>
+										<div className="font-semibold">Get Started</div>
 										<div className="text-xs text-muted-foreground">
-											Try a different payment method
+											Create your account to manage billing
 										</div>
 									</div>
 									<ArrowRight className="h-4 w-4 ml-auto" />

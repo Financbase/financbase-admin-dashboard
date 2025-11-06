@@ -157,6 +157,28 @@ export const ourFileRouter = {
 				optimized: true,
 			};
 		}),
+
+	// Gallery images with optimization
+	galleryImage: f({ image: { maxFileSize: '10MB' } })
+		.middleware(async () => {
+			const { userId } = await auth();
+
+			if (!userId) {
+				throw new UploadThingError('Unauthorized');
+			}
+
+			return { userId };
+		})
+		.onUploadComplete(async ({ metadata, file }) => {
+			console.log('Gallery image uploaded:', file.url);
+			return {
+				uploadedBy: metadata.userId,
+				url: file.url,
+				optimized: true,
+				name: file.name,
+				size: file.size,
+			};
+		}),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

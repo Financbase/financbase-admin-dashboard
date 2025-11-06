@@ -158,7 +158,7 @@ export function DeveloperPortal() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['api-keys']);
+			queryClient.invalidateQueries({ queryKey: ['api-keys'] });
 			setShowCreateDialog(false);
 		},
 	});
@@ -172,7 +172,7 @@ export function DeveloperPortal() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['api-keys']);
+			queryClient.invalidateQueries({ queryKey: ['api-keys'] });
 		},
 	});
 
@@ -185,7 +185,7 @@ export function DeveloperPortal() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['api-keys']);
+			queryClient.invalidateQueries({ queryKey: ['api-keys'] });
 		},
 	});
 
@@ -223,7 +223,7 @@ export function DeveloperPortal() {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button variant="outline" onClick={() => queryClient.invalidateQueries(['api-usage'])}>
+					<Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ['api-usage'] })}>
 						<RefreshCw className="mr-2 h-4 w-4" />
 						Refresh
 					</Button>
@@ -322,7 +322,7 @@ export function DeveloperPortal() {
 							<Key className="h-4 w-4 text-blue-600" />
 							<div>
 								<p className="text-sm text-muted-foreground">Active API Keys</p>
-								<p className="text-xl font-bold">{apiKeys.filter(k => k.status === 'active').length}</p>
+								<p className="text-xl font-bold">{apiKeys.filter((k: any) => k.status === 'active').length}</p>
 							</div>
 						</div>
 					</CardContent>
@@ -335,7 +335,7 @@ export function DeveloperPortal() {
 							<div>
 								<p className="text-sm text-muted-foreground">Requests Today</p>
 								<p className="text-xl font-bold">
-									{usageData.reduce((sum, day) => sum + day.requests, 0)}
+									{usageData.reduce((sum: number, day: any) => sum + day.requests, 0)}
 								</p>
 							</div>
 						</div>
@@ -349,8 +349,8 @@ export function DeveloperPortal() {
 							<div>
 								<p className="text-sm text-muted-foreground">Success Rate</p>
 								<p className="text-xl font-bold">
-									{Math.round((usageData.reduce((sum, day) => sum + day.requests, 0) /
-										(usageData.reduce((sum, day) => sum + day.requests + day.errors, 0))) * 100)}%
+									{Math.round((usageData.reduce((sum: number, day: any) => sum + day.requests, 0) /
+										(usageData.reduce((sum: number, day: any) => sum + day.requests + day.errors, 0))) * 100)}%
 								</p>
 							</div>
 						</div>
@@ -364,7 +364,7 @@ export function DeveloperPortal() {
 							<div>
 								<p className="text-sm text-muted-foreground">Avg Response</p>
 								<p className="text-xl font-bold">
-									{Math.round(usageData.reduce((sum, day) => sum + day.avgResponseTime, 0) / usageData.length)}ms
+									{Math.round(usageData.reduce((sum: number, day: any) => sum + day.avgResponseTime, 0) / usageData.length)}ms
 								</p>
 							</div>
 						</div>
@@ -394,7 +394,7 @@ export function DeveloperPortal() {
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-4">
-								{apiKeys.map((apiKey) => (
+								{apiKeys.map((apiKey: any) => (
 									<div key={apiKey.id} className="flex items-center justify-between p-4 border rounded-lg">
 										<div className="flex-1">
 											<div className="flex items-center gap-2 mb-1">
@@ -485,7 +485,7 @@ export function DeveloperPortal() {
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-4">
-									{usageData.map((day) => (
+									{usageData.map((day: any) => (
 										<div key={day.date} className="flex items-center justify-between">
 											<span className="text-sm">{new Date(day.date).toLocaleDateString()}</span>
 											<span className="font-medium">{day.requests.toLocaleString()}</span>
@@ -502,7 +502,7 @@ export function DeveloperPortal() {
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-4">
-									{usageData.map((day) => (
+									{usageData.map((day: any) => (
 										<div key={day.date} className="space-y-1">
 											<div className="flex items-center justify-between">
 												<span className="text-sm">{new Date(day.date).toLocaleDateString()}</span>

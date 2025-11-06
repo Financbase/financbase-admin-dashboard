@@ -301,15 +301,25 @@ export async function getReportHistory(
  * Get report templates
  */
 export async function getReportTemplates(category?: string) {
-	const conditions = [];
-	if (category) {
-		conditions.push(eq(reportTemplates.category, category));
-	}
+	try {
+		const conditions = [];
+		if (category) {
+			conditions.push(eq(reportTemplates.category, category));
+		}
 
-	return await db.query.reportTemplates.findMany({
-		where: conditions.length > 0 ? and(...conditions) : undefined,
-		orderBy: [desc(reportTemplates.isPopular), reportTemplates.name],
-	});
+		return await db.query.reportTemplates.findMany({
+			where: conditions.length > 0 ? and(...conditions) : undefined,
+			orderBy: [desc(reportTemplates.isPopular), reportTemplates.name],
+		});
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		if (errorMessage.includes('column "user_id" does not exist') || 
+		    errorMessage.includes('does not exist')) {
+			console.warn('[Report Templates] Table or column not found, returning empty array:', errorMessage);
+			return [];
+		}
+		throw error;
+	}
 }
 
 /**

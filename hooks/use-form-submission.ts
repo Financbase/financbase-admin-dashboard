@@ -28,6 +28,7 @@ interface UseFormSubmissionOptions {
   redirectTo?: string;
   showSuccessToast?: boolean;
   showErrorToast?: boolean;
+  errorMessage?: string; // Added for compatibility
 }
 
 interface FormSubmissionState {
@@ -203,6 +204,8 @@ export function useFormSubmission<T = any>(
   return {
     submit,
     isSubmitting: state.isSubmitting,
+    isLoading: state.isSubmitting,
+    error: state.generalError,
     errors: state.errors,
     generalError: state.generalError,
     setFieldError,

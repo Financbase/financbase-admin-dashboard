@@ -67,7 +67,7 @@ export default function DashboardPage() {
 								</CardHeader>
 								<CardContent>
 									<Button variant="outline" size="sm" className="w-full" asChild>
-										<Link href="/dashboard/analytics">
+										<Link href="/products/analytics">
 											Explore Analytics
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>
@@ -89,8 +89,8 @@ export default function DashboardPage() {
 								</CardHeader>
 								<CardContent>
 									<Button variant="outline" size="sm" className="w-full" asChild>
-										<Link href="/dashboard/transactions">
-											View Transactions
+										<Link href="/docs/dashboard">
+											Learn More
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>
 									</Button>
@@ -111,8 +111,8 @@ export default function DashboardPage() {
 								</CardHeader>
 								<CardContent>
 									<Button variant="outline" size="sm" className="w-full" asChild>
-										<Link href="/dashboard/accounts">
-											Manage Accounts
+										<Link href="/docs">
+											Learn More
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>
 									</Button>
@@ -133,8 +133,8 @@ export default function DashboardPage() {
 								</CardHeader>
 								<CardContent>
 									<Button variant="outline" size="sm" className="w-full" asChild>
-										<Link href="/dashboard/team">
-											Manage Team
+										<Link href="/docs">
+											Learn More
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>
 									</Button>
@@ -192,9 +192,9 @@ export default function DashboardPage() {
 									Access your personalized dashboard to start managing your financial data and insights.
 								</p>
 								<Button asChild>
-									<Link href="/dashboard">
+									<Link href="/auth/sign-up">
 										<LayoutDashboard className="h-4 w-4 mr-2" />
-										Open Dashboard
+										Get Started Free
 									</Link>
 								</Button>
 							</CardContent>

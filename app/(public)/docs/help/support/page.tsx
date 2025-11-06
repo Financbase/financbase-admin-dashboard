@@ -68,8 +68,8 @@ export default function HelpSupportPage() {
 										<span>Available 24/7</span>
 									</div>
 									<Button className="w-full" asChild>
-										<Link href="/dashboard/support">
-											Start Chat
+										<Link href="/support">
+											Contact Support
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>
 									</Button>
@@ -243,9 +243,9 @@ export default function HelpSupportPage() {
 								</p>
 								<div className="flex flex-col sm:flex-row gap-4 justify-center">
 									<Button asChild>
-										<Link href="/dashboard/support">
+										<Link href="/support">
 											<MessageCircle className="h-4 w-4 mr-2" />
-											Start Live Chat
+											Contact Support
 										</Link>
 									</Button>
 									<Button variant="outline" asChild>

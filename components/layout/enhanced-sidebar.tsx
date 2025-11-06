@@ -14,6 +14,8 @@ import { motion } from "framer-motion";
 import { FinancbaseLogo } from "@/components/ui/financbase-logo";
 import { UserAvatar } from "@/components/core/ui/layout/user-avatar";
 import { cn } from "@/lib/utils";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { canAccessRoute } from "@/lib/config/navigation-permissions";
 import {
 	LayoutDashboard,
 	CreditCard,
@@ -57,6 +59,8 @@ import {
 	Clock,
 	Rocket,
 	Activity,
+	PiggyBank,
+	Calendar,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -118,6 +122,7 @@ const navigationData: NavigationItem[] = [
 	// Financial Management
 	{ href: "/invoices", icon: Receipt, label: "Invoices", section: "financial" },
 	{ href: "/expenses", icon: DollarSign, label: "Expenses", section: "financial" },
+	{ href: "/budgets", icon: PiggyBank, label: "Budgets", section: "financial" },
 	{ href: "/bill-pay", icon: FileText, label: "Bill Pay", section: "financial" },
 	{ href: "/accounts", icon: Building2, label: "Accounts", section: "financial" },
 	{ href: "/financial-intelligence", icon: Brain, label: "Financial Intelligence", section: "financial" },
@@ -133,7 +138,6 @@ const navigationData: NavigationItem[] = [
 	{ href: "/marketplace", icon: Store, label: "Marketplace", section: "business" },
 	{ href: "/workflows", icon: Workflow, label: "Workflows", section: "business" },
 	{ href: "/leads", icon: Target, label: "Leads", section: "business" },
-	{ href: "/adboard", icon: Briefcase, label: "Adboard", section: "business" },
 	{ href: "/real-estate", icon: Home, label: "Real Estate", section: "business" },
 	{ href: "/freelance", icon: User, label: "Freelance", section: "business" },
 	
@@ -150,6 +154,8 @@ const navigationData: NavigationItem[] = [
 	{ href: "/hr/contractors", icon: User, label: "Contractors", section: "hr" },
 	{ href: "/hr/time-tracking", icon: Clock, label: "Time Tracking", section: "hr" },
 	{ href: "/hr/payroll", icon: DollarSign, label: "Payroll", section: "hr" },
+	{ href: "/hr/leave", icon: Calendar, label: "Leave Management", section: "hr" },
+	{ href: "/hr/attendance", icon: Clock, label: "Attendance", section: "hr" },
 	
 	// AI & Intelligence
 	{ href: "/ai-assistant", icon: Bot, label: "AI Assistant", section: "ai" },
@@ -189,7 +195,7 @@ const sectionLabels = {
 	main: "Main",
 	financial: "Financial Management",
 	business: "Business Services",
-	marketing: "Marketing & Advertising",
+	marketing: "AdBoard",
 	hr: "HR & People Management",
 	ai: "AI & Intelligence",
 	platform: "Platform Services",
@@ -206,18 +212,33 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 	user,
 }) => {
 	const pathname = usePathname();
+	const { role, permissions, isAdmin } = useUserPermissions();
 
-	// Memoize grouped navigation items
+	// Memoize grouped navigation items with permission filtering
 	const groupedNavigation = useMemo(() => {
 		const groups: Record<string, NavigationItem[]> = {};
-		navigationData.forEach(item => {
+		
+		// Filter navigation items based on user permissions
+		const filteredItems = navigationData.filter(item => {
+			// Admin sees all items
+			if (isAdmin) {
+				return true;
+			}
+
+			// Check if user can access this route
+			return canAccessRoute(item.href, role, permissions);
+		});
+
+		// Group filtered items by section
+		filteredItems.forEach(item => {
 			if (!groups[item.section]) {
 				groups[item.section] = [];
 			}
 			groups[item.section].push(item);
 		});
+		
 		return groups;
-	}, []);
+	}, [role, permissions, isAdmin]);
 
 	// Memoize event handlers
 	const handleToggleCollapse = useCallback(() => {

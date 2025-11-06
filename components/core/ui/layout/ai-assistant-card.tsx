@@ -9,7 +9,7 @@
 
 import {
 	ArrowLeft,
-	ChartNetworkIcon,
+	Network,
 	Filter,
 	HelpCircle,
 	ImageIcon,
@@ -302,7 +302,7 @@ export const Component = () => {
 							variant="secondary"
 							className="h-7 min-w-7 cursor-pointer gap-1.5 [&_svg]:-ms-px [&_svg]:shrink-0 text-xs [&_svg]:size-3.5 rounded-md"
 						>
-							<ChartNetworkIcon
+							<Network
 								aria-hidden="true"
 								className="text-orange-500"
 							/>
@@ -386,8 +386,7 @@ export const Component = () => {
 					<div className="flex items-center justify-between rounded-b-md border-t bg-muted/50 px-3 py-2 dark:bg-muted">
 						<Select defaultValue="gpt-4">
 							<SelectTrigger
-								size="sm"
-								className="h-7! bg-background text-xs w-[90px]"
+								className="h-7 bg-background text-xs w-[90px]"
 							>
 								<SelectValue placeholder="Select a model" />
 							</SelectTrigger>

@@ -18,8 +18,12 @@ import { Clock, Trash2 } from "lucide-react";
 
 export interface StartTimeEntryInput {
 	userId: string;
+	employeeId?: string;
+	contractorId?: string;
 	clientId?: string;
 	projectId?: string;
+	taskId?: string;
+	taskName?: string;
 	description: string;
 	hourlyRate?: number;
 	isBillable?: boolean;
@@ -27,8 +31,12 @@ export interface StartTimeEntryInput {
 
 export interface UpdateTimeEntryInput {
 	description?: string;
+	employeeId?: string;
+	contractorId?: string;
 	clientId?: string;
 	projectId?: string;
+	taskId?: string;
+	taskName?: string;
 	hourlyRate?: number;
 	isBillable?: boolean;
 	notes?: string;
@@ -62,14 +70,17 @@ export async function startTimeEntry(
 		.insert(timeEntries)
 		.values({
 			userId: input.userId,
-			clientId: input.clientId,
+			employeeId: input.employeeId,
+			contractorId: input.contractorId,
 			projectId: input.projectId,
+			taskId: input.taskId,
+			taskName: input.taskName,
 			description: input.description,
 			startTime: new Date(),
 			endTime: null,
 			duration: null,
 			hourlyRate: input.hourlyRate ? input.hourlyRate.toString() : null,
-			amount: null,
+			totalAmount: null,
 			isBillable: input.isBillable !== false,
 			isBilled: false,
 			invoiceId: null,
@@ -178,8 +189,11 @@ export async function listTimeEntries(params: {
 	userId: string;
 	page?: number;
 	limit?: number;
+	employeeId?: string;
+	contractorId?: string;
 	clientId?: string;
 	projectId?: string;
+	taskId?: string;
 	startDate?: Date;
 	endDate?: Date;
 	isBillable?: boolean;
@@ -191,12 +205,24 @@ export async function listTimeEntries(params: {
 
 	const conditions = [eq(timeEntries.userId, params.userId)];
 
+	if (params.employeeId) {
+		conditions.push(eq(timeEntries.employeeId, params.employeeId));
+	}
+
+	if (params.contractorId) {
+		conditions.push(eq(timeEntries.contractorId, params.contractorId));
+	}
+
 	if (params.clientId) {
 		conditions.push(eq(timeEntries.clientId, params.clientId));
 	}
 
 	if (params.projectId) {
 		conditions.push(eq(timeEntries.projectId, params.projectId));
+	}
+
+	if (params.taskId) {
+		conditions.push(eq(timeEntries.taskId, params.taskId));
 	}
 
 	if (params.startDate) {
@@ -250,8 +276,12 @@ export async function updateTimeEntry(
 	};
 
 	if (input.description) updateData.description = input.description;
+	if (input.employeeId !== undefined) updateData.employeeId = input.employeeId;
+	if (input.contractorId !== undefined) updateData.contractorId = input.contractorId;
 	if (input.clientId !== undefined) updateData.clientId = input.clientId;
 	if (input.projectId !== undefined) updateData.projectId = input.projectId;
+	if (input.taskId !== undefined) updateData.taskId = input.taskId;
+	if (input.taskName !== undefined) updateData.taskName = input.taskName;
 	if (input.hourlyRate !== undefined)
 		updateData.hourlyRate = input.hourlyRate.toString();
 	if (input.isBillable !== undefined) updateData.isBillable = input.isBillable;
@@ -386,4 +416,26 @@ export async function markTimeEntriesAsBilled(
 		.returning();
 
 	return result.length;
+}
+
+/**
+ * Get billable hours for contractor
+ */
+export async function getContractorBillableHours(
+	contractorId: string,
+	projectId?: string,
+	startDate?: Date,
+	endDate?: Date,
+): Promise<number> {
+	const db10 = getDbOrThrow();
+	const result = await db10.execute(sql`
+		SELECT calculate_billable_hours(
+			${contractorId}::UUID,
+			${projectId || null}::UUID,
+			${startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)}::TIMESTAMP WITH TIME ZONE,
+			${endDate || new Date()}::TIMESTAMP WITH TIME ZONE
+		) as billable_hours
+	`);
+
+	return Number(result[0]?.billable_hours || 0);
 }

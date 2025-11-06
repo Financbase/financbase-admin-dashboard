@@ -174,8 +174,8 @@ export default function AccountSetupPage() {
 											Add colleagues and team members to collaborate on financial management.
 										</p>
 										<Button variant="outline" asChild>
-											<Link href="/dashboard/team">
-												Manage Team
+											<Link href="/auth/sign-up">
+												Get Started
 												<ArrowRight className="h-4 w-4 ml-2" />
 											</Link>
 										</Button>
@@ -212,9 +212,9 @@ export default function AccountSetupPage() {
 									Your account is now configured and ready for use. You can always update these settings later.
 								</p>
 								<Button asChild>
-									<Link href="/dashboard">
+									<Link href="/auth/sign-up">
 										<Settings className="h-4 w-4 mr-2" />
-										Access Dashboard
+										Get Started Free
 									</Link>
 								</Button>
 							</CardContent>

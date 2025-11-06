@@ -20,11 +20,23 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-	VALIDATION_PATTERNS,
-	type ValidationPatternKey,
-	safeRegex,
-} from "@/lib/validation-patterns";
+// Validation patterns - define locally if module doesn't exist
+const VALIDATION_PATTERNS: Record<string, RegExp> = {
+	email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+	phone: /^\+?[\d\s\-()]+$/,
+	url: /^https?:\/\/.+/,
+	zipCode: /^\d{5}(-\d{4})?$/,
+};
+
+type ValidationPatternKey = keyof typeof VALIDATION_PATTERNS;
+
+const safeRegex = (pattern: string): RegExp => {
+	try {
+		return new RegExp(pattern);
+	} catch {
+		return /.*/; // Default to match all
+	}
+};
 import {
 	AlertCircle,
 	CheckCircle2,

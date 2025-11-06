@@ -24,7 +24,7 @@ import {
 	WifiOff,
 	XCircle,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 
 type FeedItem = LiveFeedItem;
@@ -112,7 +112,7 @@ export const NotificationCenterFeed = ({
 		limit,
 		entityTypes,
 		autoRefresh,
-		onError: (error) => {
+		onError: (error: Error) => {
 			console.error("Live feed error:", error);
 		},
 	});
@@ -290,7 +290,7 @@ export const NotificationCenterFeed = ({
 							</div>
 						</div>
 					) : (
-						items.map((it, i) => (
+						items.map((it: any, i: number) => (
 							<motion.div
 								key={it.id + i}
 								initial={{ opacity: 0, y: 10 }}

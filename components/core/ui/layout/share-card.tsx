@@ -131,7 +131,7 @@ export const ShareCard = ({
 			>
 				<div className="flex items-center justify-center h-32">
 					<div className="text-sm text-destructive">
-						Error loading folder sharing: {error}
+						Error loading folder sharing: {error?.message || String(error)}
 					</div>
 				</div>
 			</div>
@@ -155,7 +155,7 @@ export const ShareCard = ({
 		);
 	}
 
-	const users = data.users as User[];
+	const users = (data.users || data.members || []) as User[];
 
 	return (
 		<div
@@ -176,7 +176,7 @@ export const ShareCard = ({
 				</div>
 				<div>
 					<h2 className="text-lg font-semibold">
-						{folderName || data.folder.name}
+						{folderName || data.folder?.name || 'Folder'}
 					</h2>
 					<p className="text-sm text-muted-foreground">{itemCount} Items</p>
 				</div>
@@ -195,10 +195,11 @@ export const ShareCard = ({
 					/>
 					<div className="flex gap-2">
 						<Select
-							value={inviteRole}
-							onValueChange={(value: Omit<User["role"], "Owner">) =>
-								setInviteRole(value)
-							}
+							value={inviteRole as string}
+							onValueChange={(value: string) => {
+								const role = value as Omit<User["role"], "Owner">;
+								setInviteRole(role);
+							}}
 						>
 							<SelectTrigger className="w-full sm:w-[120px]">
 								<SelectValue placeholder="Select role" />

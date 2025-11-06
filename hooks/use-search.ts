@@ -34,117 +34,6 @@ const defaultConfig: SearchConfig = {
 	maxResults: 10,
 };
 
-// Mock search data - in production, this would come from your API
-const mockSearchData: SearchResult[] = [
-	// Pages
-	{
-		id: 'dashboard',
-		title: 'Dashboard',
-		description: 'Overview of your financial data',
-		type: 'page',
-		href: '/dashboard',
-		icon: 'LayoutDashboard',
-	},
-	{
-		id: 'transactions',
-		title: 'Transactions',
-		description: 'Manage income and expenses',
-		type: 'page',
-		href: '/transactions',
-		icon: 'CreditCard',
-	},
-	{
-		id: 'analytics',
-		title: 'Analytics',
-		description: 'Advanced reporting and insights',
-		type: 'page',
-		href: '/analytics',
-		icon: 'BarChart3',
-	},
-	{
-		id: 'invoices',
-		title: 'Invoices',
-		description: 'Create and track invoices',
-		type: 'page',
-		href: '/invoices',
-		icon: 'Receipt',
-	},
-	{
-		id: 'reports',
-		title: 'Reports',
-		description: 'Financial reports and statements',
-		type: 'page',
-		href: '/reports',
-		icon: 'FileText',
-	},
-	{
-		id: 'clients',
-		title: 'Clients',
-		description: 'Manage your client relationships',
-		type: 'page',
-		href: '/clients',
-		icon: 'Users',
-	},
-	{
-		id: 'settings',
-		title: 'Settings',
-		description: 'Configure your account settings',
-		type: 'page',
-		href: '/settings',
-		icon: 'Settings',
-	},
-	// Sample transactions
-	{
-		id: 'txn-001',
-		title: 'Payment from Acme Corp',
-		description: '$2,500.00 - Invoice #INV-2024-001',
-		type: 'transaction',
-		href: '/transactions/txn-001',
-		metadata: { amount: 2500, date: '2024-01-15' },
-	},
-	{
-		id: 'txn-002',
-		title: 'Office Supplies Expense',
-		description: '$150.00 - Office Depot',
-		type: 'transaction',
-		href: '/transactions/txn-002',
-		metadata: { amount: -150, date: '2024-01-14' },
-	},
-	// Sample invoices
-	{
-		id: 'inv-001',
-		title: 'Invoice #INV-2024-001',
-		description: 'Acme Corp - $2,500.00 - Due Jan 30',
-		type: 'invoice',
-		href: '/invoices/inv-001',
-		metadata: { amount: 2500, status: 'paid', dueDate: '2024-01-30' },
-	},
-	{
-		id: 'inv-002',
-		title: 'Invoice #INV-2024-002',
-		description: 'Beta LLC - $1,200.00 - Due Feb 15',
-		type: 'invoice',
-		href: '/invoices/inv-002',
-		metadata: { amount: 1200, status: 'pending', dueDate: '2024-02-15' },
-	},
-	// Sample clients
-	{
-		id: 'client-001',
-		title: 'Acme Corporation',
-		description: 'Technology Company - 5 active projects',
-		type: 'client',
-		href: '/clients/client-001',
-		metadata: { projects: 5, status: 'active' },
-	},
-	{
-		id: 'client-002',
-		title: 'Beta LLC',
-		description: 'Consulting Firm - 2 active projects',
-		type: 'client',
-		href: '/clients/client-002',
-		metadata: { projects: 2, status: 'active' },
-	},
-];
 
 export function useSearch(config: Partial<SearchConfig> = {}) {
 	const router = useRouter();
@@ -166,16 +55,20 @@ export function useSearch(config: Partial<SearchConfig> = {}) {
 		setIsLoading(true);
 		
 		try {
-			// Simulate API call delay
-			await new Promise(resolve => setTimeout(resolve, 200));
+			// Call real search API
+			const params = new URLSearchParams({
+				q: searchQuery,
+				limit: searchConfig.maxResults.toString(),
+			});
 			
-			// Filter mock data based on query
-			const filteredResults = mockSearchData.filter(item =>
-				item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				item.description.toLowerCase().includes(searchQuery.toLowerCase())
-			).slice(0, searchConfig.maxResults);
+			const response = await fetch(`/api/search?${params.toString()}`);
 			
-			setResults(filteredResults);
+			if (!response.ok) {
+				throw new Error('Search API request failed');
+			}
+			
+			const data = await response.json();
+			setResults(data.results || []);
 		} catch (error) {
 			console.error('Search error:', error);
 			setResults([]);

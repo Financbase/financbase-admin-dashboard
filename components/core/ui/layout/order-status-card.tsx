@@ -129,13 +129,12 @@ export const OrderStatusCard: React.FC<OrderStatusCardProps> = ({
 	};
 
 	return (
-		<Card
-			as={motion.div}
+		<motion.div
 			variants={cardVariants}
 			initial="hidden"
 			animate="visible"
-			className="w-full max-w-md overflow-hidden rounded-xl border-none shadow-2xl shadow-primary/10"
 		>
+			<Card className="w-full max-w-md overflow-hidden rounded-xl border-none shadow-2xl shadow-primary/10">
 			{/* Card Header */}
 			<CardHeader className="p-6">
 				<motion.div
@@ -182,5 +181,6 @@ export const OrderStatusCard: React.FC<OrderStatusCardProps> = ({
 				</Button>
 			</motion.div>
 		</Card>
+		</motion.div>
 	);
 };

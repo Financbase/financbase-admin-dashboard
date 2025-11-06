@@ -80,7 +80,7 @@ const getActivityColor = (type: Activity["type"]) => {
 };
 
 const ActivityFeed = memo(function ActivityFeed() {
-	const { data: activities, loading, error } = useActivityFeed(10);
+	const { data: activities, loading, error } = useActivityFeed();
 
 	if (loading) {
 		return (
@@ -140,48 +140,64 @@ const ActivityFeed = memo(function ActivityFeed() {
 				</button>
 
 				<div className="space-y-4" data-testid="activity-list">
-					{activities.map((activity) => (
-						<div
-							key={activity.id}
-							className="flex items-start gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors"
-							data-testid="activity-item"
-						>
-							<div
-								className={`p-2 rounded-full ${getActivityColor(activity.type)} flex-shrink-0`}
-							>
-								{getActivityIcon(activity.type)}
-							</div>
+					{activities.map((activityItem) => {
+						// Map ActivityItem to Activity format
+						const activityType = (activityItem.type === 'user' || activityItem.type === 'payment' || activityItem.type === 'review' || activityItem.type === 'order' || activityItem.type === 'product') 
+							? activityItem.type 
+							: 'order' as Activity["type"];
+						
+						const activity: Activity = {
+							id: activityItem.id,
+							type: activityType,
+							title: activityItem.description || 'Activity',
+							description: activityItem.description || '',
+							time: activityItem.createdAt || new Date().toISOString(),
+							user: undefined,
+							metadata: activityItem.amount ? { amount: String(activityItem.amount) } : undefined,
+						};
 
-							<div className="flex-1 min-w-0">
-								<div className="flex items-center justify-between gap-2">
-									<p className="text-sm font-medium text-gray-900 dark:text-white break-words flex-1">
-										{activity.title}
-									</p>
-									<span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">
-										{formatRelativeTime(new Date(activity.time))}
-									</span>
+						return (
+							<div
+								key={activity.id}
+								className="flex items-start gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors"
+								data-testid="activity-item"
+							>
+								<div
+									className={`p-2 rounded-full ${getActivityColor(activity.type)} flex-shrink-0`}
+								>
+									{getActivityIcon(activity.type)}
 								</div>
 
-								<p className="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words">
-									{activity.description}
-								</p>
-
-								<div className="flex items-center justify-between gap-2 mt-2">
-									<div className="flex items-center space-x-2 min-w-0 flex-1">
-										{activity.user && (
-											<div className="flex items-center space-x-2 min-w-0">
-												<UserAvatar
-													name={activity.user.name}
-													imageUrl={activity.user.avatar}
-													size={24}
-													className="flex-shrink-0"
-												/>
-												<span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-													{activity.user.name}
-												</span>
-											</div>
-										)}
+								<div className="flex-1 min-w-0">
+									<div className="flex items-center justify-between gap-2">
+										<p className="text-sm font-medium text-gray-900 dark:text-white break-words flex-1">
+											{activity.title}
+										</p>
+										<span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">
+											{formatRelativeTime(new Date(activity.time))}
+										</span>
 									</div>
+
+									<p className="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words">
+										{activity.description}
+									</p>
+
+									<div className="flex items-center justify-between gap-2 mt-2">
+										<div className="flex items-center space-x-2 min-w-0 flex-1">
+											{activity.user && (
+												<div className="flex items-center space-x-2 min-w-0">
+													<UserAvatar
+														name={activity.user.name}
+														imageUrl={activity.user.avatar}
+														size={24}
+														className="flex-shrink-0"
+													/>
+													<span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+														{activity.user.name}
+													</span>
+												</div>
+											)}
+										</div>
 
 									<div className="flex items-center space-x-2 flex-shrink-0">
 										{activity.metadata?.amount && (
@@ -205,7 +221,8 @@ const ActivityFeed = memo(function ActivityFeed() {
 								</div>
 							</div>
 						</div>
-					))}
+						);
+					})}
 				</div>
 			</div>
 		</DashboardErrorBoundary>

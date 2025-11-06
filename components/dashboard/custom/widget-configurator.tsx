@@ -34,7 +34,7 @@ import {
   Eye,
   EyeOff,
   Move,
-  Resize
+  Maximize2
 } from 'lucide-react';
 
 interface WidgetConfiguratorProps {

@@ -58,7 +58,11 @@ import {
   Activity,
   Clock,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  AreaChart,
+  Gauge,
+  ArrowUpDown,
+  TrendingDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/utils/sanitize';
@@ -131,6 +135,10 @@ export interface WidgetConfig {
   columns?: TableColumn[];
   pagination?: boolean;
   pageSize?: number;
+  tableType?: string;
+
+  // Text widget config
+  content?: string;
 
   // Conditional formatting
   thresholds?: ThresholdRule[];
@@ -240,6 +248,7 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
         title: 'Monthly Recurring Revenue',
         dataSource: 'revenue',
         config: {
+          dataSource: 'revenue',
           format: 'currency',
           comparison: { enabled: true, period: 'previous_period' }
         },
@@ -254,6 +263,7 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
         title: 'Cash Flow Trend',
         dataSource: 'transactions',
         config: {
+          dataSource: 'transactions',
           xAxis: 'date',
           yAxis: ['inflow', 'outflow'],
           chartType: 'line',
@@ -270,6 +280,7 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
         title: 'Expense Breakdown',
         dataSource: 'expenses',
         config: {
+          dataSource: 'expenses',
           groupBy: ['category'],
           chartType: 'pie',
           showLegend: true
@@ -298,6 +309,7 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
         title: 'Financial Health Score',
         dataSource: 'health_metrics',
         config: {
+          dataSource: 'health_metrics',
           format: 'number',
           thresholds: [
             { field: 'score', operator: 'greater', value: 80, color: '#22c55e', icon: 'check', message: 'Excellent' },
@@ -730,7 +742,12 @@ function WidgetContainer({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => onUpdate({ title: prompt('New title') })}>
+                <DropdownMenuItem onClick={() => {
+                  const newTitle = prompt('New title');
+                  if (newTitle !== null) {
+                    onUpdate({ title: newTitle });
+                  }
+                }}>
                   <Edit className="h-4 w-4 mr-2" />
                   Rename
                 </DropdownMenuItem>
@@ -1038,8 +1055,16 @@ function getWidgetIcon(type: WidgetType) {
     line_chart: <LineChart className="h-4 w-4" />,
     bar_chart: <BarChart3 className="h-4 w-4" />,
     pie_chart: <PieChart className="h-4 w-4" />,
+    area_chart: <AreaChart className="h-4 w-4" />,
     table: <Activity className="h-4 w-4" />,
-    text: <Eye className="h-4 w-4" />
+    text: <Eye className="h-4 w-4" />,
+    metric_comparison: <ArrowUpDown className="h-4 w-4" />,
+    trend_indicator: <TrendingUp className="h-4 w-4" />,
+    progress_bar: <Gauge className="h-4 w-4" />,
+    cash_flow: <DollarSign className="h-4 w-4" />,
+    profitability: <TrendingUp className="h-4 w-4" />,
+    revenue_breakdown: <BarChart3 className="h-4 w-4" />,
+    expense_analysis: <TrendingDown className="h-4 w-4" />
   };
 
   return icons[type] || <BarChart3 className="h-4 w-4" />;
@@ -1050,8 +1075,16 @@ const WIDGET_TYPES: Array<{ type: WidgetType; title: string; description: string
   { type: 'line_chart', title: 'Line Chart', description: 'Show trends over time' },
   { type: 'bar_chart', title: 'Bar Chart', description: 'Compare values across categories' },
   { type: 'pie_chart', title: 'Pie Chart', description: 'Show proportions and percentages' },
+  { type: 'area_chart', title: 'Area Chart', description: 'Display cumulative trends with filled areas' },
   { type: 'table', title: 'Data Table', description: 'Display tabular data with sorting and filtering' },
-  { type: 'text', title: 'Text Widget', description: 'Add explanatory text or notes' }
+  { type: 'text', title: 'Text Widget', description: 'Add explanatory text or notes' },
+  { type: 'metric_comparison', title: 'Metric Comparison', description: 'Compare multiple metrics side by side' },
+  { type: 'trend_indicator', title: 'Trend Indicator', description: 'Show directional trends and changes' },
+  { type: 'progress_bar', title: 'Progress Bar', description: 'Display progress towards goals' },
+  { type: 'cash_flow', title: 'Cash Flow', description: 'Track cash inflows and outflows' },
+  { type: 'profitability', title: 'Profitability', description: 'Analyze profit margins and returns' },
+  { type: 'revenue_breakdown', title: 'Revenue Breakdown', description: 'Break down revenue by source' },
+  { type: 'expense_analysis', title: 'Expense Analysis', description: 'Analyze expense patterns and categories' }
 ];
 
 function getDefaultWidgetTitle(type: WidgetType): string {
@@ -1060,10 +1093,18 @@ function getDefaultWidgetTitle(type: WidgetType): string {
     line_chart: 'Trend Chart',
     bar_chart: 'Comparison Chart',
     pie_chart: 'Breakdown Chart',
+    area_chart: 'Area Chart',
     table: 'Data Table',
-    text: 'Text Widget'
+    text: 'Text Widget',
+    metric_comparison: 'Metric Comparison',
+    trend_indicator: 'Trend Indicator',
+    progress_bar: 'Progress Bar',
+    cash_flow: 'Cash Flow',
+    profitability: 'Profitability',
+    revenue_breakdown: 'Revenue Breakdown',
+    expense_analysis: 'Expense Analysis'
   };
-  return titles[type];
+  return titles[type] || 'New Widget';
 }
 
 function getDefaultDataSource(type: WidgetType): string {
@@ -1072,10 +1113,18 @@ function getDefaultDataSource(type: WidgetType): string {
     line_chart: 'time_series',
     bar_chart: 'categorical',
     pie_chart: 'proportions',
+    area_chart: 'time_series',
     table: 'tabular',
-    text: 'static'
+    text: 'static',
+    metric_comparison: 'comparison',
+    trend_indicator: 'trends',
+    progress_bar: 'progress',
+    cash_flow: 'cash_flow',
+    profitability: 'profitability',
+    revenue_breakdown: 'revenue',
+    expense_analysis: 'expenses'
   };
-  return sources[type];
+  return sources[type] || 'default';
 }
 
 function getDefaultWidgetConfig(type: WidgetType): WidgetConfig {
@@ -1107,6 +1156,14 @@ function getDefaultWidgetConfig(type: WidgetType): WidgetConfig {
       chartType: 'pie',
       showLegend: true
     },
+    area_chart: {
+      dataSource: 'time_series',
+      xAxis: 'date',
+      yAxis: ['value'],
+      chartType: 'area',
+      showLegend: true,
+      showGrid: true
+    },
     table: {
       dataSource: 'tabular',
       columns: [
@@ -1119,6 +1176,46 @@ function getDefaultWidgetConfig(type: WidgetType): WidgetConfig {
     text: {
       dataSource: 'static',
       content: 'Add your content here...'
+    },
+    metric_comparison: {
+      dataSource: 'comparison',
+      format: 'number',
+      comparison: { enabled: true, period: 'previous_period' }
+    },
+    trend_indicator: {
+      dataSource: 'trends',
+      format: 'percentage',
+      comparison: { enabled: true, period: 'previous_period' }
+    },
+    progress_bar: {
+      dataSource: 'progress',
+      format: 'percentage'
+    },
+    cash_flow: {
+      dataSource: 'cash_flow',
+      xAxis: 'date',
+      yAxis: ['inflow', 'outflow'],
+      chartType: 'bar',
+      showLegend: true,
+      showGrid: true
+    },
+    profitability: {
+      dataSource: 'profitability',
+      format: 'percentage',
+      comparison: { enabled: true, period: 'previous_period' }
+    },
+    revenue_breakdown: {
+      dataSource: 'revenue',
+      groupBy: ['source'],
+      chartType: 'pie',
+      showLegend: true
+    },
+    expense_analysis: {
+      dataSource: 'expenses',
+      groupBy: ['category'],
+      chartType: 'bar',
+      showLegend: true,
+      showGrid: true
     }
   };
 
@@ -1131,11 +1228,19 @@ function getDefaultWidgetSize(type: WidgetType): { w: number; h: number; size: D
     line_chart: { w: 6, h: 4, size: 'large' as const },
     bar_chart: { w: 6, h: 4, size: 'large' as const },
     pie_chart: { w: 3, h: 4, size: 'medium' as const },
+    area_chart: { w: 6, h: 4, size: 'large' as const },
     table: { w: 8, h: 6, size: 'xlarge' as const },
-    text: { w: 4, h: 2, size: 'medium' as const }
+    text: { w: 4, h: 2, size: 'medium' as const },
+    metric_comparison: { w: 4, h: 3, size: 'medium' as const },
+    trend_indicator: { w: 3, h: 2, size: 'small' as const },
+    progress_bar: { w: 4, h: 2, size: 'medium' as const },
+    cash_flow: { w: 6, h: 4, size: 'large' as const },
+    profitability: { w: 4, h: 3, size: 'medium' as const },
+    revenue_breakdown: { w: 4, h: 4, size: 'medium' as const },
+    expense_analysis: { w: 6, h: 4, size: 'large' as const }
   };
 
-  return sizes[type];
+  return sizes[type] || { w: 4, h: 3, size: 'medium' as const };
 }
 
 // Real data fetching function - connects to actual API endpoints
@@ -1224,20 +1329,56 @@ async function fetchWidgetData(widget: DashboardWidget, globalFilters: Record<st
 
       case 'line_chart':
       case 'area_chart':
-        // For time series data, we'll need to fetch historical data
-        // For now, generate from current data or use a simplified approach
-        if (apiData.data?.revenue?.monthly) {
-          const baseValue = apiData.data.revenue.monthly;
-          return Array.from({ length: 12 }, (_, i) => {
-            const date = new Date();
-            date.setMonth(date.getMonth() - (11 - i));
-            return {
-              date: date.toISOString().split('T')[0],
-              value: Math.round(baseValue * (0.8 + Math.random() * 0.4)) // Simulate variation
-            };
-          });
+        // Fetch real historical time series data from database
+        try {
+          // Determine chart type from widget config or dataSource
+          const chartType = widget.config?.chartType || 
+                          (widget.dataSource?.includes('revenue') ? 'revenue' : 
+                           widget.dataSource?.includes('expense') ? 'expenses' : 'revenue');
+          
+          // Determine period from filters or default to 12 months
+          const periodFilter = widget.config.filters?.find(f => f.field === 'period');
+          const period = periodFilter?.value || globalFilters.period || '12m';
+          
+          // Fetch historical data from chart data API
+          const chartDataResponse = await fetch(
+            `/api/dashboard/chart-data?type=${chartType}&period=${period}&timeRange=month`
+          );
+          
+          if (chartDataResponse.ok) {
+            const chartData = await chartDataResponse.json();
+            if (chartData.success && chartData.data?.timeSeries) {
+              // Return time series data in expected format
+              return chartData.data.timeSeries.map((point: { date: string; value: number }) => ({
+                date: point.date,
+                value: Math.round(point.value),
+              }));
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to fetch historical chart data:', error);
         }
-        // Fallback to empty array if no data
+        
+        // Fallback: try to use existing API data if available
+        if (apiData.data?.revenue?.monthly) {
+          // If we have monthly data, try to fetch historical data with a shorter period
+          try {
+            const fallbackResponse = await fetch('/api/dashboard/chart-data?type=revenue&period=90d&timeRange=week');
+            if (fallbackResponse.ok) {
+              const fallbackData = await fallbackResponse.json();
+              if (fallbackData.success && fallbackData.data?.timeSeries) {
+                return fallbackData.data.timeSeries.map((point: { date: string; value: number }) => ({
+                  date: point.date,
+                  value: Math.round(point.value),
+                }));
+              }
+            }
+          } catch (error) {
+            console.warn('Fallback chart data fetch failed:', error);
+          }
+        }
+        
+        // Last resort: return empty array if no data available
         return [];
 
       case 'bar_chart':
@@ -1249,12 +1390,28 @@ async function fetchWidgetData(widget: DashboardWidget, globalFilters: Record<st
             values: categories.map(cat => apiData.data.expenses.categories[cat])
           };
         }
-        // Fallback: use month names with revenue data
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const revenue = apiData.data?.revenue?.monthly || 0;
+        // Fallback: try to fetch historical data for bar chart
+        try {
+          const chartDataResponse = await fetch('/api/dashboard/chart-data?type=revenue&period=90d&timeRange=week');
+          if (chartDataResponse.ok) {
+            const chartData = await chartDataResponse.json();
+            if (chartData.success && chartData.data?.timeSeries && chartData.data.timeSeries.length > 0) {
+              // Use last 6 data points for bar chart
+              const recentData = chartData.data.timeSeries.slice(-6);
+              return {
+                categories: recentData.map((point: { date: string }) => point.date),
+                values: recentData.map((point: { value: number }) => Math.round(point.value)),
+              };
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to fetch bar chart historical data:', error);
+        }
+        
+        // Last resort: return empty structure if no data available
         return {
-          categories: months.slice(0, 6),
-          values: Array.from({ length: 6 }, () => Math.round(revenue / 6))
+          categories: [],
+          values: []
         };
 
       case 'pie_chart':

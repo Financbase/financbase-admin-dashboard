@@ -7,8 +7,8 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { Component } from "@/components/ui/camera-permission-request-card";
+import { CameraPermissionRequestCard } from "@/components/ui/camera-permission-request-card";
 
 export default function DemoOne() {
-	return <Component />;
+	return <CameraPermissionRequestCard />;
 }

@@ -15,20 +15,63 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star, Quote, Users, Award, Shield } from "lucide-react"
 import Image from "next/image"
+import { useQuery } from "@tanstack/react-query"
+
+interface Testimonial {
+  id: string
+  name: string
+  role: string
+  company: string
+  avatar?: string
+  content: string
+  rating: number
+  metric: string
+  createdAt: string
+}
+
+interface PlatformStats {
+  totalUsers: number
+  totalClients: number
+  totalRevenue: string
+  avgRating: number
+  formatted: {
+    users: string
+    clients: string
+    revenue: string
+    rating: string
+  }
+}
 
 export default function PremiumSocialProof() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
 
-  useEffect(() => {
-    setIsVisible(true)
-    const interval = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [])
+  // Fetch testimonials from API
+  const { data: testimonialsData } = useQuery<{ success: boolean; data: Testimonial[] }>({
+    queryKey: ['home-testimonials'],
+    queryFn: async () => {
+      const response = await fetch('/api/home/testimonials?limit=3')
+      if (!response.ok) throw new Error('Failed to fetch testimonials')
+      return response.json()
+    },
+    refetchInterval: 600000, // Refetch every 10 minutes
+    staleTime: 300000, // Consider data fresh for 5 minutes
+  })
 
-  const testimonials = [
+  // Fetch platform stats from API
+  const { data: statsData } = useQuery<{ success: boolean; data: PlatformStats }>({
+    queryKey: ['home-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/home/stats')
+      if (!response.ok) throw new Error('Failed to fetch stats')
+      return response.json()
+    },
+    refetchInterval: 300000, // Refetch every 5 minutes
+    staleTime: 60000, // Consider data fresh for 1 minute
+  })
+
+  // Use real testimonials or fallback to defaults
+  const testimonials: Testimonial[] = testimonialsData?.data || [
     {
       id: "sarah-johnson",
       name: "Sarah Johnson",
@@ -37,7 +80,8 @@ export default function PremiumSocialProof() {
       avatar: "/avatars/sarah-johnson.jpg",
       content: "Financbase has transformed our financial operations. We've significantly reduced manual work and improved accuracy. The AI insights are game-changing.",
       rating: 5,
-      metric: "Significant time saved"
+      metric: "Significant time saved",
+      createdAt: new Date().toISOString()
     },
     {
       id: "michael-chen",
@@ -47,7 +91,8 @@ export default function PremiumSocialProof() {
       avatar: "/avatars/michael-chen.jpg",
       content: "The automation features are impressive. We process more transactions efficiently with the same team. ROI was positive within the first month.",
       rating: 5,
-      metric: "Improved efficiency"
+      metric: "Improved efficiency",
+      createdAt: new Date().toISOString()
     },
     {
       id: "emily-rodriguez",
@@ -57,20 +102,37 @@ export default function PremiumSocialProof() {
       avatar: "/avatars/emily-rodriguez.jpg",
       content: "Finally, a platform that scales with our business. The real-time analytics help us make data-driven decisions every day.",
       rating: 5,
-      metric: "Real-time insights"
+      metric: "Real-time insights",
+      createdAt: new Date().toISOString()
     }
   ]
+
+  useEffect(() => {
+    setIsVisible(true)
+    if (testimonials.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
+      }, 4000)
+      return () => clearInterval(interval)
+    }
+  }, [testimonials.length])
 
   const companies = [
     { id: "microsoft", name: "Microsoft", logo: "/logos/microsoft.svg", tier: "enterprise" },
     { id: "google", name: "Google", logo: "/logos/google.svg", tier: "enterprise" },
-    { id: "stripe", name: "Stripe", logo: "/logos/stripe.svg", tier: "enterprise" },
+    { id: "stripe", name: "Stripe", logo: "/logos/stripe-official.svg", tier: "enterprise" },
     { id: "shopify", name: "Shopify", logo: "/logos/shopify.svg", tier: "enterprise" },
     { id: "notion", name: "Notion", logo: "/logos/notion.svg", tier: "growth" },
     { id: "linear", name: "Linear", logo: "/logos/linear.svg", tier: "growth" }
   ]
 
-  const stats = [
+  // Use real stats or fallback to defaults
+  const stats = statsData?.data ? [
+    { id: "users", number: statsData.data.formatted.users, label: "Business Community", icon: <Users className="h-5 w-5" /> },
+    { id: "rating", number: statsData.data.formatted.rating, label: "Rated Platform", icon: <Star className="h-5 w-5" /> },
+    { id: "revenue", number: statsData.data.formatted.revenue, label: "Revenue Processed", icon: <Award className="h-5 w-5" /> },
+    { id: "uptime", number: "99.9%", label: "Uptime", icon: <Shield className="h-5 w-5" /> }
+  ] : [
     { id: "users", number: "Growing", label: "Business Community", icon: <Users className="h-5 w-5" /> },
     { id: "rating", number: "Highly", label: "Rated Platform", icon: <Star className="h-5 w-5" /> },
     { id: "uptime", number: "Built for", label: "Reliability", icon: <Shield className="h-5 w-5" /> }

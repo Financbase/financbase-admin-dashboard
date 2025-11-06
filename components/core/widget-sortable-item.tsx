@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { WidgetConfig } from "@/lib/widget-registry";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 interface SortableWidgetItemProps {
   widget: WidgetConfig;
@@ -58,6 +58,8 @@ export function SortableWidgetItem({
   onRemove,
 }: SortableWidgetItemProps) {
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [resizeMenuOpen, setResizeMenuOpen] = useState(false);
+  
   const {
     attributes,
     listeners,
@@ -65,7 +67,10 @@ export function SortableWidgetItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: widget.id });
+  } = useSortable({ 
+    id: widget.id,
+    disabled: !isEditMode, // Disable sorting when not in edit mode
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -74,17 +79,25 @@ export function SortableWidgetItem({
   };
 
   // Use explicit class names for Tailwind to detect them during build
+  // Support up to 12 columns for flexible grid layouts
   const colSpanClass = {
-    1: "md:col-span-1",
-    2: "md:col-span-2",
-    3: "md:col-span-3",
-  }[colSpan] || "md:col-span-1";
+    1: "col-span-12 md:col-span-1",
+    2: "col-span-12 md:col-span-2",
+    3: "col-span-12 md:col-span-3",
+    4: "col-span-12 md:col-span-4",
+    5: "col-span-12 md:col-span-5",
+    6: "col-span-12 md:col-span-6",
+    12: "col-span-12",
+  }[colSpan] || `col-span-12 md:col-span-${colSpan}`;
   
   const rowSpanClass = rowSpan ? {
-    1: "md:row-span-1",
-    2: "md:row-span-2",
-    3: "md:row-span-3",
-  }[rowSpan] || "" : "";
+    1: "row-span-1",
+    2: "row-span-2",
+    3: "row-span-3",
+    4: "row-span-4",
+    5: "row-span-5",
+    6: "row-span-6",
+  }[rowSpan] || `row-span-${rowSpan}` : "";
 
   const defaultHeader = header || (
     <div className="flex items-center space-x-2">
@@ -100,11 +113,14 @@ export function SortableWidgetItem({
   const handleResize = (newColSpan: number, newRowSpan?: number) => {
     if (onResize) {
       onResize(newColSpan, newRowSpan);
+      // Keep menu open to allow multiple resize operations
+      // The menu will close when user clicks outside or presses escape
     }
   };
 
   const increaseColSpan = () => {
-    if (colSpan < 3) {
+    // Support up to 6 columns (half of 12-column grid)
+    if (colSpan < 6) {
       handleResize(colSpan + 1, rowSpan);
     }
   };
@@ -117,7 +133,8 @@ export function SortableWidgetItem({
 
   const increaseRowSpan = () => {
     const newRowSpan = (rowSpan || 1) + 1;
-    if (newRowSpan <= 3) {
+    // Support up to 6 rows
+    if (newRowSpan <= 6) {
       handleResize(colSpan, newRowSpan);
     }
   };
@@ -129,9 +146,16 @@ export function SortableWidgetItem({
     }
   };
 
+
+
+  // Set ref for sortable
+  const combinedRef = useCallback((node: HTMLDivElement | null) => {
+    setNodeRef(node);
+  }, [setNodeRef]);
+
   return (
     <div
-      ref={setNodeRef}
+      ref={combinedRef}
       style={style}
       className={cn(
         "relative group",
@@ -143,12 +167,12 @@ export function SortableWidgetItem({
         title={widget.title}
         description={widget.description}
         header={
-          <div className="flex items-center justify-between w-full">
+          <div className="flex items-center justify-between w-full relative">
             {defaultHeader}
             {isEditMode && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 z-10">
                 {/* Resize Controls - More Visible */}
-                <DropdownMenu>
+                <DropdownMenu open={resizeMenuOpen} onOpenChange={setResizeMenuOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
@@ -159,16 +183,18 @@ export function SortableWidgetItem({
                         "hover:bg-blue-100 dark:hover:bg-blue-900/50",
                         "border border-blue-200 dark:border-blue-800",
                         "transition-colors",
-                        "opacity-100"
+                        "opacity-100",
+                        "relative z-10"
                       )}
                       onClick={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
                       aria-label="Resize widget"
                       title={`Current size: ${colSpan}×${rowSpan || 1}`}
                     >
                       <Move className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56" onCloseAutoFocus={(e) => e.preventDefault()}>
                     <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground border-b">
                       Resize Widget
                     </div>
@@ -176,8 +202,8 @@ export function SortableWidgetItem({
                       Width (Columns)
                     </div>
                     <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onSelect={(e) => {
+                        e.preventDefault();
                         decreaseColSpan();
                       }}
                       disabled={colSpan <= 1}
@@ -186,11 +212,11 @@ export function SortableWidgetItem({
                       Decrease Width ({colSpan - 1} cols)
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onSelect={(e) => {
+                        e.preventDefault();
                         increaseColSpan();
                       }}
-                      disabled={colSpan >= 3}
+                      disabled={colSpan >= 6}
                     >
                       <Maximize2 className="h-4 w-4 mr-2" />
                       Increase Width ({colSpan + 1} cols)
@@ -200,8 +226,8 @@ export function SortableWidgetItem({
                       Height (Rows)
                     </div>
                     <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onSelect={(e) => {
+                        e.preventDefault();
                         decreaseRowSpan();
                       }}
                       disabled={(rowSpan || 1) <= 1}
@@ -210,11 +236,11 @@ export function SortableWidgetItem({
                       Decrease Height ({(rowSpan || 1) - 1} rows)
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onSelect={(e) => {
+                        e.preventDefault();
                         increaseRowSpan();
                       }}
-                      disabled={(rowSpan || 1) >= 3}
+                      disabled={(rowSpan || 1) >= 6}
                     >
                       <Maximize2 className="h-4 w-4 mr-2" />
                       Increase Height ({(rowSpan || 1) + 1} rows)
@@ -237,19 +263,26 @@ export function SortableWidgetItem({
                         "hover:bg-red-100 dark:hover:bg-red-900/50",
                         "border border-red-200 dark:border-red-800",
                         "transition-colors",
-                        "opacity-100"
+                        "opacity-100",
+                        "relative z-10"
                       )}
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowRemoveDialog(true);
                       }}
+                      onPointerDown={(e) => e.stopPropagation()}
                       aria-label="Remove widget"
                       title="Remove widget"
                     >
                       <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
                     </Button>
-                    <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
-                      <AlertDialogContent>
+                    <AlertDialog 
+                      open={showRemoveDialog} 
+                      onOpenChange={(open) => {
+                        setShowRemoveDialog(open);
+                      }}
+                    >
+                      <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Remove Widget?</AlertDialogTitle>
                           <AlertDialogDescription>
@@ -258,16 +291,21 @@ export function SortableWidgetItem({
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel onClick={(e) => {
+                          <AlertDialogCancel 
+                            onClick={(e) => {
                             e.stopPropagation();
                             setShowRemoveDialog(false);
-                          }}>
+                            }}
+                          >
                             Cancel
                           </AlertDialogCancel>
                           <AlertDialogAction
                             onClick={(e) => {
                               e.stopPropagation();
+                              e.preventDefault();
+                              if (onRemove) {
                               onRemove(widget.id);
+                              }
                               setShowRemoveDialog(false);
                             }}
                             className="bg-red-600 hover:bg-red-700"
@@ -279,22 +317,30 @@ export function SortableWidgetItem({
                     </AlertDialog>
                   </>
                 )}
-                {/* Drag Handle */}
-                <div
-                  {...attributes}
-                  {...listeners}
-                  className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-lg",
-                    "bg-gray-100 dark:bg-gray-800",
-                    "hover:bg-gray-200 dark:hover:bg-gray-700",
-                    "cursor-grab active:cursor-grabbing",
-                    "transition-colors"
-                  )}
-                  aria-label="Drag to reorder"
-                  title="Drag to reorder"
-                >
-                  <GripVertical className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                </div>
+                {/* Drag Handle - Only enable in edit mode */}
+                {isEditMode && (
+                  <div
+                    {...attributes}
+                    {...listeners}
+                    className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-lg",
+                      "bg-blue-50 dark:bg-blue-950/50",
+                      "hover:bg-blue-100 dark:hover:bg-blue-900/50",
+                      "border border-blue-200 dark:border-blue-800",
+                      "cursor-grab active:cursor-grabbing",
+                      "transition-all duration-200",
+                      "touch-none", // Prevent touch scrolling on mobile
+                      "hover:scale-110 hover:shadow-md",
+                      "active:scale-95",
+                      "select-none", // Prevent text selection during drag
+                      "relative z-20" // Ensure drag handle is above other controls
+                    )}
+                    aria-label="Drag to reorder"
+                    title="Drag to reorder"
+                  >
+                    <GripVertical className="h-4 w-4 text-blue-600 dark:text-blue-400 pointer-events-none" />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -309,55 +355,6 @@ export function SortableWidgetItem({
       >
         {children}
       </BentoGridItem>
-      {/* Resize handles on corners (visual indicators in edit mode) */}
-      {isEditMode && (
-        <>
-          <div
-            className={cn(
-              "absolute -bottom-1 -right-1 w-5 h-5",
-              "bg-blue-500 dark:bg-blue-400 rounded-full",
-              "opacity-60 group-hover:opacity-100 transition-opacity",
-              "cursor-nwse-resize",
-              "ring-2 ring-white dark:ring-gray-900",
-              "shadow-sm hover:shadow-md"
-            )}
-            title="Resize widget (drag corner)"
-          />
-          <div
-            className={cn(
-              "absolute -bottom-1 -left-1 w-5 h-5",
-              "bg-blue-500 dark:bg-blue-400 rounded-full",
-              "opacity-60 group-hover:opacity-100 transition-opacity",
-              "cursor-nesw-resize",
-              "ring-2 ring-white dark:ring-gray-900",
-              "shadow-sm hover:shadow-md"
-            )}
-            title="Resize widget (drag corner)"
-          />
-          <div
-            className={cn(
-              "absolute -top-1 -right-1 w-5 h-5",
-              "bg-blue-500 dark:bg-blue-400 rounded-full",
-              "opacity-60 group-hover:opacity-100 transition-opacity",
-              "cursor-nesw-resize",
-              "ring-2 ring-white dark:ring-gray-900",
-              "shadow-sm hover:shadow-md"
-            )}
-            title="Resize widget (drag corner)"
-          />
-          <div
-            className={cn(
-              "absolute -top-1 -left-1 w-5 h-5",
-              "bg-blue-500 dark:bg-blue-400 rounded-full",
-              "opacity-60 group-hover:opacity-100 transition-opacity",
-              "cursor-nwse-resize",
-              "ring-2 ring-white dark:ring-gray-900",
-              "shadow-sm hover:shadow-md"
-            )}
-            title="Resize widget (drag corner)"
-          />
-        </>
-      )}
     </div>
   );
 }

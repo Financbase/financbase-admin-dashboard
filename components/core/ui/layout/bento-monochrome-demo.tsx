@@ -7,8 +7,8 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import FeaturesSectionMinimal from "@/components/ui/bento-monochrome";
+import { BentoMonochrome } from "@/components/ui/bento-monochrome";
 
 export default function DemoOne() {
-	return <FeaturesSectionMinimal />;
+	return <BentoMonochrome />;
 }

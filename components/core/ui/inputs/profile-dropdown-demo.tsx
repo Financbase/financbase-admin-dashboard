@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { ProfileDropdown } from "@/components/ui/profile-dropdown";
+import { ProfileDropdown } from "@/components/core/ui/inputs/profile-dropdown";
 
 export default function DemoOne() {
 	return <ProfileDropdown />;

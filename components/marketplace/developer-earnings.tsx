@@ -30,7 +30,8 @@ import {
 	Activity,
 	Target,
 	Coins,
-	Receipt
+	Receipt,
+	Clock,
 } from 'lucide-react';
 
 interface DeveloperEarnings {
@@ -306,19 +307,19 @@ export function DeveloperEarnings() {
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 								<div className="text-center">
 									<div className="text-2xl font-bold text-blue-600">
-										{plugins.reduce((sum, p) => sum + p.installations, 0)}
+										{plugins.reduce((sum: number, p: any) => sum + p.installations, 0)}
 									</div>
 									<div className="text-sm text-muted-foreground">Total Installations</div>
 								</div>
 								<div className="text-center">
 									<div className="text-2xl font-bold text-green-600">
-										{formatCurrency(plugins.reduce((sum, p) => sum + p.revenue, 0))}
+										{formatCurrency(plugins.reduce((sum: number, p: any) => sum + p.revenue, 0))}
 									</div>
 									<div className="text-sm text-muted-foreground">Total Revenue</div>
 								</div>
 								<div className="text-center">
 									<div className="text-2xl font-bold text-purple-600">
-										{(plugins.reduce((sum, p) => sum + p.rating, 0) / plugins.length).toFixed(1)}
+										{(plugins.reduce((sum: number, p: any) => sum + p.rating, 0) / plugins.length).toFixed(1)}
 									</div>
 									<div className="text-sm text-muted-foreground">Average Rating</div>
 								</div>
@@ -352,7 +353,7 @@ export function DeveloperEarnings() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{plugins.map((plugin) => (
+									{plugins.map((plugin: any) => (
 										<TableRow key={plugin.pluginId}>
 											<TableCell>
 												<div>

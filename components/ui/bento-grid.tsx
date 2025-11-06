@@ -17,14 +17,24 @@ import { Button } from "@/components/ui/button";
 export const BentoGrid = ({
   children,
   className,
+  columns = 12, // Default to 12-column grid for more flexibility
 }: {
   children: ReactNode;
   className?: string;
+  columns?: 3 | 4 | 6 | 12; // Support different grid layouts
 }) => {
+  const gridColsClass = {
+    3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
+    6: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6",
+    12: "grid-cols-12", // 12-column grid - use explicit 12 columns
+  }[columns] || "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+
   return (
     <div
       className={cn(
-        "grid w-full auto-rows-[minmax(22rem,auto)] grid-cols-3 gap-4",
+        "grid w-full auto-rows-[minmax(22rem,auto)] gap-4",
+        gridColsClass,
         className,
       )}
     >
@@ -54,12 +64,12 @@ export const BentoCard = ({
     href={href}
     key={name}
     className={cn(
-      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
+      "group relative col-span-1 md:col-span-2 lg:col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
       // light styles
-      "bg-card border border-border shadow-sm",
+      "bg-card border border-border shadow-card",
       // dark styles
-      "transform-gpu dark:bg-card dark:border-border dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
-      "transition-all duration-300 hover:shadow-lg",
+      "transform-gpu dark:bg-card dark:border-border",
+      "transition-all duration-300 hover:shadow-elevated",
       className,
     )}
   >
@@ -73,7 +83,7 @@ export const BentoCard = ({
         <h3 className="text-xl font-semibold text-foreground">
           {name}
         </h3>
-        <p className="max-w-lg text-muted-foreground">{description}</p>
+        <p className="max-w-lg text-muted-foreground leading-relaxed">{description}</p>
       </div>
 
       {/* CTA Button - appears on hover */}
@@ -112,10 +122,10 @@ export const BentoGridItem = ({
       className={cn(
         "group relative col-span-3 flex flex-col overflow-hidden rounded-xl h-full",
         // light styles
-        "bg-card border border-border shadow-sm",
+        "bg-card border border-border shadow-card",
         // dark styles
-        "transform-gpu dark:bg-card dark:border-border dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
-        "transition-all duration-300 hover:shadow-lg",
+        "transform-gpu dark:bg-card dark:border-border",
+        "transition-all duration-300 hover:shadow-elevated",
         className,
       )}
     >
@@ -123,7 +133,7 @@ export const BentoGridItem = ({
         <div className="mb-4 px-6 pt-6 flex-shrink-0">
           {header}
           {title && <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>}
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {description && <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>}
         </div>
       )}
       <div className="flex-1 px-6 pb-6 min-w-0 w-full min-h-0 overflow-hidden">

@@ -35,6 +35,7 @@ import { db } from "../db";
 import { resend } from "../email";
 import { EmailTemplates } from "../email-templates";
 import { generateSecureToken } from "../lib/security-utils";
+import { getUserFromDatabase } from "../db/rls-context";
 
 export class FolderSharingService {
 	/**
@@ -429,12 +430,33 @@ export class FolderSharingService {
 	}
 
 	/**
-	 * Get user roles (placeholder - integrate with your RBAC system)
+	 * Get user roles from RBAC system
 	 */
 	private async getUserRoles(userId: string): Promise<string[]> {
-		// TODO: Integrate with your actual RBAC system
-		// This should return roles like ['admin', 'manager', 'editor']
-		return ["viewer"]; // Placeholder
+		try {
+			// Import RBAC utilities and Clerk client
+			const { getUserMetadata } = await import('@/lib/auth/financbase-rbac');
+			const { clerkClient } = await import('@clerk/nextjs/server');
+			
+			// Get user's role from Clerk metadata
+			const clerk = await clerkClient();
+			const clerkUser = await clerk.users.getUser(userId);
+			const metadata = (clerkUser.publicMetadata as any) || {};
+			const role = metadata.role || 'viewer';
+
+			// Map Financbase roles to folder sharing roles
+			const roleMap: Record<string, string[]> = {
+				admin: ["super_admin", "admin"],
+				manager: ["manager"],
+				user: ["editor", "contributor"],
+				viewer: ["viewer"],
+			};
+
+			return roleMap[role] || ["viewer"];
+		} catch (error) {
+			console.error('Error getting user roles:', error);
+			return ["viewer"]; // Default fallback
+		}
 	}
 
 	/**
@@ -494,14 +516,41 @@ export class FolderSharingService {
 	}
 
 	/**
-	 * Assign RBAC role to folder (placeholder - integrate with your RBAC system)
+	 * Assign RBAC role to folder
+	 * Note: This stores folder-level role assignments in the database
+	 * Full RBAC integration would require a resource-role mapping table
 	 */
 	private async assignFolderRole(
 		folderId: string,
 		role: string,
+		assignedBy?: string,
 	): Promise<void> {
-		// TODO: Integrate with your actual RBAC system to assign roles to resources
-		console.log(`Assigning role ${role} to folder ${folderId}`);
+		try {
+			// Use folder_roles table for RBAC role assignments
+			const { db } = await import('@/lib/db');
+			const { folderRoles } = await import('@/lib/db/schemas/folder-roles.schema');
+			
+			// Insert or update folder role assignment
+			await db
+				.insert(folderRoles)
+				.values({
+					folderId,
+					role,
+					assignedBy: assignedBy || null,
+					assignedAt: new Date(),
+					updatedAt: new Date(),
+				})
+				.onConflictDoUpdate({
+					target: [folderRoles.folderId, folderRoles.role],
+					set: {
+						updatedAt: new Date(),
+						assignedBy: assignedBy || undefined,
+					},
+				});
+		} catch (error) {
+			console.error('Error assigning folder role:', error);
+			// Don't throw - role assignment failure shouldn't prevent folder creation
+		}
 	}
 
 	/**
@@ -865,10 +914,24 @@ export class FolderSharingService {
 			.values(invitationData)
 			.returning();
 
+		// Get inviter name from user data
+		let inviterName = "Team Member"; // Default fallback
+		try {
+			const inviter = await getUserFromDatabase(invitedBy);
+			if (inviter) {
+				inviterName = inviter.first_name && inviter.last_name
+					? `${inviter.first_name} ${inviter.last_name}`
+					: inviter.first_name || inviter.email || inviterName;
+			}
+		} catch (error) {
+			console.error("Failed to fetch inviter name:", error);
+			// Continue with default name if fetch fails
+		}
+
 		// Send invitation email
 		try {
 			await this.sendInvitationEmail({
-				inviterName: "Team Member", // TODO: Get actual inviter name from user data
+				inviterName,
 				folderName: folder.name,
 				workspaceName: workspace.name,
 				permissionLevel,

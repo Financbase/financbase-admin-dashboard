@@ -11,6 +11,7 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WebhookList } from '@/components/webhooks/webhook-list';
 import { WebhookForm } from '@/components/webhooks/webhook-form';
@@ -100,13 +101,10 @@ export default function WebhooksPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleCreateWebhook}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
+          <Button onClick={handleCreateWebhook}>
             <Plus className="mr-2 h-4 w-4" />
             Create Webhook
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -145,13 +143,10 @@ export default function WebhooksPage() {
                   <p className="text-muted-foreground mb-4">
                     Create a new webhook or select an existing one to edit
                   </p>
-                  <button
-                    onClick={handleCreateWebhook}
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-                  >
+                  <Button onClick={handleCreateWebhook}>
                     <Plus className="mr-2 h-4 w-4" />
                     Create Webhook
-                  </button>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

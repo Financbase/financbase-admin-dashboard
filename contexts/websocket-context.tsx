@@ -37,10 +37,16 @@ export function WebSocketProvider({ children, roomId = 'main' }: WebSocketProvid
 	const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
 
 	useEffect(() => {
-		// Get PartyKit host from environment or use default
+		// Get PartyKit host from environment
+		// For Cloudflare-hosted PartyKit, use: your-project.your-subdomain.partykit.dev
+		// For local development, use: localhost:1999
 		const host = process.env.NEXT_PUBLIC_PARTYKIT_HOST || 'localhost:1999';
-		const protocol = host.includes('localhost') ? 'ws' : 'wss';
-		const socketUrl = `${protocol}://${host}/parties/main/${roomId}`;
+		
+		// Use wss (secure WebSocket) for production, ws for localhost
+		const protocol = host.includes('localhost') || host.includes('127.0.0.1') ? 'ws' : 'wss';
+		
+		// PartyKit URL format: wss://host/parties/party-name/room-id
+		const socketUrl = `${protocol}://${host}/parties/financbase-partykit/${roomId}`;
 
 		console.log('Connecting to WebSocket:', socketUrl);
 

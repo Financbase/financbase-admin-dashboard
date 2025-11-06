@@ -177,15 +177,15 @@ export function BatchImageUpload({
 				clearInterval(progressInterval);
 
 				// Update as completed
-				setUploadItems(prev =>
-					prev.map(uploadItem =>
+				setUploadItems((prev: BatchUploadItem[]) =>
+					prev.map((uploadItem: BatchUploadItem) =>
 						uploadItem.id === item.id
 							? {
 								...uploadItem,
 								status: 'completed' as const,
 								progress: 85,
-								url
-							}
+								url: url || undefined
+							} as BatchUploadItem
 							: uploadItem
 					)
 				);

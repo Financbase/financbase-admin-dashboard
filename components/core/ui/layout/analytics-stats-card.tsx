@@ -300,7 +300,11 @@ export const AnalyticsStatsCard = React.forwardRef<
 							</div>
 						)}
 					</div>
-					<StaggeredContainer delay={0.2}>
+					<StaggeredContainer
+						initial="hidden"
+						animate="visible"
+						variants={staggerContainerVariants}
+					>
 						<div
 							className="flex items-end gap-1 h-12 mt-3"
 							aria-label="Activity chart"

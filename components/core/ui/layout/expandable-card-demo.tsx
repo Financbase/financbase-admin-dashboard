@@ -10,7 +10,7 @@
 import { ArrowUp, Code, Puzzle } from "lucide-react";
 ("use client");
 
-import { ProjectStatusCard } from "@/components/ui/expandable-card";
+import { ProjectStatusCard } from "@/components/core/ui/layout/expandable-card";
 import { useState } from "react";
 
 function ExpandableCardDemo() {

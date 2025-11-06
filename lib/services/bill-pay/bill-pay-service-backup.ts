@@ -499,32 +499,106 @@ export class BillPayAutomationService {
     }
 
     // Find current step
-    const currentStep = approval.steps.find(s => s.status === 'pending');
-    if (!currentStep) {
+    const currentStepIndex = approval.steps.findIndex(s => s.status === 'pending');
+    if (currentStepIndex === -1) {
       throw new Error('No pending approval step found');
     }
 
-    // Update step - this would need to be implemented with proper workflow step management
-    // For now, we'll skip database update since workflow is mock
-    // TODO: Implement full approval workflow system with database persistence
-    if (approval.workflowId && approval.workflowId !== 'default') {
-      await db
-        .update(approvalWorkflows)
-        .set({
-          status: decision === 'approve' ? 'active' : 'inactive',
-          updatedAt: new Date()
-        })
-        .where(eq(approvalWorkflows.id, approval.workflowId));
-    }
+    const currentStep = approval.steps[currentStepIndex];
+    
+    // Update the current step with decision
+    const updatedSteps = [...approval.steps];
+    updatedSteps[currentStepIndex] = {
+      ...currentStep,
+      status: decision === 'approve' ? 'approved' : 'rejected',
+      decidedBy: userId,
+      decidedAt: new Date().toISOString(),
+      comments: comments || undefined,
+    };
 
-    // Update approval status
-    if (decision === 'approve') {
-      // Check if all steps are complete
-      const remainingSteps = approval.steps.filter(s => s.status === 'pending');
+    // Build approval history entry
+    const historyEntry = {
+      step: currentStepIndex + 1,
+      decision,
+      decidedBy: userId,
+      decidedAt: new Date().toISOString(),
+      comments: comments || undefined,
+    };
+    const updatedHistory = [
+      ...(approval.approvalHistory || []),
+      historyEntry,
+    ];
+
+    // Determine new status and update current step
+    let newStatus: 'pending' | 'approved' | 'rejected' | 'escalated' = 'pending';
+    let newCurrentStep = approval.currentStep;
+    let completedAt: Date | undefined = undefined;
+    let approvedBy: string | undefined = undefined;
+    let rejectedBy: string | undefined = undefined;
+    let approvedAt: Date | undefined = undefined;
+    let rejectedAt: Date | undefined = undefined;
+
+    if (decision === 'reject') {
+      // Rejection ends the workflow
+      newStatus = 'rejected';
+      rejectedBy = userId;
+      rejectedAt = new Date();
+      completedAt = new Date();
+    } else if (decision === 'approve') {
+      // Check if there are more steps
+      const remainingSteps = updatedSteps.filter(s => s.status === 'pending');
+      
       if (remainingSteps.length === 0) {
+        // All steps approved
+        newStatus = 'approved';
+        approvedBy = userId;
+        approvedAt = new Date();
+        completedAt = new Date();
         // All approved - schedule payment
         await this.scheduleApprovedPayment(userId, bill);
+      } else {
+        // Move to next step
+        newCurrentStep = approval.currentStep + 1;
+        newStatus = 'pending';
       }
+    }
+
+    // Update approval record in database
+    await db
+      .update(billApprovals)
+      .set({
+        status: newStatus,
+        currentStep: newCurrentStep,
+        steps: updatedSteps,
+        approvalHistory: updatedHistory,
+        approvedBy: approvedBy || undefined,
+        approvedAt: approvedAt || undefined,
+        rejectedBy: rejectedBy || undefined,
+        rejectedAt: rejectedAt || undefined,
+        completedAt: completedAt || undefined,
+        approvalNotes: decision === 'approve' ? comments : undefined,
+        rejectionReason: decision === 'reject' ? comments : undefined,
+        updatedAt: new Date(),
+      })
+      .where(eq(billApprovals.id, approvalId));
+
+    // Update bill status if fully approved or rejected
+    if (newStatus === 'approved') {
+      await db
+        .update(bills)
+        .set({
+          status: 'approved',
+          updatedAt: new Date(),
+        })
+        .where(eq(bills.id, bill.id));
+    } else if (newStatus === 'rejected') {
+      await db
+        .update(bills)
+        .set({
+          status: 'rejected',
+          updatedAt: new Date(),
+        })
+        .where(eq(bills.id, bill.id));
     }
 
     // Log approval decision
@@ -536,11 +610,17 @@ export class BillPayAutomationService {
       entityId: bill.id,
       description: `Bill ${decision === 'approve' ? 'approved' : 'rejected'}: ${bill.description}`,
       riskLevel: decision === 'approve' ? RiskLevel.LOW : RiskLevel.MEDIUM,
-      metadata: { comments },
+      metadata: { comments, approvalId },
       complianceFlags: [ComplianceFramework.SOC2]
     });
 
-    return approval;
+    // Fetch and return updated approval
+    const updatedApproval = await this.getBillApproval(approvalId);
+    if (!updatedApproval) {
+      throw new Error('Failed to fetch updated approval');
+    }
+    
+    return updatedApproval;
   }
 
   /**

@@ -10,7 +10,7 @@
 import { Clock } from "lucide-react";
 ("use client");
 
-import { FullScreenCalendar } from "@/components/ui/fullscreen-calendar";
+import { FullscreenCalendar } from "@/components/ui/fullscreen-calendar";
 
 const dummyEvents = [
 	{
@@ -115,7 +115,7 @@ const dummyEvents = [
 function CalendarDemo() {
 	return (
 		<div className="flex h-screen flex-1 flex-col scale-90">
-			<FullScreenCalendar data={dummyEvents} />
+			<FullscreenCalendar data={dummyEvents} />
 		</div>
 	);
 }

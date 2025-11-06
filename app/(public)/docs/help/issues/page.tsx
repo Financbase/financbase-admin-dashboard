@@ -201,8 +201,8 @@ export default function HelpIssuesPage() {
 										Reconnect your bank accounts if sync fails.
 									</p>
 									<Button variant="outline" size="sm" asChild>
-										<Link href="/dashboard/accounts">
-											Manage Accounts
+										<Link href="/auth/sign-up">
+											Get Started
 											<ArrowRight className="h-4 w-4 ml-2" />
 										</Link>
 									</Button>

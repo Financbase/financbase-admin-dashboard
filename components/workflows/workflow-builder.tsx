@@ -201,7 +201,7 @@ export function WorkflowBuilder() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['workflows']);
+			queryClient.invalidateQueries({ queryKey: ['workflows'] });
 			setShowCreateDialog(false);
 			setNewWorkflow({ name: '', description: '', category: 'general', type: 'sequential' });
 		},
@@ -218,7 +218,7 @@ export function WorkflowBuilder() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['workflows']);
+			queryClient.invalidateQueries({ queryKey: ['workflows'] });
 		},
 	});
 
@@ -231,7 +231,7 @@ export function WorkflowBuilder() {
 			return response.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(['workflows']);
+			queryClient.invalidateQueries({ queryKey: ['workflows'] });
 			setSelectedWorkflow(null);
 		},
 	});
@@ -303,7 +303,7 @@ export function WorkflowBuilder() {
 							<div>
 								<p className="text-sm text-muted-foreground">Active Workflows</p>
 								<p className="text-xl font-bold">
-									{workflows.filter(w => w.status === 'active').length}
+									{workflows.filter((w: any) => w.status === 'active').length}
 								</p>
 							</div>
 						</div>
@@ -317,7 +317,7 @@ export function WorkflowBuilder() {
 							<div>
 								<p className="text-sm text-muted-foreground">Total Executions</p>
 								<p className="text-xl font-bold">
-									{workflows.reduce((sum, w) => sum + (w.executionCount || 0), 0)}
+									{workflows.reduce((sum: number, w: any) => sum + (w.executionCount || 0), 0)}
 								</p>
 							</div>
 						</div>
@@ -331,7 +331,7 @@ export function WorkflowBuilder() {
 							<div>
 								<p className="text-sm text-muted-foreground">Success Rate</p>
 								<p className="text-xl font-bold">
-									{Math.round(workflows.reduce((sum, w) => sum + (w.successRate || 0), 0) / workflows.length || 0)}%
+									{Math.round(workflows.reduce((sum: number, w: any) => sum + (w.successRate || 0), 0) / workflows.length || 0)}%
 								</p>
 							</div>
 						</div>
@@ -345,7 +345,7 @@ export function WorkflowBuilder() {
 							<div>
 								<p className="text-sm text-muted-foreground">This Week</p>
 								<p className="text-xl font-bold">
-									{workflows.reduce((sum, w) => {
+									{workflows.reduce((sum: number, w: any) => {
 										const weekAgo = new Date();
 										weekAgo.setDate(weekAgo.getDate() - 7);
 										return sum + (new Date(w.lastExecutionAt || 0) > weekAgo ? 1 : 0);
@@ -470,7 +470,7 @@ export function WorkflowBuilder() {
 										</TableRow>
 									</TableHeader>
 									<TableBody>
-										{workflows.map((workflow) => (
+										{workflows.map((workflow: any) => (
 											<TableRow key={workflow.id}>
 												<TableCell>
 													<div>

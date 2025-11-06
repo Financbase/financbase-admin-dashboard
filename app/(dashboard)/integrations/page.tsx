@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -457,10 +458,21 @@ export default function IntegrationsPage() {
 											<Card key={integration.id} className="hover:shadow-md transition-shadow">
 												<CardContent className="p-6">
 													<div className="flex items-center justify-between">
-														<div className="flex items-center gap-4">
-															<div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+													<div className="flex items-center gap-4">
+														<div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+															{integration.logo ? (
+																<Image
+																	src={integration.logo}
+																	alt={integration.name}
+																	width={48}
+																	height={48}
+																	className="w-full h-full object-contain"
+																	unoptimized={integration.logo.endsWith('.svg')}
+																/>
+															) : (
 																<Plug className="h-6 w-6 text-primary" />
-															</div>
+															)}
+														</div>
 															<div className="flex-1">
 																<div className="flex items-center gap-2 mb-1">
 																	<h3 className="font-semibold text-lg">{integration.name}</h3>

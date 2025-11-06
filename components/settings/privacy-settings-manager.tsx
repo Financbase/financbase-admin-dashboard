@@ -17,6 +17,20 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { Database, Download, Trash2, AlertTriangle, Eye, FileText, Shield } from 'lucide-react';
 
 interface PrivacySettings {
 	id: string;
@@ -41,6 +55,9 @@ interface PrivacySettings {
 }
 
 export function PrivacySettingsManager() {
+	const [loading, setLoading] = useState(true);
+	const [exportLoading, setExportLoading] = useState(false);
+	const [deleteLoading, setDeleteLoading] = useState(false);
 	const [settings, setSettings] = useState<Partial<PrivacySettings>>({
 		analyticsTracking: true,
 		errorReporting: true,
@@ -60,6 +77,7 @@ export function PrivacySettingsManager() {
 	});
 
 	const loadSettings = useCallback(async () => {
+		setLoading(true);
 		try {
 			const response = await fetch('/api/settings/preferences/privacy');
 			if (response.ok) {
@@ -73,6 +91,8 @@ export function PrivacySettingsManager() {
 		} catch (error) {
 			console.error('Error loading privacy settings:', error);
 			toast.error('Failed to load privacy settings');
+		} finally {
+			setLoading(false);
 		}
 	}, []);
 
@@ -203,7 +223,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.analyticsTracking}
-								onCheckedChange={(checked) => updateSetting('analyticsTracking', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('analyticsTracking', checked)}
 							/>
 						</div>
 
@@ -216,7 +236,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.errorReporting}
-								onCheckedChange={(checked) => updateSetting('errorReporting', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('errorReporting', checked)}
 							/>
 						</div>
 
@@ -229,7 +249,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.performanceMonitoring}
-								onCheckedChange={(checked) => updateSetting('performanceMonitoring', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('performanceMonitoring', checked)}
 							/>
 						</div>
 
@@ -242,7 +262,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.usageStatistics}
-								onCheckedChange={(checked) => updateSetting('usageStatistics', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('usageStatistics', checked)}
 							/>
 						</div>
 
@@ -255,7 +275,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.crashReports}
-								onCheckedChange={(checked) => updateSetting('crashReports', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('crashReports', checked)}
 							/>
 						</div>
 					</div>
@@ -284,7 +304,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.shareWithPartners}
-								onCheckedChange={(checked) => updateSetting('shareWithPartners', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('shareWithPartners', checked)}
 							/>
 						</div>
 
@@ -297,7 +317,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.shareForResearch}
-								onCheckedChange={(checked) => updateSetting('shareForResearch', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('shareForResearch', checked)}
 							/>
 						</div>
 
@@ -310,7 +330,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.shareForMarketing}
-								onCheckedChange={(checked) => updateSetting('shareForMarketing', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('shareForMarketing', checked)}
 							/>
 						</div>
 
@@ -323,7 +343,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.allowPersonalization}
-								onCheckedChange={(checked) => updateSetting('allowPersonalization', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('allowPersonalization', checked)}
 							/>
 						</div>
 					</div>
@@ -371,7 +391,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.autoDeleteInactive}
-								onCheckedChange={(checked) => updateSetting('autoDeleteInactive', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('autoDeleteInactive', checked)}
 							/>
 						</div>
 					</div>
@@ -400,7 +420,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.allowThirdPartyIntegrations}
-								onCheckedChange={(checked) => updateSetting('allowThirdPartyIntegrations', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('allowThirdPartyIntegrations', checked)}
 							/>
 						</div>
 
@@ -413,7 +433,7 @@ export function PrivacySettingsManager() {
 							</div>
 							<Switch
 								checked={settings.requireConsentForNewIntegrations}
-								onCheckedChange={(checked) => updateSetting('requireConsentForNewIntegrations', checked)}
+								onCheckedChange={(checked: boolean) => updateSetting('requireConsentForNewIntegrations', checked)}
 							/>
 						</div>
 					</div>

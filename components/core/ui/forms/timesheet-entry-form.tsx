@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import {} from "lucide-react";
+import { Clock, Mic, Minus, Play, Plus, Save } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 
@@ -345,13 +345,10 @@ export const TimesheetEntryForm: React.FC<TimesheetEntryFormProps> = ({
 								{/* Audio Recording */}
 								<div className="space-y-2">
 									<Label>Voice Notes (Optional)</Label>
-									<AudioRecorder
-										timesheetEntryId={entry.id}
-										onRecordingComplete={(audioData) =>
-											handleRecordingComplete(entry.id, audioData)
-										}
-										maxDuration={300} // 5 minutes
-									/>
+									{/* AudioRecorder component - placeholder for future implementation */}
+									<div className="p-4 border rounded-md bg-muted/50">
+										<p className="text-sm text-muted-foreground">Audio recording feature coming soon</p>
+									</div>
 								</div>
 
 								{/* Audio Recording Display */}

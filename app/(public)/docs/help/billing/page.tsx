@@ -73,8 +73,8 @@ export default function HelpBillingPage() {
 										Add a credit card, debit card, or bank account to your account.
 									</p>
 									<Button asChild>
-										<Link href="/settings/billing">
-											Add Payment Method
+										<Link href="/auth/sign-up">
+											Get Started
 											<ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
 										</Link>
 									</Button>
@@ -93,8 +93,8 @@ export default function HelpBillingPage() {
 										Update your existing payment method or change your default payment option.
 									</p>
 									<Button variant="outline" asChild>
-										<Link href="/settings/billing">
-											Manage Payment Methods
+										<Link href="/auth/sign-up">
+											Get Started
 											<ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
 										</Link>
 									</Button>
@@ -119,8 +119,8 @@ export default function HelpBillingPage() {
 												Access all your past invoices and receipts in one place. You can view, download, or print any invoice.
 											</p>
 											<Button variant="outline" asChild>
-												<Link href="/settings/billing">
-													View Invoices
+												<Link href="/auth/sign-up">
+													Get Started
 													<Download className="h-4 w-4 ml-2" />
 												</Link>
 											</Button>
@@ -137,8 +137,8 @@ export default function HelpBillingPage() {
 												Download receipts in PDF format for your records or accounting purposes.
 											</p>
 											<Button variant="outline" asChild>
-												<Link href="/settings/billing">
-													Download Receipts
+												<Link href="/auth/sign-up">
+													Get Started
 													<Download className="h-4 w-4 ml-2" />
 												</Link>
 											</Button>
@@ -200,8 +200,8 @@ export default function HelpBillingPage() {
 										If your payment fails, we'll send you an email notification. Update your payment method and retry the payment.
 									</p>
 									<Button variant="outline" size="sm" asChild>
-										<Link href="/settings/billing">
-											Update Payment Method
+										<Link href="/auth/sign-up">
+											Get Started
 										</Link>
 									</Button>
 								</CardContent>

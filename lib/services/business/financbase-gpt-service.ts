@@ -18,6 +18,8 @@ import type {
 	GPTAnalysisResult,
 } from "./types/financbase-gpt-types";
 import { db } from '@/lib/db';
+import { invoices, expenses, clients, transactions } from '@/lib/db/schemas';
+import { eq, desc, sql } from 'drizzle-orm';
 import { NotificationService } from '@/lib/services/notification-service';
 
 export class FinancbaseGPTService {
@@ -82,35 +84,116 @@ export class FinancbaseGPTService {
 	 */
 	private async getFinancialContext(userId: string): Promise<FinancialContext> {
 		try {
-			// This would fetch real financial data from the database
-			// For now, returning mock data structure
+			// Fetch real financial data from the database
+
+			// Get revenue data
+			const [revenueData] = await db
+				.select({
+					totalRevenue: sql<number>`sum(case when ${invoices.status} = 'paid' then ${invoices.total}::numeric else 0 end)`,
+					outstandingInvoices: sql<number>`count(case when ${invoices.status} in ('sent', 'viewed') then 1 end)`,
+					overdueInvoices: sql<number>`count(case when ${invoices.status} = 'overdue' then 1 end)`,
+				})
+				.from(invoices)
+				.where(eq(invoices.userId, userId));
+
+			// Get expense data
+			const [expenseData] = await db
+				.select({
+					totalExpenses: sql<number>`sum(${expenses.amount}::numeric)`,
+					topExpenses: sql<any>`jsonb_agg(
+						jsonb_build_object(
+							'category', ${expenses.category},
+							'amount', sum(${expenses.amount}::numeric)
+						) ORDER BY sum(${expenses.amount}::numeric) DESC
+					) FILTER (WHERE ${expenses.category} IS NOT NULL)`,
+				})
+				.from(expenses)
+				.where(eq(expenses.userId, userId))
+				.groupBy(expenses.category);
+
+			// Get top expenses by category
+			const topExpensesQuery = await db
+				.select({
+					category: expenses.category,
+					amount: sql<number>`sum(${expenses.amount}::numeric)`,
+				})
+				.from(expenses)
+				.where(eq(expenses.userId, userId))
+				.groupBy(expenses.category)
+				.orderBy(desc(sql<number>`sum(${expenses.amount}::numeric)`))
+				.limit(5);
+
+			const totalExpenses = Number(expenseData?.totalExpenses || 0);
+			const topExpenses = topExpensesQuery.map(exp => ({
+				category: exp.category || 'Other',
+				amount: Number(exp.amount || 0),
+				percentage: totalExpenses > 0 ? (Number(exp.amount || 0) / totalExpenses) * 100 : 0,
+			}));
+
+			// Get recent transactions
+			const recentTransactionsData = await db
+				.select()
+				.from(transactions)
+				.where(eq(transactions.userId, userId))
+				.orderBy(desc(transactions.date))
+				.limit(10);
+
+			const recentTransactions = recentTransactionsData.map(txn => ({
+				id: txn.id.toString(),
+				amount: Number(txn.amount),
+				category: txn.category || 'Uncategorized',
+				date: txn.date.toISOString().split('T')[0],
+				description: txn.description || 'Transaction',
+			}));
+
+			// Calculate monthly growth
+			const oneMonthAgo = new Date();
+			oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+			const [lastMonthRevenue] = await db
+				.select({
+					revenue: sql<number>`sum(case when ${invoices.status} = 'paid' and ${invoices.paidDate} >= ${oneMonthAgo} then ${invoices.total}::numeric else 0 end)`,
+				})
+				.from(invoices)
+				.where(eq(invoices.userId, userId));
+
+			const [twoMonthsAgoRevenue] = await db
+				.select({
+					revenue: sql<number>`sum(case when ${invoices.status} = 'paid' and ${invoices.paidDate} >= ${new Date(oneMonthAgo.getTime() - 30 * 24 * 60 * 60 * 1000)} and ${invoices.paidDate} < ${oneMonthAgo} then ${invoices.total}::numeric else 0 end)`,
+				})
+				.from(invoices)
+				.where(eq(invoices.userId, userId));
+
+			const currentMonthRevenue = Number(lastMonthRevenue?.revenue || 0);
+			const previousMonthRevenue = Number(twoMonthsAgoRevenue?.revenue || 0);
+			const monthlyGrowth = previousMonthRevenue > 0 
+				? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 
+				: 0;
+
+			// Calculate performance metrics
+			const totalRevenue = Number(revenueData?.totalRevenue || 0);
+			const cashFlow = totalRevenue - totalExpenses;
+			const profitMargin = totalRevenue > 0 ? ((cashFlow / totalRevenue) * 100) : 0;
+
 			return {
 				userId,
-				totalRevenue: 45000,
-				totalExpenses: 32000,
-				cashFlow: 13000,
-				outstandingInvoices: 8,
-				overdueInvoices: 2,
-				monthlyGrowth: 12.5,
-				topExpenses: [
-					{ category: 'Software', amount: 8500, percentage: 26.6 },
-					{ category: 'Marketing', amount: 6200, percentage: 19.4 },
-					{ category: 'Office', amount: 4800, percentage: 15.0 },
-				],
-				recentTransactions: [
-					{ id: '1', amount: 2500, category: 'Invoice Payment', date: '2024-11-15', description: 'Client payment received' },
-					{ id: '2', amount: -1200, category: 'Software', date: '2024-11-14', description: 'Monthly subscription' },
-				],
+				totalRevenue,
+				totalExpenses,
+				cashFlow,
+				outstandingInvoices: Number(revenueData?.outstandingInvoices || 0),
+				overdueInvoices: Number(revenueData?.overdueInvoices || 0),
+				monthlyGrowth: Number(monthlyGrowth.toFixed(2)),
+				topExpenses,
+				recentTransactions,
 				budgetStatus: {
-					totalBudget: 40000,
-					spent: 32000,
-					remaining: 8000,
-					overBudgetCategories: ['Marketing'],
+					totalBudget: totalExpenses * 1.25, // Estimate budget as 125% of expenses
+					spent: totalExpenses,
+					remaining: (totalExpenses * 1.25) - totalExpenses,
+					overBudgetCategories: topExpenses.filter(exp => exp.percentage > 30).map(exp => exp.category),
 				},
 				performance: {
-					profitMargin: 28.9,
-					burnRate: 32000,
-					runway: 15.6, // months
+					profitMargin: Number(profitMargin.toFixed(2)),
+					burnRate: totalExpenses,
+					runway: cashFlow > 0 ? (totalRevenue / totalExpenses) : 0, // Simplified runway calculation
 				},
 			};
 		} catch (error) {

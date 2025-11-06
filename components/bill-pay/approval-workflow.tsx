@@ -68,11 +68,85 @@ import {
 import { cn } from '@/lib/utils';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
 import type {
-  BillApproval,
   ApprovalWorkflow,
-  ApprovalStep,
   Bill
 } from '@/lib/services/bill-pay/bill-pay-service';
+
+// Local type definitions
+interface BillApproval {
+  id: string;
+  billId: string;
+  workflowId: string;
+  status: 'pending' | 'approved' | 'rejected';
+  currentStep: number;
+  steps: ApprovalStep[];
+  initiatedAt: Date | string;
+  approvedBy?: string;
+  approvedAt?: Date | string;
+  rejectedBy?: string;
+  rejectedAt?: Date | string;
+  completedAt?: Date | string;
+  approvalNotes?: string;
+  rejectionReason?: string;
+}
+
+interface ApprovalStep {
+  id: string;
+  name: string;
+  type: 'user' | 'role' | 'auto_approve';
+  approverId?: string;
+  role?: string;
+  threshold?: number;
+  order: number;
+  status: 'pending' | 'approved' | 'rejected';
+  approvedBy?: string;
+  approvedAt?: Date | string;
+}
+
+// Utility functions - module level
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(amount);
+};
+
+const formatDate = (date: Date | string): string => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'approved':
+      return 'bg-green-100 text-green-800';
+    case 'rejected':
+      return 'bg-red-100 text-red-800';
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'escalated':
+      return 'bg-purple-100 text-purple-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getStepStatusColor = (status: string) => {
+  switch (status) {
+    case 'approved':
+      return 'bg-green-100 text-green-800';
+    case 'rejected':
+      return 'bg-red-100 text-red-800';
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
 
 // Approval workflow schema
 const workflowSchema = z.object({
@@ -153,7 +227,9 @@ export function ApprovalWorkflowDashboard({ userId, billId, className }: Approva
       decision: 'approve' | 'reject';
       comments?: string;
     }) => {
-      return await billPayService.processApproval(userId, approvalId, decision, comments);
+      // Convert 'approve'/'reject' to 'approved'/'rejected' for the service
+      const serviceDecision = decision === 'approve' ? 'approved' : 'rejected';
+      return await billPayService.processApproval(userId, approvalId, serviceDecision, comments);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pending-approvals'] });
@@ -173,44 +249,7 @@ export function ApprovalWorkflowDashboard({ userId, billId, className }: Approva
     }
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'escalated':
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
-  const getStepStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'text-green-600';
-      case 'rejected':
-        return 'text-red-600';
-      case 'pending':
-        return 'text-yellow-600';
-      default:
-        return 'text-gray-600';
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
-  const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString();
-  };
 
   return (
     <div className={cn("w-full space-y-6", className)}>
@@ -257,7 +296,7 @@ export function ApprovalWorkflowDashboard({ userId, billId, className }: Approva
             </Card>
           ) : (
             <div className="space-y-4">
-              {pendingApprovals.map(approval => (
+              {pendingApprovals.map((approval: BillApproval) => (
                 <ApprovalCard
                   key={approval.id}
                   approval={approval}
@@ -275,6 +314,7 @@ export function ApprovalWorkflowDashboard({ userId, billId, className }: Approva
                       comments
                     });
                   }}
+                  isProcessing={processApprovalMutation.isPending}
                 />
               ))}
             </div>
@@ -289,7 +329,7 @@ export function ApprovalWorkflowDashboard({ userId, billId, className }: Approva
             </div>
           ) : (
             <div className="grid gap-4">
-              {workflows?.map(workflow => (
+              {workflows?.map((workflow: ApprovalWorkflow) => (
                 <WorkflowCard
                   key={workflow.id}
                   workflow={workflow}
@@ -361,6 +401,7 @@ export function ApprovalWorkflowDashboard({ userId, billId, className }: Approva
                   comments
                 });
               }}
+              isProcessing={processApprovalMutation.isPending}
             />
           )}
 
@@ -380,9 +421,10 @@ interface ApprovalCardProps {
   approval: BillApproval;
   onApprove: (comments?: string) => void;
   onReject: (comments?: string) => void;
+  isProcessing?: boolean;
 }
 
-function ApprovalCard({ approval, onApprove, onReject }: ApprovalCardProps) {
+function ApprovalCard({ approval, onApprove, onReject, isProcessing = false }: ApprovalCardProps) {
   const { data: bill } = useQuery({
     queryKey: ['bill', approval.billId],
     queryFn: async () => {
@@ -518,7 +560,7 @@ function ApprovalCard({ approval, onApprove, onReject }: ApprovalCardProps) {
           <Button
             variant="outline"
             onClick={() => onReject()}
-            disabled={processApprovalMutation.isPending}
+            disabled={isProcessing}
           >
             <ThumbsDown className="h-4 w-4 mr-2" />
             Reject
@@ -526,7 +568,7 @@ function ApprovalCard({ approval, onApprove, onReject }: ApprovalCardProps) {
 
           <Button
             onClick={() => onApprove()}
-            disabled={processApprovalMutation.isPending}
+            disabled={isProcessing}
           >
             <ThumbsUp className="h-4 w-4 mr-2" />
             Approve
@@ -572,14 +614,14 @@ function WorkflowCard({ workflow, onEdit }: WorkflowCardProps) {
             <div className="text-sm font-medium mb-1">Amount Threshold</div>
             <div className="flex items-center space-x-1">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="font-mono">{formatCurrency(workflow.conditions.amountThreshold)}</span>
+              <span className="font-mono">{formatCurrency(workflow.conditions?.amountThreshold ?? 0)}</span>
             </div>
           </div>
 
           <div>
             <div className="text-sm font-medium mb-1">Vendor Categories</div>
             <div className="flex flex-wrap gap-1">
-              {workflow.conditions.vendorCategories.map(category => (
+              {(workflow.conditions?.vendorCategories ?? []).map((category: string) => (
                 <Badge key={category} variant="outline" className="text-xs">
                   {category.replace('_', ' ')}
                 </Badge>
@@ -592,7 +634,7 @@ function WorkflowCard({ workflow, onEdit }: WorkflowCardProps) {
         <div>
           <div className="text-sm font-medium mb-2">Approval Steps</div>
           <div className="space-y-1">
-            {workflow.steps.map((step, index) => (
+            {(workflow.steps ?? []).map((step: any, index: number) => (
               <div key={step.id} className="flex items-center space-x-2 p-2 bg-muted/50 rounded">
                 <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs">
                   {index + 1}
@@ -784,9 +826,10 @@ interface ApprovalDecisionFormProps {
   approvalId: string;
   onApprove: (comments?: string) => void;
   onReject: (comments?: string) => void;
+  isProcessing?: boolean;
 }
 
-function ApprovalDecisionForm({ approvalId, onApprove, onReject }: ApprovalDecisionFormProps) {
+function ApprovalDecisionForm({ approvalId, onApprove, onReject, isProcessing = false }: ApprovalDecisionFormProps) {
   const [comments, setComments] = useState('');
 
   return (
@@ -813,7 +856,7 @@ function ApprovalDecisionForm({ approvalId, onApprove, onReject }: ApprovalDecis
         <Button
           variant="outline"
           onClick={() => onReject(comments || undefined)}
-          disabled={processApprovalMutation.isPending}
+          disabled={isProcessing}
         >
           <ThumbsDown className="h-4 w-4 mr-2" />
           Reject
@@ -821,7 +864,7 @@ function ApprovalDecisionForm({ approvalId, onApprove, onReject }: ApprovalDecis
 
         <Button
           onClick={() => onApprove(comments || undefined)}
-          disabled={processApprovalMutation.isPending}
+          disabled={isProcessing}
         >
           <ThumbsUp className="h-4 w-4 mr-2" />
           Approve

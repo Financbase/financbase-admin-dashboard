@@ -60,6 +60,7 @@ import {
   Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
 
 // Types based on our new schema
 interface ReconciliationSession {
@@ -217,25 +218,87 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
     });
   };
 
-  const handleStartMatching = () => {
+  const handleStartMatching = async () => {
     if (!selectedSession) return;
 
-    // In a real implementation, you would fetch statement transactions
-    // For now, using mock data
-    const mockStatementTransactions = [
-      {
-        id: "stmt_1",
-        amount: 1000.00,
-        description: "Client Payment - Invoice #1234",
-        date: new Date(),
-        reference: "INV-1234"
+    try {
+      // Get session details to fetch transactions for the date range
+      const session = sessions?.find(s => s.id === selectedSession);
+      if (!session) {
+        console.error('Session not found');
+        return;
       }
-    ];
 
-    startMatchingMutation.mutate({
-      sessionId: selectedSession,
-      statementTransactions: mockStatementTransactions
-    });
+      // Fetch statement transactions from API
+      // First try to get statement transactions if they exist
+      let statementTransactions: Array<{
+        id: string;
+        amount: number;
+        description: string;
+        date: Date;
+        reference?: string;
+      }> = [];
+
+      try {
+        // Try to fetch from reconciliation statement transactions endpoint
+        const response = await fetch(`/api/reconciliation/statement-transactions/${selectedSession}`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            statementTransactions = result.data.map((tx: any) => ({
+              id: tx.id,
+              amount: parseFloat(tx.amount),
+              description: tx.description || '',
+              date: new Date(tx.date),
+              reference: tx.reference,
+            }));
+          }
+        }
+      } catch (error) {
+        console.warn('Could not fetch statement transactions, using transactions API:', error);
+      }
+
+      // If no statement transactions found, fetch from transactions API as fallback
+      if (statementTransactions.length === 0) {
+        const transactionsResponse = await fetch(
+          `/api/transactions?accountId=${session.accountId}&startDate=${session.startDate}&endDate=${session.endDate}&limit=1000`
+        );
+        if (transactionsResponse.ok) {
+          const transactionsResult = await transactionsResponse.json();
+          if (transactionsResult.transactions && transactionsResult.transactions.length > 0) {
+            statementTransactions = transactionsResult.transactions.map((tx: any) => ({
+              id: tx.id,
+              amount: parseFloat(tx.amount),
+              description: tx.description || '',
+              date: new Date(tx.transactionDate),
+              reference: tx.referenceId,
+            }));
+          }
+        }
+      }
+
+      // If still no transactions, show a message
+      if (statementTransactions.length === 0) {
+        toast({
+          title: 'No Statement Transactions',
+          description: 'Please import bank statement transactions first.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      startMatchingMutation.mutate({
+        sessionId: selectedSession,
+        statementTransactions
+      });
+    } catch (error) {
+      console.error('Error fetching statement transactions:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch statement transactions. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -271,7 +334,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
     }).format(numAmount);
   };
 
-  const currentSession = sessions?.find(s => s.id === selectedSession);
+  const currentSession = sessions?.find((s: any) => s.id === selectedSession);
 
   if (accountsLoading || sessionsLoading) {
     return (
@@ -299,7 +362,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
               <SelectValue placeholder="Select Account" />
             </SelectTrigger>
             <SelectContent>
-              {accounts?.map(account => (
+              {accounts?.map((account: any) => (
                 <SelectItem key={account.id} value={account.id}>
                   {account.name} ({account.bankName})
                 </SelectItem>
@@ -325,7 +388,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {sessions?.filter(s => s.status === "in_progress").length || 0}
+              {sessions?.filter((s: any) => s.status === "in_progress").length || 0}
             </div>
             <p className="text-xs text-muted-foreground">
               Currently reconciling
@@ -340,7 +403,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {sessions?.filter(s => s.status === "completed").length || 0}
+              {sessions?.filter((s: any) => s.status === "completed").length || 0}
             </div>
             <p className="text-xs text-muted-foreground">
               Successfully finished
@@ -356,9 +419,9 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
           <CardContent>
             <div className="text-2xl font-bold">
               {(() => {
-                const completedSessions = sessions?.filter(s => s.status === "completed") || [];
+                const completedSessions = sessions?.filter((s: any) => s.status === "completed") || [];
                 if (completedSessions.length === 0) return "0%";
-                const avgConfidence = completedSessions.reduce((acc, s) => acc + (s.aiConfidence || 0), 0) / completedSessions.length;
+                const avgConfidence = completedSessions.reduce((acc: number, s: any) => acc + (s.aiConfidence || 0), 0) / completedSessions.length;
                 return `${Math.round(avgConfidence)}%`;
               })()}
             </div>
@@ -378,8 +441,8 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
               {(() => {
                 const allSessions = sessions || [];
                 if (allSessions.length === 0) return "0%";
-                const totalTransactions = allSessions.reduce((acc, s) => acc + s.matchedTransactions + s.unmatchedTransactions, 0);
-                const matchedTransactions = allSessions.reduce((acc, s) => acc + s.matchedTransactions, 0);
+                const totalTransactions = allSessions.reduce((acc: number, s: any) => acc + s.matchedTransactions + s.unmatchedTransactions, 0);
+                const matchedTransactions = allSessions.reduce((acc: number, s: any) => acc + s.matchedTransactions, 0);
                 return totalTransactions > 0 ? `${Math.round((matchedTransactions / totalTransactions) * 100)}%` : "0%";
               })()}
             </div>
@@ -460,13 +523,13 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
             <Tabs defaultValue="matches" className="w-full">
               <TabsList>
                 <TabsTrigger value="matches">
-                  Matches ({currentSessionMatches?.filter(m => m.status === "matched").length || 0})
+                  Matches ({currentSessionMatches?.filter((m: any) => m.status === "matched").length || 0})
                 </TabsTrigger>
                 <TabsTrigger value="unmatched">
-                  Unmatched ({currentSessionMatches?.filter(m => m.status === "unmatched").length || 0})
+                  Unmatched ({currentSessionMatches?.filter((m: any) => m.status === "unmatched").length || 0})
                 </TabsTrigger>
                 <TabsTrigger value="disputed">
-                  Disputed ({currentSessionMatches?.filter(m => m.status === "disputed").length || 0})
+                  Disputed ({currentSessionMatches?.filter((m: any) => m.status === "disputed").length || 0})
                 </TabsTrigger>
               </TabsList>
 
@@ -477,21 +540,21 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
                       <CheckCircle className="h-4 w-4 text-green-600" />
                       <span className="text-sm font-medium">High Confidence</span>
                       <Badge variant="secondary">
-                        {currentSessionMatches?.filter(m => m.confidence === "high").length || 0}
+                        {currentSessionMatches?.filter((m: any) => m.confidence === "high").length || 0}
                       </Badge>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Clock className="h-4 w-4 text-blue-600" />
                       <span className="text-sm font-medium">Medium Confidence</span>
                       <Badge variant="secondary">
-                        {currentSessionMatches?.filter(m => m.confidence === "medium").length || 0}
+                        {currentSessionMatches?.filter((m: any) => m.confidence === "medium").length || 0}
                       </Badge>
                     </div>
                     <div className="flex items-center space-x-2">
                       <AlertTriangle className="h-4 w-4 text-yellow-600" />
                       <span className="text-sm font-medium">Low Confidence</span>
                       <Badge variant="secondary">
-                        {currentSessionMatches?.filter(m => m.confidence === "low").length || 0}
+                        {currentSessionMatches?.filter((m: any) => m.confidence === "low").length || 0}
                       </Badge>
                     </div>
                   </div>
@@ -517,9 +580,9 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
                     </TableHeader>
                     <TableBody>
                       {currentSessionMatches
-                        ?.filter(match => filterStatus === 'all' || match.status === filterStatus)
+                        ?.filter((match: any) => filterStatus === 'all' || match.status === filterStatus)
                         .slice(0, 10)
-                        .map(match => (
+                        .map((match: any) => (
                           <MatchRow
                             key={match.id}
                             match={match}
@@ -533,13 +596,13 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
 
               <TabsContent value="unmatched">
                 <UnmatchedTransactions
-                  matches={currentSessionMatches?.filter(m => m.status === "unmatched") || []}
+                  matches={currentSessionMatches?.filter((m: any) => m.status === "unmatched") || []}
                 />
               </TabsContent>
 
               <TabsContent value="disputed">
                 <DisputedTransactions
-                  matches={currentSessionMatches?.filter(m => m.status === "disputed") || []}
+                  matches={currentSessionMatches?.filter((m: any) => m.status === "disputed") || []}
                 />
               </TabsContent>
             </Tabs>
@@ -557,7 +620,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {sessions?.map((session) => (
+            {sessions?.map((session: any) => (
               <div
                 key={session.id}
                 className={cn(
@@ -653,7 +716,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
 
           {showMatchDetails && currentSessionMatches && (
             <MatchDetails
-              match={currentSessionMatches.find(m => m.id === showMatchDetails)!}
+              match={currentSessionMatches.find((m: any) => m.id === showMatchDetails)!}
               onApprove={() => setShowMatchDetails(null)}
               onDispute={() => setShowMatchDetails(null)}
             />
@@ -685,6 +748,21 @@ function MatchRow({ match, onViewDetails }: MatchRowProps) {
       style: 'currency',
       currency: 'USD'
     }).format(numAmount);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return 'bg-green-100 text-green-800';
+      case "in_progress":
+        return 'bg-blue-100 text-blue-800';
+      case "pending":
+        return 'bg-yellow-100 text-yellow-800';
+      case "rejected":
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -735,6 +813,15 @@ interface UnmatchedTransactionsProps {
 }
 
 function UnmatchedTransactions({ matches }: UnmatchedTransactionsProps) {
+  const formatCurrency = (amount: string | number | undefined) => {
+    if (!amount) return "$0.00";
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(numAmount);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

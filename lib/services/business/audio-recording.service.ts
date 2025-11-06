@@ -268,7 +268,8 @@ export class AudioRecordingService {
 	}
 
 	/**
-	 * Generate presigned URL for audio upload (placeholder for cloud storage integration)
+	 * Generate presigned URL for audio upload
+	 * Supports R2/S3 cloud storage or local API endpoint fallback
 	 */
 	async generateAudioUploadUrl(fileName: string, fileType: string) {
 		try {
@@ -277,15 +278,53 @@ export class AudioRecordingService {
 				throw new Error("Unauthorized");
 			}
 
-			// This would integrate with your cloud storage service (AWS S3, Cloudflare R2, etc.)
-			// For now, return a placeholder structure
-			const uploadUrl = `/api/audio/upload?fileName=${encodeURIComponent(fileName)}&fileType=${encodeURIComponent(fileType)}`;
+			// Check if cloud storage is configured (R2/S3)
+			if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
+				const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+				const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+				
+				const r2Client = new S3Client({
+					region: "auto",
+					endpoint: process.env.R2_ENDPOINT || 
+						`https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+					credentials: {
+						accessKeyId: process.env.R2_ACCESS_KEY_ID,
+						secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+					},
+				});
+
+				const timestamp = Date.now();
+				const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
+				const fileKey = `audio-recordings/${userId}/${timestamp}-${sanitizedFileName}`;
+
+				const command = new PutObjectCommand({
+					Bucket: process.env.R2_BUCKET || "cms-admin-files",
+					Key: fileKey,
+					ContentType: fileType,
+				});
+
+				const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 3600 });
+
+				return {
+					uploadUrl,
+					fileName,
+					fileType,
+					fileKey,
+					expiresAt: new Date(Date.now() + 3600000), // 1 hour
+					storageProvider: 'r2',
+				};
+			}
+
+			// Fallback to API endpoint if cloud storage not configured
+			const uploadUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/audio/upload?fileName=${encodeURIComponent(fileName)}&fileType=${encodeURIComponent(fileType)}`;
 
 			return {
 				uploadUrl,
 				fileName,
 				fileType,
 				expiresAt: new Date(Date.now() + 3600000), // 1 hour
+				storageProvider: 'local',
+				note: 'Cloud storage not configured - using local API endpoint',
 			};
 		} catch (error) {
 			console.error("Error generating audio upload URL:", error);

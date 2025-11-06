@@ -94,14 +94,31 @@ export function OnboardingWizard({
 
 	// Render the appropriate step component
 	const renderStepComponent = () => {
-		const StepComponent = stepComponents[currentStep.stepConfig.component];
+		// Map step IDs to components
+		const stepIdToComponent: Record<string, string> = {
+			'agency_welcome': 'AgencyWelcomeStep',
+			'agency_import': 'AgencyImportDataStep',
+			'agency_slack': 'ConnectSlackStep',
+			'agency_invoice': 'AgencyInvoiceExpenseStep',
+			'agency_dashboard': 'AgencyDashboardStep',
+			'agency_invite': 'InviteTeamStep',
+			'realestate_welcome': 'RealEstateWelcomeStep',
+			'realestate_property': 'RealEstatePropertyStep',
+			'startup_welcome': 'StartupWelcomeStep',
+			'startup_import': 'StartupDataImportStep',
+			'freelancer_welcome': 'FreelancerWelcomeStep',
+			'freelancer_profile': 'FreelancerProfileStep',
+		};
+		
+		const componentName = stepIdToComponent[currentStep.stepId] || currentStep.stepId;
+		const StepComponent = stepComponents[componentName];
 		if (!StepComponent) {
 			return (
 				<div className="min-h-[200px] flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
 					<div className="text-center text-gray-500">
 						<p className="text-lg font-medium">Step Component Not Found</p>
-						<p className="text-sm">Component: {currentStep.stepConfig.component}</p>
-						<p className="text-xs mt-2">Step ID: {currentStep.stepId}</p>
+						<p className="text-sm">Step ID: {currentStep.stepId}</p>
+						<p className="text-xs mt-2">Component: {componentName}</p>
 					</div>
 				</div>
 			);
@@ -109,7 +126,7 @@ export function OnboardingWizard({
 
 		return (
 			<StepComponent
-				onComplete={(data) => handleStepComplete(data)}
+				onComplete={(data: any) => handleStepComplete(data)}
 				onSkip={() => handleSkip()}
 			/>
 		);
@@ -151,6 +168,13 @@ export function OnboardingWizard({
 			setIsLoading(false);
 		}
 	}, [currentStep, stepData, isLastStep, onStepComplete, onComplete]);
+
+	const handleStepComplete = useCallback(async (data: any) => {
+		if (!currentStep) return;
+		
+		setStepData(prev => ({ ...prev, [currentStep.stepId]: data }));
+		await onStepComplete(currentStep.stepId, data);
+	}, [currentStep, onStepComplete]);
 
 	const handleSkip = useCallback(async () => {
 		if (!currentStep) return;

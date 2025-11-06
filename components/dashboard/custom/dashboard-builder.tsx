@@ -23,7 +23,7 @@ import {
   Copy,
   Trash2,
   Move,
-  Resize,
+  Maximize2,
   Lock,
   Unlock,
   Download,
@@ -75,7 +75,7 @@ export function DashboardBuilder({ dashboardId, onSave, onCancel }: DashboardBui
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['dashboards']);
+      queryClient.invalidateQueries({ queryKey: ['dashboards'] });
       onSave(data);
     },
   });

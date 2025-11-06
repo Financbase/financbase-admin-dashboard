@@ -14,7 +14,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MicrophoneWaveform } from "@/components/ui/waveform";
 import { cn } from "@/lib/utils";
-import {} from "lucide-react";
+import {
+  Mic,
+  Pause,
+  Square,
+  RotateCcw,
+  Download,
+  Save,
+} from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -333,7 +340,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 						barRadius={2}
 						fadeEdges={true}
 						sensitivity={1.5}
-						onError={(error) => setError(error.message)}
+						onError={(error: Error) => setError(error.message)}
 					/>
 
 					{/* Recording Indicator Overlay */}

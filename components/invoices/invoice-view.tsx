@@ -36,7 +36,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 
 interface InvoiceViewProps {
-	invoiceId: number;
+	invoiceId: string;
 }
 
 interface Invoice {
@@ -183,11 +183,11 @@ export function InvoiceView({ invoiceId }: InvoiceViewProps) {
 		);
 	}
 
-	const subtotal = parseFloat(invoice.subtotal);
-	const taxAmount = parseFloat(invoice.taxAmount);
-	const discountAmount = parseFloat(invoice.discountAmount);
-	const total = parseFloat(invoice.total);
-	const amountPaid = parseFloat(invoice.amountPaid);
+	const subtotal = typeof invoice.subtotal === 'string' ? parseFloat(invoice.subtotal) : invoice.subtotal;
+	const taxAmount = typeof invoice.taxAmount === 'string' ? parseFloat(invoice.taxAmount) : invoice.taxAmount;
+	const discountAmount = typeof invoice.discountAmount === 'string' ? parseFloat(invoice.discountAmount) : invoice.discountAmount;
+	const total = typeof invoice.total === 'string' ? parseFloat(invoice.total) : invoice.total;
+	const amountPaid = typeof invoice.amountPaid === 'string' ? parseFloat(invoice.amountPaid) : invoice.amountPaid;
 	const remaining = total - amountPaid;
 
 	return (
@@ -362,7 +362,7 @@ export function InvoiceView({ invoiceId }: InvoiceViewProps) {
 								{taxAmount > 0 && (
 									<div className="flex justify-between text-sm">
 										<span className="text-muted-foreground">
-											Tax ({parseFloat(invoice.taxRate)}%):
+											Tax ({typeof invoice.taxRate === 'string' ? parseFloat(invoice.taxRate) : (invoice.taxRate || 0)}%):
 										</span>
 										<span>${taxAmount.toFixed(2)}</span>
 									</div>

@@ -16,6 +16,99 @@ import { createExpenseSchema } from '@/lib/validation-schemas';
 import { ApiErrorHandler } from '@/lib/api-error-handler';
 import { eq, count, and, gte, lte, like } from 'drizzle-orm';
 
+/**
+ * @swagger
+ * /api/expenses:
+ *   get:
+ *     summary: Get list of expenses
+ *     description: Retrieves a paginated list of expenses with optional filtering by status, category, and date range
+ *     tags:
+ *       - Financial
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, approved, rejected]
+ *         description: Filter expenses by approval status
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter expenses by category
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date for filtering (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date for filtering (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: Expenses retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: expense_123
+ *                       amount:
+ *                         type: number
+ *                         example: 150.00
+ *                       category:
+ *                         type: string
+ *                         example: Office Supplies
+ *                       status:
+ *                         type: string
+ *                         enum: [pending, approved, rejected]
+ *                       date:
+ *                         type: string
+ *                         format: date-time
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(req: NextRequest) {
   try {
     const { userId } = await auth();
@@ -79,6 +172,78 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * @swagger
+ * /api/expenses:
+ *   post:
+ *     summary: Create a new expense
+ *     description: Creates a new expense record for the authenticated user
+ *     tags:
+ *       - Financial
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *               - category
+ *               - date
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 example: 150.00
+ *               category:
+ *                 type: string
+ *                 example: Office Supplies
+ *               description:
+ *                 type: string
+ *                 example: Printer paper and ink cartridges
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *               receiptUrl:
+ *                 type: string
+ *                 format: uri
+ *               status:
+ *                 type: string
+ *                 enum: [pending, approved, rejected]
+ *                 default: pending
+ *               vendor:
+ *                 type: string
+ *                 example: Office Depot
+ *     responses:
+ *       201:
+ *         description: Expense created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Expense created successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: expense_123
+ *                     amount:
+ *                       type: number
+ *       400:
+ *         description: Bad request - Invalid input data
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();

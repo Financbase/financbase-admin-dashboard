@@ -9,7 +9,7 @@
 
 "use client";
 
-import { ShareCard } from "@/components/ui/share-card";
+import { ShareCard } from "@/components/core/ui/layout/share-card";
 import * as React from "react";
 
 // Example folder ID - in a real app, this would come from props or context

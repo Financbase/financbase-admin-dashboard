@@ -7,12 +7,13 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { AnalyticsStatsCard } from "@/components/ui/analytics-stats-card";
+import { AnalyticsStatsCard } from "@/components/core/ui/layout/analytics-stats-card";
 import {
 	Activity,
 	ArrowDown,
 	ArrowUp,
 	BarChart3,
+	Clock,
 	Eye,
 	MousePointerClick,
 	TrendingUp,

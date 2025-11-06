@@ -34,7 +34,7 @@ const cardVariants = cva(
 );
 
 export interface EmailClientCardProps
-	extends React.HTMLAttributes<HTMLDivElement>,
+	extends Omit<React.HTMLAttributes<HTMLDivElement>, 'animate' | 'initial' | 'variants'>,
 		VariantProps<typeof cardVariants> {
 	avatarSrc: string;
 	avatarFallback: string;
@@ -43,8 +43,8 @@ export interface EmailClientCardProps
 	timestamp: string;
 	message: string;
 	actions?: React.ReactNode[];
-	reactions?: string[];
-	onReactionClick?: (reaction: string) => void;
+	reactions?: React.ReactNode[];
+	onReactionClick?: (reaction: React.ReactNode, index: number) => void;
 	onActionClick?: (index: number) => void;
 }
 
@@ -85,14 +85,18 @@ const EmailClientCard = React.forwardRef<HTMLDivElement, EmailClientCardProps>(
 			visible: { opacity: 1, y: 0 },
 		};
 
+		const motionProps = {
+			variants: containerVariants,
+			initial: "hidden",
+			animate: "visible",
+		};
+
 		return (
 			<motion.div
 				ref={ref}
 				className={cn(cardVariants({ isExpanded }), className)}
-				variants={containerVariants}
-				initial="hidden"
-				animate="visible"
-				{...props}
+				{...motionProps}
+				{...(props as any)}
 			>
 				{/* Card Header */}
 				<motion.div
@@ -161,9 +165,9 @@ const EmailClientCard = React.forwardRef<HTMLDivElement, EmailClientCardProps>(
 									<Button
 										variant="ghost"
 										size="icon"
-										className="w-8 h-8 text-xl"
-										onClick={() => onReactionClick?.(reaction)}
-										aria-label={`React with ${reaction}`}
+										className="w-8 h-8"
+										onClick={() => onReactionClick?.(reaction, index)}
+										aria-label={`React ${index + 1}`}
 									>
 										{reaction}
 									</Button>

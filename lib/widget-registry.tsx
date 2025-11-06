@@ -16,6 +16,7 @@ import CustomerAnalytics from "@/components/core/customer-analytics";
 import { SupportWidget } from "@/components/shared/support-widget";
 import ActivityFeed from "@/components/core/activity-feed";
 import FinancialWidgets from "@/components/core/financial-widgets";
+import type { FinancialPermission } from "@/types/auth";
 
 export interface WidgetConfig {
   id: string;
@@ -23,13 +24,16 @@ export interface WidgetConfig {
   description: string;
   component: React.ComponentType;
   defaultOrder: number;
-  defaultColSpan: 1 | 2 | 3;
+  defaultColSpan: 1 | 2 | 3 | 4 | 5 | 6 | 12;
   defaultRowSpan?: number;
   canHide: boolean;
   isPermanent?: boolean;
   icon?: React.ComponentType<{ className?: string }>;
   iconColor?: string;
   header?: React.ReactNode;
+  // Role and permission requirements
+  requiredRole?: ('admin' | 'manager' | 'user' | 'viewer')[];
+  requiredPermissions?: FinancialPermission[];
 }
 
 export const WIDGET_REGISTRY: Record<string, WidgetConfig> = {

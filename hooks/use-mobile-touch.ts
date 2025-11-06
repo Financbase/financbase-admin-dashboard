@@ -10,6 +10,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import * as React from 'react';
 
 interface TouchPosition {
 	x: number;
@@ -51,7 +52,7 @@ export function useTouchGestures(options: TouchGestureOptions = {}) {
 	const touchStartTime = useRef<number>(0);
 	const lastTouchTime = useRef<number>(0);
 
-	const handleTouchStart = useCallback((e: TouchEvent) => {
+	const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement> | TouchEvent) => {
 		if (opts.preventDefault) {
 			e.preventDefault();
 		}
@@ -66,7 +67,7 @@ export function useTouchGestures(options: TouchGestureOptions = {}) {
 		lastTouchTime.current = Date.now();
 	}, [opts.preventDefault]);
 
-	const handleTouchMove = useCallback((e: TouchEvent) => {
+	const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement> | TouchEvent) => {
 		if (!touchStart) return;
 		
 		if (opts.preventDefault) {
@@ -80,7 +81,7 @@ export function useTouchGestures(options: TouchGestureOptions = {}) {
 		lastTouchTime.current = Date.now();
 	}, [touchStart, opts.preventDefault]);
 
-	const handleTouchEnd = useCallback((e: TouchEvent) => {
+	const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLDivElement> | TouchEvent) => {
 		if (opts.preventDefault) {
 			e.preventDefault();
 		}

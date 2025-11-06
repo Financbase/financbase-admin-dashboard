@@ -60,11 +60,9 @@ describe('Clerk Webhook - User Registration', () => {
   }
 
   describe('POST /api/webhooks/clerk - user.created event', () => {
-    it('should successfully create a user in the database', async () => {
-      if (!tableExists) {
-        console.warn('Skipping test: financbase.users table does not exist');
-        return;
-      }
+    const testIfTableExists = tableExists ? it : it.skip;
+    
+    testIfTableExists('should successfully create a user in the database', async () => {
       // Set webhook secret for testing
       process.env.CLERK_WEBHOOK_SECRET = 'test_webhook_secret';
 
@@ -131,11 +129,7 @@ describe('Clerk Webhook - User Registration', () => {
       testUserId = createdUser[0].id;
     });
 
-    it('should handle duplicate user creation gracefully', async () => {
-      if (!tableExists) {
-        console.warn('Skipping test: financbase.users table does not exist');
-        return;
-      }
+    testIfTableExists('should handle duplicate user creation gracefully', async () => {
       process.env.CLERK_WEBHOOK_SECRET = 'test_webhook_secret';
 
       // First, create a user
@@ -210,11 +204,7 @@ describe('Clerk Webhook - User Registration', () => {
       expect(duplicateUsers.length).toBeLessThanOrEqual(1);
     });
 
-    it('should validate organizationId type matches database schema', async () => {
-      if (!tableExists) {
-        console.warn('Skipping test: financbase.users table does not exist');
-        return;
-      }
+    testIfTableExists('should validate organizationId type matches database schema', async () => {
       process.env.CLERK_WEBHOOK_SECRET = 'test_webhook_secret';
 
       // Query the actual database schema to verify type
@@ -302,11 +292,7 @@ describe('Clerk Webhook - User Registration', () => {
       }
     });
 
-    it('should handle missing email address gracefully', async () => {
-      if (!tableExists) {
-        console.warn('Skipping test: financbase.users table does not exist');
-        return;
-      }
+    testIfTableExists('should handle missing email address gracefully', async () => {
       process.env.CLERK_WEBHOOK_SECRET = 'test_webhook_secret';
 
       const mockPayload = JSON.stringify({

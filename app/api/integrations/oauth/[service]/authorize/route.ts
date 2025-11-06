@@ -96,11 +96,53 @@ function getOAuthConfig(service: string) {
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
       redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/oauth/microsoft/callback`,
     },
+    // Coming Soon integrations - OAuth configs ready for implementation
+    wise: {
+      clientId: process.env.WISE_CLIENT_ID,
+      clientSecret: process.env.WISE_CLIENT_SECRET,
+      redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/oauth/wise/callback`,
+      authorizationUrl: 'https://api.wise.com/oauth/authorize',
+      tokenUrl: 'https://api.wise.com/oauth/token',
+    },
+    freshbooks: {
+      clientId: process.env.FRESHBOOKS_CLIENT_ID,
+      clientSecret: process.env.FRESHBOOKS_CLIENT_SECRET,
+      redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/oauth/freshbooks/callback`,
+      authorizationUrl: 'https://auth.freshbooks.com/oauth/authorize',
+      tokenUrl: 'https://api.freshbooks.com/auth/oauth/token',
+    },
+    netsuite: {
+      clientId: process.env.NETSUITE_CLIENT_ID,
+      clientSecret: process.env.NETSUITE_CLIENT_SECRET,
+      redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/oauth/netsuite/callback`,
+      authorizationUrl: 'https://system.netsuite.com/app/login/oauth2/auth.nl',
+      tokenUrl: 'https://system.netsuite.com/services/rest/auth/oauth2/v1/token',
+    },
+    bamboohr: {
+      clientId: process.env.BAMBOOHR_CLIENT_ID,
+      clientSecret: process.env.BAMBOOHR_CLIENT_SECRET,
+      redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/oauth/bamboohr/callback`,
+      authorizationUrl: 'https://api.bamboohr.com/oauth/authorize',
+      tokenUrl: 'https://api.bamboohr.com/oauth/token',
+    },
+    adp: {
+      clientId: process.env.ADP_CLIENT_ID,
+      clientSecret: process.env.ADP_CLIENT_SECRET,
+      redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/oauth/adp/callback`,
+      authorizationUrl: 'https://accounts.adp.com/auth/oauth/v2/authorize',
+      tokenUrl: 'https://accounts.adp.com/auth/oauth/v2/token',
+    },
   };
 
   const config = configs[service];
-  if (!config || !config.clientId || !config.clientSecret) {
+  if (!config) {
     return null;
+  }
+  
+  // For "Coming Soon" integrations, return config even without credentials
+  // This allows the UI to show "In Development" status
+  if (!config.clientId || !config.clientSecret) {
+    return { ...config, inDevelopment: true };
   }
 
   return config;

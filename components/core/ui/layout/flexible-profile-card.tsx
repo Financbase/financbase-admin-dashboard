@@ -212,7 +212,7 @@ const SocialButton = ({
 	setHoveredItem,
 	hoveredItem,
 }: {
-	item: ProfileCardProps["socialLinks"][0];
+	item: NonNullable<ProfileCardProps["socialLinks"]>[0];
 	setHoveredItem: (id: string | null) => void;
 	hoveredItem: string | null;
 }) => (
@@ -261,7 +261,7 @@ const Tooltip = ({
 	item,
 	hoveredItem,
 }: {
-	item: ProfileCardProps["socialLinks"][0];
+	item: NonNullable<ProfileCardProps["socialLinks"]>[0];
 	hoveredItem: string | null;
 }) => (
 	<div

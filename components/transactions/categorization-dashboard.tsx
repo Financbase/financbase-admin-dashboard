@@ -73,6 +73,28 @@ import { bookkeepingEngine } from '@/lib/services/bookkeeping/ai-bookkeeping-eng
 import { aiOrchestrator } from '@/lib/services/ai/unified-ai-orchestrator';
 import { TransactionCategorization } from '@/components/transactions/transaction-categorization';
 
+// Utility functions (module level)
+const getConfidenceColor = (confidence?: number) => {
+  if (!confidence) return 'text-gray-600';
+  if (confidence >= 0.8) return 'text-green-600';
+  if (confidence >= 0.6) return 'text-yellow-600';
+  return 'text-red-600';
+};
+
+const getConfidenceBadge = (confidence?: number) => {
+  if (!confidence) return <Badge variant="secondary">Unreviewed</Badge>;
+  if (confidence >= 0.8) return <Badge className="bg-green-100 text-green-800">High</Badge>;
+  if (confidence >= 0.6) return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
+  return <Badge className="bg-red-100 text-red-800">Low</Badge>;
+};
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(amount);
+};
+
 // Transaction interfaces
 interface Transaction {
   id: string;
@@ -288,26 +310,6 @@ export function TransactionCategorizationDashboard({
     }
   };
 
-  const getConfidenceColor = (confidence?: number) => {
-    if (!confidence) return 'text-gray-600';
-    if (confidence >= 0.8) return 'text-green-600';
-    if (confidence >= 0.6) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getConfidenceBadge = (confidence?: number) => {
-    if (!confidence) return <Badge variant="secondary">Unreviewed</Badge>;
-    if (confidence >= 0.8) return <Badge className="bg-green-100 text-green-800">High</Badge>;
-    if (confidence >= 0.6) return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
-    return <Badge className="bg-red-100 text-red-800">Low</Badge>;
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
 
   return (
     <div className={cn("w-full space-y-6", className)}>

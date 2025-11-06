@@ -65,7 +65,7 @@ export function MFASettings() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['mfa-settings']);
+      queryClient.invalidateQueries({ queryKey: ['mfa-settings'] });
       toast({
         title: 'MFA Setup Initiated',
         description: 'Please scan the QR code with your authenticator app.',
@@ -84,7 +84,7 @@ export function MFASettings() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['mfa-settings']);
+      queryClient.invalidateQueries({ queryKey: ['mfa-settings'] });
       toast({
         title: 'MFA Enabled',
         description: 'Multi-factor authentication has been successfully enabled.',
@@ -111,7 +111,7 @@ export function MFASettings() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['mfa-settings']);
+      queryClient.invalidateQueries({ queryKey: ['mfa-settings'] });
       toast({
         title: 'MFA Disabled',
         description: 'Multi-factor authentication has been disabled.',
@@ -129,7 +129,7 @@ export function MFASettings() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['mfa-settings']);
+      queryClient.invalidateQueries({ queryKey: ['mfa-settings'] });
       toast({
         title: 'Backup Codes Generated',
         description: 'New backup codes have been generated.',

@@ -102,6 +102,136 @@ interface DashboardLayout {
 	updatedAt: string;
 }
 
+// Helper functions for calculations
+async function calculateClientRetentionRate(userId: string): Promise<number> {
+	const now = new Date();
+	const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+	const sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+
+	// Get clients who were active one year ago
+	const [oldClientsResult] = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(clients)
+		.where(
+			and(
+				eq(clients.userId, userId),
+				lte(clients.createdAt, oneYearAgo),
+				eq(clients.status, 'active' as any)
+			)
+		);
+
+	// Get clients who are still active now
+	const [activeClientsResult] = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(clients)
+		.where(
+			and(
+				eq(clients.userId, userId),
+				lte(clients.createdAt, oneYearAgo),
+				eq(clients.status, 'active' as any),
+				gte(clients.updatedAt, sixMonthsAgo) // Active in last 6 months
+			)
+		);
+
+	const oldClients = Number(oldClientsResult?.count || 0);
+	const activeClients = Number(activeClientsResult?.count || 0);
+
+	return oldClients > 0 ? Math.round((activeClients / oldClients) * 100) : 0;
+}
+
+async function calculateProjectCompletionRate(userId: string): Promise<number> {
+	const [projectStats] = await db
+		.select({
+			total: sql<number>`count(*)`,
+			completed: sql<number>`count(case when ${projects.status} = 'completed' then 1 end)`,
+		})
+		.from(projects)
+		.where(eq(projects.userId, userId));
+
+	const total = Number(projectStats?.total || 0);
+	const completed = Number(projectStats?.completed || 0);
+
+	return total > 0 ? Math.round((completed / total) * 100) : 0;
+}
+
+async function calculateRevenueGrowth(userId: string): Promise<number> {
+	const now = new Date();
+	const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+	const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+	const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+	const [currentMonthRevenue] = await db
+		.select({
+			total: sql<number>`sum(case when ${invoices.status} = 'paid' and ${invoices.paidDate} >= ${currentMonthStart} then ${invoices.total}::numeric else 0 end)`,
+		})
+		.from(invoices)
+		.where(eq(invoices.userId, userId));
+
+	const [lastMonthRevenue] = await db
+		.select({
+			total: sql<number>`sum(case when ${invoices.status} = 'paid' and ${invoices.paidDate} >= ${lastMonthStart} and ${invoices.paidDate} <= ${lastMonthEnd} then ${invoices.total}::numeric else 0 end)`,
+		})
+		.from(invoices)
+		.where(eq(invoices.userId, userId));
+
+	const current = Number(currentMonthRevenue?.total || 0);
+	const last = Number(lastMonthRevenue?.total || 0);
+
+	return last > 0 ? Number(((current - last) / last * 100).toFixed(1)) : 0;
+}
+
+async function calculateClientGrowth(userId: string): Promise<number> {
+	const now = new Date();
+	const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+	const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+	const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+	const [currentMonthClients] = await db
+		.select({
+			count: sql<number>`count(case when ${clients.createdAt} >= ${currentMonthStart} then 1 end)`,
+		})
+		.from(clients)
+		.where(eq(clients.userId, userId));
+
+	const [lastMonthClients] = await db
+		.select({
+			count: sql<number>`count(case when ${clients.createdAt} >= ${lastMonthStart} and ${clients.createdAt} <= ${lastMonthEnd} then 1 end)`,
+		})
+		.from(clients)
+		.where(eq(clients.userId, userId));
+
+	const current = Number(currentMonthClients?.count || 0);
+	const last = Number(lastMonthClients?.count || 0);
+
+	return last > 0 ? Number(((current - last) / last * 100).toFixed(1)) : 0;
+}
+
+async function calculateProjectGrowth(userId: string): Promise<number> {
+	const now = new Date();
+	const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+	const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+	const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+	const [currentMonthProjects] = await db
+		.select({
+			count: sql<number>`count(case when ${projects.createdAt} >= ${currentMonthStart} then 1 end)`,
+		})
+		.from(projects)
+		.where(eq(projects.userId, userId));
+
+	const [lastMonthProjects] = await db
+		.select({
+			count: sql<number>`count(case when ${projects.createdAt} >= ${lastMonthStart} and ${projects.createdAt} <= ${lastMonthEnd} then 1 end)`,
+		})
+		.from(projects)
+		.where(eq(projects.userId, userId));
+
+	const current = Number(currentMonthProjects?.count || 0);
+	const last = Number(lastMonthProjects?.count || 0);
+
+	return last > 0 ? Number(((current - last) / last * 100).toFixed(1)) : 0;
+}
+
 /**
  * Get unified metrics for the dashboard
  */
@@ -170,7 +300,7 @@ export async function getUnifiedMetrics(userId: string): Promise<UnifiedMetrics>
 	const recentInvoices = await db
 		.select({
 			id: invoices.id,
-			clientName: clients.companyName,
+			clientName: clients.name,
 			amount: invoices.total,
 			status: invoices.status,
 			createdAt: invoices.createdAt,
@@ -230,6 +360,15 @@ export async function getUnifiedMetrics(userId: string): Promise<UnifiedMetrics>
 	const completedPayments = Number(paymentData?.completedPayments || 0);
 	const paymentSuccessRate = totalPayments > 0 ? (completedPayments / totalPayments) * 100 : 0;
 
+	// Calculate client retention rate
+	const clientRetentionRate = await calculateClientRetentionRate(userId);
+	// Calculate project completion rate
+	const projectCompletionRate = await calculateProjectCompletionRate(userId);
+	// Calculate growth metrics
+	const revenueGrowth = await calculateRevenueGrowth(userId);
+	const clientGrowth = await calculateClientGrowth(userId);
+	const projectGrowth = await calculateProjectGrowth(userId);
+
 	return {
 		totalRevenue,
 		totalExpenses,
@@ -240,14 +379,14 @@ export async function getUnifiedMetrics(userId: string): Promise<UnifiedMetrics>
 		activeCampaigns: Number(campaignData?.activeCampaigns || 0),
 		averageInvoiceValue: Number(invoicePerformanceData?.averageInvoiceValue || 0),
 		paymentSuccessRate,
-		clientRetentionRate: 85, // Placeholder - would need historical data
-		projectCompletionRate: 78, // Placeholder - would need historical data
+		clientRetentionRate,
+		projectCompletionRate,
 		campaignROAS: Number(campaignPerformanceData?.campaignROAS || 0),
-		revenueGrowth: 12.5, // Placeholder - would need historical comparison
-		clientGrowth: 8.3, // Placeholder - would need historical comparison
-		projectGrowth: 15.2, // Placeholder - would need historical comparison
+		revenueGrowth,
+		clientGrowth,
+		projectGrowth,
 		recentInvoices: recentInvoices.map(invoice => ({
-			id: invoice.id,
+			id: String(invoice.id),
 			clientName: invoice.clientName || 'Unknown Client',
 			amount: Number(invoice.amount),
 			status: invoice.status || 'draft',
@@ -342,7 +481,7 @@ async function getExpenseBreakdownData(userId: string) {
 			amount: sql<number>`sum(${expenses.amount}::numeric)`,
 		})
 		.from(expenses)
-		.innerJoin(expenseCategories, eq(expenses.categoryId, expenseCategories.id))
+		.innerJoin(expenseCategories, eq(expenses.category, expenseCategories.name))
 		.where(eq(expenses.userId, userId))
 		.groupBy(expenseCategories.name);
 
@@ -466,14 +605,14 @@ async function getTopClientsData(userId: string) {
 	const topClients = await db
 		.select({
 			clientId: clients.id,
-			clientName: clients.companyName,
+			clientName: clients.name,
 			totalRevenue: sql<number>`sum(${invoices.total}::numeric)`,
 			invoiceCount: sql<number>`count(${invoices.id})`,
 		})
 		.from(clients)
 		.leftJoin(invoices, eq(clients.id, invoices.clientId))
 		.where(eq(clients.userId, userId))
-		.groupBy(clients.id, clients.companyName)
+		.groupBy(clients.id, clients.name)
 		.orderBy(desc(sql`sum(${invoices.total}::numeric)`))
 		.limit(5);
 

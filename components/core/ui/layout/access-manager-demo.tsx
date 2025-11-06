@@ -9,7 +9,7 @@
 
 "use client";
 
-import { AccessManagerCard } from "@/components/ui/access-manager-card";
+import { AccessManagerCard } from "@/components/core/ui/layout/access-manager-card";
 import { Folder, ShieldCheck, Users } from "lucide-react";
 import * as React from "react";
 

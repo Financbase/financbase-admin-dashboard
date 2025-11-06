@@ -62,7 +62,7 @@ export function SupportTicketForm({ onSuccess, onCancel }: SupportTicketFormProp
       return response.json();
     },
     onSuccess: (ticket) => {
-      queryClient.invalidateQueries(['supportTickets']);
+      queryClient.invalidateQueries({ queryKey: ['supportTickets'] });
       onSuccess(ticket);
     },
   });

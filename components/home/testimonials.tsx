@@ -55,7 +55,7 @@ export default function Testimonials() {
     { id: "amazon", name: "Amazon", logo: "/logos/amazon.svg" },
     { id: "salesforce", name: "Salesforce", logo: "/logos/salesforce.svg" },
     { id: "shopify", name: "Shopify", logo: "/logos/shopify.svg" },
-    { id: "stripe", name: "Stripe", logo: "/logos/stripe.svg" }
+    { id: "stripe", name: "Stripe", logo: "/logos/stripe-official.svg" }
   ]
 
   return (

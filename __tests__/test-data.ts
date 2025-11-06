@@ -11,9 +11,11 @@ import { eq, sql as dsql } from 'drizzle-orm';
 export class TestDataFactory {
   static async createTestUser(overrides: Partial<typeof schema.users.$inferInsert> = {}) {
     const userData = {
-      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       email: 'test@example.com',
-      name: 'Test User',
+      clerkId: `clerk-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      organizationId: `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      firstName: 'Test',
+      lastName: 'User',
       isActive: true,
       role: 'user' as const,
       createdAt: new Date(),
@@ -28,22 +30,21 @@ export class TestDataFactory {
 
   static async createTestClient(userId: string, overrides: Partial<typeof schema.clients.$inferInsert> = {}) {
     const clientData = {
-      id: `client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId,
-      companyName: 'Test Company Inc.',
-      contactName: 'John Doe',
+      name: 'Test Company Inc.',
       email: `client-${Date.now()}@example.com`,
       phone: '+1234567890',
+      company: 'Test Company Inc.',
       currency: 'USD',
       paymentTerms: 'net30',
-      isActive: true,
+      status: 'active' as const,
       createdAt: new Date(),
       updatedAt: new Date(),
       ...overrides,
     };
 
-    await testDb.insert(schema.clients).values(clientData);
-    return clientData;
+    const [client] = await testDb.insert(schema.clients).values(clientData).returning();
+    return client;
   }
 
   static async createTestLead(userId: string, overrides: Partial<typeof schema.leads.$inferInsert> = {}) {

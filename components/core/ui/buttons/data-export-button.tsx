@@ -68,11 +68,11 @@ export function DataExportButton({
 
 		setIsExporting(true);
 		try {
-			await exportData(data, {
+			await exportData(data as Record<string, any>[], {
 				format,
 				filename,
 				includeHeaders: true,
-				dateRange,
+				dateRange: dateRange ? { start: dateRange.from, end: dateRange.to } : undefined,
 			});
 			toast.success(`${format.toUpperCase()} file exported successfully`);
 		} catch (_error) {
@@ -160,11 +160,11 @@ export function SimpleExportButton({
 
 		setIsExporting(true);
 		try {
-			await exportData(data, {
+			await exportData(data as Record<string, any>[], {
 				format,
 				filename,
 				includeHeaders: true,
-				dateRange,
+				dateRange: dateRange ? { start: dateRange.from, end: dateRange.to } : undefined,
 			});
 			toast.success(`${format.toUpperCase()} file exported successfully`);
 		} catch (_error) {

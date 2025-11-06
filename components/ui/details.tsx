@@ -93,8 +93,7 @@ export const Details = React.forwardRef<HTMLDetailsElement, DetailsProps>(
     return (
       <details
         ref={ref}
-        open={isControlled ? controlledOpen : undefined}
-        defaultOpen={defaultOpen}
+        {...(isControlled ? { open: controlledOpen } : { defaultOpen })}
         onToggle={handleToggle}
         className={cn(
           'group',

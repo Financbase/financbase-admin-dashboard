@@ -33,24 +33,16 @@ import {
   Loader2
 } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-
-interface PayrollRun {
-  id: string;
-  name: string;
-  period: string;
-  status: 'draft' | 'processing' | 'completed' | 'approved' | 'rejected';
-  totalEmployees: number;
-  totalGrossPay: number;
-  totalDeductions: number;
-  totalNetPay: number;
-  totalTaxes: number;
-  totalBenefits: number;
-  processedAt: string | null;
-  paymentDate: string;
-  createdBy: string;
-  notes: string;
-}
+import { useQueryClient } from "@tanstack/react-query";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import {
+	usePayrollRuns,
+	usePayrollEntries,
+	useProcessPayroll,
+	useUpdatePayrollRunStatus,
+	type PayrollRun,
+} from "@/hooks/hr/use-payroll";
+import { PayrollRunForm } from "@/components/hr/payroll-run-form";
 
 interface EmployeePayroll {
   id: string;
@@ -101,37 +93,39 @@ export default function PayrollPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [periodFilter, setPeriodFilter] = useState("");
   const [selectedRun, setSelectedRun] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { data: currentUser } = useCurrentUser();
 
-  // Fetch payroll data
-  const { data: payrollData, isLoading, error } = useQuery({
-    queryKey: ['payroll', searchQuery, statusFilter, periodFilter],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchQuery) params.append('search', searchQuery);
-      if (statusFilter) params.append('status', statusFilter);
-      if (periodFilter) params.append('period', periodFilter);
+  const organizationId = currentUser?.organizationId || undefined;
 
-      const response = await fetch(`/api/hr/payroll?${params.toString()}`);
-      if (!response.ok) throw new Error('Failed to fetch payroll data');
-      return response.json();
-    },
+  // Fetch payroll runs
+  const { data: payrollRuns = [], isLoading, error } = usePayrollRuns({
+    status: statusFilter || undefined,
+    organizationId,
   });
 
-  const payrollRuns: PayrollRun[] = payrollData?.payrollRuns || [];
-  const employeePayroll: EmployeePayroll[] = payrollData?.employeePayroll || [];
-  const stats: PayrollStats = payrollData?.stats || {
-    totalRuns: 0,
-    completedRuns: 0,
-    processingRuns: 0,
-    draftRuns: 0,
-    totalEmployees: 0,
-    totalGrossPay: 0,
-    totalNetPay: 0,
-    totalTaxes: 0,
-    totalDeductions: 0,
-    averageGrossPay: 0,
-    averageNetPay: 0,
-    monthlyTrend: []
+  // Fetch payroll entries for selected run
+  const { data: employeePayroll = [] } = usePayrollEntries(selectedRun || undefined);
+
+  // Calculate stats from runs
+  const stats: PayrollStats = {
+    totalRuns: payrollRuns.length,
+    completedRuns: payrollRuns.filter((r) => r.status === "completed").length,
+    processingRuns: payrollRuns.filter((r) => r.status === "processing").length,
+    draftRuns: payrollRuns.filter((r) => r.status === "draft").length,
+    totalEmployees: employeePayroll.length,
+    totalGrossPay: payrollRuns.reduce((sum, r) => sum + (parseFloat(r.totalGrossPay || "0")), 0),
+    totalNetPay: payrollRuns.reduce((sum, r) => sum + (parseFloat(r.totalNetPay || "0")), 0),
+    totalTaxes: payrollRuns.reduce((sum, r) => sum + (parseFloat(r.totalTaxes || "0")), 0),
+    totalDeductions: payrollRuns.reduce((sum, r) => sum + (parseFloat(r.totalDeductions || "0")), 0),
+    averageGrossPay: payrollRuns.length > 0
+      ? payrollRuns.reduce((sum, r) => sum + (parseFloat(r.totalGrossPay || "0")), 0) / payrollRuns.length
+      : 0,
+    averageNetPay: payrollRuns.length > 0
+      ? payrollRuns.reduce((sum, r) => sum + (parseFloat(r.totalNetPay || "0")), 0) / payrollRuns.length
+      : 0,
+    monthlyTrend: [],
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -168,21 +162,21 @@ export default function PayrollPage() {
     }
   };
 
+  const processMutation = useProcessPayroll();
+  const updateStatusMutation = useUpdatePayrollRunStatus();
+
   const handlePayrollAction = async (action: string, payrollRunId: string) => {
-    try {
-      const response = await fetch('/api/hr/payroll', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, payrollRunId })
-      });
-      
-      if (response.ok) {
-        // Refresh data or show success message
-        console.log(`${action} action completed`);
-      }
-    } catch (error) {
-      console.error(`Error performing ${action}:`, error);
+    if (action === "process") {
+      await processMutation.mutateAsync({ payrollRunId });
+    } else if (action === "approve") {
+      await updateStatusMutation.mutateAsync({ id: payrollRunId, status: "completed" });
+    } else if (action === "reject") {
+      await updateStatusMutation.mutateAsync({ id: payrollRunId, status: "failed" });
     }
+  };
+
+  const handleFormSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["payroll-runs"] });
   };
 
   if (isLoading) {
@@ -227,7 +221,7 @@ export default function PayrollPage() {
               <Upload className="h-4 w-4 mr-2" />
               Import Timesheets
             </Button>
-            <Button>
+            <Button onClick={() => setIsFormOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               New Payroll Run
             </Button>
@@ -401,7 +395,7 @@ export default function PayrollPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-medium text-lg">{run.name}</h3>
+                            <h3 className="font-medium text-lg">{run.runNumber || `Payroll Run ${run.id.slice(0, 8)}`}</h3>
                             <Badge
                               variant={getStatusBadgeVariant(run.status)}
                               className="text-xs"
@@ -413,10 +407,10 @@ export default function PayrollPage() {
                             </Badge>
                           </div>
                           <p className="text-sm text-slate-600 dark:text-slate-300">
-                            {run.period} • Payment Date: {new Date(run.paymentDate).toLocaleDateString()}
+                            {new Date(run.payPeriodStart).toLocaleDateString()} - {new Date(run.payPeriodEnd).toLocaleDateString()} • Payment Date: {new Date(run.payDate).toLocaleDateString()}
                           </p>
                           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Created by {run.createdBy} • {run.totalEmployees} employees
+                            {run.totalEmployees || 0} employees • {run.totalContractors || 0} contractors
                           </p>
                           {run.notes && (
                             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -429,7 +423,11 @@ export default function PayrollPage() {
                         {run.status === 'draft' && (
                           <Button 
                             size="sm" 
-                            onClick={() => handlePayrollAction('process', run.id)}
+                            onClick={() => {
+                              handlePayrollAction('process', run.id);
+                              setSelectedRun(run.id);
+                            }}
+                            disabled={processMutation.isPending}
                           >
                             <Play className="h-4 w-4 mr-1" />
                             Process
@@ -441,6 +439,7 @@ export default function PayrollPage() {
                               size="sm" 
                               variant="outline"
                               onClick={() => handlePayrollAction('approve', run.id)}
+                              disabled={updateStatusMutation.isPending}
                             >
                               <CheckCircle className="h-4 w-4 mr-1" />
                               Approve
@@ -449,13 +448,18 @@ export default function PayrollPage() {
                               size="sm" 
                               variant="outline"
                               onClick={() => handlePayrollAction('reject', run.id)}
+                              disabled={updateStatusMutation.isPending}
                             >
                               <XCircle className="h-4 w-4 mr-1" />
                               Reject
                             </Button>
                           </>
                         )}
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setSelectedRun(selectedRun === run.id ? null : run.id)}
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </div>
@@ -464,21 +468,21 @@ export default function PayrollPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <p className="text-slate-500 dark:text-slate-400">Gross Pay</p>
-                        <p className="font-medium">${run.totalGrossPay.toLocaleString()}</p>
+                        <p className="font-medium">${parseFloat(run.totalGrossPay || "0").toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-slate-500 dark:text-slate-400">Deductions</p>
-                        <p className="font-medium">${run.totalDeductions.toLocaleString()}</p>
+                        <p className="font-medium">${parseFloat(run.totalDeductions || "0").toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-slate-500 dark:text-slate-400">Net Pay</p>
                         <p className="font-medium text-green-600 dark:text-green-400">
-                          ${run.totalNetPay.toLocaleString()}
+                          ${parseFloat(run.totalNetPay || "0").toLocaleString()}
                         </p>
                       </div>
                       <div>
                         <p className="text-slate-500 dark:text-slate-400">Taxes</p>
-                        <p className="font-medium">${run.totalTaxes.toLocaleString()}</p>
+                        <p className="font-medium">${parseFloat(run.totalTaxes || "0").toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
@@ -492,63 +496,75 @@ export default function PayrollPage() {
         {selectedRun && (
           <Card>
             <CardHeader>
-              <CardTitle>Employee Payroll Details</CardTitle>
+              <CardTitle>Payroll Entries</CardTitle>
               <CardDescription>
-                Individual employee payroll breakdown
+                Individual employee/contractor payroll breakdown
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="border-b bg-muted/50">
-                    <tr>
-                      <th className="text-left p-4 font-medium text-sm">Employee</th>
-                      <th className="text-left p-4 font-medium text-sm">Department</th>
-                      <th className="text-right p-4 font-medium text-sm">Gross Pay</th>
-                      <th className="text-right p-4 font-medium text-sm">Deductions</th>
-                      <th className="text-right p-4 font-medium text-sm">Net Pay</th>
-                      <th className="text-left p-4 font-medium text-sm">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {employeePayroll.map((employee) => (
-                      <tr key={employee.id} className="border-b hover:bg-muted/50 transition-colors">
-                        <td className="p-4">
-                          <div>
-                            <p className="font-medium">{employee.name}</p>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                              {employee.position}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="p-4 text-sm text-slate-600 dark:text-slate-300">
-                          {employee.department}
-                        </td>
-                        <td className="p-4 text-sm text-right font-medium">
-                          ${employee.grossPay.toLocaleString()}
-                        </td>
-                        <td className="p-4 text-sm text-right">
-                          ${Object.values(employee.deductions).reduce((sum, val) => sum + val, 0).toLocaleString()}
-                        </td>
-                        <td className="p-4 text-sm text-right font-medium text-green-600">
-                          ${employee.netPay.toLocaleString()}
-                        </td>
-                        <td className="p-4">
-                          <Badge
-                            variant={employee.status === 'paid' ? 'default' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {employee.status}
-                          </Badge>
-                        </td>
+              {employeePayroll.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-slate-600 dark:text-slate-300">No payroll entries found for this run</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="border-b bg-muted/50">
+                      <tr>
+                        <th className="text-left p-4 font-medium text-sm">Employee/Contractor</th>
+                        <th className="text-right p-4 font-medium text-sm">Gross Pay</th>
+                        <th className="text-right p-4 font-medium text-sm">Deductions</th>
+                        <th className="text-right p-4 font-medium text-sm">Taxes</th>
+                        <th className="text-right p-4 font-medium text-sm">Net Pay</th>
+                        <th className="text-left p-4 font-medium text-sm">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {employeePayroll.map((entry) => (
+                        <tr key={entry.id} className="border-b hover:bg-muted/50 transition-colors">
+                          <td className="p-4">
+                            <div>
+                              <p className="font-medium">
+                                {entry.employeeId ? "Employee" : "Contractor"} {entry.id.slice(0, 8)}
+                              </p>
+                            </div>
+                          </td>
+                          <td className="p-4 text-sm text-right font-medium">
+                            ${parseFloat(entry.grossPay || "0").toLocaleString()}
+                          </td>
+                          <td className="p-4 text-sm text-right">
+                            ${parseFloat(entry.totalDeductions || "0").toLocaleString()}
+                          </td>
+                          <td className="p-4 text-sm text-right">
+                            ${parseFloat(entry.totalTaxes || "0").toLocaleString()}
+                          </td>
+                          <td className="p-4 text-sm text-right font-medium text-green-600">
+                            ${parseFloat(entry.netPay || "0").toLocaleString()}
+                          </td>
+                          <td className="p-4">
+                            <Badge
+                              variant={entry.status === 'paid' ? 'default' : entry.status === 'processed' ? 'secondary' : 'outline'}
+                              className="text-xs"
+                            >
+                              {entry.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
+
+        <PayrollRunForm
+          open={isFormOpen}
+          onOpenChange={setIsFormOpen}
+          organizationId={organizationId || "00000000-0000-0000-0000-000000000000"}
+          onSuccess={handleFormSuccess}
+        />
       </div>
     </div>
   );

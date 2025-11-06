@@ -88,8 +88,8 @@ export default function ApiWebhooksPage() {
 												Register your webhook endpoint in the Financbase dashboard.
 											</p>
 											<Button variant="outline" asChild>
-												<Link href="/dashboard/settings">
-													Go to Settings
+												<Link href="/auth/sign-up">
+													Get Started
 													<ArrowRight className="h-4 w-4 ml-2" />
 												</Link>
 											</Button>
@@ -205,9 +205,9 @@ export default function ApiWebhooksPage() {
 									Set up webhooks to receive real-time notifications about your financial data.
 								</p>
 								<Button asChild>
-									<Link href="/dashboard/settings">
+									<Link href="/auth/sign-up">
 										<Settings className="h-4 w-4 mr-2" />
-										Configure Webhooks
+										Get Started Free
 									</Link>
 								</Button>
 							</CardContent>

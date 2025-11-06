@@ -12,6 +12,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Sun, Bell } from "lucide-react";
+import { Workspaces, WorkspaceTrigger } from "@/components/core/ui/layout/workspaces";
 import {
 	Archive,
 	BarChart3,

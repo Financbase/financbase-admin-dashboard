@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { NotificationCenterStack } from "@/components/ui/stacked-alerts";
+import { NotificationCenterStack } from "@/components/core/ui/feedback/stacked-alerts";
 
 export default function DemoOne() {
 	return <NotificationCenterStack />;

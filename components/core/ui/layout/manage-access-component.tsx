@@ -9,7 +9,17 @@
 
 import { cva } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
-import {} from "lucide-react";
+import {
+	ChevronDown,
+	Check,
+	Copy,
+	Link,
+	Loader2,
+	Trash2,
+	UserPlus,
+	Users,
+	X,
+} from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -74,7 +84,7 @@ export const ManageAccess = ({
 		updateMemberRole,
 		removeMember,
 		updateAccessLevel: updateAccessLevelApi,
-	} = useManageAccess(folderId);
+	} = useManageAccess({ folderId });
 
 	// Transform API data to component format
 	const users: User[] =
@@ -83,7 +93,7 @@ export const ManageAccess = ({
 			name: member.name,
 			email: member.email,
 			avatarUrl:
-				member.avatar ||
+				member.avatarUrl ||
 				`https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000000000)}?w=150&h=150&fit=crop&crop=face`,
 			role: member.role.toLowerCase() as Role,
 		})) || [];
@@ -159,7 +169,7 @@ export const ManageAccess = ({
 			<Card className={cn("w-full max-w-2xl mx-auto", className)}>
 				<CardContent className="p-6">
 					<Alert variant="destructive">
-						<AlertDescription>{error}</AlertDescription>
+						<AlertDescription>{error?.message || String(error)}</AlertDescription>
 					</Alert>
 				</CardContent>
 			</Card>

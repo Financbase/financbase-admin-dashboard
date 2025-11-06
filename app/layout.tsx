@@ -8,14 +8,29 @@
  */
 
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Roboto_Flex, Roboto_Slab, Roboto_Mono } from 'next/font/google'
 import { ClientLayout } from './client-layout'
 import './globals.css'
 
-const inter = Inter({
+const robotoFlex = Roboto_Flex({
 	subsets: ['latin'],
 	display: 'swap',
-	variable: '--font-inter'
+	variable: '--font-roboto-flex',
+	weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+})
+
+const robotoSlab = Roboto_Slab({
+	subsets: ['latin'],
+	display: 'swap',
+	variable: '--font-roboto-slab',
+	weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+})
+
+const robotoMono = Roboto_Mono({
+	subsets: ['latin'],
+	display: 'swap',
+	variable: '--font-roboto-mono',
+	weight: ['100', '200', '300', '400', '500', '600', '700'],
 })
 
 export default function RootLayout({
@@ -24,12 +39,38 @@ export default function RootLayout({
 	children: React.ReactNode
 }) {
 	return (
-		<html lang="en" className={inter.variable} suppressHydrationWarning>
+		<html 
+			lang="en" 
+			className={`${robotoFlex.variable} ${robotoSlab.variable} ${robotoMono.variable}`}
+			suppressHydrationWarning
+		>
 			<head>
 				<link rel="preconnect" href="https://fonts.googleapis.com" />
 				<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+				{/* Initialize theme immediately to prevent flash of unstyled content */}
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `
+							(function() {
+								try {
+									const theme = localStorage.getItem('financbase-theme') || 'light';
+									const html = document.documentElement;
+									if (theme === 'dark') {
+										html.classList.add('dark');
+										html.setAttribute('data-theme', 'dark');
+									} else {
+										html.classList.remove('dark');
+										html.setAttribute('data-theme', 'light');
+									}
+								} catch (e) {
+									console.warn('Failed to initialize theme:', e);
+								}
+							})();
+						`,
+					}}
+				/>
 			</head>
-			<body className={`${inter.className} font-sans`}>
+			<body className="font-sans">
 				<ClientLayout>
 					{children}
 				</ClientLayout>

@@ -9,7 +9,7 @@
 
 // User Preferences System Schemas
 
-import { pgTable, uuid, text, timestamp, boolean, pgEnum, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, boolean, pgEnum, jsonb, serial } from "drizzle-orm/pg-core";
 
 // Enums for user preferences
 export const theme = pgEnum("theme", ["light", "dark", "system"]);
@@ -36,8 +36,8 @@ export const numberFormat = pgEnum("number_format", ["1,234.56", "1.234,56", "1 
 
 // User Preferences table
 export const userPreferences = pgTable("user_preferences", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	userId: uuid("user_id").notNull().unique(),
+	id: serial("id").primaryKey(),
+	userId: text("user_id").notNull().unique(),
 
 	// Appearance preferences
 	theme: theme("theme").default("system"),
@@ -91,8 +91,8 @@ export const userPreferences = pgTable("user_preferences", {
 
 // Notification Preferences table (for detailed notification settings)
 export const notificationPreferences = pgTable("notification_preferences", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	userId: uuid("user_id").notNull().unique(),
+	id: serial("id").primaryKey(),
+	userId: text("user_id").notNull().unique(),
 
 	// Email notification preferences
 	emailInvoices: boolean("email_invoices").default(true),
@@ -130,8 +130,8 @@ export const notificationPreferences = pgTable("notification_preferences", {
 
 // Privacy Settings table (for detailed privacy controls)
 export const privacySettings = pgTable("privacy_settings", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	userId: uuid("user_id").notNull().unique(),
+	id: serial("id").primaryKey(),
+	userId: text("user_id").notNull().unique(),
 
 	// Data collection preferences
 	analyticsTracking: boolean("analytics_tracking").default(true),

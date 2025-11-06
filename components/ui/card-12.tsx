@@ -25,3 +25,25 @@ export function Card12() {
     </Card>
   );
 }
+
+export interface OpportunityCardProps {
+  status?: string;
+  onAccept?: () => void;
+  onDecline?: () => void;
+  [key: string]: any;
+}
+
+export function OpportunityCard({ status, onAccept, onDecline, ...props }: OpportunityCardProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Opportunity</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">Status: {status || "Available"}</p>
+        {onAccept && <button onClick={onAccept}>Accept</button>}
+        {onDecline && <button onClick={onDecline}>Decline</button>}
+      </CardContent>
+    </Card>
+  );
+}

@@ -19,6 +19,12 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { useAnalytics } from "@/lib/analytics";
+import { toast } from "@/lib/toast";
+import {
+	parseApiError,
+	getUserFriendlyMessage,
+	createErrorFromFetch,
+} from "@/lib/utils/api-error-handler";
 import {
 	AlertCircle,
 	BarChart3,
@@ -60,23 +66,113 @@ export function SupportWidget({
 
 	useEffect(() => {
 		fetchTickets();
-	}, []);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [component, maxDisplay]);
 
 	const fetchTickets = async () => {
 		try {
 			setLoading(true);
 			const response = await fetch(
-				`/api/support/tickets?component=${component}&status=open`,
+				`/api/help/tickets?status=open&limit=${maxDisplay * 2}`,
 			);
 
 			if (!response.ok) {
-				throw new Error("Failed to fetch tickets");
+				// Use standardized error parsing utility
+				const parsedError = await parseApiError(response);
+				
+				if (parsedError) {
+					// Log full error details for debugging
+					console.error('API Error Response:', {
+						code: parsedError.code,
+						message: parsedError.message,
+						requestId: parsedError.requestId,
+						timestamp: parsedError.timestamp,
+						status: response.status,
+						statusText: response.statusText,
+						url: response.url,
+						details: parsedError.details,
+					});
+					
+					// Throw error with parsed message
+					throw new Error(parsedError.message);
+				} else {
+					// Fallback if parsing fails
+					console.error('API Error Response: Failed to parse error', {
+						status: response.status,
+						statusText: response.statusText,
+						url: response.url,
+					});
+					throw new Error(`Request failed with status ${response.status}`);
+				}
 			}
 
 			const data = await response.json();
-			setTickets(data.tickets || []);
-		} catch (_error) {
-			// TODO: Implement logic
+			// Map API response to component's expected structure
+			const mappedTickets = (data.tickets || []).map((ticket: any) => ({
+				id: ticket.id,
+				ticketNumber: ticket.ticketNumber,
+				subject: ticket.subject,
+				status: ticket.status,
+				priority: ticket.priority,
+				component: ticket.category || component, // Use category as component, fallback to prop
+				createdAt: typeof ticket.createdAt === 'string' 
+					? ticket.createdAt 
+					: new Date(ticket.createdAt).toISOString(),
+				slaDeadline: ticket.customFields?.slaDeadline 
+					? (typeof ticket.customFields.slaDeadline === 'string'
+						? ticket.customFields.slaDeadline
+						: new Date(ticket.customFields.slaDeadline).toISOString())
+					: undefined,
+			}));
+			
+			// Filter by component if specified (client-side filtering)
+			const filteredTickets = component !== "dashboard"
+				? mappedTickets.filter((t: SupportTicket) => t.component === component)
+				: mappedTickets;
+			
+			setTickets(filteredTickets);
+		} catch (error) {
+			// Handle error fetching tickets
+			console.error('Error fetching support tickets:', error);
+			
+			// Create standardized error from fetch error if needed
+			let parsedError;
+			if (error instanceof Error) {
+				// Check if it's a network/fetch error
+				if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
+					parsedError = createErrorFromFetch(error);
+				} else {
+					// Use the error message directly
+					parsedError = {
+						code: 'UNKNOWN_ERROR',
+						message: error.message,
+					};
+				}
+			} else {
+				parsedError = createErrorFromFetch(error);
+			}
+			
+			// Get user-friendly error message
+			const userFriendlyMessage = getUserFriendlyMessage(parsedError);
+			const errorMessage = parsedError.message || 'Failed to load support tickets';
+			
+			// Show user-friendly error message
+			toast.error(
+				'Unable to load tickets',
+				userFriendlyMessage
+			);
+			
+			// Set empty tickets array to prevent UI errors
+			setTickets([]);
+			
+			// Track error analytics
+			track(events.SUPPORT_TICKET_VIEWED, {
+				component,
+				action: 'fetch_error',
+				error: errorMessage,
+				errorCode: parsedError.code,
+				requestId: parsedError.requestId,
+			});
 		} finally {
 			setLoading(false);
 		}

@@ -26,7 +26,9 @@ export function PublicForm({ onSubmit, children, className, isLoading = false }:
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    const data = Object.fromEntries(formData.entries());
+    const data = Object.fromEntries(
+      Object.entries(Object.fromEntries(formData.entries())).map(([k, v]) => [k, String(v)])
+    ) as Record<string, string>;
     onSubmit(data);
   };
 
@@ -163,7 +165,7 @@ export function PublicCTA({
           {title}
         </h2>
         {description && (
-          <p className="text-xl mb-8 max-w-2xl mx-auto text-foreground/90">
+          <p className="text-xl mb-8 max-w-2xl mx-auto text-white/95" style={{ color: "rgba(255, 255, 255, 0.95)" }}>
             {description}
           </p>
         )}

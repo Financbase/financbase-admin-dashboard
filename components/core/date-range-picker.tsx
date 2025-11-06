@@ -17,7 +17,22 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { useDashboardDateRange } from "@/contexts/dashboard-context";
-import { DATE_RANGE_OPTIONS, formatDateRange } from "@/lib/date-range-utils";
+// Local date range utilities
+const DATE_RANGE_OPTIONS = [
+	{ value: 'today', label: 'Today' },
+	{ value: 'yesterday', label: 'Yesterday' },
+	{ value: 'last7days', label: 'Last 7 days' },
+	{ value: 'last30days', label: 'Last 30 days' },
+	{ value: 'thisMonth', label: 'This month' },
+	{ value: 'lastMonth', label: 'Last month' },
+	{ value: 'thisYear', label: 'This year' },
+	{ value: 'custom', label: 'Custom range' },
+];
+
+const formatDateRange = (from: Date, to: Date): string => {
+	return `${from.toLocaleDateString()} - ${to.toLocaleDateString()}`;
+};
+
 import { cn } from "@/lib/utils";
 import {
 	Calendar as CalendarIcon,
@@ -32,8 +47,51 @@ interface DateRangePickerProps {
 }
 
 export default function DateRangePicker({ className }: DateRangePickerProps) {
-	const { dateRange, setDateRange, setDateRangeByValue } =
-		useDashboardDateRange();
+	const { dateRange, setDateRange } = useDashboardDateRange();
+	
+	// Helper function to set date range by value
+	const setDateRangeByValue = (value: string) => {
+		const now = new Date();
+		let from: Date, to: Date;
+		
+		switch (value) {
+			case 'today':
+				from = new Date(now.setHours(0, 0, 0, 0));
+				to = new Date(now.setHours(23, 59, 59, 999));
+				break;
+			case 'yesterday':
+				const yesterday = new Date(now);
+				yesterday.setDate(yesterday.getDate() - 1);
+				from = new Date(yesterday.setHours(0, 0, 0, 0));
+				to = new Date(yesterday.setHours(23, 59, 59, 999));
+				break;
+			case 'last7days':
+				from = new Date(now);
+				from.setDate(from.getDate() - 7);
+				to = new Date(now);
+				break;
+			case 'last30days':
+				from = new Date(now);
+				from.setDate(from.getDate() - 30);
+				to = new Date(now);
+				break;
+			case 'thisMonth':
+				from = new Date(now.getFullYear(), now.getMonth(), 1);
+				to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+				break;
+			case 'lastMonth':
+				from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+				to = new Date(now.getFullYear(), now.getMonth(), 0);
+				break;
+			case 'thisYear':
+				from = new Date(now.getFullYear(), 0, 1);
+				to = new Date(now.getFullYear(), 11, 31);
+				break;
+			default:
+				return;
+		}
+		setDateRange({ from, to });
+	};
 	const [isOpen, setIsOpen] = useState(false);
 	const [showCustomRange, setShowCustomRange] = useState(false);
 	const [customRange, setCustomRange] = useState<{
@@ -59,7 +117,6 @@ export default function DateRangePicker({ className }: DateRangePickerProps) {
 			setDateRange({
 				from: customRange.from,
 				to: customRange.to,
-				label: "Custom",
 			});
 			setIsOpen(false);
 			setShowCustomRange(false);
@@ -85,7 +142,7 @@ export default function DateRangePicker({ className }: DateRangePickerProps) {
 					aria-label="Select date range"
 				>
 					<CalendarIcon className="mr-2 h-4 w-4" />
-					{dateRange ? formatDateRange(dateRange) : "Select date range"}
+					{dateRange ? formatDateRange(dateRange.from, dateRange.to) : "Select date range"}
 					<ChevronDown className="ml-auto h-4 w-4" />
 				</Button>
 			</PopoverTrigger>
@@ -180,7 +237,7 @@ export default function DateRangePicker({ className }: DateRangePickerProps) {
 								className="grid grid-cols-2 gap-2"
 								data-testid="date-range-options"
 							>
-								{DATE_RANGE_OPTIONS.map((option) => (
+								{DATE_RANGE_OPTIONS.map((option: { value: string; label: string }) => (
 									<Button
 										key={option.value}
 										variant="ghost"

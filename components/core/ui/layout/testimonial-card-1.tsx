@@ -110,7 +110,7 @@ const TestimonialCard = React.forwardRef<HTMLDivElement, TestimonialCardProps>(
 
 		// Use static data if provided, otherwise use API data
 		const testimonials =
-			staticTestimonials || apiTestimonials?.data?.testimonials || [];
+			staticTestimonials || apiTestimonials?.testimonials || [];
 
 		// Auto-play functionality
 		React.useEffect(() => {
@@ -271,7 +271,7 @@ const TestimonialCard = React.forwardRef<HTMLDivElement, TestimonialCardProps>(
 							transition={{ duration: 0.3, ease: "easeInOut" }}
 							className="space-y-3"
 						>
-							<StarRating rating={currentTestimonial.rating} />
+							{currentTestimonial.rating && <StarRating rating={currentTestimonial.rating} />}
 							<div className="flex items-center gap-3">
 								{currentTestimonial.avatar && (
 									<img
@@ -319,7 +319,7 @@ const TestimonialCard = React.forwardRef<HTMLDivElement, TestimonialCardProps>(
 
 							{/* Pagination dots */}
 							<div className="flex items-center gap-1">
-								{testimonials.slice(0, 5).map((_, index) => (
+								{testimonials.slice(0, 5).map((_: unknown, index: number) => (
 									<button
 										key={index}
 										className={cn(

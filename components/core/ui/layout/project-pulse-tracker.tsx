@@ -8,7 +8,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Clock, Image, Key, Rocket } from "lucide-react";
+import { CheckCircle2, Clock, Key, Rocket } from "lucide-react";
 import Image from "next/image";
 
 interface TeamMember {

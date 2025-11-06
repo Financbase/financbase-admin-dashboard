@@ -21,24 +21,116 @@ import { isAdmin } from '@/lib/auth/financbase-rbac';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { checkDatabaseHealth } from '@/lib/db';
 
+/**
+ * @swagger
+ * /api/notifications:
+ *   get:
+ *     summary: Get user notifications
+ *     description: Retrieves a paginated list of notifications for the authenticated user with optional filtering
+ *     tags:
+ *       - Analytics
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Maximum number of notifications to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *           minimum: 0
+ *         description: Number of notifications to skip
+ *       - in: query
+ *         name: unreadOnly
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *         description: Return only unread notifications
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *         description: Filter notifications by type
+ *     responses:
+ *       200:
+ *         description: Notifications retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 notifications:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: notif_123
+ *                       title:
+ *                         type: string
+ *                         example: Invoice Paid
+ *                       message:
+ *                         type: string
+ *                         example: Invoice #123 has been paid
+ *                       type:
+ *                         type: string
+ *                       read:
+ *                         type: boolean
+ *                         example: false
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                 unreadCount:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     limit:
+ *                       type: integer
+ *                     offset:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(req: NextRequest) {
 	const requestId = generateRequestId();
+	
+	console.log('[API] GET /api/notifications - Request started', { requestId });
+	
 	try {
 		// Check database connection health
+		console.log('[API] Checking database health...', { requestId });
 		const dbHealthy = await checkDatabaseHealth();
 		if (!dbHealthy) {
-			console.error('[API] Database health check failed for GET /api/notifications');
+			console.error('[API] Database health check failed for GET /api/notifications', { requestId });
 			return ApiErrorHandler.databaseError(
 				new Error('Database connection unavailable'),
 				requestId
 			);
 		}
+		console.log('[API] Database health check passed', { requestId });
 
 		const { userId } = await auth();
 
 		if (!userId) {
+			console.warn('[API] Unauthorized request - no userId', { requestId });
 			return ApiErrorHandler.unauthorized();
 		}
+
+		console.log('[API] Authenticated user', { requestId, userId });
 
 		// Parse query parameters
 		const searchParams = req.nextUrl.searchParams;
@@ -46,6 +138,8 @@ export async function GET(req: NextRequest) {
 		const offset = parseInt(searchParams.get('offset') || '0', 10);
 		const unreadOnly = searchParams.get('unreadOnly') === 'true';
 		const type = searchParams.get('type') || undefined;
+
+		console.log('[API] Query parameters parsed', { requestId, limit, offset, unreadOnly, type });
 
 		// Validate query parameters
 		if (isNaN(limit) || limit < 1 || limit > 100) {
@@ -55,18 +149,51 @@ export async function GET(req: NextRequest) {
 			return ApiErrorHandler.badRequest('Invalid offset parameter (must be >= 0)');
 		}
 
-		// Fetch notifications
-		const notifications = await NotificationService.getForUser(userId, {
-			limit,
-			offset,
-			unreadOnly,
-			type,
-		});
+		// Fetch notifications with individual error handling
+		let notifications;
+		try {
+			console.log('[API] Fetching notifications for user', { requestId, userId, filters: { limit, offset, unreadOnly, type } });
+			notifications = await NotificationService.getForUser(userId, {
+				limit,
+				offset,
+				unreadOnly,
+				type,
+			});
+			console.log('[API] Notifications fetched successfully', { requestId, count: notifications?.length || 0 });
+		} catch (error) {
+			console.error('[API] Error fetching notifications:', {
+				requestId,
+				userId,
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+			throw error;
+		}
 
-		// Get unread count
-		const unreadCount = await NotificationService.getUnreadCount(userId);
+		// Get unread count with individual error handling
+		let unreadCount;
+		try {
+			console.log('[API] Fetching unread count for user', { requestId, userId });
+			unreadCount = await NotificationService.getUnreadCount(userId);
+			console.log('[API] Unread count fetched successfully', { requestId, unreadCount });
+		} catch (error) {
+			console.error('[API] Error fetching unread count:', {
+				requestId,
+				userId,
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+			// Set default value if unread count fails, but don't fail the entire request
+			unreadCount = 0;
+		}
 
-		return NextResponse.json({
+		// Ensure notifications is always an array
+		if (!Array.isArray(notifications)) {
+			console.warn('[API] Notifications is not an array, defaulting to empty array', { requestId, notifications });
+			notifications = [];
+		}
+
+		const response = {
 			notifications,
 			unreadCount,
 			pagination: {
@@ -74,13 +201,20 @@ export async function GET(req: NextRequest) {
 				offset,
 				total: notifications.length,
 			},
-		});
+		};
+
+		console.log('[API] GET /api/notifications - Request completed successfully', { requestId, notificationCount: notifications.length, unreadCount });
+		
+		return NextResponse.json(response);
 	} catch (error) {
 		console.error('[API] Error in GET /api/notifications:', {
 			requestId,
 			error: error instanceof Error ? error.message : String(error),
 			stack: error instanceof Error ? error.stack : undefined,
+			errorType: error?.constructor?.name,
 		});
+		
+		// Ensure error response is properly formatted
 		return ApiErrorHandler.handle(error, requestId);
 	}
 }

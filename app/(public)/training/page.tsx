@@ -34,7 +34,7 @@ export default function TrainingPage() {
 			difficulty: "Beginner",
 			description: "Quick introduction to Financbase for new users",
 			topics: ["Account setup", "Basic navigation", "First steps"],
-			href: "/docs/user-training/getting-started",
+			href: "/docs/help/getting-started",
 		},
 		{
 			icon: <Target className="w-8 h-8" />,
@@ -43,7 +43,7 @@ export default function TrainingPage() {
 			difficulty: "Beginner",
 			description: "Learn to navigate and use your financial dashboard",
 			topics: ["Dashboard overview", "Key metrics", "Charts and visualizations"],
-			href: "/docs/user-training/dashboard-training",
+			href: "/docs/help/dashboard",
 		},
 		{
 			icon: <BookOpen className="w-8 h-8" />,
@@ -52,7 +52,7 @@ export default function TrainingPage() {
 			difficulty: "Intermediate",
 			description: "Master invoice creation, management, and workflows",
 			topics: ["Creating invoices", "Managing invoices", "Invoice workflows"],
-			href: "/docs/user-training/invoice-training",
+			href: "/docs",
 		},
 		{
 			icon: <Users className="w-8 h-8" />,
@@ -61,7 +61,7 @@ export default function TrainingPage() {
 			difficulty: "Intermediate",
 			description: "Learn to track and manage expenses effectively",
 			topics: ["Recording expenses", "Expense categories", "Expense reports"],
-			href: "/docs/user-training/expense-training",
+			href: "/docs",
 		},
 		{
 			icon: <GraduationCap className="w-8 h-8" />,
@@ -70,7 +70,7 @@ export default function TrainingPage() {
 			difficulty: "Advanced",
 			description: "Explore workflows, automation, and integrations",
 			topics: ["Workflows and automation", "Integrations", "Custom dashboards"],
-			href: "/docs/user-training/advanced-features-training",
+			href: "/docs/help/workflows",
 		},
 		{
 			icon: <Video className="w-8 h-8" />,
@@ -79,7 +79,7 @@ export default function TrainingPage() {
 			difficulty: "Intermediate",
 			description: "Leverage AI-powered financial insights and recommendations",
 			topics: ["Using Financbase GPT", "Financial insights", "Recommendations"],
-			href: "/docs/user-training/ai-assistant-training",
+			href: "/financbase-gpt",
 		},
 	];
 
@@ -235,7 +235,7 @@ export default function TrainingPage() {
 										))}
 									</ul>
 								</div>
-								<Link href="/docs/user-training">
+								<Link href="/docs">
 									<Button variant="outline" className="w-full mt-auto">
 										View Full Path
 										<ArrowRight className="w-4 h-4 ml-2" />
@@ -280,7 +280,7 @@ export default function TrainingPage() {
 							<p className="text-gray-600 dark:text-gray-400 mb-4">
 								Watch step-by-step video tutorials for visual learners
 							</p>
-							<Link href="/docs/video-tutorials">
+							<Link href="/docs">
 								<Button variant="outline">
 									Watch Videos
 									<ArrowRight className="w-4 h-4 ml-2" />
@@ -296,7 +296,7 @@ export default function TrainingPage() {
 							<p className="text-gray-600 dark:text-gray-400 mb-4">
 								Comprehensive guides for getting started and workflows
 							</p>
-							<Link href="/docs/user-guides">
+							<Link href="/guides">
 								<Button variant="outline">
 									Read Guides
 									<ArrowRight className="w-4 h-4 ml-2" />

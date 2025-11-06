@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { TestimonialCard } from "@/components/ui/testimonial-card-1";
+import { TestimonialCard } from "@/components/core/ui/layout/testimonial-card-1";
 import { ArrowLeft, Building2, Database, User, Users } from "lucide-react";
 
 // A simple SVG component for the Trustpilot logo to keep the demo self-contained.
@@ -131,7 +131,10 @@ export default function TestimonialCardDemo() {
 						totalRatingsText="4.4 out of 5 stars"
 						title="Static customer experiences"
 						features={staticFeaturesData}
-						testimonials={staticTestimonialsData}
+						testimonials={staticTestimonialsData.map(({ featured, status, source, createdAt, updatedAt, quote, ...rest }) => ({
+							...rest,
+							content: quote || rest.title || '',
+						}))}
 						autoPlay={true}
 						autoPlayInterval={4000}
 					/>

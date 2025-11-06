@@ -15,6 +15,7 @@ import {
 	Briefcase,
 	LayoutDashboard,
 	TrendingUp,
+	Wallet,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,16 @@ export const EmptyStates = {
 		action: {
 			label: "View transactions",
 			onClick: () => (window.location.href = "/transactions"),
+		},
+	},
+
+	accounts: {
+		icon: Wallet,
+		title: "No accounts found",
+		description: "Add an account to start tracking your finances.",
+		action: {
+			label: "Add account",
+			onClick: () => (window.location.href = "/accounts/new"),
 		},
 	},
 };

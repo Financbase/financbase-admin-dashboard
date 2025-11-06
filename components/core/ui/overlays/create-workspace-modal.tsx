@@ -15,13 +15,13 @@ import {
 	ModalHeader,
 	ModalTitle,
 	ModalTrigger,
-} from "@/components/ui/modal";
-import { Grid2x2Plus, Link2, PlusIcon } from "lucide-react";
+} from "@/components/core/ui/overlays/modal";
+import { Grid2x2, Link2, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { Button } from "./button";
-import { Input } from "./input";
-import { Label } from "./label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function CreateWorkspaceModal() {
 	const [open, setOpen] = React.useState(false);
@@ -37,7 +37,7 @@ export function CreateWorkspaceModal() {
 
 			<ModalContent className="md:max-w-md">
 				<ModalHeader className="items-center py-10">
-					<Grid2x2Plus className="size-9" />
+					<Grid2x2 className="size-9" />
 					<div className="flex flex-col items-center space-y-1">
 						<ModalTitle className="text-2xl font-medium">
 							Create a workspace

@@ -68,7 +68,10 @@ export default function CustomerAnalytics() {
 			},
 			tooltip: {
 				callbacks: {
-					label: (context: unknown) => `${context.label}: ${context.parsed}%`,
+					label: (context: any) => {
+						const ctx = context as { label?: string; parsed?: number };
+						return `${ctx.label || 'Value'}: ${ctx.parsed || 0}%`;
+					},
 				},
 			},
 		},

@@ -15,7 +15,7 @@
 
 
 import React from 'react';
-import { useForm, UseFormProps, FieldValues, Path } from 'react-hook-form';
+import { useForm, UseFormProps, FieldValues, Path, DefaultValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
@@ -157,7 +157,7 @@ export function useAdvancedForm<T extends FieldValues = FieldValues>(
 ) {
   const form = useForm<T>({
     resolver: zodResolver(config.validationSchema),
-    defaultValues: config.defaultValues as T,
+    defaultValues: (config.defaultValues as DefaultValues<T> | undefined) ?? options?.defaultValues,
     mode: 'onChange',
     ...options,
   });
@@ -257,22 +257,22 @@ export function AdvancedForm({
 // Section component
 function FormSection({ section }: { section: FormSection }) {
   const context = React.useContext(FormContext);
-  if (!context) return null;
-
-  const { config, watch } = context;
-  const watchedValues = watch();
-
+  
+  // Always call hooks in the same order, even if context is null
+  const watchedValues = context?.watch() || {};
+  
   // Check if section should be visible based on conditional logic
   const isVisible = React.useMemo(() => {
+    if (!context) return false;
     if (!section.conditionalFields) return true;
 
     return section.conditionalFields.every((condition) => {
       const fieldValue = watchedValues[condition.field];
       return evaluateCondition(fieldValue, condition);
     });
-  }, [watchedValues, section.conditionalFields]);
+  }, [context, watchedValues, section.conditionalFields]);
 
-  if (!isVisible) return null;
+  if (!context || !isVisible) return null;
 
   return (
     <div className={cn("space-y-6", section.className)}>
@@ -297,14 +297,18 @@ function FormSection({ section }: { section: FormSection }) {
 // Individual field component
 function FormField({ field }: { field: FormField }) {
   const context = React.useContext(FormContext);
-  if (!context) return null;
-
-  const { config, watch, setValue, formState } = context;
-  const watchedValues = watch();
-  const fieldError = formState.errors[field.name];
+  
+  // Always call hooks in the same order, even if context is null
+  const watchedValues = context?.watch() || {};
+  const fieldError = context?.formState?.errors?.[field.name];
 
   // Check if field should be visible/disabled based on conditions
   const fieldState = React.useMemo(() => {
+    if (!context) {
+      return { visible: false, disabled: field.disabled || false, required: field.required || false };
+    }
+
+    const { config } = context;
     if (!config.sections.some(s => s.conditionalFields)) {
       return { visible: true, disabled: field.disabled, required: field.required };
     }
@@ -336,9 +340,11 @@ function FormField({ field }: { field: FormField }) {
     }
 
     return { visible, disabled, required };
-  }, [watchedValues, field, config.sections]);
+  }, [context, watchedValues, field]);
 
-  if (!fieldState.visible) return null;
+  if (!context || !fieldState.visible) return null;
+  
+  const { setValue, formState } = context;
 
   return (
     <div className={cn("space-y-2", field.className)}>
@@ -641,16 +647,22 @@ export const INVOICE_FORM_CONFIG: FormConfig = {
       ]
     },
     {
-      name: 'notes',
-      label: 'Notes',
-      type: 'textarea',
-      description: 'Additional notes or payment instructions'
-    },
-    {
-      name: 'terms',
-      label: 'Terms & Conditions',
-      type: 'textarea',
-      description: 'Payment terms and conditions'
+      id: 'additional-notes',
+      title: 'Additional Information',
+      fields: [
+        {
+          name: 'notes',
+          label: 'Notes',
+          type: 'textarea',
+          description: 'Additional notes or payment instructions'
+        },
+        {
+          name: 'terms',
+          label: 'Terms & Conditions',
+          type: 'textarea',
+          description: 'Payment terms and conditions'
+        }
+      ]
     }
   ]
 };
@@ -757,52 +769,72 @@ export function createFormConfig(
       case 'email':
       case 'tel':
       case 'url':
-        fieldSchema = z.string();
-        if (field.required) fieldSchema = fieldSchema.min(1, `${field.label} is required`);
-        if (field.minLength) fieldSchema = fieldSchema.min(field.minLength);
-        if (field.maxLength) fieldSchema = fieldSchema.max(field.maxLength);
-        if (field.pattern) fieldSchema = fieldSchema.regex(new RegExp(field.pattern));
+      case 'password': {
+        let stringSchema = z.string();
+        if (field.required) stringSchema = stringSchema.min(1, `${field.label} is required`);
+        if (field.minLength) stringSchema = stringSchema.min(field.minLength);
+        if (field.maxLength) stringSchema = stringSchema.max(field.maxLength);
+        if (field.pattern) stringSchema = stringSchema.regex(new RegExp(field.pattern));
+        fieldSchema = stringSchema;
         break;
+      }
 
       case 'number':
-      case 'currency':
-        fieldSchema = z.number();
-        if (field.required) fieldSchema = fieldSchema.min(0.01, `${field.label} is required`);
-        if (field.min !== undefined) fieldSchema = fieldSchema.min(field.min);
-        if (field.max !== undefined) fieldSchema = fieldSchema.max(field.max);
+      case 'currency': {
+        let numberSchema = z.number();
+        if (field.required) numberSchema = numberSchema.min(0.01, `${field.label} is required`);
+        if (field.min !== undefined) numberSchema = numberSchema.min(field.min);
+        if (field.max !== undefined) numberSchema = numberSchema.max(field.max);
+        fieldSchema = numberSchema;
         break;
+      }
 
       case 'date':
       case 'datetime':
-      case 'time':
-        fieldSchema = z.date();
-        if (field.required) fieldSchema = fieldSchema.refine(date => date != null, `${field.label} is required`);
+      case 'time': {
+        let dateSchema: z.ZodDate = z.date();
+        if (field.required) {
+          dateSchema = dateSchema.refine(date => date != null, `${field.label} is required`) as unknown as z.ZodDate;
+        }
+        fieldSchema = dateSchema;
         break;
+      }
 
-      case 'select':
-        fieldSchema = z.string();
-        if (field.required) fieldSchema = fieldSchema.min(1, `${field.label} is required`);
+      case 'select': {
+        let stringSchema = z.string();
+        if (field.required) stringSchema = stringSchema.min(1, `${field.label} is required`);
+        fieldSchema = stringSchema;
         break;
+      }
 
-      case 'multiselect':
-        fieldSchema = z.array(z.string());
-        if (field.required) fieldSchema = fieldSchema.min(1, `${field.label} is required`);
+      case 'multiselect': {
+        let arraySchema = z.array(z.string());
+        if (field.required) arraySchema = arraySchema.min(1, `${field.label} is required`);
+        fieldSchema = arraySchema;
         break;
+      }
 
       case 'checkbox':
+      case 'switch':
         fieldSchema = z.boolean();
         break;
 
-      case 'file':
-        fieldSchema = z.any();
-        if (field.required) fieldSchema = fieldSchema.refine(file => file != null, `${field.label} is required`);
+      case 'file': {
+        let anySchema: z.ZodAny = z.any();
+        if (field.required) {
+          anySchema = anySchema.refine(file => file != null, `${field.label} is required`) as unknown as z.ZodAny;
+        }
+        fieldSchema = anySchema;
         break;
+      }
 
-      case 'textarea':
-        fieldSchema = z.string();
-        if (field.required) fieldSchema = fieldSchema.min(1, `${field.label} is required`);
-        if (field.maxLength) fieldSchema = fieldSchema.max(field.maxLength);
+      case 'textarea': {
+        let stringSchema = z.string();
+        if (field.required) stringSchema = stringSchema.min(1, `${field.label} is required`);
+        if (field.maxLength) stringSchema = stringSchema.max(field.maxLength);
+        fieldSchema = stringSchema;
         break;
+      }
 
       default:
         fieldSchema = z.any();

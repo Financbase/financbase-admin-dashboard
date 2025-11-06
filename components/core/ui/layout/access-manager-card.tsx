@@ -27,7 +27,7 @@ import {
 	TooltipTrigger,
 } from "@/components/core/ui/layout/tooltip";
 import { useAccessManagement } from "@/hooks/use-access-management";
-import { AccessMember } from "@/lib/types/access-management";
+import { AccessMember, AccessInvitation } from "@/lib/types/access-management";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -67,6 +67,9 @@ export const AccessManagerCard = ({
 }: AccessManagerCardProps) => {
 	const [email, setEmail] = React.useState("");
 	const [role, setRole] = React.useState<"Editor" | "Viewer">("Viewer");
+	const handleInviteRoleChange = (value: string) => {
+		setRole(value as "Editor" | "Viewer");
+	};
 
 	const {
 		members,
@@ -214,7 +217,7 @@ export const AccessManagerCard = ({
 							/>
 							<Select
 								value={role}
-								onValueChange={setRole}
+								onValueChange={handleInviteRoleChange}
 								disabled={isInviting}
 							>
 								<SelectTrigger className="sm:w-[120px] whitespace-nowrap truncate">
@@ -260,10 +263,10 @@ export const AccessManagerCard = ({
 										<Avatar className="h-9 w-9">
 											<AvatarImage src={user.avatar} alt={user.name} />
 											<AvatarFallback>
-												{user.name
-													.split(" ")
-													.map((n) => n[0])
-													.join("")}
+										{user.name
+											.split(" ")
+											.map((n: string) => n[0])
+											.join("")}
 											</AvatarFallback>
 										</Avatar>
 										<div>
@@ -285,7 +288,7 @@ export const AccessManagerCard = ({
 													<Select
 														value={user.role}
 														onValueChange={(val: "Editor" | "Viewer") =>
-															handleRoleChange(user.id, val)
+															updateMemberRole(user.id, val)
 														}
 														disabled={!userPermissions.canChangeRoles}
 													>
@@ -336,7 +339,7 @@ export const AccessManagerCard = ({
 					<div className="space-y-3">
 						<h3 className="text-sm font-medium">Pending Invitations</h3>
 						<div className="space-y-2">
-							{invitations.map((invitation) => (
+							{invitations.map((invitation: AccessInvitation) => (
 								<div
 									key={invitation.id}
 									className="flex items-center justify-between p-2 bg-muted rounded-lg"
@@ -344,8 +347,10 @@ export const AccessManagerCard = ({
 									<div>
 										<p className="text-sm font-medium">{invitation.email}</p>
 										<p className="text-xs text-muted-foreground capitalize">
-											{invitation.role} • Expires{" "}
-											{new Date(invitation.expiresAt).toLocaleDateString()}
+											{invitation.role}
+											{invitation.expiresAt && (
+												<> • Expires {new Date(invitation.expiresAt).toLocaleDateString()}</>
+											)}
 										</p>
 									</div>
 									<span className="text-xs text-muted-foreground">Pending</span>

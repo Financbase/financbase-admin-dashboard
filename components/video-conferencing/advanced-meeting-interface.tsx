@@ -49,7 +49,7 @@ import {
 	ScreenShare,
 	SplitSquareHorizontal,
 	BarChart3 as Poll,
-	Whiteboard,
+	LayoutDashboard,
 	Download,
 	ExternalLink,
 	Copy

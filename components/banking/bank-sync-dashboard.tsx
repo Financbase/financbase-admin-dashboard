@@ -245,27 +245,6 @@ export function BankSyncDashboard({ userId, className }: BankSyncProps) {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'connected':
-        return 'bg-green-100 text-green-800';
-      case 'syncing':
-        return 'bg-blue-100 text-blue-800';
-      case 'error':
-        return 'bg-red-100 text-red-800';
-      case 'disconnected':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency
-    }).format(amount);
-  };
 
   // Filter accounts based on current filters
   const filteredAccounts = React.useMemo(() => {
@@ -460,6 +439,7 @@ export function BankSyncDashboard({ userId, className }: BankSyncProps) {
                   account={account}
                   onSync={() => handleSyncAccount(account.id)}
                   onViewDetails={() => setShowSyncStatus(account.id)}
+                  isSyncing={syncAccountMutation.isPending}
                 />
               ))}
             </div>
@@ -570,14 +550,38 @@ export function BankSyncDashboard({ userId, className }: BankSyncProps) {
   );
 }
 
+// Utility functions
+const formatCurrency = (amount: number, currency: string = 'USD') => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency
+  }).format(amount);
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'connected':
+      return 'bg-green-100 text-green-800';
+    case 'syncing':
+      return 'bg-blue-100 text-blue-800';
+    case 'error':
+      return 'bg-red-100 text-red-800';
+    case 'disconnected':
+      return 'bg-gray-100 text-gray-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
 // Individual account card component
 interface AccountCardProps {
   account: BankAccount;
   onSync: () => void;
   onViewDetails: () => void;
+  isSyncing?: boolean;
 }
 
-function AccountCard({ account, onSync, onViewDetails }: AccountCardProps) {
+function AccountCard({ account, onSync, onViewDetails, isSyncing = false }: AccountCardProps) {
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
@@ -614,7 +618,12 @@ function AccountCard({ account, onSync, onViewDetails }: AccountCardProps) {
               </Badge>
 
               {account.errorMessage && (
-                <AlertTriangle className="h-4 w-4 text-red-600" title={account.errorMessage} />
+                <div className="group relative">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                  <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                    {account.errorMessage}
+                  </span>
+                </div>
               )}
             </div>
 
@@ -623,11 +632,11 @@ function AccountCard({ account, onSync, onViewDetails }: AccountCardProps) {
                 variant="outline"
                 size="sm"
                 onClick={onSync}
-                disabled={syncAccountMutation.isPending}
+                disabled={isSyncing}
               >
                 <RefreshCw className={cn(
                   "h-4 w-4",
-                  syncAccountMutation.isPending && "animate-spin"
+                  isSyncing && "animate-spin"
                 )} />
               </Button>
 

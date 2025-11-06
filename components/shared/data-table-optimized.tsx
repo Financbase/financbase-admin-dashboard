@@ -22,7 +22,7 @@ import {
 	Filter,
 	Key,
 	Layout,
-	Link,
+	Link as LinkIcon,
 	Link2,
 	Plus,
 	Search,
@@ -121,26 +121,27 @@ const TableRow = memo(function TableRow({
 	columns: TableColumn[];
 	rowIndex: number;
 }) {
+	const typedRow = row as Record<string, any>;
 	return (
 		<tr className="border-b hover:bg-muted/50 transform-gpu will-change-transform">
 			{columns.map((column) => {
 				const cellContent =
-					typeof row[column.key] === "object" && row[column.key]?.badge ? (
-						<Badge variant={row[column.key].variant || "default"}>
-							{row[column.key].value}
+					typeof typedRow[column.key] === "object" && typedRow[column.key]?.badge ? (
+						<Badge variant={typedRow[column.key].variant || "default"}>
+							{typedRow[column.key].value}
 						</Badge>
 					) : (
-						row[column.key]
+						typedRow[column.key]
 					);
 				const cellText = String(
-					typeof row[column.key] === "object" && row[column.key]?.value
-						? row[column.key].value
-						: row[column.key] || ""
+					typeof typedRow[column.key] === "object" && typedRow[column.key]?.value
+						? typedRow[column.key].value
+						: typedRow[column.key] || ""
 				);
 				
 				return (
 					<td key={column.key} className="px-4 py-3 text-sm min-w-0">
-						{typeof row[column.key] === "object" && row[column.key]?.badge ? (
+						{typeof typedRow[column.key] === "object" && typedRow[column.key]?.badge ? (
 							cellContent
 						) : (
 							<div className="break-words" title={cellText}>

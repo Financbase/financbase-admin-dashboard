@@ -12,7 +12,7 @@ import { BarChart3, Clock, Key } from "lucide-react";
 
 import CookieNotice from "@/components/ui/cookie-notice";
 import CookiePreferencesModal from "@/components/ui/cookie-preferences-modal";
-import CookieSettingsButton from "@/components/ui/cookie-settings-button";
+import { CookieSettingsButton } from "@/components/core/ui/buttons/cookie-settings-button";
 import { useCookiePreferences } from "@/hooks/use-cookie-preferences";
 import { useState } from "react";
 

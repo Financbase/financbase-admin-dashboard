@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Plus, Building2, CreditCard, Wallet, Loader2, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface Account {
 	id: string;
@@ -461,7 +462,13 @@ export default function AccountsPage() {
 											</Badge>
 										</td>
 										<td className="p-4">
-											<Button variant="ghost" size="sm">View</Button>
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => toast.info('Viewing account details')}
+											>
+												View
+											</Button>
 										</td>
 									</tr>
 								))
