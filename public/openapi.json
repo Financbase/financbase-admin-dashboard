@@ -1,0 +1,4230 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Financbase Admin Dashboard API",
+    "version": "2.0.0",
+    "description": "A comprehensive financial management platform API with advanced automation, integrations, and analytics capabilities.",
+    "contact": {
+      "name": "Financbase Support",
+      "email": "support@financbase.com"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "https://financbase.com/license"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    },
+    {
+      "url": "https://app.financbase.com",
+      "description": "Production server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Clerk session token obtained from getToken()"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Authentication and token validation endpoints"
+    },
+    {
+      "name": "Dashboard",
+      "description": "Dashboard metrics and data export"
+    },
+    {
+      "name": "Financial",
+      "description": "Financial management - invoices, expenses, transactions"
+    },
+    {
+      "name": "Analytics",
+      "description": "Analytics and reporting endpoints"
+    },
+    {
+      "name": "Integrations",
+      "description": "Third-party integrations and webhooks"
+    },
+    {
+      "name": "Workflows",
+      "description": "Workflow automation and execution"
+    },
+    {
+      "name": "AI",
+      "description": "AI-powered features and analysis"
+    }
+  ],
+  "paths": {
+    "/api/accounts": {
+      "get": {
+        "summary": "Get list of financial accounts",
+        "description": "Retrieves a paginated list of financial accounts (checking, savings, credit cards, etc.) with optional filtering",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for account name or bank name"
+          },
+          {
+            "in": "query",
+            "name": "accountType",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "checking",
+                "savings",
+                "credit_card",
+                "investment",
+                "loan",
+                "other"
+              ]
+            },
+            "description": "Filter accounts by type"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive",
+                "closed",
+                "suspended"
+              ]
+            },
+            "description": "Filter accounts by status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Accounts retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "account_123"
+                          },
+                          "accountName": {
+                            "type": "string",
+                            "example": "Business Checking"
+                          },
+                          "accountType": {
+                            "type": "string",
+                            "enum": [
+                              "checking",
+                              "savings",
+                              "credit_card",
+                              "investment",
+                              "loan",
+                              "other"
+                            ]
+                          },
+                          "balance": {
+                            "type": "number",
+                            "example": 12500
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "pages": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new financial account",
+        "description": "Creates a new financial account (checking, savings, credit card, investment, loan, etc.)",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "accountName",
+                  "accountType"
+                ],
+                "properties": {
+                  "accountName": {
+                    "type": "string",
+                    "example": "Business Checking Account"
+                  },
+                  "accountType": {
+                    "type": "string",
+                    "enum": [
+                      "checking",
+                      "savings",
+                      "credit_card",
+                      "investment",
+                      "loan",
+                      "other"
+                    ],
+                    "example": "checking"
+                  },
+                  "bankName": {
+                    "type": "string",
+                    "example": "First National Bank"
+                  },
+                  "accountNumber": {
+                    "type": "string"
+                  },
+                  "lastFourDigits": {
+                    "type": "string",
+                    "example": "1234"
+                  },
+                  "routingNumber": {
+                    "type": "string"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "USD"
+                  },
+                  "openingBalance": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "creditLimit": {
+                    "type": "number",
+                    "description": "Credit limit for credit cards"
+                  },
+                  "interestRate": {
+                    "type": "number",
+                    "description": "Interest rate for loans or savings"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "account": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "account_123"
+                        },
+                        "accountName": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/ai/financial-analysis": {
+      "post": {
+        "summary": "AI-powered financial analysis",
+        "description": "Analyzes financial data using AI to provide insights, trends, and recommendations",
+        "tags": [
+          "AI"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "revenue",
+                  "expenses",
+                  "budget"
+                ],
+                "properties": {
+                  "revenue": {
+                    "type": "number",
+                    "example": 125000.5,
+                    "description": "Total revenue amount"
+                  },
+                  "expenses": {
+                    "type": "number",
+                    "example": 45000.25,
+                    "description": "Total expenses amount"
+                  },
+                  "budget": {
+                    "type": "number",
+                    "example": 150000,
+                    "description": "Budgeted amount"
+                  },
+                  "transactions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    },
+                    "description": "Optional array of transaction details for deeper analysis"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Financial analysis completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "insights": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "example": [
+                            "Revenue increased 15% month-over-month",
+                            "Expenses are 8% under budget"
+                          ]
+                        },
+                        "recommendations": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "trends": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Missing required fields"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/analytics": {
+      "get": {
+        "summary": "Get analytics and metrics",
+        "description": "Returns comprehensive financial analytics including revenue, expenses, net income, client counts, and growth metrics for the specified time period",
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "7d",
+                "30d",
+                "90d"
+              ],
+              "default": "30d"
+            },
+            "description": "Time period for analytics (7 days, 30 days, or 90 days)"
+          },
+          {
+            "in": "query",
+            "name": "metric",
+            "schema": {
+              "type": "string",
+              "default": "overview"
+            },
+            "description": "Specific metric to retrieve (overview returns all metrics)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "revenue": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number",
+                          "example": 125000.5
+                        },
+                        "growth": {
+                          "type": "number",
+                          "example": 15.5
+                        }
+                      }
+                    },
+                    "expenses": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number",
+                          "example": 45000.25
+                        },
+                        "growth": {
+                          "type": "number",
+                          "example": -5.2
+                        }
+                      }
+                    },
+                    "netIncome": {
+                      "type": "number",
+                      "example": 80000.25
+                    },
+                    "clients": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number",
+                          "example": 45
+                        },
+                        "active": {
+                          "type": "number",
+                          "example": 38
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/approval-workflows": {
+      "get": {
+        "summary": "Get list of approval workflows",
+        "description": "Retrieves a paginated list of bill approval workflows configured for the authenticated user",
+        "tags": [
+          "Workflows"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive"
+              ]
+            },
+            "description": "Filter workflows by status"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            },
+            "description": "Maximum number of workflows to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Number of workflows to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approval workflows retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "workflows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "workflow_123"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "High Value Approval Workflow"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "steps": {
+                            "type": "array",
+                            "items": {
+                              "type": "object"
+                            }
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "inactive"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new approval workflow",
+        "description": "Creates a new bill approval workflow with configurable steps, thresholds, and conditions",
+        "tags": [
+          "Workflows"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "steps"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "High Value Approval Workflow"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Multi-step approval for bills over $10,000"
+                  },
+                  "amountThreshold": {
+                    "type": "number",
+                    "example": 10000,
+                    "description": "Minimum bill amount to trigger this workflow"
+                  },
+                  "vendorCategories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "supplier",
+                      "contractor"
+                    ]
+                  },
+                  "steps": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "approverId": {
+                          "type": "string"
+                        },
+                        "order": {
+                          "type": "integer"
+                        },
+                        "required": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "description": "Array of approval steps with approvers"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Approval workflow created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "workflow": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "workflow_123"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "array"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/auth/user": {
+      "get": {
+        "summary": "Get current authenticated user information",
+        "description": "Returns detailed information about the currently authenticated user from Clerk",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User information retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "user_123"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "example": "user@example.com"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "example": "John"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "example": "Doe"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "johndoe"
+                    },
+                    "imageUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://img.clerk.com/..."
+                    },
+                    "createdAt": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 1704067200000
+                    },
+                    "updatedAt": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "emailVerified": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "phoneVerified": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "hasImage": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "primaryEmail": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "primaryPhone": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/auth/validate-token": {
+      "post": {
+        "summary": "Validate Clerk JWT token for WebSocket connections",
+        "description": "Validates a Clerk JWT token and returns user information. Used by Cloudflare Workers to authenticate WebSocket connections.",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "Clerk session token obtained from getToken()"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token is valid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "userId": {
+                      "type": "string",
+                      "example": "user_123"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "user@example.com"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Token is required"
+          },
+          "401": {
+            "description": "Token is invalid, expired, or user account is inactive"
+          }
+        }
+      },
+      "get": {
+        "summary": "Health check for token validation endpoint",
+        "description": "Returns the status of the token validation endpoint",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Endpoint is active",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Token validation endpoint is active"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bills": {
+      "get": {
+        "summary": "Get list of bills",
+        "description": "Retrieves a paginated list of bills with optional filtering by status and vendor",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "received",
+                "processing",
+                "pending_approval",
+                "approved",
+                "rejected",
+                "paid",
+                "overdue",
+                "cancelled",
+                "disputed"
+              ]
+            },
+            "description": "Filter bills by status"
+          },
+          {
+            "in": "query",
+            "name": "vendorId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter bills by vendor ID"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            },
+            "description": "Maximum number of bills to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Number of bills to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bills retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "bills": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "bill_123"
+                          },
+                          "vendorId": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 1250
+                          },
+                          "currency": {
+                            "type": "string",
+                            "example": "USD"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "draft",
+                              "received",
+                              "processing",
+                              "pending_approval",
+                              "approved",
+                              "rejected",
+                              "paid",
+                              "overdue",
+                              "cancelled",
+                              "disputed"
+                            ]
+                          },
+                          "dueDate": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "invoiceNumber": {
+                            "type": "string",
+                            "example": "INV-2025-001"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 125
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new bill",
+        "description": "Creates a new bill record for processing, OCR extraction, and payment automation",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "vendorId",
+                  "amount",
+                  "invoiceNumber"
+                ],
+                "properties": {
+                  "vendorId": {
+                    "type": "string",
+                    "example": "vendor_123"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "example": 1250
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "USD"
+                  },
+                  "dueDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "issueDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "invoiceNumber": {
+                    "type": "string",
+                    "example": "INV-2025-001"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "documentUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "received",
+                      "processing",
+                      "pending_approval",
+                      "approved",
+                      "rejected",
+                      "paid",
+                      "overdue",
+                      "cancelled",
+                      "disputed"
+                    ],
+                    "default": "received"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bill created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "bill": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "bill_123"
+                        },
+                        "invoiceNumber": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/clients": {
+      "get": {
+        "summary": "Get list of clients",
+        "description": "Retrieves a paginated list of clients for the authenticated user with optional filtering and search",
+        "tags": [
+          "Clients"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term to filter clients by name, email, or company"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive",
+                "suspended"
+              ]
+            },
+            "description": "Filter clients by status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clients retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "client_123"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Acme Corporation"
+                          },
+                          "email": {
+                            "type": "string",
+                            "example": "contact@acme.com"
+                          },
+                          "company": {
+                            "type": "string",
+                            "example": "Acme Corp"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "inactive",
+                              "suspended"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "example": 10
+                        },
+                        "total": {
+                          "type": "integer",
+                          "example": 45
+                        },
+                        "pages": {
+                          "type": "integer",
+                          "example": 5
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new client",
+        "description": "Creates a new client for the authenticated user",
+        "tags": [
+          "Clients"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Acme Corporation"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "contact@acme.com"
+                  },
+                  "company": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "+1-555-0123"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "123 Main St"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "New York"
+                  },
+                  "state": {
+                    "type": "string",
+                    "example": "NY"
+                  },
+                  "zipCode": {
+                    "type": "string",
+                    "example": "10001"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive",
+                      "suspended"
+                    ],
+                    "default": "active"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Client created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "client_123"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/dashboard/ai-insights": {
+      "get": {
+        "summary": "Get AI-powered financial insights",
+        "description": "Returns AI-generated insights and recommendations based on financial data analysis including revenue trends, expense patterns, and health scores",
+        "tags": [
+          "Dashboard",
+          "AI"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI insights retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "insights": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "Revenue has increased 15% month-over-month",
+                        "Expenses are 8% under budget"
+                      ]
+                    },
+                    "recommendations": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "healthScore": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100,
+                      "example": 85
+                    },
+                    "trends": {
+                      "type": "object",
+                      "properties": {
+                        "revenue": {
+                          "type": "string",
+                          "enum": [
+                            "increasing",
+                            "stable",
+                            "decreasing"
+                          ]
+                        },
+                        "expenses": {
+                          "type": "string",
+                          "enum": [
+                            "increasing",
+                            "stable",
+                            "decreasing"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/dashboard/export": {
+      "get": {
+        "summary": "Export dashboard data as CSV",
+        "description": "Exports dashboard overview metrics and recent activity as a CSV file",
+        "tags": [
+          "Dashboard"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV file with dashboard data",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            },
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string",
+                  "example": "attachment; filename=\"dashboard-export-2025-01-XX.csv\""
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/dashboard/overview": {
+      "get": {
+        "summary": "Get dashboard overview metrics",
+        "description": "Returns comprehensive dashboard overview data including revenue, expenses, clients, invoices, and net income metrics",
+        "tags": [
+          "Dashboard"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard overview data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Dashboard API with real database data works!"
+                    },
+                    "overview": {
+                      "type": "object",
+                      "description": "Dashboard metrics and statistics",
+                      "properties": {
+                        "totalRevenue": {
+                          "type": "number",
+                          "example": 125000.5
+                        },
+                        "totalExpenses": {
+                          "type": "number",
+                          "example": 45000.25
+                        },
+                        "netIncome": {
+                          "type": "number",
+                          "example": 80000.25
+                        },
+                        "totalClients": {
+                          "type": "number",
+                          "example": 45
+                        },
+                        "activeProjects": {
+                          "type": "number",
+                          "example": 12
+                        }
+                      }
+                    },
+                    "userId": {
+                      "type": "string",
+                      "example": "user_123"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/dashboard/recent-activity": {
+      "get": {
+        "summary": "Get recent dashboard activity",
+        "description": "Returns a list of recent activities including invoices, transactions, and other financial events",
+        "tags": [
+          "Dashboard"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Maximum number of activities to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recent activities retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "activities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "activity_123"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "invoice",
+                              "transaction",
+                              "expense",
+                              "payment"
+                            ]
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Invoice"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 1250
+                          },
+                          "timestamp": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/expenses": {
+      "get": {
+        "summary": "Get list of expenses",
+        "description": "Retrieves a paginated list of expenses with optional filtering by status, category, and date range",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            },
+            "description": "Filter expenses by approval status"
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter expenses by category"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Start date for filtering (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "End date for filtering (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expenses retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "expense_123"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 150
+                          },
+                          "category": {
+                            "type": "string",
+                            "example": "Office Supplies"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "pending",
+                              "approved",
+                              "rejected"
+                            ]
+                          },
+                          "date": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "pages": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new expense",
+        "description": "Creates a new expense record for the authenticated user",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "amount",
+                  "category",
+                  "date"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "example": 150
+                  },
+                  "category": {
+                    "type": "string",
+                    "example": "Office Supplies"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Printer paper and ink cartridges"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "receiptUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pending",
+                      "approved",
+                      "rejected"
+                    ],
+                    "default": "pending"
+                  },
+                  "vendor": {
+                    "type": "string",
+                    "example": "Office Depot"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Expense created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Expense created successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "expense_123"
+                        },
+                        "amount": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Health check endpoint",
+        "description": "Returns comprehensive health status of the application including database, services, and system metrics. Used for monitoring and uptime checks.",
+        "tags": [
+          "Analytics"
+        ],
+        "responses": {
+          "200": {
+            "description": "Service is healthy or degraded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "healthy",
+                        "degraded",
+                        "unhealthy"
+                      ],
+                      "example": "healthy"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "database": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        },
+                        "responseTime": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "services": {
+                      "type": "object",
+                      "description": "Status of various services"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is unhealthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "unhealthy"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/integrations": {
+      "get": {
+        "summary": "Get available integrations",
+        "description": "Retrieves a paginated list of available third-party integrations (accounting software, payment processors, etc.)",
+        "tags": [
+          "Integrations"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter integrations by category (accounting, payment, crm, etc.)"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for integration name or description"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            },
+            "description": "Maximum number of integrations to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Number of integrations to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Integrations retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "integration_123"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "QuickBooks"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "category": {
+                        "type": "string",
+                        "example": "accounting"
+                      },
+                      "isOfficial": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "isActive": {
+                        "type": "boolean",
+                        "example": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/invoices": {
+      "get": {
+        "summary": "Get list of invoices",
+        "description": "Retrieves a paginated list of invoices for the authenticated user. Uses Row Level Security (RLS) to ensure users can only access their own invoices.",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoices retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "invoice_123"
+                          },
+                          "invoiceNumber": {
+                            "type": "string",
+                            "example": "INV-2025-001"
+                          },
+                          "clientId": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 1250
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "draft",
+                              "sent",
+                              "paid",
+                              "overdue",
+                              "cancelled"
+                            ]
+                          },
+                          "dueDate": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "pages": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new invoice",
+        "description": "Creates a new invoice for the authenticated user. Uses Row Level Security (RLS) to ensure invoices are associated with the correct user.",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "clientId",
+                  "amount",
+                  "invoiceNumber"
+                ],
+                "properties": {
+                  "clientId": {
+                    "type": "string",
+                    "example": "client_123"
+                  },
+                  "invoiceNumber": {
+                    "type": "string",
+                    "example": "INV-2025-001"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "example": 1250
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "USD"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Monthly consulting services"
+                  },
+                  "dueDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "sent",
+                      "paid",
+                      "overdue",
+                      "cancelled"
+                    ],
+                    "default": "draft"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Invoice created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "invoice_123"
+                        },
+                        "invoiceNumber": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/leads": {
+      "get": {
+        "summary": "Get list of leads",
+        "description": "Retrieves a paginated list of sales leads with optional filtering by status, source, priority, and assignment",
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for lead name, email, or company"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "new",
+                "contacted",
+                "qualified",
+                "proposal",
+                "negotiation",
+                "closed_won",
+                "closed_lost",
+                "nurturing"
+              ]
+            },
+            "description": "Filter leads by status"
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "website",
+                "referral",
+                "social_media",
+                "email_campaign",
+                "cold_call",
+                "trade_show",
+                "advertisement",
+                "partner",
+                "other"
+              ]
+            },
+            "description": "Filter leads by source"
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "urgent"
+              ]
+            },
+            "description": "Filter leads by priority"
+          },
+          {
+            "in": "query",
+            "name": "assignedTo",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter leads by assigned user ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leads retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "lead_123"
+                          },
+                          "firstName": {
+                            "type": "string",
+                            "example": "John"
+                          },
+                          "lastName": {
+                            "type": "string",
+                            "example": "Doe"
+                          },
+                          "email": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "company": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "new",
+                              "contacted",
+                              "qualified",
+                              "proposal",
+                              "negotiation",
+                              "closed_won",
+                              "closed_lost",
+                              "nurturing"
+                            ]
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "estimatedValue": {
+                            "type": "number",
+                            "example": 50000
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new lead",
+        "description": "Creates a new sales lead with contact information, source tracking, and pipeline management",
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "firstName",
+                  "lastName",
+                  "email",
+                  "source"
+                ],
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "john.doe@example.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "+1-555-0123"
+                  },
+                  "company": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                  },
+                  "jobTitle": {
+                    "type": "string",
+                    "example": "CEO"
+                  },
+                  "website": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "website",
+                      "referral",
+                      "social_media",
+                      "email_campaign",
+                      "cold_call",
+                      "trade_show",
+                      "advertisement",
+                      "partner",
+                      "other"
+                    ],
+                    "example": "website"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "low",
+                      "medium",
+                      "high",
+                      "urgent"
+                    ],
+                    "default": "medium"
+                  },
+                  "estimatedValue": {
+                    "type": "number",
+                    "example": 50000
+                  },
+                  "probability": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "example": 75
+                  },
+                  "expectedCloseDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "assignedTo": {
+                    "type": "string",
+                    "description": "User ID to assign the lead to"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "enterprise",
+                      "saas"
+                    ]
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lead created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "lead": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "lead_123"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "summary": "Get user notifications",
+        "description": "Retrieves a paginated list of notifications for the authenticated user with optional filtering",
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Maximum number of notifications to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            },
+            "description": "Number of notifications to skip"
+          },
+          {
+            "in": "query",
+            "name": "unreadOnly",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Return only unread notifications"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter notifications by type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "notifications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "notif_123"
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Invoice Paid"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Invoice"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "read": {
+                            "type": "boolean",
+                            "example": false
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "unreadCount": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "offset": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/payments": {
+      "get": {
+        "summary": "Get list of payments",
+        "description": "Retrieves a paginated list of payments with optional filtering by status, payment method, and date range",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for payment reference or description"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "processing",
+                "completed",
+                "failed",
+                "cancelled",
+                "refunded",
+                "partially_refunded"
+              ]
+            },
+            "description": "Filter payments by status"
+          },
+          {
+            "in": "query",
+            "name": "paymentMethodId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter payments by payment method ID"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Start date for filtering (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "End date for filtering (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payments retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "payment_123"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 1250
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "pending",
+                              "processing",
+                              "completed",
+                              "failed",
+                              "cancelled",
+                              "refunded",
+                              "partially_refunded"
+                            ]
+                          },
+                          "paymentType": {
+                            "type": "string",
+                            "enum": [
+                              "invoice_payment",
+                              "refund",
+                              "chargeback",
+                              "adjustment",
+                              "transfer"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Process a payment",
+        "description": "Processes a payment transaction (invoice payment, refund, chargeback, adjustment, or transfer)",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "paymentMethodId",
+                  "paymentType",
+                  "amount"
+                ],
+                "properties": {
+                  "paymentMethodId": {
+                    "type": "string",
+                    "example": "pm_123",
+                    "description": "ID of the payment method to use"
+                  },
+                  "invoiceId": {
+                    "type": "string",
+                    "description": "Optional invoice ID if this is an invoice payment"
+                  },
+                  "paymentType": {
+                    "type": "string",
+                    "enum": [
+                      "invoice_payment",
+                      "refund",
+                      "chargeback",
+                      "adjustment",
+                      "transfer"
+                    ],
+                    "example": "invoice_payment"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "example": 1250
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "USD"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Payment for invoice"
+                  },
+                  "reference": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "payment": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "payment_123"
+                        },
+                        "amount": {
+                          "type": "number"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "summary": "Get list of projects",
+        "description": "Retrieves a paginated list of projects with optional filtering by status, priority, and client",
+        "tags": [
+          "Workflows"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for project name or description"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "planning",
+                "active",
+                "on_hold",
+                "completed",
+                "cancelled"
+              ]
+            },
+            "description": "Filter projects by status"
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "urgent"
+              ]
+            },
+            "description": "Filter projects by priority"
+          },
+          {
+            "in": "query",
+            "name": "clientId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter projects by client ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Projects retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Website Redesign"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "planning",
+                              "active",
+                              "on_hold",
+                              "completed",
+                              "cancelled"
+                            ]
+                          },
+                          "priority": {
+                            "type": "string",
+                            "enum": [
+                              "low",
+                              "medium",
+                              "high",
+                              "urgent"
+                            ]
+                          },
+                          "budget": {
+                            "type": "number",
+                            "example": 50000
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new project",
+        "description": "Creates a new project for time tracking, billing, and task management",
+        "tags": [
+          "Workflows"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Website Redesign Project"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Complete redesign of company website"
+                  },
+                  "clientId": {
+                    "type": "string",
+                    "example": "client_123"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "planning",
+                      "active",
+                      "on_hold",
+                      "completed",
+                      "cancelled"
+                    ],
+                    "default": "planning"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "low",
+                      "medium",
+                      "high",
+                      "urgent"
+                    ],
+                    "default": "medium"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "dueDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "budget": {
+                    "type": "number",
+                    "example": 50000
+                  },
+                  "hourlyRate": {
+                    "type": "number",
+                    "example": 150
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "USD"
+                  },
+                  "isBillable": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "estimatedHours": {
+                    "type": "number",
+                    "example": 200
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "web-design",
+                      "frontend",
+                      "backend"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Project created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "project": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/reports": {
+      "get": {
+        "summary": "Get list of reports",
+        "description": "Retrieves a paginated list of financial reports with optional filtering by type and favorites",
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter reports by type"
+          },
+          {
+            "in": "query",
+            "name": "isFavorite",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Return only favorite reports"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            },
+            "description": "Maximum number of reports to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Number of reports to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reports retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "report_123"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Monthly Revenue Report"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "isFavorite": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/search": {
+      "get": {
+        "summary": "Search across the platform",
+        "description": "Performs a unified search across invoices, transactions, clients, pages, and reports",
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query string"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "page",
+                "transaction",
+                "invoice",
+                "client",
+                "report",
+                "setting"
+              ]
+            },
+            "description": "Filter results by type"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Maximum number of results to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "page",
+                          "transaction",
+                          "invoice",
+                          "client",
+                          "report",
+                          "setting"
+                        ]
+                      },
+                      "href": {
+                        "type": "string"
+                      },
+                      "icon": {
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/transactions": {
+      "get": {
+        "summary": "Get list of transactions",
+        "description": "Retrieves a paginated list of financial transactions with filtering by type, status, category, and date range",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "income",
+                "expense",
+                "transfer",
+                "payment"
+              ]
+            },
+            "description": "Filter transactions by type"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter transactions by status"
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter transactions by category"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Start date for filtering (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "End date for filtering (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for transaction description"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            },
+            "description": "Maximum number of transactions to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Number of transactions to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transactions retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "trans_123"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "income",
+                              "expense",
+                              "transfer",
+                              "payment"
+                            ]
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 1250
+                          },
+                          "currency": {
+                            "type": "string",
+                            "example": "USD"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "pending",
+                              "completed",
+                              "failed",
+                              "cancelled"
+                            ]
+                          },
+                          "transactionDate": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new transaction",
+        "description": "Creates a new financial transaction record (income, expense, transfer, or payment)",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "amount",
+                  "transactionDate"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "income",
+                      "expense",
+                      "transfer",
+                      "payment"
+                    ],
+                    "example": "expense"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "example": 1250
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "USD"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Monthly subscription payment"
+                  },
+                  "category": {
+                    "type": "string",
+                    "example": "Software"
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "example": "credit_card"
+                  },
+                  "referenceId": {
+                    "type": "string"
+                  },
+                  "referenceType": {
+                    "type": "string"
+                  },
+                  "accountId": {
+                    "type": "string"
+                  },
+                  "transactionDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "notes": {
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transaction created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transaction": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "trans_123"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/vendors": {
+      "get": {
+        "summary": "Get list of vendors",
+        "description": "Retrieves a paginated list of vendors with optional filtering by status and category",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive",
+                "suspended",
+                "blacklisted"
+              ]
+            },
+            "description": "Filter vendors by status"
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter vendors by category"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            },
+            "description": "Maximum number of vendors to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Number of vendors to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vendors retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "vendors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "vendor_123"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Acme Supplies Inc"
+                          },
+                          "email": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "inactive",
+                              "suspended",
+                              "blacklisted"
+                            ]
+                          },
+                          "paymentTerms": {
+                            "type": "string",
+                            "example": "Net 30"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new vendor",
+        "description": "Creates a new vendor record with payment preferences and approval settings",
+        "tags": [
+          "Financial"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Acme Supplies Inc"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "contact@acme.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "+1-555-0123"
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "zipCode": {
+                    "type": "string"
+                  },
+                  "taxId": {
+                    "type": "string",
+                    "example": "12-3456789"
+                  },
+                  "paymentTerms": {
+                    "type": "string",
+                    "example": "Net 30"
+                  },
+                  "category": {
+                    "type": "string",
+                    "example": "supplier"
+                  },
+                  "paymentMethods": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "check",
+                      "ach"
+                    ]
+                  },
+                  "autoPay": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "approvalRequired": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "approvalThreshold": {
+                    "type": "number",
+                    "default": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vendor created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "vendor": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "vendor_123"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/webhooks": {
+      "get": {
+        "summary": "Get list of webhooks",
+        "description": "Retrieves a paginated list of webhook endpoints configured for the authenticated user",
+        "tags": [
+          "Integrations"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term to filter webhooks by name or URL"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive"
+              ]
+            },
+            "description": "Filter webhooks by status"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            },
+            "description": "Maximum number of webhooks to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Number of webhooks to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhooks retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "webhook_123"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Invoice Paid Webhook"
+                      },
+                      "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://example.com/webhook"
+                      },
+                      "events": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "example": [
+                          "invoice.paid",
+                          "invoice.created"
+                        ]
+                      },
+                      "isActive": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new webhook",
+        "description": "Creates a new webhook endpoint to receive events from the platform",
+        "tags": [
+          "Integrations"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "url",
+                  "events"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Invoice Paid Webhook"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Receive notifications when invoices are paid"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://example.com/webhook/invoice-paid"
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "invoice.paid",
+                      "invoice.created"
+                    ]
+                  },
+                  "secret": {
+                    "type": "string",
+                    "description": "Webhook secret for signature verification (auto-generated if not provided)"
+                  },
+                  "retryPolicy": {
+                    "type": "object",
+                    "properties": {
+                      "maxRetries": {
+                        "type": "integer",
+                        "default": 3
+                      },
+                      "retryDelay": {
+                        "type": "integer",
+                        "default": 1000
+                      }
+                    }
+                  },
+                  "headers": {
+                    "type": "object",
+                    "description": "Custom headers to include in webhook requests"
+                  },
+                  "filters": {
+                    "type": "object",
+                    "description": "Event filters"
+                  },
+                  "timeout": {
+                    "type": "integer",
+                    "default": 30000,
+                    "description": "Request timeout in milliseconds"
+                  },
+                  "organizationId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Webhook created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "webhook_123"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "secret": {
+                      "type": "string",
+                      "description": "Generated webhook secret for signature verification"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  }
+}
