@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Connection Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #60a5fa;
+            margin-bottom: 20px;
+        }
+        .config {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .config-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+        button.danger {
+            background: #ef4444;
+        }
+        button.danger:hover {
+            background: #dc2626;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .status.connected {
+            background: #065f46;
+            color: #6ee7b7;
+        }
+        .status.disconnected {
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+        .status.connecting {
+            background: #78350f;
+            color: #fcd34d;
+        }
+        .logs {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid transparent;
+        }
+        .log-entry.info {
+            background: #1e3a5f;
+            border-left-color: #60a5fa;
+        }
+        .log-entry.success {
+            background: #064e3b;
+            border-left-color: #10b981;
+        }
+        .log-entry.error {
+            background: #7f1d1d;
+            border-left-color: #ef4444;
+        }
+        .log-entry.warning {
+            background: #78350f;
+            border-left-color: #f59e0b;
+        }
+        .log-time {
+            color: #64748b;
+            margin-right: 10px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+        .stat-label {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            color: #60a5fa;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 WebSocket Connection Test</h1>
+        
+        <div class="config">
+            <div class="config-group">
+                <label>Environment</label>
+                <select id="environment">
+                    <option value="dev">Development</option>
+                    <option value="staging">Staging</option>
+                    <option value="production">Production</option>
+                </select>
+            </div>
+            <div class="config-group">
+                <label>Ticket ID</label>
+                <input type="text" id="ticketId" value="test-ticket-123" placeholder="Enter ticket ID">
+            </div>
+            <div class="config-group">
+                <label>Token</label>
+                <input type="text" id="token" value="test-token" placeholder="Enter authentication token">
+            </div>
+            <button id="connectBtn" onclick="connect()">Connect</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled class="danger">Disconnect</button>
+            <button onclick="clearLogs()">Clear Logs</button>
+        </div>
+
+        <div id="status" class="status disconnected">
+            Disconnected
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Messages Sent</div>
+                <div class="stat-value" id="sentCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Messages Received</div>
+                <div class="stat-value" id="receivedCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Connection Time</div>
+                <div class="stat-value" id="connectionTime">0s</div>
+            </div>
+        </div>
+
+        <div class="config">
+            <h3 style="margin-bottom: 15px; color: #60a5fa;">Test Actions</h3>
+            <button onclick="sendPing()" id="pingBtn" disabled>Send Ping</button>
+            <button onclick="sendMessage()" id="messageBtn" disabled>Send Message</button>
+            <button onclick="sendTyping()" id="typingBtn" disabled>Send Typing Indicator</button>
+            <button onclick="testRateLimit()" id="rateLimitBtn" disabled>Test Rate Limit (5 messages)</button>
+        </div>
+
+        <div class="logs" id="logs"></div>
+    </div>
+
+    <script>
+        const environments = {
+            dev: 'wss://financbase-websocket-dev.tight-queen-09af.workers.dev',
+            staging: 'wss://financbase-websocket-staging.tight-queen-09af.workers.dev',
+            production: 'wss://financbase-websocket.tight-queen-09af.workers.dev',
+        };
+
+        let ws = null;
+        let connectionStartTime = null;
+        let sentCount = 0;
+        let receivedCount = 0;
+        let connectionTimer = null;
+
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span class="log-time">[${time}]</span>${message}`;
+            logs.appendChild(entry);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function updateStatus(status, className) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = status;
+            statusEl.className = `status ${className}`;
+        }
+
+        function updateButtons(connected) {
+            document.getElementById('connectBtn').disabled = connected;
+            document.getElementById('disconnectBtn').disabled = !connected;
+            document.getElementById('pingBtn').disabled = !connected;
+            document.getElementById('messageBtn').disabled = !connected;
+            document.getElementById('typingBtn').disabled = !connected;
+            document.getElementById('rateLimitBtn').disabled = !connected;
+        }
+
+        function updateConnectionTime() {
+            if (connectionStartTime) {
+                const elapsed = Math.floor((Date.now() - connectionStartTime) / 1000);
+                document.getElementById('connectionTime').textContent = `${elapsed}s`;
+            }
+        }
+
+        function connect() {
+            const environment = document.getElementById('environment').value;
+            const ticketId = document.getElementById('ticketId').value;
+            const token = document.getElementById('token').value;
+
+            if (!ticketId || !token) {
+                log('Please enter both Ticket ID and Token', 'error');
+                return;
+            }
+
+            const baseUrl = environments[environment];
+            const wsUrl = `${baseUrl}/ws?ticketId=${encodeURIComponent(ticketId)}&token=${encodeURIComponent(token)}`;
+
+            log(`Connecting to ${wsUrl}...`, 'info');
+            updateStatus('Connecting...', 'connecting');
+            updateButtons(false);
+
+            try {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    log('✅ WebSocket connection opened', 'success');
+                    updateStatus('Connected', 'connected');
+                    updateButtons(true);
+                    connectionStartTime = Date.now();
+                    connectionTimer = setInterval(updateConnectionTime, 1000);
+                    sentCount = 0;
+                    receivedCount = 0;
+                    updateStats();
+                };
+
+                ws.onmessage = (event) => {
+                    receivedCount++;
+                    updateStats();
+                    try {
+                        const message = JSON.parse(event.data);
+                        log(`📥 Received: ${JSON.stringify(message, null, 2)}`, 'success');
+                        
+                        if (message.type === 'error' && message.code === 'RATE_LIMIT_EXCEEDED') {
+                            log(`⚠️ Rate limit exceeded! Reset at: ${message.resetAt}`, 'warning');
+                        }
+                    } catch (error) {
+                        log(`📥 Received (raw): ${event.data}`, 'info');
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    log(`❌ WebSocket error: ${error.message || 'Unknown error'}`, 'error');
+                    updateStatus('Error', 'disconnected');
+                };
+
+                ws.onclose = (event) => {
+                    log(`🔌 Connection closed. Code: ${event.code}, Reason: ${event.reason || 'None'}`, 'info');
+                    updateStatus('Disconnected', 'disconnected');
+                    updateButtons(false);
+                    if (connectionTimer) {
+                        clearInterval(connectionTimer);
+                        connectionTimer = null;
+                    }
+                    connectionStartTime = null;
+                    ws = null;
+                };
+            } catch (error) {
+                log(`❌ Failed to create WebSocket: ${error.message}`, 'error');
+                updateStatus('Error', 'disconnected');
+                updateButtons(false);
+            }
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+
+        function sendPing() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'ping' }));
+                sentCount++;
+                updateStats();
+                log('📤 Sent: ping', 'info');
+            }
+        }
+
+        function sendMessage() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = {
+                    type: 'message',
+                    content: `Test message at ${new Date().toISOString()}`,
+                };
+                ws.send(JSON.stringify(message));
+                sentCount++;
+                updateStats();
+                log(`📤 Sent: ${JSON.stringify(message)}`, 'info');
+            }
+        }
+
+        function sendTyping() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'typing',
+                    isTyping: true,
+                }));
+                sentCount++;
+                updateStats();
+                log('📤 Sent: typing indicator', 'info');
+                
+                setTimeout(() => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: 'typing',
+                            isTyping: false,
+                        }));
+                        sentCount++;
+                        updateStats();
+                        log('📤 Sent: typing stopped', 'info');
+                    }
+                }, 2000);
+            }
+        }
+
+        function testRateLimit() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                log('📤 Testing rate limit (sending 5 messages quickly)...', 'warning');
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        if (ws && ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({
+                                type: 'message',
+                                content: `Rate limit test message ${i + 1}`,
+                            }));
+                            sentCount++;
+                            updateStats();
+                            log(`📤 Sent: Rate limit test message ${i + 1}`, 'info');
+                        }
+                    }, i * 100);
+                }
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('sentCount').textContent = sentCount;
+            document.getElementById('receivedCount').textContent = receivedCount;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        // Auto-connect on page load for testing
+        // connect();
+    </script>
+</body>
+</html>
+

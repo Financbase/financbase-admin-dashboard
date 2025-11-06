@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Bank/Financial Institution Logo - Clean building design -->
+  <rect width="100" height="100" rx="12" fill="#1E3A8A"/>
+  <!-- Main building structure with proper proportions -->
+  <rect x="25" y="45" width="50" height="45" fill="white" rx="2"/>
+  <!-- Roof -->
+  <path d="M25 45 L50 30 L75 45 Z" fill="white"/>
+  <!-- Columns/windows - evenly spaced and properly sized -->
+  <rect x="32" y="52" width="10" height="12" fill="#1E3A8A" rx="1"/>
+  <rect x="46" y="52" width="10" height="12" fill="#1E3A8A" rx="1"/>
+  <rect x="60" y="52" width="10" height="12" fill="#1E3A8A" rx="1"/>
+  <rect x="32" y="68" width="10" height="12" fill="#1E3A8A" rx="1"/>
+  <rect x="46" y="68" width="10" height="12" fill="#1E3A8A" rx="1"/>
+  <rect x="60" y="68" width="10" height="12" fill="#1E3A8A" rx="1"/>
+  <!-- Door -->
+  <rect x="43" y="75" width="14" height="15" fill="#1E3A8A" rx="2"/>
+</svg>

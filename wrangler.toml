@@ -1,0 +1,68 @@
+# Cloudflare Workers Configuration for Financbase
+# This configuration manages the WebSocket Worker for support tickets and real-time features
+
+name = "financbase-websocket"
+main = "workers/websocket.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Your Cloudflare Account ID (from wrangler whoami)
+account_id = "f6d3a9509166b843e883145e262cb97a"
+
+# Environment variables
+[env.production]
+name = "financbase-websocket"
+routes = [
+  # Uncomment and configure when you have a custom domain
+  # { pattern = "websocket.financbase.com/*", zone_name = "financbase.com" }
+]
+
+[env.production.vars]
+ENVIRONMENT = "production"
+LOG_LEVEL = "info"
+
+[env.staging]
+name = "financbase-websocket-staging"
+routes = []
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+LOG_LEVEL = "debug"
+
+[env.development]
+name = "financbase-websocket-dev"
+routes = []
+
+[env.development.vars]
+ENVIRONMENT = "development"
+LOG_LEVEL = "debug"
+
+# R2 Bucket bindings (if needed for worker storage)
+# Uncomment and configure when you need R2 access from the worker
+# [[env.production.r2_buckets]]
+# binding = "WEBSOCKET_STORAGE"
+# bucket_name = "websocket-data"
+
+# KV Namespace bindings (if needed for state management)
+# Uncomment and configure when you need KV storage
+# [[env.production.kv_namespaces]]
+# binding = "WEBSOCKET_STATE"
+# id = "your-kv-namespace-id"
+
+# Durable Objects (if needed for WebSocket state management)
+# Uncomment and configure when you need Durable Objects
+# [[migrations]]
+# tag = "v1"
+# new_classes = ["WebSocketRoom"]
+
+# [env.production.durable_objects]
+# bindings = [
+#   { name = "WEBSOCKET_ROOM", class_name = "WebSocketRoom" }
+# ]
+
+# Limits
+# Note: CPU limits are only available on paid plans
+# Uncomment when you upgrade to a paid plan
+# [limits]
+# cpu_ms = 50
+

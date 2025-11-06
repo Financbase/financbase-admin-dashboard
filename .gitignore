@@ -10,3 +10,45 @@ node_modules
 bun.lockb
 yarn.lock
 package-lock.json
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Build outputs
+.next/
+.swc/
+dist/
+build/
+coverage/
+.vercel/
+out/
+
+# Environment files
+.env.local
+.env*.local
+.env.local.backup
+.env.staging.secure
+
+# IDE
+.cursor/
+.vscode/
+.idea/
+
+# Logs
+*.log
+dev.log
+e2e-results.log
+
+# Test results
+test-results/
+playwright-report/
+
+# TypeScript
+*.tsbuildinfo
+
+# Node binaries
+node-v*/

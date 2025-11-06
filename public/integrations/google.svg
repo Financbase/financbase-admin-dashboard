@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Google Logo - Multi-colored G -->
+  <circle cx="50" cy="50" r="50" fill="white"/>
+  <path d="M50 25C35.0883 25 23 37.0883 23 52C23 66.9117 35.0883 79 50 79C64.9117 79 77 66.9117 77 52C77 37.0883 64.9117 25 50 25Z" fill="#4285F4"/>
+  <path d="M50 25V52H77C77 37.0883 64.9117 25 50 25Z" fill="#EA4335"/>
+  <path d="M50 52V79C64.9117 79 77 66.9117 77 52H50Z" fill="#34A853"/>
+  <path d="M23 52C23 37.0883 35.0883 25 50 25V52H23Z" fill="#FBBC05"/>
+</svg>
+
