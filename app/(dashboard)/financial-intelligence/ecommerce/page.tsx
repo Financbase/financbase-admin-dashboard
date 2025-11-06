@@ -383,8 +383,14 @@ export default function EcommerceIntelligencePage() {
                     <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                     <p className="text-gray-500 font-medium mb-1">Sales performance matrix</p>
                     <p className="text-sm text-gray-400 mb-3">Chart visualization will be displayed here</p>
-                    <Button size="sm" variant="outline" onClick={() => toast.info('Interactive chart feature will be available soon')}>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      disabled
+                      title="Interactive chart feature coming soon"
+                    >
                       Enable Chart
+                      <Badge variant="secondary" className="ml-2 text-xs">Soon</Badge>
                     </Button>
                   </div>
                 </div>

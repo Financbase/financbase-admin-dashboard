@@ -13,8 +13,10 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle, Star } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function StickyFooter() {
+  const router = useRouter()
   const features = [
     "AI-Powered Financial Intelligence",
     "Real-Time Analytics Dashboard",
@@ -57,15 +59,17 @@ export default function StickyFooter() {
 
             <div className="flex gap-3">
               <Button asChild variant="outline" size="sm">
-                <Link href="/about">
+                <Link href="/docs/help">
                   Learn More
                 </Link>
               </Button>
-              <Button asChild size="sm">
-                <Link href="/auth/sign-up">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+              <Button 
+                size="sm"
+                onClick={() => router.push('/auth/sign-up')}
+                className="flex items-center"
+              >
+                Start Free Trial
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>

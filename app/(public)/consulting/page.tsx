@@ -66,7 +66,6 @@ export default function ConsultingPage() {
 		const data = {
 			...formDataObj,
 			website: formDataObj.website || '', // Honeypot
-			type: 'consulting', // Mark as consulting inquiry
 		};
 
 		setFormData({
@@ -84,6 +83,18 @@ export default function ConsultingPage() {
 		setSubmitMessage("");
 
 		try {
+			// Prepare metadata for consulting-specific fields
+			const metadata: Record<string, string> = {
+				type: 'consulting',
+			};
+			
+			if (data.service) {
+				metadata.service = data.service;
+			}
+			if (data.phone) {
+				metadata.phone = data.phone;
+			}
+
 			const response = await fetch('/api/contact', {
 				method: 'POST',
 				headers: {
@@ -93,8 +104,10 @@ export default function ConsultingPage() {
 					name: data.name,
 					email: data.email,
 					company: data.company,
-					message: `Consulting Inquiry\n\nService Interest: ${data.service || 'N/A'}\nPhone: ${data.phone || 'N/A'}\n\nMessage: ${data.message}`,
+					message: data.message,
 					website: data.website,
+					source: 'consulting_page',
+					metadata: metadata,
 				}),
 			});
 

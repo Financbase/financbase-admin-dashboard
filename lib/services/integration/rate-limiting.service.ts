@@ -29,8 +29,48 @@ import {
 	rateLimitViolations,
 	rateLimits,
 } from "../../drizzle/schema/rate-limiting";
-import { query } from "../db/neon-connection";
-import { AppError } from "../middleware/error-handler";
+import { getRawSqlConnection } from "../../db";
+import { ApiErrorHandler } from "../../api-error-handler";
+
+/**
+ * Helper function to execute parameterized SQL queries
+ * Converts PostgreSQL-style parameterized queries ($1, $2, etc.) to Neon's template literal format
+ */
+async function query<T = any>(sqlQuery: string, params: any[] = []): Promise<T[]> {
+	const connection = getRawSqlConnection();
+	
+	// Convert $1, $2, etc. format to template literal format
+	// Split query by parameter placeholders and build template literal parts
+	const parts: string[] = [];
+	const values: any[] = [];
+	
+	let currentIndex = 0;
+	const paramRegex = /\$(\d+)/g;
+	let match;
+	
+	while ((match = paramRegex.exec(sqlQuery)) !== null) {
+		// Add the text before this parameter
+		parts.push(sqlQuery.substring(currentIndex, match.index));
+		
+		// Get the parameter index (1-based to 0-based)
+		const paramIndex = parseInt(match[1], 10) - 1;
+		if (paramIndex >= 0 && paramIndex < params.length) {
+			values.push(params[paramIndex]);
+		} else {
+			values.push(null);
+		}
+		
+		currentIndex = match.index + match[0].length;
+	}
+	
+	// Add the remaining text after the last parameter
+	parts.push(sqlQuery.substring(currentIndex));
+	
+	// Execute using Neon's template literal API
+	// Neon expects (strings, ...values) format
+	const result = await (connection as any)(parts as any, ...values);
+	return result.rows as T[];
+}
 
 export interface RateLimitConfig {
 	requestsPerMinute: number;
@@ -87,12 +127,7 @@ export class RateLimitingService {
 			return events[0];
 		} catch (error) {
 			console.error("Error logging API event:", error);
-			throw new AppError(
-				"Failed to log API event",
-				500,
-				"API_EVENT_LOG_ERROR",
-				{ event },
-			);
+			throw new Error("Failed to log API event: " + (error instanceof Error ? error.message : String(error)));
 		}
 	}
 
@@ -157,11 +192,7 @@ export class RateLimitingService {
 			return await query<ApiEvent>(queryStr, params);
 		} catch (error) {
 			console.error("Error fetching API events:", error);
-			throw new AppError(
-				"Failed to fetch API events",
-				500,
-				"API_EVENTS_FETCH_ERROR",
-			);
+			throw new Error("Failed to fetch API events: " + (error instanceof Error ? error.message : String(error)));
 		}
 	}
 
@@ -189,12 +220,7 @@ export class RateLimitingService {
 			return limits[0];
 		} catch (error) {
 			console.error("Error creating rate limit:", error);
-			throw new AppError(
-				"Failed to create rate limit",
-				500,
-				"RATE_LIMIT_CREATE_ERROR",
-				{ rateLimit },
-			);
+			throw new Error("Failed to create rate limit: " + (error instanceof Error ? error.message : String(error)));
 		}
 	}
 
@@ -208,11 +234,7 @@ export class RateLimitingService {
 			);
 		} catch (error) {
 			console.error("Error fetching rate limits:", error);
-			throw new AppError(
-				"Failed to fetch rate limits",
-				500,
-				"RATE_LIMITS_FETCH_ERROR",
-			);
+			throw new Error("Failed to fetch rate limits: " + (error instanceof Error ? error.message : String(error)));
 		}
 	}
 
@@ -241,12 +263,7 @@ export class RateLimitingService {
 			return violations[0];
 		} catch (error) {
 			console.error("Error logging rate limit violation:", error);
-			throw new AppError(
-				"Failed to log rate limit violation",
-				500,
-				"RATE_LIMIT_VIOLATION_LOG_ERROR",
-				{ violation },
-			);
+			throw new Error("Failed to log rate limit violation: " + (error instanceof Error ? error.message : String(error)));
 		}
 	}
 
@@ -302,11 +319,7 @@ export class RateLimitingService {
 			}));
 		} catch (error) {
 			console.error("Error fetching rate limit violations:", error);
-			throw new AppError(
-				"Failed to fetch rate limit violations",
-				500,
-				"RATE_LIMIT_VIOLATIONS_FETCH_ERROR",
-			);
+			throw new Error("Failed to fetch rate limit violations: " + (error instanceof Error ? error.message : String(error)));
 		}
 	}
 
@@ -348,11 +361,7 @@ export class RateLimitingService {
 			return await query<ApiHealthMetric>(queryStr, params);
 		} catch (error) {
 			console.error("Error fetching API health metrics:", error);
-			throw new AppError(
-				"Failed to fetch API health metrics",
-				500,
-				"API_HEALTH_METRICS_FETCH_ERROR",
-			);
+			throw new Error("Failed to fetch API health metrics: " + (error instanceof Error ? error.message : String(error)));
 		}
 	}
 
@@ -400,11 +409,7 @@ export class RateLimitingService {
 			};
 		} catch (error) {
 			console.error("Error fetching summary statistics:", error);
-			throw new AppError(
-				"Failed to fetch summary statistics",
-				500,
-				"SUMMARY_STATISTICS_FETCH_ERROR",
-			);
+			throw new Error("Failed to fetch summary statistics: " + (error instanceof Error ? error.message : String(error)));
 		}
 	}
 
@@ -450,11 +455,7 @@ export class RateLimitingService {
 			console.log("Sample data seeded successfully");
 		} catch (error) {
 			console.error("Error seeding sample data:", error);
-			throw new AppError(
-				"Failed to seed sample data",
-				500,
-				"SAMPLE_DATA_SEED_ERROR",
-			);
+			throw new Error("Failed to seed sample data: " + (error instanceof Error ? error.message : String(error)));
 		}
 	}
 

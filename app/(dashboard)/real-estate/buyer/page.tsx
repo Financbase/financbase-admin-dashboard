@@ -393,22 +393,22 @@ export default function BuyerDashboard() {
             <Button
               variant="outline"
               className="h-20 flex-col gap-2"
-              onClick={() => {
-                toast.info('Pre-approval application will be available soon');
-              }}
+              disabled
+              title="Pre-approval application coming soon"
             >
               <CreditCard className="h-6 w-6" />
               <span>Pre-Approval</span>
+              <Badge variant="secondary" className="text-xs mt-1">Soon</Badge>
             </Button>
             <Button
               variant="outline"
               className="h-20 flex-col gap-2"
-              onClick={() => {
-                toast.info('Tour scheduling feature will be available soon');
-              }}
+              disabled
+              title="Tour scheduling feature coming soon"
             >
               <Calendar className="h-6 w-6" />
               <span>Schedule Tours</span>
+              <Badge variant="secondary" className="text-xs mt-1">Soon</Badge>
             </Button>
           </div>
         </CardContent>

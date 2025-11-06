@@ -87,12 +87,17 @@ export default function AutomationsPage() {
 	const fetchWorkflows = async () => {
 		try {
 			const response = await fetch("/api/workflows");
-			if (!response.ok) throw new Error("Failed to fetch workflows");
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch workflows`);
+			}
 			const data = await response.json();
 			setWorkflows(Array.isArray(data) ? data : []);
 		} catch (error) {
 			console.error("Error fetching workflows:", error);
-			toast.error("Failed to load workflows");
+			const errorMessage = error instanceof Error ? error.message : "Failed to load workflows";
+			toast.error(errorMessage);
+			setWorkflows([]);
 		}
 	};
 
@@ -100,11 +105,16 @@ export default function AutomationsPage() {
 	const fetchTemplates = async () => {
 		try {
 			const response = await fetch("/api/workflows/templates");
-			if (!response.ok) throw new Error("Failed to fetch templates");
+			if (!response.ok) {
+				// Templates are optional, so we don't show error toast
+				setTemplates([]);
+				return;
+			}
 			const data = await response.json();
 			setTemplates(Array.isArray(data) ? data : []);
 		} catch (error) {
 			console.error("Error fetching templates:", error);
+			setTemplates([]);
 		}
 	};
 
@@ -112,11 +122,17 @@ export default function AutomationsPage() {
 	const fetchExecutions = async (workflowId: number) => {
 		try {
 			const response = await fetch(`/api/workflows/${workflowId}/executions?limit=10`);
-			if (!response.ok) throw new Error("Failed to fetch executions");
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch executions`);
+			}
 			const data = await response.json();
 			setExecutions(Array.isArray(data) ? data : []);
 		} catch (error) {
 			console.error("Error fetching executions:", error);
+			const errorMessage = error instanceof Error ? error.message : "Failed to fetch executions";
+			toast.error(errorMessage);
+			setExecutions([]);
 		}
 	};
 
@@ -129,12 +145,16 @@ export default function AutomationsPage() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ status: newStatus, isActive: newStatus === "active" }),
 			});
-			if (!response.ok) throw new Error("Failed to update workflow");
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(errorData.message || `HTTP ${response.status}: Failed to update workflow`);
+			}
 			await fetchWorkflows();
 			toast.success(`Workflow ${newStatus === "active" ? "activated" : "paused"}`);
 		} catch (error) {
 			console.error("Error toggling workflow:", error);
-			toast.error("Failed to update workflow");
+			const errorMessage = error instanceof Error ? error.message : "Failed to update workflow";
+			toast.error(errorMessage);
 		}
 	};
 
@@ -320,7 +340,7 @@ const automationStats = [
 			</div>
 
 			{/* Automation Alerts */}
-			{automationAlerts.length > 0 && (
+			{getAlerts().length > 0 && (
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
@@ -332,12 +352,12 @@ const automationStats = [
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-3">
-						{alerts.length === 0 ? (
+						{getAlerts().length === 0 ? (
 							<p className="text-sm text-muted-foreground text-center py-4">
 								No alerts at this time
 							</p>
 						) : (
-							alerts.map((alert) => (
+							getAlerts().map((alert) => (
 								<div
 									key={`${alert.workflow}-${alert.message}`}
 									className="flex items-center justify-between p-3 rounded-lg border"
@@ -554,11 +574,12 @@ const automationStats = [
 											</Button>
 													<Button
 														size="sm"
-														onClick={() => {
-															toast.info("Template feature will be available soon");
-														}}
+														variant="outline"
+														disabled
+														title="Template feature coming soon"
 													>
 												Use Template
+												<Badge variant="secondary" className="ml-2 text-xs">Soon</Badge>
 											</Button>
 										</div>
 									</div>

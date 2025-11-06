@@ -5,6 +5,9 @@
  * or use of this software, via any medium, is strictly prohibited.
  * 
  * @see LICENSE file in the root directory for full license terms.
+ * 
+ * @deprecated This component is deprecated. Use `@/components/ui/button` instead.
+ * This file is kept for backward compatibility but should not be used in new code.
  */
 
 import { Slot } from "@radix-ui/react-slot";

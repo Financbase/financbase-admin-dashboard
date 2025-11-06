@@ -28,21 +28,26 @@ export const ActionButton = memo(function ActionButton({
 	icon,
 	children,
 	className,
+	asChild = false,
 	...props
 }: ActionButtonProps) {
+	// When asChild is true, the child (usually Link) receives the button styling
+	// We wrap the children with icon if provided
+	const content = isLoading ? (
+		<>
+			<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+			{loadingText || "Loading..."}
+		</>
+	) : (
+		<>
+			{icon && <span className="mr-2">{icon}</span>}
+			{children}
+		</>
+	);
+
 	return (
-		<Button disabled={isLoading} className={className} {...props}>
-			{isLoading ? (
-				<>
-					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-					{loadingText || "Loading..."}
-				</>
-			) : (
-				<>
-					{icon && <span className="mr-2">{icon}</span>}
-					{children}
-				</>
-			)}
+		<Button disabled={isLoading} className={className} asChild={asChild} {...props}>
+			{content}
 		</Button>
 	);
 });

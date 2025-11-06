@@ -7,8 +7,9 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
+"use client";
+
 import { MessageCircle, XCircle } from "lucide-react";
-("use client");
 
 import type * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";

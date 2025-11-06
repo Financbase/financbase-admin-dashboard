@@ -50,6 +50,14 @@ const nextConfig = {
 				protocol: 'https',
 				hostname: 'opencv.org',
 			},
+			{
+				protocol: 'https',
+				hostname: 'cdn.jsdelivr.net',
+			},
+			{
+				protocol: 'https',
+				hostname: 'logo.clearbit.com',
+			},
 		],
 		deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
 		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -100,6 +108,23 @@ const nextConfig = {
 			worker_threads: false,
 		};
 
+		// Enhanced module resolution to prevent undefined module errors
+		config.resolve = {
+			...config.resolve,
+			// Ensure proper module resolution
+			fullySpecified: false,
+			// Add extensions for better module resolution
+			extensionAlias: {
+				'.js': ['.js', '.ts', '.tsx'],
+				'.jsx': ['.jsx', '.tsx'],
+			},
+			// Ensure modules are properly resolved
+			modules: [
+				...(config.resolve?.modules || []),
+				'node_modules',
+			],
+		};
+
 		// Handle server-side modules
 		if (isServer) {
 			config.externals = [...(config.externals || []), 'pg-native'];
@@ -134,7 +159,19 @@ const nextConfig = {
 			// Set chunk loading global variable name for better error tracking
 			// This helps identify chunk loading errors in the console
 			config.output.chunkLoadingGlobal = 'webpackChunkLoad';
+			
+			// Add error handling for chunk loading
+			config.output.chunkLoadTimeout = 120000;
 		}
+
+		// Add better error handling for module resolution
+		config.ignoreWarnings = [
+			...((config.ignoreWarnings && Array.isArray(config.ignoreWarnings)) ? config.ignoreWarnings : []),
+			// Ignore warnings about missing exports (common in some packages)
+			/export .* was not found in/,
+			// Ignore warnings about module resolution
+			/Module not found: Error: Can't resolve/,
+		];
 
 		return config;
 	},

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-11-04T03:19:19.473Z",
+  "timestamp": "2025-11-06T16:09:31.227Z",
   "baseUrl": "http://localhost:3003",
   "summary": {
     "total": 0,
@@ -52,57 +52,57 @@
     {
       "url": "http://localhost:3003/security",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/security: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/security\""
     },
     {
       "url": "http://localhost:3003/support",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/support: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/support\""
     },
     {
       "url": "http://localhost:3003/blog",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/blog: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/blog\""
     },
     {
       "url": "http://localhost:3003/careers",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/careers: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/careers\""
     },
     {
-      "url": "http://localhost:3003/analytics",
+      "url": "http://localhost:3003/products/analytics",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/products/analytics: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/products/analytics\""
     },
     {
       "url": "http://localhost:3003/adboard",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/adboard: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/adboard\""
     },
     {
       "url": "http://localhost:3003/cloud-platform",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/cloud-platform: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/cloud-platform\""
     },
     {
       "url": "http://localhost:3003/team-collaboration",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/team-collaboration: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/team-collaboration\""
     },
     {
       "url": "http://localhost:3003/docs",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/docs: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/docs\""
     },
     {
       "url": "http://localhost:3003/auth/sign-in",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/auth/sign-in: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/auth/sign-in\""
     },
     {
       "url": "http://localhost:3003/auth/sign-up",
       "status": "error",
-      "error": "HTTP 500"
+      "error": "Failed to fetch http://localhost:3003/auth/sign-up: Command failed: curl -L -s -w \"\\n%{http_code}\" -m 10 \"http://localhost:3003/auth/sign-up\""
     }
   ]
 }

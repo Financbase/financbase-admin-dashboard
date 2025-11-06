@@ -20,49 +20,63 @@ const isPublicRoute = createRouteMatcher([
   '/legal(.*)',
   '/careers(.*)',
   '/guides(.*)',
-  '/products(.*)',
+  '/catalog(.*)',
   '/integrations(.*)',
   '/adboard(.*)',
   '/training(.*)',
   '/enterprise(.*)',
   '/cloud-platform(.*)',
   '/consulting(.*)',
-  '/public-help(.*)',
-  '/public-security(.*)',
+  '/public-help(.*)', // Moved to (public)/public-help
+  '/public-security(.*)', // Moved to (public)/public-security
   '/financbase-gpt(.*)',
+  '/team-collaboration(.*)',
+  '/products(.*)', // Public product marketing pages
   '/api/health',
+  '/api/v1/health',
   '/api/test-simple',
   '/api/test-minimal',
   '/api/test-minimal-2',
   '/api/test-minimal-final',
   '/api/contact',
   '/api/webhooks(.*)',
+  '/status(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
-  // '/real-estate(.*)', // Temporarily disable auth for real estate routes for testing
-  '/profile(.*)',
-  '/settings(.*)',
+  '/real-estate(.*)',
+  '/profile(.*)', // Moved to (dashboard)/profile
+  '/settings(.*)', // Moved to (dashboard)/settings
   '/budgets(.*)',
   '/workflows(.*)',
   '/webhooks(.*)',
   '/reports(.*)',
   '/developer(.*)',
   '/demo(.*)',
-  // Dashboard route group pages (moved from root app/)
-  '/admin(.*)',
-  '/ai-assist(.*)',
-  '/automations(.*)',
-  '/customers(.*)',
-  '/employees(.*)',
-  '/orders(.*)',
-  '/organization(.*)',
-  '/tax(.*)',
-  '/chat(.*)',
-  '/gallery(.*)',
-  '/global-search(.*)',
-  '/products(.*)',
+	// Dashboard route group pages (organized in (dashboard) route group)
+	'/admin(.*)',
+	'/ai-assist(.*)',
+	'/automations(.*)',
+	'/customers(.*)',
+	'/employees(.*)',
+	'/orders(.*)',
+	'/organization(.*)',
+	'/tax(.*)',
+	'/chat(.*)',
+	'/gallery(.*)',
+	'/global-search(.*)',
+	'/financial-intelligence(.*)',
+	// Note: /products(.*) moved to public routes - marketing pages are public
+	'/analytics(.*)', // Moved to (dashboard)/analytics
+	'/content(.*)', // Moved to (dashboard)/content
+	'/platform(.*)', // Moved to (dashboard)/platform
+	'/video(.*)', // Moved to (dashboard)/video
+	'/optimization(.*)', // Moved to (dashboard)/optimization
+	'/assets(.*)', // Moved to (dashboard)/assets
+	'/gpt(.*)', // Moved to (dashboard)/gpt
+	'/help(.*)', // Moved to (dashboard)/help
+  // API Routes - All authenticated API endpoints
   '/api/leads(.*)',
   '/api/onboarding(.*)',
   '/api/accounts(.*)',
@@ -74,13 +88,56 @@ const isProtectedRoute = createRouteMatcher([
   '/api/auth(.*)',
   '/api/ai(.*)',
   '/api/dashboard(.*)',
+  '/api/dashboards(.*)',
   '/api/support(.*)',
-  '/api/platform(.*)', // Add Platform Services API routes
-  '/api/workflows(.*)', // Add Workflows API routes
-  '/api/monitoring(.*)', // Add Monitoring API routes
-  '/api/integrations(.*)', // Add Integrations API routes
-  '/api/marketplace(.*)', // Add Marketplace API routes
-  // '/api/real-estate(.*)', // Temporarily disable auth for real estate API routes for testing
+  '/api/platform(.*)',
+  '/api/workflows(.*)',
+  '/api/monitoring(.*)',
+  '/api/integrations(.*)',
+  '/api/marketplace(.*)',
+  '/api/real-estate(.*)',
+  '/api/training(.*)',
+  '/api/hr(.*)',
+  '/api/employees(.*)',
+  '/api/customers(.*)',
+  '/api/products(.*)',
+  '/api/orders(.*)',
+  '/api/campaigns(.*)',
+  '/api/gallery(.*)',
+  '/api/chat(.*)',
+  '/api/video-conferencing(.*)',
+  '/api/reconciliation(.*)',
+  '/api/bills(.*)',
+  '/api/payments(.*)',
+  '/api/payment-methods(.*)',
+  '/api/transactions(.*)',
+  '/api/time-entries(.*)',
+  '/api/blog(.*)',
+  '/api/byok(.*)',
+  '/api/feature-flags(.*)',
+  '/api/admin(.*)',
+  '/api/security(.*)',
+  '/api/settings(.*)',
+  '/api/performance(.*)',
+  '/api/unified-dashboard(.*)',
+  '/api/freelancers(.*)',
+  '/api/investor-portal(.*)',
+  '/api/financial-intelligence(.*)',
+  '/api/vendors(.*)',
+  '/api/budgets(.*)',
+  '/api/approval-workflows(.*)',
+  '/api/notifications(.*)',
+  '/api/search(.*)',
+  '/api/analytics(.*)',
+  '/api/developer(.*)',
+  '/api/docs(.*)',
+  '/api/email(.*)',
+  '/api/help(.*)',
+  '/api/home(.*)',
+  '/api/uploadthing(.*)',
+  '/api/marketing(.*)',
+  '/api/v1(.*)',
+  '/api/test(.*)',
   '/onboarding(.*)',
 ]);
 

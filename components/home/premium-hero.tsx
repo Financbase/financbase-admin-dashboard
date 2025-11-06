@@ -9,7 +9,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -26,7 +26,17 @@ import {
   Loader2
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts"
 
 interface HomeMetrics {
   revenue: {
@@ -53,6 +63,7 @@ interface HomeMetrics {
 }
 
 export default function PremiumHero() {
+  const router = useRouter()
   const [activeMetric, setActiveMetric] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -84,7 +95,7 @@ export default function PremiumHero() {
       label: "Revenue Processed", 
       change: metricsData.data.revenue.growth > 0 ? `+${metricsData.data.revenue.growth.toFixed(1)}%` : `${metricsData.data.revenue.growth.toFixed(1)}%`, 
       icon: <DollarSign className="h-4 w-4" />,
-      color: "text-emerald-600"
+      color: "text-primary"
     },
     { 
       id: "efficiency", 
@@ -92,7 +103,7 @@ export default function PremiumHero() {
       label: "Time Saved", 
       change: `+${metricsData.data.efficiency.change}%`, 
       icon: <TrendingUp className="h-4 w-4" />,
-      color: "text-blue-600"
+      color: "text-primary"
     },
     { 
       id: "accuracy", 
@@ -100,7 +111,7 @@ export default function PremiumHero() {
       label: "Accuracy Rate", 
       change: `+${metricsData.data.accuracy.change}%`, 
       icon: <BarChart3 className="h-4 w-4" />,
-      color: "text-purple-600"
+      color: "text-primary"
     }
   ] : [
     { 
@@ -109,7 +120,7 @@ export default function PremiumHero() {
       label: "Revenue Processed", 
       change: "+23%", 
       icon: <DollarSign className="h-4 w-4" />,
-      color: "text-emerald-600"
+      color: "text-primary"
     },
     { 
       id: "efficiency", 
@@ -117,7 +128,7 @@ export default function PremiumHero() {
       label: "Time Saved", 
       change: "+12%", 
       icon: <TrendingUp className="h-4 w-4" />,
-      color: "text-blue-600"
+      color: "text-primary"
     },
     { 
       id: "accuracy", 
@@ -125,7 +136,7 @@ export default function PremiumHero() {
       label: "Accuracy Rate", 
       change: "+5%", 
       icon: <BarChart3 className="h-4 w-4" />,
-      color: "text-purple-600"
+      color: "text-primary"
     }
   ]
 
@@ -147,8 +158,23 @@ export default function PremiumHero() {
     }
   ]
 
+  // Generate sample real-time analytics data
+  const analyticsData = useMemo(() => {
+    const days = 14
+    const baseValue = 45000
+    return Array.from({ length: days }, (_, i) => {
+      const date = new Date()
+      date.setDate(date.getDate() - (days - 1 - i))
+      const variation = (Math.random() - 0.5) * 10000
+      return {
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        value: Math.max(30000, baseValue + variation + (i * 500)), // Slight upward trend
+      }
+    })
+  }, [])
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="relative min-h-screen overflow-hidden bg-background">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
         {/* Floating geometric shapes */}
@@ -178,12 +204,7 @@ export default function PremiumHero() {
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
                 <span className="text-slate-900">Financial Operations</span>
                 <br />
-                <span 
-                  className="bg-clip-text text-transparent"
-                  style={{
-                    backgroundImage: 'linear-gradient(to right, oklch(var(--primary)), oklch(var(--brand-primary-dark)))'
-                  }}
-                >
+                <span className="text-primary">
                   Reimagined
                 </span>
               </h1>
@@ -195,11 +216,13 @@ export default function PremiumHero() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" className="px-8 py-4 text-lg bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300">
-                <Link href="/auth/sign-up" className="flex items-center">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+              <Button 
+                size="lg" 
+                className="px-8 py-4 text-lg bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center"
+                onClick={() => router.push('/auth/sign-up')}
+              >
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button asChild variant="outline" size="lg" className="px-8 py-4 text-lg border-2 hover:bg-slate-50 transition-all duration-300">
                 <Link href="/contact" className="flex items-center">
@@ -253,7 +276,7 @@ export default function PremiumHero() {
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className={`${metric.color}`}>{metric.icon}</div>
-                          <span className="text-xs font-medium text-emerald-600">{metric.change}</span>
+                          <span className="text-xs font-medium text-primary">{metric.change}</span>
                         </div>
                         <div className="text-2xl font-bold text-slate-900">{metric.value}</div>
                         <div className="text-xs text-slate-600">{metric.label}</div>
@@ -261,9 +284,57 @@ export default function PremiumHero() {
                     ))}
                   </div>
 
-                  {/* Chart Placeholder */}
-                  <div className="h-32 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg flex items-center justify-center">
-                    <div className="text-slate-500 text-sm">Real-time Analytics</div>
+                  {/* Real-time Analytics Chart */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-slate-900">Real-time Analytics</h3>
+                    <div className="h-48 rounded-lg bg-background border border-border p-3">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={analyticsData}
+                          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                        >
+                          <defs>
+                            <linearGradient id="heroAnalyticsGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="oklch(var(--brand-primary))" stopOpacity={0.6} />
+                              <stop offset="50%" stopColor="oklch(var(--brand-primary))" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="oklch(var(--brand-primary))" stopOpacity={0.1} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
+                          <XAxis 
+                            dataKey="date" 
+                            tick={{ fontSize: 10, fill: '#64748b', fontWeight: 500 }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis 
+                            tick={{ fontSize: 10, fill: '#64748b', fontWeight: 500 }}
+                            axisLine={false}
+                            tickLine={false}
+                            tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              padding: '8px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            }}
+                            formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="value"
+                            stroke="oklch(var(--brand-primary))"
+                            strokeWidth={3}
+                            fillOpacity={1}
+                            fill="url(#heroAnalyticsGradient)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
 
                   {/* Recent Transactions */}

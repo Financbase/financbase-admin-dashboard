@@ -97,8 +97,8 @@ const NavigationItem = React.memo<{
 				className={cn(
 					"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
 					isActive
-						? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-						: "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
+						? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+						: "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
 				)}
 			>
 				<item.icon className="h-4 w-4 flex-shrink-0" />
@@ -170,8 +170,8 @@ const navigationData: NavigationItem[] = [
 	{ href: "/alerts", icon: AlertTriangle, label: "Alerts & Notifications", section: "platform" },
 	
 	// Integration & Development
-	{ href: "/integrations", icon: Plug, label: "Integrations", section: "integration" },
-	{ href: "/integrations/marketplace", icon: Package, label: "Plugin Marketplace", section: "integration" },
+	{ href: "/dashboard/integrations", icon: Plug, label: "Integrations", section: "integration" },
+	{ href: "/dashboard/integrations/marketplace", icon: Package, label: "Plugin Marketplace", section: "integration" },
 	{ href: "/developer", icon: Code, label: "Developer Portal", section: "integration" },
 	{ href: "/api", icon: Globe, label: "API Hub", section: "integration" },
 	
@@ -256,13 +256,13 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 			transition={{ duration: 0.3 }}
 			className={cn(
 				"flex h-full flex-col transition-all duration-300",
-				"bg-[var(--sidebar)] border-r border-[var(--sidebar-border)]",
+				"bg-sidebar border-r border-sidebar-border",
 				"overflow-hidden",
 				collapsed ? "w-16" : "w-64",
 			)}
 		>
 			{/* Header */}
-			<div className="flex h-16 items-center justify-between px-4 border-b border-[var(--sidebar-border)] flex-shrink-0">
+			<div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border flex-shrink-0">
 				{!collapsed && (
 					<Link href="/dashboard" className="flex items-center gap-2">
 						<FinancbaseLogo size="sm" />
@@ -278,18 +278,18 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 						<button
 							type="button"
 							onClick={handleToggleCollapse}
-							className="p-1.5 rounded-md hover:bg-[var(--sidebar-accent)] transition-colors"
+							className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors"
 						>
-							<ChevronLeft className={cn("h-4 w-4 text-[var(--sidebar-foreground)]", collapsed && "rotate-180")} />
+							<ChevronLeft className={cn("h-4 w-4 text-sidebar-foreground", collapsed && "rotate-180")} />
 						</button>
 					)}
 					{onClose && (
 						<button
 							type="button"
 							onClick={handleClose}
-							className="p-1.5 rounded-md hover:bg-[var(--sidebar-accent)] transition-colors lg:hidden"
+							className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors lg:hidden"
 						>
-							<X className="h-4 w-4 text-[var(--sidebar-foreground)]" />
+							<X className="h-4 w-4 text-sidebar-foreground" />
 						</button>
 					)}
 				</div>
@@ -302,7 +302,7 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 						<div key={section}>
 						<h3 className={cn(
 							"px-3 text-xs font-semibold uppercase tracking-wider mb-3",
-							"text-[var(--sidebar-foreground)] opacity-60",
+							"text-sidebar-foreground opacity-60",
 							collapsed && "hidden",
 						)}>
 								{sectionLabels[section as keyof typeof sectionLabels]}
@@ -323,7 +323,7 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 			</nav>
 
 			{/* Footer - User Section */}
-			<div className="border-t border-[var(--sidebar-border)] p-4 flex-shrink-0">
+			<div className="border-t border-sidebar-border p-4 flex-shrink-0">
 				{user ? (
 					<div className={cn(
 						"flex items-center gap-3",
@@ -336,11 +336,11 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 						/>
 						{!collapsed && (
 							<div className="flex-1 min-w-0">
-								<p className="text-sm font-medium text-[var(--sidebar-foreground)] truncate">
+								<p className="text-sm font-medium text-sidebar-foreground truncate">
 									{user.name || "User"}
 								</p>
 								{user.email && (
-									<p className="text-xs text-[var(--sidebar-foreground)] opacity-60 truncate">
+									<p className="text-xs text-sidebar-foreground opacity-60 truncate">
 										{user.email}
 									</p>
 								)}
@@ -352,15 +352,15 @@ export const EnhancedSidebar = React.memo<EnhancedSidebarProps>(({
 						"flex items-center gap-3",
 						collapsed && "justify-center",
 					)}>
-						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] text-sm font-medium">
+						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-sm font-medium">
 							U
 						</div>
 						{!collapsed && (
 							<div className="flex-1 min-w-0">
-								<p className="text-sm font-medium text-[var(--sidebar-foreground)] truncate">
+								<p className="text-sm font-medium text-sidebar-foreground truncate">
 									Guest User
 								</p>
-								<p className="text-xs text-[var(--sidebar-foreground)] opacity-60 truncate">
+								<p className="text-xs text-sidebar-foreground opacity-60 truncate">
 									Not signed in
 								</p>
 							</div>

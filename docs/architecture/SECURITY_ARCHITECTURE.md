@@ -14,38 +14,71 @@ The Financbase Admin Dashboard implements a multi-layered security architecture 
 
 ```36:58:app/providers.tsx
 export function Providers({ children }: ProvidersProps) {
-	return (
-		<ClerkProvider>
-			<QueryClientProvider client={queryClient}>
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="light"
-					enableSystem={false}
-					disableTransitionOnChange
-					storageKey="financbase-theme"
-					suppressHydrationWarning
-				>
-					<DashboardProvider>
-						{children}
-					</DashboardProvider>
-				</ThemeProvider>
-				{process.env.NODE_ENV === 'development' && (
-					<ReactQueryDevtoolsDevelopment initialIsOpen={false} />
-				)}
-			</QueryClientProvider>
-		</ClerkProvider>
-	);
+ return (
+  <ClerkProvider>
+   <QueryClientProvider client={queryClient}>
+    <ThemeProvider
+     attribute="class"
+     defaultTheme="light"
+     enableSystem={false}
+     disableTransitionOnChange
+     storageKey="financbase-theme"
+     suppressHydrationWarning
+    >
+     <DashboardProvider>
+      {children}
+     </DashboardProvider>
+    </ThemeProvider>
+    {process.env.NODE_ENV === 'development' && (
+     <ReactQueryDevtoolsDevelopment initialIsOpen={false} />
+    )}
+   </QueryClientProvider>
+  </ClerkProvider>
+ );
 }
 ```
 
 ### Middleware Authentication
 
-```48:128:middleware.ts
+The middleware (`middleware.ts`) implements comprehensive route protection using Clerk's `clerkMiddleware`. All sensitive routes are protected at the middleware level, providing defense-in-depth security.
+
+**Key Features:**
+
+- Route matching using `createRouteMatcher` for efficient pattern matching
+- Automatic redirect for authenticated users accessing auth pages
+- Consistent error handling (401 for API routes, redirect for page routes)
+- Integration with RBAC system for permission checking
+- API versioning header support
+
+**Protected Routes:**
+
+- All `/dashboard(.*)` routes
+- All `/api/*` routes (except public endpoints)
+- All application pages requiring authentication
+- See `docs/security/ROUTE_PROTECTION_AUDIT.md` for complete list
+
+**Public Routes:**
+
+- `/home(.*)`, `/about(.*)`, `/pricing(.*)`, `/contact(.*)`
+- `/api/health`, `/api/contact`, `/api/webhooks(.*)`
+- See `docs/security/ROUTE_PROTECTION_AUDIT.md` for complete list
+
+```45:129:middleware.ts
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  // ... all protected routes including 50+ API route patterns
+  '/api/leads(.*)',
+  '/api/onboarding(.*)',
+  '/api/accounts(.*)',
+  // ... see middleware.ts for complete list
+]);
+
 export default clerkMiddleware(async (auth, req) => {
   const { pathname } = req.nextUrl;
-
-  // Get userId only when needed (for protected routes and auth route checks)
-  const { userId } = await auth();
+  
+  // Get auth result once and reuse it
+  const authResult = await auth();
+  const { userId } = authResult;
 
   // If user is authenticated and accessing auth pages, redirect to dashboard FIRST
   if (userId && isAuthRoute(req)) {
@@ -60,7 +93,7 @@ export default clerkMiddleware(async (auth, req) => {
   // Protect routes that require authentication
   if (isProtectedRoute(req)) {
     if (!userId) {
-      // For API routes, return 401 JSON response
+      // For API routes, return 401 JSON response with version headers
       if (pathname.startsWith('/api/')) {
         const errorResponse = NextResponse.json(
           {
@@ -75,31 +108,59 @@ export default clerkMiddleware(async (auth, req) => {
       // For page routes, redirect to sign-in
       return NextResponse.redirect(new URL('/auth/sign-in', req.url));
     }
+
+    // Check route permissions for authenticated users
+    try {
+      const hasPermission = await checkRoutePermissions(pathname, authResult);
+      if (!hasPermission) {
+        // Return 403 Forbidden for API routes
+        if (pathname.startsWith('/api/')) {
+          return NextResponse.json(
+            {
+              error: 'Forbidden',
+              message: 'You do not have permission to access this resource',
+              code: 'FORBIDDEN'
+            },
+            { status: 403 }
+          );
+        }
+        // Redirect to dashboard with error for page routes
+        const redirectUrl = new URL('/dashboard', req.url);
+        redirectUrl.searchParams.set('error', 'unauthorized');
+        return NextResponse.redirect(redirectUrl);
+      }
+    } catch (error) {
+      console.error('Error checking route permissions:', error);
+      // Fail open for now - in production, consider failing closed
+    }
   }
 
   return NextResponse.next();
 });
 ```
 
+**For complete route protection documentation, see:** `docs/security/ROUTE_PROTECTION_AUDIT.md`
+
 ### Role-Based Access Control (RBAC)
 
 User roles defined in schema:
+
 - **admin**: Full system access
 - **user**: Standard user access
 - **viewer**: Read-only access
 
 ```9:20:lib/db/schemas/users.schema.ts
 export const users = pgTable("financbase.users", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	clerkId: text("clerk_id").notNull().unique(),
-	email: text("email").notNull().unique(),
-	firstName: text("first_name"),
-	lastName: text("last_name"),
-	role: text("role", { enum: ["admin", "user", "viewer"] }).notNull().default("user"),
-	isActive: boolean("is_active").notNull().default(true),
-	organizationId: uuid("organization_id").notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-	updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+ id: uuid("id").primaryKey().defaultRandom(),
+ clerkId: text("clerk_id").notNull().unique(),
+ email: text("email").notNull().unique(),
+ firstName: text("first_name"),
+ lastName: text("last_name"),
+ role: text("role", { enum: ["admin", "user", "viewer"] }).notNull().default("user"),
+ isActive: boolean("is_active").notNull().default(true),
+ organizationId: uuid("organization_id").notNull(),
+ createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+ updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 ```
 
@@ -164,36 +225,36 @@ Implemented via SecurityService with Arcjet:
 
 ```68:99:app/api/contact/route.ts
 export async function POST(request: NextRequest) {
-	const requestId = generateRequestId();
-	try {
-		// Apply security checks (rate limiting, bot detection, threat protection)
-		const securityCheck = await SecurityService.securityCheck(
-			request,
-			'/api/contact'
-		);
+ const requestId = generateRequestId();
+ try {
+  // Apply security checks (rate limiting, bot detection, threat protection)
+  const securityCheck = await SecurityService.securityCheck(
+   request,
+   '/api/contact'
+  );
 
-		if (securityCheck.denied) {
-			if (securityCheck.status === 429) {
-				return ApiErrorHandler.rateLimitExceeded(
-					securityCheck.reasons?.join(', ') || 'Too many requests'
-				);
-			}
-			return NextResponse.json(
-				{
-					error: 'Request denied for security reasons',
-					details: securityCheck.reasons,
-					requestId,
-				},
-				{
-					status: securityCheck.status || 403,
-					headers: {
-						'X-RateLimit-Remaining': securityCheck.rateLimitRemaining
-							? String(securityCheck.rateLimitRemaining)
-							: '0',
-					},
-				}
-			);
-		}
+  if (securityCheck.denied) {
+   if (securityCheck.status === 429) {
+    return ApiErrorHandler.rateLimitExceeded(
+     securityCheck.reasons?.join(', ') || 'Too many requests'
+    );
+   }
+   return NextResponse.json(
+    {
+     error: 'Request denied for security reasons',
+     details: securityCheck.reasons,
+     requestId,
+    },
+    {
+     status: securityCheck.status || 403,
+     headers: {
+      'X-RateLimit-Remaining': securityCheck.rateLimitRemaining
+       ? String(securityCheck.rateLimitRemaining)
+       : '0',
+     },
+    }
+   );
+  }
 ```
 
 ### Input Sanitization
@@ -201,11 +262,11 @@ export async function POST(request: NextRequest) {
 All user inputs are sanitized before processing:
 
 ```127:131:app/api/contact/route.ts
-		// Sanitize inputs
-		const sanitizedName = sanitizeInput(name);
-		const sanitizedEmail = email.toLowerCase().trim();
-		const sanitizedCompany = company ? sanitizeInput(company) : null;
-		const sanitizedMessage = sanitizeInput(message);
+  // Sanitize inputs
+  const sanitizedName = sanitizeInput(name);
+  const sanitizedEmail = email.toLowerCase().trim();
+  const sanitizedCompany = company ? sanitizeInput(company) : null;
+  const sanitizedMessage = sanitizeInput(message);
 ```
 
 ### Honeypot Fields
@@ -213,10 +274,10 @@ All user inputs are sanitized before processing:
 Spam protection using hidden form fields:
 
 ```117:120:app/api/contact/route.ts
-		// Additional honeypot check (should be empty)
-		if (website && website.length > 0) {
-			return ApiErrorHandler.badRequest('Spam detected');
-		}
+  // Additional honeypot check (should be empty)
+  if (website && website.length > 0) {
+   return ApiErrorHandler.badRequest('Spam detected');
+  }
 ```
 
 ## HTTP Security Headers
@@ -224,42 +285,43 @@ Spam protection using hidden form fields:
 ### Content Security Policy (CSP)
 
 ```121:152:next.config.mjs
-	headers: async () => {
-		return [
-			{
-				source: '/(.*)',
-				headers: [
-					{
-						key: 'X-Frame-Options',
-						value: 'DENY',
-					},
-					{
-						key: 'X-Content-Type-Options',
-						value: 'nosniff',
-					},
-					{
-						key: 'Referrer-Policy',
-						value: 'strict-origin-when-cross-origin',
-					},
-					{
-						key: 'Permissions-Policy',
-						value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-					},
-					{
-						key: 'Strict-Transport-Security',
-						value: 'max-age=31536000; includeSubDomains',
-					},
-					{
-						key: 'Content-Security-Policy',
-						value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.financbase.com https://js.clerk.com https://clerk.com https://content-alien-33.clerk.accounts.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.financbase.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.financbase.com wss://ws.financbase.com https://clerk.com https://content-alien-33.clerk.accounts.dev https://clerk-telemetry.com; frame-src https://clerk.com https://js.clerk.com https://content-alien-33.clerk.accounts.dev; worker-src 'self' blob:;",
-					},
-				],
-			},
-		];
-	},
+ headers: async () => {
+  return [
+   {
+    source: '/(.*)',
+    headers: [
+     {
+      key: 'X-Frame-Options',
+      value: 'DENY',
+     },
+     {
+      key: 'X-Content-Type-Options',
+      value: 'nosniff',
+     },
+     {
+      key: 'Referrer-Policy',
+      value: 'strict-origin-when-cross-origin',
+     },
+     {
+      key: 'Permissions-Policy',
+      value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+     },
+     {
+      key: 'Strict-Transport-Security',
+      value: 'max-age=31536000; includeSubDomains',
+     },
+     {
+      key: 'Content-Security-Policy',
+      value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.financbase.com https://js.clerk.com https://clerk.com https://content-alien-33.clerk.accounts.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.financbase.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.financbase.com wss://ws.financbase.com https://clerk.com https://content-alien-33.clerk.accounts.dev https://clerk-telemetry.com; frame-src https://clerk.com https://js.clerk.com https://content-alien-33.clerk.accounts.dev; worker-src 'self' blob:;",
+     },
+    ],
+   },
+  ];
+ },
 ```
 
 **Security Headers:**
+
 - **X-Frame-Options**: DENY (prevents clickjacking)
 - **X-Content-Type-Options**: nosniff (prevents MIME type sniffing)
 - **Referrer-Policy**: strict-origin-when-cross-origin
@@ -410,4 +472,3 @@ Based on security audit:
 - [Security Audit Report](../../SECURITY_AUDIT_REPORT.md)
 - [Database Security Guidelines](../database/security-guidelines.md)
 - [API Security](../api/API.md#security)
-

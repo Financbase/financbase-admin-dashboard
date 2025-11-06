@@ -28,8 +28,10 @@ import {
   ArrowRight
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function Features() {
+  const router = useRouter()
   const mainFeatures = [
     {
       icon: <Brain className="h-8 w-8" />,
@@ -242,14 +244,17 @@ export default function Features() {
               and accelerate their growth.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" variant="secondary">
-                <Link href="/auth/sign-up">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+              <Button 
+                size="lg" 
+                variant="secondary"
+                onClick={() => router.push('/auth/sign-up')}
+                className="flex items-center"
+              >
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-                <Link href="/about">
+                <Link href="/docs">
                   Learn More
                 </Link>
               </Button>

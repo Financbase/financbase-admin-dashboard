@@ -43,7 +43,7 @@ export function ModernNavbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-transparent bg-background/95 backdrop-blur-lg">
+    <header className="sticky top-0 z-50 w-full border-b border-transparent bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
@@ -67,7 +67,7 @@ export function ModernNavbar() {
                   <ProductItem
                     title="Financial Intelligence"
                     description="AI-powered financial insights and predictions"
-                    href="/financial-intelligence"
+                    href="/products/financial-intelligence"
                     src="/images/products/financial-intelligence.svg"
                   />
                   <ProductItem
@@ -161,7 +161,7 @@ export function ModernNavbar() {
                   <Link href="/adboard" className="block text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" onClick={closeMobileMenu}>
                     Adboard
                   </Link>
-                  <Link href="/financial-intelligence" className="block text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" onClick={closeMobileMenu}>
+                  <Link href="/products/financial-intelligence" className="block text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" onClick={closeMobileMenu}>
                     Financial Intelligence
                   </Link>
                   <Link href="/products/analytics" className="block text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" onClick={closeMobileMenu}>

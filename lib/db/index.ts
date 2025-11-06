@@ -56,19 +56,19 @@ const createDatabaseConnection = () => {
 			const sql = neon(process.env.DATABASE_URL);
 			return drizzle(sql, { schema });
 		}
-			
+		
 		case 'neon-serverless': {
 			const neonSql = neon(process.env.DATABASE_URL);
 			return drizzleNode(neonSql, { schema });
 		}
-			
+		
 		case 'postgres': {
 			// Fallback to neon-http for postgres driver to avoid pg module issues
 			console.warn('Postgres driver not available in browser, falling back to neon-http');
 			const sql = neon(process.env.DATABASE_URL);
 			return drizzle(sql, { schema });
 		}
-			
+		
 		default:
 			throw new Error(`Unsupported database driver: ${driver}`);
 	}

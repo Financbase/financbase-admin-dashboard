@@ -369,11 +369,11 @@ export default function AlertsPage() {
                               const safeUrl = validateSafeUrl(alert.actionUrl);
                               // Security: safeUrl is validated - safe for use in Next.js Link
                               return safeUrl ? (
-                                <Link href={safeUrl}>
-                                  <Button size="sm" variant="outline">
+                                <Button size="sm" variant="outline" asChild>
+                                  <Link href={safeUrl}>
                                     View Details
-                                  </Button>
-                                </Link>
+                                  </Link>
+                                </Button>
                               ) : null;
                             })()}
                             {!alert.read && (

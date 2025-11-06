@@ -24,8 +24,10 @@ import {
   Zap
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function PremiumInteractiveDemo() {
+  const router = useRouter()
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
@@ -185,11 +187,13 @@ export default function PremiumInteractiveDemo() {
 
             {/* CTA */}
             <div className="pt-8">
-              <Button asChild size="lg" className="w-full">
-                <Link href="/auth/sign-up">
-                  Get Started Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+              <Button 
+                size="lg" 
+                className="w-full flex items-center justify-center"
+                onClick={() => router.push('/auth/sign-up')}
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>

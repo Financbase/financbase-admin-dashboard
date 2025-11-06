@@ -7,7 +7,9 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { Metadata } from "next";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,11 +30,6 @@ import {
   Globe,
   Shield
 } from "lucide-react";
-
-export const metadata: Metadata = {
-  title: "Platform Hub - Financbase",
-  description: "Workflows, webhooks, and system monitoring",
-};
 
 const platformStats = [
   {
@@ -170,14 +167,14 @@ const quickActions = [
     title: "Create Workflow",
     description: "Build a new automation workflow",
     icon: Plus,
-    href: "/workflows/new",
+    href: "/workflows",
     color: "bg-blue-500",
   },
   {
     title: "Add Webhook",
     description: "Create a new webhook endpoint",
     icon: Webhook,
-    href: "/webhooks/new",
+    href: "/webhooks",
     color: "bg-green-500",
   },
   {
@@ -197,6 +194,20 @@ const quickActions = [
 ];
 
 export default function PlatformHubPage() {
+  const router = useRouter();
+
+  const handleQuickAction = (href: string) => {
+    router.push(href);
+  };
+
+  const handleCreateWorkflow = () => {
+    router.push('/workflows');
+  };
+
+  const handleAddWebhook = () => {
+    router.push('/webhooks');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-8">
@@ -255,6 +266,7 @@ export default function PlatformHubPage() {
                     key={action.title}
                     variant="outline"
                     className="w-full justify-start h-auto p-4"
+                    onClick={() => handleQuickAction(action.href)}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg ${action.color}`}>
@@ -288,7 +300,7 @@ export default function PlatformHubPage() {
                       Automation workflows and their performance
                     </CardDescription>
                   </div>
-                  <Button size="sm">
+                  <Button size="sm" onClick={handleCreateWorkflow}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Workflow
                   </Button>
@@ -358,7 +370,7 @@ export default function PlatformHubPage() {
                       Event delivery endpoints and their status
                     </CardDescription>
                   </div>
-                  <Button size="sm">
+                  <Button size="sm" onClick={handleAddWebhook}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Webhook
                   </Button>

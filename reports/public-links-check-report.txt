@@ -1,6 +1,6 @@
 # Public Pages Link Check Report
 
-Generated: 2025-11-04T03:19:19.473Z
+Generated: 2025-11-06T16:09:31.227Z
 Base URL: http://localhost:3003
 
 ## Summary
@@ -30,24 +30,24 @@ Base URL: http://localhost:3003
 - http://localhost:3003/legal - error
   Error: Failed to fetch http://localhost:3003/legal: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/legal"
 - http://localhost:3003/security - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/security: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/security"
 - http://localhost:3003/support - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/support: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/support"
 - http://localhost:3003/blog - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/blog: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/blog"
 - http://localhost:3003/careers - error
-  Error: HTTP 500
-- http://localhost:3003/analytics - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/careers: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/careers"
+- http://localhost:3003/products/analytics - error
+  Error: Failed to fetch http://localhost:3003/products/analytics: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/products/analytics"
 - http://localhost:3003/adboard - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/adboard: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/adboard"
 - http://localhost:3003/cloud-platform - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/cloud-platform: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/cloud-platform"
 - http://localhost:3003/team-collaboration - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/team-collaboration: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/team-collaboration"
 - http://localhost:3003/docs - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/docs: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/docs"
 - http://localhost:3003/auth/sign-in - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/auth/sign-in: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/auth/sign-in"
 - http://localhost:3003/auth/sign-up - error
-  Error: HTTP 500
+  Error: Failed to fetch http://localhost:3003/auth/sign-up: Command failed: curl -L -s -w "\n%{http_code}" -m 10 "http://localhost:3003/auth/sign-up"

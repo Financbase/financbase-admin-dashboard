@@ -94,7 +94,7 @@ const ActionButton = memo(function ActionButton({
 		<Button
 			variant={action.variant || "outline"}
 			asChild={!!action.href}
-			onClick={action.onClick}
+			onClick={action.href ? undefined : action.onClick}
 		>
 			{action.href ? (
 				<Link href={action.href}>

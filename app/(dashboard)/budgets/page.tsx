@@ -166,9 +166,15 @@ export default function BudgetsPage() {
 										Manage and configure your budget categories
 									</p>
 								</div>
-								<Button size="sm" onClick={() => toast.info('Category management feature will be available soon')}>
+								<Button 
+									size="sm" 
+									variant="outline"
+									disabled
+									title="Category management feature coming soon"
+								>
 									<Plus className="h-4 w-4 mr-2" />
 									Add Category
+									<Badge variant="secondary" className="ml-2 text-xs">Soon</Badge>
 								</Button>
 							</div>
 						</CardHeader>
@@ -189,9 +195,15 @@ export default function BudgetsPage() {
 										</Card>
 									))}
 								</div>
-								<Button variant="outline" className="w-full" onClick={() => toast.info('Add new category feature coming soon')}>
+								<Button 
+									variant="outline" 
+									className="w-full" 
+									disabled
+									title="Add new category feature coming soon"
+								>
 									<Plus className="h-4 w-4 mr-2" />
 									Create New Category
+									<Badge variant="secondary" className="ml-2 text-xs">Soon</Badge>
 								</Button>
 							</div>
 						</CardContent>

@@ -29,18 +29,32 @@ export default function OnboardingCompletePage() {
 	const router = useRouter();
 	const [persona, setPersona] = useState<string>("");
 	const [completedSteps, setCompletedSteps] = useState<number>(0);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		// Get onboarding completion data from localStorage or API
-		const onboardingData = localStorage.getItem("onboarding-complete");
-		if (onboardingData) {
-			const data = JSON.parse(onboardingData);
-			setPersona(data.persona || "");
-			setCompletedSteps(data.completedSteps || 0);
-		}
-
-		// Show confetti effect
-		toast.success("🎉 Welcome to Financbase! Your setup is complete!");
+		const fetchOnboardingData = async () => {
+			try {
+				const response = await fetch("/api/onboarding");
+				const data = await response.json();
+				
+				if (data.success && data.onboarding) {
+					setPersona(data.onboarding.userOnboarding.persona);
+					setCompletedSteps(data.onboarding.progress.completed);
+					// Show confetti effect
+					toast.success("🎉 Welcome to Financbase! Your setup is complete!");
+				} else {
+					// Fallback if no onboarding data found
+					toast.info("Onboarding data not found");
+				}
+			} catch (error) {
+				console.error("Error fetching onboarding data:", error);
+				toast.error("Failed to load onboarding data");
+			} finally {
+				setIsLoading(false);
+			}
+		};
+		
+		fetchOnboardingData();
 	}, []);
 
 	const getPersonaInfo = (persona: string) => {
@@ -107,6 +121,17 @@ export default function OnboardingCompletePage() {
 	const handleExploreFeatures = () => {
 		router.push("/dashboard?tour=true");
 	};
+
+	if (isLoading) {
+		return (
+			<div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-6">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4" />
+					<p className="text-gray-600">Loading your completion data...</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-6">

@@ -127,7 +127,7 @@ export function DataTableTemplate({
 							key={`item-${index}`}
 							variant={action.variant || "outline"}
 							asChild={!!action.href}
-							onClick={action.onClick}
+							onClick={action.href ? undefined : action.onClick}
 						>
 							{action.href ? (
 								<Link href={action.href}>

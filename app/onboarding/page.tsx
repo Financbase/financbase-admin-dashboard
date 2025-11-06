@@ -41,9 +41,112 @@ export default function OnboardingPage() {
 		}
 	}, [personaParam, selectedPersona]);
 
+	// Auto-initialize onboarding if persona is provided in URL and no onboarding exists
+	useEffect(() => {
+		const autoInitializeOnboarding = async () => {
+			// Only auto-initialize if:
+			// 1. Persona is in URL
+			// 2. No onboarding exists yet
+			// 3. Not currently initializing
+			// 4. Not loading
+			if (personaParam && !onboarding && !isInitializing && !isLoading) {
+				// Validate persona is a valid Persona type
+				const validPersonas: Persona[] = ["digital_agency", "real_estate", "tech_startup", "freelancer"];
+				if (validPersonas.includes(personaParam as Persona)) {
+					setIsInitializing(true);
+					try {
+						const response = await fetch("/api/onboarding", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ persona: personaParam })
+						});
+
+						// Handle 401 Unauthorized - session might not be ready yet
+						if (response.status === 401) {
+							// Wait a bit for session to initialize, then retry
+							await new Promise(resolve => setTimeout(resolve, 1500));
+							const retryResponse = await fetch("/api/onboarding", {
+								method: "POST",
+								headers: { "Content-Type": "application/json" },
+								body: JSON.stringify({ persona: personaParam })
+							});
+							
+							if (retryResponse.status === 401) {
+								toast.error("Please sign in to continue");
+								router.push("/auth/sign-in");
+								setIsInitializing(false);
+								return;
+							}
+
+							const retryData = await retryResponse.json();
+							if (retryData.success) {
+								setOnboarding(retryData.onboarding);
+								setSelectedPersona(personaParam as Persona);
+								toast.success("Onboarding initialized! Let's get started.");
+							} else {
+								throw new Error(retryData.error || "Failed to initialize onboarding");
+							}
+							setIsInitializing(false);
+							return;
+						}
+
+						if (!response.ok) {
+							throw new Error(`HTTP error! status: ${response.status}`);
+						}
+
+						const data = await response.json();
+
+						if (data.success) {
+							setOnboarding(data.onboarding);
+							setSelectedPersona(personaParam as Persona);
+							toast.success("Onboarding initialized! Let's get started.");
+						} else {
+							throw new Error(data.error || "Failed to initialize onboarding");
+						}
+					} catch (error) {
+						console.error("Error initializing onboarding:", error);
+						toast.error("Failed to start onboarding. Please try again.");
+					} finally {
+						setIsInitializing(false);
+					}
+				}
+			}
+		};
+
+		autoInitializeOnboarding();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [personaParam, onboarding, isInitializing, isLoading]);
+
 	const checkOnboardingStatus = async () => {
 		try {
 			const response = await fetch("/api/onboarding");
+			
+			// Handle 401 Unauthorized - user might not be fully authenticated yet
+			if (response.status === 401) {
+				// Wait a bit and retry (session might still be initializing)
+				await new Promise(resolve => setTimeout(resolve, 1000));
+				const retryResponse = await fetch("/api/onboarding");
+				if (retryResponse.status === 401) {
+					// Still unauthorized after retry - redirect to sign-in
+					router.push("/auth/sign-in");
+					return;
+				}
+				const retryData = await retryResponse.json();
+				if (retryData.success && retryData.onboarding) {
+					setOnboarding(retryData.onboarding);
+					if (retryData.onboarding.userOnboarding.status === "completed") {
+						router.push("/dashboard");
+						return;
+					}
+				}
+				setIsLoading(false);
+				return;
+			}
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
 			const data = await response.json();
 
 			if (data.success && data.onboarding) {
@@ -57,6 +160,8 @@ export default function OnboardingPage() {
 			}
 		} catch (error) {
 			console.error("Error checking onboarding status:", error);
+			// If it's a network error or other issue, don't block the user
+			// They can still proceed with persona selection
 		} finally {
 			setIsLoading(false);
 		}

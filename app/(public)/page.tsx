@@ -54,7 +54,7 @@ export default function Home() {
 				}}
 				secondaryAction={{
 					text: "Learn More",
-					href: "/about",
+					href: "/docs",
 				}}
 			/>
 		</>
