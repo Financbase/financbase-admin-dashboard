@@ -11,6 +11,7 @@
 
 import { FinancbaseLogo } from "@/components/ui/financbase-logo";
 import { Button } from "@/components/ui/button";
+import { useBrandingContext } from "@/contexts/branding-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,6 +69,11 @@ const dashboardNavigation = {
 };
 
 export function DashboardFooter() {
+  const { getCompanyName, getSupportEmail, getSupportUrl, branding } = useBrandingContext();
+  const companyName = getCompanyName();
+  const supportEmail = getSupportEmail();
+  const supportUrl = getSupportUrl();
+
   return (
     <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-8">
@@ -102,17 +108,32 @@ export function DashboardFooter() {
           <div>
             <h3 className="text-sm font-semibold mb-4">Support</h3>
             <ul className="space-y-3">
-              {dashboardNavigation.support.map((item) => (
-                <li key={item.name}>
-                  <Link
-                    href={item.href}
+              {dashboardNavigation.support.map((item) => {
+                // Use branded support URL if available
+                const href = item.href === "/support" && supportUrl ? supportUrl : item.href;
+                return (
+                  <li key={item.name}>
+                    <Link
+                      href={href}
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+                    >
+                      <item.icon className="h-3 w-3" />
+                      {item.name}
+                    </Link>
+                  </li>
+                );
+              })}
+              {supportEmail && (
+                <li>
+                  <a
+                    href={`mailto:${supportEmail}`}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
                   >
-                    <item.icon className="h-3 w-3" />
-                    {item.name}
-                  </Link>
+                    <Mail className="h-3 w-3" />
+                    Contact Support
+                  </a>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
 
@@ -165,7 +186,7 @@ export function DashboardFooter() {
         <div className="mt-8 pt-8 border-t">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              © 2025 Financbase. All rights reserved.
+              © 2025 {companyName}. All rights reserved.
             </p>
             <div className="flex items-center gap-4 mt-4 md:mt-0">
               <span className="text-xs text-muted-foreground">

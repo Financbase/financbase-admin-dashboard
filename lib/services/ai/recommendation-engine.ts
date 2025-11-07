@@ -8,7 +8,7 @@
  */
 
 import {} from "lucide-react";
-import { FinancialHealthService } from "../financial-health-service";
+import { FinancialHealthService } from "../financial/financial-health-service";
 import type { AIRecommendation } from "./ai-types";
 import { CashFlowPredictor } from "./cash-flow-predictor";
 import { ExpensePredictor } from "./expense-predictor";
@@ -325,7 +325,7 @@ export class RecommendationEngine {
 						potentialRevenue: 0,
 						confidence: 80,
 						actionable: true,
-						steps: (risk.mitigation as string[]).map(
+						steps: (Array.isArray(risk?.mitigation) ? risk.mitigation : []).map(
 							(action: string, index: number) => ({
 								step: index + 1,
 								action,
@@ -340,17 +340,17 @@ export class RecommendationEngine {
 			},
 		);
 
-		(cashFlowRisks.opportunities as unknown[]).forEach(
-			(opportunity: Record<string, unknown>) => {
+		(Array.isArray(cashFlowRisks.opportunities) ? cashFlowRisks.opportunities : []).forEach(
+			(opportunity: any) => {
 				recommendations.push({
 					id: crypto.randomUUID(),
 					type: "optimization",
-					title: `Optimize ${opportunity.type.replace("_", " ")}`,
-					description: opportunity.description,
+					title: `Optimize ${String(opportunity?.type || "unknown").replace("_", " ")}`,
+					description: String(opportunity?.description || ""),
 					impact: "medium",
 					effort: "low",
-					timeframe: opportunity.timeframe,
-					potentialSavings: opportunity.potential,
+					timeframe: String(opportunity?.timeframe || "4 weeks"),
+					potentialSavings: Number(opportunity?.potential || 0),
 					potentialRevenue: 0,
 					confidence: 75,
 					actionable: true,

@@ -29,7 +29,7 @@ import {
  */
 export async function GET(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
 	try {
 		const { userId } = await auth();
@@ -37,7 +37,8 @@ export async function GET(
 			return ApiErrorHandler.unauthorized();
 		}
 
-		const id = parseInt(params.id);
+		const resolvedParams = await Promise.resolve(params);
+		const id = parseInt(resolvedParams.id);
 		if (isNaN(id)) {
 			return NextResponse.json(
 				{ success: false, error: 'Invalid budget ID' },
@@ -68,7 +69,7 @@ export async function GET(
  */
 export async function PATCH(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
 	try {
 		const { userId } = await auth();
@@ -76,7 +77,8 @@ export async function PATCH(
 			return ApiErrorHandler.unauthorized();
 		}
 
-		const id = parseInt(params.id);
+		const resolvedParams = await Promise.resolve(params);
+		const id = parseInt(resolvedParams.id);
 		if (isNaN(id)) {
 			return NextResponse.json(
 				{ success: false, error: 'Invalid budget ID' },

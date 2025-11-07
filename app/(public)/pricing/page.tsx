@@ -328,15 +328,10 @@ export default function PricingPage() {
 								</CardHeader>
 
 								<CardContent className="pt-0">
-								<button
-									type="button"
-									className={`w-full mb-6 p-4 text-xl rounded-xl ${
-										plan.popular
-											? "text-white shadow-lg border"
-											: plan.buttonVariant === "outline"
-												? "bg-gradient-to-t from-neutral-900 to-neutral-600  shadow-lg shadow-neutral-900 border border-neutral-700 text-white"
-												: ""
-									}`}
+								<Button
+									variant={plan.popular ? "default" : plan.buttonVariant}
+									size="lg"
+									className="w-full mb-6 text-xl"
 									style={plan.popular ? {
 										background: `linear-gradient(to bottom, var(--brand-primary-light), var(--brand-primary))`,
 										borderColor: 'var(--brand-primary)',
@@ -344,13 +339,7 @@ export default function PricingPage() {
 									} : {}}
 								>
 									{plan.buttonText}
-								</button>
-								<button
-									type="button"
-									className={`w-full mb-6 p-4 text-xl rounded-xl bg-white text-black border border-gray-200 shadow-lg shadow-gray-200`}
-								>
-									Click to Sale
-								</button>
+								</Button>
 
 								<div className="space-y-3 pt-4 border-t border-neutral-200">
 									<h2 className="text-xl font-semibold uppercase text-gray-900 mb-3">
@@ -570,18 +559,15 @@ export default function PricingPage() {
 					<div className="flex flex-col sm:flex-row gap-4 justify-center">
 						<Button 
 							size="lg" 
-							className="bg-white hover:bg-gray-100"
-							style={{ color: 'var(--brand-primary)' }}
+							variant="secondary"
+							className="bg-white text-primary hover:bg-gray-100"
 						>
 							Start Your Free Trial
 						</Button>
 						<Button 
 							size="lg" 
 							variant="outline" 
-							className="border-white text-white hover:bg-white"
-							style={{ 
-								'--hover-text-color': 'var(--brand-primary)',
-							} as React.CSSProperties}
+							className="border-white text-white hover:bg-white hover:text-primary"
 						>
 							Contact Sales
 						</Button>

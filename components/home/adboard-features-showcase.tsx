@@ -80,17 +80,17 @@ const integrations = [
   {
     name: "Meta Ads",
     desc: "Connect Facebook and Instagram advertising campaigns",
-    logo: "/integrations/meta.svg",
+    logo: "/integrations/meta-ads.svg",
   },
   {
     name: "LinkedIn Ads",
     desc: "B2B advertising and professional targeting campaigns",
-    logo: "/integrations/linkedin.svg",
+    logo: "/integrations/linkedin-ads.svg",
   },
   {
     name: "TikTok Ads",
     desc: "Video advertising for younger audiences and trends",
-    logo: "/integrations/tiktok.svg",
+    logo: "/integrations/tiktok-ads.svg",
   }
 ];
 
@@ -143,7 +143,7 @@ export default function AdboardFeaturesShowcase() {
                         width={32}
                         height={32}
                         className="w-full h-full object-contain"
-                        unoptimized={item.logo.endsWith('.svg')}
+                        unoptimized={item.logo.endsWith('.svg') || item.logo.startsWith('https://')}
                       />
                     </div>
                     <div className="min-w-0 flex-1">

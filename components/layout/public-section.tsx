@@ -7,10 +7,14 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { PageAnimationWrapper } from "@/components/layout/public-page-animations";
+import { motion, useInView } from "framer-motion";
 import type { ReactNode } from "react";
-import { forwardRef } from "react";
+import { forwardRef, useRef } from "react";
 
 interface PublicSectionProps {
   children: ReactNode;
@@ -33,6 +37,9 @@ export const PublicSection = forwardRef<HTMLElement, PublicSectionProps>(({
   padding = "md",
   id,
 }, ref) => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef || ref, { once: true, margin: "-100px" });
+  
   const paddingClasses = {
     sm: "py-12",
     md: "py-20",
@@ -46,21 +53,29 @@ export const PublicSection = forwardRef<HTMLElement, PublicSectionProps>(({
   };
 
   return (
-    <section 
-      ref={ref}
+    <motion.section 
+      ref={sectionRef || ref}
       id={id}
       className={cn(
         paddingClasses[padding],
         backgroundClasses[background],
         className
       )}
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+      transition={{ duration: 0.6 }}
     >
       <div className={cn(
         "max-w-6xl mx-auto px-6",
         containerClassName
       )}>
         {(title || description) && (
-          <div className="text-center mb-16">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
             {title && (
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
                 {title}
@@ -71,11 +86,11 @@ export const PublicSection = forwardRef<HTMLElement, PublicSectionProps>(({
                 {description}
               </p>
             )}
-          </div>
+          </motion.div>
         )}
         {children}
       </div>
-    </section>
+    </motion.section>
   );
 });
 
@@ -89,15 +104,22 @@ export interface PublicCardProps {
 
 export function PublicCard({ children, className, hover = true }: PublicCardProps) {
   return (
-    <Card className={cn(
-      "p-6 hover:shadow-lg transition-all duration-300 bg-card border",
-      hover && "hover:scale-[1.02]",
-      className
-    )}>
-      <CardContent className="p-0">
-        {children}
-      </CardContent>
-    </Card>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5 }}
+      whileHover={hover ? { scale: 1.02, y: -4 } : undefined}
+    >
+      <Card className={cn(
+        "p-6 hover:shadow-lg transition-all duration-300 bg-card border",
+        className
+      )}>
+        <CardContent className="p-0">
+          {children}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 

@@ -63,7 +63,9 @@ const AvatarFallback = React.forwardRef<
 	<AvatarPrimitive.Fallback
 		ref={ref}
 		className={cn(
-			"flex h-full w-full items-center justify-center rounded-[inherit] bg-secondary text-xs",
+			"flex h-full w-full items-center justify-center rounded-[inherit] text-xs",
+			// Only apply default background if no gradient class is provided
+			!className?.includes("bg-gradient") && !className?.includes("bg-") && "bg-secondary",
 			className,
 		)}
 		{...props}

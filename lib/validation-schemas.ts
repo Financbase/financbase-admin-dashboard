@@ -90,7 +90,7 @@ export const updateExpenseSchema = createExpenseSchema.partial().extend({
 });
 
 // Budget validation schemas
-export const createBudgetSchema = z.object({
+const baseBudgetSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
   name: z.string().min(1, 'Budget name is required').max(200, 'Budget name must be less than 200 characters'),
   category: z.string().min(1, 'Category is required'),
@@ -105,7 +105,9 @@ export const createBudgetSchema = z.object({
   notes: z.string().optional(),
   tags: z.array(z.string()).optional(),
   metadata: z.record(z.any()).optional()
-}).refine((data) => {
+});
+
+export const createBudgetSchema = baseBudgetSchema.refine((data) => {
   const start = new Date(data.startDate);
   const end = new Date(data.endDate);
   return end > start;
@@ -114,7 +116,7 @@ export const createBudgetSchema = z.object({
   path: ['endDate']
 });
 
-export const updateBudgetSchema = createBudgetSchema.partial().extend({
+export const updateBudgetSchema = baseBudgetSchema.partial().extend({
   id: z.number().positive('Valid budget ID is required')
 });
 

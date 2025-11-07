@@ -1,6 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-  <!-- Amazon Logo - Arrow from A to Z -->
-  <path d="M50 20C33.4315 20 20 33.4315 20 50C20 66.5685 33.4315 80 50 80C66.5685 80 80 66.5685 80 50C80 33.4315 66.5685 20 50 20Z" fill="#FF9900"/>
-  <path d="M35 45L50 35L65 45M50 35V65M50 65L35 55M50 65L65 55" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Amazon Logo - Smile Arrow from A to Z -->
+  <rect width="200" height="200" rx="15" fill="#FF9900"/>
+  
+  <!-- Amazon smile curve -->
+  <path d="M40 100 Q 100 50, 160 100" stroke="white" stroke-width="14" stroke-linecap="round" fill="none"/>
+  
+  <!-- Arrow path from A to Z -->
+  <path d="M55 75 L100 50 L145 75 M100 50 L100 150 M100 150 L55 125 M100 150 L145 125" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Letter A (simplified as a triangle) -->
+  <path d="M55 75 L65 95 L45 95 Z" fill="white"/>
+  <path d="M55 80 L60 90 L50 90 Z" fill="#FF9900"/>
+  
+  <!-- Letter Z (simplified) -->
+  <path d="M145 125 L155 125 L145 135 L155 135" stroke="white" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <line x1="145" y1="125" x2="155" y2="135" stroke="white" stroke-width="6" stroke-linecap="round"/>
 </svg>
-

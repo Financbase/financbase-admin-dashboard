@@ -33,8 +33,9 @@ import {
 	ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useId } from "react";
+import { useState, useId, useEffect, useCallback, useRef } from "react";
 import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
+import { useRouter } from "next/navigation";
 
 interface ContactFormData {
 	name: string;
@@ -43,6 +44,15 @@ interface ContactFormData {
 	priority: string;
 	category: string;
 	message: string;
+}
+
+interface SearchResult {
+	type: 'faq' | 'category' | 'article';
+	title: string;
+	excerpt: string;
+	href: string;
+	category?: string;
+	index?: number; // For FAQ items to auto-expand
 }
 
 export default function SupportPage() {
@@ -54,6 +64,14 @@ export default function SupportPage() {
 	const messageId = useId();
 	
 	const [searchQuery, setSearchQuery] = useState("");
+	const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+	const [isSearching, setIsSearching] = useState(false);
+	const [showSearchResults, setShowSearchResults] = useState(false);
+	const [selectedResultIndex, setSelectedResultIndex] = useState(-1);
+	const searchInputRef = useRef<HTMLInputElement>(null);
+	const searchResultsRef = useRef<HTMLDivElement>(null);
+	const router = useRouter();
+	
 	const [openFaq, setOpenFaq] = useState<number | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [formData, setFormData] = useState<ContactFormData>({
@@ -66,6 +84,91 @@ export default function SupportPage() {
 	});
 	const [formErrors, setFormErrors] = useState<Partial<ContactFormData>>({});
 	const [submitMessage, setSubmitMessage] = useState("");
+
+	// Define FAQ items and categories before they're used in callbacks
+	const faqItems = [
+		{
+			question: "How do I get started with Financbase?",
+			answer:
+				"Getting started is easy! Sign up for an account, verify your email, and complete the onboarding process. You'll have access to our dashboard and can start using our financial tools immediately.",
+		},
+		{
+			question: "What payment methods do you accept?",
+			answer:
+				"We accept all major credit cards (Visa, Mastercard, American Express), bank transfers, and digital wallets like PayPal and Apple Pay. All transactions are processed securely through our PCI-compliant payment system.",
+		},
+		{
+			question: "How secure is my financial data?",
+			answer:
+				"Security is our top priority. We use bank-level encryption (256-bit SSL), are SOC 2 compliant, and follow strict data protection protocols. Your data is encrypted both in transit and at rest.",
+		},
+		{
+			question: "Can I integrate Financbase with my existing systems?",
+			answer:
+				"Yes! We offer comprehensive APIs and webhooks that integrate with most popular business tools including QuickBooks, Xero, Salesforce, and custom applications. Check our integration guides for detailed setup instructions.",
+		},
+		{
+			question: "What's your refund policy?",
+			answer:
+				"We offer a 30-day money-back guarantee for all new subscriptions. If you're not satisfied with our service, contact our support team within 30 days of your initial purchase for a full refund.",
+		},
+		{
+			question: "Do you offer phone support?",
+			answer:
+				"Yes! Our Enterprise customers have access to dedicated phone support. Standard and Professional plan customers can reach us via live chat, email, or our help center. Response times vary by plan.",
+		},
+	];
+
+	const supportCategories = [
+		{
+			title: "Getting Started",
+			description: "New to Financbase? Start here",
+			icon: BookOpen,
+			color: "bg-primary/10",
+			href: "/support/category/getting-started",
+			articles: 12,
+		},
+		{
+			title: "Billing & Payments",
+			description: "Questions about pricing, billing, and payments",
+			icon: CreditCard,
+			color: "bg-green-500/10",
+			href: "/support/category/billing-payments",
+			articles: 8,
+		},
+		{
+			title: "Account Management",
+			description: "Manage your account settings and preferences",
+			icon: Settings,
+			color: "bg-blue-500/10",
+			href: "/support/category/account-management",
+			articles: 10,
+		},
+		{
+			title: "Security & Privacy",
+			description: "Learn about our security measures and privacy policy",
+			icon: Shield,
+			color: "bg-red-500/10",
+			href: "/support/category/security-privacy",
+			articles: 15,
+		},
+		{
+			title: "API & Integrations",
+			description: "Connect Financbase with your favorite tools",
+			icon: Zap,
+			color: "bg-purple-500/10",
+			href: "/support/category/api-integrations",
+			articles: 20,
+		},
+		{
+			title: "Troubleshooting",
+			description: "Fix common issues and resolve errors",
+			icon: HelpCircle,
+			color: "bg-orange-500/10",
+			href: "/support/category/troubleshooting",
+			articles: 18,
+		},
+	];
 
 	const validateForm = (): boolean => {
 		const errors: Partial<ContactFormData> = {};
@@ -144,83 +247,251 @@ export default function SupportPage() {
 		}
 	};
 
-	const faqItems = [
-		{
-			question: "How do I get started with Financbase?",
-			answer:
-				"Getting started is easy! Sign up for an account, verify your email, and complete the onboarding process. You'll have access to our dashboard and can start using our financial tools immediately.",
-		},
-		{
-			question: "What payment methods do you accept?",
-			answer:
-				"We accept all major credit cards (Visa, Mastercard, American Express), bank transfers, and digital wallets like PayPal and Apple Pay. All transactions are processed securely through our PCI-compliant payment system.",
-		},
-		{
-			question: "How secure is my financial data?",
-			answer:
-				"Security is our top priority. We use bank-level encryption (256-bit SSL), are SOC 2 compliant, and follow strict data protection protocols. Your data is encrypted both in transit and at rest.",
-		},
-		{
-			question: "Can I integrate Financbase with my existing systems?",
-			answer:
-				"Yes! We offer comprehensive APIs and webhooks that integrate with most popular business tools including QuickBooks, Xero, Salesforce, and custom applications. Check our integration guides for detailed setup instructions.",
-		},
-		{
-			question: "What's your refund policy?",
-			answer:
-				"We offer a 30-day money-back guarantee for all new subscriptions. If you're not satisfied with our service, contact our support team within 30 days of your initial purchase for a full refund.",
-		},
-		{
-			question: "Do you offer phone support?",
-			answer:
-				"Yes! Our Enterprise customers have access to dedicated phone support. Standard and Professional plan customers can reach us via live chat, email, or our help center. Response times vary by plan.",
-		},
-	];
-
-	const supportCategories = [
-		{
+	// Category data for search (matches category page data)
+	const categoryData: Record<string, {
+		title: string;
+		description: string;
+		articles: Array<{
+			title: string;
+			description: string;
+			href: string;
+		}>;
+	}> = {
+		"getting-started": {
 			title: "Getting Started",
-			description: "New to Financbase? Start here",
-			icon: BookOpen,
-			color: "bg-primary/10",
-			articles: 12,
+			description: "New to Financbase? Start here with our comprehensive guides",
+			articles: [
+				{ title: "Quick Start Guide", description: "Get up and running with Financbase in 5 minutes", href: "/docs/help/getting-started" },
+				{ title: "Account Setup", description: "Learn how to configure your organization and user settings", href: "/docs/help/account-setup" },
+				{ title: "Dashboard Overview", description: "Understand your financial dashboard and key features", href: "/docs/help/dashboard" },
+				{ title: "First Steps", description: "Essential first steps after creating your account", href: "/docs/first-steps" },
+			],
 		},
-		{
+		"account-billing": {
 			title: "Account & Billing",
-			description: "Manage your account and payments",
-			icon: CreditCard,
-			color: "bg-chart-2/10",
-			articles: 8,
+			description: "Manage your account, subscription, and payment settings",
+			articles: [
+				{ title: "Subscription Plans", description: "Compare features and pricing across different plans", href: "/pricing" },
+				{ title: "Billing & Invoices", description: "Manage payments, view invoices, and update payment methods", href: "/docs/help/billing" },
+				{ title: "Update Payment Method", description: "How to change or update your payment information", href: "/docs/help/payment" },
+			],
 		},
-		{
+		"security-privacy": {
 			title: "Security & Privacy",
-			description: "Keep your data safe and secure",
-			icon: Shield,
-			color: "bg-primary/5",
-			articles: 15,
+			description: "Keep your data safe and secure with best practices",
+			articles: [
+				{ title: "Security Best Practices", description: "Learn how to secure your account and data", href: "/docs/help/security" },
+				{ title: "Two-Factor Authentication", description: "Set up 2FA to add an extra layer of security", href: "/docs/help/2fa" },
+				{ title: "Privacy Policy", description: "Understand how we protect and handle your data", href: "/privacy" },
+				{ title: "Data Encryption", description: "Learn about our encryption and security measures", href: "/docs/security" },
+			],
 		},
-		{
+		"api-integrations": {
 			title: "API & Integrations",
-			description: "Connect with your favorite tools",
-			icon: Settings,
-			color: "bg-chart-3/10",
-			articles: 20,
+			description: "Connect Financbase with your favorite tools and services",
+			articles: [
+				{ title: "API Overview", description: "Introduction to the Financbase API", href: "/docs/api" },
+				{ title: "API Authentication", description: "Learn how to authenticate with our API", href: "/docs/api/auth" },
+				{ title: "Webhooks Guide", description: "Set up and configure webhooks for real-time updates", href: "/docs/api/webhooks" },
+				{ title: "Integration Setup", description: "Connect with QuickBooks, Stripe, and other services", href: "/docs/integrations" },
+			],
 		},
-		{
+		"troubleshooting": {
 			title: "Troubleshooting",
-			description: "Fix common issues and errors",
-			icon: AlertCircle,
-			color: "bg-chart-5/10",
-			articles: 18,
+			description: "Fix common issues and resolve errors",
+			articles: [
+				{ title: "Common Issues", description: "Solutions for frequently encountered problems", href: "/docs/help/issues" },
+				{ title: "Payment Issues", description: "Troubleshoot payment and billing problems", href: "/docs/help/payment-issues" },
+				{ title: "Import Errors", description: "Fix data import and synchronization errors", href: "/docs/help/import-errors" },
+				{ title: "Performance Issues", description: "Optimize performance and resolve slowdowns", href: "/docs/help/performance" },
+			],
 		},
-		{
+		"advanced-features": {
 			title: "Advanced Features",
-			description: "Unlock the full potential",
-			icon: Zap,
-			color: "bg-chart-4/10",
-			articles: 10,
+			description: "Unlock the full potential of Financbase",
+			articles: [
+				{ title: "Custom Workflows", description: "Create and automate custom business workflows", href: "/docs/help/workflows" },
+				{ title: "Advanced Reporting", description: "Build custom reports and analytics dashboards", href: "/docs/help/reporting" },
+				{ title: "Multi-Tenant Setup", description: "Configure multi-tenant organizations", href: "/docs/multi-tenant" },
+				{ title: "Best Practices", description: "Expert tips and best practices for power users", href: "/docs/help/best-practices" },
+			],
 		},
-	];
+	};
+
+	// Search function
+	const performSearch = useCallback(async (query: string) => {
+		if (!query.trim() || query.length < 2) {
+			setSearchResults([]);
+			setShowSearchResults(false);
+			return;
+		}
+
+		setIsSearching(true);
+		const lowerQuery = query.toLowerCase();
+		const results: SearchResult[] = [];
+
+		// Search FAQs
+		faqItems.forEach((faq, index) => {
+			if (
+				faq.question.toLowerCase().includes(lowerQuery) ||
+				faq.answer.toLowerCase().includes(lowerQuery)
+			) {
+				results.push({
+					type: 'faq',
+					title: faq.question,
+					excerpt: faq.answer.substring(0, 150) + (faq.answer.length > 150 ? '...' : ''),
+					href: '#faq',
+					index,
+				});
+			}
+		});
+
+		// Search categories
+		supportCategories.forEach((category) => {
+			const slug = category.title
+				.toLowerCase()
+				.replace(/\s+/g, '-')
+				.replace(/&/g, '')
+				.replace(/[^\w-]/g, '')
+				.replace(/-+/g, '-')
+				.replace(/^-|-$/g, '');
+			
+			if (
+				category.title.toLowerCase().includes(lowerQuery) ||
+				category.description.toLowerCase().includes(lowerQuery)
+			) {
+				results.push({
+					type: 'category',
+					title: category.title,
+					excerpt: category.description,
+					href: `/support/category/${slug}`,
+					category: category.title,
+				});
+			}
+		});
+
+		// Search category articles
+		Object.entries(categoryData).forEach(([slug, category]) => {
+			category.articles.forEach((article) => {
+				if (
+					article.title.toLowerCase().includes(lowerQuery) ||
+					article.description.toLowerCase().includes(lowerQuery)
+				) {
+					results.push({
+						type: 'article',
+						title: article.title,
+						excerpt: article.description,
+						href: article.href,
+						category: category.title,
+					});
+				}
+			});
+		});
+
+		// Search database articles via API
+		try {
+			const response = await fetch(`/api/support/search?q=${encodeURIComponent(query)}&limit=5`);
+			if (response.ok) {
+				const data = await response.json();
+				if (data.results && Array.isArray(data.results)) {
+					results.push(...data.results.map((article: any) => ({
+						type: 'article' as const,
+						title: article.title,
+						excerpt: article.excerpt,
+						href: article.href,
+						category: article.category,
+					})));
+				}
+			}
+		} catch (error) {
+			console.error('Error searching articles:', error);
+		}
+
+		// Limit results to 20 total
+		setSearchResults(results.slice(0, 20));
+		setShowSearchResults(results.length > 0);
+		setIsSearching(false);
+	}, [faqItems, supportCategories]);
+
+	// Debounced search effect
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			performSearch(searchQuery);
+		}, 300);
+
+		return () => clearTimeout(timeoutId);
+	}, [searchQuery, performSearch]);
+
+	// Handle keyboard navigation
+	const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (!showSearchResults || searchResults.length === 0) {
+			if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
+				performSearch(searchQuery);
+			}
+			return;
+		}
+
+		switch (e.key) {
+			case 'ArrowDown':
+				e.preventDefault();
+				setSelectedResultIndex((prev) =>
+					prev < searchResults.length - 1 ? prev + 1 : prev
+				);
+				break;
+			case 'ArrowUp':
+				e.preventDefault();
+				setSelectedResultIndex((prev) => (prev > 0 ? prev - 1 : -1));
+				break;
+			case 'Enter':
+				e.preventDefault();
+				if (selectedResultIndex >= 0 && selectedResultIndex < searchResults.length) {
+					const result = searchResults[selectedResultIndex];
+					handleResultClick(result);
+				}
+				break;
+			case 'Escape':
+				setShowSearchResults(false);
+				setSelectedResultIndex(-1);
+				searchInputRef.current?.blur();
+				break;
+		}
+	};
+
+	// Handle result click
+	const handleResultClick = (result: SearchResult) => {
+		if (result.type === 'faq' && result.index !== undefined) {
+			// Scroll to FAQ and expand it
+			setOpenFaq(result.index);
+			setShowSearchResults(false);
+			setSearchQuery('');
+			// Scroll to FAQ section
+			setTimeout(() => {
+				const faqElement = document.getElementById(`faq-${result.index}`);
+				faqElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}, 100);
+		} else {
+			router.push(result.href);
+			setShowSearchResults(false);
+			setSearchQuery('');
+		}
+	};
+
+	// Handle click outside to close results
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				searchResultsRef.current &&
+				!searchResultsRef.current.contains(event.target as Node) &&
+				searchInputRef.current &&
+				!searchInputRef.current.contains(event.target as Node)
+			) {
+				setShowSearchResults(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => document.removeEventListener('mousedown', handleClickOutside);
+	}, []);
 
 	const contactMethods = [
 		{
@@ -272,14 +543,111 @@ export default function SupportPage() {
 
 						{/* Search Bar */}
 						<div className="relative max-w-2xl mx-auto">
-							<Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-							<Input
-								type="text"
-								placeholder="Search for help articles..."
-								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
-								className="pl-12 pr-4 py-3 text-lg"
-							/>
+							<div className="relative">
+								<Search className={`absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 ${
+									isSearching ? 'text-primary animate-pulse' : 'text-muted-foreground'
+								}`} />
+								<Input
+									ref={searchInputRef}
+									type="text"
+									placeholder="Search for help articles..."
+									value={searchQuery}
+									onChange={(e) => {
+										setSearchQuery(e.target.value);
+										setSelectedResultIndex(-1);
+									}}
+									onKeyDown={handleSearchKeyDown}
+									onFocus={() => {
+										if (searchResults.length > 0) {
+											setShowSearchResults(true);
+										}
+									}}
+									className="pl-12 pr-10 py-3 text-lg"
+								/>
+								{searchQuery && (
+									<button
+										type="button"
+										onClick={() => {
+											setSearchQuery('');
+											setSearchResults([]);
+											setShowSearchResults(false);
+											searchInputRef.current?.focus();
+										}}
+										className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+										aria-label="Clear search"
+									>
+										<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+										</svg>
+									</button>
+								)}
+							</div>
+							
+							{/* Search Results Dropdown */}
+							{showSearchResults && (
+								<div
+									ref={searchResultsRef}
+									className="absolute z-50 w-full mt-2 bg-card border border-border rounded-lg shadow-lg max-h-96 overflow-y-auto"
+								>
+									{isSearching ? (
+										<div className="p-6 text-center text-muted-foreground">
+											<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+											<p>Searching...</p>
+										</div>
+									) : searchResults.length > 0 ? (
+										<div className="py-2">
+											{searchResults.map((result, index) => {
+												const isSelected = index === selectedResultIndex;
+												const Icon = result.type === 'faq' 
+													? HelpCircle 
+													: result.type === 'category' 
+													? BookOpen 
+													: BookOpen;
+												
+												return (
+													<button
+														key={`${result.type}-${index}`}
+														type="button"
+														onClick={() => handleResultClick(result)}
+														className={`w-full text-left px-4 py-3 hover:bg-muted transition-colors ${
+															isSelected ? 'bg-muted' : ''
+														}`}
+														onMouseEnter={() => setSelectedResultIndex(index)}
+													>
+														<div className="flex items-start gap-3">
+															<Icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${
+																result.type === 'faq' ? 'text-blue-600' :
+																result.type === 'category' ? 'text-green-600' :
+																'text-purple-600'
+															}`} />
+															<div className="flex-1 min-w-0">
+																<div className="flex items-center gap-2 mb-1">
+																	<h4 className="font-semibold text-sm truncate">{result.title}</h4>
+																	{result.category && (
+																		<Badge variant="secondary" className="text-xs flex-shrink-0">
+																			{result.category}
+																		</Badge>
+																	)}
+																</div>
+																<p className="text-xs text-muted-foreground line-clamp-2">{result.excerpt}</p>
+																{result.type === 'faq' && (
+																	<span className="text-xs text-blue-600 mt-1 inline-block">FAQ</span>
+																)}
+															</div>
+														</div>
+													</button>
+												);
+											})}
+										</div>
+									) : (
+										<div className="p-6 text-center text-muted-foreground">
+											<HelpCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+											<p>No results found</p>
+											<p className="text-xs mt-1">Try different keywords</p>
+										</div>
+									)}
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
@@ -330,23 +698,27 @@ export default function SupportPage() {
 						{/* FAQ Tab */}
 						<TabsContent value="faq" className="space-y-4">
 							<div className="space-y-4">
-								{faqItems.map((item) => (
-									<Card key={`faq-${item.question.toLowerCase().replace(/\s+/g, '-').slice(0, 50)}`} className="overflow-hidden">
+								{faqItems.map((item, index) => (
+									<Card 
+										key={`faq-${item.question.toLowerCase().replace(/\s+/g, '-').slice(0, 50)}`} 
+										id={`faq-${index}`}
+										className="overflow-hidden"
+									>
 										<button
 											type="button"
 											className="w-full p-6 text-left hover:bg-muted/50 transition-colors"
-											onClick={() => setOpenFaq(openFaq === faqItems.indexOf(item) ? null : faqItems.indexOf(item))}
+											onClick={() => setOpenFaq(openFaq === index ? null : index)}
 										>
 											<div className="flex items-center justify-between">
 												<h3 className="font-semibold text-lg">{item.question}</h3>
-												{openFaq === faqItems.indexOf(item) ? (
+												{openFaq === index ? (
 													<ChevronUp className="h-5 w-5 text-muted-foreground" />
 												) : (
 													<ChevronDown className="h-5 w-5 text-muted-foreground" />
 												)}
 											</div>
 										</button>
-										{openFaq === faqItems.indexOf(item) && (
+										{openFaq === index && (
 											<div className="px-6 pb-6">
 												<p className="text-muted-foreground leading-relaxed">
 													{item.answer}

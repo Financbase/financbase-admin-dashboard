@@ -28,11 +28,11 @@ color: hsl(var(--color-primary-hsl));
 
 ### Primary Colors
 
-- **Base**: `hsl(271 60% 50%)` - Main brand color
-- **Light**: `hsl(271 60% 60%)` - Lighter variant
-- **Dark**: `hsl(271 60% 40%)` - Darker variant
-- **Lighter**: `hsl(271 55% 70%)` - Very light variant
-- **Darker**: `hsl(271 65% 30%)` - Very dark variant
+- **Base**: `hsl(231.6 54% 36%)` / `rgb(43, 57, 143)` / `oklch(0.388 0.1423 231.6)` - Main brand color (Financbase Blue)
+- **Light**: `hsl(231.6 54% 46%)` - Lighter variant
+- **Dark**: `hsl(231.6 54% 26%)` - Darker variant
+- **Lighter**: `hsl(231.6 54% 56%)` - Very light variant
+- **Darker**: `hsl(231.6 54% 20%)` - Very dark variant
 
 ### Secondary Colors
 
@@ -42,9 +42,9 @@ color: hsl(var(--color-primary-hsl));
 
 ### Accent Colors
 
-- **Base**: `hsl(271 70% 60%)` - Highlight color
-- **Light**: `hsl(271 70% 70%)`
-- **Dark**: `hsl(271 70% 50%)`
+- **Base**: `hsl(231.6 60% 50%)` - Highlight color (Financbase Blue)
+- **Light**: `hsl(231.6 60% 60%)`
+- **Dark**: `hsl(231.6 60% 40%)`
 
 ### Neutral Colors
 

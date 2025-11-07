@@ -21,6 +21,7 @@ import {
   Sparkles
 } from "lucide-react"
 import Link from "next/link"
+import { FloatingPaths } from "@/components/auth/floating-paths"
 
 export default function Hero() {
 
@@ -60,12 +61,21 @@ export default function Hero() {
       <div className="absolute inset-0 bg-primary/5" />
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
 
-      {/* Floating Elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-[var(--brand-primary)]/10 rounded-full opacity-20 animate-pulse" />
-      <div className="absolute top-40 right-20 w-16 h-16 bg-[var(--brand-primary)]/15 rounded-full opacity-20 animate-pulse delay-1000" />
-      <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-[var(--brand-secondary)]/20 rounded-full opacity-20 animate-pulse delay-500" />
+      {/* Floating Paths Background Animation */}
+      <div className="absolute inset-0 z-0 overflow-hidden opacity-[0.15]">
+        <FloatingPaths position={1} />
+        <FloatingPaths position={-1} />
+      </div>
+      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none" />
+      {/* Additional overlay for left content area to improve text readability */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-r from-background/60 via-transparent to-transparent pointer-events-none lg:block hidden" />
 
-      <div className="relative z-10 container mx-auto px-4 py-20">
+      {/* Floating Elements */}
+      <div className="absolute top-20 left-10 w-20 h-20 bg-[var(--brand-primary)]/10 rounded-full opacity-20 animate-pulse z-[2]" />
+      <div className="absolute top-40 right-20 w-16 h-16 bg-[var(--brand-primary)]/15 rounded-full opacity-20 animate-pulse delay-1000 z-[2]" />
+      <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-[var(--brand-secondary)]/20 rounded-full opacity-20 animate-pulse delay-500 z-[2]" />
+
+      <div className="relative z-10 container mx-auto px-4 pt-12 pb-20">
         {/* Badge */}
         <div className="flex justify-center mb-8">
           <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">

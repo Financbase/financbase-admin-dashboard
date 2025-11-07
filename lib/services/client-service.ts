@@ -80,8 +80,7 @@ export async function createClient(input: CreateClientInput): Promise<Client> {
 	// Send notification
 	await NotificationHelpers.client.created(
 		input.userId,
-		client.companyName,
-		client.email
+		client.id.toString()
 	);
 
 	return client;

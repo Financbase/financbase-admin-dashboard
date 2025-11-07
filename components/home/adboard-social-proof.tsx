@@ -17,6 +17,24 @@ import { Star, Quote, Target, Award, TrendingUp } from "lucide-react"
 import Image from "next/image"
 import { useQuery } from "@tanstack/react-query"
 
+// Helper component for logo with fallback
+function LogoImage({ src, fallback, alt, ...props }: { src: string; fallback?: string; alt: string; [key: string]: any }) {
+  const [imgSrc, setImgSrc] = useState(src)
+  
+  return (
+    <Image
+      src={imgSrc}
+      alt={alt}
+      {...props}
+      onError={() => {
+        if (fallback && imgSrc !== fallback) {
+          setImgSrc(fallback)
+        }
+      }}
+    />
+  )
+}
+
 interface Testimonial {
   id: string
   name: string
@@ -92,13 +110,50 @@ export default function AdboardSocialProof() {
     }
   }, [testimonials.length])
 
+  // Using local official logos with fallbacks
   const companies = [
-    { id: "google", name: "Google Ads", logo: "/logos/google.svg", tier: "enterprise" },
-    { id: "meta", name: "Meta", logo: "/logos/meta.svg", tier: "enterprise" },
-    { id: "linkedin", name: "LinkedIn", logo: "/logos/linkedin.svg", tier: "enterprise" },
-    { id: "tiktok", name: "TikTok", logo: "/logos/tiktok.svg", tier: "growth" },
-    { id: "twitter", name: "Twitter", logo: "/logos/twitter.svg", tier: "growth" },
-    { id: "amazon", name: "Amazon Ads", logo: "/logos/amazon.svg", tier: "growth" }
+    { 
+      id: "google", 
+      name: "Google Ads", 
+      logo: "/logos/google-ads.svg",
+      fallback: "/logos/google.svg",
+      tier: "enterprise" 
+    },
+    { 
+      id: "meta", 
+      name: "Meta", 
+      logo: "/logos/meta.svg",
+      fallback: "/logos/facebook.svg",
+      tier: "enterprise" 
+    },
+    { 
+      id: "linkedin", 
+      name: "LinkedIn", 
+      logo: "/logos/linkedin.svg",
+      fallback: "/logos/linkedin.svg",
+      tier: "enterprise" 
+    },
+    { 
+      id: "tiktok", 
+      name: "TikTok", 
+      logo: "/logos/tiktok.svg",
+      fallback: "/logos/tiktok.svg",
+      tier: "growth" 
+    },
+    { 
+      id: "twitter", 
+      name: "Twitter", 
+      logo: "/logos/x.svg",
+      fallback: "/logos/twitter.svg",
+      tier: "growth" 
+    },
+    { 
+      id: "amazon", 
+      name: "Amazon Ads", 
+      logo: "/logos/amazon.svg",
+      fallback: "/logos/amazon.svg",
+      tier: "growth" 
+    }
   ]
 
   const stats = [
@@ -141,16 +196,14 @@ export default function AdboardSocialProof() {
                 key={company.id} 
                 className="group flex items-center justify-center hover:opacity-100 transition-opacity duration-300 min-w-[80px]"
               >
-                <Image
+                <LogoImage
                   src={company.logo}
+                  fallback={company.fallback}
                   alt={company.name}
                   width={120}
                   height={40}
                   className="h-8 w-auto max-w-[120px] grayscale group-hover:grayscale-0 transition-all duration-500 object-contain"
-                  unoptimized={company.logo.endsWith('.svg')}
-                  onError={(e) => {
-                    console.error(`Failed to load logo for ${company.name}:`, company.logo)
-                  }}
+                  unoptimized={company.logo.endsWith('.svg') || company.logo.startsWith('https://')}
                 />
               </div>
             ))}
@@ -193,7 +246,7 @@ export default function AdboardSocialProof() {
                 <div className="flex items-center">
                   <Avatar className="h-12 w-12 mr-4 ring-2 ring-primary/10">
                     <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-white font-semibold">
+                    <AvatarFallback className="bg-gradient-to-br from-[hsl(231.6_54%_42%)] to-[hsl(231.6_54%_30%)] text-white font-semibold">
                       {testimonial.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>

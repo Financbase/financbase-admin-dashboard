@@ -38,6 +38,7 @@ export * from "./freelancers.schema";
 export * from "./campaigns.schema";
 export * from "./ad-groups.schema";
 export * from "./ads.schema";
+export * from "./adboard.schema";
 
 // Marketing Analytics
 export * from "./marketing-analytics.schema";
@@ -50,6 +51,12 @@ export * from "./lead-tasks.schema";
 // Analytics and reporting
 export * from "./analytics.schema";
 export * from "./reports.schema";
+
+// CMS (Content Management System)
+export * from "./cms.schema";
+
+// CRM (Customer Relationship Management)
+export * from "./crm.schema";
 
 // Real Estate
 export * from "./real-estate.schema";
@@ -84,12 +91,13 @@ export * from "./api-keys.schema";
 
 // Subscription & Billing System
 export * from "./billing.schema";
+export * from "./subscription-rbac.schema";
 
 // Notifications System
 export * from "./notifications.schema";
 
-// Workflows and automation (commented out for now)
-// export * from "./workflows.schema";
+// Workflows and automation
+export * from "./workflows.schema";
 
 // AI Bookkeeping and Reconciliation
 export * from "./reconciliation.schema";

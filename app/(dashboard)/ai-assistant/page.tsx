@@ -28,6 +28,7 @@ import {
 	Plus,
 	Trash2
 } from "lucide-react";
+import { toast } from "@/lib/toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ChatMessage {

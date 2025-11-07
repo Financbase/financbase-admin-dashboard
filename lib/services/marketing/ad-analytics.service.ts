@@ -9,13 +9,12 @@
 
 import { db } from "@/lib/db/connection";
 import {
-	adBudgets,
-	adCampaigns,
-	adCreatives,
-	adGroups,
-	adPerformance,
-	ads,
-} from "@/lib/db/schema-adboard";
+	adboardBudgets,
+	adboardCampaigns,
+	adboardAdCreatives,
+	adboardAds,
+	adboardPerformanceMetrics,
+} from "@/lib/db/schemas/adboard.schema";
 import {
 	and,
 	asc,
@@ -122,32 +121,33 @@ export class AdAnalyticsService {
 		startDate?: Date,
 		endDate?: Date,
 	): Promise<PlatformPerformance[]> {
-		let query = db
-			.select({
-				platform: adCampaigns.platform,
-				totalSpend: sql<number>`COALESCE(SUM(${adCampaigns.totalSpend}), 0)`,
-				totalImpressions: sql<number>`COALESCE(SUM(${adCampaigns.totalImpressions}), 0)`,
-				totalClicks: sql<number>`COALESCE(SUM(${adCampaigns.totalClicks}), 0)`,
-				totalConversions: sql<number>`COALESCE(SUM(${adCampaigns.totalConversions}), 0)`,
-				averageCtr: sql<number>`COALESCE(AVG(${adCampaigns.ctr}), 0)`,
-				averageCpc: sql<number>`COALESCE(AVG(${adCampaigns.cpc}), 0)`,
-				averageCpm: sql<number>`COALESCE(AVG(${adCampaigns.cpm}), 0)`,
-				averageCpa: sql<number>`COALESCE(AVG(${adCampaigns.cpa}), 0)`,
-				averageRoas: sql<number>`COALESCE(AVG(${adCampaigns.roas}), 0)`,
-				campaignCount: sql<number>`COUNT(${adCampaigns.id})`,
-			})
-			.from(adCampaigns)
-			.where(eq(adCampaigns.userId, userId));
-
+		const conditions = [eq(adboardPerformanceMetrics.userId, userId)];
+		
 		if (startDate) {
-			query = query.where(gte(adCampaigns.startDate, startDate));
+			conditions.push(gte(adboardPerformanceMetrics.date, startDate));
 		}
 
 		if (endDate) {
-			query = query.where(lte(adCampaigns.endDate, endDate));
+			conditions.push(lte(adboardPerformanceMetrics.date, endDate));
 		}
 
-		const results = await query.groupBy(adCampaigns.platform);
+		const results = await db
+			.select({
+				platform: adboardPerformanceMetrics.platform,
+				totalSpend: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.spend}), 0)`,
+				totalImpressions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.impressions}), 0)`,
+				totalClicks: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.clicks}), 0)`,
+				totalConversions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.conversions}), 0)`,
+				averageCtr: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.ctr}), 0)`,
+				averageCpc: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpc}), 0)`,
+				averageCpm: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpm}), 0)`,
+				averageCpa: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`,
+				averageRoas: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.roas}), 0)`,
+				campaignCount: sql<number>`COUNT(DISTINCT ${adboardPerformanceMetrics.campaignId})`,
+			})
+			.from(adboardPerformanceMetrics)
+			.where(and(...conditions))
+			.groupBy(adboardPerformanceMetrics.platform);
 
 		return results.map((result) => ({
 			platform: result.platform,
@@ -170,59 +170,70 @@ export class AdAnalyticsService {
 		metric: "roas" | "ctr" | "cpc" | "cpa" | "conversions" = "roas",
 		limit = 10,
 	): Promise<CampaignPerformance[]> {
-		const orderBy =
-			metric === "roas"
-				? desc(adCampaigns.roas)
-				: metric === "ctr"
-					? desc(adCampaigns.ctr)
-					: metric === "cpc"
-						? asc(adCampaigns.cpc)
-						: metric === "cpa"
-							? asc(adCampaigns.cpa)
-							: desc(adCampaigns.totalConversions);
-
-		const campaigns = await db
+		const campaignsWithMetrics = await db
 			.select({
-				id: adCampaigns.id,
-				name: adCampaigns.name,
-				platform: adCampaigns.platform,
-				objective: adCampaigns.objective,
-				status: adCampaigns.status,
-				totalSpend: adCampaigns.totalSpend,
-				totalImpressions: adCampaigns.totalImpressions,
-				totalClicks: adCampaigns.totalClicks,
-				totalConversions: adCampaigns.totalConversions,
-				ctr: adCampaigns.ctr,
-				cpc: adCampaigns.cpc,
-				cpm: adCampaigns.cpm,
-				cpa: adCampaigns.cpa,
-				roas: adCampaigns.roas,
-				dailyBudget: adCampaigns.dailyBudget,
+				id: adboardCampaigns.id,
+				name: adboardCampaigns.name,
+				platform: adboardCampaigns.platform || adboardPerformanceMetrics.platform,
+				objective: adboardCampaigns.objective,
+				status: adboardCampaigns.status,
+				budget: adboardCampaigns.budget,
+				spent: adboardCampaigns.spent,
+				totalSpend: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.spend}), 0)`,
+				totalImpressions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.impressions}), 0)`,
+				totalClicks: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.clicks}), 0)`,
+				totalConversions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.conversions}), 0)`,
+				ctr: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.ctr}), 0)`,
+				cpc: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpc}), 0)`,
+				cpm: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpm}), 0)`,
+				cpa: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`,
+				roas: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.roas}), 0)`,
 			})
-			.from(adCampaigns)
-			.where(eq(adCampaigns.userId, userId))
-			.orderBy(orderBy)
+			.from(adboardCampaigns)
+			.leftJoin(adboardPerformanceMetrics, eq(adboardCampaigns.id, adboardPerformanceMetrics.campaignId))
+			.where(eq(adboardCampaigns.userId, userId))
+			.groupBy(
+				adboardCampaigns.id,
+				adboardCampaigns.name,
+				adboardCampaigns.platform,
+				adboardCampaigns.objective,
+				adboardCampaigns.status,
+				adboardCampaigns.budget,
+				adboardCampaigns.spent,
+				adboardPerformanceMetrics.platform,
+			)
+			.orderBy(
+				metric === "roas"
+					? desc(sql`COALESCE(AVG(${adboardPerformanceMetrics.roas}), 0)`)
+					: metric === "ctr"
+						? desc(sql`COALESCE(AVG(${adboardPerformanceMetrics.ctr}), 0)`)
+						: metric === "cpc"
+							? asc(sql`COALESCE(AVG(${adboardPerformanceMetrics.cpc}), 0)`)
+							: metric === "cpa"
+								? asc(sql`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`)
+								: desc(sql`COALESCE(SUM(${adboardPerformanceMetrics.conversions}), 0)`)
+			)
 			.limit(limit);
 
-		return campaigns.map((campaign) => ({
+		return campaignsWithMetrics.map((campaign) => ({
 			campaignId: campaign.id,
 			campaignName: campaign.name,
-			platform: campaign.platform,
+			platform: campaign.platform || "unknown",
 			objective: campaign.objective,
 			status: campaign.status,
-			totalSpend: Number.parseFloat(campaign.totalSpend || "0"),
-			totalImpressions: campaign.totalImpressions || 0,
-			totalClicks: campaign.totalClicks || 0,
-			totalConversions: campaign.totalConversions || 0,
-			ctr: Number.parseFloat(campaign.ctr || "0"),
-			cpc: Number.parseFloat(campaign.cpc || "0"),
-			cpm: Number.parseFloat(campaign.cpm || "0"),
-			cpa: Number.parseFloat(campaign.cpa || "0"),
-			roas: Number.parseFloat(campaign.roas || "0"),
-			budgetUtilization: this.calculateBudgetUtilization(
-				Number.parseFloat(campaign.totalSpend || "0"),
-				Number.parseFloat(campaign.dailyBudget || "0"),
-			),
+			totalSpend: Number(campaign.totalSpend),
+			totalImpressions: Number(campaign.totalImpressions),
+			totalClicks: Number(campaign.totalClicks),
+			totalConversions: Number(campaign.totalConversions),
+			ctr: Number(campaign.ctr),
+			cpc: Number(campaign.cpc),
+			cpm: Number(campaign.cpm),
+			cpa: Number(campaign.cpa),
+			roas: Number(campaign.roas),
+			budgetUtilization:
+				campaign.budget && Number(campaign.budget) > 0
+					? (Number(campaign.spent) / Number(campaign.budget)) * 100
+					: 0,
 		}));
 	}
 
@@ -242,28 +253,28 @@ export class AdAnalyticsService {
 
 		const trends = await db
 			.select({
-				date: sql<string>`TO_CHAR(${adPerformance.date}, ${dateFormat})`,
-				spend: sql<number>`COALESCE(SUM(${adPerformance.spend}), 0)`,
-				impressions: sql<number>`COALESCE(SUM(${adPerformance.impressions}), 0)`,
-				clicks: sql<number>`COALESCE(SUM(${adPerformance.clicks}), 0)`,
-				conversions: sql<number>`COALESCE(SUM(${adPerformance.conversions}), 0)`,
-				ctr: sql<number>`COALESCE(AVG(${adPerformance.ctr}), 0)`,
-				cpc: sql<number>`COALESCE(AVG(${adPerformance.cpc}), 0)`,
-				cpm: sql<number>`COALESCE(AVG(${adPerformance.cpm}), 0)`,
-				cpa: sql<number>`COALESCE(AVG(${adPerformance.cpa}), 0)`,
-				roas: sql<number>`COALESCE(AVG(${adPerformance.roas}), 0)`,
+				date: sql<string>`TO_CHAR(${adboardPerformanceMetrics.date}, ${dateFormat})`,
+				spend: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.spend}), 0)`,
+				impressions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.impressions}), 0)`,
+				clicks: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.clicks}), 0)`,
+				conversions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.conversions}), 0)`,
+				ctr: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.ctr}), 0)`,
+				cpc: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpc}), 0)`,
+				cpm: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpm}), 0)`,
+				cpa: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`,
+				roas: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.roas}), 0)`,
 			})
-			.from(adPerformance)
-			.innerJoin(adCampaigns, eq(adPerformance.campaignId, adCampaigns.id))
+			.from(adboardPerformanceMetrics)
+			.innerJoin(adboardCampaigns, eq(adboardPerformanceMetrics.campaignId, adboardCampaigns.id))
 			.where(
 				and(
-					eq(adCampaigns.userId, userId),
-					gte(adPerformance.date, startDate),
-					lte(adPerformance.date, endDate),
+					eq(adboardCampaigns.userId, userId),
+					gte(adboardPerformanceMetrics.date, startDate),
+					lte(adboardPerformanceMetrics.date, endDate),
 				),
 			)
-			.groupBy(sql`TO_CHAR(${adPerformance.date}, ${dateFormat})`)
-			.orderBy(asc(sql`TO_CHAR(${adPerformance.date}, ${dateFormat})`));
+			.groupBy(sql`TO_CHAR(${adboardPerformanceMetrics.date}, ${dateFormat})`)
+			.orderBy(asc(sql`TO_CHAR(${adboardPerformanceMetrics.date}, ${dateFormat})`));
 
 		return trends.map((trend) => ({
 			date: trend.date,
@@ -285,36 +296,37 @@ export class AdAnalyticsService {
 		startDate?: Date,
 		endDate?: Date,
 	): Promise<AttributionData[]> {
-		let query = db
-			.select({
-				campaignId: adCampaigns.id,
-				campaignName: adCampaigns.name,
-				platform: adCampaigns.platform,
-				touchpoints: sql<number>`COUNT(DISTINCT ${adPerformance.date})`,
-				firstTouch: sql<number>`COUNT(CASE WHEN ${adPerformance.date} = MIN(${adPerformance.date}) THEN 1 END)`,
-				lastTouch: sql<number>`COUNT(CASE WHEN ${adPerformance.date} = MAX(${adPerformance.date}) THEN 1 END)`,
-				assistedConversions: sql<number>`COUNT(CASE WHEN ${adPerformance.conversions} > 0 AND ${adPerformance.date} != MIN(${adPerformance.date}) THEN 1 END)`,
-				directConversions: sql<number>`COUNT(CASE WHEN ${adPerformance.conversions} > 0 AND ${adPerformance.date} = MIN(${adPerformance.date}) THEN 1 END)`,
-				totalConversions: sql<number>`SUM(${adPerformance.conversions})`,
-				attributionValue: sql<number>`SUM(${adPerformance.conversionValue || 0})`,
-			})
-			.from(adPerformance)
-			.innerJoin(adCampaigns, eq(adPerformance.campaignId, adCampaigns.id))
-			.where(eq(adCampaigns.userId, userId));
-
+		const conditions = [eq(adboardCampaigns.userId, userId)];
+		
 		if (startDate) {
-			query = query.where(gte(adPerformance.date, startDate));
+			conditions.push(gte(adboardPerformanceMetrics.date, startDate));
 		}
 
 		if (endDate) {
-			query = query.where(lte(adPerformance.date, endDate));
+			conditions.push(lte(adboardPerformanceMetrics.date, endDate));
 		}
 
-		const results = await query.groupBy(
-			adCampaigns.id,
-			adCampaigns.name,
-			adCampaigns.platform,
-		);
+		const results = await db
+			.select({
+				campaignId: adboardCampaigns.id,
+				campaignName: adboardCampaigns.name,
+				platform: adboardCampaigns.platform || adboardPerformanceMetrics.platform,
+				touchpoints: sql<number>`COUNT(DISTINCT ${adboardPerformanceMetrics.date})`,
+				firstTouch: sql<number>`COUNT(CASE WHEN ${adboardPerformanceMetrics.date} = MIN(${adboardPerformanceMetrics.date}) THEN 1 END)`,
+				lastTouch: sql<number>`COUNT(CASE WHEN ${adboardPerformanceMetrics.date} = MAX(${adboardPerformanceMetrics.date}) THEN 1 END)`,
+				assistedConversions: sql<number>`COUNT(CASE WHEN ${adboardPerformanceMetrics.conversions} > 0 AND ${adboardPerformanceMetrics.date} != MIN(${adboardPerformanceMetrics.date}) THEN 1 END)`,
+				directConversions: sql<number>`COUNT(CASE WHEN ${adboardPerformanceMetrics.conversions} > 0 AND ${adboardPerformanceMetrics.date} = MIN(${adboardPerformanceMetrics.date}) THEN 1 END)`,
+				totalConversions: sql<number>`SUM(${adboardPerformanceMetrics.conversions})`,
+				attributionValue: sql<number>`SUM(${adboardPerformanceMetrics.revenue})`,
+			})
+			.from(adboardPerformanceMetrics)
+			.innerJoin(adboardCampaigns, eq(adboardPerformanceMetrics.campaignId, adboardCampaigns.id))
+			.where(and(...conditions))
+			.groupBy(
+				adboardCampaigns.id,
+				adboardCampaigns.name,
+				adboardPerformanceMetrics.platform,
+			);
 
 		return results.map((result) => ({
 			campaignId: result.campaignId,
@@ -336,25 +348,25 @@ export class AdAnalyticsService {
 		startDate?: Date,
 		endDate?: Date,
 	): Promise<ROIAnalysis> {
-		let query = db
-			.select({
-				totalSpend: sql<number>`COALESCE(SUM(${adCampaigns.totalSpend}), 0)`,
-				totalConversions: sql<number>`COALESCE(SUM(${adCampaigns.totalConversions}), 0)`,
-				averageCpa: sql<number>`COALESCE(AVG(${adCampaigns.cpa}), 0)`,
-				averageRoas: sql<number>`COALESCE(AVG(${adCampaigns.roas}), 0)`,
-			})
-			.from(adCampaigns)
-			.where(eq(adCampaigns.userId, userId));
-
+		const conditions = [eq(adboardPerformanceMetrics.userId, userId)];
+		
 		if (startDate) {
-			query = query.where(gte(adCampaigns.startDate, startDate));
+			conditions.push(gte(adboardPerformanceMetrics.date, startDate));
 		}
 
 		if (endDate) {
-			query = query.where(lte(adCampaigns.endDate, endDate));
+			conditions.push(lte(adboardPerformanceMetrics.date, endDate));
 		}
 
-		const [result] = await query;
+		const [result] = await db
+			.select({
+				totalSpend: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.spend}), 0)`,
+				totalConversions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.conversions}), 0)`,
+				averageCpa: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`,
+				averageRoas: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.roas}), 0)`,
+			})
+			.from(adboardPerformanceMetrics)
+			.where(and(...conditions));
 
 		const totalSpend = result.totalSpend;
 		const totalConversions = result.totalConversions;
@@ -405,19 +417,20 @@ export class AdAnalyticsService {
 	}> {
 		const [summary] = await db
 			.select({
-				totalSpend: sql<number>`COALESCE(SUM(${adCampaigns.totalSpend}), 0)`,
-				totalImpressions: sql<number>`COALESCE(SUM(${adCampaigns.totalImpressions}), 0)`,
-				totalClicks: sql<number>`COALESCE(SUM(${adCampaigns.totalClicks}), 0)`,
-				totalConversions: sql<number>`COALESCE(SUM(${adCampaigns.totalConversions}), 0)`,
-				averageCtr: sql<number>`COALESCE(AVG(${adCampaigns.ctr}), 0)`,
-				averageCpc: sql<number>`COALESCE(AVG(${adCampaigns.cpc}), 0)`,
-				averageCpa: sql<number>`COALESCE(AVG(${adCampaigns.cpa}), 0)`,
-				averageRoas: sql<number>`COALESCE(AVG(${adCampaigns.roas}), 0)`,
-				platformCount: sql<number>`COUNT(DISTINCT ${adCampaigns.platform})`,
-				campaignCount: sql<number>`COUNT(${adCampaigns.id})`,
+				totalSpend: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.spend}), 0)`,
+				totalImpressions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.impressions}), 0)`,
+				totalClicks: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.clicks}), 0)`,
+				totalConversions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.conversions}), 0)`,
+				averageCtr: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.ctr}), 0)`,
+				averageCpc: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpc}), 0)`,
+				averageCpa: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`,
+				averageRoas: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.roas}), 0)`,
+				platformCount: sql<number>`COUNT(DISTINCT ${adboardPerformanceMetrics.platform})`,
+				campaignCount: sql<number>`COUNT(DISTINCT ${adboardCampaigns.id})`,
 			})
-			.from(adCampaigns)
-			.where(eq(adCampaigns.userId, userId));
+			.from(adboardPerformanceMetrics)
+			.innerJoin(adboardCampaigns, eq(adboardPerformanceMetrics.campaignId, adboardCampaigns.id))
+			.where(eq(adboardCampaigns.userId, userId));
 
 		return {
 			totalSpend: summary.totalSpend,
@@ -450,32 +463,33 @@ export class AdAnalyticsService {
 			cpa: number;
 		}[]
 	> {
-		let query = db
-			.select({
-				device: adPerformance.device,
-				spend: sql<number>`COALESCE(SUM(${adPerformance.spend}), 0)`,
-				impressions: sql<number>`COALESCE(SUM(${adPerformance.impressions}), 0)`,
-				clicks: sql<number>`COALESCE(SUM(${adPerformance.clicks}), 0)`,
-				conversions: sql<number>`COALESCE(SUM(${adPerformance.conversions}), 0)`,
-				ctr: sql<number>`COALESCE(AVG(${adPerformance.ctr}), 0)`,
-				cpc: sql<number>`COALESCE(AVG(${adPerformance.cpc}), 0)`,
-				cpa: sql<number>`COALESCE(AVG(${adPerformance.cpa}), 0)`,
-			})
-			.from(adPerformance)
-			.innerJoin(adCampaigns, eq(adPerformance.campaignId, adCampaigns.id))
-			.where(eq(adCampaigns.userId, userId));
-
+		const conditions = [eq(adboardCampaigns.userId, userId)];
+		
 		if (startDate) {
-			query = query.where(gte(adPerformance.date, startDate));
+			conditions.push(gte(adboardPerformanceMetrics.date, startDate));
 		}
 
 		if (endDate) {
-			query = query.where(lte(adPerformance.date, endDate));
+			conditions.push(lte(adboardPerformanceMetrics.date, endDate));
 		}
 
-		const results = await query
-			.groupBy(adPerformance.device)
-			.orderBy(desc(sql`SUM(${adPerformance.spend})`));
+		// Note: device field doesn't exist in adboardPerformanceMetrics, using platform as proxy
+		const results = await db
+			.select({
+				device: adboardPerformanceMetrics.platform, // Using platform as device proxy
+				spend: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.spend}), 0)`,
+				impressions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.impressions}), 0)`,
+				clicks: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.clicks}), 0)`,
+				conversions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.conversions}), 0)`,
+				ctr: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.ctr}), 0)`,
+				cpc: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpc}), 0)`,
+				cpa: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`,
+			})
+			.from(adboardPerformanceMetrics)
+			.innerJoin(adboardCampaigns, eq(adboardPerformanceMetrics.campaignId, adboardCampaigns.id))
+			.where(and(...conditions))
+			.groupBy(adboardPerformanceMetrics.platform)
+			.orderBy(desc(sql`SUM(${adboardPerformanceMetrics.spend})`));
 
 		return results.map((result) => ({
 			device: result.device || "Unknown",

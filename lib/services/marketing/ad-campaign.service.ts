@@ -9,21 +9,19 @@
 
 import { db } from "@/lib/db/connection";
 import {
-	type Ad,
-	type AdAudience,
-	type AdBudget,
-	type AdCampaign,
-	type AdCreative,
-	type AdGroup,
-	type AdPerformance,
-	adAudiences,
-	adBudgets,
-	adCampaigns,
-	adCreatives,
-	adGroups,
-	adPerformance,
-	ads,
-} from "@/lib/db/schema-adboard";
+	type AdboardAd as Ad,
+	type AdboardAudience as AdAudience,
+	type AdboardBudget as AdBudget,
+	type AdboardCampaign as AdCampaign,
+	type AdboardAdCreative as AdCreative,
+	type AdboardPerformanceMetric as AdPerformance,
+	adboardAudiences as adAudiences,
+	adboardBudgets as adBudgets,
+	adboardCampaigns as adCampaigns,
+	adboardAdCreatives as adCreatives,
+	adboardPerformanceMetrics as adPerformance,
+	adboardAds as ads,
+} from "@/lib/db/schemas/adboard.schema";
 import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
 import {
 	Calendar,

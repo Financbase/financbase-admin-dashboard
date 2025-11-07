@@ -9,7 +9,6 @@
 
 import { db } from "@/lib/db";
 import {
-	adBudgets,
 	budgets,
 	campaigns,
 	clients,

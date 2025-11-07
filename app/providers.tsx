@@ -11,18 +11,14 @@
 
 import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import dynamic from 'next/dynamic';
 import { ThemeProvider } from 'next-themes';
 import { ClerkProvider } from '@clerk/nextjs';
 import { DashboardProvider } from '@/contexts/dashboard-context';
+import { BrandingProvider } from '@/contexts/branding-context';
 import { setupChunkErrorHandler } from '@/lib/utils/chunk-error-handler';
+import { setupWebpackChunkHandler } from '@/lib/utils/webpack-chunk-handler';
 import { ChunkErrorBoundary } from '@/components/errors/chunk-error-boundary';
-
-// Dynamically import ReactQueryDevtools to avoid SSR issues
-const ReactQueryDevtoolsDevelopment = dynamic(
-	() => import('@tanstack/react-query-devtools').then((d) => d.ReactQueryDevtools),
-	{ ssr: false }
-);
+import { SafeReactQueryDevtools } from '@/components/devtools/react-query-devtools-wrapper';
 
 interface ProvidersProps {
 	children: React.ReactNode;
@@ -46,10 +42,9 @@ const queryClient = new QueryClient({
 });
 
 export function Providers({ children }: ProvidersProps) {
-	// Set up global chunk error handler on mount
+	// Set up global chunk error handlers on mount
 	useEffect(() => {
-		// Initialize chunk error handler with automatic recovery
-		const cleanup = setupChunkErrorHandler({
+		const errorHandlerOptions = {
 			maxRetries: 3,
 			initialDelay: 1000,
 			maxDelay: 10000,
@@ -60,10 +55,24 @@ export function Providers({ children }: ProvidersProps) {
 					console.info('[ChunkErrorHandler] Reloading page to recover from chunk load error...');
 				}
 			},
+		};
+
+		// Initialize chunk error handler with automatic recovery
+		const cleanupChunkHandler = setupChunkErrorHandler(errorHandlerOptions);
+
+		// Initialize webpack chunk handler for runtime chunk loading interception
+		// This provides early detection and recovery at the webpack level
+		const cleanupWebpackHandler = setupWebpackChunkHandler({
+			...errorHandlerOptions,
+			maxChunkRetries: 3,
+			verbose: process.env.NODE_ENV === 'development',
 		});
 
 		// Cleanup on unmount
-		return cleanup;
+		return () => {
+			cleanupChunkHandler();
+			cleanupWebpackHandler();
+		};
 	}, []);
 
 	return (
@@ -84,14 +93,18 @@ export function Providers({ children }: ProvidersProps) {
 				>
 					{/* Wrap with ChunkErrorBoundary to catch React-level chunk errors */}
 					<ChunkErrorBoundary autoRecover={true}>
-						<DashboardProvider>
-							{children}
-						</DashboardProvider>
+						<BrandingProvider>
+							<DashboardProvider>
+								{children}
+							</DashboardProvider>
+						</BrandingProvider>
 					</ChunkErrorBoundary>
 				</ThemeProvider>
-				{process.env.NODE_ENV === 'development' && (
-					<ReactQueryDevtoolsDevelopment initialIsOpen={false} />
-				)}
+				{/* 
+					SafeReactQueryDevtools handles chunk loading errors gracefully.
+					If DevTools fails to load, the app continues to work normally.
+				*/}
+				<SafeReactQueryDevtools initialIsOpen={false} />
 			</QueryClientProvider>
 		</ClerkProvider>
 	);

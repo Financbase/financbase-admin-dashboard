@@ -71,14 +71,15 @@ export function generatePalette(base: HSLColor): ColorPalette {
 
 /**
  * Primary Color Palette
- * Based on Financbase brand: Purple/Blue tones
+ * Based on Financbase brand: Blue (hue 231.6)
+ * Base: rgb(43, 57, 143) / hsl(231.6 54% 36%) / oklch(0.388 0.1423 231.6)
  */
 export const primaryColors: ColorPalette = {
-  base: { h: 271, s: 60, l: 50 }, // Primary brand color
-  light: { h: 271, s: 60, l: 60 },
-  dark: { h: 271, s: 60, l: 40 },
-  lighter: { h: 271, s: 55, l: 70 },
-  darker: { h: 271, s: 65, l: 30 },
+  base: { h: 231.6, s: 54, l: 36 }, // Primary brand color
+  light: { h: 231.6, s: 54, l: 46 },
+  dark: { h: 231.6, s: 54, l: 26 },
+  lighter: { h: 231.6, s: 54, l: 56 },
+  darker: { h: 231.6, s: 54, l: 20 },
 };
 
 /**
@@ -107,14 +108,14 @@ export const tertiaryColors: ColorPalette = {
 
 /**
  * Accent Color Palette
- * Highlight colors
+ * Highlight colors - Using Financbase Blue
  */
 export const accentColors: ColorPalette = {
-  base: { h: 271, s: 70, l: 60 },
-  light: { h: 271, s: 70, l: 70 },
-  dark: { h: 271, s: 70, l: 50 },
-  lighter: { h: 271, s: 65, l: 80 },
-  darker: { h: 271, s: 75, l: 40 },
+  base: { h: 231.6, s: 60, l: 50 },
+  light: { h: 231.6, s: 60, l: 60 },
+  dark: { h: 231.6, s: 60, l: 40 },
+  lighter: { h: 231.6, s: 55, l: 70 },
+  darker: { h: 231.6, s: 65, l: 30 },
 };
 
 /**

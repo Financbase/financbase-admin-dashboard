@@ -36,7 +36,8 @@ import {
   Brain,
   PieChart,
   LineChart,
-  Flame
+  Flame,
+	TrendingDown,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import {

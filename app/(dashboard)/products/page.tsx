@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
 	Plus,
 	Package,
@@ -23,18 +24,15 @@ import {
 	Filter,
 	MoreHorizontal,
 	TrendingUp,
-	TrendingDown,
 	ShoppingCart,
 	BarChart3,
 	Tag,
 	Edit,
 	Trash2,
-	Star,
 	AlertTriangle,
 	Loader2
 } from "lucide-react";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { ProductForm } from "@/components/products/product-form";
 import {
@@ -55,7 +53,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
 
 interface Product {
 	id: string;
@@ -68,8 +65,8 @@ interface Product {
 	stockQuantity: number;
 	lowStockThreshold: number;
 	status: "active" | "inactive" | "low_stock" | "discontinued" | "out_of_stock";
-	images?: any;
-	tags?: any;
+	images?: string[];
+	tags?: string[];
 	createdAt: string;
 }
 
@@ -77,12 +74,20 @@ interface ProductCategory {
 	id: string;
 	name: string;
 	description?: string;
+	color?: string;
+	count?: number;
+	revenue?: number;
 }
 
 export default function ProductsPage() {
 	const [products, setProducts] = useState<Product[]>([]);
 	const [categories, setCategories] = useState<ProductCategory[]>([]);
-	const [analytics, setAnalytics] = useState<any>(null);
+	const [analytics, setAnalytics] = useState<{
+		total?: number;
+		active?: number;
+		lowStock?: number;
+		totalValue?: number;
+	} | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -108,7 +113,7 @@ export default function ProductsPage() {
 			const data = await response.json();
 			setProducts(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching products:", error);
+			// Error handling - toast notification shown to user
 			toast.error("Failed to load products");
 		} finally {
 			setLoading(false);
@@ -120,7 +125,7 @@ export default function ProductsPage() {
 		try {
 			const organizationId = userData?.organizationId || null;
 			if (!organizationId) {
-				console.warn("No organizationId available");
+				// No organizationId available - skip fetching categories
 				return;
 			}
 			const response = await fetch(`/api/products/categories?organizationId=${organizationId}`);
@@ -128,7 +133,7 @@ export default function ProductsPage() {
 			const data = await response.json();
 			setCategories(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching categories:", error);
+			// Error fetching categories - silently fail
 		}
 	};
 
@@ -140,7 +145,7 @@ export default function ProductsPage() {
 			const data = await response.json();
 			setAnalytics(data);
 		} catch (error) {
-			console.error("Error fetching analytics:", error);
+			// Error fetching analytics - silently fail
 		}
 	};
 
@@ -231,7 +236,7 @@ export default function ProductsPage() {
 	// Calculate category stats from products
 	const categoryStats = categories.map((cat) => {
 		const catProducts = products.filter((p) => p.category === cat.name);
-		const revenue = catProducts.reduce((sum, p) => {
+		const revenue = catProducts.reduce((sum: number, p) => {
 			const price = parseFloat(p.price || "0");
 			const stock = p.stockQuantity || 0;
 			return sum + price * stock;
@@ -275,7 +280,7 @@ export default function ProductsPage() {
 			: 0;
 
 	// Count products with discounts (has compareAtPrice or special pricing)
-	const activeDiscounts = products.filter((p) => {
+	const activeDiscounts = products.filter((_p) => {
 		// For now, we'll count products that are marked as having discounts
 		// In a real implementation, you'd check for compareAtPrice field
 		return false; // Placeholder - would check actual discount logic
@@ -306,7 +311,7 @@ export default function ProductsPage() {
 
 			{/* Stats Overview */}
 			<div className="grid gap-4 md:grid-cols-4">
-				{productStats.map((stat, index) => (
+				{productStats.map((stat) => (
 					<Card key={stat.name}>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 							<CardTitle className="text-sm font-medium">{stat.name}</CardTitle>
@@ -332,16 +337,16 @@ export default function ProductsPage() {
 				</CardHeader>
 				<CardContent>
 					<div className="grid gap-4 md:grid-cols-4">
-						{categories.map((category, index) => (
+						{categoryStats.map((category) => (
 							<div key={category.name} className="space-y-2">
 								<div className="flex items-center gap-2">
-									<div className={`w-3 h-3 rounded-full ${category.color}`} />
+									<div className={`w-3 h-3 rounded-full ${category.color || 'bg-gray-500'}`} />
 									<h4 className="font-medium">{category.name}</h4>
 								</div>
 								<div className="space-y-1">
-									<p className="text-2xl font-bold">{category.count}</p>
+									<p className="text-2xl font-bold">{category.count || 0}</p>
 									<p className="text-sm text-muted-foreground">
-										${category.revenue.toLocaleString()} revenue
+										${(category.revenue || 0).toLocaleString()} revenue
 									</p>
 								</div>
 							</div>

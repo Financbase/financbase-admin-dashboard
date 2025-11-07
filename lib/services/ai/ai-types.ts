@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { TrendingUp, TrendingUp, TrendingDown, TrendingDown, PiggyBank, CheckCircle, XCircle, MessageCircle } from "lucide-react";
+import { TrendingUp, TrendingDown, PiggyBank, CheckCircle, XCircle, MessageCircle } from "lucide-react";
 export interface FinancialInsight {
   id: string;
   type: 'cash_flow' | 'revenue' | 'expense' | 'profitability' | 'risk' | 'opportunity';

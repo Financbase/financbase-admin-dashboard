@@ -48,44 +48,38 @@ export class GalleryService {
 			throw new Error("Unauthorized");
 		}
 
-		let query = db.select().from(galleryImages).where(eq(galleryImages.userId, userId));
+		const conditions = [eq(galleryImages.userId, userId)];
 
 		if (filters) {
 			if (filters.search) {
 				const searchTerm = `%${filters.search}%`;
-				query = query.where(
-					and(
-						eq(galleryImages.userId, userId),
-						or(
-							ilike(galleryImages.name, searchTerm),
-							isNotNull(galleryImages.category),
-							// Search in category only if it exists
-							...(filters.search ? [eq(galleryImages.category, filters.search)] : [])
-						)
-					)
-				);
+				const searchConditions = [
+					ilike(galleryImages.name, searchTerm),
+					...(filters.search ? [eq(galleryImages.category, filters.search)] : [])
+				].filter(Boolean);
+				if (searchConditions.length > 0) {
+					conditions.push(or(...searchConditions));
+				}
 			}
 
 			if (filters.category) {
-				query = query.where(
-					and(eq(galleryImages.userId, userId), eq(galleryImages.category, filters.category))
-				);
+				conditions.push(eq(galleryImages.category, filters.category));
 			}
 
 			if (filters.favorite !== undefined) {
-				query = query.where(
-					and(eq(galleryImages.userId, userId), eq(galleryImages.favorite, filters.favorite))
-				);
+				conditions.push(eq(galleryImages.favorite, filters.favorite));
 			}
 
 			if (filters.archived !== undefined) {
-				query = query.where(
-					and(eq(galleryImages.userId, userId), eq(galleryImages.archived, filters.archived))
-				);
+				conditions.push(eq(galleryImages.archived, filters.archived));
 			}
 		}
 
-		const results = await query.orderBy(desc(galleryImages.createdAt));
+		const results = await db
+			.select()
+			.from(galleryImages)
+			.where(and(...conditions))
+			.orderBy(desc(galleryImages.createdAt));
 		return results;
 	}
 
@@ -128,10 +122,10 @@ export class GalleryService {
 			size: input.size,
 			type: input.type,
 			category: input.category,
-			tags: input.tags ? JSON.stringify(input.tags) : null,
+			tags: input.tags || null,
 			favorite: false,
 			archived: false,
-			metadata: input.metadata ? JSON.stringify(input.metadata) : null,
+			metadata: input.metadata || null,
 		};
 
 		const result = await db.insert(galleryImages).values(newImage).returning();
@@ -156,10 +150,10 @@ export class GalleryService {
 
 		if (input.name !== undefined) updateData.name = input.name;
 		if (input.category !== undefined) updateData.category = input.category;
-		if (input.tags !== undefined) updateData.tags = JSON.stringify(input.tags);
+		if (input.tags !== undefined) updateData.tags = input.tags;
 		if (input.favorite !== undefined) updateData.favorite = input.favorite;
 		if (input.archived !== undefined) updateData.archived = input.archived;
-		if (input.metadata !== undefined) updateData.metadata = JSON.stringify(input.metadata);
+		if (input.metadata !== undefined) updateData.metadata = input.metadata;
 
 		const result = await db
 			.update(galleryImages)

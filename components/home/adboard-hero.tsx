@@ -9,7 +9,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -25,6 +25,16 @@ import {
   Eye
 } from "lucide-react"
 import Link from "next/link"
+import { FloatingPaths } from "@/components/auth/floating-paths"
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  CartesianGrid,
+} from "recharts"
 
 export default function AdboardHero() {
   const [activeMetric, setActiveMetric] = useState(0)
@@ -37,6 +47,17 @@ export default function AdboardHero() {
     }, 2000)
     return () => clearInterval(interval)
   }, [])
+
+  // Mock campaign performance data for the last 7 days (stable data for hero section)
+  const campaignPerformanceData = useMemo(() => [
+    { day: 'Mon', roas: 2.8 },
+    { day: 'Tue', roas: 3.1 },
+    { day: 'Wed', roas: 2.9 },
+    { day: 'Thu', roas: 3.4 },
+    { day: 'Fri', roas: 3.6 },
+    { day: 'Sat', roas: 3.2 },
+    { day: 'Sun', roas: 3.5 },
+  ], [])
 
   const metrics = [
     { 
@@ -61,7 +82,7 @@ export default function AdboardHero() {
       label: "Cost Reduction", 
       change: "-12%", 
       icon: <DollarSign className="h-4 w-4" />,
-      color: "text-purple-600"
+      color: "text-blue-600"
     }
   ]
 
@@ -87,18 +108,27 @@ export default function AdboardHero() {
     <div className="relative min-h-screen overflow-hidden bg-background">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
+        {/* Floating Paths Background Animation - Same as sign-up page */}
+        <div className="absolute inset-0 z-0 overflow-hidden opacity-[0.15]">
+          <FloatingPaths position={1} />
+          <FloatingPaths position={-1} />
+        </div>
+        <div className="absolute inset-0 z-[1] bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none" />
+        {/* Additional overlay for left content area to improve text readability */}
+        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-background/60 via-transparent to-transparent pointer-events-none lg:block hidden" />
+        
         {/* Floating geometric shapes */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/5 rounded-full animate-pulse" />
-        <div className="absolute top-40 right-20 w-24 h-24 bg-primary/10 rounded-lg rotate-12 animate-pulse delay-1000" />
-        <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-primary/5 rounded-full animate-pulse delay-500" />
-        <div className="absolute top-1/3 right-1/3 w-16 h-16 bg-primary/10 rounded-lg rotate-45 animate-pulse delay-700" />
+        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/5 rounded-full animate-pulse z-[2]" />
+        <div className="absolute top-40 right-20 w-24 h-24 bg-primary/10 rounded-lg rotate-12 animate-pulse delay-1000 z-[2]" />
+        <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-primary/5 rounded-full animate-pulse delay-500 z-[2]" />
+        <div className="absolute top-1/3 right-1/3 w-16 h-16 bg-primary/10 rounded-lg rotate-45 animate-pulse delay-700 z-[2]" />
         
         {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] z-[2]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center min-h-screen">
+      <div className="relative z-10 container mx-auto px-4 pt-12 pb-20">
+        <div className="grid lg:grid-cols-2 gap-16 items-start pt-8">
           {/* Left Column - Content */}
           <div className={`space-y-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             {/* Badge */}
@@ -192,9 +222,64 @@ export default function AdboardHero() {
                     ))}
                   </div>
 
-                  {/* Chart Placeholder */}
-                  <div className="h-32 bg-primary/5 rounded-lg flex items-center justify-center">
-                    <div className="text-slate-500 text-sm">Campaign Performance</div>
+                  {/* Campaign Performance Chart */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-slate-900">Campaign Performance</h3>
+                    <div className="h-32 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={campaignPerformanceData}
+                          margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient id="colorRoas" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#3c4baa" stopOpacity={0.4} />
+                              <stop offset="50%" stopColor="#2b398f" stopOpacity={0.2} />
+                              <stop offset="95%" stopColor="#1e2864" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                          <XAxis 
+                            dataKey="day" 
+                            tick={{ fontSize: 10, fill: '#64748b' }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis 
+                            tick={{ fontSize: 10, fill: '#64748b' }}
+                            axisLine={false}
+                            tickLine={false}
+                            domain={[2, 5]}
+                            tickFormatter={(value) => `${value.toFixed(1)}x`}
+                          />
+                          <Tooltip
+                            content={({ active, payload, label }) => {
+                              if (active && payload && payload.length) {
+                                const data = payload[0]
+                                return (
+                                  <div className="bg-white rounded-lg border border-slate-200 shadow-lg p-2">
+                                    <p className="text-xs font-semibold text-slate-900">{label}</p>
+                                    <p className="text-xs" style={{ color: '#2b398f' }}>
+                                      ROAS: <span className="font-semibold">{typeof data.value === 'number' ? data.value.toFixed(2) : '0.00'}x</span>
+                                    </p>
+                                  </div>
+                                )
+                              }
+                              return null
+                            }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="roas"
+                            stroke="#2b398f"
+                            strokeWidth={2}
+                            fill="url(#colorRoas)"
+                            dot={{ fill: '#2b398f', r: 3 }}
+                            activeDot={{ r: 5, fill: '#2b398f' }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
 
                   {/* Recent Campaigns */}

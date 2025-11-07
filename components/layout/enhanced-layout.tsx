@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { EnhancedSidebar } from "./enhanced-sidebar";
 import { EnhancedTopNav } from "./enhanced-top-nav";
+import { DashboardFooter } from "./dashboard-footer";
 import { cn } from "@/lib/utils";
 import { useMobileNavigation } from "@/hooks/use-mobile-touch";
 
@@ -180,10 +181,10 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 			{/* Main Content Area - Mobile */}
 			<div 
 				className={cn(
-					"lg:hidden fixed inset-0 pt-16"
+					"lg:hidden fixed inset-0 pt-16 flex flex-col"
 				)}
 			>
-				<main className="h-full w-full overflow-x-hidden overflow-y-auto">
+				<main className="flex-1 w-full overflow-x-hidden overflow-y-auto">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -193,17 +194,18 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 						{children}
 					</motion.div>
 				</main>
+				<DashboardFooter />
 			</div>
 
 			{/* Main Content Area - Desktop */}
 			<div 
 				className={cn(
-					"hidden lg:block fixed inset-0 transition-all duration-300",
+					"hidden lg:block fixed inset-0 transition-all duration-300 flex flex-col",
 					"pt-16",
 					sidebarCollapsed ? "left-16" : "left-64"
 				)}
 			>
-				<main className="h-full w-full overflow-x-hidden overflow-y-auto">
+				<main className="flex-1 w-full overflow-x-hidden overflow-y-auto">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -213,6 +215,7 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 						{children}
 					</motion.div>
 				</main>
+				<DashboardFooter />
 			</div>
 		</div>
 	);

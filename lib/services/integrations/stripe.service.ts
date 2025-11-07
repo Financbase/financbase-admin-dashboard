@@ -44,6 +44,9 @@ export class StripeIntegration extends BasePartnerIntegration {
 			'invoice.payment_failed',
 			'customer.created',
 			'customer.updated',
+			'customer.subscription.created',
+			'customer.subscription.updated',
+			'customer.subscription.deleted',
 		];
 	}
 
@@ -72,6 +75,22 @@ export class StripeIntegration extends BasePartnerIntegration {
 					break;
 				case 'invoice.payment_succeeded':
 					await this.handleInvoicePayment(eventData);
+					// Ensure subscription is synced after successful payment
+					if (eventData.subscription) {
+						await this.handleSubscriptionUpdate(eventData.subscription);
+					}
+					break;
+				case 'invoice.payment_failed':
+					await this.handleInvoicePaymentFailed(eventData);
+					break;
+				case 'customer.subscription.created':
+					await this.handleSubscriptionCreated(eventData);
+					break;
+				case 'customer.subscription.updated':
+					await this.handleSubscriptionUpdate(eventData);
+					break;
+				case 'customer.subscription.deleted':
+					await this.handleSubscriptionDeleted(eventData);
 					break;
 			}
 
@@ -180,5 +199,138 @@ export class StripeIntegration extends BasePartnerIntegration {
 			SET status = 'paid', paid_at = NOW()
 			WHERE stripe_invoice_id = $1
 		`, [invoiceData.id]);
+	}
+
+	private async handleInvoicePaymentFailed(invoiceData: any): Promise<void> {
+		// Handle failed invoice payment - may trigger grace period
+		console.log('Invoice payment failed:', invoiceData.id);
+		// Grace period handling is done in subscription-grace-period.service.ts
+	}
+
+	private async handleSubscriptionCreated(subscriptionData: any): Promise<void> {
+		try {
+			// Import here to avoid circular dependencies
+			const { syncSubscriptionToClerk } = await import('@/lib/services/clerk-metadata-sync.service');
+			const { db } = await import('@/lib/db');
+			const { userSubscriptions, subscriptionPlans } = await import('@/lib/db/schemas');
+			const { eq } = await import('drizzle-orm');
+
+			// Find user subscription by Stripe subscription ID
+			const subscription = await db
+				.select()
+				.from(userSubscriptions)
+				.where(eq(userSubscriptions.stripeSubscriptionId, subscriptionData.id))
+				.limit(1);
+
+			if (subscription.length > 0) {
+				const sub = subscription[0];
+				const plan = await db
+					.select()
+					.from(subscriptionPlans)
+					.where(eq(subscriptionPlans.id, sub.planId))
+					.limit(1);
+
+				if (plan.length > 0) {
+					await syncSubscriptionToClerk(sub.userId, sub, plan[0]);
+				}
+			}
+		} catch (error) {
+			console.error('Error handling subscription created:', error);
+		}
+	}
+
+	private async handleSubscriptionUpdate(subscriptionData: any): Promise<void> {
+		try {
+			// Import here to avoid circular dependencies
+			const { syncSubscriptionToClerk } = await import('@/lib/services/clerk-metadata-sync.service');
+			const { db } = await import('@/lib/db');
+			const { userSubscriptions, subscriptionPlans } = await import('@/lib/db/schemas');
+			const { eq } = await import('drizzle-orm');
+
+			// Find user subscription by Stripe subscription ID
+			const subscription = await db
+				.select()
+				.from(userSubscriptions)
+				.where(eq(userSubscriptions.stripeSubscriptionId, subscriptionData.id))
+				.limit(1);
+
+			if (subscription.length > 0) {
+				const sub = subscription[0];
+				
+				// Update subscription status if changed
+				const stripeStatus = subscriptionData.status;
+				const statusMap: Record<string, string> = {
+					active: 'active',
+					trialing: 'trial',
+					past_due: 'suspended',
+					canceled: 'cancelled',
+					unpaid: 'expired',
+				};
+
+				if (statusMap[stripeStatus] && statusMap[stripeStatus] !== sub.status) {
+					await db
+						.update(userSubscriptions)
+						.set({
+							status: statusMap[stripeStatus] as any,
+							updatedAt: new Date(),
+						})
+						.where(eq(userSubscriptions.id, sub.id));
+					
+					// Update sub object for sync
+					sub.status = statusMap[stripeStatus] as any;
+				}
+
+				const plan = await db
+					.select()
+					.from(subscriptionPlans)
+					.where(eq(subscriptionPlans.id, sub.planId))
+					.limit(1);
+
+				if (plan.length > 0) {
+					await syncSubscriptionToClerk(sub.userId, sub, plan[0]);
+				}
+			}
+		} catch (error) {
+			console.error('Error handling subscription update:', error);
+		}
+	}
+
+	private async handleSubscriptionDeleted(subscriptionData: any): Promise<void> {
+		try {
+			// Import here to avoid circular dependencies
+			const { revertToFreePlan } = await import('@/lib/services/clerk-metadata-sync.service');
+			const { startGracePeriod } = await import('@/lib/services/subscription-grace-period.service');
+			const { db } = await import('@/lib/db');
+			const { userSubscriptions } = await import('@/lib/db/schemas');
+			const { eq } = await import('drizzle-orm');
+
+			// Find user subscription by Stripe subscription ID
+			const subscription = await db
+				.select()
+				.from(userSubscriptions)
+				.where(eq(userSubscriptions.stripeSubscriptionId, subscriptionData.id))
+				.limit(1);
+
+			if (subscription.length > 0) {
+				const sub = subscription[0];
+				
+				// Update subscription status to cancelled
+				await db
+					.update(userSubscriptions)
+					.set({
+						status: 'cancelled',
+						cancelledAt: new Date(),
+						updatedAt: new Date(),
+					})
+					.where(eq(userSubscriptions.id, sub.id));
+
+				// Start grace period
+				await startGracePeriod(sub.userId, sub.id);
+
+				// After grace period, revertToFreePlan will be called by cron job
+			}
+		} catch (error) {
+			console.error('Error handling subscription deleted:', error);
+		}
 	}
 }

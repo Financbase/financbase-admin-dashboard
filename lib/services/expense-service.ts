@@ -70,8 +70,7 @@ export async function createExpense(input: CreateExpenseInput): Promise<Expense>
 	// Send notification
 	await NotificationHelpers.expense.created(
 		input.userId,
-		expense.id.toString(),
-		input.amount
+		expense.id.toString()
 	);
 
 	// Log action

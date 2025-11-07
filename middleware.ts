@@ -148,6 +148,31 @@ const isAuthRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   const { pathname } = req.nextUrl;
 
+  // Custom domain resolution for white label workspaces
+  // This runs early to resolve workspace from domain before auth checks
+  let resolvedWorkspaceId: string | null = null;
+  const hostname = req.headers.get('host') || req.nextUrl.hostname;
+  
+  // Skip domain resolution for localhost and known Financbase domains
+  const isFinancbaseDomain = hostname?.includes('financbase.com') || 
+                             hostname?.includes('localhost') ||
+                             hostname?.includes('127.0.0.1') ||
+                             hostname?.includes('vercel.app');
+  
+  if (!isFinancbaseDomain && hostname) {
+    try {
+      const { whiteLabelService } = await import('@/lib/services/white-label-service');
+      const domainResult = await whiteLabelService.getBrandingByDomain(hostname);
+      
+      if (domainResult) {
+        resolvedWorkspaceId = domainResult.workspaceId;
+      }
+    } catch (error) {
+      // Log but don't block - domain resolution is optional
+      console.warn('Error resolving custom domain:', error);
+    }
+  }
+
   // Explicitly exclude Next.js internal files and static assets
   // This ensures middleware doesn't interfere with chunk loading
   // Critical: Must exclude all webpack chunk paths to prevent ChunkLoadError
@@ -156,6 +181,7 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.startsWith('/_next/static/') ||
     pathname.startsWith('/_next/webpack/') ||
     pathname.startsWith('/_next/image/') ||
+    pathname.startsWith('/_next/data/') ||
     pathname.startsWith('/static/') ||
     pathname.includes('/favicon.ico') ||
     pathname.includes('/manifest.json') ||
@@ -165,8 +191,17 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.match(/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp|avif|map)$/i) ||
     // Match webpack chunk patterns (e.g., /_next/static/chunks/webpack-*.js)
     pathname.match(/\/_next\/static\/chunks\/.*\.js$/) ||
-    // Match webpack runtime chunks
-    pathname.match(/\/_next\/static\/chunks\/webpack\.js/)
+    // Match webpack runtime chunks (with or without query params)
+    pathname.match(/\/_next\/static\/chunks\/webpack\.js/) ||
+    // Match webpack chunk files with contenthash (e.g., chunk.[hash].js)
+    pathname.match(/\/_next\/static\/chunks\/.*\.[a-f0-9]{8}\.chunk\.js/) ||
+    // Match any file in _next/static directory (covers all build artifacts)
+    pathname.match(/^\/_next\/static\//) ||
+    // Match RSC (React Server Components) requests
+    pathname.match(/\/_next\/data\//) ||
+    // Match webpack hot module replacement
+    pathname.match(/\/_next\/webpack-hmr/) ||
+    pathname.match(/\/_next\/webpack\/.*/)
   ) {
     return NextResponse.next();
   }
@@ -304,6 +339,12 @@ export default clerkMiddleware(async (auth, req) => {
 
   // Final response - ensure version headers are included
   const finalResponse = NextResponse.next();
+  
+  // Inject resolved workspace ID into headers for downstream use
+  if (resolvedWorkspaceId) {
+    finalResponse.headers.set('x-workspace-id', resolvedWorkspaceId);
+  }
+  
   if (versioningHeaders) {
     versioningHeaders.headers.forEach((value, key) => {
       finalResponse.headers.set(key, value);

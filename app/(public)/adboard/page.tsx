@@ -8,17 +8,28 @@
  */
 
 import { Metadata } from "next";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Target, TrendingUp, BarChart3, DollarSign, Eye, MousePointer, CheckCircle, Sparkles, Zap, Shield, Clock, Users } from "lucide-react";
-import Link from "next/link";
+import { Target, TrendingUp, Eye, CheckCircle, Sparkles, Zap, Shield, Clock, Users } from "lucide-react";
+import { PlatformLogo } from "@/components/ui/platform-logo";
 import AdboardHero from "@/components/home/adboard-hero";
 import AdboardSocialProof from "@/components/home/adboard-social-proof";
 import AdboardFeaturesShowcase from "@/components/home/adboard-features-showcase";
 import AdboardPricing from "@/components/home/adboard-pricing";
 import AdboardFAQ from "@/components/home/adboard-faq";
 import { PublicCTA } from "@/components/layout/public-form";
+import { EnterpriseCapabilitiesSection } from "@/components/home/enterprise-capabilities-section";
+
+// Icon mapping to avoid JSX in server component
+const iconMap = {
+  Target,
+  TrendingUp,
+  Eye,
+  Zap,
+  Shield,
+  Clock,
+  Users,
+};
 
 export const metadata: Metadata = {
 	title: "Adboard | Financbase",
@@ -38,7 +49,7 @@ export const metadata: Metadata = {
 const features = [
 	{
 		id: "campaign-management",
-		icon: <Target className="h-8 w-8" />,
+		iconName: "Target" as keyof typeof iconMap,
 		title: "Campaign Management",
 		description: "Create, manage, and optimize advertising campaigns across multiple platforms from one unified dashboard",
 		benefits: [
@@ -56,7 +67,7 @@ const features = [
 	},
 	{
 		id: "roas-tracking",
-		icon: <TrendingUp className="h-8 w-8" />,
+		iconName: "TrendingUp" as keyof typeof iconMap,
 		title: "ROAS Tracking",
 		description: "Track Return on Ad Spend with real-time analytics and performance insights across all channels",
 		benefits: [
@@ -74,7 +85,7 @@ const features = [
 	},
 	{
 		id: "audience-insights",
-		icon: <Eye className="h-8 w-8" />,
+		iconName: "Eye" as keyof typeof iconMap,
 		title: "Audience Insights",
 		description: "Understand your audience with detailed demographics, behavior analysis, and segmentation tools",
 		benefits: [
@@ -93,32 +104,62 @@ const features = [
 ];
 
 const platforms = [
-	{ name: "Google Ads", description: "Search, Display, Shopping, YouTube", icon: "🔍" },
-	{ name: "Facebook Ads", description: "Social media advertising and retargeting", icon: "📱" },
-	{ name: "LinkedIn Ads", description: "B2B advertising and professional targeting", icon: "💼" },
-	{ name: "Twitter Ads", description: "Social media campaigns and engagement", icon: "🐦" },
-	{ name: "TikTok Ads", description: "Video advertising for younger audiences", icon: "🎵" },
-	{ name: "Amazon Ads", description: "E-commerce advertising and product promotion", icon: "📦" }
+	{ 
+		name: "Google Ads", 
+		description: "Search, Display, Shopping, YouTube", 
+		logo: "/logos/google-ads.svg",
+		fallback: "/logos/google.svg"
+	},
+	{ 
+		name: "Facebook Ads", 
+		description: "Social media advertising and retargeting", 
+		logo: "/logos/meta.svg",
+		fallback: "/logos/facebook.svg"
+	},
+	{ 
+		name: "LinkedIn Ads", 
+		description: "B2B advertising and professional targeting", 
+		logo: "/logos/linkedin.svg",
+		fallback: "/logos/linkedin.svg"
+	},
+	{ 
+		name: "Twitter Ads", 
+		description: "Social media campaigns and engagement", 
+		logo: "/logos/x.svg",
+		fallback: "/logos/twitter.svg"
+	},
+	{ 
+		name: "TikTok Ads", 
+		description: "Video advertising for younger audiences", 
+		logo: "/logos/tiktok.svg",
+		fallback: "/logos/tiktok.svg"
+	},
+	{ 
+		name: "Amazon Ads", 
+		description: "E-commerce advertising and product promotion", 
+		logo: "/logos/amazon.svg",
+		fallback: "/logos/amazon.svg"
+	}
 ];
 
 const capabilities = [
 	{
-		icon: <Zap className="h-6 w-6" />,
+		iconName: "Zap" as keyof typeof iconMap,
 		title: "Lightning Fast",
 		description: "Process thousands of campaigns in seconds"
 	},
 	{
-		icon: <Clock className="h-6 w-6" />,
+		iconName: "Clock" as keyof typeof iconMap,
 		title: "Real-Time Updates",
 		description: "Live data sync across all platforms"
 	},
 	{
-		icon: <Users className="h-6 w-6" />,
+		iconName: "Users" as keyof typeof iconMap,
 		title: "Team Collaboration",
 		description: "Seamless collaboration across departments"
 	},
 	{
-		icon: <Shield className="h-6 w-6" />,
+		iconName: "Shield" as keyof typeof iconMap,
 		title: "Secure & Compliant",
 		description: "Enterprise-grade security and compliance"
 	}
@@ -166,7 +207,10 @@ export default function AdboardPage() {
 									{/* Icon and Title */}
 									<div className="flex items-center mb-6">
 										<div className={`p-4 bg-gradient-to-br ${feature.color} rounded-xl text-white mr-4 group-hover:scale-110 transition-transform duration-300`}>
-											{feature.icon}
+											{(() => {
+												const IconComponent = iconMap[feature.iconName];
+												return IconComponent ? <IconComponent className="h-8 w-8" /> : null;
+											})()}
 										</div>
 										<div>
 											<h3 className="text-xl font-bold text-slate-900">{feature.title}</h3>
@@ -196,33 +240,12 @@ export default function AdboardPage() {
 					</div>
 
 					{/* Capabilities Section */}
-					<Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-						<CardContent className="p-8">
-							<div className="text-center mb-8">
-								<h3 className="text-2xl font-bold text-slate-900 mb-4">
-									Enterprise-Grade Capabilities
-								</h3>
-								<p className="text-slate-600">
-									Everything you need to scale your advertising operations
-								</p>
-							</div>
-
-							<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-								{capabilities.map((capability) => (
-									<div 
-										key={`capability-${capability.title.toLowerCase().replace(/\s+/g, '-')}`}
-										className="group p-6 rounded-lg border border-slate-200 hover:border-primary/30 hover:shadow-md transition-all duration-300"
-									>
-										<div className="text-primary mb-4 group-hover:scale-110 transition-transform duration-300">
-											{capability.icon}
-										</div>
-										<h4 className="font-semibold text-slate-900 mb-2">{capability.title}</h4>
-										<p className="text-sm text-slate-600">{capability.description}</p>
-									</div>
-								))}
-							</div>
-						</CardContent>
-					</Card>
+					<EnterpriseCapabilitiesSection
+						capabilities={capabilities}
+						title="Enterprise-Grade Capabilities"
+						description="Everything you need to scale your advertising operations"
+						iconMap={iconMap}
+					/>
 				</div>
 			</section>
 
@@ -248,7 +271,13 @@ export default function AdboardPage() {
 							<Card key={platform.name} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:scale-105">
 								<CardContent className="p-6">
 									<div className="flex items-center gap-4 mb-4">
-										<div className="text-3xl">{platform.icon}</div>
+										<div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
+											<PlatformLogo 
+												src={platform.logo}
+												fallback={platform.fallback}
+												alt={`${platform.name} logo`}
+											/>
+										</div>
 										<h3 className="text-lg font-semibold text-gray-900">{platform.name}</h3>
 									</div>
 									<p className="text-gray-600">{platform.description}</p>

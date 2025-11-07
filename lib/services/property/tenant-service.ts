@@ -156,7 +156,7 @@ export async function getTenantServiceRequests(
 		.select()
 		.from(serviceRequests)
 		.where(whereClause)
-		.orderBy(desc(serviceRequests.priority), desc(serviceRequests.requestDate))
+		.orderBy(desc(serviceRequests.priority), desc(serviceRequests.createdAt))
 		.limit(options?.limit || 50)
 		.offset(options?.offset || 0);
 
@@ -229,7 +229,7 @@ export async function getTenantDashboard(tenantId: string): Promise<{
 		.select()
 		.from(serviceRequests)
 		.where(eq(serviceRequests.tenantId, tenantId))
-		.orderBy(desc(serviceRequests.requestDate))
+		.orderBy(desc(serviceRequests.requestedDate))
 		.limit(5);
 
 	// Get property information
@@ -255,8 +255,8 @@ export async function getTenantDashboard(tenantId: string): Promise<{
 		propertyInfo: propertyInfo
 			? {
 					propertyId: propertyInfo.propertyId,
-					address: propertyInfo.address,
-					propertyType: propertyInfo.propertyType,
+					address: propertyInfo.address || "",
+					propertyType: propertyInfo.propertyType || "",
 					rentalAmount: Number(propertyInfo.rentalAmount || 0),
 				}
 			: null,

@@ -21,6 +21,39 @@ export interface AvatarProps {
 	fallback?: string;
 	size?: number;
 	style?: React.CSSProperties;
+	gradientClassName?: string;
+}
+
+/**
+ * Generate gradient class names based on name for consistent avatar styling
+ * Uses Financbase brand colors (hue 231.6 - blue)
+ * Base color: hsl(231.6 54% 36%) / rgb(43, 57, 143) / oklch(0.388 0.1423 271.13)
+ */
+export function getGradientFromName(name: string): string {
+	// Financbase brand color gradients using primary color (hue 231.6 - blue)
+	// Creating variations with different lightness and saturation for visual variety
+	const gradients = [
+		// Primary brand color variations
+		'bg-gradient-to-br from-primary to-primary/80',
+		'bg-gradient-to-br from-[hsl(231.6_54%_42%)] to-[hsl(231.6_54%_30%)]',
+		'bg-gradient-to-br from-[hsl(231.6_58%_44%)] to-[hsl(231.6_50%_32%)]',
+		'bg-gradient-to-br from-[hsl(231.6_50%_46%)] to-[hsl(231.6_58%_28%)]',
+		'bg-gradient-to-br from-[hsl(231.6_60%_40%)] to-[hsl(231.6_48%_34%)]',
+		'bg-gradient-to-br from-[hsl(231.6_52%_44%)] to-[hsl(231.6_56%_30%)]',
+		// Slightly shifted hues for subtle variation while staying in brand blue
+		'bg-gradient-to-br from-[hsl(229_54%_42%)] to-[hsl(234_54%_30%)]',
+		'bg-gradient-to-br from-[hsl(230_58%_40%)] to-[hsl(233_50%_34%)]',
+		'bg-gradient-to-br from-[hsl(230.5_52%_44%)] to-[hsl(232.7_56%_30%)]',
+		'bg-gradient-to-br from-[hsl(231.6_54%_46%)] to-[hsl(231.6_54%_28%)]',
+		'bg-gradient-to-br from-[hsl(232_58%_40%)] to-[hsl(231_50%_34%)]',
+		'bg-gradient-to-br from-[hsl(231.6_50%_48%)] to-[hsl(231.6_58%_26%)]',
+	];
+
+	const hash = name.split('').reduce((acc, char) => {
+		return acc + char.charCodeAt(0);
+	}, 0);
+
+	return gradients[hash % gradients.length];
 }
 
 /**
@@ -42,19 +75,19 @@ export function getAvatarProps(
 		};
 	}
 
-	// Generate fallback with initials and color based on name
+	// Generate fallback with initials and gradient based on name
 	const initials = getInitials(name);
-	const color = getColorFromName(name);
+	const gradientClassName = getGradientFromName(name);
 
 	return {
 		src: null,
 		alt: `${name}'s avatar`,
 		fallback: initials,
 		size,
+		gradientClassName,
 		style: {
 			width: size,
 			height: size,
-			backgroundColor: color,
 			color: 'white',
 			fontWeight: 'bold',
 			fontSize: size * 0.4,

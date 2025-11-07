@@ -95,7 +95,7 @@ export const ourFileRouter = {
 	// Plugin package uploads (ZIP/TAR files)
 	pluginPackage: f({ 
 		blob: { 
-			maxFileSize: '10MB',
+			maxFileSize: '8MB' as const,
 			maxFileCount: 1,
 		} 
 	})

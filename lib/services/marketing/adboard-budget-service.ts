@@ -15,7 +15,7 @@ import {
 	adboardCampaigns,
 	adboardPerformance,
 } from "@/lib/db/schemas/adboard.schema";
-import { and, desc, eq, gte, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lte, like, or, sql } from "drizzle-orm";
 import {
 	BarChart3,
 	PiggyBank,

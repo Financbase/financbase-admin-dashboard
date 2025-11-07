@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { TrendingUp, TrendingUp, TrendingUp, TrendingDown, PiggyBank, Users, XCircle, ArrowUp, MessageCircle, Bot, Workflow } from "lucide-react";
+import { TrendingUp, TrendingDown, PiggyBank, Users, XCircle, ArrowUp, MessageCircle, Bot, Workflow } from "lucide-react";
 import type { ProfitabilityPrediction } from './ai-types';
 import { FinancialAIService } from './financial-ai-service';
 

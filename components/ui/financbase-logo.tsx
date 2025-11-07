@@ -10,6 +10,7 @@
 "use client";
 
 import Image from "next/image";
+import { useBrandingContext } from "@/contexts/branding-context";
 
 interface FinancbaseLogoProps {
   size?: "sm" | "md" | "lg";
@@ -24,6 +25,8 @@ export function FinancbaseLogo({
   showText = false, 
   variant = "default" 
 }: FinancbaseLogoProps) {
+  const { branding, getLogo, getCompanyName } = useBrandingContext();
+  
   const sizeClasses = {
     sm: { width: 120, height: 40 },
     md: { width: 150, height: 50 }, 
@@ -32,19 +35,23 @@ export function FinancbaseLogo({
 
   const dimensions = sizeClasses[size];
 
-  // Determine logo source based on variant and background
+  // Determine logo source based on variant and branding
   const getLogoSrc = () => {
+    // Use branded logo if available
     if (variant === "white" || variant === "monochrome") {
-      return "/financbase-logo-white.png";
+      return getLogo(true) || "/financbase-logo-white.png";
     }
-    return "/financbase-logo.png";
+    return getLogo(false) || "/financbase-logo.png";
   };
+
+  const companyName = getCompanyName();
+  const isBranded = !branding.hideFinancbaseBranding && branding.logo;
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
       <Image 
         src={getLogoSrc()}
-        alt="Financbase Logo"
+        alt={`${companyName} Logo`}
         width={dimensions.width}
         height={dimensions.height}
         className={`object-contain ${
@@ -55,7 +62,7 @@ export function FinancbaseLogo({
         priority
       />
       {showText && (
-        <span className="font-bold text-xl">Financbase</span>
+        <span className="font-bold text-xl">{companyName}</span>
       )}
     </div>
   );

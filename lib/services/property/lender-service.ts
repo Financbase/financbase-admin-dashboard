@@ -155,7 +155,7 @@ export async function getLenderPerformance(
 			totalLoanVolume: sql<number>`COALESCE(sum(CASE WHEN ${loanApplications.status} = 'approved' THEN ${loanApplications.loanAmount} END), 0)`,
 			averageLoanAmount: sql<number>`COALESCE(avg(${loanApplications.loanAmount}), 0)`,
 			averageCreditScore: sql<number>`COALESCE(avg(${loanApplications.creditScore}), 0)`,
-			averageDTI: sql<number>`COALESCE(avg(${loanApplications.debtToIncomeRatio}), 0)`,
+			averageDTI: sql<number>`COALESCE(avg(${loanApplications.dti}), 0)`,
 		})
 		.from(loanApplications)
 		.where(whereClause);

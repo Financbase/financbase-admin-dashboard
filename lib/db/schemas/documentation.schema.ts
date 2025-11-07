@@ -289,3 +289,59 @@ export const faqItems = pgTable('financbase_faq_items', {
 export const faqItemsRelations = relations(faqItems, ({ one }) => ({
   category: one(helpCategories, { fields: [faqItems.categoryId], references: [helpCategories.id] }),
 }));
+
+// Guides Table - User guides and tutorials
+export const guides = pgTable('financbase_guides', {
+  id: serial('id').primaryKey(),
+  
+  // Core content
+  title: text('title').notNull(),
+  slug: text('slug').notNull().unique(),
+  content: text('content').notNull(), // Markdown content
+  excerpt: text('excerpt'),
+  description: text('description'),
+  
+  // Metadata
+  category: text('category').notNull(), // 'getting-started', 'advanced', 'integrations', 'api', 'troubleshooting'
+  type: text('type').notNull().default('guide'), // 'tutorial', 'guide', 'documentation'
+  difficulty: text('difficulty').notNull().default('beginner'), // 'beginner', 'intermediate', 'advanced'
+  
+  // Media
+  imageUrl: text('image_url'),
+  thumbnailUrl: text('thumbnail_url'),
+  videoUrl: text('video_url'), // Optional video URL
+  
+  // Authoring
+  authorId: text('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  status: text('status').notNull().default('draft'), // 'draft', 'published', 'archived'
+  
+  // Guide-specific
+  duration: text('duration'), // String like "15 min"
+  estimatedReadTime: integer('estimated_read_time'), // Integer in minutes
+  
+  // SEO
+  metaTitle: text('meta_title'),
+  metaDescription: text('meta_description'),
+  tags: jsonb('tags').default([]).notNull(), // Array of tag strings
+  keywords: jsonb('keywords').default([]).notNull(), // Array of keyword strings
+  
+  // Engagement
+  viewCount: integer('view_count').default(0).notNull(),
+  rating: integer('rating').default(0).notNull(), // Average rating (0-5, stored as integer * 10 for precision)
+  helpfulCount: integer('helpful_count').default(0).notNull(),
+  notHelpfulCount: integer('not_helpful_count').default(0).notNull(),
+  
+  // Organization
+  featured: boolean('featured').default(false).notNull(),
+  priority: integer('priority').default(0).notNull(), // Higher number = higher priority
+  sortOrder: integer('sort_order').default(0).notNull(),
+  
+  // Timestamps
+  publishedAt: timestamp('published_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const guidesRelations = relations(guides, ({ one }) => ({
+  author: one(users, { fields: [guides.authorId], references: [users.id] }),
+}));
