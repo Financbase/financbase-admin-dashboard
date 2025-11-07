@@ -31,6 +31,7 @@ import {
 import Link from "next/link";
 import { CodeExamples } from "./code-examples";
 import { StatsSection } from "./stats-section";
+import { PublicCTA } from "@/components/layout/public-form";
 
 export const metadata: Metadata = {
 	title: "API Documentation | Financbase",
@@ -294,40 +295,6 @@ export default function APIDocumentationPage() {
 						</div>
 					</section>
 
-					{/* CTA Section */}
-					<section className="mb-20">
-						<Card className="bg-gradient-to-r from-primary/90 to-primary text-white border-0 shadow-2xl">
-							<CardContent className="text-center py-16 px-6">
-								<h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Build?</h2>
-								<p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-									Join thousands of developers building amazing integrations with our API.
-								</p>
-								<div className="flex flex-col sm:flex-row gap-4 justify-center">
-									<Button 
-										size="lg" 
-										className="text-lg px-8 h-12 bg-white text-primary hover:bg-white/90 border-white" 
-										asChild
-									>
-										<Link href="/auth/sign-up">
-											Get Your API Key
-											<ArrowRight className="ml-2 h-5 w-5" />
-										</Link>
-									</Button>
-									<Button 
-										size="lg" 
-										variant="outline" 
-										className="text-lg px-8 h-12 border-white text-white hover:bg-white hover:text-primary" 
-										asChild
-									>
-										<Link href="/docs/api/endpoints">
-											View Full Documentation
-										</Link>
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
-					</section>
-
 					{/* Support Section */}
 					<Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 shadow-lg">
 						<CardContent className="p-8 md:p-12 text-center">
@@ -362,6 +329,21 @@ export default function APIDocumentationPage() {
 					</Card>
 				</div>
 			</div>
+
+			{/* CTA Section */}
+			<PublicCTA
+				title="Ready to Build?"
+				description="Join thousands of developers building amazing integrations with our API."
+				primaryAction={{
+					text: "Get Your API Key",
+					href: "/auth/sign-up"
+				}}
+				secondaryAction={{
+					text: "View Full Documentation",
+					href: "/docs/api/endpoints"
+				}}
+				background="gradient"
+			/>
 		</div>
 	);
 }

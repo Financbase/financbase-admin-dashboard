@@ -223,7 +223,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
 
     try {
       // Get session details to fetch transactions for the date range
-      const session = sessions?.find(s => s.id === selectedSession);
+      const session = sessions?.find((s: any) => s.id === selectedSession);
       if (!session) {
         console.error('Session not found');
         return;

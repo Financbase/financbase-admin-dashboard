@@ -19,6 +19,7 @@ import { db } from '@/lib/db';
 import { subscriptionPlans, userSubscriptions } from '@/lib/db/schemas';
 import { eq } from 'drizzle-orm';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { syncSubscriptionToClerk } from '@/lib/services/clerk-metadata-sync.service';
 
 // GET /api/settings/billing/subscription
 // Get user's current subscription
@@ -146,6 +147,14 @@ export async function POST(request: NextRequest) {
 				.where(eq(userSubscriptions.userId, userId))
 				.returning();
 
+			// Sync to Clerk metadata (async, don't fail subscription update if this fails)
+			syncSubscriptionToClerk(userId, updatedSubscription[0], plan[0]).catch(
+				(error) => {
+					console.error('Failed to sync subscription to Clerk:', error);
+					// Log but don't throw - subscription update succeeded
+				},
+			);
+
 			return NextResponse.json({ subscription: updatedSubscription[0] });
 		} else {
 			// Create new subscription
@@ -161,6 +170,14 @@ export async function POST(request: NextRequest) {
 					autoRenew: true,
 				})
 				.returning();
+
+			// Sync to Clerk metadata (async, don't fail subscription creation if this fails)
+			syncSubscriptionToClerk(userId, newSubscription[0], plan[0]).catch(
+				(error) => {
+					console.error('Failed to sync subscription to Clerk:', error);
+					// Log but don't throw - subscription creation succeeded
+				},
+			);
 
 			return NextResponse.json({ subscription: newSubscription[0] });
 		}

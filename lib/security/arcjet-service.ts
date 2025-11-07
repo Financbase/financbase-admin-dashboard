@@ -83,21 +83,31 @@ export const arcjetSecurity = arcjet({
 export class SecurityService {
 	/**
 	 * Apply rate limiting to API routes
+	 * Uses arcjetSecurity instance which applies all configured rules
 	 */
 	static async applyRateLimit(request: Request, endpoint: string) {
 		try {
-			// Apply different rate limits based on endpoint type
-			let rateLimitRule = rateLimitRules[0]; // Default
+			// Determine which rate limit rule to use based on endpoint
+			let selectedRateLimitRule = rateLimitRules[0]; // Default
 
 			if (endpoint.includes('/auth') || endpoint.includes('/login')) {
-				rateLimitRule = rateLimitRules[1]; // Stricter for auth
+				selectedRateLimitRule = rateLimitRules[1]; // Stricter for auth
 			} else if (endpoint.includes('/upload') || endpoint.includes('/files')) {
-				rateLimitRule = rateLimitRules[2]; // File upload limits
+				selectedRateLimitRule = rateLimitRules[2]; // File upload limits
 			} else if (endpoint.includes('/contact') || endpoint.includes('/support')) {
-				rateLimitRule = rateLimitRules[3]; // Stricter for public forms
+				selectedRateLimitRule = rateLimitRules[3]; // Stricter for public forms
 			}
 
-			const decision = await rateLimitRule.protect(request);
+			// Create endpoint-specific Arcjet instance with selected rate limit
+			const endpointSecurity = arcjet({
+				key: process.env.ARCJET_KEY!,
+				rules: [
+					selectedRateLimitRule,
+					...protectionRules,
+				],
+			});
+
+			const decision = await endpointSecurity.protect(request);
 
 			if (decision.isDenied()) {
 				return {
@@ -107,9 +117,13 @@ export class SecurityService {
 				};
 			}
 
+			// Extract remaining tokens from the decision
+			// Arcjet returns remaining in the decision object or results array
+			const remaining = (decision as any).remaining ?? decision.results?.[0]?.remaining ?? null;
+
 			return {
 				denied: false,
-				remaining: decision.remaining,
+				remaining,
 			};
 		} catch (error) {
 			console.error('Rate limit check error:', error);
@@ -127,14 +141,30 @@ export class SecurityService {
 	 */
 	static async detectBot(request: Request) {
 		try {
-			const botRule = protectionRules.find(rule => rule.type === 'DETECT_BOT');
-			if (!botRule) return { isBot: false };
+			const decision = await arcjetSecurity.protect(request);
+			
+			// Check if request was denied due to bot detection
+			if (decision.isDenied()) {
+				const reason = decision.reason || '';
+				// Check if the denial reason indicates bot detection
+				if (reason.toLowerCase().includes('bot') || reason.toLowerCase().includes('automated')) {
+					return {
+						isBot: true,
+						reason: decision.reason,
+					};
+				}
+			}
 
-			const decision = await botRule.protect(request);
+			// Also check results array for bot-related denials
+			const botResult = decision.results?.find(
+				result => (result as any).state === 'DENY' && 
+					((result as any).reason?.toLowerCase().includes('bot') || 
+					 (result as any).reason?.toLowerCase().includes('automated'))
+			);
 
 			return {
-				isBot: decision.isDenied(),
-				reason: decision.reason,
+				isBot: botResult !== undefined,
+				reason: (botResult as any)?.reason,
 			};
 		} catch (error) {
 			console.error('Bot detection error:', error);
@@ -148,14 +178,33 @@ export class SecurityService {
 	 */
 	static async detectThreats(request: Request) {
 		try {
-			const shieldRule = protectionRules.find(rule => rule.type === 'SHIELD');
-			if (!shieldRule) return { isThreat: false };
+			const decision = await arcjetSecurity.protect(request);
+			
+			// Check if request was denied due to threat detection
+			if (decision.isDenied()) {
+				const reason = decision.reason || '';
+				// Check if the denial reason indicates threat detection
+				if (reason.toLowerCase().includes('shield') || 
+					reason.toLowerCase().includes('threat') ||
+					reason.toLowerCase().includes('attack')) {
+					return {
+						isThreat: true,
+						reason: decision.reason,
+					};
+				}
+			}
 
-			const decision = await shieldRule.protect(request);
+			// Also check results array for threat-related denials
+			const threatResult = decision.results?.find(
+				result => (result as any).state === 'DENY' && 
+					((result as any).reason?.toLowerCase().includes('shield') ||
+					 (result as any).reason?.toLowerCase().includes('threat') ||
+					 (result as any).reason?.toLowerCase().includes('attack'))
+			);
 
 			return {
-				isThreat: decision.isDenied(),
-				reason: decision.reason,
+				isThreat: threatResult !== undefined,
+				reason: (threatResult as any)?.reason,
 			};
 		} catch (error) {
 			console.error('Threat detection error:', error);

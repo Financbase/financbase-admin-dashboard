@@ -307,7 +307,7 @@ export class RentalIncomeService {
 
 			if (payment.length > 0) {
 				const paymentData = payment[0];
-				paidDate = paymentData.receivedDate || paymentData.date;
+				paidDate = paymentData.date;
 				status = paymentData.paymentStatus === "received" ? "paid" : "late";
 
 				if (paidDate && status === "late") {

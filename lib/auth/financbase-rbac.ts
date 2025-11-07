@@ -17,9 +17,12 @@ import { auth } from '@clerk/nextjs/server';
 import type { FinancbaseUserMetadata, FinancialPermission } from '@/types/auth';
 import { FINANCIAL_PERMISSIONS } from '@/types/auth';
 import { canAccessRoute as canAccessRouteConfig, getRoutePermissions } from '@/lib/config/navigation-permissions';
+import { getEffectiveRoleAndPermissions } from '@/lib/services/subscription-rbac.service';
+import { canAccessWithSubscription } from '@/lib/utils/subscription-rbac-utils';
 
 /**
  * Check if the current user has a specific permission
+ * Also checks subscription-based permissions
  */
 export async function checkPermission(permission: FinancialPermission): Promise<boolean> {
 	try {
@@ -41,8 +44,14 @@ export async function checkPermission(permission: FinancialPermission): Promise<
 			return true;
 		}
 
-		// Check if user has the specific permission
-		return metadata.permissions?.includes(permission) ?? false;
+		// Check if user has the specific permission in Clerk metadata
+		const hasClerkPermission = metadata.permissions?.includes(permission) ?? false;
+
+		// Also check subscription-based permissions
+		const hasSubscriptionPermission = await canAccessWithSubscription(userId, permission);
+
+		// User needs permission from either source (Clerk metadata or subscription)
+		return hasClerkPermission || hasSubscriptionPermission;
 	} catch (error) {
 		console.error('Error checking permission:', error);
 		return false;
@@ -112,6 +121,7 @@ export async function checkFinancialAccess(
 /**
  * Check permissions for a specific route
  * Uses the comprehensive navigation permissions configuration
+ * Also considers subscription-based permissions
  * 
  * @param pathname - The route pathname to check
  * @param authResult - Optional auth result from middleware (to avoid calling auth() again)
@@ -139,8 +149,31 @@ export async function checkRoutePermissions(
 		const userRole = metadata.role ?? null;
 		const userPermissions = (metadata.permissions ?? []) as FinancialPermission[];
 
-		// Use the navigation permissions configuration
-		return canAccessRouteConfig(pathname, userRole, userPermissions);
+		// Get effective role and permissions from subscription
+		const effective = await getEffectiveRoleAndPermissions(userId);
+		
+		// Combine Clerk permissions with subscription permissions
+		const allPermissions = [
+			...userPermissions,
+			...(effective?.permissions || []),
+		];
+		
+		// Use the higher role (admin > manager > user > viewer)
+		const roleHierarchy: Record<string, number> = {
+			admin: 4,
+			manager: 3,
+			user: 2,
+			viewer: 1,
+		};
+		
+		const effectiveRole = effective?.role || userRole;
+		const finalRole = 
+			roleHierarchy[effectiveRole || ''] > roleHierarchy[userRole || '']
+				? effectiveRole
+				: userRole;
+
+		// Use the navigation permissions configuration with combined permissions
+		return canAccessRouteConfig(pathname, finalRole, allPermissions);
 	} catch (error) {
 		console.error('Error checking route permissions:', error);
 		return false;
@@ -214,9 +247,47 @@ export async function isAdmin(): Promise<boolean> {
 
 /**
  * Check if user is manager or above
+ * Also considers subscription-based role
  */
 export async function isManagerOrAbove(): Promise<boolean> {
-	const role = await getUserRole();
-	return role === 'admin' || role === 'manager';
+	const { userId } = await auth();
+	if (!userId) {
+		return false;
+	}
+
+	// Get effective role from subscription
+	const effective = await getEffectiveRoleAndPermissions(userId);
+	const effectiveRole = effective?.role;
+
+	// Also check Clerk metadata role
+	const clerkRole = await getUserRole();
+
+	// User is manager or above if either role is admin or manager
+	return (
+		effectiveRole === 'admin' ||
+		effectiveRole === 'manager' ||
+		clerkRole === 'admin' ||
+		clerkRole === 'manager'
+	);
+}
+
+/**
+ * Check subscription-based permission
+ * Helper function to check if user has permission based on subscription
+ */
+export async function checkSubscriptionPermission(
+	permission: FinancialPermission,
+): Promise<boolean> {
+	try {
+		const { userId } = await auth();
+		if (!userId) {
+			return false;
+		}
+
+		return await canAccessWithSubscription(userId, permission);
+	} catch (error) {
+		console.error('Error checking subscription permission:', error);
+		return false;
+	}
 }
 

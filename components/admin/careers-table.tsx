@@ -143,7 +143,7 @@ export function CareersTable() {
 			qualifications: job.qualifications || [],
 			salary: job.salary || '',
 			benefits: job.benefits || [],
-			status: job.status,
+			status: (job.status === 'draft' || job.status === 'published' || job.status === 'closed' || job.status === 'archived') ? job.status : 'draft',
 			isFeatured: job.isFeatured,
 		});
 		setIsDialogOpen(true);

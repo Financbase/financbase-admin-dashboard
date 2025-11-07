@@ -368,6 +368,16 @@ export class RateLimitingService {
 	/**
 	 * Get aggregated summary statistics
 	 */
+	/**
+	 * Get summary statistics (alias for getSummaryStatistics)
+	 */
+	async getSummary(hours = 24): Promise<RateLimitingSummary> {
+		return this.getSummaryStatistics(hours);
+	}
+
+	/**
+	 * Get aggregated summary statistics
+	 */
 	async getSummaryStatistics(hours = 24): Promise<RateLimitingSummary> {
 		try {
 			const queryStr = `

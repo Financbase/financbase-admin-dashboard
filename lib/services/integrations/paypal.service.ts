@@ -94,10 +94,12 @@ export class PayPalIntegration extends BasePartnerIntegration {
 				case 'CHECKOUT.ORDER.APPROVED':
 					await this.handleOrderApproval(resource);
 					break;
-				case 'BILLING.SUBSCRIPTION.CREATED':
-				case 'BILLING.SUBSCRIPTION.UPDATED':
-					await this.handleSubscriptionChange(resource);
-					break;
+			case 'BILLING.SUBSCRIPTION.CREATED':
+			case 'BILLING.SUBSCRIPTION.UPDATED':
+			case 'BILLING.SUBSCRIPTION.CANCELLED':
+			case 'BILLING.SUBSCRIPTION.EXPIRED':
+				await this.handleSubscriptionChange(resource);
+				break;
 			}
 
 		} catch (error) {
@@ -279,7 +281,127 @@ export class PayPalIntegration extends BasePartnerIntegration {
 	}
 
 	private async handleSubscriptionChange(subscriptionData: any): Promise<void> {
-		await this.upsertSubscription(subscriptionData);
+		try {
+			await this.upsertSubscription(subscriptionData);
+
+			// Sync subscription to Clerk
+			const { syncSubscriptionToClerk, revertToFreePlan } = await import('@/lib/services/clerk-metadata-sync.service');
+			const { startGracePeriod } = await import('@/lib/services/subscription-grace-period.service');
+			const { db } = await import('@/lib/db');
+			const { userSubscriptions, subscriptionPlans } = await import('@/lib/db/schemas');
+			const { eq } = await import('drizzle-orm');
+
+			// Find user subscription by PayPal subscription ID (stored in metadata or separate field)
+			// Note: You may need to adjust this based on how PayPal subscription IDs are stored
+			const subscription = await db
+				.select()
+				.from(userSubscriptions)
+				.where(eq(userSubscriptions.metadata, JSON.stringify({ paypal_subscription_id: subscriptionData.id })))
+				.limit(1);
+
+			// If not found by metadata, try to find by matching plan and user
+			// This is a fallback - you should store PayPal subscription ID properly
+			if (subscription.length === 0) {
+				// Try to find by user ID from integration
+				const userId = this.userId;
+				const allSubscriptions = await db
+					.select()
+					.from(userSubscriptions)
+					.where(eq(userSubscriptions.userId, userId))
+					.orderBy(userSubscriptions.createdAt)
+					.limit(1);
+
+				if (allSubscriptions.length > 0) {
+					const sub = allSubscriptions[0];
+					const paypalStatus = subscriptionData.status;
+					const statusMap: Record<string, string> = {
+						ACTIVE: 'active',
+						APPROVAL_PENDING: 'trial',
+						APPROVED: 'active',
+						SUSPENDED: 'suspended',
+						CANCELLED: 'cancelled',
+						EXPIRED: 'expired',
+					};
+
+					const newStatus = statusMap[paypalStatus] || sub.status;
+
+					// Update subscription status if changed
+					if (newStatus !== sub.status) {
+						await db
+							.update(userSubscriptions)
+							.set({
+								status: newStatus as any,
+								cancelledAt: ['cancelled', 'expired'].includes(newStatus) ? new Date() : sub.cancelledAt,
+								updatedAt: new Date(),
+							})
+							.where(eq(userSubscriptions.id, sub.id));
+
+						sub.status = newStatus as any;
+					}
+
+					// Get plan details
+					const plan = await db
+						.select()
+						.from(subscriptionPlans)
+						.where(eq(subscriptionPlans.id, sub.planId))
+						.limit(1);
+
+					if (plan.length > 0) {
+						if (['cancelled', 'expired'].includes(newStatus)) {
+							// Start grace period for cancelled/expired
+							await startGracePeriod(userId, sub.id);
+						} else {
+							// Sync active subscription to Clerk
+							await syncSubscriptionToClerk(userId, sub, plan[0]);
+						}
+					}
+				}
+			} else {
+				// Found subscription by metadata
+				const sub = subscription[0];
+				const plan = await db
+					.select()
+					.from(subscriptionPlans)
+					.where(eq(subscriptionPlans.id, sub.planId))
+					.limit(1);
+
+				if (plan.length > 0) {
+					const paypalStatus = subscriptionData.status;
+					const statusMap: Record<string, string> = {
+						ACTIVE: 'active',
+						APPROVAL_PENDING: 'trial',
+						APPROVED: 'active',
+						SUSPENDED: 'suspended',
+						CANCELLED: 'cancelled',
+						EXPIRED: 'expired',
+					};
+
+					const newStatus = statusMap[paypalStatus] || sub.status;
+
+					if (newStatus !== sub.status) {
+						await db
+							.update(userSubscriptions)
+							.set({
+								status: newStatus as any,
+								cancelledAt: ['cancelled', 'expired'].includes(newStatus) ? new Date() : sub.cancelledAt,
+								updatedAt: new Date(),
+							})
+							.where(eq(userSubscriptions.id, sub.id));
+
+						sub.status = newStatus as any;
+					}
+
+					if (['cancelled', 'expired'].includes(newStatus)) {
+						await startGracePeriod(sub.userId, sub.id);
+					} else {
+						await syncSubscriptionToClerk(sub.userId, sub, plan[0]);
+					}
+				}
+			}
+		} catch (error) {
+			console.error('Error handling PayPal subscription change:', error);
+			// Don't throw - subscription was already saved
+		}
 	}
 
 	private async upsertPaymentCapture(captureData: any): Promise<void> {

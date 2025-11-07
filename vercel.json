@@ -3,6 +3,10 @@
     {
       "path": "/api/monitoring/snapshot-queries",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/subscription-grace-period",
+      "schedule": "0 3 * * *"
     }
   ]
 }

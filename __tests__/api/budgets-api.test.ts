@@ -56,7 +56,7 @@ describe('Budget Details API', () => {
 		);
 		const params = { id: mockBudgetId };
 
-		const response = await GET(request, { params: Promise.resolve(params) });
+		const response = await GET(request, { params: Promise.resolve(params) } as { params: Promise<{ id: string }> });
 		const data = await response.json();
 
 		expect(response.status).toBe(200);
@@ -73,7 +73,7 @@ describe('Budget Details API', () => {
 		const request = new NextRequest('http://localhost:3000/api/budgets/1');
 		const params = { id: '1' };
 
-		const response = await GET(request, { params: Promise.resolve(params) });
+		const response = await GET(request, { params: Promise.resolve(params) } as { params: Promise<{ id: string }> });
 
 		expect(response.status).toBe(401);
 		expect(getBudgetById).not.toHaveBeenCalled();
@@ -89,7 +89,7 @@ describe('Budget Details API', () => {
 		const request = new NextRequest('http://localhost:3000/api/budgets/invalid');
 		const params = { id: 'invalid' };
 
-		const response = await GET(request, { params: Promise.resolve(params) });
+		const response = await GET(request, { params: Promise.resolve(params) } as { params: Promise<{ id: string }> });
 		const data = await response.json();
 
 		expect(response.status).toBe(400);
@@ -113,7 +113,7 @@ describe('Budget Details API', () => {
 		);
 		const params = { id: mockBudgetId };
 
-		const response = await GET(request, { params: Promise.resolve(params) });
+		const response = await GET(request, { params: Promise.resolve(params) } as { params: Promise<{ id: string }> });
 		const data = await response.json();
 
 		expect(response.status).toBe(404);

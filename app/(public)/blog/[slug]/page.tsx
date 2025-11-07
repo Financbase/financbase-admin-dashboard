@@ -113,26 +113,26 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 				</div>
 			</div>
 
-			<article className="max-w-4xl mx-auto px-6 py-12">
+			<article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 				{/* Post Header */}
-				<header className="mb-8">
+				<header className="mb-10 sm:mb-12">
 					{category && (
 						<Badge variant="secondary" className="mb-4">
 							{category.name}
 						</Badge>
 					)}
 					
-					<h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+					<h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
 						{post.title}
 					</h1>
 					
 					{post.excerpt && (
-						<p className="text-xl text-muted-foreground mb-6">
+						<p className="text-lg sm:text-xl text-muted-foreground mb-6 leading-relaxed">
 							{post.excerpt}
 						</p>
 					)}
 
-					<div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
+					<div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-muted-foreground mb-8 pb-6 border-b">
 						<div className="flex items-center gap-2">
 							<Calendar className="h-4 w-4" />
 							<span>{formatDate(post.publishedAt)}</span>
@@ -148,20 +148,22 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 					</div>
 
 					{/* Featured Image */}
-					<div className="relative w-full h-96 mb-8 rounded-lg overflow-hidden">
-						<Image
-							src={imageUrl}
-							alt={post.title}
-							fill
-							className="object-cover"
-							priority
-						/>
-					</div>
+					{post.featuredImage && (
+						<div className="relative w-full aspect-video mb-10 rounded-lg overflow-hidden bg-muted">
+							<Image
+								src={imageUrl}
+								alt={post.title}
+								fill
+								className="object-cover"
+								priority
+							/>
+						</div>
+					)}
 				</header>
 
 				{/* Post Content */}
 				<div 
-					className="prose prose-lg dark:prose-invert max-w-none mb-12"
+					className="blog-content prose prose-lg prose-slate dark:prose-invert max-w-none"
 					dangerouslySetInnerHTML={{ __html: post.content }}
 				/>
 

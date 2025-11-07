@@ -47,7 +47,10 @@ export function UserAvatar({
 				/>
 			)}
 			<AvatarFallback
-				className="text-sm font-semibold"
+				className={cn(
+					"text-sm font-semibold text-white",
+					avatarProps.gradientClassName
+				)}
 				style={avatarProps.style}
 			>
 				{avatarProps.fallback}

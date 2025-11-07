@@ -270,6 +270,52 @@ export class AIService {
       };
     }
   }
+
+  /**
+   * Generate AI response from a prompt (generic method)
+   */
+  async generateResponse(prompt: string, options?: { maxTokens?: number; temperature?: number }): Promise<string> {
+    try {
+      const response = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful AI assistant.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: options?.temperature || 0.7,
+        max_tokens: options?.maxTokens || 1000,
+      });
+
+      return response.choices[0].message.content || '';
+    } catch (error) {
+      console.error('AI generateResponse error:', error);
+      throw new Error('Failed to generate AI response');
+    }
+  }
+
+  /**
+   * Process a request with AI (generic method)
+   */
+  async processRequest(request: { prompt: string; type?: string; maxTokens?: number }): Promise<{ success: boolean; result?: string; error?: string }> {
+    try {
+      const response = await this.generateResponse(request.prompt, { maxTokens: request.maxTokens });
+      return {
+        success: true,
+        result: response,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 }
 
 export default AIService;

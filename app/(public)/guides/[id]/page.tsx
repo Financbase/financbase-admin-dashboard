@@ -10,73 +10,14 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, User, Star, BookOpen, Play, FileText } from "lucide-react";
+import { ArrowLeft, Clock, User, Star, BookOpen, Play, FileText, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-
-// Mock guide data - in production, this would come from an API or CMS
-const mockGuides: Record<number, any> = {
-	1: {
-		id: 1,
-		title: "Getting Started with Financbase",
-		description: "Learn the basics of setting up your account and navigating the platform",
-		category: "getting-started",
-		type: "tutorial",
-		duration: "15 min",
-		difficulty: "beginner",
-		author: "Sarah Johnson",
-		rating: 4.9,
-		views: 1250,
-		content: `
-# Getting Started with Financbase
-
-Welcome to Financbase! This guide will help you get up and running quickly.
-
-## Overview
-Financbase is a comprehensive financial management platform designed to help you take control of your finances.
-
-## Key Features
-- Dashboard overview
-- Transaction management
-- Financial reporting
-- Budget tracking
-
-## Next Steps
-1. Complete your profile setup
-2. Connect your accounts
-3. Explore the dashboard
-
-## Need Help?
-If you have any questions, feel free to reach out to our support team.
-		`,
-	},
-	2: {
-		id: 2,
-		title: "Advanced Financial Analytics",
-		description: "Deep dive into advanced analytics features and custom reporting",
-		category: "advanced",
-		type: "guide",
-		duration: "45 min",
-		difficulty: "intermediate",
-		author: "Mike Chen",
-		rating: 4.8,
-		views: 890,
-		content: `
-# Advanced Financial Analytics
-
-Learn how to leverage Financbase's powerful analytics features.
-
-## Advanced Features
-- Custom report builder
-- Data visualization
-- Trend analysis
-- Forecasting
-		`,
-	},
-};
+import { MarkdownRenderer } from "@/components/guides/markdown-renderer";
 
 const getDifficultyColor = (difficulty: string) => {
 	switch (difficulty) {
@@ -87,7 +28,7 @@ const getDifficultyColor = (difficulty: string) => {
 		case "advanced":
 			return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
 		default:
-			return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
+			return "bg-muted text-muted-foreground";
 	}
 };
 
@@ -108,22 +49,56 @@ export default function GuideDetailPage() {
 	const params = useParams();
 	const router = useRouter();
 	const guideId = parseInt(params.id as string);
-	const guide = mockGuides[guideId];
 
-	if (!guide) {
+	// Fetch guide from API
+	const { data: guideData, isLoading, error } = useQuery({
+		queryKey: ['guide', guideId],
+		queryFn: async () => {
+			const response = await fetch(`/api/guides/${guideId}`);
+			if (!response.ok) {
+				if (response.status === 404) {
+					return null;
+				}
+				throw new Error('Failed to fetch guide');
+			}
+			const data = await response.json();
+			return data.data;
+		},
+		retry: 2,
+		staleTime: 5 * 60 * 1000,
+	});
+
+	const guide = guideData;
+
+	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+			<div className="min-h-screen bg-background">
+				<div className="max-w-4xl mx-auto px-6 py-16">
+					<div className="animate-pulse space-y-8">
+						<div className="h-8 bg-muted rounded w-1/4"></div>
+						<div className="h-12 bg-muted rounded"></div>
+						<div className="h-64 bg-muted rounded"></div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (error || !guide) {
+		return (
+			<div className="min-h-screen bg-background">
 				<div className="max-w-4xl mx-auto px-6 py-16">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						className="text-center"
 					>
-						<h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">
+						<AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+						<h1 className="text-3xl font-bold mb-4 text-foreground">
 							Guide Not Found
 						</h1>
-						<p className="text-gray-600 dark:text-gray-400 mb-8">
-							The guide you're looking for doesn't exist or has been removed.
+						<p className="text-muted-foreground mb-8">
+							{error instanceof Error ? error.message : "The guide you're looking for doesn't exist or has been removed."}
 						</p>
 						<Button asChild>
 							<Link href="/guides">
@@ -138,7 +113,7 @@ export default function GuideDetailPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+		<div className="min-h-screen bg-background">
 			<div className="max-w-4xl mx-auto px-6 py-8">
 				{/* Back Button */}
 				<motion.div
@@ -179,22 +154,33 @@ export default function GuideDetailPage() {
 								<Badge className={getDifficultyColor(guide.difficulty)}>
 									{guide.difficulty}
 								</Badge>
-								<div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-									<Clock className="w-4 h-4" />
-									<span>{guide.duration}</span>
-								</div>
-								<div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-									<User className="w-4 h-4" />
-									<span>{guide.author}</span>
-								</div>
-								<div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-									<Star className="w-4 h-4 text-yellow-500 fill-current" />
-									<span>{guide.rating}</span>
-								</div>
+								{guide.duration && (
+									<div className="flex items-center gap-1 text-sm text-muted-foreground">
+										<Clock className="w-4 h-4" />
+										<span>{guide.duration}</span>
+									</div>
+								)}
+								{guide.author && (
+									<div className="flex items-center gap-1 text-sm text-muted-foreground">
+										<User className="w-4 h-4" />
+										<span>{typeof guide.author === 'object' ? guide.author.name : guide.author}</span>
+									</div>
+								)}
+								{guide.rating && (
+									<div className="flex items-center gap-1 text-sm text-muted-foreground">
+										<Star className="w-4 h-4 text-yellow-500 fill-current" />
+										<span>{typeof guide.rating === 'number' && guide.rating > 10 ? (guide.rating / 10).toFixed(1) : guide.rating}</span>
+									</div>
+								)}
+								{guide.viewCount !== undefined && (
+									<div className="flex items-center gap-1 text-sm text-muted-foreground">
+										<span>{guide.viewCount} views</span>
+									</div>
+								)}
 							</div>
 						</CardHeader>
 						<CardContent>
-							<p className="text-lg text-gray-700 dark:text-gray-300">
+							<p className="text-lg text-foreground/80">
 								{guide.description}
 							</p>
 						</CardContent>
@@ -210,18 +196,14 @@ export default function GuideDetailPage() {
 					<Card>
 						<CardContent className="p-8">
 							{guide.content ? (
-							<div className="prose dark:prose-invert max-w-none">
-								<div className="whitespace-pre-line text-gray-700 dark:text-gray-300">
-										{guide.content}
-									</div>
-								</div>
+								<MarkdownRenderer content={guide.content} />
 							) : (
 								<div className="text-center py-12">
-									<BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-									<h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+									<BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+									<h3 className="text-xl font-semibold text-foreground mb-2">
 										Content Not Available
 									</h3>
-									<p className="text-gray-600 dark:text-gray-400 mb-6">
+									<p className="text-muted-foreground mb-6">
 										This guide content is not currently available. Please explore our other guides or contact support for assistance.
 									</p>
 									<div className="flex flex-col sm:flex-row gap-3 justify-center">

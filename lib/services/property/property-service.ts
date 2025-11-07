@@ -143,7 +143,7 @@ export async function deleteProperty(
 		.delete(properties)
 		.where(and(eq(properties.id, propertyId), eq(properties.userId, userId)));
 
-	return result.rowCount > 0;
+	return (result.rowCount ?? 0) > 0;
 }
 
 /**
@@ -186,13 +186,13 @@ export async function getPropertyROI(
 		.orderBy(desc(propertyExpenses.expenseDate));
 
 	// Get tenants
-	const tenants = await db
+	const propertyTenants = await db
 		.select()
 		.from(tenants)
 		.where(eq(tenants.propertyId, propertyId));
 
 	// Get leases
-	const leases = await db
+	const propertyLeases = await db
 		.select()
 		.from(leases)
 		.where(eq(leases.propertyId, propertyId));
@@ -225,8 +225,8 @@ export async function getPropertyROI(
 		capRate,
 		income,
 		expenses,
-		tenants,
-		leases,
+		tenants: propertyTenants,
+		leases: propertyLeases,
 	};
 }
 

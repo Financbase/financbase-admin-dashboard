@@ -11,6 +11,8 @@
 
 import { PublicFooter } from "@/components/layout/public-footer";
 import { ModernNavbar } from "@/components/layout/modern-navbar";
+import { PageAnimationWrapper } from "@/components/layout/public-page-animations";
+import { FloatingPaths } from "@/components/auth/floating-paths";
 
 export default function PublicLayout({
 	children,
@@ -18,10 +20,25 @@ export default function PublicLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="min-h-screen flex flex-col bg-background">
-			<ModernNavbar />
-			<main className="flex-1">{children}</main>
-			<PublicFooter />
+		<div className="relative min-h-screen flex flex-col bg-background">
+			{/* Global Floating Paths Background Animation - Same as sign-up page */}
+			<div className="fixed inset-0 z-0 pointer-events-none">
+				<FloatingPaths position={1} />
+				<FloatingPaths position={-1} />
+			</div>
+			<div className="fixed inset-0 z-[1] bg-gradient-to-t from-background to-transparent pointer-events-none" />
+			
+			<div className="relative z-10 min-h-screen flex flex-col">
+				<ModernNavbar />
+				<main className="flex-1">
+					<PageAnimationWrapper delay={0.1}>
+						{children}
+					</PageAnimationWrapper>
+				</main>
+				<PageAnimationWrapper delay={0.2}>
+					<PublicFooter />
+				</PageAnimationWrapper>
+			</div>
 		</div>
 	);
 }

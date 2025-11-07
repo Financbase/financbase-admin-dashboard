@@ -14,7 +14,7 @@
 
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings, User, Shield, Bell, CreditCard, Users, Eye, Palette, Key } from 'lucide-react';
+import { Settings, User, Shield, Bell, CreditCard, Users, Eye, Palette, Key, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
@@ -67,6 +67,9 @@ export default function SettingsLayout({
 					</SettingsTab>
 					<SettingsTab href="/settings/roles" icon={<Key className="h-4 w-4" />}>
 						Roles & Permissions
+					</SettingsTab>
+					<SettingsTab href="/settings/white-label" icon={<Sparkles className="h-4 w-4" />}>
+						White Label
 					</SettingsTab>
 				</div>
 			</div>

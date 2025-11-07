@@ -9,10 +9,10 @@
 
 import { AIService } from "@/lib/ai-service";
 import { db } from "@/lib/db/connection";
-import { adBudgets, adCampaigns, adPerformance } from "@/lib/db/schema-adboard";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { adboardAds, adboardBudgets, adboardCampaigns, adboardPerformanceMetrics } from "@/lib/db/schemas/adboard.schema";
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { Bot, PiggyBank, XCircle } from "lucide-react";
-import { AdCampaignService } from "./ad-campaign.service";
+import { AdCampaignService } from "./marketing/ad-campaign.service";
 
 export interface OptimizationRecommendation {
 	type: "budget" | "targeting" | "creative" | "bidding" | "scheduling";
@@ -94,14 +94,47 @@ export class AIAdOptimizationService {
 
 			const performanceData = await db
 				.select()
-				.from(adPerformance)
+				.from(adboardPerformanceMetrics)
 				.where(
 					and(
-						eq(adPerformance.campaignId, campaignId),
-						gte(adPerformance.date, thirtyDaysAgo),
+						eq(adboardPerformanceMetrics.campaignId, campaignId),
+						gte(adboardPerformanceMetrics.date, thirtyDaysAgo),
 					),
 				)
-				.orderBy(desc(adPerformance.date));
+				.orderBy(desc(adboardPerformanceMetrics.date));
+
+			// Get aggregated metrics
+			const [aggregatedMetrics] = await db
+				.select({
+					totalSpend: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.spend}), 0)`,
+					totalImpressions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.impressions}), 0)`,
+					totalClicks: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.clicks}), 0)`,
+					totalConversions: sql<number>`COALESCE(SUM(${adboardPerformanceMetrics.conversions}), 0)`,
+					avgCtr: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.ctr}), 0)`,
+					avgCpc: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpc}), 0)`,
+					avgCpm: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpm}), 0)`,
+					avgCpa: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`,
+					avgRoas: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.roas}), 0)`,
+					platform: sql<string>`MAX(${adboardPerformanceMetrics.platform})`,
+				})
+				.from(adboardPerformanceMetrics)
+				.where(
+					and(
+						eq(adboardPerformanceMetrics.campaignId, campaignId),
+						gte(adboardPerformanceMetrics.date, thirtyDaysAgo),
+					),
+				);
+
+			// Get platform from first ad or performance metrics
+			const [firstAd] = await db
+				.select({ platform: adboardAds.platform })
+				.from(adboardAds)
+				.where(eq(adboardAds.campaignId, campaignId))
+				.limit(1);
+
+			// Access settings JSONB
+			const settings = (campaign.settings as Record<string, unknown>) || {};
+			const targetAudience = (campaign.targetAudience as Record<string, unknown>) || {};
 
 			// Get budget data
 			const budget = await this.campaignService.getCampaignBudget(
@@ -113,20 +146,20 @@ export class AIAdOptimizationService {
 			const analysisData = {
 				campaign: {
 					name: campaign.name,
-					platform: campaign.platform,
+					platform: firstAd?.platform || aggregatedMetrics?.platform || (settings.platform as string) || "unknown",
 					objective: campaign.objective,
 					status: campaign.status,
-					budgetType: campaign.budgetType,
-					dailyBudget: campaign.dailyBudget,
-					totalSpend: campaign.totalSpend,
-					totalImpressions: campaign.totalImpressions,
-					totalClicks: campaign.totalClicks,
-					totalConversions: campaign.totalConversions,
-					ctr: campaign.ctr,
-					cpc: campaign.cpc,
-					cpm: campaign.cpm,
-					cpa: campaign.cpa,
-					roas: campaign.roas,
+					budgetType: (settings.budgetType as string) || "total",
+					dailyBudget: Number(settings.dailyBudget || campaign.budget || 0),
+					totalSpend: Number(aggregatedMetrics?.totalSpend || campaign.spent || 0),
+					totalImpressions: Number(aggregatedMetrics?.totalImpressions || 0),
+					totalClicks: Number(aggregatedMetrics?.totalClicks || 0),
+					totalConversions: Number(aggregatedMetrics?.totalConversions || 0),
+					ctr: Number(aggregatedMetrics?.avgCtr || 0),
+					cpc: Number(aggregatedMetrics?.avgCpc || 0),
+					cpm: Number(aggregatedMetrics?.avgCpm || 0),
+					cpa: Number(aggregatedMetrics?.avgCpa || 0),
+					roas: Number(aggregatedMetrics?.avgRoas || 0),
 				},
 				performance: performanceData.map((p) => ({
 					date: p.date,
@@ -142,11 +175,11 @@ export class AIAdOptimizationService {
 				})),
 				budget: budget
 					? {
-							totalBudget: budget.totalBudget,
-							allocatedBudget: budget.allocatedBudget,
-							remainingBudget: budget.remainingBudget,
-							targetRoas: budget.targetRoas,
-							targetCpa: budget.targetCpa,
+							totalBudget: Number(budget.totalBudget || 0),
+							allocatedBudget: Number(budget.totalBudget || 0),
+							remainingBudget: Number(budget.remaining || 0),
+							targetRoas: Number((budget as any).targetRoas || (settings.targetRoas as number) || 0),
+							targetCpa: Number((budget as any).targetCpa || (settings.targetCpa as number) || 0),
 						}
 					: null,
 			};
@@ -233,11 +266,18 @@ export class AIAdOptimizationService {
 						campaign.id,
 						userId,
 					);
+					const settings = (campaign.settings as Record<string, unknown>) || {};
+					// Get platform from first ad
+					const [firstAd] = await db
+						.select({ platform: adboardAds.platform })
+						.from(adboardAds)
+						.where(eq(adboardAds.campaignId, campaign.id))
+						.limit(1);
 					return {
 						campaignId: campaign.id,
 						name: campaign.name,
-						platform: campaign.platform,
-						currentBudget: Number.parseFloat(campaign.dailyBudget || "0"),
+						platform: firstAd?.platform || (settings.platform as string) || "unknown",
+						currentBudget: Number.parseFloat((settings.dailyBudget as string) || campaign.budget || "0"),
 						performance: metrics,
 					};
 				}),
@@ -310,19 +350,39 @@ export class AIAdOptimizationService {
 				userId,
 			);
 
+			// Get aggregated metrics
+			const [aggregatedMetrics] = await db
+				.select({
+					avgCtr: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.ctr}), 0)`,
+					avgCpc: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpc}), 0)`,
+					avgCpm: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpm}), 0)`,
+					avgCpa: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`,
+					avgRoas: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.roas}), 0)`,
+					platform: sql<string>`MAX(${adboardPerformanceMetrics.platform})`,
+				})
+				.from(adboardPerformanceMetrics)
+				.where(eq(adboardPerformanceMetrics.campaignId, campaignId));
+
+			const settings = (campaign.settings as Record<string, unknown>) || {};
+			const [firstAd] = await db
+				.select({ platform: adboardAds.platform })
+				.from(adboardAds)
+				.where(eq(adboardAds.campaignId, campaignId))
+				.limit(1);
+
 			const prompt = `
         Predict the performance of this advertising campaign for the next ${timeframe}.
         
         Campaign Details:
-        - Platform: ${campaign.platform}
+        - Platform: ${firstAd?.platform || aggregatedMetrics?.platform || (settings.platform as string) || "unknown"}
         - Objective: ${campaign.objective}
-        - Daily Budget: $${campaign.dailyBudget}
+        - Daily Budget: $${Number(settings.dailyBudget || campaign.budget || 0)}
         - Current Performance:
-          * CTR: ${campaign.ctr}%
-          * CPC: $${campaign.cpc}
-          * CPM: $${campaign.cpm}
-          * CPA: $${campaign.cpa}
-          * ROAS: ${campaign.roas}
+          * CTR: ${Number(aggregatedMetrics?.avgCtr || 0)}%
+          * CPC: $${Number(aggregatedMetrics?.avgCpc || 0)}
+          * CPM: $${Number(aggregatedMetrics?.avgCpm || 0)}
+          * CPA: $${Number(aggregatedMetrics?.avgCpa || 0)}
+          * ROAS: ${Number(aggregatedMetrics?.avgRoas || 0)}
 
         Historical Performance:
         ${JSON.stringify(performanceData.slice(0, 14), null, 2)}
@@ -377,22 +437,36 @@ export class AIAdOptimizationService {
 				throw new Error("Campaign not found");
 			}
 
+			// Get aggregated metrics
+			const [aggregatedMetrics] = await db
+				.select({
+					avgCtr: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.ctr}), 0)`,
+					avgCpc: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpc}), 0)`,
+					avgCpa: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.cpa}), 0)`,
+					avgRoas: sql<number>`COALESCE(AVG(${adboardPerformanceMetrics.roas}), 0)`,
+				})
+				.from(adboardPerformanceMetrics)
+				.where(eq(adboardPerformanceMetrics.campaignId, campaignId));
+
+			const targetAudience = (campaign.targetAudience as Record<string, unknown>) || {};
+			const settings = (campaign.settings as Record<string, unknown>) || {};
+
 			const prompt = `
         Generate targeting suggestions for this ${platform} advertising campaign.
         
         Campaign Details:
         - Objective: ${campaign.objective}
-        - Current Targeting: ${JSON.stringify(campaign.targetAudience)}
-        - Demographics: ${JSON.stringify(campaign.demographics)}
-        - Interests: ${JSON.stringify(campaign.interests)}
-        - Behaviors: ${JSON.stringify(campaign.behaviors)}
-        - Locations: ${JSON.stringify(campaign.locations)}
+        - Current Targeting: ${JSON.stringify(targetAudience)}
+        - Demographics: ${JSON.stringify(targetAudience.demographics || {})}
+        - Interests: ${JSON.stringify(targetAudience.interests || [])}
+        - Behaviors: ${JSON.stringify(targetAudience.behaviors || [])}
+        - Locations: ${JSON.stringify(targetAudience.locations || [])}
 
         Current Performance:
-        - CTR: ${campaign.ctr}%
-        - CPC: $${campaign.cpc}
-        - CPA: $${campaign.cpa}
-        - ROAS: ${campaign.roas}
+        - CTR: ${Number(aggregatedMetrics?.avgCtr || 0)}%
+        - CPC: $${Number(aggregatedMetrics?.avgCpc || 0)}
+        - CPA: $${Number(aggregatedMetrics?.avgCpa || 0)}
+        - ROAS: ${Number(aggregatedMetrics?.avgRoas || 0)}
 
         Provide targeting optimization suggestions in this format:
         {

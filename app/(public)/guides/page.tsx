@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import {
+	AlertCircle,
 	BarChart3,
 	BookOpen,
 	Code,
@@ -28,6 +29,7 @@ import {
 	Zap,
 } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { GuideCard, type Guide } from "@/components/guides/guide-card";
 import { GuideCardSkeleton } from "@/components/guides/guide-card-skeleton";
 import { GuideFilters, type SortOption } from "@/components/guides/guide-filters";
@@ -38,7 +40,6 @@ export default function GuidesPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
 	const [sortBy, setSortBy] = useState<SortOption>("popular");
-	const [isLoading] = useState(false); // For future loading states
 
 	const containerVariants = {
 		hidden: { opacity: 0 },
@@ -99,165 +100,93 @@ export default function GuidesPage() {
 		},
 	];
 
-	const guides: Guide[] = [
-		{
-			id: 1,
-			title: "Getting Started with Financbase",
-			description:
-				"Learn the basics of setting up your account and navigating the platform",
-			category: "getting-started",
-			type: "tutorial",
-			duration: "15 min",
-			difficulty: "beginner",
-			author: "Sarah Johnson",
-			rating: 4.9,
-			views: 1250,
-			image:
-				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-			tags: ["setup", "basics", "onboarding"],
-			icon: <Play className="w-4 h-4" />,
-		},
-		{
-			id: 2,
-			title: "Advanced Financial Analytics",
-			description:
-				"Deep dive into advanced analytics features and custom reporting",
-			category: "advanced",
-			type: "guide",
-			duration: "45 min",
-			difficulty: "intermediate",
-			author: "Mike Chen",
-			rating: 4.8,
-			views: 890,
-			image:
-				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-			tags: ["analytics", "reporting", "data"],
-			icon: <BarChart3 className="w-4 h-4" />,
-		},
-		{
-			id: 3,
-			title: "API Integration Guide",
-			description:
-				"Complete guide to integrating Financbase with your existing systems",
-			category: "integrations",
-			type: "documentation",
-			duration: "30 min",
-			difficulty: "advanced",
-			author: "Alex Rodriguez",
-			rating: 4.7,
-			views: 650,
-			image:
-				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-			tags: ["api", "integration", "development"],
-			icon: <Code className="w-4 h-4" />,
-		},
-		{
-			id: 4,
-			title: "Setting Up Automated Reports",
-			description:
-				"Configure automated financial reports and email notifications",
-			category: "getting-started",
-			type: "tutorial",
-			duration: "20 min",
-			difficulty: "beginner",
-			author: "Emma Wilson",
-			rating: 4.9,
-			views: 1100,
-			image:
-				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-			tags: ["automation", "reports", "email"],
-			icon: <FileText className="w-4 h-4" />,
-		},
-		{
-			id: 5,
-			title: "Troubleshooting Common Issues",
-			description: "Solutions to the most common problems users encounter",
-			category: "troubleshooting",
-			type: "guide",
-			duration: "25 min",
-			difficulty: "intermediate",
-			author: "Support Team",
-			rating: 4.6,
-			views: 750,
-			image:
-				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-			tags: ["troubleshooting", "support", "issues"],
-			icon: <Shield className="w-4 h-4" />,
-		},
-		{
-			id: 6,
-			title: "Advanced Data Visualization",
-			description:
-				"Create stunning charts and dashboards with custom visualizations",
-			category: "advanced",
-			type: "tutorial",
-			duration: "40 min",
-			difficulty: "advanced",
-			author: "David Kim",
-			rating: 4.8,
-			views: 520,
-			image:
-				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-			tags: ["visualization", "charts", "dashboards"],
-			icon: <BarChart3 className="w-4 h-4" />,
-		},
-	];
-
-	const featuredGuides = [
-		{
-			title: "Complete Platform Overview",
-			description: "Master Financbase in 30 minutes",
-			duration: "30 min",
-			difficulty: "beginner",
-			views: 2500,
-			image:
-				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=300&fit=crop",
-		},
-		{
-			title: "AI-Powered Financial Insights",
-			description: "Leverage artificial intelligence for better decisions",
-			duration: "25 min",
-			difficulty: "intermediate",
-			views: 1800,
-			image:
-				"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=300&fit=crop",
-		},
-	];
-
-	// Memoized filtered and sorted guides
-	const filteredAndSortedGuides = useMemo(() => {
-		let filtered = guides.filter((guide) => {
-			const matchesSearch =
-				guide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				guide.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				guide.tags.some((tag) =>
-					tag.toLowerCase().includes(searchTerm.toLowerCase()),
-				);
-			const matchesCategory =
-				selectedCategory === "all" || guide.category === selectedCategory;
-			return matchesSearch && matchesCategory;
-		});
-
-		// Sort guides
-		filtered = [...filtered].sort((a, b) => {
-			switch (sortBy) {
-				case "popular":
-					return b.views - a.views;
-				case "rating":
-					return b.rating - a.rating;
-				case "difficulty":
-					const difficultyOrder: Record<"beginner" | "intermediate" | "advanced", number> = { beginner: 0, intermediate: 1, advanced: 2 };
-					return difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty];
-				case "recent":
-					// Assuming guides with higher IDs are more recent
-					return b.id - a.id;
-				default:
-					return 0;
+	// Fetch all guides from API
+	const { data: guidesData, isLoading: guidesLoading, error: guidesError } = useQuery({
+		queryKey: ['guides', selectedCategory, searchTerm, sortBy],
+		queryFn: async () => {
+			const params = new URLSearchParams();
+			if (selectedCategory !== 'all') {
+				params.append('category', selectedCategory);
 			}
-		});
+			if (searchTerm) {
+				params.append('search', searchTerm);
+			}
+			params.append('sort', sortBy);
+			params.append('limit', '100'); // Get all guides for client-side filtering if needed
 
-		return filtered;
-	}, [guides, searchTerm, selectedCategory, sortBy]);
+			const response = await fetch(`/api/guides?${params.toString()}`);
+			if (!response.ok) {
+				throw new Error('Failed to fetch guides');
+			}
+			const data = await response.json();
+			return data.data;
+		},
+		retry: 2,
+		staleTime: 5 * 60 * 1000, // 5 minutes
+	});
+
+	// Fetch featured guides
+	const { data: featuredData, isLoading: featuredLoading } = useQuery({
+		queryKey: ['guides', 'featured'],
+		queryFn: async () => {
+			const response = await fetch('/api/guides?featured=true&limit=2&sort=popular');
+			if (!response.ok) {
+				throw new Error('Failed to fetch featured guides');
+			}
+			const data = await response.json();
+			return data.data.guides;
+		},
+		retry: 2,
+		staleTime: 5 * 60 * 1000,
+	});
+
+	// Transform API guides to match Guide interface
+	const guides: Guide[] = useMemo(() => {
+		if (!guidesData?.guides) return [];
+		return guidesData.guides.map((guide: any) => ({
+			id: guide.id,
+			title: guide.title,
+			description: guide.description || guide.excerpt || '',
+			category: guide.category,
+			type: guide.type,
+			duration: guide.duration || 'N/A',
+			difficulty: guide.difficulty,
+			author: guide.author?.name || 'Unknown Author',
+			rating: guide.rating ? guide.rating / 10 : 0, // Convert from integer * 10 to decimal
+			views: guide.viewCount || 0,
+			image: guide.imageUrl || guide.thumbnailUrl || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop',
+			tags: Array.isArray(guide.tags) ? guide.tags : [],
+			icon: guide.type === 'tutorial' ? <Play className="w-4 h-4" /> :
+				guide.type === 'documentation' ? <FileText className="w-4 h-4" /> :
+				<BookOpen className="w-4 h-4" />,
+		}));
+	}, [guidesData]);
+
+	const featuredGuides: Guide[] = useMemo(() => {
+		if (!featuredData) return [];
+		return featuredData.map((guide: any) => ({
+			id: guide.id,
+			title: guide.title,
+			description: guide.description || guide.excerpt || '',
+			category: guide.category || 'getting-started',
+			type: guide.type || 'tutorial',
+			duration: guide.duration || '30 min',
+			difficulty: guide.difficulty || 'beginner',
+			author: guide.author?.name || 'Financbase Team',
+			rating: guide.rating ? guide.rating / 10 : 4.9,
+			views: guide.viewCount || 0,
+			image: guide.imageUrl || guide.thumbnailUrl || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=300&fit=crop',
+			tags: Array.isArray(guide.tags) ? guide.tags : ['featured', 'popular'],
+			icon: <Video className="w-5 h-5" />,
+		}));
+	}, [featuredData]);
+
+	// Guides are already filtered and sorted by the API, but we can do additional client-side filtering if needed
+	const filteredAndSortedGuides = useMemo(() => {
+		// API already handles filtering, but we can add additional client-side filtering here if needed
+		// For now, just return the guides from API
+		return guides;
+	}, [guides]);
 
 	const handleCategoryChange = useCallback((category: string) => {
 		setSelectedCategory(category);
@@ -340,40 +269,33 @@ export default function GuidesPage() {
 			>
 				<div className="max-w-6xl mx-auto px-6">
 					<motion.div className="text-center mb-16" variants={itemVariants}>
-						<h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						<h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
 							Featured Guides
 						</h2>
-						<p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+						<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
 							Start with these popular guides to get the most out of Financbase
 						</p>
 					</motion.div>
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-						{isLoading
+						{featuredLoading
 							? Array.from({ length: 2 }).map((_, i) => (
 									<GuideCardSkeleton key={i} variant="featured" />
 								))
-							: featuredGuides.map((guide, index) => {
-									const featuredGuide: Guide = {
-										...guide,
-										id: index + 100,
-										category: "getting-started",
-										type: "tutorial",
-										difficulty: guide.difficulty as "beginner" | "intermediate" | "advanced",
-										author: "Financbase Team",
-										rating: 4.9,
-										tags: ["featured", "popular"],
-										icon: <Video className="w-5 h-5" />,
-									};
-									return (
-										<GuideCard
-											key={index}
-											guide={featuredGuide}
-											index={index}
-											variant="featured"
-										/>
-									);
-								})}
+							: featuredGuides.length > 0
+							? featuredGuides.map((guide, index) => (
+									<GuideCard
+										key={guide.id}
+										guide={guide}
+										index={index}
+										variant="featured"
+									/>
+								))
+							: (
+								<div className="col-span-2 text-center py-12 text-muted-foreground">
+									<p>No featured guides available</p>
+								</div>
+							)}
 					</div>
 				</div>
 			</motion.section>
@@ -388,20 +310,41 @@ export default function GuidesPage() {
 			>
 				<div className="max-w-6xl mx-auto px-6">
 					<motion.div className="text-center mb-16" variants={itemVariants}>
-						<h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						<h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
 							All Guides
 						</h2>
-						<p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+						<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
 							Browse our complete library of guides and tutorials
 						</p>
 					</motion.div>
 
-					{isLoading ? (
+					{guidesLoading ? (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 							{Array.from({ length: 6 }).map((_, i) => (
 								<GuideCardSkeleton key={i} />
 							))}
 						</div>
+					) : guidesError ? (
+						<motion.div
+							className="text-center py-12"
+							variants={itemVariants}
+							role="status"
+							aria-live="polite"
+						>
+							<AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+							<h3 className="text-xl font-semibold text-foreground mb-2">
+								Error loading guides
+							</h3>
+							<p className="text-muted-foreground mb-4">
+								{guidesError instanceof Error ? guidesError.message : 'Failed to load guides. Please try again later.'}
+							</p>
+							<Button
+								variant="outline"
+								onClick={() => window.location.reload()}
+							>
+								Retry
+							</Button>
+						</motion.div>
 					) : filteredAndSortedGuides.length > 0 ? (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 							{filteredAndSortedGuides.map((guide, index) => (
@@ -420,13 +363,13 @@ export default function GuidesPage() {
 							aria-live="polite"
 						>
 							<BookOpen
-								className="w-16 h-16 text-gray-400 mx-auto mb-4"
+								className="w-16 h-16 text-muted-foreground mx-auto mb-4"
 								aria-hidden="true"
 							/>
-							<h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+							<h3 className="text-xl font-semibold text-foreground mb-2">
 								No guides found
 							</h3>
-							<p className="text-gray-600 dark:text-gray-400 mb-4">
+							<p className="text-muted-foreground mb-4">
 								{searchTerm
 									? `No results match "${searchTerm}". Try adjusting your search terms.`
 									: selectedCategory !== "all"

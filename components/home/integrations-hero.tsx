@@ -26,6 +26,16 @@ import {
   Clock
 } from "lucide-react"
 import Link from "next/link"
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts"
+import { FloatingPaths } from "@/components/auth/floating-paths"
 
 export default function IntegrationsHero() {
   const [activeMetric, setActiveMetric] = useState(0)
@@ -38,6 +48,17 @@ export default function IntegrationsHero() {
     }, 2000)
     return () => clearInterval(interval)
   }, [])
+
+  // Chart data for integration status over time
+  const chartData = [
+    { day: "Mon", active: 12, syncing: 3 },
+    { day: "Tue", active: 15, syncing: 2 },
+    { day: "Wed", active: 18, syncing: 4 },
+    { day: "Thu", active: 22, syncing: 3 },
+    { day: "Fri", active: 25, syncing: 2 },
+    { day: "Sat", active: 23, syncing: 3 },
+    { day: "Sun", active: 20, syncing: 2 },
+  ]
 
   const metrics = [
     { 
@@ -88,18 +109,31 @@ export default function IntegrationsHero() {
     <div className="relative min-h-screen overflow-hidden bg-background">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-primary/5" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+        
+        {/* Floating Paths Background Animation */}
+        <div className="absolute inset-0 z-0 overflow-hidden opacity-[0.15]">
+          <FloatingPaths position={1} />
+          <FloatingPaths position={-1} />
+        </div>
+        <div className="absolute inset-0 z-[1] bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none" />
+        {/* Additional overlay for left content area to improve text readability */}
+        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-background/60 via-transparent to-transparent pointer-events-none lg:block hidden" />
+        
         {/* Floating geometric shapes */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/5 rounded-full animate-pulse" />
-        <div className="absolute top-40 right-20 w-24 h-24 bg-primary/10 rounded-lg rotate-12 animate-pulse delay-1000" />
-        <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-primary/5 rounded-full animate-pulse delay-500" />
-        <div className="absolute top-1/3 right-1/3 w-16 h-16 bg-primary/10 rounded-lg rotate-45 animate-pulse delay-700" />
+        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/5 rounded-full animate-pulse z-[2]" />
+        <div className="absolute top-40 right-20 w-24 h-24 bg-primary/10 rounded-lg rotate-12 animate-pulse delay-1000 z-[2]" />
+        <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-primary/5 rounded-full animate-pulse delay-500 z-[2]" />
+        <div className="absolute top-1/3 right-1/3 w-16 h-16 bg-primary/10 rounded-lg rotate-45 animate-pulse delay-700 z-[2]" />
         
         {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] z-[2]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center min-h-screen">
+      <div className="relative z-10 container mx-auto px-4 pt-12 pb-20">
+        <div className="grid lg:grid-cols-2 gap-16 items-start pt-8">
           {/* Left Column - Content */}
           <div className={`space-y-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             {/* Badge */}
@@ -192,9 +226,72 @@ export default function IntegrationsHero() {
                     ))}
                   </div>
 
-                  {/* Chart Placeholder */}
-                  <div className="h-32 bg-primary/5 rounded-lg flex items-center justify-center">
-                    <div className="text-slate-500 text-sm">Integration Status</div>
+                  {/* Integration Status Chart */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-slate-900">Integration Status</h3>
+                    <div className="h-32 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                            </linearGradient>
+                            <linearGradient id="colorSyncing" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                          <XAxis 
+                            dataKey="day" 
+                            tick={{ fontSize: 10, fill: '#64748b' }}
+                            axisLine={{ stroke: '#e2e8f0' }}
+                          />
+                          <YAxis 
+                            tick={{ fontSize: 10, fill: '#64748b' }}
+                            axisLine={{ stroke: '#e2e8f0' }}
+                            width={30}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: 'white',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '0.5rem',
+                              fontSize: '12px',
+                              padding: '8px',
+                            }}
+                            formatter={(value: number) => [value, '']}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="active"
+                            stroke="#3b82f6"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill="url(#colorActive)"
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="syncing"
+                            stroke="#10b981"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill="url(#colorSyncing)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex items-center justify-center gap-4 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-blue-500" />
+                        <span className="text-slate-600">Active</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <span className="text-slate-600">Syncing</span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Recent Integrations */}

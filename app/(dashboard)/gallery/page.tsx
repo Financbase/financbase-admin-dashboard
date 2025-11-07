@@ -12,10 +12,10 @@
 import { useState, useEffect } from "react";
 import { ImageGallery } from '@/components/core/ui/layout/image-gallery';
 import type { UploadedImage } from '@/components/core/ui/layout/image-gallery';
-import { UploadButton } from "@/utils/uploadthing";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { Button } from "@/components/ui/button";
 
 interface GalleryImage {
 	id: string;
@@ -141,13 +141,15 @@ export default function ImageGalleryDemo() {
 						Manage and organize your uploaded images with advanced filtering, search, and bulk operations.
 					</p>
 				</div>
-				<UploadButton
-					endpoint="galleryImage"
-					onClientUploadComplete={handleUploadComplete}
-					onUploadError={(error) => {
-						toast.error(`Upload failed: ${error.message}`);
+				<Button
+					onClick={() => {
+						// TODO: Implement upload functionality with uploadthing
+						toast.info("Upload functionality coming soon");
 					}}
-				/>
+				>
+					<Upload className="h-4 w-4 mr-2" />
+					Upload Image
+				</Button>
 			</div>
 
 			<ImageGallery

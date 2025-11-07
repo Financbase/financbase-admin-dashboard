@@ -28,6 +28,8 @@ import {
 	Code,
 	Settings,
 	Shield,
+	Eye,
+	Bookmark,
 	Users,
 	BarChart3,
 	Brain,

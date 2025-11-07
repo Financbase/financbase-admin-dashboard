@@ -8,7 +8,7 @@
  */
 
 import { db } from "@/lib/db";
-import { adCampaigns } from "@/lib/db/schema-adboard";
+import { adboardCampaigns } from "@/lib/db/schemas/adboard.schema";
 import {
 	financialAlerts,
 	financialIntelligenceMetrics,

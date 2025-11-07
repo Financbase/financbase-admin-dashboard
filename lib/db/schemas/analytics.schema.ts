@@ -137,3 +137,19 @@ export const investorAccessLogs = pgTable("investor_access_logs", {
 	metricsViewed: text("metrics_viewed").array(),
 	reportsAccessed: uuid("reports_accessed").references(() => customReports.id).array(),
 });
+
+// Landing page analytics
+export const landingPageAnalytics = pgTable("landing_page_analytics", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	landingPageId: integer("landing_page_id").notNull(),
+	eventType: text("event_type").notNull(), // 'page_view', 'cta_click', 'form_submit', 'link_click'
+	timestamp: timestamp("timestamp").defaultNow().notNull(),
+	sessionId: text("session_id").notNull(),
+	userId: text("user_id"),
+	referrer: text("referrer"),
+	deviceType: text("device_type"), // 'desktop', 'mobile', 'tablet'
+	userAgent: text("user_agent"),
+	ipAddress: text("ip_address"),
+	metadata: jsonb("metadata"),
+	createdAt: timestamp("created_at").defaultNow(),
+});

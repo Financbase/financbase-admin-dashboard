@@ -156,7 +156,7 @@ export async function generateFinancialInsights(userId: string): Promise<Financi
 		.from(invoices)
 		.where(eq(invoices.userId, userId));
 
-	const [recentExpenses] = await db
+	const [recentExpensesResult] = await db
 		.select({
 			expenses: sql<number>`sum(case when ${expenses.date} >= ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)} then ${expenses.amount}::numeric else 0 end)`,
 		})
@@ -176,7 +176,7 @@ export async function generateFinancialInsights(userId: string): Promise<Financi
 		));
 
 	const revenue = Number(recentRevenue?.revenue || 0);
-	const expenses = Number(recentExpenses?.expenses || 0);
+	const expensesTotal = Number(recentExpensesResult?.expenses || 0);
 	const overdueCount = Number(overdueInvoices?.count || 0);
 	const overdueAmount = Number(overdueInvoices?.amount || 0);
 
@@ -184,7 +184,7 @@ export async function generateFinancialInsights(userId: string): Promise<Financi
 	if (revenue > 0) {
 		insights.push({
 			id: `revenue-${Date.now()}`,
-			type: 'success',
+			type: 'success' as const,
 			title: 'Strong Revenue Performance',
 			description: `You've generated $${revenue.toLocaleString()} in revenue this month.`,
 			impact: 'high',
@@ -195,12 +195,12 @@ export async function generateFinancialInsights(userId: string): Promise<Financi
 	}
 
 	// Expense insights
-	if (expenses > revenue * 0.8) {
+	if (expensesTotal > revenue * 0.8) {
 		insights.push({
 			id: `expense-${Date.now()}`,
 			type: 'warning',
 			title: 'High Expense Ratio',
-			description: `Your expenses ($${expenses.toLocaleString()}) are ${Math.round((expenses / revenue) * 100)}% of your revenue. Consider cost optimization.`,
+			description: `Your expenses ($${expensesTotal.toLocaleString()}) are ${Math.round((expensesTotal / revenue) * 100)}% of your revenue. Consider cost optimization.`,
 			impact: 'medium',
 			category: 'expenses',
 			confidence: 90,
@@ -224,7 +224,7 @@ export async function generateFinancialInsights(userId: string): Promise<Financi
 	}
 
 	// Profitability insights
-	const profit = revenue - expenses;
+	const profit = revenue - expensesTotal;
 	if (profit > 0) {
 		const margin = (profit / revenue) * 100;
 		insights.push({

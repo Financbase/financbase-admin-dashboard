@@ -1,0 +1,105 @@
+-- Update featured images for blog posts with relevant Unsplash images
+-- Each post gets a unique image based on its topic
+
+-- Financial Planning & Strategy
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop' WHERE slug = 'getting-started-with-financial-management';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'small-business-financial-planning-guide-2025';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'budget-planning-small-businesses-guide';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-business-expansion';
+
+-- Cash Flow & Receivables
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'cash-flow-forecasting-strategic-guide';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop' WHERE slug = 'accounts-receivable-management-strategies';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'working-capital-management-optimize-operations';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'cash-management-strategies-business-success';
+
+-- Expense & Invoice Management
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop' WHERE slug = 'business-expense-management-control-costs';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'invoice-management-best-practices';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'vendor-payment-management-strategies';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'accounts-payable-optimization-strategies';
+
+-- Financial Reporting & Analysis
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-reporting-small-businesses-guide';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop' WHERE slug = 'how-to-read-financial-statements';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-ratios-key-metrics-business-analysis';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-metrics-dashboard-key-indicators';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-health-check-assess-business-performance';
+
+-- Tax & Compliance
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop' WHERE slug = 'tax-planning-strategies-small-businesses-2025';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-compliance-requirements-small-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-reporting-standards-compliance';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-audit-preparation-guide';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-data-security-best-practices';
+
+-- Technology & Tools
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop' WHERE slug = 'ai-revolutionizing-financial-management';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'choosing-right-accounting-software';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-tools-every-business-should-use';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop' WHERE slug = 'financial-automation-streamline-operations';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-technology-trends-2025';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'payment-processing-solutions-modern-businesses';
+
+-- Business Types
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'client-management-service-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop' WHERE slug = 'small-business-finance-essential-guide-entrepreneurs';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-startups';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-seasonal-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-ecommerce-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-freelancers';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-subscription-businesses';
+
+-- Industry-Specific
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-service-based-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-manufacturing-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-retail-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-consulting-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-technology-startups';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-healthcare-practices';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-real-estate-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-restaurant-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-professional-services';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-nonprofit-organizations';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-construction-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-law-firms';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-marketing-agencies';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-accounting-firms';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-fitness-wellness-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-education-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-transportation-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-hospitality-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-agriculture-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-wholesale-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-franchise-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-home-based-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-online-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-b2b-service-providers';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-event-planning-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-photography-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-coaching-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-cleaning-services';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-pet-care-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-landscaping-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-home-improvement-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-planning-personal-training-businesses';
+
+-- Additional Topics
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'profit-margin-analysis-understanding-profitability';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop' WHERE slug = 'financial-kpis-business-owner-track';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'debt-management-strategies-small-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'business-valuation-methods-determine-company-worth';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'cost-control-strategies-growing-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'revenue-optimization-techniques-small-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop' WHERE slug = 'financial-risk-management-small-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'investment-strategies-business-growth';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'bookkeeping-best-practices-small-businesses';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'financial-forecasting-techniques-business-planning';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'quarterly-financial-review-best-practices';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop' WHERE slug = 'understanding-business-credit-scores';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop' WHERE slug = 'break-even-analysis-understanding-business-threshold';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-8c0c0c0c0c0c?w=1200&h=630&fit=crop' WHERE slug = 'inventory-management-financial-impact';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1200&h=630&fit=crop' WHERE slug = 'multi-currency-financial-management';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop' WHERE slug = 'financial-forecasting-models-business-planning';
+UPDATE public.financbase_blog_posts SET featured_image = 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop' WHERE slug = 'retirement-planning-business-owners';
+

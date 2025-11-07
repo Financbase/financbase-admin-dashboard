@@ -127,7 +127,7 @@ export default function Testimonials() {
                 <div className="flex items-center">
                   <Avatar className="h-12 w-12 mr-4 ring-2 ring-blue-100">
                     <AvatarImage src={testimonial.image} alt={testimonial.name} />
-                    <AvatarFallback className="bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary-dark)] text-white font-semibold">
+                    <AvatarFallback className="bg-gradient-to-br from-[hsl(231.6_54%_42%)] to-[hsl(231.6_54%_30%)] text-white font-semibold">
                       {testimonial.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>

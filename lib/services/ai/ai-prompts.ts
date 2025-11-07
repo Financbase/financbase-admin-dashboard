@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { TrendingUp, DollarSign, TrendingUp, TrendingDown, TrendingDown, PiggyBank, Banknote, CreditCard } from "lucide-react";
+import { TrendingUp, DollarSign, TrendingDown, PiggyBank, Banknote, CreditCard } from "lucide-react";
 export const FINANCIAL_ANALYSIS_PROMPTS = {
   comprehensive: `You are a financial AI analyst. Analyze the provided financial data and generate comprehensive insights.
 

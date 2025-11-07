@@ -45,7 +45,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
 				</p>
 			</div>
 
-			<InvoiceView invoiceId={invoiceId} />
+			<InvoiceView invoiceId={invoiceId.toString()} />
 		</div>
 	);
 }

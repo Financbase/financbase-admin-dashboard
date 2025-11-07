@@ -137,33 +137,39 @@ export default function EmployeesPage() {
 		.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 		.slice(0, 10);
 
-	const employeeStats = [
+	const employeeStats: Array<{
+		name: string;
+		value: string;
+		change: string;
+		changeType: "positive" | "negative" | "neutral";
+		icon: React.ComponentType<{ className?: string }>;
+	}> = [
 		{
 			name: "Total Employees",
 			value: analytics?.total?.toString() || "0",
 			change: "+3",
-			changeType: "positive" as const,
+			changeType: "positive",
 			icon: Users,
 		},
 		{
 			name: "Active Employees",
 			value: analytics?.active?.toString() || "0",
 			change: "+2",
-			changeType: "positive" as const,
+			changeType: "positive",
 			icon: UserCheck,
 		},
 		{
 			name: "Departments",
 			value: departments.length.toString(),
 			change: "0",
-			changeType: "neutral" as const,
+			changeType: "neutral",
 			icon: Building,
 		},
 		{
 			name: "On Leave",
 			value: analytics?.onLeave?.toString() || "0",
 			change: "0",
-			changeType: "neutral" as const,
+			changeType: "neutral",
 			icon: Clock,
 		},
 	];

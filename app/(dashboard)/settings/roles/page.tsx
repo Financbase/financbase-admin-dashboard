@@ -81,13 +81,15 @@ function RolesSettingsClient() {
 					) : (
 						<div className="space-y-4">
 							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-								{Object.entries(DEFAULT_ROLES).map(([key, role]) => (
+								{Object.entries(DEFAULT_ROLES).map(([key, permissions]) => (
 									<div key={key} className="p-4 border rounded-lg">
 										<div className="flex items-center justify-between mb-2">
 											<span className="font-medium capitalize">{key}</span>
 											<Badge variant="outline">{roleCounts[key] || 0}</Badge>
 										</div>
-										<p className="text-sm text-muted-foreground">{role.description}</p>
+										<p className="text-sm text-muted-foreground">
+											{Array.isArray(permissions) ? `${permissions.length} permission${permissions.length !== 1 ? 's' : ''}` : 'No permissions'}
+										</p>
 									</div>
 								))}
 							</div>

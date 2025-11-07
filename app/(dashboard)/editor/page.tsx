@@ -26,7 +26,7 @@ import {
   FlipVertical,
   Crop,
   Filter,
-  Adjustments,
+  Sliders,
   Save,
   X,
   ZoomIn,
@@ -57,7 +57,10 @@ export default function ImageEditorPage() {
     }
   }, [imageUrl, rotation, flipHorizontal, flipVertical, brightness, contrast, saturation, zoom]);
 
-  const handleImageUpload = (url: string) => {
+  const handleImageUpload = (imageUrl: string | string[], analysis?: any) => {
+    // For single image editor, extract first URL if array is passed
+    const url = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl;
+    
     // Security: Validate image URL before setting
     const safeUrl = validateSafeUrl(url) || (url.startsWith('blob:') ? url : null);
     if (!safeUrl && !url.startsWith('blob:')) {
@@ -420,7 +423,7 @@ export default function ImageEditorPage() {
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 border rounded-lg">
-              <Adjustments className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <Sliders className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
               <div>
                 <h4 className="font-medium text-sm">Color Filters</h4>
                 <p className="text-xs text-muted-foreground">Brightness, contrast, saturation</p>

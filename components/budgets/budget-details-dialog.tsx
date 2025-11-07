@@ -14,6 +14,7 @@
 
 "use client";
 
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
 	Dialog,
@@ -62,26 +63,28 @@ export function BudgetDetailsDialog({ budgetId, open, onOpenChange, onEdit }: Bu
 		}).format(numAmount);
 	};
 
-	const statusColors = {
+	type BudgetStatus = 'good' | 'warning' | 'critical' | 'over-budget';
+
+	const statusColors: Record<BudgetStatus, 'default' | 'secondary' | 'destructive'> = {
 		good: 'default',
 		warning: 'secondary',
 		critical: 'secondary',
 		'over-budget': 'destructive',
-	} as const;
+	};
 
-	const statusLabels = {
+	const statusLabels: Record<BudgetStatus, string> = {
 		good: 'On Track',
 		warning: 'Warning',
 		critical: 'Critical',
 		'over-budget': 'Over Budget',
-	} as const;
+	};
 
-	const statusIcons = {
+	const statusIcons: Record<BudgetStatus, React.ReactNode> = {
 		good: <Target className="h-4 w-4 text-blue-500" />,
 		warning: <TrendingUp className="h-4 w-4 text-yellow-500" />,
 		critical: <TrendingUp className="h-4 w-4 text-orange-500" />,
 		'over-budget': <TrendingUp className="h-4 w-4 text-red-500" />,
-	} as const;
+	};
 
 	if (!budgetId) {
 		return null;
@@ -132,9 +135,9 @@ export function BudgetDetailsDialog({ budgetId, open, onOpenChange, onEdit }: Bu
 								<div className="flex items-center justify-between">
 									<CardTitle className="text-lg">{budget.name}</CardTitle>
 									<div className="flex items-center gap-2">
-										{statusIcons[budget.status]}
-										<Badge variant={statusColors[budget.status]}>
-											{statusLabels[budget.status]}
+										{statusIcons[budget.status as BudgetStatus]}
+										<Badge variant={statusColors[budget.status as BudgetStatus]}>
+											{statusLabels[budget.status as BudgetStatus]}
 										</Badge>
 									</div>
 								</div>

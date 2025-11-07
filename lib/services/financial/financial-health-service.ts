@@ -11,8 +11,8 @@ import { db } from "@/lib/db";
 import {
 	adboardCampaigns,
 	expenses,
-	freelanceProjects,
-	income,
+	projects,
+	propertyIncome,
 	properties,
 } from "@/lib/db/schemas";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
@@ -343,15 +343,15 @@ export class FinancialHealthService {
 	private async getIncomeData(userId: string, startDate: Date, endDate: Date) {
 		return await db
 			.select()
-			.from(income)
+			.from(propertyIncome)
 			.where(
 				and(
-					eq(income.userId, userId),
-					gte(income.date, startDate),
-					lte(income.date, endDate),
+					eq(propertyIncome.userId, userId),
+					gte(propertyIncome.date, startDate),
+					lte(propertyIncome.date, endDate),
 				),
 			)
-			.orderBy(desc(income.date));
+			.orderBy(desc(propertyIncome.date));
 	}
 
 	private async getExpenseData(userId: string, startDate: Date, endDate: Date) {
@@ -371,15 +371,15 @@ export class FinancialHealthService {
 	private async getProjectData(userId: string, startDate: Date, endDate: Date) {
 		return await db
 			.select()
-			.from(freelanceProjects)
+			.from(projects)
 			.where(
 				and(
-					eq(freelanceProjects.userId, userId),
-					gte(freelanceProjects.createdAt, startDate),
-					lte(freelanceProjects.createdAt, endDate),
+					eq(projects.userId, userId),
+					gte(projects.createdAt, startDate),
+					lte(projects.createdAt, endDate),
 				),
 			)
-			.orderBy(desc(freelanceProjects.createdAt));
+			.orderBy(desc(projects.createdAt));
 	}
 
 	private async getPropertyData(

@@ -27,6 +27,7 @@ import {
   Smartphone
 } from "lucide-react"
 import Link from "next/link"
+import { EnterpriseCapabilitiesSection } from "@/components/home/enterprise-capabilities-section"
 
 export default function PremiumUSPs() {
   const [activeFeature, setActiveFeature] = useState(0)
@@ -200,33 +201,11 @@ export default function PremiumUSPs() {
 
         {/* Capabilities Section */}
         <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-            <CardContent className="p-8">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">
-                  Enterprise-Grade Capabilities
-                </h3>
-                <p className="text-slate-600">
-                  Everything you need to scale your financial operations
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {capabilities.map((capability) => (
-                  <div 
-                    key={`capability-${capability.title.toLowerCase().replace(/\s+/g, '-')}`}
-                    className="group p-6 rounded-lg border border-slate-200 hover:border-primary/30 hover:shadow-md transition-all duration-300"
-                  >
-                    <div className="text-primary mb-4 group-hover:scale-110 transition-transform duration-300">
-                      {capability.icon}
-                    </div>
-                    <h4 className="font-semibold text-slate-900 mb-2">{capability.title}</h4>
-                    <p className="text-sm text-slate-600">{capability.description}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <EnterpriseCapabilitiesSection
+            capabilities={capabilities}
+            title="Enterprise-Grade Capabilities"
+            description="Everything you need to scale your financial operations"
+          />
         </div>
 
         {/* Security Badge */}

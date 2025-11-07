@@ -172,7 +172,7 @@ export default function ResponsiveUITestPage() {
                     <dialog ref={dialogRef} className="rounded-lg p-6">
                       <h2 className="text-xl font-bold mb-4">Dialog via Hook</h2>
                       <p className="mb-4">Opened using useNativeDialog hook</p>
-                      <Button onClick={close}>Close</Button>
+                      <Button onClick={() => close()}>Close</Button>
                     </dialog>
                   </div>
                 </CardContent>

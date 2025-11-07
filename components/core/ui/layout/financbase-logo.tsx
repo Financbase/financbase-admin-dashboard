@@ -10,6 +10,7 @@
 "use client";
 
 import React from "react";
+import { useBrandingContext } from "@/contexts/branding-context";
 
 interface FinancbaseLogoProps {
 	className?: string;
@@ -22,6 +23,8 @@ export function FinancbaseLogo({
 	size = "md",
 	variant = "full",
 }: FinancbaseLogoProps) {
+	const { branding, getLogo, getCompanyName } = useBrandingContext();
+	
 	const sizeClasses = {
 		sm: "h-6 w-auto",
 		md: "h-8 w-auto",
@@ -29,19 +32,23 @@ export function FinancbaseLogo({
 	};
 
 	const getLogoSrc = () => {
-		if (variant === "symbol") {
+		// Use branded logo if available
+		if (variant === "white") {
+			return getLogo(true) || "/financbase-logo-white.png";
+		} else if (variant === "symbol") {
+			// For symbol variant, use default for now (can be extended)
 			return "/financbasesymbol.png";
-		} else if (variant === "white") {
-			return "/financbase-logo-white.png";
 		}
-		return "/financbase-logo.png";
+		return getLogo(false) || "/financbase-logo.png";
 	};
+
+	const companyName = getCompanyName();
 
 	return (
 		<div className="relative inline-block">
 			<img
 				src={getLogoSrc()}
-				alt="Financbase Logo"
+				alt={`${companyName} Logo`}
 				className={`${sizeClasses[size]} ${className} no-filter`}
 				style={{
 					filter: "none",

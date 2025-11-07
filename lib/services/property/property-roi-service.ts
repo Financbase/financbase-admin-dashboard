@@ -138,15 +138,15 @@ export async function calculatePropertyROI(
 	const maintenanceRatio =
 		(expenses
 			.filter(
-				(e) => e.expenseType === "maintenance" || e.expenseType === "repairs",
+				(e) => e.category === "maintenance" || e.category === "repairs",
 			)
 			.reduce((sum, e) => sum + Number(e.amount), 0) /
 			totalIncome) *
 		100;
 	const operatingExpenses = expenses
 		.filter((e) =>
-			["utilities", "insurance", "property_tax", "management_fee"].includes(
-				e.expenseType,
+			["utilities", "insurance", "taxes", "management"].includes(
+				e.category || "",
 			),
 		)
 		.reduce((sum, e) => sum + Number(e.amount), 0);
@@ -155,9 +155,9 @@ export async function calculatePropertyROI(
 	const daysOnMarket = 0; // Would need listing data
 	const rentalDemand = 100; // Would need market data
 	const marketValue = currentValue;
-	const squareFeet = Number(property.squareFeet || 0);
-	const pricePerSqFt = squareFeet > 0 ? currentValue / squareFeet : 0;
-	const rentPerSqFt = squareFeet > 0 ? annualIncome / squareFeet : 0;
+	const squareFootage = Number(property.squareFootage || 0);
+	const pricePerSqFt = squareFootage > 0 ? currentValue / squareFootage : 0;
+	const rentPerSqFt = squareFootage > 0 ? annualIncome / squareFootage : 0;
 
 	return {
 		property,

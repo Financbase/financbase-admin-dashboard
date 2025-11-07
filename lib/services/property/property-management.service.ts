@@ -64,7 +64,6 @@ export interface PropertyROIAnalysis {
 	totalReturn: number;
 	cashOnCashReturn: number;
 	capRate: number;
-	totalReturn: number;
 	appreciation: number;
 	occupancyRate: number;
 	averageRent: number;
@@ -131,28 +130,27 @@ export class PropertyManagementService {
 			city?: string;
 		},
 	): Promise<Property[]> {
-		let query = db
-			.select()
-			.from(properties)
-			.where(eq(properties.userId, userId));
+		const conditions = [eq(properties.userId, userId)];
 
 		if (filters?.status) {
-			query = query.where(eq(properties.status, filters.status as any));
+			conditions.push(eq(properties.status, filters.status as any));
 		}
 		if (filters?.propertyType) {
-			query = query.where(
+			conditions.push(
 				eq(properties.propertyType, filters.propertyType as any),
 			);
 		}
 		if (filters?.city) {
 			// Security: Use Drizzle's ilike function for safe parameterized LIKE queries
 			// This prevents SQL injection by properly parameterizing the query
-			query = query.where(
-				ilike(properties.city, `%${filters.city}%`),
-			);
+			conditions.push(ilike(properties.city, `%${filters.city}%`));
 		}
 
-		return await query.orderBy(desc(properties.createdAt));
+		return await db
+			.select()
+			.from(properties)
+			.where(and(...conditions))
+			.orderBy(desc(properties.createdAt));
 	}
 
 	/**
@@ -196,7 +194,7 @@ export class PropertyManagementService {
 			.delete(properties)
 			.where(and(eq(properties.id, propertyId), eq(properties.userId, userId)));
 
-		return result.rowCount > 0;
+		return (result.rowCount ?? 0) > 0;
 	}
 
 	/**
@@ -270,14 +268,16 @@ export class PropertyManagementService {
 		propertyId: string,
 		userId: string,
 	): Promise<Lease[]> {
-		return await db
-			.select()
+		const results = await db
+			.select({ leases: leases })
 			.from(leases)
 			.innerJoin(properties, eq(leases.propertyId, properties.id))
 			.where(
 				and(eq(properties.userId, userId), eq(leases.propertyId, propertyId)),
 			)
 			.orderBy(desc(leases.startDate));
+
+		return results.map((r) => r.leases);
 	}
 
 	/**
@@ -305,32 +305,29 @@ export class PropertyManagementService {
 			category?: string;
 		},
 	): Promise<MaintenanceRequest[]> {
-		let query = db
-			.select()
-			.from(maintenanceRequests)
-			.innerJoin(properties, eq(maintenanceRequests.propertyId, properties.id))
-			.where(
-				and(
-					eq(properties.userId, userId),
-					eq(maintenanceRequests.propertyId, propertyId),
-				),
-			);
+		const conditions = [
+			eq(properties.userId, userId),
+			eq(maintenanceRequests.propertyId, propertyId),
+		];
 
 		if (filters?.status) {
-			query = query.where(
-				eq(maintenanceRequests.status, filters.status as any),
-			);
+			conditions.push(eq(maintenanceRequests.status, filters.status as any));
 		}
 		if (filters?.priority) {
-			query = query.where(
-				eq(maintenanceRequests.priority, filters.priority as any),
-			);
+			conditions.push(eq(maintenanceRequests.priority, filters.priority as any));
 		}
 		if (filters?.category) {
-			query = query.where(eq(maintenanceRequests.category, filters.category));
+			conditions.push(eq(maintenanceRequests.category, filters.category));
 		}
 
-		return await query.orderBy(desc(maintenanceRequests.requestDate));
+		const results = await db
+			.select({ maintenance_requests: maintenanceRequests })
+			.from(maintenanceRequests)
+			.innerJoin(properties, eq(maintenanceRequests.propertyId, properties.id))
+			.where(and(...conditions))
+			.orderBy(desc(maintenanceRequests.reportedDate));
+
+		return results.map((r) => r.maintenance_requests);
 	}
 
 	/**

@@ -577,12 +577,278 @@ export class NotificationService {
 			priority,
 		});
 	}
+
+	/**
+	 * Send lead created notification
+	 */
+	static async sendLeadCreated(leadId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'New Lead Created',
+			message: `A new lead has been created`,
+			data: { leadId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send lead activity created notification
+	 */
+	static async sendLeadActivityCreated(activityId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Lead Activity Created',
+			message: `A new activity has been added to a lead`,
+			data: { activityId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send lead task created notification
+	 */
+	static async sendLeadTaskCreated(taskId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Lead Task Created',
+			message: `A new task has been created for a lead`,
+			data: { taskId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send campaign created notification
+	 */
+	static async sendCampaignCreated(campaignId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Campaign Created',
+			message: `A new campaign has been created`,
+			data: { campaignId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send project created notification
+	 */
+	static async sendProjectCreated(projectId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Project Created',
+			message: `A new project has been created`,
+			data: { projectId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send time entry created notification
+	 */
+	static async sendTimeEntryCreated(timeEntryId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Time Entry Created',
+			message: `A new time entry has been created`,
+			data: { timeEntryId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send task created notification
+	 */
+	static async sendTaskCreated(taskId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Task Created',
+			message: `A new task has been created`,
+			data: { taskId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send account created notification
+	 */
+	static async sendAccountCreated(accountId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Account Created',
+			message: `A new account has been created`,
+			data: { accountId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send account updated notification
+	 */
+	static async sendAccountUpdated(accountId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Account Updated',
+			message: `An account has been updated`,
+			data: { accountId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send account deleted notification
+	 */
+	static async sendAccountDeleted(accountId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Account Deleted',
+			message: `An account has been deleted`,
+			data: { accountId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send account reconciled notification
+	 */
+	static async sendAccountReconciled(accountId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Account Reconciled',
+			message: `An account has been reconciled`,
+			data: { accountId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send payment method created notification
+	 */
+	static async sendPaymentMethodCreated(paymentMethodId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Payment Method Created',
+			message: `A new payment method has been added`,
+			data: { paymentMethodId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send payment method deleted notification
+	 */
+	static async sendPaymentMethodDeleted(paymentMethodId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'general',
+			title: 'Payment Method Deleted',
+			message: `A payment method has been removed`,
+			data: { paymentMethodId },
+			priority: 'normal',
+		});
+	}
+
+	/**
+	 * Send payment processed notification
+	 */
+	static async sendPaymentProcessed(paymentId: string, userId: string) {
+		return this.create({
+			userId,
+			type: 'system',
+			category: 'financial',
+			title: 'Payment Processed',
+			message: `A payment has been processed`,
+			data: { paymentId },
+			priority: 'normal',
+		});
+	}
 }
 
 // Export helper functions for backward compatibility
 export const NotificationHelpers = {
 	createFinancialNotification: NotificationService.createFinancialNotification,
 	createSystemAlert: NotificationService.createSystemAlert,
+	sendLeadCreated: NotificationService.sendLeadCreated,
+	sendLeadActivityCreated: NotificationService.sendLeadActivityCreated,
+	sendLeadTaskCreated: NotificationService.sendLeadTaskCreated,
+	sendCampaignCreated: NotificationService.sendCampaignCreated,
+	sendProjectCreated: NotificationService.sendProjectCreated,
+	sendTimeEntryCreated: NotificationService.sendTimeEntryCreated,
+	sendTaskCreated: NotificationService.sendTaskCreated,
+	sendAccountCreated: NotificationService.sendAccountCreated,
+	sendAccountUpdated: NotificationService.sendAccountUpdated,
+	sendAccountDeleted: NotificationService.sendAccountDeleted,
+	sendAccountReconciled: NotificationService.sendAccountReconciled,
+	sendPaymentMethodCreated: NotificationService.sendPaymentMethodCreated,
+	sendPaymentMethodDeleted: NotificationService.sendPaymentMethodDeleted,
+	sendPaymentProcessed: NotificationService.sendPaymentProcessed,
+	expense: {
+		created: async (userId: string, expenseId: string) => {
+			return NotificationService.createFinancialNotification(
+				userId,
+				'expense',
+				'Expense Created',
+				'A new expense has been created',
+				{ expenseId }
+			);
+		},
+		approved: async (userId: string, expenseId: string) => {
+			return NotificationService.createFinancialNotification(
+				userId,
+				'expense',
+				'Expense Approved',
+				'An expense has been approved',
+				{ expenseId }
+			);
+		},
+		rejected: async (userId: string, expenseId: string) => {
+			return NotificationService.createFinancialNotification(
+				userId,
+				'expense',
+				'Expense Rejected',
+				'An expense has been rejected',
+				{ expenseId }
+			);
+		},
+	},
+	client: {
+		created: async (userId: string, clientId: string) => {
+			return NotificationService.create({
+				userId,
+				type: 'system',
+				category: 'general',
+				title: 'Client Created',
+				message: 'A new client has been created',
+				data: { clientId },
+				priority: 'normal',
+			});
+		},
+	},
 	getForUser: NotificationService.getForUser,
 	markAsRead: NotificationService.markAsRead,
 	markAllAsRead: NotificationService.markAllAsRead,

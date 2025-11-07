@@ -51,17 +51,101 @@ export function isChunkLoadError(error: Error | unknown): boolean {
 
 	const errorMessage = error.message.toLowerCase();
 	const errorName = error.name.toLowerCase();
+	const errorStack = error.stack?.toLowerCase() || '';
 
-	return (
-		errorName.includes('chunkload') ||
-		errorMessage.includes('chunkload') ||
-		errorMessage.includes('loading chunk') ||
-		errorMessage.includes('failed to fetch dynamically imported module') ||
-		errorMessage.includes('loading css chunk') ||
-		// Check for network errors that might be chunk-related
-		(errorMessage.includes('failed to fetch') && 
-			(errorMessage.includes('_next/static') || errorMessage.includes('chunk')))
-	);
+	// Check error name first - exact match for ChunkLoadError
+	if (errorName === 'chunkloaderror' || errorName.includes('chunkload') || errorName.includes('chunk load')) {
+		return true;
+	}
+
+	// Check for webpack internal chunk loading errors
+	// These occur in __webpack_require__.f.j and related webpack functions
+	const webpackInternalPatterns = [
+		/__webpack_require__/i,
+		/webpack_require__\.f\.j/i,
+		/webpack_require__\.e/i,
+		/webpack\.js/i,
+		/webpack-internal/i,
+		/react-server-dom-webpack/i,
+	];
+
+	for (const pattern of webpackInternalPatterns) {
+		if (pattern.test(errorStack) || pattern.test(errorMessage)) {
+			// If it's a webpack internal error, check if it's chunk-related
+			if (
+				errorStack.includes('chunk') ||
+				errorStack.includes('_next/static') ||
+				errorMessage.includes('chunk') ||
+				errorMessage.includes('loading') ||
+				errorMessage.includes('failed')
+			) {
+				return true;
+			}
+		}
+	}
+
+	// Check for common chunk loading error patterns
+	const chunkErrorPatterns = [
+		'chunkload',
+		'loading chunk',
+		'loading css chunk',
+		'failed to fetch dynamically imported module',
+		'chunk load error',
+		'chunkloaderror',
+		// Pattern: "Loading chunk [name] failed"
+		/loading chunk .* failed/i,
+		// Pattern: "ChunkLoadError: Loading chunk [name] failed"
+		/chunkloaderror.*loading chunk/i,
+		// Pattern: "Failed to load chunk [name]"
+		/failed to load chunk/i,
+		// Pattern: "ChunkLoadError" as standalone
+		/^chunkloaderror$/i,
+	];
+
+	// Check if message matches any pattern
+	for (const pattern of chunkErrorPatterns) {
+		if (typeof pattern === 'string') {
+			if (errorMessage.includes(pattern) || errorStack.includes(pattern)) {
+				return true;
+			}
+		} else if (pattern instanceof RegExp) {
+			if (pattern.test(errorMessage) || pattern.test(errorStack)) {
+				return true;
+			}
+		}
+	}
+
+	// Check for network errors that might be chunk-related
+	if (errorMessage.includes('failed to fetch') || errorMessage.includes('networkerror')) {
+		const isChunkRelated = 
+			errorMessage.includes('_next/static') ||
+			errorMessage.includes('chunk') ||
+			errorMessage.includes('_app-pages-browser') ||
+			errorMessage.includes('node_modules') ||
+			errorMessage.includes('webpack') ||
+			errorStack.includes('_next/static') ||
+			errorStack.includes('chunk') ||
+			errorStack.includes('webpack');
+		
+		if (isChunkRelated) {
+			return true;
+		}
+	}
+
+	// Check for specific DevTools chunk errors
+	if (errorMessage.includes('react-query-devtools') || errorMessage.includes('tanstack')) {
+		if (errorMessage.includes('failed') || errorMessage.includes('error') || errorMessage.includes('chunk')) {
+			return true;
+		}
+	}
+
+	// Check for errors in webpack chunk loading mechanism
+	// This catches errors from webpack's internal chunk loading functions
+	if (errorStack.includes('loadchunk') || errorStack.includes('preloadmodule') || errorStack.includes('resolvemodule')) {
+		return true;
+	}
+
+	return false;
 }
 
 /**

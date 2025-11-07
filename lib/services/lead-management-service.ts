@@ -521,7 +521,7 @@ export async function getLeadStats(userId: string): Promise<LeadStats> {
 			leadName: activity.leadName,
 			activityType: activity.activityType,
 			description: activity.description,
-			createdAt: activity.createdAt.toISOString(),
+			createdAt: activity.createdAt?.toISOString() || new Date().toISOString(),
 		})),
 	};
 }
@@ -578,8 +578,8 @@ export async function convertLeadToClient(
 		// Create client
 		const [client] = await db.insert(clients).values({
 			userId: userId,
-			companyName: clientData.companyName,
-			contactName: clientData.contactName,
+			name: clientData.contactName || clientData.companyName,
+			company: clientData.companyName,
 			email: clientData.email,
 			phone: clientData.phone,
 			address: clientData.address,
@@ -618,7 +618,7 @@ export async function convertLeadToClient(
 			leadId,
 			type: 'conversion',
 			subject: 'Lead converted to client',
-			description: `Lead ${updatedLead.firstName} ${updatedLead.lastName} has been converted to client ${client.companyName}`,
+			description: `Lead ${updatedLead.firstName} ${updatedLead.lastName} has been converted to client ${client.company || client.name}`,
 			notes: 'Lead successfully converted to client',
 		});
 

@@ -11,8 +11,8 @@ import { db } from "@/lib/db";
 import {
 	adboardCampaigns,
 	expenses,
-	freelanceProjects,
-	income,
+	projects,
+	propertyIncome,
 	properties,
 } from "@/lib/db/schemas";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
@@ -77,7 +77,7 @@ export class FinancialAIService {
 			);
 
 			// Generate AI analysis
-			const analysis = await this.performAIAnalysis(financialData, request);
+			const analysis = await this.performAIAnalysis(userId, financialData, request);
 
 			// Calculate processing time
 			const processingTime = Date.now() - startTime;
@@ -372,18 +372,18 @@ export class FinancialAIService {
 			timeframe?.start || new Date(Date.now() - 365 * 24 * 60 * 60 * 1000); // 1 year ago
 		const endDate = timeframe?.end || new Date();
 
-		// Fetch income data
+		// Fetch income data from property income
 		const incomeData = await db
 			.select()
-			.from(income)
+			.from(propertyIncome)
 			.where(
 				and(
-					eq(income.userId, userId),
-					gte(income.date, startDate),
-					lte(income.date, endDate),
+					eq(propertyIncome.userId, userId),
+					gte(propertyIncome.date, startDate),
+					lte(propertyIncome.date, endDate),
 				),
 			)
-			.orderBy(desc(income.date));
+			.orderBy(desc(propertyIncome.date));
 
 		// Fetch expense data
 		const expenseData = await db
@@ -401,15 +401,15 @@ export class FinancialAIService {
 		// Fetch project data
 		const projectData = await db
 			.select()
-			.from(freelanceProjects)
+			.from(projects)
 			.where(
 				and(
-					eq(freelanceProjects.userId, userId),
-					gte(freelanceProjects.createdAt, startDate),
-					lte(freelanceProjects.createdAt, endDate),
+					eq(projects.userId, userId),
+					gte(projects.createdAt, startDate),
+					lte(projects.createdAt, endDate),
 				),
 			)
-			.orderBy(desc(freelanceProjects.createdAt));
+			.orderBy(desc(projects.createdAt));
 
 		// Fetch property data
 		const propertyData = await db
@@ -443,11 +443,11 @@ export class FinancialAIService {
 			projects: projectData,
 			properties: propertyData,
 			campaigns: campaignData,
-			inflows: incomeData.map((i) => i.amount),
-			outflows: expenseData.map((e) => e.amount),
+			inflows: incomeData.map((i: any) => Number(i.amount || 0)),
+			outflows: expenseData.map((e: any) => Number(e.amount || 0)),
 			currentBalance: this.calculateCurrentBalance(incomeData, expenseData),
 			paymentTerms: this.extractPaymentTerms(incomeData),
-			revenue: incomeData.map((i) => i.amount),
+			revenue: incomeData.map((i: any) => Number(i.amount || 0)),
 			revenueSources: this.extractRevenueSources(incomeData),
 			growthRate: this.calculateGrowthRate(incomeData),
 			seasonality: this.calculateSeasonality(incomeData),
@@ -467,6 +467,7 @@ export class FinancialAIService {
 	 * Perform AI analysis using OpenAI
 	 */
 	private async performAIAnalysis(
+		userId: string,
 		financialData: Record<string, unknown>,
 		request: AIAnalysisRequest,
 	): Promise<FinancialAnalysis> {
@@ -503,7 +504,7 @@ export class FinancialAIService {
 
 		return {
 			id: crypto.randomUUID(),
-			userId: financialData.userId || "unknown",
+			userId: userId,
 			analysisType: request.type,
 			timeframe: request.timeframe || {
 				start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
@@ -542,104 +543,104 @@ export class FinancialAIService {
 		income: unknown[],
 		expenses: unknown[],
 	): number {
-		const totalIncome = income.reduce((sum, i) => sum + (i.amount || 0), 0);
-		const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+		const totalIncome = income.reduce((sum: number, i: any) => sum + Number(i?.amount || 0), 0);
+		const totalExpenses = expenses.reduce((sum: number, e: any) => sum + Number(e?.amount || 0), 0);
 		return totalIncome - totalExpenses;
 	}
 
 	private extractPaymentTerms(income: unknown[]): unknown[] {
-		return income.map((i) => ({
-			source: i.source,
-			terms: i.paymentTerms || "30 days",
-			frequency: i.frequency || "monthly",
+		return income.map((i: any) => ({
+			source: i?.source || "unknown",
+			terms: i?.paymentTerms || "30 days",
+			frequency: i?.frequency || "monthly",
 		}));
 	}
 
 	private extractRevenueSources(income: unknown[]): unknown[] {
-		const sources = income.reduce((acc, i) => {
-			const source = i.source || "Unknown";
-			acc[source] = (acc[source] || 0) + (i.amount || 0);
+		const sources = income.reduce((acc: Record<string, number>, i: any) => {
+			const source = i?.source || "Unknown";
+			acc[source] = (acc[source] || 0) + Number(i?.amount || 0);
 			return acc;
 		}, {});
+
+		const total = income.reduce((sum: number, i: any) => sum + Number(i?.amount || 0), 0);
 
 		return Object.entries(sources).map(([source, amount]) => ({
 			source,
 			amount,
-			percentage:
-				((amount as number) /
-					income.reduce((sum, i) => sum + (i.amount || 0), 0)) *
-				100,
+			percentage: total > 0 ? ((amount as number) / total) * 100 : 0,
 		}));
 	}
 
 	private calculateGrowthRate(income: unknown[]): number {
 		if (income.length < 2) return 0;
 
-		const sorted = income.sort(
-			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+		const sorted = [...income].sort(
+			(a: any, b: any) => new Date(a?.date || 0).getTime() - new Date(b?.date || 0).getTime(),
 		);
-		const first = sorted[0].amount || 0;
-		const last = sorted[sorted.length - 1].amount || 0;
+		const first = sorted.length > 0 ? Number((sorted[0] as any)?.amount || 0) : 0;
+		const last = sorted.length > 0 ? Number((sorted[sorted.length - 1] as any)?.amount || 0) : 0;
 
 		return first > 0 ? ((last - first) / first) * 100 : 0;
 	}
 
 	private calculateSeasonality(income: unknown[]): unknown[] {
-		const monthly = income.reduce((acc, i) => {
-			const month = new Date(i.date).getMonth();
-			acc[month] = (acc[month] || 0) + (i.amount || 0);
+		const monthly = income.reduce((acc: Record<number, number>, i: any) => {
+			const month = new Date(i?.date || 0).getMonth();
+			acc[month] = (acc[month] || 0) + Number(i?.amount || 0);
 			return acc;
 		}, {});
 
 		const avg =
 			Object.values(monthly).reduce(
-				(sum, amount) => sum + (amount as number),
+				(sum: number, amount: number) => sum + amount,
 				0,
 			) / 12;
 
+		const monthNames = [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"May",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Oct",
+			"Nov",
+			"Dec",
+		];
+
 		return Object.entries(monthly).map(([month, amount]) => ({
-			month: [
-				"Jan",
-				"Feb",
-				"Mar",
-				"Apr",
-				"May",
-				"Jun",
-				"Jul",
-				"Aug",
-				"Sep",
-				"Oct",
-				"Nov",
-				"Dec",
-			][Number.parseInt(month)],
+			month: monthNames[Number.parseInt(month)] || "Unknown",
 			factor: avg > 0 ? (amount as number) / avg : 1,
 		}));
 	}
 
 	private categorizeExpenses(expenses: unknown[]): unknown[] {
-		const categories = expenses.reduce((acc, e) => {
-			const category = e.category || "Other";
-			acc[category] = (acc[category] || 0) + (e.amount || 0);
+		const categories = expenses.reduce((acc: Record<string, number>, e: any) => {
+			const category = e?.category || "Other";
+			acc[category] = (acc[category] || 0) + Number(e?.amount || 0);
 			return acc;
 		}, {});
+
+		const total = expenses.reduce((sum: number, e: any) => sum + Number(e?.amount || 0), 0);
 
 		return Object.entries(categories).map(([category, amount]) => ({
 			category,
 			amount,
-			percentage:
-				((amount as number) /
-					expenses.reduce((sum, e) => sum + (e.amount || 0), 0)) *
-				100,
+			percentage: total > 0 ? ((amount as number) / total) * 100 : 0,
 		}));
 	}
 
 	private categorizeFixedVariable(expenses: unknown[]): unknown {
 		const fixed = expenses
-			.filter((e) => e.isFixed)
-			.reduce((sum, e) => sum + (e.amount || 0), 0);
+			.filter((e: any) => e?.isFixed)
+			.reduce((sum: number, e: any) => sum + Number(e?.amount || 0), 0);
 		const variable = expenses
-			.filter((e) => !e.isFixed)
-			.reduce((sum, e) => sum + (e.amount || 0), 0);
+			.filter((e: any) => !e?.isFixed)
+			.reduce((sum: number, e: any) => sum + Number(e?.amount || 0), 0);
 		const total = fixed + variable;
 
 		return {
@@ -655,9 +656,9 @@ export class FinancialAIService {
 	}
 
 	private calculateExpenseTrends(expenses: unknown[]): unknown[] {
-		const monthly = expenses.reduce((acc, e) => {
-			const month = new Date(e.date).toISOString().substring(0, 7);
-			acc[month] = (acc[month] || 0) + (e.amount || 0);
+		const monthly = expenses.reduce((acc: Record<string, number>, e: any) => {
+			const month = new Date(e?.date || 0).toISOString().substring(0, 7);
+			acc[month] = (acc[month] || 0) + Number(e?.amount || 0);
 			return acc;
 		}, {});
 
@@ -667,8 +668,8 @@ export class FinancialAIService {
 	}
 
 	private calculateMargins(income: unknown[], expenses: unknown[]): unknown {
-		const totalIncome = income.reduce((sum, i) => sum + (i.amount || 0), 0);
-		const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+		const totalIncome = income.reduce((sum: number, i: any) => sum + Number(i?.amount || 0), 0);
+		const totalExpenses = expenses.reduce((sum: number, e: any) => sum + Number(e?.amount || 0), 0);
 		const profit = totalIncome - totalExpenses;
 		const margin = totalIncome > 0 ? (profit / totalIncome) * 100 : 0;
 
@@ -682,8 +683,8 @@ export class FinancialAIService {
 	}
 
 	private analyzeCostStructure(expenses: unknown[]): unknown {
-		const total = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-		const categories = this.categorizeExpenses(expenses);
+		const total = expenses.reduce((sum: number, e: any) => sum + Number(e?.amount || 0), 0);
+		const categories = this.categorizeExpenses(expenses) as Array<{ category: string; amount: number; percentage: number }>;
 
 		return {
 			total,
@@ -700,11 +701,11 @@ export class FinancialAIService {
 	}
 
 	private calculateBudget(income: unknown[]): number {
-		return income.reduce((sum, i) => sum + (i.amount || 0), 0);
+		return income.reduce((sum: number, i: any) => sum + Number(i?.amount || 0), 0);
 	}
 
 	private calculateSpending(expenses: unknown[]): number {
-		return expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+		return expenses.reduce((sum: number, e: any) => sum + Number(e?.amount || 0), 0);
 	}
 
 	private calculateVariance(income: unknown[], expenses: unknown[]): unknown {
@@ -723,7 +724,7 @@ export class FinancialAIService {
 	}
 
 	private getExpenseCategories(expenses: unknown[]): string[] {
-		return [...new Set(expenses.map((e) => e.category || "Other"))];
+		return [...new Set(expenses.map((e: any) => e?.category || "Other"))];
 	}
 
 	/**

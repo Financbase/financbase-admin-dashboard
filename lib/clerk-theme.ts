@@ -17,8 +17,9 @@ function getClerkThemeColors() {
   // Only compute on client-side
   if (typeof window === 'undefined') {
     // SSR fallback - return default colors matching theme defaults
+    // Financbase Blue: rgb(43, 57, 143) / #2b398f / hsl(231.6 54% 36%)
     return {
-      colorPrimary: '#2563eb', // --primary from globals.css light theme
+      colorPrimary: '#2b398f', // Financbase brand blue from globals.css
       colorBackground: '#ffffff', // --background
       colorInputBackground: '#f9fafb', // --input
       colorInputText: '#111827', // --foreground
@@ -46,9 +47,9 @@ function getClerkThemeColors() {
     };
   } catch (error) {
     console.warn('Failed to load theme colors for Clerk, using fallback:', error);
-    // Fallback to defaults
+    // Fallback to defaults - Financbase Blue
     return {
-      colorPrimary: '#2563eb',
+      colorPrimary: '#2b398f', // Financbase brand blue
       colorBackground: '#ffffff',
       colorInputBackground: '#f9fafb',
       colorInputText: '#111827',
