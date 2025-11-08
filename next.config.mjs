@@ -25,6 +25,9 @@ const nextConfig = {
 		// Disable experimental features that might cause module resolution issues
 		optimizeCss: false,
 	},
+	
+	// Use webpack instead of Turbopack (we have custom webpack config)
+	turbopack: {},
 
 	// Image optimization
 	images: {
@@ -285,11 +288,6 @@ const nextConfig = {
 
 	// Development mode configuration
 	output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
-
-	eslint: {
-		// Disable Next.js ESLint to avoid conflicts with flat config
-		ignoreDuringBuilds: true,
-	},
 };
 
 export default nextConfig;
