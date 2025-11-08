@@ -20,15 +20,16 @@
 
 ### Database
 
-- [ ] `DATABASE_URL` - PostgreSQL connection string
+* [ ] `DATABASE_URL` - PostgreSQL connection string
   * Format: `postgresql://user:password@host:port/database`
   * Verify: Connection test successful
 
 ### Authentication (Clerk)
 
-- [ ] `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
+* [ ] `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
   * Format: `pk_test_...` or `pk_live_...`
   * Verify: Key is valid and matches environment
+
 * [ ] `CLERK_SECRET_KEY` - Clerk secret key
   * Format: `sk_test_...` or `sk_live_...`
   * Verify: Key is valid and matches environment
@@ -37,17 +38,19 @@
 
 ### Email Service (Resend)
 
-- [ ] `RESEND_API_KEY` - Resend API key
+* [ ] `RESEND_API_KEY` - Resend API key
   * Format: `re_...`
   * Verify: Key is valid and has sending permissions
+
 * [ ] `RESEND_FROM_EMAIL` - Sender email address
   * Verify: Domain is verified in Resend dashboard
 
 ### Contact & Support Forms
 
-- [ ] `ARCJET_KEY` - Arcjet API key for rate limiting
+* [ ] `ARCJET_KEY` - Arcjet API key for rate limiting
   * Format: `arcj_public_...` or `arcj_private_...`
   * Verify: Key is valid
+
 * [ ] `CONTACT_NOTIFICATION_EMAIL` - Email for contact form submissions
 * [ ] `SUPPORT_EMAIL` - Email for support form submissions
 * [ ] `PUBLIC_SUPPORT_USER_ID` - System user ID for support tickets
@@ -58,13 +61,13 @@
 
 ### Monitoring & Error Tracking
 
-- [ ] `SENTRY_DSN` - Sentry error tracking DSN
+* [ ] `SENTRY_DSN` - Sentry error tracking DSN
   * Format: `https://...@sentry.io/...`
   * Verify: Project is active and receiving errors
 
 ### Caching (Optional)
 
-- [ ] `REDIS_URL` - Redis connection string (if using Redis)
+* [ ] `REDIS_URL` - Redis connection string (if using Redis)
   * Format: `redis://...` or `rediss://...`
   * Verify: Connection test successful
 

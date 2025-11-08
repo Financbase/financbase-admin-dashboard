@@ -1,0 +1,12 @@
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/FactEvaluationResultTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/LepLanguageTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/TestFactsWrapper.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/autoconfigure/EncryptionAutoConfigurationTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/message/QueueMessageHeadersTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/message/SnsPublisherTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/message/SqsPublisherTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/message/confirmation/VersionedSubmissionConfirmationMessageTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/message/dispatch/VersionedDispatchMessageTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/message/email/VersionedSendEmailMessageTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/message/pending/VersionedPendingSubmissionMessageTest.java
+/Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/direct-file/libs/data-models/src/test/java/gov/irs/directfile/models/message/status/VersionedStatusChangeMessageTest.java

@@ -56,6 +56,18 @@
     "worker:deploy:staging": "wrangler deploy --env staging",
     "worker:deploy:dev": "wrangler deploy --env development",
     "worker:tail": "wrangler tail --env production",
+    "direct-file:setup-env": "./scripts/setup-direct-file-env.sh",
+    "direct-file:start": "./scripts/start-direct-file-services.sh",
+    "direct-file:stop": "./scripts/stop-direct-file-services.sh",
+    "direct-file:health": "./scripts/check-direct-file-health.sh",
+    "direct-file:backend:start": "./scripts/start-direct-file-backend-services.sh",
+    "direct-file:backend:stop": "./scripts/stop-direct-file-backend-services.sh",
+    "direct-file:backend:restart": "./scripts/stop-direct-file-backend-services.sh; sleep 2; ./scripts/start-direct-file-backend-services.sh",
+    "direct-file:backend:status": "./scripts/status-direct-file-backend-services.sh",
+    "direct-file:start:all": "START_BACKEND=true ./scripts/start-direct-file-services.sh",
+    "direct-file:backend:start": "cd lib/irs-direct-file/direct-file && ./scripts/start-services.sh",
+    "direct-file:backend:stop": "cd lib/irs-direct-file/direct-file && ./scripts/stop-services.sh",
+    "direct-file:backend:health": "cd lib/irs-direct-file/direct-file && ./scripts/health-check.sh",
     "prepare": "husky install"
   },
   "dependencies": {

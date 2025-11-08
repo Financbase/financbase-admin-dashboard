@@ -1,0 +1,1325 @@
+<!DOCTYPE html><html data-pathToRoot="../../"><head><meta charset="utf-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta><title>gov.irs.factgraph</title><link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico"></link><script type="text/javascript" src="../../scripts/theme.js"></script><script type="text/javascript" src="../../scripts/searchData.js" defer="true"></script><script type="text/javascript" src="../../scripts/scastieConfiguration.js" defer="true"></script><link rel="stylesheet" href="../../styles/theme/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/components/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/components/button/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/layout/bundle.css"></link><link rel="stylesheet" href="../../styles/nord-light.css"></link><link rel="stylesheet" href="../../styles/dotty-icons.css"></link><link rel="stylesheet" href="../../styles/filter-bar.css"></link><link rel="stylesheet" href="../../styles/code-snippets.css"></link><link rel="stylesheet" href="../../styles/searchbar.css"></link><link rel="stylesheet" href="../../styles/social-links.css"></link><link rel="stylesheet" href="../../styles/versions-dropdown.css"></link><link rel="stylesheet" href="../../styles/content-contributors.css"></link><link rel="stylesheet" href="../../styles/fontawesome.css"></link><script type="text/javascript" src="../../hljs/highlight.pack.js" defer="true"></script><script type="text/javascript" src="../../scripts/hljs-scala3.js" defer="true"></script><script type="text/javascript" src="../../scripts/ux.js" defer="true"></script><script type="text/javascript" src="../../scripts/common/component.js" defer="true"></script><script type="text/javascript" src="../../scripts/common/utils.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/FilterBar.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/DocumentableList.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/Input.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/FilterGroup.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/Filter.js" defer="true"></script><script type="text/javascript" src="../../scripts/scaladoc-scalajs.js" defer="true"></script><script type="text/javascript" src="../../scripts/contributors.js" defer="true"></script><script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js" defer="true"></script><script type="text/javascript" src="https://d3js.org/d3.v6.min.js" defer="true"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/graphlib-dot@0.6.2/dist/graphlib-dot.min.js" defer="true"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js" defer="true"></script><script type="text/javascript" src="https://scastie.scala-lang.org/embedded.js" defer="true"></script><script type="text/javascript" src="../../scripts/data.js" defer="true"></script><link rel="stylesheet" href="../../styles/apistyles.css"></link><script>var pathToRoot = "../../";</script></head><body><div id=""><div id="header" class="body-small"><div class="header-container-left"><a href="../../" class="logo-container"><span class="project-name h300">fact-graph</span></a><span onclick="dropdownHandler(event)" class="text-button with-arrow" id="dropdown-trigger"><a></a></span><div id="version-dropdown" class="dropdown-menu"></div></div><div class="header-container-right"><button id="search-toggle" class="icon-button"></button><span id="theme-toggle" class="icon-button"></span><span id="mobile-menu-toggle" class="icon-button hamburger"></span></div></div><div id="mobile-menu"><div class="mobile-menu-header body-small"><span class="mobile-menu-logo"><span class="project-name h300">fact-graph</span></span><button id="mobile-menu-close" class="icon-button close"></button></div><div class="mobile-menu-container body-medium"><input id="mobile-scaladoc-searchbar-input" class="scaladoc-searchbar-input" type="search" placeholder="Find anything"></input><span id="mobile-theme-toggle" class="mobile-menu-item mode"></span></div></div><span id="mobile-sidebar-toggle" class="floating-button"></span><div id="leftColumn" class="body-small"><div class="switcher-container"><a id="api-nav-button" class="switcher h100 selected" href="../../index.html">API</a></div><nav id="api-nav" class="side-menu"><div class="ni n0 expanded"><span class="nh h100 selected"><button class="ar icon-button expanded"></button><a href="#"><span class="micon pa"></span><span>gov.irs.factgraph</span></a></span><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/compnodes.html"><span class="micon pa"></span><span>compnodes</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/compnodes/transformations.html"><span class="micon pa"></span><span>transformations</span></a></span><div class="ni n3 "><span class="nh "><a href="factgraph/compnodes/transformations/TruncateNameForMeF$.html"><span class="micon ob"></span><span>TruncateNameForMeF</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Add$.html"><span class="micon ob"></span><span>Add</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/AddressNode.html"><span class="micon cl"></span><span>AddressNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/AddressNode$.html"><span class="micon ob"></span><span>AddressNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/All$.html"><span class="micon ob"></span><span>All</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Any$.html"><span class="micon ob"></span><span>Any</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/AsDecimalString$.html"><span class="micon ob"></span><span>AsDecimalString</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/AsString$.html"><span class="micon ob"></span><span>AsString</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/BankAccountNode.html"><span class="micon cl"></span><span>BankAccountNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/BankAccountNode$.html"><span class="micon ob"></span><span>BankAccountNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/BooleanNode.html"><span class="micon cl"></span><span>BooleanNode</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/compnodes/BooleanNode$.html"><span class="micon ob"></span><span>BooleanNode</span></a></span><div class="ni n3 "><span class="nh "><a href="factgraph/compnodes/BooleanNode$$False$.html"><span class="micon ob"></span><span>False</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/compnodes/BooleanNode$$True$.html"><span class="micon ob"></span><span>True</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/CollectionItemNode.html"><span class="micon cl"></span><span>CollectionItemNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/CollectionItemNode$.html"><span class="micon ob"></span><span>CollectionItemNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/CollectionNode.html"><span class="micon cl"></span><span>CollectionNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/CollectionNode$.html"><span class="micon ob"></span><span>CollectionNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/CollectionSize$.html"><span class="micon ob"></span><span>CollectionSize</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/CollectionSum$.html"><span class="micon ob"></span><span>CollectionSum</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/CompNode.html"><span class="micon tr"></span><span>CompNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/CompNode$.html"><span class="micon ob"></span><span>CompNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/CompNodeFactory.html"><span class="micon tr"></span><span>CompNodeFactory</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Count$.html"><span class="micon ob"></span><span>Count</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/DayNode.html"><span class="micon cl"></span><span>DayNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/DayNode$.html"><span class="micon ob"></span><span>DayNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/DaysNode.html"><span class="micon cl"></span><span>DaysNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/DaysNode$.html"><span class="micon ob"></span><span>DaysNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Dependency$.html"><span class="micon ob"></span><span>Dependency</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Divide$.html"><span class="micon ob"></span><span>Divide</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/DollarNode.html"><span class="micon cl"></span><span>DollarNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/DollarNode$.html"><span class="micon ob"></span><span>DollarNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EinNode.html"><span class="micon cl"></span><span>EinNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EinNode$.html"><span class="micon ob"></span><span>EinNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EmailAddressNode.html"><span class="micon cl"></span><span>EmailAddressNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EmailAddressNode$.html"><span class="micon ob"></span><span>EmailAddressNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EnumNode.html"><span class="micon cl"></span><span>EnumNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EnumNode$.html"><span class="micon ob"></span><span>EnumNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EnumOptionsContains$.html"><span class="micon ob"></span><span>EnumOptionsContains</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EnumOptionsNode.html"><span class="micon cl"></span><span>EnumOptionsNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EnumOptionsNode$.html"><span class="micon ob"></span><span>EnumOptionsNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/EnumOptionsSize$.html"><span class="micon ob"></span><span>EnumOptionsSize</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Equal$.html"><span class="micon ob"></span><span>Equal</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Filter$.html"><span class="micon ob"></span><span>Filter</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Find$.html"><span class="micon ob"></span><span>Find</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/FirstNCollectionItems$.html"><span class="micon ob"></span><span>FirstNCollectionItems</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/GreaterOf$.html"><span class="micon ob"></span><span>GreaterOf</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/GreaterThan$.html"><span class="micon ob"></span><span>GreaterThan</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/GreaterThanOrEqual$.html"><span class="micon ob"></span><span>GreaterThanOrEqual</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/IndexOf$.html"><span class="micon ob"></span><span>IndexOf</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/IntNode.html"><span class="micon cl"></span><span>IntNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/IntNode$.html"><span class="micon ob"></span><span>IntNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/IpPinNode.html"><span class="micon cl"></span><span>IpPinNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/IpPinNode$.html"><span class="micon ob"></span><span>IpPinNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/IsComplete$.html"><span class="micon ob"></span><span>IsComplete</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Length$.html"><span class="micon ob"></span><span>Length</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/LessThan$.html"><span class="micon ob"></span><span>LessThan</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/LessThanOrEqual$.html"><span class="micon ob"></span><span>LessThanOrEqual</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/LesserOf$.html"><span class="micon ob"></span><span>LesserOf</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Maximum$.html"><span class="micon ob"></span><span>Maximum</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Minimum$.html"><span class="micon ob"></span><span>Minimum</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/MultiEnumNode.html"><span class="micon cl"></span><span>MultiEnumNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/MultiEnumNode$.html"><span class="micon ob"></span><span>MultiEnumNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Multiply$.html"><span class="micon ob"></span><span>Multiply</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Not$.html"><span class="micon ob"></span><span>Not</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/NotEqual$.html"><span class="micon ob"></span><span>NotEqual</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Paste$.html"><span class="micon ob"></span><span>Paste</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/PhoneNumberNode.html"><span class="micon cl"></span><span>PhoneNumberNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/PhoneNumberNode$.html"><span class="micon ob"></span><span>PhoneNumberNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/PinNode.html"><span class="micon cl"></span><span>PinNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/PinNode$.html"><span class="micon ob"></span><span>PinNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Placeholder$.html"><span class="micon ob"></span><span>Placeholder</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/RationalNode.html"><span class="micon cl"></span><span>RationalNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/RationalNode$.html"><span class="micon ob"></span><span>RationalNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Regex$.html"><span class="micon ob"></span><span>Regex</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/RootNode.html"><span class="micon cl"></span><span>RootNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Round$.html"><span class="micon ob"></span><span>Round</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/RoundToInt$.html"><span class="micon ob"></span><span>RoundToInt</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/StepwiseMultiply$.html"><span class="micon ob"></span><span>StepwiseMultiply</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/StringNode.html"><span class="micon cl"></span><span>StringNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/StringNode$.html"><span class="micon ob"></span><span>StringNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/StripChars$.html"><span class="micon ob"></span><span>StripChars</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Subtract$.html"><span class="micon ob"></span><span>Subtract</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Switch$.html"><span class="micon ob"></span><span>Switch</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/TinNode.html"><span class="micon cl"></span><span>TinNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/TinNode$.html"><span class="micon ob"></span><span>TinNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/ToUpper$.html"><span class="micon ob"></span><span>ToUpper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Today$.html"><span class="micon ob"></span><span>Today</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/Trim$.html"><span class="micon ob"></span><span>Trim</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/TruncateCents$.html"><span class="micon ob"></span><span>TruncateCents</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/WritableNode$.html"><span class="micon ob"></span><span>WritableNode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/compnodes/WritableNodeFactory.html"><span class="micon tr"></span><span>WritableNodeFactory</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/definitions.html"><span class="micon pa"></span><span>definitions</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/definitions/fact.html"><span class="micon pa"></span><span>fact</span></a></span><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/CommonOptionConfigTraits$.html"><span class="micon ob"></span><span>CommonOptionConfigTraits</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/CompNodeConfigElement.html"><span class="micon cl"></span><span>CompNodeConfigElement</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/CompNodeConfigTrait.html"><span class="micon tr"></span><span>CompNodeConfigTrait</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/FactConfigElement.html"><span class="micon cl"></span><span>FactConfigElement</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/FactConfigTrait.html"><span class="micon tr"></span><span>FactConfigTrait</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/LimitConfigTrait.html"><span class="micon tr"></span><span>LimitConfigTrait</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/LimitLevel.html"><span class="micon en"></span><span>LimitLevel</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/OptionConfigTrait.html"><span class="micon tr"></span><span>OptionConfigTrait</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/WritableConfigElement.html"><span class="micon cl"></span><span>WritableConfigElement</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/fact/WritableConfigTrait.html"><span class="micon tr"></span><span>WritableConfigTrait</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/definitions/meta.html"><span class="micon pa"></span><span>meta</span></a></span><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/meta/EnumDeclarationOptionsTrait.html"><span class="micon tr"></span><span>EnumDeclarationOptionsTrait</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/meta/EnumDeclarationTrait.html"><span class="micon tr"></span><span>EnumDeclarationTrait</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/definitions/meta/MetaConfigTrait.html"><span class="micon tr"></span><span>MetaConfigTrait</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="factgraph/definitions/FactDictionaryConfigElement.html"><span class="micon cl"></span><span>FactDictionaryConfigElement</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/definitions/FactDictionaryConfigTrait.html"><span class="micon tr"></span><span>FactDictionaryConfigTrait</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/limits.html"><span class="micon pa"></span><span>limits</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/limits/ContainsLimit.html"><span class="micon cl"></span><span>ContainsLimit</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/ContainsLimit$.html"><span class="micon ob"></span><span>ContainsLimit</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/Limit.html"><span class="micon tr"></span><span>Limit</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/Limit$.html"><span class="micon ob"></span><span>Limit</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/LimitContext.html"><span class="micon cl"></span><span>LimitContext</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/LimitFactory.html"><span class="micon tr"></span><span>LimitFactory</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/LimitViolation.html"><span class="micon cl"></span><span>LimitViolation</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/Match.html"><span class="micon cl"></span><span>Match</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/Match$.html"><span class="micon ob"></span><span>Match</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/Max.html"><span class="micon cl"></span><span>Max</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/Max$.html"><span class="micon ob"></span><span>Max</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/MaxCollectionSize.html"><span class="micon cl"></span><span>MaxCollectionSize</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/MaxCollectionSize$.html"><span class="micon ob"></span><span>MaxCollectionSize</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/MaxLength.html"><span class="micon cl"></span><span>MaxLength</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/MaxLength$.html"><span class="micon ob"></span><span>MaxLength</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/Min.html"><span class="micon cl"></span><span>Min</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/Min$.html"><span class="micon ob"></span><span>Min</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/MinLength.html"><span class="micon cl"></span><span>MinLength</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/limits/MinLength$.html"><span class="micon ob"></span><span>MinLength</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/monads.html"><span class="micon pa"></span><span>monads</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/monads/MaybeVector.html"><span class="micon en"></span><span>MaybeVector</span></a></span><div class="ni n3 "><span class="nh "><a href="factgraph/monads/MaybeVector$$Single.html"><span class="micon ca"></span><span>Single</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/monads/MaybeVector$$Multiple.html"><span class="micon ca"></span><span>Multiple</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="factgraph/monads/MaybeVector$.html"><span class="micon ob"></span><span>MaybeVector</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/monads/Result.html"><span class="micon en"></span><span>Result</span></a></span><div class="ni n3 "><span class="nh "><a href="factgraph/monads/Result$$Complete.html"><span class="micon ca"></span><span>Complete</span></a></span></div><div class="ni n3 "><span class="nh "><a href="factgraph/monads/Result$$Placeholder.html"><span class="micon ca"></span><span>Placeholder</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="factgraph/monads/Result$.html"><span class="micon ob"></span><span>Result</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/monads/Thunk.html"><span class="micon cl"></span><span>Thunk</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/operators.html"><span class="micon pa"></span><span>operators</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/operators/AggregateOperator.html"><span class="micon tr"></span><span>AggregateOperator</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/operators/Arity4Operator.html"><span class="micon tr"></span><span>Arity4Operator</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/operators/BinaryOperator.html"><span class="micon tr"></span><span>BinaryOperator</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/operators/CollectOperator.html"><span class="micon tr"></span><span>CollectOperator</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/operators/Operator.html"><span class="micon tr"></span><span>Operator</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/operators/ReduceOperator.html"><span class="micon tr"></span><span>ReduceOperator</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/operators/UnaryOperator.html"><span class="micon tr"></span><span>UnaryOperator</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/persisters.html"><span class="micon pa"></span><span>persisters</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/AddressWrapper.html"><span class="micon cl"></span><span>AddressWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/BankAccountWrapper.html"><span class="micon cl"></span><span>BankAccountWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/BooleanWrapper.html"><span class="micon cl"></span><span>BooleanWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/CollectionItemWrapper.html"><span class="micon cl"></span><span>CollectionItemWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/CollectionWrapper.html"><span class="micon cl"></span><span>CollectionWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/DayWrapper.html"><span class="micon cl"></span><span>DayWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/DollarWrapper.html"><span class="micon cl"></span><span>DollarWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/E164Wrapper.html"><span class="micon cl"></span><span>E164Wrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/EinWrapper.html"><span class="micon cl"></span><span>EinWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/EmailAddressWrapper.html"><span class="micon cl"></span><span>EmailAddressWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/EnumWrapper.html"><span class="micon cl"></span><span>EnumWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/InMemoryPersister.html"><span class="micon cl"></span><span>InMemoryPersister</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/InMemoryPersister$.html"><span class="micon ob"></span><span>InMemoryPersister</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/InMemoryPersisterJava$.html"><span class="micon ob"></span><span>InMemoryPersisterJava</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/IntWrapper.html"><span class="micon cl"></span><span>IntWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/IpPinWrapper.html"><span class="micon cl"></span><span>IpPinWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/MultEnumWrapper.html"><span class="micon cl"></span><span>MultEnumWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/Persister.html"><span class="micon tr"></span><span>Persister</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/PinWrapper.html"><span class="micon cl"></span><span>PinWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/RationalWrapper.html"><span class="micon cl"></span><span>RationalWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/StringWrapper.html"><span class="micon cl"></span><span>StringWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/TinWrapper.html"><span class="micon cl"></span><span>TinWrapper</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/TypeContainer.html"><span class="micon cl"></span><span>TypeContainer</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/persisters/TypeContainer$.html"><span class="micon ob"></span><span>TypeContainer</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/types.html"><span class="micon pa"></span><span>types</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/types/Address.html"><span class="micon cl"></span><span>Address</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Address$.html"><span class="micon ob"></span><span>Address</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/AddressFailureReason.html"><span class="micon en"></span><span>AddressFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/AddressFieldValidationFailure.html"><span class="micon cl"></span><span>AddressFieldValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/AddressValidationFailure.html"><span class="micon cl"></span><span>AddressValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/BankAccount.html"><span class="micon cl"></span><span>BankAccount</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/BankAccountFailureReason.html"><span class="micon en"></span><span>BankAccountFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/BankAccountFieldValidationFailure.html"><span class="micon cl"></span><span>BankAccountFieldValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/BankAccountType.html"><span class="micon en"></span><span>BankAccountType</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/BankAccountValidationFailure.html"><span class="micon cl"></span><span>BankAccountValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Collection.html"><span class="micon cl"></span><span>Collection</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/CollectionItem.html"><span class="micon cl"></span><span>CollectionItem</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Day.html"><span class="micon cl"></span><span>Day</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/types/Day$.html"><span class="micon ob"></span><span>Day</span></a></span><div class="ni n3 "><span class="nh "><a href="factgraph/types/Day$$DayIsComparable$.html"><span class="micon ob"></span><span>DayIsComparable</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Days$.html"><span class="micon ob"></span><span>Days</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/types/Dollar$.html"><span class="micon ob"></span><span>Dollar</span></a></span><div class="ni n3 "><span class="nh "><a href="factgraph/types/Dollar$$DollarIsFractional$.html"><span class="micon ob"></span><span>DollarIsFractional</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/DollarFailureReason.html"><span class="micon en"></span><span>DollarFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/DollarValidationFailure.html"><span class="micon cl"></span><span>DollarValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/E164Number.html"><span class="micon tr"></span><span>E164Number</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/E164NumberFailureReason.html"><span class="micon en"></span><span>E164NumberFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/E164NumberValidationFailure.html"><span class="micon cl"></span><span>E164NumberValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Ein.html"><span class="micon cl"></span><span>Ein</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Ein$.html"><span class="micon ob"></span><span>Ein</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/EinFailureReason.html"><span class="micon en"></span><span>EinFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/EinValidationFailure.html"><span class="micon cl"></span><span>EinValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/EmailAddress.html"><span class="micon cl"></span><span>EmailAddress</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/EmailAddress$.html"><span class="micon ob"></span><span>EmailAddress</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Enum.html"><span class="micon cl"></span><span>Enum</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Enum$.html"><span class="micon ob"></span><span>Enum</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/InternationalPhoneNumber.html"><span class="micon cl"></span><span>InternationalPhoneNumber</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/IpPin.html"><span class="micon cl"></span><span>IpPin</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/IpPin$.html"><span class="micon ob"></span><span>IpPin</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/IpPinFailureReason.html"><span class="micon en"></span><span>IpPinFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/IpPinValidationFailure.html"><span class="micon cl"></span><span>IpPinValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/MultiEnum.html"><span class="micon cl"></span><span>MultiEnum</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/MultiEnum$.html"><span class="micon ob"></span><span>MultiEnum</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/PhoneNumber$.html"><span class="micon ob"></span><span>PhoneNumber</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Pin.html"><span class="micon cl"></span><span>Pin</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Pin$.html"><span class="micon ob"></span><span>Pin</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/PinFailureReason.html"><span class="micon en"></span><span>PinFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/PinValidationFailure.html"><span class="micon cl"></span><span>PinValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Rational.html"><span class="micon cl"></span><span>Rational</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/types/Rational$.html"><span class="micon ob"></span><span>Rational</span></a></span><div class="ni n3 "><span class="nh "><a href="factgraph/types/Rational$$RationalIsFractional$.html"><span class="micon ob"></span><span>RationalIsFractional</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Tin.html"><span class="micon cl"></span><span>Tin</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/Tin$.html"><span class="micon ob"></span><span>Tin</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/TinFailureReason.html"><span class="micon en"></span><span>TinFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/TinValidationFailure.html"><span class="micon cl"></span><span>TinValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/UsPhoneNumber.html"><span class="micon cl"></span><span>UsPhoneNumber</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/UserFriendlyAddressFailureReason.html"><span class="micon en"></span><span>UserFriendlyAddressFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/UserFriendlyBankAccountFailureReason.html"><span class="micon en"></span><span>UserFriendlyBankAccountFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/UserFriendlyEinFailureReason.html"><span class="micon en"></span><span>UserFriendlyEinFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/UserFriendlyIpPinFailureReason.html"><span class="micon en"></span><span>UserFriendlyIpPinFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/UserFriendlyPhoneNumberFailureReason.html"><span class="micon en"></span><span>UserFriendlyPhoneNumberFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/UserFriendlyPinFailureReason.html"><span class="micon en"></span><span>UserFriendlyPinFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/UserFriendlyTinFailureReason.html"><span class="micon en"></span><span>UserFriendlyTinFailureReason</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/types/given_Conversion_Rational_Dollar$.html"><span class="micon ob"></span><span>given_Conversion_Rational_Dollar</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/util.html"><span class="micon pa"></span><span>util</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/util/Math$.html"><span class="micon ob"></span><span>Math</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/util/Seq$.html"><span class="micon ob"></span><span>Seq</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/validation.html"><span class="micon pa"></span><span>validation</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/validation/ValidationFailure.html"><span class="micon tr"></span><span>ValidationFailure</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/validation/ValidationFailureReason.html"><span class="micon tr"></span><span>ValidationFailureReason</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/Explanation.html"><span class="micon en"></span><span>Explanation</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/Explanation$$Writable.html"><span class="micon ca"></span><span>Writable</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Explanation$$Operation.html"><span class="micon ca"></span><span>Operation</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Explanation$$Dependency.html"><span class="micon ca"></span><span>Dependency</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="factgraph/Explanation$.html"><span class="micon ob"></span><span>Explanation</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/Expression.html"><span class="micon en"></span><span>Expression</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Constant.html"><span class="micon ca"></span><span>Constant</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Writable.html"><span class="micon ca"></span><span>Writable</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Dependency.html"><span class="micon ca"></span><span>Dependency</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Switch.html"><span class="micon ca"></span><span>Switch</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Extract.html"><span class="micon ca"></span><span>Extract</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Unary.html"><span class="micon ca"></span><span>Unary</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Binary.html"><span class="micon ca"></span><span>Binary</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Arity4.html"><span class="micon ca"></span><span>Arity4</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Reduce.html"><span class="micon ca"></span><span>Reduce</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$ConditionalList.html"><span class="micon ca"></span><span>ConditionalList</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Aggregate.html"><span class="micon ca"></span><span>Aggregate</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Expression$$Collect.html"><span class="micon ca"></span><span>Collect</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="factgraph/Fact.html"><span class="micon cl"></span><span>Fact</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/Fact$.html"><span class="micon ob"></span><span>Fact</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/FactDefinition.html"><span class="micon cl"></span><span>FactDefinition</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/FactDefinition$.html"><span class="micon ob"></span><span>FactDefinition</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/FactDictionary.html"><span class="micon cl"></span><span>FactDictionary</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/FactDictionary$.html"><span class="micon ob"></span><span>FactDictionary</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/Factual.html"><span class="micon tr"></span><span>Factual</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/Factual$.html"><span class="micon ob"></span><span>Factual</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/Factual$$Meta.html"><span class="micon cl"></span><span>Meta</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/Factual$$Size.html"><span class="micon en"></span><span>Size</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="factgraph/Graph.html"><span class="micon cl"></span><span>Graph</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/Graph$.html"><span class="micon ob"></span><span>Graph</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/Meta.html"><span class="micon cl"></span><span>Meta</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/Meta$.html"><span class="micon ob"></span><span>Meta</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/Migrations$.html"><span class="micon ob"></span><span>Migrations</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/Path.html"><span class="micon cl"></span><span>Path</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/Path$.html"><span class="micon ob"></span><span>Path</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="factgraph/PathItem.html"><span class="micon en"></span><span>PathItem</span></a></span><div class="ni n2 "><span class="nh "><a href="factgraph/PathItem$$Child.html"><span class="micon ca"></span><span>Child</span></a></span></div><div class="ni n2 "><span class="nh "><a href="factgraph/PathItem$$Member.html"><span class="micon ca"></span><span>Member</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="factgraph/PathItem$.html"><span class="micon ob"></span><span>PathItem</span></a></span></div><div class="ni n1 "><span class="nh "><a href="factgraph/PersisterSyncIssue.html"><span class="micon cl"></span><span>PersisterSyncIssue</span></a></span></div></div></nav></div><div id="footer" class="body-small"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div><div id="scaladoc-searchBar"></div><div id="main"><div class="breadcrumbs container"><a href="../../index.html">fact-graph</a>/<a href="factgraph.html">gov.irs.factgraph</a></div><div id="content" class="body-medium"><div><div class="cover-header">
+ <span class="icon"><span class="micon pa"></span></span>
+ <h1 class="h600 single">gov.irs.factgraph</h1>
+</div>
+<div class="fqname body-large">
+ <span></span>
+</div>
+<div class="main-signature mono-small-block">
+ <div class="signature">
+  <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph.html" t="n" class="documentableName ">gov.irs.factgraph</a>
+ </div>
+</div>
+<section id="members-list">
+ <h2 class="h500">Members list</h2>
+ <div class="documentableFilter">
+  <div class="filtersContainer"></div><input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+ </div>
+ <div class="membersList expand">
+  <div class="tabs">
+   <div class="contents">
+    <section id="Packages">
+     <div data-togglable="packages" class="tab expand">
+      <div class="documentableList expand">
+       <div class="documentableList-expander">
+        <button class="icon-button show-content expand"></button>
+        <h3 class="groupHeader h400">Packages</h3>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph/compnodes.html" t="n" class="documentableName ">gov.irs.factgraph.compnodes</a>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph/definitions.html" t="n" class="documentableName ">gov.irs.factgraph.definitions</a>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph/limits.html" t="n" class="documentableName ">gov.irs.factgraph.limits</a>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph/monads.html" t="n" class="documentableName ">gov.irs.factgraph.monads</a>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph/operators.html" t="n" class="documentableName ">gov.irs.factgraph.operators</a>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph/persisters.html" t="n" class="documentableName ">gov.irs.factgraph.persisters</a>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph/types.html" t="n" class="documentableName ">gov.irs.factgraph.types</a>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph/util.html" t="n" class="documentableName ">gov.irs.factgraph.util</a>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="factgraph/validation.html" t="n" class="documentableName ">gov.irs.factgraph.validation</a>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section>
+    <section id="Type-members">
+     <div data-togglable="Type members" class="tab expand">
+      <div class="member-group-header">
+       <h3 data-togglable="Type members" class="h400">Type members</h3>
+      </div>
+      <section id="Classlikes">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Classlikes</h4>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">enum </span></span><a href="factgraph/Explanation.html" t="n" class="documentableName ">Explanation</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Explanation$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Enum</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/Explanation$.html" t="n" class="documentableName ">Explanation</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Explanation.html">enum</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Sum</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/Explanation$.html" t="n">Explanation</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">enum </span></span><a href="factgraph/Expression.html" t="n" class="documentableName ">Expression</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Enum</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Known subtypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block subtypes">
+                <div>
+                 case <a href="factgraph/Expression$$Extract.html" t="n">Extract</a>[<span t="t">A</span>, <span t="t">X</span>]
+                </div>
+                <div>
+                 case <a href="factgraph/Expression$$Unary.html" t="n">Unary</a>[<span t="t">A</span>, <span t="t">X</span>]
+                </div>
+                <div>
+                 case <a href="factgraph/Expression$$Binary.html" t="n">Binary</a>[<span t="t">A</span>, <span t="t">L</span>, <span t="t">R</span>]
+                </div>
+                <div>
+                 case <a href="factgraph/Expression$$Arity4.html" t="n">Arity4</a>[<span t="t">A</span>, <span t="t">W</span>, <span t="t">X</span>, <span t="t">Y</span>, <span t="t">Z</span>]
+                </div>
+                <div>
+                 case <a href="factgraph/Expression$$ConditionalList.html" t="n">ConditionalList</a>
+                </div>
+                <div>
+                 case <a href="factgraph/Expression$$Aggregate.html" t="n">Aggregate</a>[<span t="t">A</span>, <span t="t">X</span>]
+                </div>
+                <div>
+                 case <a href="factgraph/Expression$$Collect.html" t="n">Collect</a>[<span t="t">A</span>, <span t="t">X</span>]
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">class </span></span><a href="factgraph/Fact.html" t="n" class="documentableName ">Fact</a>(<span t="k"></span><span t="k">val </span><span data-unresolved-link="" t="n">value</span>: <a href="factgraph/compnodes/CompNode.html" t="t">CompNode</a>, <span t="k">val </span><span data-unresolved-link="" t="n">path</span>: <a href="factgraph/Path.html" t="t">Path</a>, <span t="k">val </span><span data-unresolved-link="" t="n">limits</span>: <span data-unresolved-link="" t="t">Seq</span>[<a href="factgraph/limits/Limit.html" t="t">Limit</a>], <span t="k">val </span><span data-unresolved-link="" t="n">graph</span>: <a href="factgraph/Graph.html" t="t">Graph</a>, <span t="k">val </span><span data-unresolved-link="" t="n">parent</span>: <span data-unresolved-link="" t="t">Option</span>[<a href="factgraph/Fact.html" t="t">Fact</a>], <span t="k">val </span><span data-unresolved-link="" t="n">meta</span>: <a href="factgraph/Factual$$Meta.html" t="t">Meta</a>)<span t="k"> extends </span><a href="factgraph/Factual.html" t="t">Factual</a></span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Fact$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <a href="factgraph/Factual.html" t="n">Factual</a>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/Fact$.html" t="n" class="documentableName ">Fact</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Fact.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/Fact$.html" t="n">Fact</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">class </span></span><a href="factgraph/FactDefinition.html" t="n" class="documentableName ">FactDefinition</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">cnBuilder</span>: <a href="factgraph/Factual.html" t="t">Factual</a><span t="k"> ?=&gt; </span><a href="factgraph/compnodes/CompNode.html" t="t">CompNode</a>, <span t="k">val </span><span data-unresolved-link="" t="n">path</span>: <a href="factgraph/Path.html" t="t">Path</a>, <span t="k"></span><span data-unresolved-link="" t="n">limitsBuilder</span>: <a href="factgraph/Factual.html" t="t">Factual</a><span t="k"> ?=&gt; </span><span data-unresolved-link="" t="t">Seq</span>[<a href="factgraph/limits/Limit.html" t="t">Limit</a>], <span t="k">val </span><span data-unresolved-link="" t="n">dictionary</span>: <a href="factgraph/FactDictionary.html" t="t">FactDictionary</a>)<span t="k"> extends </span><a href="factgraph/Factual.html" t="t">Factual</a></span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/FactDefinition$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <a href="factgraph/Factual.html" t="n">Factual</a>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/FactDefinition$.html" t="n" class="documentableName ">FactDefinition</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/FactDefinition.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/FactDefinition$.html" t="n">FactDefinition</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">class </span></span><a href="factgraph/FactDictionary.html" t="n" class="documentableName ">FactDictionary</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/FactDictionary$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/FactDictionary$.html" t="n" class="documentableName ">FactDictionary</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/FactDictionary.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/FactDictionary$.html" t="n">FactDictionary</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="factgraph/Factual.html" t="n" class="documentableName ">Factual</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Factual$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Known subtypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block subtypes">
+                <div>
+                 class <a href="factgraph/Fact.html" t="n">Fact</a>
+                </div>
+                <div>
+                 class <a href="factgraph/FactDefinition.html" t="n">FactDefinition</a>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/Factual$.html" t="n" class="documentableName ">Factual</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Factual.html">trait</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/Factual$.html" t="n">Factual</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">class </span></span><a href="factgraph/Graph.html" t="n" class="documentableName ">Graph</a>(<span t="k"></span><span t="k">val </span><span data-unresolved-link="" t="n">dictionary</span>: <a href="factgraph/FactDictionary.html" t="t">FactDictionary</a>, <span t="k">val </span><span data-unresolved-link="" t="n">persister</span>: <a href="factgraph/persisters/Persister.html" t="t">Persister</a>)
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Graph$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/Graph$.html" t="n" class="documentableName ">Graph</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Graph.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/Graph$.html" t="n">Graph</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">case </span></span><span class="kind"><span t="k">class </span></span><a href="factgraph/Meta.html" t="n" class="documentableName ">Meta</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">version</span>: <span data-unresolved-link="" t="t">String</span>)<span t="k"> extends </span><a href="factgraph/definitions/meta/MetaConfigTrait.html" t="t">MetaConfigTrait</a></span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Meta$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 trait <a href="factgraph/definitions/meta/MetaConfigTrait.html" t="n">MetaConfigTrait</a>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/Meta$.html" t="n" class="documentableName ">Meta</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Meta.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/Meta$.html" t="n">Meta</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/Migrations$.html" t="n" class="documentableName ">Migrations</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/Migrations$.html" t="n">Migrations</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="factgraph/Path.html" t="n" class="documentableName ">Path</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">_items</span>: <span data-unresolved-link="" t="t">List</span>[<a href="factgraph/PathItem.html" t="t">PathItem</a>], <span t="k"></span><span data-unresolved-link="" t="n">absolute</span>: <span data-unresolved-link="" t="t">Boolean</span>)
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Path$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/Path$.html" t="n" class="documentableName ">Path</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/Path.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/Path$.html" t="n">Path</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">enum </span></span><a href="factgraph/PathItem.html" t="n" class="documentableName ">PathItem</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/PathItem$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Enum</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="factgraph/PathItem$.html" t="n" class="documentableName ">PathItem</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="factgraph/PathItem.html">enum</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Sum</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="factgraph/PathItem$.html" t="n">PathItem</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">case </span></span><span class="kind"><span t="k">class </span></span><a href="factgraph/PersisterSyncIssue.html" t="n" class="documentableName ">PersisterSyncIssue</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">path</span>: <span data-unresolved-link="" t="t">String</span>, <span t="k"></span><span data-unresolved-link="" t="n">message</span>: <span data-unresolved-link="" t="t">String</span>)
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </section>
+   </div>
+  </div>
+ </div>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#members-list">Members list</a><ul><li><a href="#Packages">Packages</a></li><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

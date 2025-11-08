@@ -108,10 +108,21 @@ export function setupWebpackChunkHandler(options: WebpackChunkHandlerOptions = {
 	const originalWebpackRequire = (window as any).__webpack_require__;
 	let originalChunkLoading: ((chunkId: string) => Promise<unknown>) | null = null;
 	
-	if (originalWebpackRequire && originalWebpackRequire.f) {
+	// Check if webpack is available and has the expected structure
+	if (!originalWebpackRequire) {
+		log('Webpack require not available - chunk handler will not intercept chunk loading');
+	} else if (!originalWebpackRequire.f) {
+		log('Webpack require.f not available - chunk handler will not intercept chunk loading');
+	} else {
 		originalChunkLoading = originalWebpackRequire.f.j;
 		
-		if (originalChunkLoading) {
+		if (!originalChunkLoading || typeof originalChunkLoading !== 'function') {
+			log('Webpack chunk loader not available or not a function - chunk handler will not intercept chunk loading');
+			originalChunkLoading = null;
+		} else {
+			// Store reference to original loader in a closure-safe way
+			const safeOriginalChunkLoading = originalChunkLoading;
+			
 			// Wrap webpack's chunk loading function
 			originalWebpackRequire.f.j = function wrappedChunkLoader(chunkId: string) {
 				const retryCount = getChunkRetryCount(chunkId);
@@ -131,54 +142,78 @@ export function setupWebpackChunkHandler(options: WebpackChunkHandlerOptions = {
 				
 				log(`Loading chunk ${chunkId} (attempt ${retryCount + 1}/${config.maxChunkRetries})`);
 				
-				// Call original chunk loader
-				return originalChunkLoading.call(this, chunkId)
-					.then((result: unknown) => {
-						// Success - reset retry count
-						resetChunkRetry(chunkId);
-						log(`Chunk ${chunkId} loaded successfully`);
-						return result;
-					})
-					.catch((error: Error) => {
-						// Increment retry count
-						incrementChunkRetry(chunkId);
-						
-						// Check if it's a chunk load error
-						if (isChunkLoadError(error)) {
-							log(`Chunk ${chunkId} load failed (attempt ${retryCount + 1}):`, error);
+				// Call original chunk loader with null check
+				if (!safeOriginalChunkLoading || typeof safeOriginalChunkLoading !== 'function') {
+					const error = new Error(`ChunkLoadError: Original chunk loader not available for chunk ${chunkId}`);
+					error.name = 'ChunkLoadError';
+					log(`Original chunk loader unavailable for chunk ${chunkId}`);
+					return Promise.reject(error);
+				}
+				
+				try {
+					return safeOriginalChunkLoading.call(this, chunkId)
+						.then((result: unknown) => {
+							// Success - reset retry count
+							resetChunkRetry(chunkId);
+							log(`Chunk ${chunkId} loaded successfully`);
+							return result;
+						})
+						.catch((error: Error) => {
+							// Increment retry count
+							incrementChunkRetry(chunkId);
 							
-							// If we haven't exceeded max retries, try again after a delay
-							if (retryCount + 1 < config.maxChunkRetries) {
-								const delay = Math.min(
-									config.initialDelay * Math.pow(2, retryCount),
-									config.maxDelay
-								);
+							// Check if it's a chunk load error
+							if (isChunkLoadError(error)) {
+								log(`Chunk ${chunkId} load failed (attempt ${retryCount + 1}):`, error);
 								
-								log(`Retrying chunk ${chunkId} after ${delay}ms`);
-								
-								return new Promise((resolve, reject) => {
-									setTimeout(() => {
-										// Retry the chunk load
-										if (originalChunkLoading) {
-											originalChunkLoading.call(this, chunkId)
-												.then(resolve)
-												.catch(reject);
-										} else {
-											reject(new Error('Original chunk loader not available'));
-										}
-									}, delay);
-								});
-							} else {
-								// Max retries exceeded - trigger error handler
-								log(`Chunk ${chunkId} failed after ${retryCount + 1} attempts, triggering error handler`);
-								handleChunkLoadError(error, config).catch((finalError) => {
-									console.error('[WebpackChunkHandler] Failed to handle chunk error:', finalError);
-								});
+								// If we haven't exceeded max retries, try again after a delay
+								if (retryCount + 1 < config.maxChunkRetries) {
+									const delay = Math.min(
+										config.initialDelay * Math.pow(2, retryCount),
+										config.maxDelay
+									);
+									
+									log(`Retrying chunk ${chunkId} after ${delay}ms`);
+									
+									return new Promise((resolve, reject) => {
+										setTimeout(() => {
+											// Retry the chunk load with null check
+											if (safeOriginalChunkLoading && typeof safeOriginalChunkLoading === 'function') {
+												try {
+													safeOriginalChunkLoading.call(this, chunkId)
+														.then(resolve)
+														.catch(reject);
+												} catch (callError) {
+													log(`Error calling original chunk loader for ${chunkId}:`, callError);
+													reject(new Error(`Original chunk loader call failed: ${callError instanceof Error ? callError.message : String(callError)}`));
+												}
+											} else {
+												const error = new Error(`Original chunk loader not available for retry of chunk ${chunkId}`);
+												log(`Original chunk loader unavailable for retry of chunk ${chunkId}`);
+												reject(error);
+											}
+										}, delay);
+									});
+								} else {
+									// Max retries exceeded - trigger error handler
+									log(`Chunk ${chunkId} failed after ${retryCount + 1} attempts, triggering error handler`);
+									handleChunkLoadError(error, config).catch((finalError) => {
+										console.error('[WebpackChunkHandler] Failed to handle chunk error:', finalError);
+									});
+								}
 							}
-						}
-						
-						throw error;
-					});
+							
+							throw error;
+						});
+				} catch (callError) {
+					// Handle synchronous errors from the call
+					const error = callError instanceof Error 
+						? callError 
+						: new Error(`ChunkLoadError: Failed to call original chunk loader: ${String(callError)}`);
+					error.name = 'ChunkLoadError';
+					log(`Error calling original chunk loader for ${chunkId}:`, error);
+					return Promise.reject(error);
+				}
 			};
 		}
 	}

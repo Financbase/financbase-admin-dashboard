@@ -370,6 +370,60 @@ export const updateTimeCardSchema = createTimeCardSchema.partial().extend({
   status: z.enum(['draft', 'submitted', 'approved', 'rejected', 'paid']).optional(),
 });
 
+// Tax validation schemas
+export const createTaxObligationSchema = z.object({
+  userId: z.string().min(1, 'User ID is required'),
+  name: z.string().min(1, 'Tax obligation name is required'),
+  type: z.enum(['federal_income', 'state_income', 'local_income', 'self_employment', 'sales_tax', 'property_tax', 'payroll_tax', 'other']),
+  amount: z.number().positive('Amount must be positive'),
+  dueDate: z.string().datetime('Valid due date is required'),
+  status: z.enum(['pending', 'paid', 'overdue', 'cancelled']).default('pending'),
+  quarter: z.string().optional(), // e.g., "Q1 2025"
+  year: z.number().int().min(2000).max(2100),
+  notes: z.string().optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
+export const updateTaxObligationSchema = createTaxObligationSchema.partial().extend({
+  id: z.string().uuid('Valid tax obligation ID is required'),
+});
+
+export const recordTaxPaymentSchema = z.object({
+  obligationId: z.string().uuid('Valid tax obligation ID is required'),
+  amount: z.number().positive('Payment amount must be positive'),
+  paymentDate: z.string().datetime('Valid payment date is required'),
+  paymentMethod: z.string().optional(), // e.g., "bank_transfer", "check", "credit_card"
+  notes: z.string().optional(),
+});
+
+export const createTaxDeductionSchema = z.object({
+  userId: z.string().min(1, 'User ID is required'),
+  category: z.string().min(1, 'Category is required'),
+  amount: z.number().positive('Amount must be positive'),
+  percentage: z.number().min(0).max(100).optional(),
+  transactionCount: z.number().int().min(0).default(0),
+  year: z.number().int().min(2000).max(2100),
+  description: z.string().optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
+export const updateTaxDeductionSchema = createTaxDeductionSchema.partial().extend({
+  id: z.string().uuid('Valid tax deduction ID is required'),
+});
+
+export const createTaxDocumentSchema = z.object({
+  userId: z.string().min(1, 'User ID is required'),
+  name: z.string().min(1, 'Document name is required'),
+  type: z.enum(['w2', '1099', 'tax_return', 'receipt', 'invoice', 'expense_report', 'other']),
+  year: z.number().int().min(2000).max(2100),
+  fileUrl: z.string().url('Valid file URL is required'),
+  fileSize: z.number().int().positive().optional(),
+  fileName: z.string().optional(),
+  mimeType: z.string().optional(),
+  description: z.string().optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
 // Type exports
 export type CreateContractorInput = z.infer<typeof createContractorSchema>;
 export type UpdateContractorInput = z.infer<typeof updateContractorSchema>;
@@ -385,3 +439,9 @@ export type ClockInInput = z.infer<typeof clockInSchema>;
 export type ClockOutInput = z.infer<typeof clockOutSchema>;
 export type CreateTimeCardInput = z.infer<typeof createTimeCardSchema>;
 export type UpdateTimeCardInput = z.infer<typeof updateTimeCardSchema>;
+export type CreateTaxObligationInput = z.infer<typeof createTaxObligationSchema>;
+export type UpdateTaxObligationInput = z.infer<typeof updateTaxObligationSchema>;
+export type RecordTaxPaymentInput = z.infer<typeof recordTaxPaymentSchema>;
+export type CreateTaxDeductionInput = z.infer<typeof createTaxDeductionSchema>;
+export type UpdateTaxDeductionInput = z.infer<typeof updateTaxDeductionSchema>;
+export type CreateTaxDocumentInput = z.infer<typeof createTaxDocumentSchema>;

@@ -1,0 +1,2 @@
+[debug] Created transactional ClassFileManager with tempDir = /Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/fact-graph-scala/js/target/scala-3.3.3/classes.bak
+[debug] Removing the temporary directory used for backing up class files: /Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/fact-graph-scala/js/target/scala-3.3.3/classes.bak
