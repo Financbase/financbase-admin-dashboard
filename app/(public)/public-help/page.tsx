@@ -31,7 +31,12 @@ import {
 	Lightbulb,
 	AlertTriangle,
 	CheckCircle,
-	Settings
+	Settings,
+	Receipt,
+	BarChart3,
+	Brain,
+	CreditCard,
+	Link
 } from "lucide-react";
 
 export const metadata: Metadata = {

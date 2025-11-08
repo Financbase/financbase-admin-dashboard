@@ -8,37 +8,35 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { directFileExports } from "@/lib/db/schemas/direct-file.schema";
 import { eq, desc } from "drizzle-orm";
+import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
+import { withRLS } from "@/lib/api/with-rls";
 
 /**
  * GET /api/tax/direct-file/exports
  * Get export history for the current user (metadata only, no PII/FTI)
  */
 export async function GET(request: NextRequest) {
-	try {
-		const user = await currentUser();
-		if (!user) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	const requestId = generateRequestId();
+	return withRLS(async (clerkUserId) => {
+		try {
+			// Fetch export metadata for user (no PII/FTI)
+			const exports = await db
+				.select()
+				.from(directFileExports)
+				.where(eq(directFileExports.userId, clerkUserId))
+				.orderBy(desc(directFileExports.exportDate));
+
+			return NextResponse.json({
+				success: true,
+				data: exports,
+			});
+		} catch (error) {
+			return ApiErrorHandler.handle(error, requestId);
 		}
-
-		// Fetch export metadata for user (no PII/FTI)
-		const exports = await db
-			.select()
-			.from(directFileExports)
-			.where(eq(directFileExports.userId, user.id))
-			.orderBy(desc(directFileExports.exportDate));
-
-		return NextResponse.json(exports);
-	} catch (error) {
-		console.error("Error fetching export history:", error);
-		return NextResponse.json(
-			{ error: "Failed to fetch export history" },
-			{ status: 500 }
-		);
-	}
+	});
 }
 
 /**
@@ -46,42 +44,48 @@ export async function GET(request: NextRequest) {
  * Store export metadata (no PII/FTI)
  */
 export async function POST(request: NextRequest) {
-	try {
-		const user = await currentUser();
-		if (!user) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-		}
+	const requestId = generateRequestId();
+	return withRLS(async (clerkUserId) => {
+		try {
+			let body;
+			try {
+				body = await request.json();
+			} catch (error) {
+				return ApiErrorHandler.badRequest("Invalid JSON in request body");
+			}
 
-		const body = await request.json();
-		const { filename, format, fileSize } = body;
+			const { filename, format, fileSize } = body;
 
-		// Validate that no PII/FTI is being stored
-		if (!filename || !format || (format !== "mef-xml" && format !== "json")) {
+			// Validate that no PII/FTI is being stored
+			if (!filename || !format || (format !== "mef-xml" && format !== "json")) {
+				return ApiErrorHandler.badRequest(
+					"Invalid export metadata: filename and format (mef-xml or json) are required"
+				);
+			}
+
+			// Store only metadata
+			const exportRecord = await db
+				.insert(directFileExports)
+				.values({
+					userId: clerkUserId,
+					filename,
+					format,
+					fileSize: fileSize || null,
+					exportDate: new Date(),
+				})
+				.returning();
+
 			return NextResponse.json(
-				{ error: "Invalid export metadata" },
-				{ status: 400 }
+				{
+					success: true,
+					message: "Export metadata stored successfully",
+					data: exportRecord[0],
+				},
+				{ status: 201 }
 			);
+		} catch (error) {
+			return ApiErrorHandler.handle(error, requestId);
 		}
-
-		// Store only metadata
-		const exportRecord = await db
-			.insert(directFileExports)
-			.values({
-				userId: user.id,
-				filename,
-				format,
-				fileSize: fileSize || null,
-				exportDate: new Date(),
-			})
-			.returning();
-
-		return NextResponse.json(exportRecord[0]);
-	} catch (error) {
-		console.error("Error storing export metadata:", error);
-		return NextResponse.json(
-			{ error: "Failed to store export metadata" },
-			{ status: 500 }
-		);
-	}
+	});
 }
 

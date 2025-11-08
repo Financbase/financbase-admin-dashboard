@@ -53,7 +53,12 @@ async function getBlogPosts(): Promise<BlogPost[]> {
 			limit: 20,
 			offset: 0,
 		});
-		return result.posts;
+		// Convert Date fields to strings for the interface
+		return result.posts.map((post) => ({
+			...post,
+			publishedAt: post.publishedAt ? new Date(post.publishedAt).toISOString() : null,
+			createdAt: new Date(post.createdAt).toISOString(),
+		})) as BlogPost[];
 	} catch (error) {
 		console.error('Error fetching blog posts:', error);
 		return [];

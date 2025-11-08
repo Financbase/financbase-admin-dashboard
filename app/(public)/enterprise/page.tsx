@@ -69,7 +69,7 @@ export default function EnterprisePage() {
 			...formDataObj,
 			website: formDataObj.website || '', // Honeypot
 			type: 'enterprise', // Mark as enterprise inquiry
-		};
+		} as EnterpriseFormData & { website: string; type: string };
 
 		setFormData({
 			name: data.name || formData.name,

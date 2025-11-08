@@ -46,7 +46,14 @@ interface BlogCategory {
 
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
 	try {
-		return await blogService.getPostBySlug(slug, false);
+		const post = await blogService.getPostBySlug(slug, false);
+		if (!post) return null;
+		// Convert Date fields to strings for the interface
+		return {
+			...post,
+			publishedAt: post.publishedAt ? new Date(post.publishedAt).toISOString() : null,
+			createdAt: new Date(post.createdAt).toISOString(),
+		} as BlogPost;
 	} catch (error) {
 		console.error('Error fetching blog post:', error);
 		return null;

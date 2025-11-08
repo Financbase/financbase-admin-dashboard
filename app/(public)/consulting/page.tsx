@@ -66,7 +66,7 @@ export default function ConsultingPage() {
 		const data = {
 			...formDataObj,
 			website: formDataObj.website || '', // Honeypot
-		};
+		} as ConsultingFormData & { website: string };
 
 		setFormData({
 			name: data.name || formData.name,

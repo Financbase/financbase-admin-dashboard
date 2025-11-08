@@ -13,9 +13,13 @@ import {
   dataRetentionPolicies,
   gdprDataRequests,
   auditLogs,
-  dataAccessLogs
+  dataAccessLogs,
+  securityEvents
 } from '@/lib/db/schemas';
 import { eq, and, desc, asc, sql, gte, lte } from 'drizzle-orm';
+import { DORAComplianceService } from './dora-compliance-service';
+import { AIGovernanceService } from './ai-governance-service';
+import { StatePrivacyService } from './state-privacy-service';
 
 export interface ComplianceReport {
   id: number;
@@ -515,5 +519,240 @@ export class ComplianceService {
       console.error('Error getting SOC2 compliance data:', error);
       throw new Error('Failed to get SOC2 compliance data');
     }
+  }
+
+  /**
+   * Generate DORA compliance report
+   */
+  static async generateDORAReport(
+    organizationId: string,
+    generatedBy: string,
+    filters: {
+      dateFrom?: Date;
+      dateTo?: Date;
+    } = {}
+  ): Promise<ComplianceReport> {
+    try {
+      const reportData = await DORAComplianceService.generateDORAReport(organizationId, filters);
+      
+      const report = await db.insert(complianceReports).values({
+        organizationId,
+        reportType: 'dora',
+        reportName: `DORA Compliance Report - ${new Date().toISOString().split('T')[0]}`,
+        reportDescription: 'DORA compliance report covering digital operational resilience',
+        reportData,
+        reportFilters: filters,
+        status: 'completed',
+        generatedBy,
+        generatedAt: new Date(),
+        fileFormat: 'json',
+        retentionPeriod: '5 years',
+        expiresAt: new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000), // 5 years
+      }).returning();
+
+      return report[0];
+    } catch (error) {
+      console.error('Error generating DORA report:', error);
+      throw new Error('Failed to generate DORA report');
+    }
+  }
+
+  /**
+   * Generate AI governance compliance report
+   */
+  static async generateAIGovernanceReport(
+    organizationId: string,
+    generatedBy: string,
+    filters: {
+      dateFrom?: Date;
+      dateTo?: Date;
+      modelName?: string;
+    } = {}
+  ): Promise<ComplianceReport> {
+    try {
+      const auditData = await AIGovernanceService.auditModelUsage(organizationId, {
+        modelName: filters.modelName,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
+      });
+
+      const performanceData = await AIGovernanceService.trackModelPerformance(
+        organizationId,
+        filters.modelName,
+        filters.dateFrom,
+        filters.dateTo
+      );
+
+      const reportData = {
+        ...auditData,
+        performance: performanceData,
+      };
+      
+      const report = await db.insert(complianceReports).values({
+        organizationId,
+        reportType: 'ai_governance',
+        reportName: `AI Governance Compliance Report - ${new Date().toISOString().split('T')[0]}`,
+        reportDescription: 'AI governance compliance report covering model decisions, bias detection, and explainability',
+        reportData,
+        reportFilters: filters,
+        status: 'completed',
+        generatedBy,
+        generatedAt: new Date(),
+        fileFormat: 'json',
+        retentionPeriod: '7 years',
+        expiresAt: new Date(Date.now() + 7 * 365 * 24 * 60 * 60 * 1000), // 7 years
+      }).returning();
+
+      return report[0];
+    } catch (error) {
+      console.error('Error generating AI governance report:', error);
+      throw new Error('Failed to generate AI governance report');
+    }
+  }
+
+  /**
+   * Generate state privacy compliance report
+   */
+  static async generateStatePrivacyReport(
+    organizationId: string,
+    generatedBy: string,
+    filters: {
+      stateLaw?: string;
+    } = {}
+  ): Promise<ComplianceReport> {
+    try {
+      const reportData = await StatePrivacyService.generateStateComplianceReport(
+        organizationId,
+        filters.stateLaw as any
+      );
+      
+      const report = await db.insert(complianceReports).values({
+        organizationId,
+        reportType: 'state_privacy',
+        reportName: `State Privacy Compliance Report - ${new Date().toISOString().split('T')[0]}`,
+        reportDescription: 'State privacy law compliance report covering CPRA, CCPA, and other state regulations',
+        reportData,
+        reportFilters: filters,
+        status: 'completed',
+        generatedBy,
+        generatedAt: new Date(),
+        fileFormat: 'json',
+        retentionPeriod: '7 years',
+        expiresAt: new Date(Date.now() + 7 * 365 * 24 * 60 * 60 * 1000), // 7 years
+      }).returning();
+
+      return report[0];
+    } catch (error) {
+      console.error('Error generating state privacy report:', error);
+      throw new Error('Failed to generate state privacy report');
+    }
+  }
+
+  /**
+   * Generate comprehensive compliance report
+   */
+  static async generateComprehensiveComplianceReport(
+    organizationId: string,
+    generatedBy: string,
+    filters: {
+      dateFrom?: Date;
+      dateTo?: Date;
+    } = {}
+  ): Promise<ComplianceReport> {
+    try {
+      // Generate all compliance reports
+      const gdprData = await this.getGDPRComplianceData(organizationId, filters);
+      const soc2Data = await this.getSOC2ComplianceData(organizationId, filters);
+      const doraData = await DORAComplianceService.generateDORAReport(organizationId, filters);
+      const aiGovernanceData = await AIGovernanceService.auditModelUsage(organizationId, filters);
+      const statePrivacyData = await StatePrivacyService.generateStateComplianceReport(organizationId);
+
+      const reportData = {
+        gdpr: gdprData,
+        soc2: soc2Data,
+        dora: doraData,
+        aiGovernance: aiGovernanceData,
+        statePrivacy: statePrivacyData,
+        overallComplianceScore: this.calculateOverallComplianceScore({
+          gdpr: gdprData,
+          soc2: soc2Data,
+          dora: doraData,
+          aiGovernance: aiGovernanceData,
+          statePrivacy: statePrivacyData,
+        }),
+      };
+      
+      const report = await db.insert(complianceReports).values({
+        organizationId,
+        reportType: 'comprehensive',
+        reportName: `Comprehensive Compliance Report - ${new Date().toISOString().split('T')[0]}`,
+        reportDescription: 'Comprehensive compliance report covering all frameworks: GDPR, SOC2, DORA, AI Governance, and State Privacy',
+        reportData,
+        reportFilters: filters,
+        status: 'completed',
+        generatedBy,
+        generatedAt: new Date(),
+        fileFormat: 'json',
+        retentionPeriod: '7 years',
+        expiresAt: new Date(Date.now() + 7 * 365 * 24 * 60 * 60 * 1000), // 7 years
+      }).returning();
+
+      return report[0];
+    } catch (error) {
+      console.error('Error generating comprehensive compliance report:', error);
+      throw new Error('Failed to generate comprehensive compliance report');
+    }
+  }
+
+  /**
+   * Calculate overall compliance score
+   */
+  private static calculateOverallComplianceScore(data: {
+    gdpr: any;
+    soc2: any;
+    dora: any;
+    aiGovernance: any;
+    statePrivacy: any;
+  }): number {
+    // Simplified scoring - in production, use more sophisticated algorithms
+    let score = 0;
+    let count = 0;
+
+    // GDPR score (based on data retention policies and GDPR requests)
+    if (data.gdpr?.summary) {
+      score += 80; // Assume good GDPR compliance
+      count++;
+    }
+
+    // SOC2 score (based on security events)
+    if (data.soc2?.summary) {
+      const unresolvedEvents = data.soc2.summary.unresolvedSecurityEvents || 0;
+      const soc2Score = Math.max(0, 100 - (unresolvedEvents * 5));
+      score += soc2Score;
+      count++;
+    }
+
+    // DORA score (based on resilience)
+    if (data.dora?.summary) {
+      const criticalIncidents = data.dora.summary.criticalIncidents || 0;
+      const doraScore = Math.max(0, 100 - (criticalIncidents * 10));
+      score += doraScore;
+      count++;
+    }
+
+    // AI Governance score
+    if (data.aiGovernance?.complianceScore !== undefined) {
+      score += data.aiGovernance.complianceScore;
+      count++;
+    }
+
+    // State Privacy score
+    if (data.statePrivacy?.summary) {
+      const avgStateScore = data.statePrivacy.summary.averageComplianceScore || 0;
+      score += avgStateScore;
+      count++;
+    }
+
+    return count > 0 ? Math.round(score / count) : 0;
   }
 }

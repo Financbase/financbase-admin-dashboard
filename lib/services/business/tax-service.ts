@@ -183,6 +183,7 @@ export class TaxService {
 
 	/**
 	 * Create new tax obligation
+	 * Invalidates cache on creation
 	 */
 	async createObligation(
 		input: CreateTaxObligationInput
@@ -206,7 +207,25 @@ export class TaxService {
 			.values(newObligation)
 			.returning();
 
+		// Invalidate cache
+		await this.invalidateTaxCache(input.userId, input.year);
+
 		return result[0];
+	}
+
+	/**
+	 * Invalidate cache for a user's tax data
+	 */
+	private async invalidateTaxCache(userId: string, year?: number): Promise<void> {
+		const tags = [
+			`tax:summary:${userId}:${year || 'all'}`,
+			`tax:obligations:${userId}`,
+			`tax:deductions:${userId}`,
+			`tax:documents:${userId}`,
+			`tax:alerts:${userId}`,
+			'tax'
+		];
+		await cache.invalidateByTags(tags);
 	}
 
 	/**
@@ -260,6 +279,10 @@ export class TaxService {
 			.where(and(eq(taxObligations.id, id), eq(taxObligations.userId, userId)))
 			.returning();
 
+		// Invalidate cache
+		const obligation = result[0];
+		await this.invalidateTaxCache(userId, obligation.year);
+
 		return result[0];
 	}
 
@@ -268,11 +291,14 @@ export class TaxService {
 	 */
 	async deleteObligation(id: string, userId: string): Promise<void> {
 		// Verify ownership
-		await this.getObligationById(id, userId);
-
+		const obligation = await this.getObligationById(id, userId);
+		
 		await db
 			.delete(taxObligations)
 			.where(and(eq(taxObligations.id, id), eq(taxObligations.userId, userId)));
+
+		// Invalidate cache
+		await this.invalidateTaxCache(userId, obligation.year);
 	}
 
 	/**
@@ -310,16 +336,80 @@ export class TaxService {
 	}
 
 	/**
-	 * Get tax deductions grouped by category
+	 * Get tax deductions grouped by category with optional pagination
+	 * Cached for 5 minutes (non-paginated requests only)
 	 */
 	async getDeductions(
 		userId: string,
-		year?: number
-	): Promise<TaxDeduction[]> {
+		year?: number,
+		filters?: TaxDeductionFilters
+	): Promise<TaxDeduction[] | PaginatedResult<TaxDeduction>> {
+		// Cache only non-paginated requests
+		if (!filters?.limit) {
+			const cacheKey = `tax:deductions:${userId}:${year || 'all'}:${filters?.category || 'all'}`;
+			return await cache.getOrSet(
+				cacheKey,
+				async () => {
+					return await this._getDeductionsInternal(userId, year, filters);
+				},
+				{ ttl: 300, namespace: 'tax' }
+			);
+		}
+
+		return await this._getDeductionsInternal(userId, year, filters);
+	}
+
+	/**
+	 * Internal method to get deductions (without cache)
+	 */
+	private async _getDeductionsInternal(
+		userId: string,
+		year?: number,
+		filters?: TaxDeductionFilters
+	): Promise<TaxDeduction[] | PaginatedResult<TaxDeduction>> {
 		const conditions = [eq(taxDeductions.userId, userId)];
 
 		if (year) {
 			conditions.push(eq(taxDeductions.year, year));
+		} else if (filters?.year) {
+			conditions.push(eq(taxDeductions.year, filters.year));
+		}
+
+		if (filters?.category) {
+			conditions.push(eq(taxDeductions.category, filters.category));
+		}
+
+		// Get total count if pagination is requested
+		if (filters?.limit !== undefined) {
+			const totalResult = await db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(taxDeductions)
+				.where(and(...conditions));
+
+			const total = totalResult[0]?.count || 0;
+			const limit = Math.min(filters.limit || 50, 100); // Max 100 per page
+			const offset = filters.offset || 0;
+			const page = Math.floor(offset / limit) + 1;
+			const totalPages = Math.ceil(total / limit);
+
+			const results = await db
+				.select()
+				.from(taxDeductions)
+				.where(and(...conditions))
+				.orderBy(desc(taxDeductions.amount))
+				.limit(limit)
+				.offset(offset);
+
+			// Calculate percentages if not set (only for returned results)
+			await this.calculateMissingPercentages(results);
+
+			return {
+				data: results,
+				total,
+				page,
+				limit,
+				totalPages,
+			};
 		}
 
 		const results = await db
@@ -329,28 +419,35 @@ export class TaxService {
 			.orderBy(desc(taxDeductions.amount));
 
 		// Calculate percentages if not set
-		if (results.length > 0) {
-			const total = results.reduce(
-				(sum, d) => sum + parseFloat(d.amount?.toString() || "0"),
-				0
-			);
+		await this.calculateMissingPercentages(results);
 
-			if (total > 0) {
-				for (const deduction of results) {
-					if (!deduction.percentage) {
-						const percentage =
-							(parseFloat(deduction.amount?.toString() || "0") / total) * 100;
-						// Update percentage in database
-						await db
-							.update(taxDeductions)
-							.set({ percentage: percentage.toString() })
-							.where(eq(taxDeductions.id, deduction.id));
-					}
+		return results;
+	}
+
+	/**
+	 * Helper method to calculate missing percentages for deductions
+	 */
+	private async calculateMissingPercentages(deductions: TaxDeduction[]): Promise<void> {
+		if (deductions.length === 0) return;
+
+		const total = deductions.reduce(
+			(sum, d) => sum + parseFloat(d.amount?.toString() || "0"),
+			0
+		);
+
+		if (total > 0) {
+			for (const deduction of deductions) {
+				if (!deduction.percentage) {
+					const percentage =
+						(parseFloat(deduction.amount?.toString() || "0") / total) * 100;
+					// Update percentage in database
+					await db
+						.update(taxDeductions)
+						.set({ percentage: percentage.toString() })
+						.where(eq(taxDeductions.id, deduction.id));
 				}
 			}
 		}
-
-		return results;
 	}
 
 	/**
@@ -377,6 +474,9 @@ export class TaxService {
 
 		// Recalculate percentages for the year
 		await this.recalculateDeductionPercentages(input.userId, input.year);
+
+		// Invalidate cache
+		await this.invalidateTaxCache(input.userId, input.year);
 
 		return result[0];
 	}
@@ -418,6 +518,9 @@ export class TaxService {
 			input.year || deduction.year
 		);
 
+		// Invalidate cache
+		await this.invalidateTaxCache(userId, input.year || deduction.year);
+
 		return result[0];
 	}
 
@@ -435,6 +538,9 @@ export class TaxService {
 
 		// Recalculate percentages for the year
 		await this.recalculateDeductionPercentages(userId, year);
+
+		// Invalidate cache
+		await this.invalidateTaxCache(userId, year);
 	}
 
 	/**
@@ -497,16 +603,77 @@ export class TaxService {
 	}
 
 	/**
-	 * Get tax documents
+	 * Get tax documents with optional pagination
+	 * Cached for 5 minutes (non-paginated requests only)
 	 */
 	async getDocuments(
 		userId: string,
-		year?: number
-	): Promise<TaxDocument[]> {
+		year?: number,
+		filters?: TaxDocumentFilters
+	): Promise<TaxDocument[] | PaginatedResult<TaxDocument>> {
+		// Cache only non-paginated requests
+		if (!filters?.limit) {
+			const cacheKey = `tax:documents:${userId}:${year || 'all'}:${filters?.type || 'all'}`;
+			return await cache.getOrSet(
+				cacheKey,
+				async () => {
+					return await this._getDocumentsInternal(userId, year, filters);
+				},
+				{ ttl: 300, namespace: 'tax' }
+			);
+		}
+
+		return await this._getDocumentsInternal(userId, year, filters);
+	}
+
+	/**
+	 * Internal method to get documents (without cache)
+	 */
+	private async _getDocumentsInternal(
+		userId: string,
+		year?: number,
+		filters?: TaxDocumentFilters
+	): Promise<TaxDocument[] | PaginatedResult<TaxDocument>> {
 		const conditions = [eq(taxDocuments.userId, userId)];
 
 		if (year) {
 			conditions.push(eq(taxDocuments.year, year));
+		} else if (filters?.year) {
+			conditions.push(eq(taxDocuments.year, filters.year));
+		}
+
+		if (filters?.type) {
+			conditions.push(eq(taxDocuments.type, filters.type as any));
+		}
+
+		// Get total count if pagination is requested
+		if (filters?.limit !== undefined) {
+			const totalResult = await db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(taxDocuments)
+				.where(and(...conditions));
+
+			const total = totalResult[0]?.count || 0;
+			const limit = Math.min(filters.limit || 50, 100); // Max 100 per page
+			const offset = filters.offset || 0;
+			const page = Math.floor(offset / limit) + 1;
+			const totalPages = Math.ceil(total / limit);
+
+			const results = await db
+				.select()
+				.from(taxDocuments)
+				.where(and(...conditions))
+				.orderBy(desc(taxDocuments.uploadedAt))
+				.limit(limit)
+				.offset(offset);
+
+			return {
+				data: results,
+				total,
+				page,
+				limit,
+				totalPages,
+			};
 		}
 
 		const results = await db
@@ -540,6 +707,9 @@ export class TaxService {
 			.values(newDocument)
 			.returning();
 
+		// Invalidate cache
+		await this.invalidateTaxCache(input.userId, input.year);
+
 		return result[0];
 	}
 
@@ -557,9 +727,14 @@ export class TaxService {
 			throw new Error("Tax document not found");
 		}
 
+		const document = results[0];
+		
 		await db
 			.delete(taxDocuments)
 			.where(and(eq(taxDocuments.id, id), eq(taxDocuments.userId, userId)));
+
+		// Invalidate cache
+		await this.invalidateTaxCache(userId, document.year);
 	}
 
 	/**
@@ -638,14 +813,54 @@ export class TaxService {
 
 	/**
 	 * Generate tax alerts for overdue/pending taxes
+	 * Optimized with single query and caching (2 minute TTL)
 	 */
-	async getTaxAlerts(userId: string): Promise<TaxAlert[]> {
+	async getTaxAlerts(userId: string, filters?: TaxAlertFilters): Promise<TaxAlert[] | PaginatedResult<TaxAlert>> {
+		const cacheKey = `tax:alerts:${userId}`;
+		
+		// Try cache first (2 minute TTL - alerts change frequently)
+		const alerts = await cache.getOrSet(
+			cacheKey,
+			async () => {
+				return await this._getTaxAlertsInternal(userId);
+			},
+			{ ttl: 120, namespace: 'tax' }
+		);
+
+		// Apply pagination if requested
+		if (filters?.limit !== undefined) {
+			const limit = Math.min(filters.limit || 50, 100);
+			const offset = filters.offset || 0;
+			const page = Math.floor(offset / limit) + 1;
+			const totalPages = Math.ceil(alerts.length / limit);
+
+			return {
+				data: alerts.slice(offset, offset + limit),
+				total: alerts.length,
+				page,
+				limit,
+				totalPages,
+			};
+		}
+
+		return alerts;
+	}
+
+	/**
+	 * Internal method to get tax alerts (without cache)
+	 * Optimized to use single query instead of N+1
+	 */
+	private async _getTaxAlertsInternal(userId: string): Promise<TaxAlert[]> {
 		const alerts: TaxAlert[] = [];
 		const now = new Date();
 
-		// Get all obligations
-		const obligations = await this.getObligations(userId);
+		// Get all obligations in single query (optimized)
+		const obligationsResult = await this.getObligations(userId);
+		const obligations = Array.isArray(obligationsResult) 
+			? obligationsResult 
+			: obligationsResult.data;
 
+		// Process obligations
 		for (const obligation of obligations) {
 			const dueDate = new Date(obligation.dueDate);
 			const amount = parseFloat(obligation.amount?.toString() || "0");
@@ -686,9 +901,13 @@ export class TaxService {
 			}
 		}
 
-		// Info alert for tax documents
+		// Info alert for tax documents (optimized - single query)
 		const currentYear = new Date().getFullYear();
-		const documents = await this.getDocuments(userId, currentYear);
+		const documentsResult = await this.getDocuments(userId, currentYear);
+		const documents = Array.isArray(documentsResult)
+			? documentsResult
+			: documentsResult.data;
+		
 		if (documents.length > 0) {
 			alerts.push({
 				type: "info",

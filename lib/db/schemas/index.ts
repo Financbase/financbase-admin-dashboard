@@ -122,6 +122,7 @@ export * from "./dashboard.schema";
 
 // Security & Compliance System
 export * from "./security.schema";
+export * from "./compliance.schema";
 
 // Onboarding System
 export * from "./onboarding.schema";

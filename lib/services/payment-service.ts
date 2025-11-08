@@ -257,67 +257,67 @@ export async function processPayment(input: CreatePaymentInput): Promise<Payment
 	const { withTransaction } = await import('@/lib/utils/db-transaction');
 	
 	return await withTransaction(async (tx) => {
-		try {
-			// Get payment method details
-			const paymentMethod = await getPaymentMethodById(input.paymentMethodId, input.userId);
-			if (!paymentMethod) {
-				throw new Error('Payment method not found');
-			}
+	try {
+		// Get payment method details
+		const paymentMethod = await getPaymentMethodById(input.paymentMethodId, input.userId);
+		if (!paymentMethod) {
+			throw new Error('Payment method not found');
+		}
 
-			// Calculate processing fee
-			const processingFee = calculateProcessingFee(
-				input.amount,
-				Number(paymentMethod.processingFee || 0),
-				Number(paymentMethod.fixedFee || 0)
-			);
+		// Calculate processing fee
+		const processingFee = calculateProcessingFee(
+			input.amount,
+			Number(paymentMethod.processingFee || 0),
+			Number(paymentMethod.fixedFee || 0)
+		);
 
-			const netAmount = input.amount - processingFee;
+		const netAmount = input.amount - processingFee;
 
-			// Create payment record
+		// Create payment record
 			const [payment] = await tx.insert(payments).values({
-				userId: input.userId,
-				paymentMethodId: input.paymentMethodId,
-				invoiceId: input.invoiceId,
-				paymentType: input.paymentType,
-				amount: input.amount.toString(),
-				currency: input.currency || 'USD',
-				processingFee: processingFee.toString(),
-				netAmount: netAmount.toString(),
-				description: input.description,
-				reference: input.reference,
-				status: 'processing',
-				metadata: input.metadata ? JSON.stringify(input.metadata) : null,
-				notes: input.notes,
-			}).returning();
+			userId: input.userId,
+			paymentMethodId: input.paymentMethodId,
+			invoiceId: input.invoiceId,
+			paymentType: input.paymentType,
+			amount: input.amount.toString(),
+			currency: input.currency || 'USD',
+			processingFee: processingFee.toString(),
+			netAmount: netAmount.toString(),
+			description: input.description,
+			reference: input.reference,
+			status: 'processing',
+			metadata: input.metadata ? JSON.stringify(input.metadata) : null,
+			notes: input.notes,
+		}).returning();
 
-			// Update payment method last used
+		// Update payment method last used
 			await tx
-				.update(paymentMethods)
-				.set({ lastUsedAt: new Date() })
-				.where(eq(paymentMethods.id, input.paymentMethodId));
+			.update(paymentMethods)
+			.set({ lastUsedAt: new Date() })
+			.where(eq(paymentMethods.id, input.paymentMethodId));
 
 			// If this is an invoice payment, update invoice status atomically
-			if (input.invoiceId && input.paymentType === 'invoice_payment') {
+		if (input.invoiceId && input.paymentType === 'invoice_payment') {
 				await tx
-					.update(invoices)
-					.set({ 
-						status: 'paid',
-						paidDate: new Date(),
-						updatedAt: new Date()
-					})
-					.where(eq(invoices.id, input.invoiceId));
-			}
+				.update(invoices)
+				.set({ 
+					status: 'paid',
+					paidDate: new Date(),
+					updatedAt: new Date()
+				})
+				.where(eq(invoices.id, input.invoiceId));
+		}
 
 			// Send notification (outside transaction to avoid blocking)
 			NotificationHelpers.sendPaymentProcessed(payment.id, input.userId).catch(
 				(error) => console.error('Failed to send payment notification:', error)
 			);
 
-			return payment;
-		} catch (error) {
-			console.error('Error processing payment:', error);
-			throw new Error('Failed to process payment');
-		}
+		return payment;
+	} catch (error) {
+		console.error('Error processing payment:', error);
+		throw new Error('Failed to process payment');
+	}
 	});
 }
 
