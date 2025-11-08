@@ -179,6 +179,33 @@ export const ourFileRouter = {
 				size: file.size,
 			};
 		}),
+
+	// Tax document uploader (supports PDF, images, and documents)
+	documentUploader: f({
+		pdf: { maxFileSize: '10MB' },
+		image: { maxFileSize: '10MB' },
+		'application/msword': { maxFileSize: '10MB' },
+		'application/vnd.openxmlformats-officedocument.wordprocessingml.document': { maxFileSize: '10MB' },
+	})
+		.middleware(async () => {
+			const { userId } = await auth();
+
+			if (!userId) {
+				throw new UploadThingError('Unauthorized');
+			}
+
+			return { userId };
+		})
+		.onUploadComplete(async ({ metadata, file }) => {
+			console.log('Tax document uploaded:', file.url);
+			return {
+				uploadedBy: metadata.userId,
+				url: file.url,
+				name: file.name,
+				size: file.size,
+				type: file.type,
+			};
+		}),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

@@ -163,3 +163,9 @@ export * from "./gallery.schema";
 
 // Training System
 export * from "./training.schema";
+
+// Tax Management System
+export * from "./tax.schema";
+
+// Direct File Integration (IRS Direct File export metadata only - no PII/FTI)
+export * from "./direct-file.schema";

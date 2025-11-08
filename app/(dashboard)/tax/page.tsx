@@ -9,6 +9,7 @@
 
 "use client";
 
+import { useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,104 +27,152 @@ import {
 	Plus,
 	Download,
 	Settings,
-	Receipt
+	Receipt,
+	Loader2,
+	Edit,
+	Trash2,
 } from "lucide-react";
+import {
+	useTaxObligations,
+	useTaxDeductions,
+	useTaxSummary,
+	useTaxDocuments,
+	useCreateTaxObligation,
+	useUpdateTaxObligation,
+	useDeleteTaxObligation,
+	useRecordTaxPayment,
+	useCreateTaxDeduction,
+	useUpdateTaxDeduction,
+	useDeleteTaxDeduction,
+	useCreateTaxDocument,
+	useDeleteTaxDocument,
+	type TaxObligation,
+	type TaxDeduction,
+	type TaxDocument,
+	type TaxAlert,
+} from "@/hooks/use-tax";
+import { TaxObligationForm } from "@/components/tax/tax-obligation-form";
+import { TaxPaymentForm } from "@/components/tax/tax-payment-form";
+import { TaxDeductionForm } from "@/components/tax/tax-deduction-form";
+import { TaxDocumentUpload } from "@/components/tax/tax-document-upload";
+import { useRouter } from "next/navigation";
+import { FileText } from "lucide-react";
 
-
-const taxObligations = [
-	{
-		name: "Federal Income Tax",
-		amount: 45000,
-		dueDate: "2025-04-15",
-		status: "pending",
-		quarter: "Q1 2025",
-		paid: 0,
-	},
-	{
-		name: "State Income Tax",
-		amount: 12500,
-		dueDate: "2025-04-15",
-		status: "pending",
-		quarter: "Q1 2025",
-		paid: 0,
-	},
-	{
-		name: "Self-Employment Tax",
-		amount: 8500,
-		dueDate: "2025-01-15",
-		status: "overdue",
-		quarter: "Q4 2024",
-		paid: 0,
-	},
-	{
-		name: "Sales Tax",
-		amount: 3200,
-		dueDate: "2025-02-15",
-		status: "paid",
-		quarter: "Q4 2024",
-		paid: 3200,
-	},
-];
-
-const taxDeductions = [
-	{
-		category: "Business Expenses",
-		amount: 24500,
-		percentage: 35,
-		transactions: 127,
-	},
-	{
-		category: "Home Office",
-		amount: 8500,
-		percentage: 12,
-		transactions: 23,
-	},
-	{
-		category: "Equipment & Software",
-		amount: 12800,
-		percentage: 18,
-		transactions: 45,
-	},
-	{
-		category: "Travel & Meals",
-		amount: 6200,
-		percentage: 9,
-		transactions: 34,
-	},
-	{
-		category: "Professional Services",
-		amount: 18200,
-		percentage: 26,
-		transactions: 28,
-	},
-];
-
-const taxAlerts = [
-	{
-		type: "danger",
-		message: "Q4 2024 Self-Employment Tax is overdue by 15 days",
-		action: "Pay Now",
-		amount: "$8,500",
-	},
-	{
-		type: "warning",
-		message: "Q1 2025 estimated taxes due in 45 days",
-		action: "Prepare Payment",
-		amount: "$57,500",
-	},
-	{
-		type: "info",
-		message: "Tax documents ready for download",
-		action: "Download",
-		amount: null,
-	},
-];
+const currentYear = new Date().getFullYear();
 
 export default function TaxPage() {
-	const totalObligations = taxObligations.reduce((sum, tax) => sum + tax.amount, 0);
-	const totalPaid = taxObligations.reduce((sum, tax) => sum + tax.paid, 0);
-	const totalPending = totalObligations - totalPaid;
-	const totalDeductions = taxDeductions.reduce((sum, deduction) => sum + deduction.amount, 0);
+	const router = useRouter();
+	const [selectedYear] = useState(currentYear);
+	
+	// Dialog state management
+	const [obligationDialogOpen, setObligationDialogOpen] = useState(false);
+	const [selectedObligation, setSelectedObligation] = useState<TaxObligation | undefined>();
+	const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+	const [paymentObligation, setPaymentObligation] = useState<TaxObligation | undefined>();
+	const [deductionDialogOpen, setDeductionDialogOpen] = useState(false);
+	const [selectedDeduction, setSelectedDeduction] = useState<TaxDeduction | undefined>();
+	const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
+
+	// Fetch data
+	const { data: obligations = [], isLoading: obligationsLoading } = useTaxObligations({
+		year: selectedYear,
+	});
+	const { data: deductions = [], isLoading: deductionsLoading } = useTaxDeductions(selectedYear);
+	const { data: documents = [], isLoading: documentsLoading } = useTaxDocuments(selectedYear);
+	const {
+		data: summaryData,
+		isLoading: summaryLoading,
+	} = useTaxSummary(selectedYear);
+
+	// Mutations
+	const createObligation = useCreateTaxObligation();
+	const updateObligation = useUpdateTaxObligation();
+	const deleteObligation = useDeleteTaxObligation();
+	const recordPayment = useRecordTaxPayment();
+	const createDeduction = useCreateTaxDeduction();
+	const updateDeduction = useUpdateTaxDeduction();
+	const deleteDeduction = useDeleteTaxDeduction();
+	const createDocument = useCreateTaxDocument();
+	const deleteDocument = useDeleteTaxDocument();
+
+	const summary = summaryData?.summary;
+	const alerts = summaryData?.alerts || [];
+
+	// Calculate totals from obligations if summary not available
+	const totalObligations =
+		summary?.totalObligations ||
+		obligations.reduce((sum, tax) => sum + parseFloat(tax.amount || "0"), 0);
+	const totalPaid =
+		summary?.totalPaid ||
+		obligations.reduce((sum, tax) => sum + parseFloat(tax.paid || "0"), 0);
+	const totalPending = summary?.totalPending || totalObligations - totalPaid;
+	const totalDeductions =
+		summary?.totalDeductions ||
+		deductions.reduce((sum, deduction) => sum + parseFloat(deduction.amount || "0"), 0);
+
+	const handlePayObligation = (obligation: TaxObligation) => {
+		const remaining = parseFloat(obligation.amount || "0") - parseFloat(obligation.paid || "0");
+		if (remaining <= 0) {
+			toast.info("This obligation is already fully paid");
+			return;
+		}
+		setPaymentObligation(obligation);
+		setPaymentDialogOpen(true);
+	};
+
+	const handleEditObligation = (obligation: TaxObligation) => {
+		setSelectedObligation(obligation);
+		setObligationDialogOpen(true);
+	};
+
+	const handleAddObligation = () => {
+		setSelectedObligation(undefined);
+		setObligationDialogOpen(true);
+	};
+
+	const handleEditDeduction = (deduction: TaxDeduction) => {
+		setSelectedDeduction(deduction);
+		setDeductionDialogOpen(true);
+	};
+
+	const handleAddDeduction = () => {
+		setSelectedDeduction(undefined);
+		setDeductionDialogOpen(true);
+	};
+
+	const handleDeleteObligation = (id: string) => {
+		if (confirm("Are you sure you want to delete this tax obligation?")) {
+			deleteObligation.mutate(id);
+		}
+	};
+
+	const handleDeleteDeduction = (id: string) => {
+		if (confirm("Are you sure you want to delete this tax deduction?")) {
+			deleteDeduction.mutate(id);
+		}
+	};
+
+	const handleDeleteDocument = (id: string) => {
+		if (confirm("Are you sure you want to delete this tax document?")) {
+			deleteDocument.mutate(id);
+		}
+	};
+
+	const formatDate = (dateString: string | null | undefined) => {
+		if (!dateString) return "N/A";
+		return new Date(dateString).toLocaleDateString("en-US", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+		});
+	};
+
+	const formatCurrency = (amount: string | number) => {
+		const num = typeof amount === "string" ? parseFloat(amount) : amount;
+		return num.toLocaleString("en-US", { style: "currency", currency: "USD" });
+	};
+
+	const isLoading = obligationsLoading || deductionsLoading || summaryLoading;
 
 	return (
 		<div className="space-y-8">
@@ -136,11 +185,19 @@ export default function TaxPage() {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button variant="outline">
+					<Button 
+						variant="default" 
+						onClick={() => router.push("/tax/direct-file")}
+						className="bg-primary"
+					>
+						<FileText className="h-4 w-4 mr-2" />
+						File Federal Taxes
+					</Button>
+					<Button variant="outline" onClick={() => toast.info("Export functionality coming soon")}>
 						<Download className="h-4 w-4 mr-2" />
 						Export Data
 					</Button>
-					<Button>
+					<Button onClick={handleAddDeduction}>
 						<Plus className="h-4 w-4 mr-2" />
 						Add Deduction
 					</Button>
@@ -155,8 +212,14 @@ export default function TaxPage() {
 						<Calculator className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">${totalObligations.toLocaleString()}</div>
-						<p className="text-xs text-muted-foreground">2025 tax year</p>
+						{isLoading ? (
+							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+						) : (
+							<>
+								<div className="text-2xl font-bold">{formatCurrency(totalObligations)}</div>
+								<p className="text-xs text-muted-foreground">{selectedYear} tax year</p>
+							</>
+						)}
 					</CardContent>
 				</Card>
 				<Card>
@@ -165,8 +228,14 @@ export default function TaxPage() {
 						<CheckCircle className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-green-600">${totalPaid.toLocaleString()}</div>
-						<p className="text-xs text-muted-foreground">Completed payments</p>
+						{isLoading ? (
+							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+						) : (
+							<>
+								<div className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</div>
+								<p className="text-xs text-muted-foreground">Completed payments</p>
+							</>
+						)}
 					</CardContent>
 				</Card>
 				<Card>
@@ -175,10 +244,16 @@ export default function TaxPage() {
 						<AlertTriangle className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className={`text-2xl font-bold ${totalPending > 0 ? 'text-red-600' : 'text-green-600'}`}>
-							${totalPending.toLocaleString()}
-						</div>
-						<p className="text-xs text-muted-foreground">Remaining to pay</p>
+						{isLoading ? (
+							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+						) : (
+							<>
+								<div className={`text-2xl font-bold ${totalPending > 0 ? 'text-red-600' : 'text-green-600'}`}>
+									{formatCurrency(totalPending)}
+								</div>
+								<p className="text-xs text-muted-foreground">Remaining to pay</p>
+							</>
+						)}
 					</CardContent>
 				</Card>
 				<Card>
@@ -187,14 +262,20 @@ export default function TaxPage() {
 						<TrendingDown className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-green-600">${totalDeductions.toLocaleString()}</div>
-						<p className="text-xs text-muted-foreground">Tax savings</p>
+						{isLoading ? (
+							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+						) : (
+							<>
+								<div className="text-2xl font-bold text-green-600">{formatCurrency(totalDeductions)}</div>
+								<p className="text-xs text-muted-foreground">Tax savings</p>
+							</>
+						)}
 					</CardContent>
 				</Card>
 			</div>
 
 			{/* Tax Alerts */}
-			{taxAlerts.length > 0 && (
+			{alerts.length > 0 && (
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
@@ -206,7 +287,7 @@ export default function TaxPage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-3">
-						{taxAlerts.map((alert, index) => (
+						{alerts.map((alert, index) => (
 							<div key={index} className="flex items-center justify-between p-3 rounded-lg border">
 								<div className="flex items-center gap-3">
 									{alert.type === 'danger' && <AlertTriangle className="h-4 w-4 text-red-500" />}
@@ -220,7 +301,20 @@ export default function TaxPage() {
 									</div>
 								</div>
 								{alert.action && (
-									<Button variant="outline" size="sm">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => {
+											if (alert.obligationId) {
+												const obligation = obligations.find((o) => o.id === alert.obligationId);
+												if (obligation) {
+													handlePayObligation(obligation);
+												}
+											} else {
+												toast.info(alert.action || "Action");
+											}
+										}}
+									>
 										{alert.action}
 									</Button>
 								)}
@@ -248,58 +342,89 @@ export default function TaxPage() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="space-y-4">
-								{taxObligations.map((tax, index) => (
-									<div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-										<div className="space-y-1">
-											<div className="flex items-center gap-2">
-												<h4 className="font-medium">{tax.name}</h4>
-												<Badge variant={
-													tax.status === 'paid' ? 'default' :
-													tax.status === 'pending' ? 'secondary' :
-													'destructive'
-												}>
-													{tax.status}
-												</Badge>
+							{obligationsLoading ? (
+								<div className="flex items-center justify-center py-8">
+									<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+								</div>
+							) : obligations.length === 0 ? (
+								<div className="text-center py-8 text-muted-foreground">
+									No tax obligations found. Create one to get started.
+								</div>
+							) : (
+								<div className="space-y-4">
+									{obligations.map((tax) => (
+										<div key={tax.id} className="flex items-center justify-between p-4 border rounded-lg">
+											<div className="space-y-1">
+												<div className="flex items-center gap-2">
+													<h4 className="font-medium">{tax.name}</h4>
+													<Badge variant={
+														tax.status === 'paid' ? 'default' :
+														tax.status === 'pending' ? 'secondary' :
+														'destructive'
+													}>
+														{tax.status}
+													</Badge>
+												</div>
+												<p className="text-sm text-muted-foreground">
+													{tax.quarter || `${tax.year}`} • Due: {formatDate(tax.dueDate)}
+												</p>
 											</div>
-											<p className="text-sm text-muted-foreground">
-												{tax.quarter} • Due: {tax.dueDate}
-											</p>
+											<div className="text-right space-y-1">
+												<div className="flex items-center gap-2">
+													<span className="font-medium">{formatCurrency(tax.amount)}</span>
+													{tax.status === 'paid' ? (
+														<CheckCircle className="h-4 w-4 text-green-500" />
+													) : (
+														<AlertTriangle className="h-4 w-4 text-yellow-500" />
+													)}
+												</div>
+												<div className="flex items-center gap-2">
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => handleEditObligation(tax)}
+													>
+														<Edit className="h-4 w-4" />
+													</Button>
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => handlePayObligation(tax)}
+														disabled={recordPayment.isPending || parseFloat(tax.amount || "0") - parseFloat(tax.paid || "0") <= 0}
+													>
+														{recordPayment.isPending ? (
+															<Loader2 className="h-4 w-4 animate-spin" />
+														) : (
+															"Pay"
+														)}
+													</Button>
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => handleDeleteObligation(tax.id)}
+														disabled={deleteObligation.isPending}
+													>
+														{deleteObligation.isPending ? (
+															<Loader2 className="h-4 w-4 animate-spin" />
+														) : (
+															<Trash2 className="h-4 w-4 text-destructive" />
+														)}
+													</Button>
+												</div>
+											</div>
 										</div>
-										<div className="text-right space-y-1">
-											<div className="flex items-center gap-2">
-												<span className="font-medium">${tax.amount.toLocaleString()}</span>
-												{tax.status === 'paid' ? (
-													<CheckCircle className="h-4 w-4 text-green-500" />
-												) : (
-													<AlertTriangle className="h-4 w-4 text-yellow-500" />
-												)}
-											</div>
-											<div className="flex items-center gap-2">
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => toast.info('Editing tax obligation')}
-												>
-													Edit
-												</Button>
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => toast.info('Processing tax payment')}
-												>
-													Pay
-												</Button>
-											</div>
-										</div>
-									</div>
-								))}
-								<Separator />
-								<Button variant="outline" className="w-full">
-									<Plus className="h-4 w-4 mr-2" />
-									Add Tax Obligation
-								</Button>
-							</div>
+									))}
+									<Separator />
+									<Button
+										variant="outline"
+										className="w-full"
+										onClick={handleAddObligation}
+									>
+										<Plus className="h-4 w-4 mr-2" />
+										Add Tax Obligation
+									</Button>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				</TabsContent>
@@ -313,37 +438,69 @@ export default function TaxPage() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="space-y-4">
-								{taxDeductions.map((deduction, index) => (
-									<div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-										<div className="space-y-1">
-											<h4 className="font-medium">{deduction.category}</h4>
-											<p className="text-sm text-muted-foreground">
-												{deduction.transactions} transactions • {deduction.percentage}% of total deductions
-											</p>
-										</div>
-										<div className="text-right space-y-1">
-											<span className="font-medium text-green-600">
-												${deduction.amount.toLocaleString()}
-											</span>
-											<Button variant="ghost" size="sm">
-												View Details
-											</Button>
-										</div>
-									</div>
-								))}
-								<Separator />
-								<div className="grid gap-4 md:grid-cols-2">
-									<Button variant="outline" className="w-full">
-										<Plus className="h-4 w-4 mr-2" />
-										Add Manual Deduction
-									</Button>
-									<Button variant="outline" className="w-full">
-										<Receipt className="h-4 w-4 mr-2" />
-										Scan Receipts
-									</Button>
+							{deductionsLoading ? (
+								<div className="flex items-center justify-center py-8">
+									<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
 								</div>
-							</div>
+							) : deductions.length === 0 ? (
+								<div className="text-center py-8 text-muted-foreground">
+									No tax deductions found. Create one to get started.
+								</div>
+							) : (
+								<div className="space-y-4">
+									{deductions.map((deduction) => (
+										<div key={deduction.id} className="flex items-center justify-between p-4 border rounded-lg">
+											<div className="space-y-1">
+												<h4 className="font-medium">{deduction.category}</h4>
+												<p className="text-sm text-muted-foreground">
+													{deduction.transactionCount} transactions • {parseFloat(deduction.percentage || "0").toFixed(1)}% of total deductions
+												</p>
+											</div>
+											<div className="text-right space-y-1">
+												<span className="font-medium text-green-600">
+													{formatCurrency(deduction.amount)}
+												</span>
+												<div className="flex items-center gap-2">
+													<Button variant="ghost" size="sm" onClick={() => handleEditDeduction(deduction)}>
+														<Edit className="h-4 w-4" />
+													</Button>
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => handleDeleteDeduction(deduction.id)}
+														disabled={deleteDeduction.isPending}
+													>
+														{deleteDeduction.isPending ? (
+															<Loader2 className="h-4 w-4 animate-spin" />
+														) : (
+															<Trash2 className="h-4 w-4 text-destructive" />
+														)}
+													</Button>
+												</div>
+											</div>
+										</div>
+									))}
+									<Separator />
+									<div className="grid gap-4 md:grid-cols-2">
+										<Button
+											variant="outline"
+											className="w-full"
+											onClick={handleAddDeduction}
+										>
+											<Plus className="h-4 w-4 mr-2" />
+											Add Manual Deduction
+										</Button>
+										<Button
+											variant="outline"
+											className="w-full"
+											onClick={() => toast.info('Receipt scanning coming soon')}
+										>
+											<Receipt className="h-4 w-4 mr-2" />
+											Scan Receipts
+										</Button>
+									</div>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				</TabsContent>
@@ -357,36 +514,57 @@ export default function TaxPage() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="space-y-4">
-								<div className="grid gap-4 md:grid-cols-2">
-									<div className="p-4 border rounded-lg">
-										<div className="flex items-center gap-2 mb-2">
-											<FileText className="h-4 w-4" />
-											<h4 className="font-medium">2024 Tax Summary</h4>
-										</div>
-										<p className="text-sm text-muted-foreground mb-3">
-											Complete tax year summary and forms
-										</p>
-										<Button size="sm" className="w-full">
-											<Download className="h-4 w-4 mr-2" />
-											Download PDF
-										</Button>
-									</div>
-									<div className="p-4 border rounded-lg">
-										<div className="flex items-center gap-2 mb-2">
-											<Receipt className="h-4 w-4" />
-											<h4 className="font-medium">Expense Report</h4>
-										</div>
-										<p className="text-sm text-muted-foreground mb-3">
-											Detailed business expense breakdown
-										</p>
-										<Button size="sm" className="w-full" variant="outline">
-											<Download className="h-4 w-4 mr-2" />
-											Download
-										</Button>
-									</div>
+							{documentsLoading ? (
+								<div className="flex items-center justify-center py-8">
+									<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
 								</div>
-							</div>
+							) : documents.length === 0 ? (
+								<div className="text-center py-8 text-muted-foreground">
+									No tax documents found. Upload one to get started.
+								</div>
+							) : (
+								<div className="space-y-4">
+									<div className="grid gap-4 md:grid-cols-2">
+										{documents.map((doc) => (
+											<div key={doc.id} className="p-4 border rounded-lg">
+												<div className="flex items-center gap-2 mb-2">
+													<FileText className="h-4 w-4" />
+													<h4 className="font-medium">{doc.name}</h4>
+												</div>
+												<p className="text-sm text-muted-foreground mb-3">
+													{doc.description || `${doc.type} • ${doc.year}`}
+												</p>
+												<div className="flex gap-2">
+													<Button
+														size="sm"
+														className="flex-1"
+														onClick={() => window.open(doc.fileUrl, '_blank')}
+													>
+														<Download className="h-4 w-4 mr-2" />
+														Download
+													</Button>
+													<Button
+														size="sm"
+														variant="outline"
+														onClick={() => handleDeleteDocument(doc.id)}
+														disabled={deleteDocument.isPending}
+													>
+														Delete
+													</Button>
+												</div>
+											</div>
+										))}
+									</div>
+									<Button
+										variant="outline"
+										className="w-full"
+										onClick={() => setDocumentDialogOpen(true)}
+									>
+										<Plus className="h-4 w-4 mr-2" />
+										Upload Document
+									</Button>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				</TabsContent>
@@ -402,8 +580,10 @@ export default function TaxPage() {
 						<CardContent>
 							<div className="space-y-4">
 								<div className="p-4 bg-blue-50 dark:bg-blue-950/50 rounded-lg">
-									<h4 className="font-medium mb-2">Estimated 2025 Tax Liability</h4>
-									<p className="text-2xl font-bold text-blue-600">$62,000 - $68,000</p>
+									<h4 className="font-medium mb-2">Estimated {selectedYear} Tax Liability</h4>
+									<p className="text-2xl font-bold text-blue-600">
+										{summary ? formatCurrency(summary.totalPending) : "Calculating..."}
+									</p>
 									<p className="text-sm text-muted-foreground">
 										Based on current income and deduction patterns
 									</p>
@@ -420,7 +600,9 @@ export default function TaxPage() {
 									</div>
 									<div className="space-y-2">
 										<h4 className="font-medium">Potential Savings</h4>
-										<p className="text-lg font-bold text-green-600">$8,500</p>
+										<p className="text-lg font-bold text-green-600">
+											{summary ? formatCurrency(summary.totalDeductions * 0.25) : "$0"}
+										</p>
 										<p className="text-sm text-muted-foreground">
 											Estimated tax savings with optimization
 										</p>
@@ -431,6 +613,38 @@ export default function TaxPage() {
 					</Card>
 				</TabsContent>
 			</Tabs>
+
+			{/* Form Dialogs */}
+			<TaxObligationForm
+				open={obligationDialogOpen}
+				onOpenChange={setObligationDialogOpen}
+				obligation={selectedObligation}
+				onSuccess={() => {
+					setSelectedObligation(undefined);
+				}}
+			/>
+			{paymentObligation && (
+				<TaxPaymentForm
+					open={paymentDialogOpen}
+					onOpenChange={setPaymentDialogOpen}
+					obligation={paymentObligation}
+					onSuccess={() => {
+						setPaymentObligation(undefined);
+					}}
+				/>
+			)}
+			<TaxDeductionForm
+				open={deductionDialogOpen}
+				onOpenChange={setDeductionDialogOpen}
+				deduction={selectedDeduction}
+				onSuccess={() => {
+					setSelectedDeduction(undefined);
+				}}
+			/>
+			<TaxDocumentUpload
+				open={documentDialogOpen}
+				onOpenChange={setDocumentDialogOpen}
+			/>
 		</div>
 	);
 }

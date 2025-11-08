@@ -1,0 +1,16 @@
+[warn] -- Unchecked Warning: /Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/fact-graph-scala/shared/src/main/scala/gov/irs/factgraph/Path.scala:87:13 
+[warn] 87 |        case MaybeVector.Multiple[Result[CollectionItem]](multiple, complete) if complete =>
+[warn]    |             ^
+[warn]    |the type test for gov.irs.factgraph.monads.MaybeVector.Multiple[
+[warn]    |  gov.irs.factgraph.monads.Result[gov.irs.factgraph.types.CollectionItem]] cannot be checked at runtime because its type arguments can't be determined from gov.irs.factgraph.monads.MaybeVector[gov.irs.factgraph.monads.Result[Any]]
+[warn] -- Unchecked Warning: /Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/fact-graph-scala/shared/src/main/scala/gov/irs/factgraph/compnodes/Placeholder.scala:46:8 
+[warn] 46 |        op.isInstanceOf[PlaceholderOperator[A]] && lhs.isWritable
+[warn]    |        ^^
+[warn]    |the type test for gov.irs.factgraph.compnodes.PlaceholderOperator[A] cannot be checked at runtime because its type arguments can't be determined from gov.irs.factgraph.operators.BinaryOperator[A, L$1, R$1]
+[warn] -- Unchecked Warning: /Users/jonathanpizarro/Projects/templates/financbase-admin-dashboard/lib/irs-direct-file/fact-graph-scala/shared/src/main/scala/gov/irs/factgraph/persisters/TypeContainer.scala:52:11 
+[warn] 52 |      case dollar: Dollar      => DollarWrapper(dollar)
+[warn]    |           ^
+[warn]    |the type test for gov.irs.factgraph.types.Dollar cannot be checked at runtime because it refers to an abstract type member or type parameter
+[warn] there were 30 feature warnings; re-run with -feature for details
+[warn] there were 2 deprecation warnings; re-run with -deprecation for details
+[warn] 5 warnings found
