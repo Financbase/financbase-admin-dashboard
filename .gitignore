@@ -52,3 +52,6 @@ playwright-report/
 
 # Node binaries
 node-v*/
+
+# clerk configuration (can include secrets)
+/.clerk/

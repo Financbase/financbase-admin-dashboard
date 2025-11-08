@@ -170,10 +170,24 @@ describe('TaxService', () => {
 			};
 
 			// Mock withTransaction for recordPayment
+			// recordPayment uses tx.execute twice (SELECT and UPDATE) and tx.insert for payment record
 			mockWithTransaction.mockImplementation(async (operation) => {
 				const mockTx = {
-					execute: vi.fn().mockResolvedValue({
-						rows: [mockResult],
+					execute: vi.fn()
+						.mockResolvedValueOnce({
+							rows: [{
+								id: mockObligationId,
+								year: 2025,
+								quarter: 'Q1',
+								amount: '1000.00',
+								paid: '0.00',
+							}],
+						})
+						.mockResolvedValueOnce({
+							rows: [mockResult],
+						}),
+					insert: vi.fn().mockReturnValue({
+						values: vi.fn().mockResolvedValue([]),
 					}),
 				};
 				return await operation(mockTx);
@@ -200,10 +214,24 @@ describe('TaxService', () => {
 			};
 
 			// Mock withTransaction for recordPayment
+			// recordPayment uses tx.execute twice (SELECT and UPDATE) and tx.insert for payment record
 			mockWithTransaction.mockImplementation(async (operation) => {
 				const mockTx = {
-					execute: vi.fn().mockResolvedValue({
-						rows: [mockResult],
+					execute: vi.fn()
+						.mockResolvedValueOnce({
+							rows: [{
+								id: mockObligationId,
+								year: 2025,
+								quarter: 'Q1',
+								amount: '1000.00',
+								paid: '0.00',
+							}],
+						})
+						.mockResolvedValueOnce({
+							rows: [mockResult],
+						}),
+					insert: vi.fn().mockReturnValue({
+						values: vi.fn().mockResolvedValue([]),
 					}),
 				};
 				return await operation(mockTx);
@@ -376,10 +404,17 @@ describe('TaxService', () => {
 
 			// Mock getObligations call (getTaxAlerts calls getObligations directly)
 			// Chain: select().from().where().orderBy()
+			// The orderBy must be a function that returns a promise
 			const orderByMockForAlerts = vi.fn().mockResolvedValue(mockObligations);
-			const whereMockForAlerts = vi.fn().mockReturnValue({ orderBy: orderByMockForAlerts });
-			const fromMockForAlerts = vi.fn().mockReturnValue({ where: whereMockForAlerts });
+			const whereMockForAlerts = vi.fn().mockReturnValue({ 
+				orderBy: orderByMockForAlerts 
+			});
+			const fromMockForAlerts = vi.fn().mockReturnValue({ 
+				where: whereMockForAlerts 
+			});
 			
+			// Reset and set up the mock
+			mockDb.select.mockReset();
 			mockDb.select.mockReturnValue({
 				from: fromMockForAlerts,
 			});
@@ -410,6 +445,9 @@ describe('TaxService', () => {
 								status: 'pending',
 							},
 						],
+					}),
+					insert: vi.fn().mockReturnValue({
+						values: vi.fn().mockResolvedValue([]),
 					}),
 				};
 				return await operation(mockTx);
@@ -449,6 +487,9 @@ describe('TaxService', () => {
 			mockWithTransaction.mockImplementation(async (operation) => {
 				const mockTx = {
 					execute: mockExecute,
+					insert: vi.fn().mockReturnValue({
+						values: vi.fn().mockResolvedValue([]),
+					}),
 				};
 				return await operation(mockTx);
 			});
@@ -775,10 +816,18 @@ describe('TaxService', () => {
 			];
 
 			// Mock getDeductions query chain: select().from().where().orderBy()
+			// The cache.getOrSet calls _getDeductionsInternal which uses this chain
+			// orderBy must be a function that returns a promise
 			const orderByMock = vi.fn().mockResolvedValue(mockDeductions);
-			const whereMock = vi.fn().mockReturnValue({ orderBy: orderByMock });
-			const fromMock = vi.fn().mockReturnValue({ where: whereMock });
+			const whereMock = vi.fn().mockReturnValue({ 
+				orderBy: orderByMock 
+			});
+			const fromMock = vi.fn().mockReturnValue({ 
+				where: whereMock 
+			});
 			
+			// Reset and set up the mock
+			mockDb.select.mockReset();
 			mockDb.select.mockReturnValue({
 				from: fromMock,
 			});
