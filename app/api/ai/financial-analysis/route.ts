@@ -8,7 +8,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { AIFinancialService } from '@/lib/ai/financial-service';
+import { withAIDecisionLogging } from '@/lib/middleware/ai-decision-logger';
 
 /**
  * @swagger
@@ -86,6 +88,14 @@ import { AIFinancialService } from '@/lib/ai/financial-service';
  */
 export async function POST(request: NextRequest) {
 	try {
+		const { userId, orgId } = await auth();
+		if (!userId || !orgId) {
+			return NextResponse.json(
+				{ error: 'Unauthorized' },
+				{ status: 401 }
+			);
+		}
+
 		const body = await request.json();
 		const { revenue, expenses, transactions, budget } = body;
 
@@ -96,12 +106,25 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		const analysis = await AIFinancialService.analyzeFinancialData({
-			revenue,
-			expenses,
-			transactions: transactions || [],
-			budget,
-		});
+		// Use AI decision logging wrapper
+		const analysis = await withAIDecisionLogging(
+			orgId,
+			userId,
+			'financial-analysis-model',
+			body,
+			async () => {
+				return await AIFinancialService.analyzeFinancialData({
+					revenue,
+					expenses,
+					transactions: transactions || [],
+					budget,
+				});
+			},
+			{
+				useCase: 'financial_analysis',
+				decisionType: 'financial_analysis',
+			}
+		);
 
 		return NextResponse.json({
 			success: true,

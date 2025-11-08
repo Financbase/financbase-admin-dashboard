@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { withAIDecisionLogging } from '@/lib/middleware/ai-decision-logger';
 
 /**
  * Simple AI chat endpoint for quick messages
@@ -18,8 +19,8 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId, orgId } = await auth();
+    if (!userId || !orgId) {
       return ApiErrorHandler.unauthorized();
     }
 
@@ -30,12 +31,25 @@ export async function POST(request: NextRequest) {
       return ApiErrorHandler.badRequest('Message is required');
     }
 
-    // For now, return a simple response
-    // In production, this would call an AI service
-    const response = {
-      response: `I received your message: "${message}". This is a placeholder response. For full AI capabilities, please use the AI Assistant page.`,
-      timestamp: new Date().toISOString(),
-    };
+    // Use AI decision logging wrapper
+    const response = await withAIDecisionLogging(
+      orgId,
+      userId,
+      'chat-model',
+      body,
+      async () => {
+        // For now, return a simple response
+        // In production, this would call an AI service
+        return {
+          response: `I received your message: "${message}". This is a placeholder response. For full AI capabilities, please use the AI Assistant page.`,
+          timestamp: new Date().toISOString(),
+        };
+      },
+      {
+        useCase: 'chat',
+        decisionType: 'recommendation',
+      }
+    );
 
     return NextResponse.json(response);
   } catch (error) {

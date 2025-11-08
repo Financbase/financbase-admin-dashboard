@@ -31,47 +31,56 @@ export interface DirectFileExportMetadata {
 export async function storeExportMetadata(
 	metadata: Omit<DirectFileExportMetadata, "id" | "exportDate">
 ): Promise<DirectFileExportMetadata> {
-	// In a real implementation, this would call an API endpoint
-	// that stores only the metadata in the database
-	
-	const fullMetadata: DirectFileExportMetadata = {
-		...metadata,
-		id: `export-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-		exportDate: new Date().toISOString(),
-	};
+	const response = await fetch("/api/tax/direct-file/exports", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			filename: metadata.filename,
+			format: metadata.format,
+			fileSize: metadata.fileSize,
+		}),
+	});
 
-	// TODO: Implement API call to store metadata
-	// Example:
-	// const response = await fetch("/api/tax/direct-file/exports", {
-	//   method: "POST",
-	//   headers: { "Content-Type": "application/json" },
-	//   body: JSON.stringify(fullMetadata),
-	// });
-	// return response.json();
+	if (!response.ok) {
+		const error = await response.json().catch(() => ({ error: "Failed to store export metadata" }));
+		throw new Error(error.error?.message || error.message || "Failed to store export metadata");
+	}
 
-	return fullMetadata;
+	const result = await response.json();
+	return result.data;
 }
 
 /**
  * Get export history for a user (metadata only, no PII/FTI)
+ * Note: userId parameter is kept for API compatibility but the API uses RLS to get current user
  */
 export async function getExportHistory(userId: string): Promise<DirectFileExportMetadata[]> {
-	// TODO: Implement API call to fetch export history
-	// Example:
-	// const response = await fetch(`/api/tax/direct-file/exports?userId=${userId}`);
-	// return response.json();
-	
-	return [];
+	const response = await fetch("/api/tax/direct-file/exports", {
+		method: "GET",
+		headers: { "Content-Type": "application/json" },
+	});
+
+	if (!response.ok) {
+		const error = await response.json().catch(() => ({ error: "Failed to fetch export history" }));
+		throw new Error(error.error?.message || error.message || "Failed to fetch export history");
+	}
+
+	const result = await response.json();
+	return result.data || [];
 }
 
 /**
  * Delete export metadata record
  */
 export async function deleteExportMetadata(exportId: string): Promise<void> {
-	// TODO: Implement API call to delete export metadata
-	// Example:
-	// await fetch(`/api/tax/direct-file/exports/${exportId}`, {
-	//   method: "DELETE",
-	// });
+	const response = await fetch(`/api/tax/direct-file/exports/${exportId}`, {
+		method: "DELETE",
+		headers: { "Content-Type": "application/json" },
+	});
+
+	if (!response.ok) {
+		const error = await response.json().catch(() => ({ error: "Failed to delete export metadata" }));
+		throw new Error(error.error?.message || error.message || "Failed to delete export metadata");
+	}
 }
 

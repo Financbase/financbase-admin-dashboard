@@ -17,6 +17,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 import { FinancbaseGPTService } from '@/lib/services/business/financbase-gpt-service';
+import { withAIDecisionLogging } from '@/lib/middleware/ai-decision-logger';
 
 // Create OpenAI client
 const openai = new OpenAI({
@@ -29,14 +30,15 @@ export const runtime = 'edge';
 export async function POST(req: NextRequest) {
 	try {
 		// Authenticate user
-		const { userId } = await auth();
+		const { userId, orgId } = await auth();
 
-		if (!userId) {
+		if (!userId || !orgId) {
 			return new Response('Unauthorized', { status: 401 });
 		}
 
 		// Parse request body
-		const { messages, context, analysisType } = await req.json();
+		const body = await req.json();
+		const { messages, context, analysisType } = body;
 
 		if (!messages || !Array.isArray(messages)) {
 			return new Response('Invalid request body', { status: 400 });
@@ -51,17 +53,30 @@ export async function POST(req: NextRequest) {
 			return new Response('Invalid message format', { status: 400 });
 		}
 
-		// Process query with enhanced service
-		const response = await gptService.query({
-			query: lastMessage.content,
+		// Use AI decision logging wrapper
+		const response = await withAIDecisionLogging(
+			orgId,
 			userId,
-			analysisType: analysisType || 'general',
-			conversationHistory: messages.slice(0, -1).map((msg: any) => ({
-				role: msg.role,
-				content: msg.content,
-				timestamp: new Date().toISOString(),
-			})),
-		});
+			'financbase-gpt',
+			body,
+			async () => {
+				// Process query with enhanced service
+				return await gptService.query({
+					query: lastMessage.content,
+					userId,
+					analysisType: analysisType || 'general',
+					conversationHistory: messages.slice(0, -1).map((msg: any) => ({
+						role: msg.role,
+						content: msg.content,
+						timestamp: new Date().toISOString(),
+					})),
+				});
+			},
+			{
+				useCase: 'financial_analysis',
+				decisionType: 'financial_analysis',
+			}
+		);
 
 		// Return structured response
 		return new Response(JSON.stringify(response), {

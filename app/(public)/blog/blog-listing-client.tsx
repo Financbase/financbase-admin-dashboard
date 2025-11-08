@@ -193,7 +193,7 @@ export function BlogListingClient({ initialPosts, initialCategories }: BlogListi
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-							{blogPosts.map((post) => {
+							{blogPosts.map((post: BlogPost) => {
 								const category = categories.find((c) => c.id === post.categoryId);
 								const imageUrl = post.featuredImage || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop";
 								

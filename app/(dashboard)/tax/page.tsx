@@ -56,7 +56,6 @@ import { TaxPaymentForm } from "@/components/tax/tax-payment-form";
 import { TaxDeductionForm } from "@/components/tax/tax-deduction-form";
 import { TaxDocumentUpload } from "@/components/tax/tax-document-upload";
 import { useRouter } from "next/navigation";
-import { FileText } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
 
