@@ -68,6 +68,7 @@ export const FINANCIAL_PERMISSIONS = {
 	CAREERS_EDIT: 'careers:edit',
 	CAREERS_DELETE: 'careers:delete',
 	CAREERS_MANAGE: 'careers:manage',
+	SUPPORT_TICKETS_MANAGE: 'support:tickets:manage',
 } as const;
 
 export type FinancialPermission = typeof FINANCIAL_PERMISSIONS[keyof typeof FINANCIAL_PERMISSIONS];

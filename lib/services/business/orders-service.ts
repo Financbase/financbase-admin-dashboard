@@ -336,5 +336,95 @@ export class OrdersService {
 			delivered: allOrders.filter((o) => o.status === "delivered").length,
 		};
 	}
+
+	/**
+	 * Get order alerts based on various conditions
+	 */
+	async getAlerts() {
+		const { userId } = await auth();
+		if (!userId) {
+			throw new Error("Unauthorized");
+		}
+
+		const allOrders = await this.getAll();
+		const alerts: Array<{
+			id: string;
+			orderNumber: string;
+			type: string;
+			severity: "low" | "medium" | "high" | "critical";
+			message: string;
+			action: string;
+			orderId: string;
+		}> = [];
+
+		const now = new Date();
+		const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+		const twoDaysFromNow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+		const highValueThreshold = 10000; // $10,000
+
+		for (const order of allOrders) {
+			// Alert 1: Orders pending > 24 hours
+			if (
+				order.status === "pending" &&
+				order.createdAt &&
+				new Date(order.createdAt) < twentyFourHoursAgo
+			) {
+				alerts.push({
+					id: order.id,
+					orderNumber: order.orderNumber,
+					type: "pending_too_long",
+					severity: "high",
+					message: `Order ${order.orderNumber} has been pending for more than 24 hours`,
+					action: "Review Order",
+					orderId: order.id,
+				});
+			}
+
+			// Alert 2: High-value orders
+			const totalAmount = parseFloat(order.totalAmount.toString());
+			if (totalAmount > highValueThreshold) {
+				alerts.push({
+					id: order.id,
+					orderNumber: order.orderNumber,
+					type: "high_value",
+					severity: "medium",
+					message: `Order ${order.orderNumber} has a high value of $${totalAmount.toLocaleString()}`,
+					action: "Review Order",
+					orderId: order.id,
+				});
+			}
+
+			// Alert 3: Orders approaching due date
+			if (order.dueDate) {
+				const dueDate = new Date(order.dueDate);
+				if (dueDate > now && dueDate < twoDaysFromNow) {
+					alerts.push({
+						id: order.id,
+						orderNumber: order.orderNumber,
+						type: "approaching_due_date",
+						severity: "high",
+						message: `Order ${order.orderNumber} is due within 2 days (${dueDate.toLocaleDateString()})`,
+						action: "View Order",
+						orderId: order.id,
+					});
+				}
+			}
+
+			// Alert 4: Cancelled/refunded orders requiring attention
+			if (order.status === "cancelled" || order.status === "refunded") {
+				alerts.push({
+					id: order.id,
+					orderNumber: order.orderNumber,
+					type: "cancelled_refunded",
+					severity: "medium",
+					message: `Order ${order.orderNumber} has been ${order.status} and may require attention`,
+					action: "Review Order",
+					orderId: order.id,
+				});
+			}
+		}
+
+		return alerts;
+	}
 }
 

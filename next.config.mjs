@@ -165,9 +165,27 @@ const nextConfig = {
 				// 'named' in dev provides better debugging, 'deterministic' in prod for stable hashes
 				moduleIds: dev ? 'named' : 'deterministic',
 				chunkIds: dev ? 'named' : 'deterministic',
-				// Split chunks more aggressively to reduce chunk size and improve loading
-				splitChunks: {
-					...config.optimization?.splitChunks,
+				// In development, use simpler chunk splitting to avoid chunk loading issues
+				// In production, split chunks more aggressively
+				splitChunks: dev ? {
+					// Development: simpler chunking to reduce chunk loading errors
+					chunks: 'all',
+					cacheGroups: {
+						...config.optimization?.splitChunks?.cacheGroups,
+						default: {
+							minChunks: 2,
+							priority: -20,
+							reuseExistingChunk: true,
+						},
+						vendor: {
+							test: /[\\/]node_modules[\\/]/,
+							name: 'vendors',
+							priority: -10,
+							reuseExistingChunk: true,
+						},
+					},
+				} : {
+					// Production: more aggressive splitting
 					chunks: 'all',
 					cacheGroups: {
 						...config.optimization?.splitChunks?.cacheGroups,
@@ -196,11 +214,20 @@ const nextConfig = {
 			config.output.chunkLoadingGlobal = 'webpackChunkLoad';
 			
 			// Add error handling for chunk loading
-			config.output.chunkLoadTimeout = 120000;
+			// Use shorter timeout in dev to catch issues faster, longer in prod for reliability
+			config.output.chunkLoadTimeout = dev ? 30000 : 120000;
 			
 			// Improve chunk filename generation for better cache busting
-			// Use content hash for stable caching and cache busting
-			config.output.chunkFilename = '[name].[contenthash:8].chunk.js';
+			// In development, use simpler naming to avoid stale chunk references
+			// In production, use content hash for stable caching and cache busting
+			if (dev) {
+				// Development: simpler naming without contenthash to avoid stale references
+				// Next.js will handle cache busting via query params in dev mode
+				config.output.chunkFilename = '[name].chunk.js';
+			} else {
+				// Production: use content hash for stable caching
+				config.output.chunkFilename = '[name].[contenthash:8].chunk.js';
+			}
 			
 			// Add DefinePlugin to expose chunk error handler globally
 			config.plugins = [

@@ -165,3 +165,36 @@ export type NewTaxDeduction = typeof taxDeductions.$inferInsert;
 export type TaxDocument = typeof taxDocuments.$inferSelect;
 export type NewTaxDocument = typeof taxDocuments.$inferInsert;
 
+/**
+ * Tax Payments Table
+ * Track individual tax payments for history and compliance
+ */
+export const taxPayments = pgTable("tax_payments", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	userId: text("user_id").notNull(),
+	obligationId: uuid("obligation_id").references(() => taxObligations.id, { onDelete: 'cascade' }),
+
+	// Payment details
+	amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+	paymentDate: timestamp("payment_date", { withTimezone: true }).notNull(),
+	paymentMethod: text("payment_method"), // e.g., "bank_transfer", "check", "credit_card"
+	reference: text("reference"), // Payment reference number
+	quarter: integer("quarter"), // Quarter number (1-4) for quarterly payments
+	year: integer("year").notNull(),
+
+	// Additional information
+	notes: text("notes"),
+	metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+
+	// Timestamps
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export type TaxPayment = typeof taxPayments.$inferSelect;
+export type NewTaxPayment = typeof taxPayments.$inferInsert;
+

@@ -27,12 +27,40 @@ export async function GET(request: NextRequest) {
 				? parseInt(searchParams.get("year")!)
 				: undefined;
 			const type = searchParams.get("type") || undefined;
+			
+			// Pagination parameters
+			const page = searchParams.get("page")
+				? parseInt(searchParams.get("page")!)
+				: undefined;
+			const limit = searchParams.get("limit")
+				? parseInt(searchParams.get("limit")!)
+				: undefined;
+			const offset = page && limit ? (page - 1) * limit : undefined;
 
 			const service = new TaxService();
-			let documents = await service.getDocuments(clerkUserId, year);
+			const result = await service.getDocuments(clerkUserId, year, {
+				type,
+				limit,
+				offset,
+			});
 
-			// Filter by type if provided
-			if (type) {
+			// Check if result is paginated
+			if (limit !== undefined && "data" in result) {
+				return NextResponse.json({
+					success: true,
+					data: result.data,
+					pagination: {
+						page: result.page,
+						limit: result.limit,
+						total: result.total,
+						totalPages: result.totalPages,
+					},
+				});
+			}
+
+			// Filter by type if provided and not paginated
+			let documents = Array.isArray(result) ? result : result.data;
+			if (type && !limit) {
 				documents = documents.filter((d) => d.type === type);
 			}
 

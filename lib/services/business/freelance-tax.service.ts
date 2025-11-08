@@ -19,16 +19,9 @@ import {
 	Filter,
 	TrendingDown,
 } from "lucide-react";
-import { db } from "../db/connection";
-import { income, invoices } from "../db/schema-actual";
-import {
-	type Project,
-	type ProjectExpense,
-	type ProjectTimeEntry,
-	projectExpenses,
-	projectTimeEntries,
-	projects,
-} from "../db/schema-freelance";
+import { db } from "@/lib/db";
+import { propertyIncome, invoices, projects, expenses, timeEntries } from "@/lib/db/schemas";
+import type { Project } from "@/lib/db/schemas";
 
 export interface TaxCalculation {
 	grossIncome: number;
@@ -249,6 +242,7 @@ export class FreelanceTaxService {
 
 	/**
 	 * Track quarterly tax payments
+	 * Creates or updates a tax obligation for the quarterly payment
 	 */
 	async recordQuarterlyPayment(
 		userId: string,
@@ -256,12 +250,83 @@ export class FreelanceTaxService {
 		year: number,
 		amount: number,
 		paymentDate: Date,
+		paymentMethod?: string,
+		reference?: string,
 	): Promise<void> {
-		// This would typically be stored in a tax_payments table
-		// For now, we'll update the quarterly estimate
-		console.log(
-			`Recorded quarterly payment: Q${quarter} ${year} - $${amount} on ${paymentDate.toISOString()}`,
-		);
+		// Validate quarter
+		if (quarter < 1 || quarter > 4) {
+			throw new Error('Quarter must be between 1 and 4');
+		}
+
+		// Validate date
+		if (paymentDate > new Date()) {
+			throw new Error('Payment date cannot be in the future');
+		}
+
+		const { TaxService } = await import("./tax-service");
+		const { db } = await import("../db/connection");
+		const { taxPayments } = await import("../db/schemas");
+		const { withTransaction } = await import("../../utils/db-transaction");
+		const { eq, and } = await import("drizzle-orm");
+		const taxService = new TaxService();
+
+		const quarterLabel = `Q${quarter} ${year}`;
+		const dueDate = this.getQuarterlyDueDate(quarter, year);
+
+		return await withTransaction(async (tx) => {
+			// Check if obligation already exists for this quarter
+			const existingObligations = await taxService.getObligations(userId, {
+				quarter: quarterLabel,
+				year,
+				type: "self_employment",
+			});
+
+			// Handle array or paginated result
+			const obligations = Array.isArray(existingObligations)
+				? existingObligations
+				: existingObligations.data || [];
+
+			let obligationId: string;
+
+			if (obligations.length > 0) {
+				obligationId = obligations[0].id;
+			} else {
+				// Create new obligation for quarterly payment
+				const newObligation = await taxService.createObligation({
+					userId,
+					name: `Q${quarter} ${year} Estimated Tax Payment`,
+					type: "self_employment",
+					amount,
+					dueDate: dueDate.toISOString(),
+					status: "pending",
+				quarter: quarterLabel,
+				year,
+				notes: `Quarterly estimated tax payment for ${quarterLabel}`,
+			});
+
+			// Record the payment
+			const newObligations = await taxService.getObligations(userId, {
+				quarter: quarterLabel,
+				year,
+				type: "self_employment",
+			});
+			const newObligationsList = Array.isArray(newObligations)
+				? newObligations
+				: newObligations.data;
+
+			if (newObligationsList.length > 0) {
+				await taxService.recordPayment(
+					{
+						obligationId: newObligationsList[0].id,
+						amount,
+						paymentDate: paymentDate.toISOString(),
+						paymentMethod: "quarterly_estimate",
+						notes: `Quarterly estimated tax payment for ${quarterLabel}`,
+					},
+					userId
+				);
+			}
+		}
 	}
 
 	/**

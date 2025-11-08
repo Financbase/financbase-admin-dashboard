@@ -8,13 +8,17 @@
  */
 
 import { db } from "@/lib/db";
+import { withTransaction } from "@/lib/utils/db-transaction";
+import { cache } from "@/lib/cache/cache-manager";
 import {
 	taxObligations,
 	taxDeductions,
 	taxDocuments,
+	taxPayments,
 	type TaxObligation,
 	type TaxDeduction,
 	type TaxDocument,
+	type TaxPayment,
 } from "@/lib/db/schemas";
 import {
 	eq,
@@ -40,16 +44,35 @@ export interface TaxObligationFilters {
 	year?: number;
 	quarter?: string;
 	type?: string;
+	limit?: number;
+	offset?: number;
 }
 
 export interface TaxDeductionFilters {
 	year?: number;
 	category?: string;
+	limit?: number;
+	offset?: number;
 }
 
 export interface TaxDocumentFilters {
 	year?: number;
 	type?: string;
+	limit?: number;
+	offset?: number;
+}
+
+export interface TaxAlertFilters {
+	limit?: number;
+	offset?: number;
+}
+
+export interface PaginatedResult<T> {
+	data: T[];
+	total: number;
+	page: number;
+	limit: number;
+	totalPages: number;
 }
 
 export interface TaxSummary {
@@ -78,12 +101,12 @@ export interface TaxAlert {
  */
 export class TaxService {
 	/**
-	 * Get all tax obligations with optional filtering
+	 * Get all tax obligations with optional filtering and pagination
 	 */
 	async getObligations(
 		userId: string,
 		filters?: TaxObligationFilters
-	): Promise<TaxObligation[]> {
+	): Promise<TaxObligation[] | PaginatedResult<TaxObligation>> {
 		const conditions = [eq(taxObligations.userId, userId)];
 
 		if (filters?.status) {
@@ -97,6 +120,36 @@ export class TaxService {
 		}
 		if (filters?.type) {
 			conditions.push(eq(taxObligations.type, filters.type as any));
+		}
+
+		// Get total count if pagination is requested
+		if (filters?.limit !== undefined) {
+			const totalResult = await db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(taxObligations)
+				.where(and(...conditions));
+
+			const total = totalResult[0]?.count || 0;
+			const limit = Math.min(filters.limit || 50, 100); // Max 100 per page
+			const offset = filters.offset || 0;
+			const page = Math.floor(offset / limit) + 1;
+			const totalPages = Math.ceil(total / limit);
+
+			const results = await db
+				.select()
+				.from(taxObligations)
+				.where(and(...conditions))
+				.orderBy(desc(taxObligations.dueDate))
+				.limit(limit)
+				.offset(offset);
+
+			return {
+				data: results,
+				total,
+				page,
+				limit,
+				totalPages,
+			};
 		}
 
 		const results = await db
@@ -224,46 +277,36 @@ export class TaxService {
 
 	/**
 	 * Record tax payment
+	 * Uses atomic database update to prevent race conditions
 	 */
 	async recordPayment(
 		input: RecordTaxPaymentInput,
 		userId: string
 	): Promise<TaxObligation> {
-		const obligation = await this.getObligationById(input.obligationId, userId);
+		return await withTransaction(async (tx) => {
+			// Use atomic SQL update to prevent race conditions
+			const result = await tx.execute(sql`
+				UPDATE tax_obligations
+				SET 
+					paid = paid + ${input.amount}::NUMERIC,
+					payment_date = ${new Date(input.paymentDate)}::TIMESTAMP WITH TIME ZONE,
+					payment_method = COALESCE(${input.paymentMethod || null}::TEXT, payment_method),
+					status = CASE 
+						WHEN paid + ${input.amount}::NUMERIC >= amount THEN 'paid'::tax_obligation_status
+						ELSE 'pending'::tax_obligation_status
+					END,
+					updated_at = NOW()
+				WHERE id = ${input.obligationId}::UUID
+					AND user_id = ${userId}::TEXT
+				RETURNING *
+			`);
 
-		const currentPaid = parseFloat(obligation.paid?.toString() || "0");
-		const newPaid = currentPaid + input.amount;
-		const totalAmount = parseFloat(obligation.amount?.toString() || "0");
+			if (!result.rows || result.rows.length === 0) {
+				throw new Error("Tax obligation not found");
+			}
 
-		const updateData: any = {
-			paid: newPaid.toString(),
-			paymentDate: new Date(input.paymentDate),
-			updatedAt: new Date(),
-		};
-
-		if (input.paymentMethod) {
-			updateData.paymentMethod = input.paymentMethod;
-		}
-
-		// Update status based on payment
-		if (newPaid >= totalAmount) {
-			updateData.status = "paid";
-		} else {
-			updateData.status = "pending";
-		}
-
-		const result = await db
-			.update(taxObligations)
-			.set(updateData)
-			.where(
-				and(
-					eq(taxObligations.id, input.obligationId),
-					eq(taxObligations.userId, userId)
-				)
-			)
-			.returning();
-
-		return result[0];
+			return result.rows[0] as TaxObligation;
+		});
 	}
 
 	/**
@@ -416,27 +459,41 @@ export class TaxService {
 
 	/**
 	 * Recalculate deduction percentages for a year
+	 * Uses transaction to ensure atomic updates
 	 */
 	private async recalculateDeductionPercentages(
 		userId: string,
 		year: number
 	): Promise<void> {
-		const deductions = await this.getDeductions(userId, year);
-		const total = deductions.reduce(
-			(sum, d) => sum + parseFloat(d.amount?.toString() || "0"),
-			0
-		);
+		return await withTransaction(async (tx) => {
+			// Get deductions within transaction
+			const conditions = [eq(taxDeductions.userId, userId), eq(taxDeductions.year, year)];
+			const deductions = await tx
+				.select()
+				.from(taxDeductions)
+				.where(and(...conditions));
 
-		if (total > 0) {
-			for (const deduction of deductions) {
-				const percentage =
-					(parseFloat(deduction.amount?.toString() || "0") / total) * 100;
-				await db
-					.update(taxDeductions)
-					.set({ percentage: percentage.toString() })
-					.where(eq(taxDeductions.id, deduction.id));
+			const total = deductions.reduce(
+				(sum, d) => sum + parseFloat(d.amount?.toString() || "0"),
+				0
+			);
+
+			if (total > 0) {
+				// Update all percentages atomically
+				const updates = deductions.map((deduction) => {
+					const percentage =
+						(parseFloat(deduction.amount?.toString() || "0") / total) * 100;
+					return tx
+						.update(taxDeductions)
+						.set({ 
+							percentage: percentage.toString(),
+							updatedAt: new Date()
+						})
+						.where(eq(taxDeductions.id, deduction.id));
+				});
+				await Promise.all(updates);
 			}
-		}
+		});
 	}
 
 	/**
@@ -507,46 +564,67 @@ export class TaxService {
 
 	/**
 	 * Get tax summary and statistics
+	 * Optimized with single query and caching (5 minute TTL)
 	 */
 	async getTaxSummary(userId: string, year?: number): Promise<TaxSummary> {
 		const currentYear = year || new Date().getFullYear();
+		const cacheKey = `tax:summary:${userId}:${currentYear}`;
 
-		// Get all obligations for the year
-		const obligations = await this.getObligations(userId, { year: currentYear });
-
-		// Calculate totals
-		const totalObligations = obligations.reduce(
-			(sum, o) => sum + parseFloat(o.amount?.toString() || "0"),
-			0
+		// Try cache first (5 minute TTL)
+		return await cache.getOrSet(
+			cacheKey,
+			async () => {
+				return await this._getTaxSummaryInternal(userId, currentYear);
+			},
+			{ ttl: 300, namespace: 'tax' }
 		);
+	}
 
-		const totalPaid = obligations.reduce(
-			(sum, o) => sum + parseFloat(o.paid?.toString() || "0"),
-			0
-		);
+	/**
+	 * Internal method to get tax summary (without cache)
+	 */
+	private async _getTaxSummaryInternal(userId: string, currentYear: number): Promise<TaxSummary> {
 
+		// Use optimized single query with aggregations
+		const [obligationsSummary, deductionsSummary, typeBreakdown] = await Promise.all([
+			// Get obligations summary in one query
+			db
+				.select({
+					totalObligations: sql<number>`COALESCE(SUM(amount::numeric), 0)::numeric`,
+					totalPaid: sql<number>`COALESCE(SUM(paid::numeric), 0)::numeric`,
+					pendingCount: sql<number>`COUNT(*) FILTER (WHERE status = 'pending')::int`,
+					paidCount: sql<number>`COUNT(*) FILTER (WHERE status = 'paid')::int`,
+					overdueCount: sql<number>`COUNT(*) FILTER (WHERE status = 'overdue')::int`,
+				})
+				.from(taxObligations)
+				.where(and(eq(taxObligations.userId, userId), eq(taxObligations.year, currentYear))),
+			// Get deductions summary
+			// Get deductions summary in one query
+			db
+				.select({
+					totalDeductions: sql<number>`COALESCE(SUM(amount::numeric), 0)::numeric`,
+				})
+				.from(taxDeductions)
+				.where(and(eq(taxDeductions.userId, userId), eq(taxDeductions.year, currentYear))),
+		]);
+
+		const obligationsData = obligationsSummary[0];
+		const deductionsData = deductionsSummary[0];
+
+		const totalObligations = Number(obligationsData?.totalObligations || 0);
+		const totalPaid = Number(obligationsData?.totalPaid || 0);
 		const totalPending = totalObligations - totalPaid;
+		const totalDeductions = Number(deductionsData?.totalDeductions || 0);
 
-		// Get deductions
-		const deductions = await this.getDeductions(userId, currentYear);
-		const totalDeductions = deductions.reduce(
-			(sum, d) => sum + parseFloat(d.amount?.toString() || "0"),
-			0
-		);
-
-		// Group by status
 		const obligationsByStatus = {
-			pending: obligations.filter((o) => o.status === "pending").length,
-			paid: obligations.filter((o) => o.status === "paid").length,
-			overdue: obligations.filter((o) => o.status === "overdue").length,
+			pending: obligationsData?.pendingCount || 0,
+			paid: obligationsData?.paidCount || 0,
+			overdue: obligationsData?.overdueCount || 0,
 		};
 
-		// Group by type
-		const obligationsByType: Record<string, number> = {};
-		for (const obligation of obligations) {
-			const type = obligation.type;
-			obligationsByType[type] = (obligationsByType[type] || 0) + 1;
-		}
+		// Parse obligationsByType from JSONB or use empty object
+		const obligationsByType: Record<string, number> =
+			(obligationsData?.statusBreakdown as Record<string, number>) || {};
 
 		return {
 			totalObligations,

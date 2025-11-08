@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { OrderDetailDialog } from "@/components/orders/order-detail-dialog";
 
 interface Order {
 	id: string;
@@ -50,12 +51,24 @@ interface Order {
 	createdAt: string;
 }
 
+interface OrderAlert {
+	id: string;
+	orderNumber: string;
+	type: "pending_long" | "high_priority" | "due_soon" | "missing_tracking";
+	severity: "low" | "medium" | "high" | "urgent";
+	message: string;
+	action: string;
+	orderId: string;
+}
+
 export default function OrdersPage() {
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [analytics, setAnalytics] = useState<any>(null);
+	const [alerts, setAlerts] = useState<OrderAlert[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState<string>("all");
+	const [viewingOrderId, setViewingOrderId] = useState<string | null>(null);
 
 	// Fetch orders
 	const fetchOrders = async () => {
@@ -89,9 +102,22 @@ export default function OrdersPage() {
 		}
 	};
 
+	// Fetch alerts
+	const fetchAlerts = async () => {
+		try {
+			const response = await fetch("/api/orders/alerts");
+			if (!response.ok) throw new Error("Failed to fetch alerts");
+			const data = await response.json();
+			setAlerts(Array.isArray(data) ? data : []);
+		} catch (error) {
+			console.error("Error fetching alerts:", error);
+		}
+	};
+
 	useEffect(() => {
 		fetchOrders();
 		fetchAnalytics();
+		fetchAlerts();
 	}, []);
 
 	useEffect(() => {
@@ -242,33 +268,58 @@ export default function OrdersPage() {
 			</Card>
 
 			{/* Order Alerts */}
-			{/* TODO: Implement order alerts functionality */}
-			{false && (
+			{alerts.length > 0 && (
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<AlertTriangle className="h-5 w-5" />
 							Order Alerts
+							<Badge variant="destructive" className="ml-2">
+								{alerts.length}
+							</Badge>
 						</CardTitle>
 						<CardDescription>
 							Important order notifications and actions needed
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-3">
-						{[].map((alert: any, index: number) => (
-							<div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-								<div className="flex items-center gap-3">
-									<AlertTriangle className="h-4 w-4 text-yellow-500" />
-									<div>
-										<span className="text-sm font-medium">Order {alert.order}</span>
-										<p className="text-sm text-muted-foreground">{alert.message}</p>
+						{alerts.map((alert) => {
+							const severityColors = {
+								urgent: "text-red-500",
+								high: "text-orange-500",
+								medium: "text-yellow-500",
+								low: "text-blue-500",
+							};
+							const severityBgColors = {
+								urgent: "bg-red-50 border-red-200",
+								high: "bg-orange-50 border-orange-200",
+								medium: "bg-yellow-50 border-yellow-200",
+								low: "bg-blue-50 border-blue-200",
+							};
+							return (
+								<div
+									key={alert.id}
+									className={`flex items-center justify-between p-3 rounded-lg border ${severityBgColors[alert.severity]}`}
+								>
+									<div className="flex items-center gap-3">
+										<AlertTriangle className={`h-4 w-4 ${severityColors[alert.severity]}`} />
+										<div>
+											<span className="text-sm font-medium">Order {alert.orderNumber}</span>
+											<p className="text-sm text-muted-foreground">{alert.message}</p>
+										</div>
 									</div>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => {
+											setViewingOrderId(alert.orderId);
+										}}
+									>
+										{alert.action}
+									</Button>
 								</div>
-								<Button variant="outline" size="sm">
-									{alert.action}
-								</Button>
-							</div>
-						))}
+							);
+						})}
 					</CardContent>
 				</Card>
 			)}
@@ -331,6 +382,13 @@ export default function OrdersPage() {
 												</Button>
 											</div>
 											<div className="flex items-center gap-2">
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={() => setViewingOrderId(order.id)}
+												>
+													View
+												</Button>
 												<Button
 													variant="ghost"
 													size="sm"
@@ -443,7 +501,7 @@ export default function OrdersPage() {
 														<Button
 															variant="ghost"
 															size="sm"
-															onClick={() => toast.info('Viewing order details')}
+															onClick={() => setViewingOrderId(order.id)}
 														>
 															View
 														</Button>
@@ -551,6 +609,23 @@ export default function OrdersPage() {
 					</div>
 				</TabsContent>
 			</Tabs>
+
+			{/* Order Detail Dialog */}
+			{viewingOrderId && (
+				<OrderDetailDialog
+					orderId={viewingOrderId}
+					open={!!viewingOrderId}
+					onOpenChange={(open) => {
+						if (!open) {
+							setViewingOrderId(null);
+						}
+					}}
+					onUpdate={() => {
+						fetchOrders();
+						fetchAlerts();
+					}}
+				/>
+			)}
 		</div>
 	);
 }

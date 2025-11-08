@@ -12,10 +12,10 @@
 import { useState, useEffect } from "react";
 import { ImageGallery } from '@/components/core/ui/layout/image-gallery';
 import type { UploadedImage } from '@/components/core/ui/layout/image-gallery';
+import { ImageUpload } from '@/components/core/ui/layout/image-upload';
 import { toast } from "sonner";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { Button } from "@/components/ui/button";
 
 interface GalleryImage {
 	id: string;
@@ -134,22 +134,34 @@ export default function ImageGalleryDemo() {
 
 	return (
 		<div className="container mx-auto p-6 space-y-6">
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between mb-6">
 				<div>
 					<h1 className="text-3xl font-bold mb-2">Image Gallery</h1>
 					<p className="text-muted-foreground">
 						Manage and organize your uploaded images with advanced filtering, search, and bulk operations.
 					</p>
 				</div>
-				<Button
-					onClick={() => {
-						// TODO: Implement upload functionality with uploadthing
-						toast.info("Upload functionality coming soon");
+			</div>
+
+			{/* Image Upload Component */}
+			<div className="mb-6">
+				<ImageUpload
+					uploadEndpoint="/api/uploadthing?endpoint=galleryImage"
+					onImageUpdate={async (uploadedUrls) => {
+						// Handle multiple uploads
+						if (Array.isArray(uploadedUrls) && uploadedUrls.length > 0) {
+							for (const url of uploadedUrls) {
+								await handleUploadComplete([{ url, name: '', size: 0, type: 'image/jpeg' }]);
+							}
+						} else if (typeof uploadedUrls === 'string' && uploadedUrls) {
+							await handleUploadComplete([{ url: uploadedUrls, name: '', size: 0, type: 'image/jpeg' }]);
+						}
 					}}
-				>
-					<Upload className="h-4 w-4 mr-2" />
-					Upload Image
-				</Button>
+					multiple={true}
+					maxFiles={10}
+					maxSize={10}
+					acceptedTypes={["image/jpeg", "image/png", "image/gif", "image/webp"]}
+				/>
 			</div>
 
 			<ImageGallery

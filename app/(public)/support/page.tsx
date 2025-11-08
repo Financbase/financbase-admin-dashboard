@@ -84,6 +84,13 @@ export default function SupportPage() {
 	});
 	const [formErrors, setFormErrors] = useState<Partial<ContactFormData>>({});
 	const [submitMessage, setSubmitMessage] = useState("");
+	const [categoryArticles, setCategoryArticles] = useState<Record<string, Array<{
+		title: string;
+		description: string;
+		href: string;
+	}>>>({});
+	const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+	const [isLoadingArticles, setIsLoadingArticles] = useState(false);
 
 	// Define FAQ items and categories before they're used in callbacks
 	const faqItems = [
@@ -126,7 +133,7 @@ export default function SupportPage() {
 			icon: BookOpen,
 			color: "bg-primary/10",
 			href: "/support/category/getting-started",
-			articles: 12,
+			slug: "getting-started",
 		},
 		{
 			title: "Billing & Payments",
@@ -134,7 +141,7 @@ export default function SupportPage() {
 			icon: CreditCard,
 			color: "bg-green-500/10",
 			href: "/support/category/billing-payments",
-			articles: 8,
+			slug: "billing-payments",
 		},
 		{
 			title: "Account Management",
@@ -142,7 +149,7 @@ export default function SupportPage() {
 			icon: Settings,
 			color: "bg-blue-500/10",
 			href: "/support/category/account-management",
-			articles: 10,
+			slug: "account-management",
 		},
 		{
 			title: "Security & Privacy",
@@ -150,7 +157,7 @@ export default function SupportPage() {
 			icon: Shield,
 			color: "bg-red-500/10",
 			href: "/support/category/security-privacy",
-			articles: 15,
+			slug: "security-privacy",
 		},
 		{
 			title: "API & Integrations",
@@ -158,7 +165,7 @@ export default function SupportPage() {
 			icon: Zap,
 			color: "bg-purple-500/10",
 			href: "/support/category/api-integrations",
-			articles: 20,
+			slug: "api-integrations",
 		},
 		{
 			title: "Troubleshooting",
@@ -166,9 +173,131 @@ export default function SupportPage() {
 			icon: HelpCircle,
 			color: "bg-orange-500/10",
 			href: "/support/category/troubleshooting",
-			articles: 18,
+			slug: "troubleshooting",
 		},
 	];
+
+	// Category data for fallback (matches category page data)
+	const categoryData: Record<string, {
+		title: string;
+		description: string;
+		articles: Array<{
+			title: string;
+			description: string;
+			href: string;
+		}>;
+	}> = {
+		"getting-started": {
+			title: "Getting Started",
+			description: "New to Financbase? Start here with our comprehensive guides",
+			articles: [
+				{ title: "Quick Start Guide", description: "Get up and running with Financbase in 5 minutes", href: "/docs/help/getting-started" },
+				{ title: "Account Setup", description: "Learn how to configure your organization and user settings", href: "/docs/help/account-setup" },
+				{ title: "Dashboard Overview", description: "Understand your financial dashboard and key features", href: "/docs/help/dashboard" },
+				{ title: "First Steps", description: "Essential first steps after creating your account", href: "/docs/first-steps" },
+			],
+		},
+		"account-billing": {
+			title: "Account & Billing",
+			description: "Manage your account, subscription, and payment settings",
+			articles: [
+				{ title: "Subscription Plans", description: "Compare features and pricing across different plans", href: "/pricing" },
+				{ title: "Billing & Invoices", description: "Manage payments, view invoices, and update payment methods", href: "/docs/help/billing" },
+				{ title: "Update Payment Method", description: "How to change or update your payment information", href: "/docs/help/payment" },
+			],
+		},
+		"account-management": {
+			title: "Account Management",
+			description: "Manage your account settings and preferences",
+			articles: [
+				{ title: "Profile Settings", description: "Update your profile information and preferences", href: "/docs/help/profile-settings" },
+				{ title: "User Management", description: "Add, remove, and manage team members", href: "/docs/help/user-management" },
+				{ title: "Organization Settings", description: "Configure organization-wide settings and preferences", href: "/docs/help/organization-settings" },
+				{ title: "Notification Preferences", description: "Customize your email and in-app notifications", href: "/docs/help/notifications" },
+				{ title: "Account Deletion", description: "Learn how to delete or deactivate your account", href: "/docs/help/account-deletion" },
+			],
+		},
+		"security-privacy": {
+			title: "Security & Privacy",
+			description: "Keep your data safe and secure with best practices",
+			articles: [
+				{ title: "Security Best Practices", description: "Learn how to secure your account and data", href: "/docs/help/security" },
+				{ title: "Two-Factor Authentication", description: "Set up 2FA to add an extra layer of security", href: "/docs/help/2fa" },
+				{ title: "Privacy Policy", description: "Understand how we protect and handle your data", href: "/privacy" },
+				{ title: "Data Encryption", description: "Learn about our encryption and security measures", href: "/docs/security" },
+			],
+		},
+		"api-integrations": {
+			title: "API & Integrations",
+			description: "Connect Financbase with your favorite tools and services",
+			articles: [
+				{ title: "API Overview", description: "Introduction to the Financbase API", href: "/docs/api" },
+				{ title: "API Authentication", description: "Learn how to authenticate with our API", href: "/docs/api/auth" },
+				{ title: "Webhooks Guide", description: "Set up and configure webhooks for real-time updates", href: "/docs/api/webhooks" },
+				{ title: "Integration Setup", description: "Connect with QuickBooks, Stripe, and other services", href: "/docs/integrations" },
+			],
+		},
+		"troubleshooting": {
+			title: "Troubleshooting",
+			description: "Fix common issues and resolve errors",
+			articles: [
+				{ title: "Common Issues", description: "Solutions for frequently encountered problems", href: "/docs/help/issues" },
+				{ title: "Payment Issues", description: "Troubleshoot payment and billing problems", href: "/docs/help/payment-issues" },
+				{ title: "Import Errors", description: "Fix data import and synchronization errors", href: "/docs/help/import-errors" },
+				{ title: "Performance Issues", description: "Optimize performance and resolve slowdowns", href: "/docs/help/performance" },
+			],
+		},
+		"advanced-features": {
+			title: "Advanced Features",
+			description: "Unlock the full potential of Financbase",
+			articles: [
+				{ title: "Custom Workflows", description: "Create and automate custom business workflows", href: "/docs/help/workflows" },
+				{ title: "Advanced Reporting", description: "Build custom reports and analytics dashboards", href: "/docs/help/reporting" },
+				{ title: "Multi-Tenant Setup", description: "Configure multi-tenant organizations", href: "/docs/multi-tenant" },
+				{ title: "Best Practices", description: "Expert tips and best practices for power users", href: "/docs/help/best-practices" },
+			],
+		},
+	};
+
+	// Fetch articles from database
+	useEffect(() => {
+		const fetchArticles = async () => {
+			setIsLoadingArticles(true);
+			const articlesMap: Record<string, Array<{ title: string; description: string; href: string }>> = {};
+			const countsMap: Record<string, number> = {};
+
+			// Fetch articles for each category
+			await Promise.all(
+				supportCategories.map(async (category) => {
+					try {
+						const response = await fetch(`/api/support/category/${category.slug}?limit=50`);
+						if (response.ok) {
+							const data = await response.json();
+							articlesMap[category.slug] = data.articles || [];
+							countsMap[category.slug] = data.total || 0;
+						} else {
+							// Fallback to hardcoded data if API fails
+							const categoryKey = category.slug === 'billing-payments' ? 'account-billing' : category.slug;
+							articlesMap[category.slug] = categoryData[categoryKey]?.articles || [];
+							countsMap[category.slug] = articlesMap[category.slug].length;
+						}
+					} catch (error) {
+						console.error(`Error fetching articles for ${category.slug}:`, error);
+						// Fallback to hardcoded data
+						const categoryKey = category.slug === 'billing-payments' ? 'account-billing' : category.slug;
+						articlesMap[category.slug] = categoryData[categoryKey]?.articles || [];
+						countsMap[category.slug] = articlesMap[category.slug].length;
+					}
+				})
+			);
+
+			setCategoryArticles(articlesMap);
+			setCategoryCounts(countsMap);
+			setIsLoadingArticles(false);
+		};
+
+		fetchArticles();
+	}, []);
 
 	const validateForm = (): boolean => {
 		const errors: Partial<ContactFormData> = {};
@@ -247,76 +376,6 @@ export default function SupportPage() {
 		}
 	};
 
-	// Category data for search (matches category page data)
-	const categoryData: Record<string, {
-		title: string;
-		description: string;
-		articles: Array<{
-			title: string;
-			description: string;
-			href: string;
-		}>;
-	}> = {
-		"getting-started": {
-			title: "Getting Started",
-			description: "New to Financbase? Start here with our comprehensive guides",
-			articles: [
-				{ title: "Quick Start Guide", description: "Get up and running with Financbase in 5 minutes", href: "/docs/help/getting-started" },
-				{ title: "Account Setup", description: "Learn how to configure your organization and user settings", href: "/docs/help/account-setup" },
-				{ title: "Dashboard Overview", description: "Understand your financial dashboard and key features", href: "/docs/help/dashboard" },
-				{ title: "First Steps", description: "Essential first steps after creating your account", href: "/docs/first-steps" },
-			],
-		},
-		"account-billing": {
-			title: "Account & Billing",
-			description: "Manage your account, subscription, and payment settings",
-			articles: [
-				{ title: "Subscription Plans", description: "Compare features and pricing across different plans", href: "/pricing" },
-				{ title: "Billing & Invoices", description: "Manage payments, view invoices, and update payment methods", href: "/docs/help/billing" },
-				{ title: "Update Payment Method", description: "How to change or update your payment information", href: "/docs/help/payment" },
-			],
-		},
-		"security-privacy": {
-			title: "Security & Privacy",
-			description: "Keep your data safe and secure with best practices",
-			articles: [
-				{ title: "Security Best Practices", description: "Learn how to secure your account and data", href: "/docs/help/security" },
-				{ title: "Two-Factor Authentication", description: "Set up 2FA to add an extra layer of security", href: "/docs/help/2fa" },
-				{ title: "Privacy Policy", description: "Understand how we protect and handle your data", href: "/privacy" },
-				{ title: "Data Encryption", description: "Learn about our encryption and security measures", href: "/docs/security" },
-			],
-		},
-		"api-integrations": {
-			title: "API & Integrations",
-			description: "Connect Financbase with your favorite tools and services",
-			articles: [
-				{ title: "API Overview", description: "Introduction to the Financbase API", href: "/docs/api" },
-				{ title: "API Authentication", description: "Learn how to authenticate with our API", href: "/docs/api/auth" },
-				{ title: "Webhooks Guide", description: "Set up and configure webhooks for real-time updates", href: "/docs/api/webhooks" },
-				{ title: "Integration Setup", description: "Connect with QuickBooks, Stripe, and other services", href: "/docs/integrations" },
-			],
-		},
-		"troubleshooting": {
-			title: "Troubleshooting",
-			description: "Fix common issues and resolve errors",
-			articles: [
-				{ title: "Common Issues", description: "Solutions for frequently encountered problems", href: "/docs/help/issues" },
-				{ title: "Payment Issues", description: "Troubleshoot payment and billing problems", href: "/docs/help/payment-issues" },
-				{ title: "Import Errors", description: "Fix data import and synchronization errors", href: "/docs/help/import-errors" },
-				{ title: "Performance Issues", description: "Optimize performance and resolve slowdowns", href: "/docs/help/performance" },
-			],
-		},
-		"advanced-features": {
-			title: "Advanced Features",
-			description: "Unlock the full potential of Financbase",
-			articles: [
-				{ title: "Custom Workflows", description: "Create and automate custom business workflows", href: "/docs/help/workflows" },
-				{ title: "Advanced Reporting", description: "Build custom reports and analytics dashboards", href: "/docs/help/reporting" },
-				{ title: "Multi-Tenant Setup", description: "Configure multi-tenant organizations", href: "/docs/multi-tenant" },
-				{ title: "Best Practices", description: "Expert tips and best practices for power users", href: "/docs/help/best-practices" },
-			],
-		},
-	};
 
 	// Search function
 	const performSearch = useCallback(async (query: string) => {
@@ -677,11 +736,12 @@ export default function SupportPage() {
 										.replace(/-+/g, '-')
 										.replace(/^-|-$/g, '');
 									
+									const articleCount = categoryCounts[category.slug] || 0;
 									return (
 										<BentoCard
 											key={`category-${slug}`}
 											name={category.title}
-											description={`${category.description}. ${category.articles} articles available.`}
+											description={`${category.description}. ${articleCount} articles available.`}
 											Icon={category.icon}
 											href={`/support/category/${slug}`}
 											cta="Browse Articles"
@@ -886,48 +946,89 @@ export default function SupportPage() {
 						</TabsContent>
 
 						{/* Support Options Tab */}
-						<TabsContent value="support" className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-								{contactMethods.map((method) => (
-									<Card
-										key={`contact-${method.title.toLowerCase().replace(/\s+/g, '-')}`}
-										className="group hover:shadow-md transition-all duration-200"
-									>
-										<CardContent className="p-6">
-											<div className="flex items-start gap-4">
-												<div className="p-3 rounded-lg bg-primary/10 text-primary">
-													<method.icon className="h-6 w-6" />
-												</div>
-												<div className="flex-1">
-													<div className="flex items-center justify-between mb-2">
-														<h3 className="font-semibold">
-															{method.title}
+						<TabsContent value="support" className="space-y-6">
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+								{supportCategories.map((category) => {
+									// Generate slug that matches category page expectations
+									const slug = category.title
+										.toLowerCase()
+										.replace(/\s+/g, '-')
+										.replace(/&/g, '')
+										.replace(/[^\w-]/g, '')
+										.replace(/-+/g, '-')
+										.replace(/^-|-$/g, '');
+									
+									// Get articles for this category - prefer database articles, fallback to hardcoded
+									const dbArticles = categoryArticles[category.slug] || [];
+									const categoryKey = slug === 'billing-payments' ? 'account-billing' : slug;
+									const fallbackArticles = categoryData[categoryKey]?.articles || [];
+									const articles = dbArticles.length > 0 ? dbArticles : fallbackArticles;
+									const articleCount = categoryCounts[category.slug] || articles.length;
+									
+									return (
+										<Card
+											key={`support-option-${slug}`}
+											className="group hover:shadow-lg transition-all duration-200"
+										>
+											<CardContent className="p-6">
+												<div className="flex items-start gap-4 mb-4">
+													<div className={`p-3 rounded-lg ${category.color} text-primary`}>
+														<category.icon className="h-6 w-6" />
+													</div>
+													<div className="flex-1">
+														<h3 className="font-semibold text-lg mb-1">
+															{category.title}
 														</h3>
-														<Badge
-															variant="secondary"
-															className="text-xs"
-														>
-															{method.availability}
+														<p className="text-sm text-muted-foreground mb-3">
+															{category.description}
+														</p>
+														<Badge variant="secondary" className="text-xs">
+															{articleCount} articles available
 														</Badge>
 													</div>
-													<p className="text-sm text-muted-foreground mb-4">
-														{method.description}
-													</p>
-													<Button
-														asChild
-														size="sm"
-														className="group-hover:bg-primary/90"
-													>
-														<Link href="/contact">
-															Get Started
-															<ExternalLink className="h-3 w-3 ml-1" />
-														</Link>
-													</Button>
 												</div>
-											</div>
+												
+												{/* Article List */}
+												{articles.length > 0 && (
+													<div className="space-y-2 mt-4 pt-4 border-t">
+														{articles.slice(0, 5).map((article) => (
+															<Link
+																key={article.href}
+																href={article.href}
+																className="block group/article"
+															>
+																<div className="flex items-start gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+																	<BookOpen className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0 group-hover/article:text-primary transition-colors" />
+																	<div className="flex-1 min-w-0">
+																		<p className="text-sm font-medium group-hover/article:text-primary transition-colors line-clamp-1">
+																			{article.title}
+																		</p>
+																		<p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+																			{article.description}
+																		</p>
+																	</div>
+																</div>
+															</Link>
+														))}
+														{articles.length > 5 && (
+															<Button
+																asChild
+																variant="ghost"
+																size="sm"
+																className="w-full mt-2"
+															>
+																<Link href={category.href}>
+																	View all {articles.length} articles
+																	<ExternalLink className="h-3 w-3 ml-1" />
+																</Link>
+															</Button>
+														)}
+													</div>
+												)}
 											</CardContent>
 										</Card>
-									))}
+									);
+								})}
 							</div>
 						</TabsContent>
 					</Tabs>

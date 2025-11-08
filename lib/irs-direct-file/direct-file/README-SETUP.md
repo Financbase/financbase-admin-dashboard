@@ -17,6 +17,7 @@ All required software has been installed and verified:
 **Issue Identified**: The backend services directory structure does not exist.
 
 The plan references paths like:
+
 - `lib/irs-direct-file/direct-file/backend`
 - `lib/irs-direct-file/direct-file/state-api`
 - `lib/irs-direct-file/direct-file/email-service`
@@ -26,6 +27,7 @@ The plan references paths like:
 - `lib/irs-direct-file/direct-file/scripts`
 
 **Current Structure**: Only the following exist:
+
 - `lib/irs-direct-file/df-client/` - ✅ Client application
 - `lib/irs-direct-file/fact-graph-scala/` - ✅ Fact graph Scala source
 
@@ -34,6 +36,7 @@ The plan references paths like:
 ### Next Steps
 
 1. **Clone Backend Services**:
+
    ```bash
    cd lib/irs-direct-file
    # Clone the backend services from IRS repository
@@ -63,9 +66,11 @@ The plan references paths like:
 ## Environment Files
 
 Environment file templates have been created:
+
 - `.env.example` - Template for Direct File backend environment variables
 
 **To use**:
+
 1. Copy `.env.example` to `.env.local`
 2. Fill in the required values
 3. Generate `LOCAL_WRAPPING_KEY` using the setup script (once available)
@@ -73,6 +78,7 @@ Environment file templates have been created:
 ## Shell Configuration
 
 Java 21 has been configured in the shell environment:
+
 - `JAVA_HOME=/usr/local/opt/openjdk@21`
 - Java 21 is in PATH
 - Coursier configured to use Java 21
@@ -102,4 +108,3 @@ docker ps
 - For now, only the client app and fact graph source are available
 - Fact graph compilation can proceed independently (Phase 5)
 - Client app setup can proceed independently (Phase 7)
-

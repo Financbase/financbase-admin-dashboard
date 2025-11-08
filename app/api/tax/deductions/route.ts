@@ -27,12 +27,40 @@ export async function GET(request: NextRequest) {
 				? parseInt(searchParams.get("year")!)
 				: undefined;
 			const category = searchParams.get("category") || undefined;
+			
+			// Pagination parameters
+			const page = searchParams.get("page")
+				? parseInt(searchParams.get("page")!)
+				: undefined;
+			const limit = searchParams.get("limit")
+				? parseInt(searchParams.get("limit")!)
+				: undefined;
+			const offset = page && limit ? (page - 1) * limit : undefined;
 
 			const service = new TaxService();
-			let deductions = await service.getDeductions(clerkUserId, year);
+			const result = await service.getDeductions(clerkUserId, year, {
+				category,
+				limit,
+				offset,
+			});
 
-			// Filter by category if provided
-			if (category) {
+			// Check if result is paginated
+			if (limit !== undefined && "data" in result) {
+				return NextResponse.json({
+					success: true,
+					data: result.data,
+					pagination: {
+						page: result.page,
+						limit: result.limit,
+						total: result.total,
+						totalPages: result.totalPages,
+					},
+				});
+			}
+
+			// Filter by category if provided and not paginated
+			let deductions = Array.isArray(result) ? result : result.data;
+			if (category && !limit) {
 				deductions = deductions.filter((d) => d.category === category);
 			}
 

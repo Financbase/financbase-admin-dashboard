@@ -175,9 +175,10 @@ export function PublicCTA({
             {primaryAction && (
               <Link 
                 href={primaryAction.href}
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 bg-white hover:bg-gray-100 shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer hover:opacity-90"
                 style={{
-                  color: "oklch(var(--primary))",
+                  backgroundColor: "oklch(var(--brand-primary))",
+                  color: "white",
                   textDecoration: "none",
                 }}
               >
@@ -187,10 +188,12 @@ export function PublicCTA({
             {secondaryAction && (
               <Link 
                 href={secondaryAction.href}
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 border-2 bg-transparent text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer hover:bg-white [&:hover]:text-[oklch(var(--primary))]"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-11 px-8 border-2 bg-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer hover:bg-white/10"
                 style={{
-                  borderColor: "white",
-                  color: "white",
+                  backgroundColor: "transparent",
+                  borderColor: "oklch(var(--brand-primary))",
+                  color: "oklch(var(--brand-primary))",
+                  textDecoration: "none",
                 }}
               >
                 {secondaryAction.text}
