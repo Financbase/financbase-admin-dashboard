@@ -10,6 +10,7 @@
 import { db } from "@/lib/db";
 import { withTransaction } from "@/lib/utils/db-transaction";
 import { cache } from "@/lib/cache/cache-manager";
+import { AuditService } from "@/lib/services/audit-service";
 import {
 	taxObligations,
 	taxDeductions,
@@ -29,6 +30,7 @@ import {
 	lte,
 	sql,
 	sum,
+	isNull,
 } from "drizzle-orm";
 import type {
 	CreateTaxObligationInput,
@@ -107,7 +109,10 @@ export class TaxService {
 		userId: string,
 		filters?: TaxObligationFilters
 	): Promise<TaxObligation[] | PaginatedResult<TaxObligation>> {
-		const conditions = [eq(taxObligations.userId, userId)];
+		const conditions = [
+			eq(taxObligations.userId, userId),
+			isNull(taxObligations.deletedAt), // Filter soft-deleted records
+		];
 
 		if (filters?.status) {
 			conditions.push(eq(taxObligations.status, filters.status));
@@ -171,7 +176,13 @@ export class TaxService {
 		const results = await db
 			.select()
 			.from(taxObligations)
-			.where(and(eq(taxObligations.id, id), eq(taxObligations.userId, userId)))
+			.where(
+				and(
+					eq(taxObligations.id, id),
+					eq(taxObligations.userId, userId),
+					isNull(taxObligations.deletedAt) // Filter soft-deleted records
+				)
+			)
 			.limit(1);
 
 		if (results.length === 0) {
@@ -206,6 +217,20 @@ export class TaxService {
 			.insert(taxObligations)
 			.values(newObligation)
 			.returning();
+
+		// Audit log
+		await AuditService.logEvent(
+			input.userId,
+			'tax_obligation_created',
+			'create',
+			{ obligationId: result[0].id, obligationName: input.name },
+			{
+				resourceType: 'tax_obligation',
+				resourceId: result[0].id,
+				resourceName: input.name,
+				riskLevel: 'low',
+			}
+		);
 
 		// Invalidate cache
 		await this.invalidateTaxCache(input.userId, input.year);
@@ -279,6 +304,19 @@ export class TaxService {
 			.where(and(eq(taxObligations.id, id), eq(taxObligations.userId, userId)))
 			.returning();
 
+		// Audit log
+		await AuditService.logEvent(
+			userId,
+			'tax_obligation_updated',
+			'update',
+			{ obligationId: id, changes: updateData },
+			{
+				resourceType: 'tax_obligation',
+				resourceId: id,
+				riskLevel: 'low',
+			}
+		);
+
 		// Invalidate cache
 		const obligation = result[0];
 		await this.invalidateTaxCache(userId, obligation.year);
@@ -287,18 +325,66 @@ export class TaxService {
 	}
 
 	/**
-	 * Delete tax obligation
+	 * Soft delete tax obligation
 	 */
 	async deleteObligation(id: string, userId: string): Promise<void> {
 		// Verify ownership
 		const obligation = await this.getObligationById(id, userId);
 		
 		await db
-			.delete(taxObligations)
+			.update(taxObligations)
+			.set({ deletedAt: new Date() })
 			.where(and(eq(taxObligations.id, id), eq(taxObligations.userId, userId)));
+
+		// Audit log
+		await AuditService.logEvent(
+			userId,
+			'tax_obligation_deleted',
+			'delete',
+			{ obligationId: id, obligationName: obligation.name },
+			{
+				resourceType: 'tax_obligation',
+				resourceId: id,
+				resourceName: obligation.name,
+				riskLevel: 'low',
+			}
+		);
 
 		// Invalidate cache
 		await this.invalidateTaxCache(userId, obligation.year);
+	}
+
+	/**
+	 * Restore soft-deleted tax obligation
+	 */
+	async restoreObligation(id: string, userId: string): Promise<TaxObligation> {
+		const result = await db
+			.update(taxObligations)
+			.set({ deletedAt: null })
+			.where(and(eq(taxObligations.id, id), eq(taxObligations.userId, userId)))
+			.returning();
+
+		if (result.length === 0) {
+			throw new Error("Tax obligation not found");
+		}
+
+		// Audit log
+		await AuditService.logEvent(
+			userId,
+			'tax_obligation_restored',
+			'restore',
+			{ obligationId: id },
+			{
+				resourceType: 'tax_obligation',
+				resourceId: id,
+				riskLevel: 'low',
+			}
+		);
+
+		// Invalidate cache
+		await this.invalidateTaxCache(userId, result[0].year);
+
+		return result[0];
 	}
 
 	/**
@@ -310,6 +396,27 @@ export class TaxService {
 		userId: string
 	): Promise<TaxObligation> {
 		return await withTransaction(async (tx) => {
+			// First, get obligation details to extract year and quarter
+			const obligationResult = await tx.execute(sql`
+				SELECT id, year, quarter, amount, paid
+				FROM tax_obligations
+				WHERE id = ${input.obligationId}::UUID
+					AND user_id = ${userId}::TEXT
+				FOR UPDATE
+			`);
+
+			if (!obligationResult.rows || obligationResult.rows.length === 0) {
+				throw new Error("Tax obligation not found");
+			}
+
+			const obligationData = obligationResult.rows[0] as {
+				id: string;
+				year: number;
+				quarter: string | null;
+				amount: string;
+				paid: string;
+			};
+
 			// Use atomic SQL update to prevent race conditions
 			const result = await tx.execute(sql`
 				UPDATE tax_obligations
@@ -327,11 +434,47 @@ export class TaxService {
 				RETURNING *
 			`);
 
-			if (!result.rows || result.rows.length === 0) {
-				throw new Error("Tax obligation not found");
-			}
+			const updatedObligation = result.rows[0] as TaxObligation;
 
-			return result.rows[0] as TaxObligation;
+			// Create payment record
+			const quarter = obligationData.quarter 
+				? Number.parseInt(obligationData.quarter.replace('Q', '')) 
+				: null;
+
+			await tx.insert(taxPayments).values({
+				userId,
+				obligationId: input.obligationId,
+				amount: input.amount.toString(),
+				paymentDate: new Date(input.paymentDate),
+				paymentMethod: input.paymentMethod || null,
+				reference: input.reference || null,
+				quarter,
+				year: obligationData.year,
+				notes: input.notes || null,
+				metadata: input.metadata || null,
+			});
+
+			// Audit log
+			await AuditService.logEvent(
+				userId,
+				'tax_payment_recorded',
+				'create',
+				{
+					obligationId: input.obligationId,
+					amount: input.amount,
+					paymentMethod: input.paymentMethod,
+				},
+				{
+					resourceType: 'tax_payment',
+					resourceId: input.obligationId,
+					riskLevel: 'low',
+				}
+			);
+
+			// Invalidate cache after transaction commits
+			await this.invalidateTaxCache(userId, obligationData.year);
+
+			return updatedObligation;
 		});
 	}
 
@@ -367,7 +510,10 @@ export class TaxService {
 		year?: number,
 		filters?: TaxDeductionFilters
 	): Promise<TaxDeduction[] | PaginatedResult<TaxDeduction>> {
-		const conditions = [eq(taxDeductions.userId, userId)];
+		const conditions = [
+			eq(taxDeductions.userId, userId),
+			isNull(taxDeductions.deletedAt), // Filter soft-deleted records
+		];
 
 		if (year) {
 			conditions.push(eq(taxDeductions.year, year));
@@ -475,6 +621,19 @@ export class TaxService {
 		// Recalculate percentages for the year
 		await this.recalculateDeductionPercentages(input.userId, input.year);
 
+		// Audit log
+		await AuditService.logEvent(
+			input.userId,
+			'tax_deduction_created',
+			'create',
+			{ deductionId: result[0].id, category: input.category },
+			{
+				resourceType: 'tax_deduction',
+				resourceId: result[0].id,
+				riskLevel: 'low',
+			}
+		);
+
 		// Invalidate cache
 		await this.invalidateTaxCache(input.userId, input.year);
 
@@ -518,6 +677,19 @@ export class TaxService {
 			input.year || deduction.year
 		);
 
+		// Audit log
+		await AuditService.logEvent(
+			userId,
+			'tax_deduction_updated',
+			'update',
+			{ deductionId: id, changes: updateData },
+			{
+				resourceType: 'tax_deduction',
+				resourceId: id,
+				riskLevel: 'low',
+			}
+		);
+
 		// Invalidate cache
 		await this.invalidateTaxCache(userId, input.year || deduction.year);
 
@@ -525,7 +697,7 @@ export class TaxService {
 	}
 
 	/**
-	 * Delete tax deduction
+	 * Soft delete tax deduction
 	 */
 	async deleteDeduction(id: string, userId: string): Promise<void> {
 		// Verify ownership
@@ -533,14 +705,64 @@ export class TaxService {
 		const year = deduction.year;
 
 		await db
-			.delete(taxDeductions)
+			.update(taxDeductions)
+			.set({ deletedAt: new Date() })
 			.where(and(eq(taxDeductions.id, id), eq(taxDeductions.userId, userId)));
 
 		// Recalculate percentages for the year
 		await this.recalculateDeductionPercentages(userId, year);
 
+		// Audit log
+		await AuditService.logEvent(
+			userId,
+			'tax_deduction_deleted',
+			'delete',
+			{ deductionId: id, category: deduction.category },
+			{
+				resourceType: 'tax_deduction',
+				resourceId: id,
+				riskLevel: 'low',
+			}
+		);
+
 		// Invalidate cache
 		await this.invalidateTaxCache(userId, year);
+	}
+
+	/**
+	 * Restore soft-deleted tax deduction
+	 */
+	async restoreDeduction(id: string, userId: string): Promise<TaxDeduction> {
+		const result = await db
+			.update(taxDeductions)
+			.set({ deletedAt: null })
+			.where(and(eq(taxDeductions.id, id), eq(taxDeductions.userId, userId)))
+			.returning();
+
+		if (result.length === 0) {
+			throw new Error("Tax deduction not found");
+		}
+
+		// Recalculate percentages
+		await this.recalculateDeductionPercentages(userId, result[0].year);
+
+		// Audit log
+		await AuditService.logEvent(
+			userId,
+			'tax_deduction_restored',
+			'restore',
+			{ deductionId: id },
+			{
+				resourceType: 'tax_deduction',
+				resourceId: id,
+				riskLevel: 'low',
+			}
+		);
+
+		// Invalidate cache
+		await this.invalidateTaxCache(userId, result[0].year);
+
+		return result[0];
 	}
 
 	/**
@@ -572,8 +794,12 @@ export class TaxService {
 		year: number
 	): Promise<void> {
 		return await withTransaction(async (tx) => {
-			// Get deductions within transaction
-			const conditions = [eq(taxDeductions.userId, userId), eq(taxDeductions.year, year)];
+			// Get deductions within transaction (excluding soft-deleted)
+			const conditions = [
+				eq(taxDeductions.userId, userId),
+				eq(taxDeductions.year, year),
+				isNull(taxDeductions.deletedAt), // Filter soft-deleted records
+			];
 			const deductions = await tx
 				.select()
 				.from(taxDeductions)
@@ -634,7 +860,10 @@ export class TaxService {
 		year?: number,
 		filters?: TaxDocumentFilters
 	): Promise<TaxDocument[] | PaginatedResult<TaxDocument>> {
-		const conditions = [eq(taxDocuments.userId, userId)];
+		const conditions = [
+			eq(taxDocuments.userId, userId),
+			isNull(taxDocuments.deletedAt), // Filter soft-deleted records
+		];
 
 		if (year) {
 			conditions.push(eq(taxDocuments.year, year));
@@ -707,6 +936,20 @@ export class TaxService {
 			.values(newDocument)
 			.returning();
 
+		// Audit log
+		await AuditService.logEvent(
+			input.userId,
+			'tax_document_created',
+			'create',
+			{ documentId: result[0].id, documentName: input.name },
+			{
+				resourceType: 'tax_document',
+				resourceId: result[0].id,
+				resourceName: input.name,
+				riskLevel: 'low',
+			}
+		);
+
 		// Invalidate cache
 		await this.invalidateTaxCache(input.userId, input.year);
 
@@ -714,13 +957,19 @@ export class TaxService {
 	}
 
 	/**
-	 * Delete document
+	 * Soft delete document
 	 */
 	async deleteDocument(id: string, userId: string): Promise<void> {
 		const results = await db
 			.select()
 			.from(taxDocuments)
-			.where(and(eq(taxDocuments.id, id), eq(taxDocuments.userId, userId)))
+			.where(
+				and(
+					eq(taxDocuments.id, id),
+					eq(taxDocuments.userId, userId),
+					isNull(taxDocuments.deletedAt)
+				)
+			)
 			.limit(1);
 
 		if (results.length === 0) {
@@ -730,11 +979,59 @@ export class TaxService {
 		const document = results[0];
 		
 		await db
-			.delete(taxDocuments)
+			.update(taxDocuments)
+			.set({ deletedAt: new Date() })
 			.where(and(eq(taxDocuments.id, id), eq(taxDocuments.userId, userId)));
+
+		// Audit log
+		await AuditService.logEvent(
+			userId,
+			'tax_document_deleted',
+			'delete',
+			{ documentId: id, documentName: document.name },
+			{
+				resourceType: 'tax_document',
+				resourceId: id,
+				resourceName: document.name,
+				riskLevel: 'low',
+			}
+		);
 
 		// Invalidate cache
 		await this.invalidateTaxCache(userId, document.year);
+	}
+
+	/**
+	 * Restore soft-deleted tax document
+	 */
+	async restoreDocument(id: string, userId: string): Promise<TaxDocument> {
+		const result = await db
+			.update(taxDocuments)
+			.set({ deletedAt: null })
+			.where(and(eq(taxDocuments.id, id), eq(taxDocuments.userId, userId)))
+			.returning();
+
+		if (result.length === 0) {
+			throw new Error("Tax document not found");
+		}
+
+		// Audit log
+		await AuditService.logEvent(
+			userId,
+			'tax_document_restored',
+			'restore',
+			{ documentId: id },
+			{
+				resourceType: 'tax_document',
+				resourceId: id,
+				riskLevel: 'low',
+			}
+		);
+
+		// Invalidate cache
+		await this.invalidateTaxCache(userId, result[0].year);
+
+		return result[0];
 	}
 
 	/**
@@ -772,15 +1069,27 @@ export class TaxService {
 					overdueCount: sql<number>`COUNT(*) FILTER (WHERE status = 'overdue')::int`,
 				})
 				.from(taxObligations)
-				.where(and(eq(taxObligations.userId, userId), eq(taxObligations.year, currentYear))),
+				.where(
+					and(
+						eq(taxObligations.userId, userId),
+						eq(taxObligations.year, currentYear),
+						isNull(taxObligations.deletedAt)
+					)
+				),
 			// Get deductions summary
-			// Get deductions summary in one query
+			// Get deductions summary in one query (excluding soft-deleted)
 			db
 				.select({
 					totalDeductions: sql<number>`COALESCE(SUM(amount::numeric), 0)::numeric`,
 				})
 				.from(taxDeductions)
-				.where(and(eq(taxDeductions.userId, userId), eq(taxDeductions.year, currentYear))),
+				.where(
+					and(
+						eq(taxDeductions.userId, userId),
+						eq(taxDeductions.year, currentYear),
+						isNull(taxDeductions.deletedAt)
+					)
+				),
 		]);
 
 		const obligationsData = obligationsSummary[0];

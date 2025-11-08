@@ -123,6 +123,12 @@ export * from "./dashboard.schema";
 // Security & Compliance System
 export * from "./security.schema";
 export * from "./compliance.schema";
+export * from "./incident-response.schema";
+export * from "./siem-monitoring.schema";
+export * from "./policy-management.schema";
+export * from "./compliance-training.schema";
+export * from "./baa-management.schema";
+export * from "./risk-assessment.schema";
 
 // Onboarding System
 export * from "./onboarding.schema";

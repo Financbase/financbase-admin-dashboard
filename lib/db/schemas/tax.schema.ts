@@ -90,6 +90,7 @@ export const taxObligations = pgTable("tax_obligations", {
 	updatedAt: timestamp("updated_at", { withTimezone: true })
 		.notNull()
 		.defaultNow(),
+	deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
 /**
@@ -118,6 +119,7 @@ export const taxDeductions = pgTable("tax_deductions", {
 	updatedAt: timestamp("updated_at", { withTimezone: true })
 		.notNull()
 		.defaultNow(),
+	deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
 /**
@@ -193,6 +195,7 @@ export const taxPayments = pgTable("tax_payments", {
 	updatedAt: timestamp("updated_at", { withTimezone: true })
 		.notNull()
 		.defaultNow(),
+	deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
 export type TaxPayment = typeof taxPayments.$inferSelect;
