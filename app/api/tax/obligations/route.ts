@@ -34,18 +34,43 @@ export async function GET(request: NextRequest) {
 				: undefined;
 			const quarter = searchParams.get("quarter") || undefined;
 			const type = searchParams.get("type") || undefined;
+			
+			// Pagination parameters
+			const page = searchParams.get("page")
+				? parseInt(searchParams.get("page")!)
+				: undefined;
+			const limit = searchParams.get("limit")
+				? parseInt(searchParams.get("limit")!)
+				: undefined;
+			const offset = page && limit ? (page - 1) * limit : undefined;
 
 			const service = new TaxService();
-			const obligations = await service.getObligations(clerkUserId, {
+			const result = await service.getObligations(clerkUserId, {
 				status: status || undefined,
 				year,
 				quarter,
 				type,
+				limit,
+				offset,
 			});
+
+			// Check if result is paginated
+			if (limit !== undefined && "data" in result) {
+				return NextResponse.json({
+					success: true,
+					data: result.data,
+					pagination: {
+						page: result.page,
+						limit: result.limit,
+						total: result.total,
+						totalPages: result.totalPages,
+					},
+				});
+			}
 
 			return NextResponse.json({
 				success: true,
-				data: obligations,
+				data: result,
 			});
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);

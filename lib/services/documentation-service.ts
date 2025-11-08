@@ -526,6 +526,443 @@ export class DocumentationService {
   }
 
   /**
+   * Get all support tickets (admin only)
+   * @param filters - Filter options
+   * @param limit - Number of tickets to return
+   * @param offset - Number of tickets to skip
+   * @param sortBy - Field to sort by
+   * @param sortOrder - Sort order (asc or desc)
+   */
+  static async getAllTickets(
+    filters: {
+      status?: string;
+      priority?: string;
+      category?: string;
+      assignedTo?: string;
+      userId?: string;
+      dateFrom?: Date;
+      dateTo?: Date;
+    } = {},
+    limit: number = 20,
+    offset: number = 0,
+    sortBy: string = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'desc'
+  ): Promise<SupportTicket[]> {
+    try {
+      const whereConditions = [];
+      
+      if (filters.status) {
+        whereConditions.push(eq(supportTickets.status, filters.status));
+      }
+      if (filters.priority) {
+        whereConditions.push(eq(supportTickets.priority, filters.priority));
+      }
+      if (filters.category) {
+        whereConditions.push(eq(supportTickets.category, filters.category));
+      }
+      if (filters.assignedTo) {
+        whereConditions.push(eq(supportTickets.assignedTo, filters.assignedTo));
+      }
+      if (filters.userId) {
+        whereConditions.push(eq(supportTickets.userId, filters.userId));
+      }
+      if (filters.dateFrom) {
+        whereConditions.push(sql`${supportTickets.createdAt} >= ${filters.dateFrom}`);
+      }
+      if (filters.dateTo) {
+        whereConditions.push(sql`${supportTickets.createdAt} <= ${filters.dateTo}`);
+      }
+
+      const creatorUsers = alias(users, 'creator_users');
+      const assigneeUsers = alias(users, 'assignee_users');
+
+      // Map sortBy to actual column
+      const sortColumnMap: Record<string, any> = {
+        createdAt: supportTickets.createdAt,
+        updatedAt: supportTickets.updatedAt,
+        status: supportTickets.status,
+        priority: supportTickets.priority,
+        subject: supportTickets.subject,
+        ticketNumber: supportTickets.ticketNumber,
+      };
+      
+      const sortColumn = sortColumnMap[sortBy] || supportTickets.createdAt;
+      const orderByClause = sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn);
+
+      const tickets = await db
+        .select({
+          id: supportTickets.id,
+          ticketNumber: supportTickets.ticketNumber,
+          subject: supportTickets.subject,
+          description: supportTickets.description,
+          priority: supportTickets.priority,
+          status: supportTickets.status,
+          category: supportTickets.category,
+          userId: supportTickets.userId,
+          organizationId: supportTickets.organizationId,
+          assignedTo: supportTickets.assignedTo,
+          assignedAt: supportTickets.assignedAt,
+          resolution: supportTickets.resolution,
+          resolvedAt: supportTickets.resolvedAt,
+          closedAt: supportTickets.closedAt,
+          attachments: supportTickets.attachments,
+          tags: supportTickets.tags,
+          customFields: supportTickets.customFields,
+          responseTime: supportTickets.responseTime,
+          resolutionTime: supportTickets.resolutionTime,
+          satisfactionRating: supportTickets.satisfactionRating,
+          createdAt: supportTickets.createdAt,
+          updatedAt: supportTickets.updatedAt,
+          user: {
+            id: creatorUsers.id,
+            name: creatorUsers.firstName,
+            email: creatorUsers.email,
+            clerkId: creatorUsers.clerkId,
+          },
+          assignee: {
+            id: assigneeUsers.id,
+            name: assigneeUsers.firstName,
+            email: assigneeUsers.email,
+            clerkId: assigneeUsers.clerkId,
+          },
+        })
+        .from(supportTickets)
+        .leftJoin(creatorUsers, eq(supportTickets.userId, creatorUsers.clerkId))
+        .leftJoin(assigneeUsers, eq(supportTickets.assignedTo, assigneeUsers.clerkId))
+        .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+        .orderBy(orderByClause)
+        .limit(limit)
+        .offset(offset);
+
+      return tickets;
+    } catch (error) {
+      console.error('Error getting all tickets:', error);
+      throw new Error('Failed to get tickets');
+    }
+  }
+
+  /**
+   * Get ticket by ID with messages
+   */
+  static async getTicketById(ticketId: number): Promise<SupportTicket & { messages: any[] } | null> {
+    try {
+      const creatorUsers = alias(users, 'creator_users');
+      const assigneeUsers = alias(users, 'assignee_users');
+      const messageAuthors = alias(users, 'message_authors');
+
+      const ticket = await db
+        .select({
+          id: supportTickets.id,
+          ticketNumber: supportTickets.ticketNumber,
+          subject: supportTickets.subject,
+          description: supportTickets.description,
+          priority: supportTickets.priority,
+          status: supportTickets.status,
+          category: supportTickets.category,
+          userId: supportTickets.userId,
+          organizationId: supportTickets.organizationId,
+          assignedTo: supportTickets.assignedTo,
+          assignedAt: supportTickets.assignedAt,
+          resolution: supportTickets.resolution,
+          resolvedAt: supportTickets.resolvedAt,
+          closedAt: supportTickets.closedAt,
+          attachments: supportTickets.attachments,
+          tags: supportTickets.tags,
+          customFields: supportTickets.customFields,
+          responseTime: supportTickets.responseTime,
+          resolutionTime: supportTickets.resolutionTime,
+          satisfactionRating: supportTickets.satisfactionRating,
+          createdAt: supportTickets.createdAt,
+          updatedAt: supportTickets.updatedAt,
+          user: {
+            id: creatorUsers.id,
+            name: creatorUsers.firstName,
+            email: creatorUsers.email,
+            clerkId: creatorUsers.clerkId,
+          },
+          assignee: {
+            id: assigneeUsers.id,
+            name: assigneeUsers.firstName,
+            email: assigneeUsers.email,
+            clerkId: assigneeUsers.clerkId,
+          },
+        })
+        .from(supportTickets)
+        .leftJoin(creatorUsers, eq(supportTickets.userId, creatorUsers.clerkId))
+        .leftJoin(assigneeUsers, eq(supportTickets.assignedTo, assigneeUsers.clerkId))
+        .where(eq(supportTickets.id, ticketId))
+        .limit(1);
+
+      if (!ticket[0]) {
+        return null;
+      }
+
+      // Get messages for this ticket
+      const messages = await db
+        .select({
+          id: supportTicketMessages.id,
+          ticketId: supportTicketMessages.ticketId,
+          authorId: supportTicketMessages.authorId,
+          content: supportTicketMessages.content,
+          messageType: supportTicketMessages.messageType,
+          attachments: supportTicketMessages.attachments,
+          isInternal: supportTicketMessages.isInternal,
+          isRead: supportTicketMessages.isRead,
+          readAt: supportTicketMessages.readAt,
+          userAgent: supportTicketMessages.userAgent,
+          ipAddress: supportTicketMessages.ipAddress,
+          createdAt: supportTicketMessages.createdAt,
+          author: {
+            id: messageAuthors.id,
+            name: messageAuthors.firstName,
+            email: messageAuthors.email,
+            clerkId: messageAuthors.clerkId,
+          },
+        })
+        .from(supportTicketMessages)
+        .leftJoin(messageAuthors, eq(supportTicketMessages.authorId, messageAuthors.clerkId))
+        .where(eq(supportTicketMessages.ticketId, ticketId))
+        .orderBy(asc(supportTicketMessages.createdAt));
+
+      return {
+        ...ticket[0],
+        messages,
+      };
+    } catch (error) {
+      console.error('Error getting ticket by ID:', error);
+      throw new Error('Failed to get ticket');
+    }
+  }
+
+  /**
+   * Update ticket
+   */
+  static async updateTicket(
+    ticketId: number,
+    updates: {
+      status?: string;
+      priority?: string;
+      assignee?: string | null;
+      tags?: string[];
+      customFields?: Record<string, any>;
+      resolution?: string;
+    }
+  ): Promise<SupportTicket> {
+    try {
+      const updateData: any = {
+        updatedAt: new Date(),
+      };
+
+      if (updates.status !== undefined) {
+        updateData.status = updates.status;
+        if (updates.status === 'resolved' && !updateData.resolvedAt) {
+          updateData.resolvedAt = new Date();
+        }
+        if (updates.status === 'closed' && !updateData.closedAt) {
+          updateData.closedAt = new Date();
+        }
+      }
+      if (updates.priority !== undefined) {
+        updateData.priority = updates.priority;
+      }
+      if (updates.assignee !== undefined) {
+        updateData.assignedTo = updates.assignee;
+        updateData.assignedAt = updates.assignee ? new Date() : null;
+      }
+      if (updates.tags !== undefined) {
+        updateData.tags = updates.tags;
+      }
+      if (updates.customFields !== undefined) {
+        updateData.customFields = updates.customFields;
+      }
+      if (updates.resolution !== undefined) {
+        updateData.resolution = updates.resolution;
+      }
+
+      const updated = await db
+        .update(supportTickets)
+        .set(updateData)
+        .where(eq(supportTickets.id, ticketId))
+        .returning();
+
+      if (!updated[0]) {
+        throw new Error('Ticket not found');
+      }
+
+      return updated[0];
+    } catch (error) {
+      console.error('Error updating ticket:', error);
+      throw new Error('Failed to update ticket');
+    }
+  }
+
+  /**
+   * Assign ticket to agent
+   */
+  static async assignTicket(
+    ticketId: number,
+    assignedTo: string | null
+  ): Promise<SupportTicket> {
+    try {
+      const updateData: any = {
+        assignedTo,
+        assignedAt: assignedTo ? new Date() : null,
+        updatedAt: new Date(),
+      };
+
+      const updated = await db
+        .update(supportTickets)
+        .set(updateData)
+        .where(eq(supportTickets.id, ticketId))
+        .returning();
+
+      if (!updated[0]) {
+        throw new Error('Ticket not found');
+      }
+
+      return updated[0];
+    } catch (error) {
+      console.error('Error assigning ticket:', error);
+      throw new Error('Failed to assign ticket');
+    }
+  }
+
+  /**
+   * Add message to ticket
+   */
+  static async addTicketMessage(
+    ticketId: number,
+    authorId: string,
+    content: string,
+    messageType: 'message' | 'note' | 'system' = 'message',
+    isInternal: boolean = false,
+    attachments: any[] = [],
+    userAgent?: string,
+    ipAddress?: string
+  ): Promise<any> {
+    try {
+      const message = await db
+        .insert(supportTicketMessages)
+        .values({
+          ticketId,
+          authorId,
+          content,
+          messageType,
+          isInternal,
+          attachments,
+          userAgent,
+          ipAddress,
+        })
+        .returning();
+
+      // Update ticket updatedAt timestamp
+      await db
+        .update(supportTickets)
+        .set({ updatedAt: new Date() })
+        .where(eq(supportTickets.id, ticketId));
+
+      // If this is the first message from support, calculate response time
+      if (!isInternal && messageType === 'message') {
+        const ticket = await db
+          .select()
+          .from(supportTickets)
+          .where(eq(supportTickets.id, ticketId))
+          .limit(1);
+
+        if (ticket[0] && !ticket[0].responseTime) {
+          const createdAt = ticket[0].createdAt;
+          const now = new Date();
+          const responseTimeMinutes = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60));
+          
+          await db
+            .update(supportTickets)
+            .set({ responseTime: responseTimeMinutes })
+            .where(eq(supportTickets.id, ticketId));
+        }
+      }
+
+      return message[0];
+    } catch (error) {
+      console.error('Error adding ticket message:', error);
+      throw new Error('Failed to add message');
+    }
+  }
+
+  /**
+   * Get ticket analytics
+   */
+  static async getTicketAnalytics(dateFrom?: Date, dateTo?: Date): Promise<any> {
+    try {
+      const whereConditions = [];
+      if (dateFrom) {
+        whereConditions.push(sql`${supportTickets.createdAt} >= ${dateFrom}`);
+      }
+      if (dateTo) {
+        whereConditions.push(sql`${supportTickets.createdAt} <= ${dateTo}`);
+      }
+
+      const allTickets = await db
+        .select()
+        .from(supportTickets)
+        .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+
+      const totalTickets = allTickets.length;
+      const byStatus = {
+        open: allTickets.filter(t => t.status === 'open').length,
+        in_progress: allTickets.filter(t => t.status === 'in_progress').length,
+        resolved: allTickets.filter(t => t.status === 'resolved').length,
+        closed: allTickets.filter(t => t.status === 'closed').length,
+      };
+
+      const byPriority = {
+        low: allTickets.filter(t => t.priority === 'low').length,
+        medium: allTickets.filter(t => t.priority === 'medium').length,
+        high: allTickets.filter(t => t.priority === 'high').length,
+        urgent: allTickets.filter(t => t.priority === 'urgent').length,
+      };
+
+      const byCategory = {
+        technical: allTickets.filter(t => t.category === 'technical').length,
+        billing: allTickets.filter(t => t.category === 'billing').length,
+        feature_request: allTickets.filter(t => t.category === 'feature_request').length,
+        bug_report: allTickets.filter(t => t.category === 'bug_report').length,
+        general: allTickets.filter(t => t.category === 'general').length,
+      };
+
+      const ticketsWithResponseTime = allTickets.filter(t => t.responseTime !== null);
+      const avgResponseTime = ticketsWithResponseTime.length > 0
+        ? ticketsWithResponseTime.reduce((sum, t) => sum + (t.responseTime || 0), 0) / ticketsWithResponseTime.length
+        : 0;
+
+      const ticketsWithResolutionTime = allTickets.filter(t => t.resolutionTime !== null);
+      const avgResolutionTime = ticketsWithResolutionTime.length > 0
+        ? ticketsWithResolutionTime.reduce((sum, t) => sum + (t.resolutionTime || 0), 0) / ticketsWithResolutionTime.length
+        : 0;
+
+      const ticketsWithRating = allTickets.filter(t => t.satisfactionRating !== null);
+      const avgSatisfactionRating = ticketsWithRating.length > 0
+        ? ticketsWithRating.reduce((sum, t) => sum + (t.satisfactionRating || 0), 0) / ticketsWithRating.length
+        : 0;
+
+      return {
+        totalTickets,
+        byStatus,
+        byPriority,
+        byCategory,
+        avgResponseTime: Math.round(avgResponseTime),
+        avgResolutionTime: Math.round(avgResolutionTime),
+        avgSatisfactionRating: Math.round(avgSatisfactionRating * 10) / 10,
+        totalWithResponseTime: ticketsWithResponseTime.length,
+        totalWithResolutionTime: ticketsWithResolutionTime.length,
+        totalWithRating: ticketsWithRating.length,
+      };
+    } catch (error) {
+      console.error('Error getting ticket analytics:', error);
+      throw new Error('Failed to get analytics');
+    }
+  }
+
+  /**
    * Get FAQ items
    */
   static async getFAQItems(categoryId?: number, limit: number = 50): Promise<any[]> {

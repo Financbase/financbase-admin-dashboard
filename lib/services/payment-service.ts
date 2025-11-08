@@ -251,67 +251,74 @@ export async function deletePaymentMethod(paymentMethodId: string, userId: strin
 
 /**
  * Process a payment
+ * Uses transaction to ensure atomic payment creation and invoice updates
  */
 export async function processPayment(input: CreatePaymentInput): Promise<Payment> {
-	try {
-		// Get payment method details
-		const paymentMethod = await getPaymentMethodById(input.paymentMethodId, input.userId);
-		if (!paymentMethod) {
-			throw new Error('Payment method not found');
+	const { withTransaction } = await import('@/lib/utils/db-transaction');
+	
+	return await withTransaction(async (tx) => {
+		try {
+			// Get payment method details
+			const paymentMethod = await getPaymentMethodById(input.paymentMethodId, input.userId);
+			if (!paymentMethod) {
+				throw new Error('Payment method not found');
+			}
+
+			// Calculate processing fee
+			const processingFee = calculateProcessingFee(
+				input.amount,
+				Number(paymentMethod.processingFee || 0),
+				Number(paymentMethod.fixedFee || 0)
+			);
+
+			const netAmount = input.amount - processingFee;
+
+			// Create payment record
+			const [payment] = await tx.insert(payments).values({
+				userId: input.userId,
+				paymentMethodId: input.paymentMethodId,
+				invoiceId: input.invoiceId,
+				paymentType: input.paymentType,
+				amount: input.amount.toString(),
+				currency: input.currency || 'USD',
+				processingFee: processingFee.toString(),
+				netAmount: netAmount.toString(),
+				description: input.description,
+				reference: input.reference,
+				status: 'processing',
+				metadata: input.metadata ? JSON.stringify(input.metadata) : null,
+				notes: input.notes,
+			}).returning();
+
+			// Update payment method last used
+			await tx
+				.update(paymentMethods)
+				.set({ lastUsedAt: new Date() })
+				.where(eq(paymentMethods.id, input.paymentMethodId));
+
+			// If this is an invoice payment, update invoice status atomically
+			if (input.invoiceId && input.paymentType === 'invoice_payment') {
+				await tx
+					.update(invoices)
+					.set({ 
+						status: 'paid',
+						paidDate: new Date(),
+						updatedAt: new Date()
+					})
+					.where(eq(invoices.id, input.invoiceId));
+			}
+
+			// Send notification (outside transaction to avoid blocking)
+			NotificationHelpers.sendPaymentProcessed(payment.id, input.userId).catch(
+				(error) => console.error('Failed to send payment notification:', error)
+			);
+
+			return payment;
+		} catch (error) {
+			console.error('Error processing payment:', error);
+			throw new Error('Failed to process payment');
 		}
-
-		// Calculate processing fee
-		const processingFee = calculateProcessingFee(
-			input.amount,
-			Number(paymentMethod.processingFee || 0),
-			Number(paymentMethod.fixedFee || 0)
-		);
-
-		const netAmount = input.amount - processingFee;
-
-		// Create payment record
-		const [payment] = await db.insert(payments).values({
-			userId: input.userId,
-			paymentMethodId: input.paymentMethodId,
-			invoiceId: input.invoiceId,
-			paymentType: input.paymentType,
-			amount: input.amount.toString(),
-			currency: input.currency || 'USD',
-			processingFee: processingFee.toString(),
-			netAmount: netAmount.toString(),
-			description: input.description,
-			reference: input.reference,
-			status: 'processing',
-			metadata: input.metadata ? JSON.stringify(input.metadata) : null,
-			notes: input.notes,
-		}).returning();
-
-		// Update payment method last used
-		await db
-			.update(paymentMethods)
-			.set({ lastUsedAt: new Date() })
-			.where(eq(paymentMethods.id, input.paymentMethodId));
-
-		// If this is an invoice payment, update invoice status
-		if (input.invoiceId && input.paymentType === 'invoice_payment') {
-			await db
-				.update(invoices)
-				.set({ 
-					status: 'paid',
-					paidDate: new Date(),
-					updatedAt: new Date()
-				})
-				.where(eq(invoices.id, input.invoiceId));
-		}
-
-		// Send notification
-		await NotificationHelpers.sendPaymentProcessed(payment.id, input.userId);
-
-		return payment;
-	} catch (error) {
-		console.error('Error processing payment:', error);
-		throw new Error('Failed to process payment');
-	}
+	});
 }
 
 /**

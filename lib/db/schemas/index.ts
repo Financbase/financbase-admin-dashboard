@@ -169,3 +169,6 @@ export * from "./tax.schema";
 
 // Direct File Integration (IRS Direct File export metadata only - no PII/FTI)
 export * from "./direct-file.schema";
+
+// Newsletter Subscriptions
+export * from "./newsletter.schema";

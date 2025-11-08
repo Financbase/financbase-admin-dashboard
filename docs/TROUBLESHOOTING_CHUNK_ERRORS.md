@@ -190,6 +190,21 @@ node_modules/
 
 ## Quick Fix Script
 
+### Option 1: Use npm script (Recommended)
+
+The project includes a `dev:clean` script that automatically cleans the cache and starts the dev server:
+
+```bash
+npm run dev:clean
+```
+
+This script:
+- Removes `.next` build directory
+- Clears `node_modules/.cache`
+- Starts a fresh dev server
+
+### Option 2: Manual script
+
 Create a `fix-chunks.sh` script:
 
 ```bash
