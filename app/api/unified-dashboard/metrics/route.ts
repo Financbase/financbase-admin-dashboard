@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { UnifiedDashboardService } from '@/lib/services/unified-dashboard-service';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
 	try {
@@ -22,7 +23,7 @@ export async function GET() {
 
 		return NextResponse.json({ metrics });
 	} catch (error) {
-		console.error('Error fetching unified metrics:', error);
+		logger.error('Error fetching unified metrics:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch unified metrics' },
 			{ status: 500 }

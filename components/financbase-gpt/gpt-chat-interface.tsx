@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { logger } from '@/lib/logger';
 
 interface Message {
 	role: 'user' | 'assistant' | 'system';
@@ -196,7 +197,7 @@ What would you like to know about your finances?`,
 			setIsTyping(false);
 		},
 		onError: (error) => {
-			console.error('GPT Error:', error);
+			logger.error('GPT Error', { error });
 			const errorMessage: Message = {
 				role: 'assistant',
 				content: 'I apologize, but I encountered an error processing your request. Please try again or contact support if the issue persists.',

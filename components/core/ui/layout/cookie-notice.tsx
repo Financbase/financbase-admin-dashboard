@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import CookiePreferencesModal from "@/components/ui/cookie-preferences-modal";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { logger } from '@/lib/logger';
 
 interface CookiePreferences {
 	necessary: boolean;
@@ -58,7 +59,7 @@ export default function CookieNotice({
 			// Show notice if no preferences found or user hasn't consented
 			setVisible(true);
 		} catch (error) {
-			console.error("Error checking cookie preferences:", error);
+			logger.error("Error checking cookie preferences:", error);
 			// Show notice by default if we can't check preferences
 			setVisible(true);
 		}
@@ -83,7 +84,7 @@ export default function CookieNotice({
 			setVisible(false);
 			onAccept?.();
 		} catch (error) {
-			console.error("Error accepting cookies:", error);
+			logger.error("Error accepting cookies:", error);
 			setError("Failed to save cookie preferences. Please try again.");
 		} finally {
 			setLoading(false);
@@ -109,7 +110,7 @@ export default function CookieNotice({
 			setVisible(false);
 			onReject?.();
 		} catch (error) {
-			console.error("Error rejecting cookies:", error);
+			logger.error("Error rejecting cookies:", error);
 			setError("Failed to save cookie preferences. Please try again.");
 		} finally {
 			setLoading(false);

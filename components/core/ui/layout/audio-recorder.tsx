@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { logger } from '@/lib/logger';
 
 interface AudioRecorderProps {
 	timesheetEntryId?: string;
@@ -133,7 +134,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 				}
 			}, 100);
 		} catch (error) {
-			console.error("Error starting recording:", error);
+			logger.error("Error starting recording:", error);
 			setError(
 				"Failed to start recording. Please check microphone permissions.",
 			);
@@ -271,7 +272,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
 			resetRecording();
 		} catch (error) {
-			console.error("Error saving recording:", error);
+			logger.error("Error saving recording:", error);
 			setError("Failed to save recording. Please try again.");
 		}
 	}, [

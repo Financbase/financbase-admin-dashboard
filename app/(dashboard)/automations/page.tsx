@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { logger } from '@/lib/logger';
 
 interface Workflow {
 	id: number;
@@ -94,7 +95,7 @@ export default function AutomationsPage() {
 			const data = await response.json();
 			setWorkflows(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching workflows:", error);
+			logger.error("Error fetching workflows:", error);
 			const errorMessage = error instanceof Error ? error.message : "Failed to load workflows";
 			toast.error(errorMessage);
 			setWorkflows([]);
@@ -113,7 +114,7 @@ export default function AutomationsPage() {
 			const data = await response.json();
 			setTemplates(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching templates:", error);
+			logger.error("Error fetching templates:", error);
 			setTemplates([]);
 		}
 	};
@@ -129,7 +130,7 @@ export default function AutomationsPage() {
 			const data = await response.json();
 			setExecutions(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching executions:", error);
+			logger.error("Error fetching executions:", error);
 			const errorMessage = error instanceof Error ? error.message : "Failed to fetch executions";
 			toast.error(errorMessage);
 			setExecutions([]);
@@ -152,7 +153,7 @@ export default function AutomationsPage() {
 			await fetchWorkflows();
 			toast.success(`Workflow ${newStatus === "active" ? "activated" : "paused"}`);
 		} catch (error) {
-			console.error("Error toggling workflow:", error);
+			logger.error("Error toggling workflow:", error);
 			const errorMessage = error instanceof Error ? error.message : "Failed to update workflow";
 			toast.error(errorMessage);
 		}

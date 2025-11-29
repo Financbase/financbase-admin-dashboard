@@ -8,11 +8,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { integrationConnections, integrations } from '@/lib/db/schemas';
-import { eq, and, desc } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { IntegrationService } from '@/lib/services/integration-service';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -23,38 +21,30 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
+    const status = searchParams.get('status') as 'active' | 'inactive' | 'error' | 'expired' | null;
+    const integrationId = searchParams.get('integrationId') ? parseInt(searchParams.get('integrationId')!) : undefined;
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = db
-      .select({
-        connection: integrationConnections,
-        integration: integrations,
+    const connections = await IntegrationService.getConnections(userId, {
+      status: status || undefined,
+      integrationId,
+      limit,
+      offset,
+    });
+
+    // Enrich with integration details
+    const enrichedConnections = await Promise.all(
+      connections.map(async (connection) => {
+        const integration = await IntegrationService.getIntegration(connection.integrationId);
+        return {
+          ...connection,
+          integration,
+        };
       })
-      .from(integrationConnections)
-      .innerJoin(integrations, eq(integrationConnections.integrationId, integrations.id))
-      .where(eq(integrationConnections.userId, userId));
+    );
 
-    if (status) {
-      query = query.where(and(
-        eq(integrationConnections.userId, userId),
-        eq(integrationConnections.status, status)
-      ));
-    }
-
-    const connections = await query
-      .orderBy(desc(integrationConnections.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    // Transform the data to include integration details
-    const transformedConnections = connections.map(({ connection, integration }) => ({
-      ...connection,
-      integration,
-    }));
-
-    return NextResponse.json(transformedConnections);
+    return NextResponse.json(enrichedConnections);
   } catch (error) {
     if (error instanceof Error && (error.message.includes('DATABASE_URL') || error.message.includes('connection'))) {
       return ApiErrorHandler.databaseError(
@@ -99,25 +89,22 @@ export async function POST(request: NextRequest) {
       return ApiErrorHandler.badRequest('Integration ID, name, and access token are required');
     }
 
-    const newConnection = await db.insert(integrationConnections).values({
-      userId,
-      organizationId,
+    const newConnection = await IntegrationService.createConnection(userId, {
       integrationId,
       name,
-      status: 'active',
-      isActive: true,
+      organizationId,
       accessToken,
       refreshToken,
-      tokenExpiresAt,
+      tokenExpiresAt: tokenExpiresAt ? new Date(tokenExpiresAt) : undefined,
       scope,
       externalId,
       externalName,
-      externalData: externalData || {},
-      settings: settings || {},
-      mappings: mappings || {},
-    }).returning();
+      externalData,
+      settings,
+      mappings,
+    });
 
-    return NextResponse.json(newConnection[0], { status: 201 });
+    return NextResponse.json(newConnection, { status: 201 });
   } catch (error) {
     if (error instanceof Error && (error.message.includes('DATABASE_URL') || error.message.includes('connection'))) {
       return ApiErrorHandler.databaseError(

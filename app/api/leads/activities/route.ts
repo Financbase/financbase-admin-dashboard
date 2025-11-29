@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { LeadManagementService } from '@/lib/services/lead-management-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const createActivitySchema = z.object({
 	leadId: z.string().min(1, 'Lead ID is required'),
@@ -25,7 +26,7 @@ const createActivitySchema = z.object({
 	notes: z.string().optional(),
 	requiresFollowUp: z.boolean().optional(),
 	followUpDate: z.string().datetime().optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export async function POST(request: NextRequest) {

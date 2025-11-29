@@ -11,6 +11,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Download, FileText } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 interface DirectFileExportProps {
 	/**
@@ -45,7 +46,7 @@ export function DirectFileExport({ onExport }: DirectFileExportProps) {
 			document.body.removeChild(link);
 			URL.revokeObjectURL(url);
 		} catch (error) {
-			console.error("Export failed:", error);
+			logger.error("Export failed:", error);
 			// Error handling would be done by parent component
 		}
 	};

@@ -10,6 +10,7 @@
 import { EmailClientCard } from "@/components/core/ui/layout/email-client-card";
 import { Heart, ThumbsUp, Zap, Flame, Star, Send, Trash } from "lucide-react";
 import React from "react";
+import { logger } from '@/lib/logger';
 
 const EmailClientCardDemo = () => {
 	// Sample data to populate the component
@@ -32,13 +33,13 @@ const EmailClientCardDemo = () => {
 	};
 
 	const handleReaction = (reaction: React.ReactNode, index: number) => {
-		console.log(`Reacted with reaction at index: ${index}`);
+		logger.info(`Reacted with reaction at index: ${index}`);
 		// Add logic to handle the reaction
 	};
 
 	const handleAction = (index: number) => {
 		const action = ["Send", "Delete"][index];
-		console.log(`Action clicked: ${action}`);
+		logger.info(`Action clicked: ${action}`);
 		// Add logic for actions
 	};
 

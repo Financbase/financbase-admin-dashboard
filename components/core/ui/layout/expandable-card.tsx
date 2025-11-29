@@ -40,6 +40,7 @@ import {
 	MessageSquare,
 } from "lucide-react";
 import React, { useRef, useEffect, useState } from "react";
+import { logger } from '@/lib/logger';
 
 interface ProjectStatusCardProps {
 	title?: string;
@@ -118,7 +119,7 @@ export function ProjectStatusCard({
 				setData(result.data[0]);
 			}
 		} catch (err) {
-			console.error("Error fetching project data:", err);
+			logger.error("Error fetching project data:", err);
 			setError(
 				err instanceof Error ? err.message : "Failed to load project data",
 			);

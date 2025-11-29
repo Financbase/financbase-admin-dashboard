@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Send } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
 
 interface BlogCategory {
 	id: number;

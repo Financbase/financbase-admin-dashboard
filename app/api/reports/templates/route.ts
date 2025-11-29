@@ -17,6 +17,7 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { ReportService } from '@/lib/services/report-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/reports/templates
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json(templates);
 	} catch (error) {
-		console.error('Error fetching templates:', error);
+		logger.error('Error fetching templates:', error);
 		
 		// Return default templates on error instead of failing
 		return NextResponse.json(getDefaultTemplates());
@@ -131,7 +132,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(report, { status: 201 });
 	} catch (error) {
-		console.error('Error creating report from template:', error);
+		logger.error('Error creating report from template:', error);
 		return NextResponse.json(
 			{ error: 'Failed to create report from template' },
 			{ status: 500 }

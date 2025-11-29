@@ -46,4 +46,43 @@ Sentry.init({
 			component: 'financbase-admin-dashboard-server',
 		},
 	},
+
+	// Alert configuration
+	beforeSend(event, hint) {
+		// Filter out non-critical errors
+		if (process.env.NODE_ENV === 'development') {
+			const error = hint.originalException;
+			if (error && typeof error === 'object' && 'code' in error) {
+				const dbError = error as any;
+				if (dbError.code === 'ECONNREFUSED' || dbError.code === 'ENOTFOUND') {
+					return null;
+				}
+			}
+		}
+
+		// Tag critical errors for alerting
+		if (event.exception) {
+			const error = hint.originalException;
+			if (error && typeof error === 'object' && 'message' in error) {
+				const message = (error as Error).message;
+				
+				// Tag authentication errors
+				if (message.includes('authentication') || message.includes('unauthorized')) {
+					event.tags = { ...event.tags, category: 'authentication', severity: 'high' };
+				}
+				
+				// Tag payment errors
+				if (message.includes('payment') || message.includes('stripe') || message.includes('transaction')) {
+					event.tags = { ...event.tags, category: 'payment', severity: 'critical' };
+				}
+				
+				// Tag database errors
+				if (message.includes('database') || message.includes('connection') || message.includes('query')) {
+					event.tags = { ...event.tags, category: 'database', severity: 'high' };
+				}
+			}
+		}
+
+		return event;
+	},
 });

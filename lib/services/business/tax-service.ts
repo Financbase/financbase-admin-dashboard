@@ -479,6 +479,54 @@ export class TaxService {
 	}
 
 	/**
+	 * Get payment history for a user
+	 */
+	async getPaymentHistory(
+		userId: string,
+		year?: number,
+		obligationId?: string
+	): Promise<TaxPayment[]> {
+		const conditions = [eq(taxPayments.userId, userId)];
+
+		if (year) {
+			conditions.push(eq(taxPayments.year, year));
+		}
+
+		if (obligationId) {
+			conditions.push(eq(taxPayments.obligationId, obligationId));
+		}
+
+		const results = await db
+			.select()
+			.from(taxPayments)
+			.where(and(...conditions))
+			.orderBy(desc(taxPayments.paymentDate));
+
+		return results;
+	}
+
+	/**
+	 * Get payments for a specific obligation
+	 */
+	async getPaymentsByObligation(
+		obligationId: string,
+		userId: string
+	): Promise<TaxPayment[]> {
+		const results = await db
+			.select()
+			.from(taxPayments)
+			.where(
+				and(
+					eq(taxPayments.obligationId, obligationId),
+					eq(taxPayments.userId, userId)
+				)
+			)
+			.orderBy(desc(taxPayments.paymentDate));
+
+		return results;
+	}
+
+	/**
 	 * Get tax deductions grouped by category with optional pagination
 	 * Cached for 5 minutes (non-paginated requests only)
 	 */
@@ -775,7 +823,13 @@ export class TaxService {
 		const results = await db
 			.select()
 			.from(taxDeductions)
-			.where(and(eq(taxDeductions.id, id), eq(taxDeductions.userId, userId)))
+			.where(
+				and(
+					eq(taxDeductions.id, id),
+					eq(taxDeductions.userId, userId),
+					isNull(taxDeductions.deletedAt) // Filter soft-deleted records
+				)
+			)
 			.limit(1);
 
 		if (results.length === 0) {
@@ -1076,7 +1130,6 @@ export class TaxService {
 						isNull(taxObligations.deletedAt)
 					)
 				),
-			// Get deductions summary
 			// Get deductions summary in one query (excluding soft-deleted)
 			db
 				.select({
@@ -1090,6 +1143,21 @@ export class TaxService {
 						isNull(taxDeductions.deletedAt)
 					)
 				),
+			// Get obligations by type breakdown
+			db
+				.select({
+					type: taxObligations.type,
+					count: sql<number>`COUNT(*)::int`,
+				})
+				.from(taxObligations)
+				.where(
+					and(
+						eq(taxObligations.userId, userId),
+						eq(taxObligations.year, currentYear),
+						isNull(taxObligations.deletedAt)
+					)
+				)
+				.groupBy(taxObligations.type),
 		]);
 
 		const obligationsData = obligationsSummary[0];
@@ -1106,9 +1174,11 @@ export class TaxService {
 			overdue: obligationsData?.overdueCount || 0,
 		};
 
-		// Parse obligationsByType from JSONB or use empty object
-		const obligationsByType: Record<string, number> =
-			(obligationsData?.statusBreakdown as Record<string, number>) || {};
+		// Build obligationsByType from type breakdown
+		const obligationsByType: Record<string, number> = {};
+		for (const item of typeBreakdown) {
+			obligationsByType[item.type] = item.count;
+		}
 
 		return {
 			totalObligations,

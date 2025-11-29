@@ -43,9 +43,7 @@ export async function GET(request: NextRequest) {
 		});
 
 		// Get summary
-		const summary = await rateLimitingService.getSummary({
-			hours,
-		});
+		const summary = await rateLimitingService.getSummary(hours);
 
 		// Calculate current rate limit status
 		const now = Date.now();

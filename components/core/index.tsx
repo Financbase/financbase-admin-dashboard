@@ -45,6 +45,7 @@ import { SortableWidgetItem } from "./widget-sortable-item";
 import { WidgetLibraryPanel } from "./widget-library-panel";
 import { cn } from "@/lib/utils";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { logger } from '@/lib/logger';
 
 export default function DashboardContent() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -81,7 +82,7 @@ export default function DashboardContent() {
   const handleSearch = (query: string) => {
     setSearchQuery(query)
     // Here you would typically filter your dashboard data based on the search query
-    console.log('Searching for:', query)
+    logger.info('Searching for:', query)
   }
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {

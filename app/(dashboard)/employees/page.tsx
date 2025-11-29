@@ -36,6 +36,7 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { logger } from '@/lib/logger';
 
 interface Employee {
 	id: string;
@@ -84,7 +85,7 @@ export default function EmployeesPage() {
 			const data = await response.json();
 			setEmployees(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching employees:", error);
+			logger.error("Error fetching employees:", error);
 			toast.error("Failed to load employees");
 		} finally {
 			setLoading(false);
@@ -96,7 +97,7 @@ export default function EmployeesPage() {
 		try {
 			const organizationId = userData?.organizationId || null;
 			if (!organizationId) {
-				console.warn("No organizationId available");
+				logger.warn("No organizationId available");
 				return;
 			}
 			const response = await fetch(`/api/employees/departments?organizationId=${organizationId}`);
@@ -104,7 +105,7 @@ export default function EmployeesPage() {
 			const data = await response.json();
 			setDepartments(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching departments:", error);
+			logger.error("Error fetching departments:", error);
 		}
 	};
 
@@ -116,7 +117,7 @@ export default function EmployeesPage() {
 			const data = await response.json();
 			setAnalytics(data);
 		} catch (error) {
-			console.error("Error fetching analytics:", error);
+			logger.error("Error fetching analytics:", error);
 		}
 	};
 

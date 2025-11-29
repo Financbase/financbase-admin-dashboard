@@ -7,6 +7,14 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
+import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
+
 export async function GET() {
-  return Response.json({ message: 'Minimal test works' });
+  try {
+    return Response.json({ message: 'Minimal test works' });
+  } catch (error) {
+    logger.error('Error in test-minimal-final route', { error });
+    return ApiErrorHandler.handle(error);
+  }
 }

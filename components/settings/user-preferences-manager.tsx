@@ -26,6 +26,7 @@ import { Separator } from '@/components/ui/separator';
 import { Palette, Globe, Calendar, BarChart3, Bell, Shield, Monitor, Moon, Sun, Laptop } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useThemeManager } from '@/hooks/use-theme-manager';
+import { logger } from '@/lib/logger';
 
 interface UserPreferences {
 	id: string;
@@ -125,7 +126,7 @@ export function UserPreferencesManager() {
 				}
 			}
 		} catch (error) {
-			console.error('Error loading preferences:', error);
+			logger.error('Error loading preferences:', error);
 			toast.error('Failed to load preferences');
 		} finally {
 			setLoading(false);
@@ -145,7 +146,7 @@ export function UserPreferencesManager() {
 			try {
 				await setTheme(value as 'light' | 'dark' | 'system');
 			} catch (error) {
-				console.error('Failed to update theme:', error);
+				logger.error('Failed to update theme:', error);
 				// Continue with API sync even if ThemeManager fails
 			}
 		}

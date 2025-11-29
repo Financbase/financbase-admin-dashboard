@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
 import { auditLogger, AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -110,7 +111,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Failed to fetch approval workflows:', error);
+    logger.error('Failed to fetch approval workflows:', error);
     return NextResponse.json(
       { error: 'Failed to fetch approval workflows' },
       { status: 500 }
@@ -253,7 +254,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ workflow }, { status: 201 });
 
   } catch (error) {
-    console.error('Failed to create approval workflow:', error);
+    logger.error('Failed to create approval workflow:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create workflow' },
       { status: 500 }
@@ -277,7 +278,7 @@ export async function PUT(_request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Failed to fetch pending approvals:', error);
+    logger.error('Failed to fetch pending approvals:', error);
     return NextResponse.json(
       { error: 'Failed to fetch pending approvals' },
       { status: 500 }
@@ -313,7 +314,7 @@ export async function PATCH(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Failed to process approval:', error);
+    logger.error('Failed to process approval:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to process approval' },
       { status: 500 }

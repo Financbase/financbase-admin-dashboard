@@ -50,6 +50,7 @@ import {
 	type UpdateTaxObligationInput,
 } from "@/lib/validation-schemas";
 import { Loader2 } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 const taxObligationTypes = [
 	{ value: "federal_income", label: "Federal Income Tax" },
@@ -125,7 +126,7 @@ export function TaxObligationForm({
 			onSuccess?.();
 		} catch (error) {
 			// Error handling is done in the mutation hooks
-			console.error("Failed to save tax obligation:", error);
+			logger.error("Failed to save tax obligation:", error);
 		}
 	};
 

@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { subscriptionPlans } from '@/lib/db/schemas';
 import { eq, asc } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 // GET /api/settings/billing/plans
 // Get all available subscription plans
@@ -47,7 +48,7 @@ export async function GET() {
 
 		return NextResponse.json({ plans });
 	} catch (error) {
-		console.error('Error fetching subscription plans:', error);
+		logger.error('Error fetching subscription plans:', error);
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 }

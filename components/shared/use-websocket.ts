@@ -22,6 +22,7 @@ import {
 
 import { useAuth } from "@clerk/nextjs";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { logger } from '@/lib/logger';
 
 export interface WebSocketMessage {
 	type:
@@ -249,7 +250,7 @@ export function useWebSocket(
 					}
 				} catch (error) {
 					// Handle message parsing errors
-					console.error('Error parsing WebSocket message:', error);
+					logger.error('Error parsing WebSocket message:', error);
 					setError(new Error('Failed to parse message from server'));
 					
 					// Send error acknowledgment to server if connection is still open
@@ -261,7 +262,7 @@ export function useWebSocket(
 								timestamp: Date.now(),
 							}));
 						} catch (sendError) {
-							console.error('Error sending error acknowledgment:', sendError);
+							logger.error('Error sending error acknowledgment:', sendError);
 						}
 					}
 				}
@@ -354,7 +355,7 @@ export function useWebSocket(
 				ws.current.send(JSON.stringify(fullMessage));
 			} catch (error) {
 				// Handle send errors (e.g., connection closed, message too large)
-				console.error('Error sending WebSocket message:', error);
+				logger.error('Error sending WebSocket message:', error);
 				setError(new Error('Failed to send message. Connection may be closed.'));
 				
 				// If send fails, the connection is likely closed

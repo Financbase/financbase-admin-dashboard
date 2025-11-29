@@ -13,6 +13,7 @@ import { db } from '@/lib/db';
 import { users, organizations } from '@/lib/db/schemas';
 import { eq } from 'drizzle-orm';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/auth/sync-user
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Sync User] Error:', error);
+    logger.error('[Sync User] Error:', error);
     
     if (error.code === '23505') {
       // Unique constraint violation - user might have been created in parallel

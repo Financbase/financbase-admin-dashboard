@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { getUserFromDatabase } from '@/lib/db/rls-context';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/auth/me
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
       } catch (syncError: any) {
         // If sync fails (e.g., duplicate), try to fetch again
         if (syncError.code !== '23505') {
-          console.error('[Auto-sync] Error:', syncError);
+          logger.error('[Auto-sync] Error:', syncError);
         }
         user = await getUserFromDatabase(clerkId);
       }

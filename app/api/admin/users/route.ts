@@ -17,6 +17,7 @@ import { checkPermission } from '@/lib/auth/financbase-rbac';
 import { FINANCIAL_PERMISSIONS } from '@/types/auth';
 import type { FinancbaseUserMetadata } from '@/types/auth';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 // GET /api/admin/users - Get all users with their permissions
 export async function GET(request: NextRequest) {
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
 						lastActive: clerkUser.lastSignInAt ? new Date(clerkUser.lastSignInAt).toISOString() : undefined,
 					};
 				} catch (error) {
-					console.error(`Error fetching Clerk user ${dbUser.clerkId}:`, error);
+					logger.error(`Error fetching Clerk user ${dbUser.clerkId}:`, error);
 					// Return DB data if Clerk fetch fails
 					return {
 						id: dbUser.clerkId,

@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { organizations } from './organizations.schema';
 import { users } from './users.schema';
@@ -47,9 +47,9 @@ export const policyTypeEnum = pgEnum('policy_type', [
 // Policy Documents Table
 export const policyDocuments = pgTable('financbase_policy_documents', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
-  approvedBy: text('approved_by').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  approvedBy: uuid('approved_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Policy identification
   policyNumber: text('policy_number').notNull().unique(), // e.g., POL-2025-001
@@ -64,7 +64,7 @@ export const policyDocuments = pgTable('financbase_policy_documents', {
   status: policyStatusEnum('status').default('draft').notNull(),
   
   // Approval workflow
-  currentApprover: text('current_approver').references(() => users.id, { onDelete: 'set null' }),
+  currentApprover: uuid('current_approver').references(() => users.id, { onDelete: 'set null' }),
   approvalHistory: jsonb('approval_history').default([]).notNull(), // Array of approval steps
   reviewHistory: jsonb('review_history').default([]).notNull(), // Array of review records
   
@@ -107,7 +107,7 @@ export const policyVersions = pgTable('financbase_policy_versions', {
   changelog: text('changelog'), // What changed in this version
   
   // Version metadata
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   publishedAt: timestamp('published_at', { withTimezone: true }),
   isCurrent: boolean('is_current').default(false).notNull(),
@@ -120,13 +120,13 @@ export const policyVersions = pgTable('financbase_policy_versions', {
 export const policyAssignments = pgTable('financbase_policy_assignments', {
   id: serial('id').primaryKey(),
   policyId: integer('policy_id').references(() => policyDocuments.id, { onDelete: 'cascade' }).notNull(),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
   roleId: text('role_id'), // If assigned to a role instead of user
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }),
   
   // Assignment details
   assignedAt: timestamp('assigned_at', { withTimezone: true }).defaultNow().notNull(),
-  assignedBy: text('assigned_by').references(() => users.id, { onDelete: 'set null' }),
+  assignedBy: uuid('assigned_by').references(() => users.id, { onDelete: 'set null' }),
   requiresAcknowledgment: boolean('requires_acknowledgment').default(false).notNull(),
   deadline: timestamp('deadline', { withTimezone: true }),
   

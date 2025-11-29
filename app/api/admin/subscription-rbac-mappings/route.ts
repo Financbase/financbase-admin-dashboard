@@ -31,7 +31,7 @@ const createMappingSchema = z.object({
 	permissions: z.array(z.string()),
 	isTrialMapping: z.boolean().default(false),
 	gracePeriodDays: z.number().int().min(0).max(365).default(7),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const updateMappingSchema = createMappingSchema.partial().extend({

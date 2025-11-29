@@ -13,6 +13,7 @@ import { integrations, integrationConnections } from '@/lib/db/schemas';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/platform/hub
@@ -202,7 +203,7 @@ export async function POST(request: NextRequest) {
       message: 'Integration connection created successfully',
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating integration connection:', error);
+    logger.error('Error creating integration connection:', error);
     return ApiErrorHandler.handle(error);
   }
 }

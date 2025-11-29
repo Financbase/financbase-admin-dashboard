@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GuidesService, GuideFilters } from '@/lib/services/guides-service';
 import { SecurityService } from '@/lib/security/arcjet-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
 			}
 		);
 	} catch (error) {
-		console.error('Guides API error:', error);
+		logger.error('Guides API error:', error);
 
 		return NextResponse.json(
 			{

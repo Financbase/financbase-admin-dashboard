@@ -64,7 +64,7 @@ export async function parseApiError(response: Response): Promise<ParsedApiError 
     // Handle legacy formats: { error: string, code: string }
     if (data.error) {
       return {
-        code: data.code || response.status >= 500 ? 'INTERNAL_SERVER_ERROR' : 'BAD_REQUEST',
+        code: data.code || (response.status >= 500 ? 'INTERNAL_SERVER_ERROR' : 'BAD_REQUEST'),
         message: typeof data.error === 'string' 
           ? data.error 
           : data.error.message || 'An error occurred',
@@ -162,8 +162,9 @@ export function getUserFriendlyMessage(error: ParsedApiError): string {
  */
 export function createErrorFromFetch(error: unknown): ParsedApiError {
   if (error instanceof Error) {
-    // Network errors
-    if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
+    const message = error.message.toLowerCase();
+    // Network errors - check case-insensitively
+    if (message.includes('fetch') || message.includes('network') || message.includes('failed to fetch')) {
       return {
         code: 'NETWORK_ERROR',
         message: 'Network error. Please check your internet connection.',

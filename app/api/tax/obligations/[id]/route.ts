@@ -13,6 +13,7 @@ import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { updateTaxObligationSchema } from "@/lib/validation-schemas";
 import { withRLS } from "@/lib/api/with-rls";
+import { createSuccessResponse } from "@/lib/api/standard-response";
 
 /**
  * GET /api/tax/obligations/[id]
@@ -29,10 +30,7 @@ export async function GET(
 			const service = new TaxService();
 			const obligation = await service.getObligationById(id, clerkUserId);
 
-			return NextResponse.json({
-				success: true,
-				data: obligation,
-			});
+			return createSuccessResponse(obligation, 200, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}
@@ -70,11 +68,7 @@ export async function PATCH(
 				clerkUserId
 			);
 
-			return NextResponse.json({
-				success: true,
-				message: "Tax obligation updated successfully",
-				data: obligation,
-			});
+			return createSuccessResponse(obligation, 200, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}
@@ -96,10 +90,11 @@ export async function DELETE(
 			const service = new TaxService();
 			await service.deleteObligation(id, clerkUserId);
 
-			return NextResponse.json({
-				success: true,
-				message: "Tax obligation deleted successfully",
-			});
+			return createSuccessResponse(
+				{ message: "Tax obligation deleted successfully" },
+				200,
+				{ requestId }
+			);
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

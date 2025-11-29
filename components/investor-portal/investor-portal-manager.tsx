@@ -56,6 +56,7 @@ import {
 	ExternalLink,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { logger } from '@/lib/logger';
 
 interface InvestorPortal {
 	id: string;
@@ -187,7 +188,7 @@ export function InvestorPortalManager() {
 				'The investor portal access URL has been copied to your clipboard.'
 			);
 		} catch (error) {
-			console.error('Failed to copy URL:', error);
+			logger.error('Failed to copy URL:', error);
 			toast.error(
 				'Failed to copy URL',
 				'Please copy the URL manually from the address bar.'

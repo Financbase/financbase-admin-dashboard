@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, numeric, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { organizations } from './organizations.schema';
 import { users } from './users.schema';
@@ -54,8 +54,8 @@ export const assetTypeEnum = pgEnum('asset_type', [
 // Assets Table (Asset Inventory)
 export const assets = pgTable('financbase_assets', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Asset identification
   assetName: text('asset_name').notNull(),
@@ -64,7 +64,7 @@ export const assets = pgTable('financbase_assets', {
   identifier: text('identifier'), // Unique identifier (serial number, etc.)
   
   // Asset details
-  owner: text('owner'), // Asset owner/user
+  owner: uuid('owner').references(() => users.id, { onDelete: 'set null' }), // Asset owner/user
   location: text('location'),
   criticality: text('criticality').default('medium').notNull(), // 'low', 'medium', 'high', 'critical'
   
@@ -87,9 +87,9 @@ export const assets = pgTable('financbase_assets', {
 // Risks Table (Risk Register)
 export const risks = pgTable('financbase_risks', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  identifiedBy: text('identified_by').references(() => users.id, { onDelete: 'set null' }),
-  owner: text('owner').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  identifiedBy: uuid('identified_by').references(() => users.id, { onDelete: 'set null' }),
+  owner: uuid('owner').references(() => users.id, { onDelete: 'set null' }),
   
   // Risk identification
   riskNumber: text('risk_number').notNull().unique(),
@@ -122,7 +122,7 @@ export const risks = pgTable('financbase_risks', {
   residualRiskLevel: riskLevelEnum('residual_risk_level'),
   
   // Acceptance
-  acceptedBy: text('accepted_by').references(() => users.id, { onDelete: 'set null' }),
+  acceptedBy: uuid('accepted_by').references(() => users.id, { onDelete: 'set null' }),
   acceptedAt: timestamp('accepted_at', { withTimezone: true }),
   acceptanceJustification: text('acceptance_justification'),
   
@@ -142,7 +142,7 @@ export const risks = pgTable('financbase_risks', {
 export const riskTreatmentPlans = pgTable('financbase_risk_treatment_plans', {
   id: serial('id').primaryKey(),
   riskId: integer('risk_id').references(() => risks.id, { onDelete: 'cascade' }).notNull(),
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Treatment plan details
   treatmentOption: riskTreatmentEnum('treatment_option').notNull(),
@@ -160,7 +160,7 @@ export const riskTreatmentPlans = pgTable('financbase_risk_treatment_plans', {
   progress: integer('progress').default(0).notNull(), // 0-100%
   
   // Resources
-  responsible: text('responsible').references(() => users.id, { onDelete: 'set null' }),
+  responsible: uuid('responsible').references(() => users.id, { onDelete: 'set null' }),
   budget: jsonb('budget'), // { amount, currency, description }
   
   // Metadata

@@ -50,6 +50,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { logger } from '@/lib/logger';
 
 interface Plugin {
   id: number;
@@ -104,11 +105,11 @@ export default function PluginMarketplacePage() {
   // Load plugins and stats on component mount
   useEffect(() => {
     if (!isLoaded) {
-      console.log('Clerk auth is still loading...');
+      logger.info('Clerk auth is still loading...');
       return; // Wait for Clerk to load
     }
     
-    console.log('Auth state:', { isLoaded, isSignedIn });
+    logger.info('Auth state:', { isLoaded, isSignedIn });
     
     // Try to load data even if isSignedIn is false - Clerk might have cookies but state not updated
     // The API will return 401 if truly unauthorized, so we can let it through
@@ -150,10 +151,10 @@ export default function PluginMarketplacePage() {
           try {
             installedPluginsData = await installedResponse.json();
           } catch (e) {
-            console.warn('Failed to parse installed plugins response:', e);
+            logger.warn('Failed to parse installed plugins response:', e);
           }
         } else if (installedResponse.status === 401) {
-          console.warn('Unauthorized - cannot load installed plugins');
+          logger.warn('Unauthorized - cannot load installed plugins');
         }
         const installedPluginIds = new Set(
           Array.isArray(installedPluginsData) 
@@ -168,7 +169,7 @@ export default function PluginMarketplacePage() {
         if (!pluginsResponse.ok) {
           if (pluginsResponse.status === 401) {
             // Don't throw - just log and set empty array
-            console.error('Unauthorized - cannot load plugins');
+            logger.error('Unauthorized - cannot load plugins');
             setPlugins([]);
             return; // Exit early but don't show error if stats loaded
           }
@@ -177,7 +178,7 @@ export default function PluginMarketplacePage() {
         const pluginsData = await pluginsResponse.json();
         
         // Debug logging
-        console.log('Plugins API Response:', {
+        logger.info('Plugins API Response:', {
           pluginsCount: pluginsData.plugins?.length || 0,
           pagination: pluginsData.pagination,
           totalPlugins: pluginsData.pagination?.total || 0
@@ -221,7 +222,7 @@ export default function PluginMarketplacePage() {
           };
         });
 
-        console.log('Mapped plugins:', {
+        logger.info('Mapped plugins:', {
           totalMapped: mappedPlugins.length,
           samplePlugin: mappedPlugins[0]
         });
@@ -230,7 +231,7 @@ export default function PluginMarketplacePage() {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load plugins. Please try again.';
         setError(errorMessage);
-        console.error('Error loading plugins:', err);
+        logger.error('Error loading plugins:', err);
       } finally {
         setLoading(false);
       }
@@ -287,7 +288,7 @@ export default function PluginMarketplacePage() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to install plugin. Please try again.';
       setError(errorMessage);
-      console.error('Error installing plugin:', err);
+      logger.error('Error installing plugin:', err);
       
       // Update plugin status to error
       setPlugins(prev => prev.map(plugin => 
@@ -369,7 +370,7 @@ export default function PluginMarketplacePage() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to uninstall plugin. Please try again.';
       setError(errorMessage);
-      console.error('Error uninstalling plugin:', err);
+      logger.error('Error uninstalling plugin:', err);
     }
   };
 
@@ -388,7 +389,7 @@ export default function PluginMarketplacePage() {
   // Debug: Log filtering results
   useEffect(() => {
     if (plugins.length > 0) {
-      console.log('Plugin Filtering:', {
+      logger.info('Plugin Filtering:', {
         totalPlugins: plugins.length,
         filteredPlugins: filteredPlugins.length,
         searchTerm,

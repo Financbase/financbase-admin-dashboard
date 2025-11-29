@@ -15,6 +15,7 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { withRLS } from '@/lib/api/with-rls';
 import { checkAdminStatus } from '@/lib/auth/check-admin-status';
 import * as blogService from '@/lib/services/blog/blog-service';
+import { createSuccessResponse } from '@/lib/api/standard-response';
 
 /**
  * GET /api/blog/categories
@@ -25,10 +26,7 @@ export async function GET(req: NextRequest) {
 	try {
 		const categories = await blogService.getCategories();
 
-		return NextResponse.json({
-			success: true,
-			data: categories,
-		});
+		return createSuccessResponse(categories, 200, { requestId });
 	} catch (error) {
 		return ApiErrorHandler.handle(error, requestId);
 	}
@@ -53,7 +51,7 @@ export async function POST(req: NextRequest) {
 			body = await req.json();
 		} catch (error) {
 			// Handle JSON parse errors (malformed JSON)
-			if (error instanceof SyntaxError || error instanceof TypeError) {
+			if (error instanceof SyntaxError || error instanceof TypeError || (error instanceof Error && error.message.includes('Invalid JSON'))) {
 				return ApiErrorHandler.badRequest('Invalid JSON in request body');
 			}
 			// Re-throw other errors to be handled by outer catch
@@ -65,11 +63,7 @@ export async function POST(req: NextRequest) {
 
 			const newCategory = await blogService.createCategory(validatedData);
 
-			return NextResponse.json({
-				success: true,
-				message: 'Blog category created successfully',
-				data: newCategory,
-			}, { status: 201 });
+			return createSuccessResponse(newCategory, 201, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

@@ -8,11 +8,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { webhooks, webhookDeliveries } from '@/lib/db/schemas';
-import { eq, and, desc } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { WebhookService } from '@/lib/services/webhook-service';
 
 export async function GET(
   request: NextRequest,
@@ -31,71 +29,25 @@ export async function GET(
       return ApiErrorHandler.badRequest('Invalid webhook ID');
     }
 
-    // Verify webhook ownership
-    const webhook = await db
-      .select()
-      .from(webhooks)
-      .where(and(eq(webhooks.id, webhookId), eq(webhooks.userId, userId)))
-      .limit(1);
-
-    if (webhook.length === 0) {
-      return ApiErrorHandler.notFound('Webhook not found');
-    }
-
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const search = searchParams.get('search');
+    const status = searchParams.get('status') as 'pending' | 'delivered' | 'failed' | 'retrying' | null;
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = db
-      .select()
-      .from(webhookDeliveries)
-      .where(eq(webhookDeliveries.webhookId, webhookId))
-      .orderBy(desc(webhookDeliveries.createdAt))
-      .limit(limit)
-      .offset(offset);
+    try {
+      const deliveries = await WebhookService.getWebhookDeliveries(webhookId, userId, {
+        status: status || undefined,
+        limit,
+        offset,
+      });
 
-    if (status) {
-      query = query.where(and(
-        eq(webhookDeliveries.webhookId, webhookId),
-        eq(webhookDeliveries.status, status)
-      ));
+      return NextResponse.json(deliveries);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Webhook not found') {
+        return ApiErrorHandler.notFound('Webhook not found');
+      }
+      return ApiErrorHandler.handle(error, requestId);
     }
-
-    if (search) {
-      query = query.where(and(
-        eq(webhookDeliveries.webhookId, webhookId),
-        // Add search functionality for event type or delivery ID
-      ));
-    }
-
-    const deliveries = await query;
-
-    // Format deliveries for response
-    const formattedDeliveries = deliveries.map((delivery: any) => ({
-      id: delivery.id,
-      webhookId: delivery.webhookId,
-      deliveryId: delivery.deliveryId,
-      eventType: delivery.eventType,
-      eventId: delivery.eventId,
-      status: delivery.status,
-      httpStatus: delivery.httpStatus ? Number(delivery.httpStatus) : undefined,
-      responseBody: delivery.responseBody || undefined,
-      responseHeaders: delivery.responseHeaders || {},
-      payload: delivery.payload || {},
-      attemptCount: Number(delivery.attemptCount) || 1,
-      maxAttempts: Number(delivery.maxAttempts) || 3,
-      nextRetryAt: delivery.nextRetryAt || undefined,
-      deliveredAt: delivery.deliveredAt || undefined,
-      failedAt: delivery.failedAt || undefined,
-      duration: delivery.duration ? Number(delivery.duration) : undefined,
-      errorMessage: delivery.errorMessage || undefined,
-      createdAt: delivery.createdAt?.toISOString() || new Date().toISOString(),
-      updatedAt: delivery.updatedAt?.toISOString() || new Date().toISOString(),
-    }));
-
-    return NextResponse.json(formattedDeliveries);
   } catch (error) {
     return ApiErrorHandler.handle(error, requestId);
   }

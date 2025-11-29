@@ -71,6 +71,7 @@ import {
 } from '@/components/ui/dialog';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface Report {
 	id: number;
@@ -123,7 +124,7 @@ export function ReportList() {
 			const response = await fetch('/api/reports/templates');
 			if (!response.ok) {
 				// Return empty array on error instead of throwing
-				console.warn('Failed to fetch templates, using defaults');
+				logger.warn('Failed to fetch templates, using defaults');
 				return [];
 			}
 			return response.json();

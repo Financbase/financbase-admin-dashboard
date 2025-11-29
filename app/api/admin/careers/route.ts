@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json({ job: job[0] }, { status: 201 });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			return ApiErrorHandler.badRequest(error.errors.map(e => e.message).join(', '));
+			return ApiErrorHandler.badRequest(error.issues.map((e: z.ZodIssue) => e.message).join(', '));
 		}
 		return ApiErrorHandler.handle(error, requestId);
 	}

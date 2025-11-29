@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { EmailService } from '@/lib/email/service';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/email/send-invoice
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 		}
 
 	} catch (error) {
-		console.error('Send Invoice Email API Error:', error);
+		logger.error('Send Invoice Email API Error:', error);
 		return NextResponse.json(
 			{ error: 'Failed to send invoice email' },
 			{ status: 500 }

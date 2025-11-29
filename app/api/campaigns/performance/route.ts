@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AdboardService } from '@/lib/services/adboard-service';
 import { getCurrentUserId } from '@/lib/api/with-rls';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json({ metrics });
 	} catch (error) {
-		console.error('Error fetching performance metrics:', error);
+		logger.error('Error fetching performance metrics:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch performance metrics' },
 			{ status: 500 }

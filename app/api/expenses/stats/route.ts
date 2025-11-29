@@ -17,6 +17,7 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { ExpenseService } from '@/lib/services/expense-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/expenses/stats
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json(stats);
 	} catch (error) {
-		console.error('Error fetching expense stats:', error);
+		logger.error('Error fetching expense stats:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch expense statistics' },
 			{ status: 500 }

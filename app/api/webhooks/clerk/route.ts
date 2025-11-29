@@ -13,6 +13,7 @@ import { LeadManagementService } from '@/lib/services/lead-management-service';
 import { db } from '@/lib/db';
 import { users, organizations } from '@/lib/db/schemas';
 import { eq, sql } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 // Clerk webhook secret - should be set in environment variables
 const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET || '';
@@ -41,7 +42,7 @@ async function verifyOrganizationIdType(): Promise<'uuid' | 'integer' | 'unknown
     }
     return 'unknown';
   } catch (error) {
-    console.error('Error verifying organization ID type:', error);
+    logger.error('Error verifying organization ID type', { error });
     return 'unknown';
   }
 }
@@ -78,12 +79,12 @@ async function getOrCreateDefaultOrganization(): Promise<string> {
       
       // Validate type based on actual database schema
       if (actualType === 'uuid' && !isValidUUID(orgId)) {
-        console.error('Schema mismatch: Expected UUID but got:', typeof orgId, orgId);
+        logger.error('Schema mismatch: Expected UUID but got:', typeof orgId, orgId);
         throw new Error(`Schema type mismatch: organizations.id should be UUID but value is ${typeof orgId}`);
       }
       
       if (actualType === 'integer' && typeof orgId !== 'number') {
-        console.error('Schema mismatch: Expected integer but got:', typeof orgId, orgId);
+        logger.error('Schema mismatch: Expected integer but got:', typeof orgId, orgId);
         throw new Error(`Schema type mismatch: organizations.id should be integer but value is ${typeof orgId}`);
       }
       
@@ -107,7 +108,7 @@ async function getOrCreateDefaultOrganization(): Promise<string> {
     } catch (insertError: any) {
       // Check for type-related errors
       if (insertError.message?.includes('type') || insertError.message?.includes('invalid input')) {
-        console.error('Type mismatch error when creating organization:', {
+        logger.error('Type mismatch error when creating organization:', {
           error: insertError.message,
           actualDatabaseType: actualType,
           schemaDefinition: 'serial (integer)',
@@ -125,7 +126,7 @@ async function getOrCreateDefaultOrganization(): Promise<string> {
     const orgId = newOrg[0].id;
     
     // Log type information for debugging
-    console.log('Created organization with ID:', {
+    logger.info('Created organization with ID:', {
       id: orgId,
       type: typeof orgId,
       actualDatabaseType: actualType,
@@ -135,7 +136,7 @@ async function getOrCreateDefaultOrganization(): Promise<string> {
     // Return the organization ID as string
     return String(orgId);
   } catch (error: any) {
-    console.error('Error getting/creating default organization:', {
+    logger.error('Error getting/creating default organization:', {
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       type: error.constructor.name,
@@ -180,7 +181,7 @@ export async function POST(request: NextRequest) {
         'svix-signature': svix_signature,
       });
     } catch (err) {
-      console.error('Error verifying webhook:', err);
+      logger.error('Error verifying webhook:', err);
       return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 400 });
     }
 
@@ -197,7 +198,7 @@ export async function POST(request: NextRequest) {
         const clerkUserId = user.id;
 
         if (!email) {
-          console.error('No email found in user.created webhook');
+          logger.error('No email found in user.created webhook');
           return NextResponse.json({ error: 'No email found' }, { status: 400 });
         }
 
@@ -212,19 +213,39 @@ export async function POST(request: NextRequest) {
         if (existingUser.length === 0) {
           // User doesn't exist, create a new user record
           try {
-            // Get or create default organization
-            // Note: This is a temporary solution - in production, you should handle
-            // the organization assignment more carefully (maybe during onboarding)
-            const defaultOrgId = await getOrCreateDefaultOrganization();
+            // Create a personal organization for the new user
+            // This personal organization will be used until the user completes onboarding,
+            // at which point they can join an existing organization or keep their personal one.
+            // The onboarding flow (app/onboarding) will handle proper organization assignment.
+            const personalOrgName = firstName && lastName 
+              ? `${firstName} ${lastName}'s Organization`
+              : email 
+                ? `${email.split('@')[0]}'s Organization`
+                : 'Personal Organization';
+            
+            const [newPersonalOrg] = await db
+              .insert(organizations)
+              .values({
+                name: personalOrgName,
+                description: 'Personal organization created during signup. Can be updated during onboarding.',
+                ownerId: null, // Will be set after user is created
+              } as any)
+              .returning();
+
+            if (!newPersonalOrg) {
+              throw new Error('Failed to create personal organization');
+            }
+
+            const personalOrgId = String(newPersonalOrg.id);
 
             // Validate organizationId format before inserting
-            if (!isValidUUID(defaultOrgId)) {
-              console.error('Invalid organizationId format:', {
-                orgId: defaultOrgId,
-                type: typeof defaultOrgId,
-                isValid: isValidUUID(defaultOrgId),
+            if (!isValidUUID(personalOrgId)) {
+              logger.error('Invalid organizationId format:', {
+                orgId: personalOrgId,
+                type: typeof personalOrgId,
+                isValid: isValidUUID(personalOrgId),
               });
-              throw new Error(`Invalid organizationId format: expected UUID, got ${typeof defaultOrgId}`);
+              throw new Error(`Invalid organizationId format: expected UUID, got ${typeof personalOrgId}`);
             }
 
             // Create user in database
@@ -239,7 +260,7 @@ export async function POST(request: NextRequest) {
                   lastName: lastName || null,
                   role: 'user',
                   isActive: true,
-                  organizationId: defaultOrgId,
+                  organizationId: personalOrgId,
                 })
                 .returning();
             } catch (insertError: any) {
@@ -248,7 +269,7 @@ export async function POST(request: NextRequest) {
                   insertError.message?.includes('invalid input') ||
                   insertError.message?.includes('uuid') ||
                   insertError.code === '22P02') { // PostgreSQL invalid input syntax error
-                console.error('Type mismatch error when creating user:', {
+                logger.error('Type mismatch error when creating user:', {
                   error: insertError.message,
                   errorCode: insertError.code,
                   organizationId: defaultOrgId,
@@ -268,14 +289,22 @@ export async function POST(request: NextRequest) {
             }
 
             dbUser = newUsers[0];
-            console.log('User created in database:', {
+            
+            // Update the organization to set the owner
+            await db
+              .update(organizations)
+              .set({ ownerId: dbUser.id })
+              .where(eq(organizations.id, personalOrgId));
+            
+            logger.info('User created in database with personal organization:', {
               userId: dbUser.id,
               clerkId: dbUser.clerkId,
               email: dbUser.email,
               organizationId: dbUser.organizationId,
+              organizationName: personalOrgName,
             });
           } catch (userError: any) {
-            console.error('Error creating user in database:', {
+            logger.error('Error creating user in database:', {
               error: userError.message,
               errorCode: userError.code,
               clerkUserId,
@@ -298,10 +327,10 @@ export async function POST(request: NextRequest) {
                 
                 if (existingUserRetry.length > 0) {
                   dbUser = existingUserRetry[0];
-                  console.log('User already exists (race condition handled):', dbUser.id);
+                  logger.info('User already exists (race condition handled):', dbUser.id);
                 }
               } catch (retryError) {
-                console.error('Error retrying user fetch:', retryError);
+                logger.error('Error retrying user fetch:', retryError);
               }
             }
             
@@ -310,12 +339,12 @@ export async function POST(request: NextRequest) {
             if (!userError.message?.includes('duplicate') && 
                 !userError.message?.includes('unique') &&
                 userError.code !== '23505') {
-              console.warn('User creation failed, but continuing with lead creation. User may need manual creation.');
+              logger.warn('User creation failed, but continuing with lead creation. User may need manual creation.');
             }
           }
         } else {
           dbUser = existingUser[0];
-          console.log('User already exists in database:', {
+          logger.info('User already exists in database:', {
             userId: dbUser.id,
             clerkId: dbUser.clerkId,
             email: dbUser.email,
@@ -340,9 +369,9 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          console.log('Lead created from signup:', lead.id);
+          logger.info('Lead created from signup:', lead.id);
         } catch (leadError) {
-          console.error('Error creating lead from signup:', leadError);
+          logger.error('Error creating lead from signup:', leadError);
           // Don't fail the webhook if lead creation fails
         }
 
@@ -354,7 +383,7 @@ export async function POST(request: NextRequest) {
         });
 
       } catch (error: any) {
-        console.error('Error processing user.created webhook:', error);
+        logger.error('Error processing user.created webhook:', error);
         // Don't fail the webhook - log the error but return success
         // This prevents webhook retries for non-critical errors
         return NextResponse.json({ 
@@ -366,12 +395,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle other webhook events if needed
-    console.log(`Received webhook event: ${type}`);
+    logger.info(`Received webhook event: ${type}`);
 
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error('Webhook error:', error);
+    logger.error('Webhook error:', error);
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }

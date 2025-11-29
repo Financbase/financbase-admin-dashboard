@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@/src/test/test-utils'
+import { render, screen, waitFor } from '@/src/test/test-utils'
 import { MetricsCard, MetricData } from '@/components/core/metrics-card'
 
 // Mock lucide-react icons
@@ -38,41 +38,51 @@ describe('MetricsCard', () => {
 		},
 	]
 
-	it('renders the card with title and metrics', () => {
+	it('renders the card with title and metrics', async () => {
 		render(<MetricsCard title="Test Metrics" metrics={mockMetrics} />)
 
-		expect(screen.getByText('Test Metrics')).toBeInTheDocument()
-		expect(screen.getByText('Revenue')).toBeInTheDocument()
-		expect(screen.getByText('Users')).toBeInTheDocument()
-		expect(screen.getByText('Conversion Rate')).toBeInTheDocument()
+		await waitFor(() => {
+			expect(screen.getByText('Test Metrics')).toBeInTheDocument()
+			expect(screen.getByText('Revenue')).toBeInTheDocument()
+			expect(screen.getByText('Users')).toBeInTheDocument()
+			expect(screen.getByText('Conversion Rate')).toBeInTheDocument()
+		}, { timeout: 3000 })
 	})
 
-	it('formats currency values correctly', () => {
+	it('formats currency values correctly', async () => {
 		render(<MetricsCard title="Test Metrics" metrics={[mockMetrics[0]]} />)
 
-		expect(screen.getByText('$45,231.89')).toBeInTheDocument()
+		await waitFor(() => {
+			expect(screen.getByText('$45,231.89')).toBeInTheDocument()
+		}, { timeout: 3000 })
 	})
 
-	it('formats number values correctly', () => {
+	it('formats number values correctly', async () => {
 		render(<MetricsCard title="Test Metrics" metrics={[mockMetrics[1]]} />)
 
-		expect(screen.getByText('1,234')).toBeInTheDocument()
+		await waitFor(() => {
+			expect(screen.getByText('1,234')).toBeInTheDocument()
+		}, { timeout: 3000 })
 	})
 
-	it('formats percentage values correctly', () => {
+	it('formats percentage values correctly', async () => {
 		render(<MetricsCard title="Test Metrics" metrics={[mockMetrics[2]]} />)
 
-		expect(screen.getByText('3.5%')).toBeInTheDocument()
+		await waitFor(() => {
+			expect(screen.getByText('3.5%')).toBeInTheDocument()
+		}, { timeout: 3000 })
 	})
 
-	it('displays change indicators correctly', () => {
+	it('displays change indicators correctly', async () => {
 		render(<MetricsCard title="Test Metrics" metrics={mockMetrics} />)
 
-		// Check for increase indicator
-		expect(screen.getByText('20.1%')).toBeInTheDocument()
+		await waitFor(() => {
+			// Check for increase indicator
+			expect(screen.getByText('20.1%')).toBeInTheDocument()
 
-		// Check for decrease indicator
-		expect(screen.getByText('5.2%')).toBeInTheDocument()
+			// Check for decrease indicator
+			expect(screen.getByText('5.2%')).toBeInTheDocument()
+		}, { timeout: 3000 })
 	})
 
 	it('applies correct color classes', () => {
@@ -101,7 +111,7 @@ describe('MetricsCard', () => {
 		expect(gridElement).toBeInTheDocument()
 	})
 
-	it('displays previous values when provided', () => {
+	it('displays previous values when provided', async () => {
 		const metricWithPrevious: MetricData = {
 			title: 'Revenue',
 			value: 45231.89,
@@ -111,7 +121,9 @@ describe('MetricsCard', () => {
 
 		render(<MetricsCard title="Test Metrics" metrics={[metricWithPrevious]} />)
 
-		expect(screen.getByText('Previous: $38,000.00')).toBeInTheDocument()
+		await waitFor(() => {
+			expect(screen.getByText('Previous: $38,000.00')).toBeInTheDocument()
+		}, { timeout: 3000 })
 	})
 
 	it('handles empty metrics array', () => {

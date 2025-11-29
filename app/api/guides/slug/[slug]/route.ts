@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GuidesService } from '@/lib/services/guides-service';
 import { SecurityService } from '@/lib/security/arcjet-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(
 	request: NextRequest,
@@ -65,7 +66,7 @@ export async function GET(
 
 		// Increment view count (async, don't wait)
 		GuidesService.incrementViewCount(guide.id).catch((error) => {
-			console.error('Error incrementing view count:', error);
+			logger.error('Error incrementing view count:', error);
 		});
 
 		return NextResponse.json(
@@ -83,7 +84,7 @@ export async function GET(
 			}
 		);
 	} catch (error) {
-		console.error('Guide API error:', error);
+		logger.error('Guide API error:', error);
 
 		return NextResponse.json(
 			{

@@ -11,6 +11,7 @@
 
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { isChunkLoadError } from "@/lib/utils/chunk-error-handler";
+import { logger } from '@/lib/logger';
 
 interface ReactQueryDevtoolsWrapperProps {
 	/** Whether DevTools should be initially open */
@@ -62,7 +63,7 @@ export class ReactQueryDevtoolsWrapper extends Component<
 
 	loadDevTools = async () => {
 		if (this.loadAttempts >= this.maxLoadAttempts) {
-			console.warn(
+			logger.warn(
 				'[ReactQueryDevtoolsWrapper] Max load attempts reached. DevTools will not be available.'
 			);
 			this.setState({ isLoading: false, hasError: true });
@@ -82,7 +83,7 @@ export class ReactQueryDevtoolsWrapper extends Component<
 			
 			// Check if it's a chunk loading error
 			if (isChunkLoadError(err)) {
-				console.warn(
+				logger.warn(
 					'[ReactQueryDevtoolsWrapper] Chunk loading error for DevTools:',
 					err.message
 				);
@@ -99,7 +100,7 @@ export class ReactQueryDevtoolsWrapper extends Component<
 						this.loadDevTools();
 					}, delay);
 				} else {
-					console.warn(
+					logger.warn(
 						'[ReactQueryDevtoolsWrapper] All retry attempts failed. DevTools will not be available.'
 					);
 					this.setState({ 
@@ -110,7 +111,7 @@ export class ReactQueryDevtoolsWrapper extends Component<
 				}
 			} else {
 				// Non-chunk error - log and fail gracefully
-				console.error(
+				logger.error(
 					'[ReactQueryDevtoolsWrapper] Error loading DevTools:',
 					err
 				);
@@ -138,13 +139,13 @@ export class ReactQueryDevtoolsWrapper extends Component<
 	componentDidCatch(error: Error, errorInfo: ErrorInfo) {
 		// Log error for debugging
 		if (isChunkLoadError(error)) {
-			console.warn(
+			logger.warn(
 				'[ReactQueryDevtoolsWrapper] Caught chunk load error in error boundary:',
 				error,
 				errorInfo
 			);
 		} else {
-			console.error(
+			logger.error(
 				'[ReactQueryDevtoolsWrapper] Caught non-chunk error:',
 				error,
 				errorInfo

@@ -12,6 +12,7 @@ import { EnhancedLayout } from "@/components/layout/enhanced-layout";
 import { currentUser } from "@clerk/nextjs/server";
 import { NotificationService } from "@/lib/services/notification-service";
 import "./dashboard.css";
+import { logger } from '@/lib/logger';
 
 // Force dynamic rendering for all dashboard pages
 export const dynamic = 'force-dynamic';
@@ -39,7 +40,7 @@ export default async function DashboardLayout({
 		try {
 			unreadCount = await NotificationService.getUnreadCount(clerkUser.id);
 		} catch (error) {
-			console.error('Error fetching unread notification count:', error);
+			logger.error('Error fetching unread notification count:', error);
 			// Default to 0 on error
 		}
 	}

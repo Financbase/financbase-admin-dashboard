@@ -24,6 +24,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import * as React from "react";
+import { logger } from '@/lib/logger';
 
 // A simple unique ID generator
 const generateId = () => `_${Math.random().toString(36).substr(2, 9)}`;
@@ -46,7 +47,7 @@ export default function GradientAlertDemo() {
 				variant: variant!,
 			});
 		} catch (err) {
-			console.error("Failed to create alert:", err);
+			logger.error("Failed to create alert:", err);
 		}
 	};
 

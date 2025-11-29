@@ -12,6 +12,7 @@ import { auth } from "@clerk/nextjs/server";
 import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { withRLS } from "@/lib/api/with-rls";
+import { createSuccessResponse } from "@/lib/api/standard-response";
 
 /**
  * DELETE /api/tax/documents/[id]
@@ -28,10 +29,11 @@ export async function DELETE(
 			const service = new TaxService();
 			await service.deleteDocument(id, clerkUserId);
 
-			return NextResponse.json({
-				success: true,
-				message: "Tax document deleted successfully",
-			});
+			return createSuccessResponse(
+				{ message: "Tax document deleted successfully" },
+				200,
+				{ requestId }
+			);
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

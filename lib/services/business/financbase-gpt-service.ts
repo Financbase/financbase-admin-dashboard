@@ -692,17 +692,24 @@ Format responses professionally and conversationally. Use the financial data to 
 			await this.makeRequest('/health', { method: 'GET' });
 			const responseTime = Date.now() - startTime;
 
+			// Use Date.now() instead of process.uptime() for Edge runtime compatibility
+			// Calculate uptime as time since service start (or use 0 if not available)
+			const uptime = typeof process !== 'undefined' && process.uptime ? process.uptime() : 0;
+
 			return {
 				status: 'healthy',
-				uptime: process.uptime(),
+				uptime,
 				responseTime,
 				errorRate: 0,
 				lastQuery: new Date().toISOString(),
 			};
 		} catch (error) {
+			// Use Date.now() instead of process.uptime() for Edge runtime compatibility
+			const uptime = typeof process !== 'undefined' && process.uptime ? process.uptime() : 0;
+
 			return {
 				status: 'unhealthy',
-				uptime: process.uptime(),
+				uptime,
 				responseTime: -1,
 				errorRate: 1,
 				lastQuery: new Date().toISOString(),

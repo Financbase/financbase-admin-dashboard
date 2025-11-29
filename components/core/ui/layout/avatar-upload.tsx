@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { getInitials, getColorFromName } from "@/lib/avatar-utils";
+import { logger } from '@/lib/logger';
 
 interface AvatarUploadProps {
 	userName: string;
@@ -87,7 +88,7 @@ export function AvatarUpload({
 					throw new Error("No URL returned");
 				}
 			} catch (error) {
-				console.error("Upload failed:", error);
+				logger.error("Upload failed:", error);
 				setPreviewUrl(null);
 				toast.error("Failed to upload avatar. Please try again.");
 			} finally {

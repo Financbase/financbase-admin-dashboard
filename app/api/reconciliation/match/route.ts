@@ -14,6 +14,7 @@ import { ReconciliationService } from "@/lib/reconciliation/reconciliation-servi
 import { db } from "@/lib/db";
 import { reconciliationMatches } from "@/lib/db/schemas/reconciliation.schema";
 import { eq, inArray, desc } from "drizzle-orm";
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/reconciliation/match
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error("Transaction Matching API Error:", error);
+		logger.error("Transaction Matching API Error:", error);
 		return NextResponse.json(
 			{ error: "Failed to find transaction matches" },
 			{ status: 500 }
@@ -137,7 +138,7 @@ export async function GET(
 		});
 
 	} catch (error) {
-		console.error("Get Matches API Error:", error);
+		logger.error("Get Matches API Error:", error);
 		return NextResponse.json(
 			{ error: "Failed to get transaction matches" },
 			{ status: 500 }

@@ -26,7 +26,7 @@ const updateTransactionSchema = z.object({
 	accountId: z.string().optional(),
 	transactionDate: z.string().transform(str => new Date(str)).refine(d => !isNaN(d.getTime()), { message: 'Invalid date' }).optional(),
 	notes: z.string().optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export async function GET(

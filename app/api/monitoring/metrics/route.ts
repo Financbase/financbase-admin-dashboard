@@ -9,8 +9,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { MetricsCollector } from '@/lib/analytics/metrics-collector';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { MonitoringService } from '@/lib/services/monitoring-service';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -21,37 +21,31 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const timeRange = searchParams.get('timeRange') || '24h';
-    const metricType = searchParams.get('type') || 'all';
-    const limit = parseInt(searchParams.get('limit') || '100');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const organizationId = searchParams.get('organizationId') || undefined;
+    const metricName = searchParams.get('metricName') || undefined;
+    const category = searchParams.get('category') || undefined;
+    const startDate = searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : undefined;
+    const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined;
+    const aggregation = searchParams.get('aggregation') as 'avg' | 'sum' | 'min' | 'max' | 'count' | undefined;
 
-    // Get metrics based on type
-    let metrics;
-    if (metricType === 'all') {
-      metrics = await MetricsCollector.getMetrics(userId, undefined, timeRange as any);
-    } else {
-      // Filter by metric type
-      const allMetrics = await MetricsCollector.getMetrics(userId, undefined, timeRange as any);
-      metrics = {
-        system: metricType === 'system' ? allMetrics.system : [],
-        performance: metricType === 'performance' ? allMetrics.performance : [],
-        business: metricType === 'business' ? allMetrics.business : [],
-      };
+    // Calculate start date from time range if provided
+    let calculatedStartDate = startDate;
+    if (!calculatedStartDate) {
+      const timeRange = searchParams.get('timeRange') || '24h';
+      const hours = timeRange === '1h' ? 1 : timeRange === '24h' ? 24 : timeRange === '7d' ? 168 : 24;
+      calculatedStartDate = new Date(Date.now() - hours * 60 * 60 * 1000);
     }
 
-    // Apply pagination
-    if (metrics.system) {
-      metrics.system = metrics.system.slice(offset, offset + limit);
-    }
-    if (metrics.performance) {
-      metrics.performance = metrics.performance.slice(offset, offset + limit);
-    }
-    if (metrics.business) {
-      metrics.business = metrics.business.slice(offset, offset + limit);
-    }
+    const result = await MonitoringService.getMetrics(userId, {
+      organizationId,
+      metricName,
+      category,
+      startDate: calculatedStartDate,
+      endDate,
+      aggregation,
+    });
 
-    return NextResponse.json(metrics);
+    return NextResponse.json(result);
   } catch (error) {
     return ApiErrorHandler.handle(error, requestId);
   }

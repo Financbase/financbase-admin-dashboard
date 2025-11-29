@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { DashboardService } from '@/lib/services/dashboard-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -68,11 +69,11 @@ export async function GET(request: NextRequest) {
 		// Add overview metrics
 		csvRows.push('Overview Metrics');
 		csvRows.push('Metric,Value');
-		csvRows.push(`Total Revenue,${overview.totalRevenue || 0}`);
-		csvRows.push(`Total Expenses,${overview.totalExpenses || 0}`);
-		csvRows.push(`Net Income,${overview.netIncome || 0}`);
-		csvRows.push(`Total Clients,${overview.totalClients || 0}`);
-		csvRows.push(`Active Projects,${overview.activeProjects || 0}`);
+		csvRows.push(`Total Revenue,${overview.revenue?.total || 0}`);
+		csvRows.push(`Total Expenses,${overview.expenses?.total || 0}`);
+		csvRows.push(`Net Income,${overview.netIncome?.thisMonth || 0}`);
+		csvRows.push(`Total Clients,${overview.clients?.total || 0}`);
+		csvRows.push(`Active Projects,${overview.clients?.active || 0}`);
 		csvRows.push('');
 		
 		// Add recent activity
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
 		csvRows.push('Type,Description,Amount,Date,Status');
 		recentActivity.forEach((activity) => {
 			const amount = activity.amount ? `$${activity.amount.toFixed(2)}` : '';
-			const date = new Date(activity.timestamp).toLocaleDateString();
+			const date = new Date(activity.createdAt).toLocaleDateString();
 			csvRows.push(
 				`${activity.type},"${activity.description || ''}",${amount},${date},${activity.status || ''}`
 			);
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
 			},
 		});
 	} catch (error) {
-		console.error('Dashboard export error:', error);
+		logger.error('Dashboard export error:', error);
 		return ApiErrorHandler.handle(error, requestId);
 	}
 }

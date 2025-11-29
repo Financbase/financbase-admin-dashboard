@@ -8,6 +8,7 @@
  */
 
 import { RuixenMenuOptions } from "@/components/ui/ruixen-menu-options";
+import { logger } from '@/lib/logger';
 
 export default function DemoOne() {
 	return (
@@ -21,7 +22,7 @@ export default function DemoOne() {
 					entityType="posts"
 					entityId="post-123"
 					entityName="Sample Blog Post"
-					onActionComplete={() => console.log("Post action completed")}
+					onActionComplete={() => logger.info("Post action completed")}
 				/>
 			</div>
 
@@ -32,7 +33,7 @@ export default function DemoOne() {
 					entityType="projects"
 					entityId="project-456"
 					entityName="Website Redesign Project"
-					onActionComplete={() => console.log("Project action completed")}
+					onActionComplete={() => logger.info("Project action completed")}
 				/>
 			</div>
 
@@ -43,7 +44,7 @@ export default function DemoOne() {
 					entityType="employees"
 					entityId="emp-789"
 					entityName="John Doe"
-					onActionComplete={() => console.log("Employee action completed")}
+					onActionComplete={() => logger.info("Employee action completed")}
 				/>
 			</div>
 

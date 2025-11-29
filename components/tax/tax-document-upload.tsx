@@ -46,6 +46,7 @@ import {
 } from "@/lib/validation-schemas";
 import { Loader2, Upload, FileText, X } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
 
 const documentTypes = [
 	{ value: "w2", label: "W-2 Form" },
@@ -224,7 +225,7 @@ export function TaxDocumentUpload({
 			setUploadProgress(0);
 			onSuccess?.();
 		} catch (error) {
-			console.error("Failed to upload document:", error);
+			logger.error("Failed to upload document:", error);
 			toast.error("Failed to upload document. Please try again.");
 		}
 	};

@@ -54,12 +54,19 @@ const createDatabaseConnection = () => {
 	switch (driver) {
 		case 'neon-http': {
 			const sql = neon(process.env.DATABASE_URL);
-			return drizzle(sql, { schema });
+			const db = drizzle(sql, { schema });
+			// Set search_path to include financbase schema for schema-qualified tables
+			// Note: For Neon HTTP, this is set per-request, so it needs to be set before each query
+			// For now, we rely on the search_path being set at the database level or in test setup
+			return db;
 		}
 		
 		case 'neon-serverless': {
 			const neonSql = neon(process.env.DATABASE_URL);
-			return drizzleNode(neonSql, { schema });
+			const db = drizzleNode(neonSql, { schema });
+			// Set search_path for serverless connections
+			// Note: This might not persist across connections, but helps for session-based queries
+			return db;
 		}
 		
 		case 'postgres': {

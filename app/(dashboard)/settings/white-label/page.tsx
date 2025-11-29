@@ -22,6 +22,7 @@ import { Loader2, Upload, Palette, Globe, Mail, Code, Eye, EyeOff } from "lucide
 import type { WhiteLabelBranding } from "@/types/white-label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 export default function WhiteLabelSettingsPage() {
 	const { selectedWorkspace } = useWorkspaces();
@@ -46,7 +47,7 @@ export default function WhiteLabelSettingsPage() {
 					setBranding(data);
 				}
 			} catch (error) {
-				console.error("Error loading branding:", error);
+				logger.error("Error loading branding:", error);
 				toast({
 					title: "Error",
 					description: "Failed to load branding settings",

@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, numeric, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { organizations } from './organizations.schema';
 import { users } from './users.schema';
@@ -45,8 +45,8 @@ export const assignmentTypeEnum = pgEnum('assignment_type', [
 // Security Training Programs Table
 export const securityTrainingPrograms = pgTable('financbase_security_training_programs', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Program details
   title: text('title').notNull(),
@@ -79,15 +79,15 @@ export const securityTrainingPrograms = pgTable('financbase_security_training_pr
 // Training Assignments Table
 export const trainingAssignments = pgTable('financbase_training_assignments', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
   programId: integer('program_id').references(() => securityTrainingPrograms.id, { onDelete: 'cascade' }).notNull(),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
   roleId: text('role_id'), // If assigned to role
   
   // Assignment details
   assignmentType: assignmentTypeEnum('assignment_type').default('mandatory').notNull(),
   assignedAt: timestamp('assigned_at', { withTimezone: true }).defaultNow().notNull(),
-  assignedBy: text('assigned_by').references(() => users.id, { onDelete: 'set null' }),
+  assignedBy: uuid('assigned_by').references(() => users.id, { onDelete: 'set null' }),
   deadline: timestamp('deadline', { withTimezone: true }),
   
   // Progress
@@ -112,7 +112,7 @@ export const trainingAssignments = pgTable('financbase_training_assignments', {
 export const trainingAssessments = pgTable('financbase_training_assessments', {
   id: serial('id').primaryKey(),
   assignmentId: integer('assignment_id').references(() => trainingAssignments.id, { onDelete: 'cascade' }).notNull(),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   
   // Assessment details
   questions: jsonb('questions').notNull(), // Array of questions
@@ -134,7 +134,7 @@ export const trainingAssessments = pgTable('financbase_training_assessments', {
 export const trainingCertificates = pgTable('financbase_training_certificates', {
   id: serial('id').primaryKey(),
   assignmentId: integer('assignment_id').references(() => trainingAssignments.id, { onDelete: 'cascade' }).notNull(),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   programId: integer('program_id').references(() => securityTrainingPrograms.id, { onDelete: 'cascade' }).notNull(),
   
   // Certificate details
@@ -154,8 +154,8 @@ export const trainingCertificates = pgTable('financbase_training_certificates', 
 // Phishing Simulation Results Table
 export const phishingSimulationResults = pgTable('financbase_phishing_simulation_results', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   
   // Simulation details
   simulationId: text('simulation_id').notNull(),

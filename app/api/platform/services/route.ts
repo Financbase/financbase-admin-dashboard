@@ -22,6 +22,7 @@ import {
 import { eq, and, desc, sql, count } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/platform/services
@@ -219,7 +220,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching Platform Services overview:', error);
+    logger.error('Error fetching Platform Services overview:', error);
     return ApiErrorHandler.handle(error, {
       userId: (await auth()).userId,
       organizationId: new URL(request.url).searchParams.get('organizationId') || undefined,
@@ -300,7 +301,7 @@ export async function POST(request: NextRequest) {
       message: 'Platform service created successfully',
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating platform service:', error);
+    logger.error('Error creating platform service:', error);
     return ApiErrorHandler.handle(error, {
       userId: (await auth()).userId,
       endpoint: '/api/platform/services',

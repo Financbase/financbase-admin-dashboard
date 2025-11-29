@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { organizations } from './organizations.schema';
 import { users } from './users.schema';
@@ -36,8 +36,8 @@ export const vendorTypeEnum = pgEnum('vendor_type', [
 // Business Associates (Vendors) Table
 export const businessAssociates = pgTable('financbase_business_associates', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Vendor details
   vendorName: text('vendor_name').notNull(),
@@ -84,7 +84,7 @@ export const baaComplianceChecklist = pgTable('financbase_baa_compliance_checkli
   
   // Review
   lastReviewedAt: timestamp('last_reviewed_at', { withTimezone: true }),
-  reviewedBy: text('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
+  reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Metadata
   notes: text('notes'),

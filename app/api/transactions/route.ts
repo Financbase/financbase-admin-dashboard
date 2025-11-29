@@ -16,7 +16,16 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const createTransactionSchema = z.object({
 	type: z.enum(['income', 'expense', 'transfer', 'payment']),
-	amount: z.number().positive('Amount must be positive'),
+	amount: z.union([
+		z.number().positive('Amount must be positive'),
+		z.string().transform((val) => {
+			const num = parseFloat(val);
+			if (isNaN(num) || num <= 0) {
+				throw new Error('Amount must be a positive number');
+			}
+			return num;
+		})
+	]),
 	currency: z.string().default('USD'),
 	description: z.string().optional(),
 	category: z.string().optional(),
@@ -24,9 +33,18 @@ const createTransactionSchema = z.object({
 	referenceId: z.string().optional(),
 	referenceType: z.string().optional(),
 	accountId: z.string().optional(),
-	transactionDate: z.string().transform(str => new Date(str)),
+	transactionDate: z.union([
+		z.string().transform((str) => {
+			const date = new Date(str);
+			if (isNaN(date.getTime())) {
+				throw new Error('Invalid date format');
+			}
+			return date;
+		}),
+		z.date()
+	]).default(() => new Date()),
 	notes: z.string().optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**
@@ -139,11 +157,39 @@ export async function GET(request: NextRequest) {
 		const category = searchParams.get('category') || undefined;
 		const startDateParam = searchParams.get('startDate');
 		const endDateParam = searchParams.get('endDate');
-		const startDate = startDateParam ? new Date(startDateParam) : undefined;
-		const endDate = endDateParam ? new Date(endDateParam) : undefined;
+		
+		// Validate date parameters
+		let startDate: Date | undefined;
+		let endDate: Date | undefined;
+		
+		if (startDateParam) {
+			startDate = new Date(startDateParam);
+			if (isNaN(startDate.getTime())) {
+				return ApiErrorHandler.badRequest('Invalid startDate format. Expected valid date string (YYYY-MM-DD).', requestId);
+			}
+		}
+		
+		if (endDateParam) {
+			endDate = new Date(endDateParam);
+			if (isNaN(endDate.getTime())) {
+				return ApiErrorHandler.badRequest('Invalid endDate format. Expected valid date string (YYYY-MM-DD).', requestId);
+			}
+		}
+		
 		const search = searchParams.get('search') || undefined;
-		const limit = parseInt(searchParams.get('limit') || '50', 10);
-		const offset = parseInt(searchParams.get('offset') || '0', 10);
+		const limitParam = searchParams.get('limit') || '50';
+		const offsetParam = searchParams.get('offset') || '0';
+		
+		const limit = parseInt(limitParam, 10);
+		const offset = parseInt(offsetParam, 10);
+		
+		if (isNaN(limit) || limit < 1) {
+			return ApiErrorHandler.badRequest('Invalid limit parameter. Expected a positive integer.', requestId);
+		}
+		
+		if (isNaN(offset) || offset < 0) {
+			return ApiErrorHandler.badRequest('Invalid offset parameter. Expected a non-negative integer.', requestId);
+		}
 
 		const transactions = await TransactionService.getAll(userId, {
 			type,
@@ -252,7 +298,40 @@ export async function POST(request: NextRequest) {
 		try {
 			body = await request.json();
 		} catch (error) {
-			return ApiErrorHandler.badRequest('Invalid JSON in request body');
+			return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+		}
+
+		// Validate and convert amount from string to number if needed
+		if (typeof body.amount === 'string') {
+			const parsedAmount = parseFloat(body.amount);
+			if (isNaN(parsedAmount)) {
+				return ApiErrorHandler.badRequest('Invalid amount format. Expected a valid number.', requestId);
+			}
+			if (parsedAmount <= 0) {
+				return ApiErrorHandler.badRequest('Amount must be a positive number.', requestId);
+			}
+			body.amount = parsedAmount;
+		} else if (typeof body.amount !== 'number') {
+			return ApiErrorHandler.badRequest('Amount must be a number.', requestId);
+		} else if (body.amount <= 0) {
+			return ApiErrorHandler.badRequest('Amount must be a positive number.', requestId);
+		}
+		
+		// Validate and ensure transactionDate is provided or use current date
+		if (!body.transactionDate) {
+			body.transactionDate = new Date().toISOString();
+		} else if (body.transactionDate instanceof Date) {
+			body.transactionDate = body.transactionDate.toISOString();
+		} else if (typeof body.transactionDate === 'string') {
+			// Validate the date string before passing to schema
+			try {
+				const testDate = new Date(body.transactionDate);
+				if (isNaN(testDate.getTime())) {
+					return ApiErrorHandler.badRequest('Invalid transactionDate format. Expected valid ISO 8601 datetime string or valid date string.', requestId);
+				}
+			} catch (error) {
+				return ApiErrorHandler.badRequest('Invalid transactionDate format. Expected valid ISO 8601 datetime string or valid date string.', requestId);
+			}
 		}
 
 		const validatedData = createTransactionSchema.parse(body);

@@ -11,6 +11,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZoomService } from '@/lib/services/integrations/zoom-service';
 import { GoogleMeetService } from '@/lib/services/integrations/google-meet-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(settings);
 	} catch (error) {
-		console.error('Error fetching video settings:', error);
+		logger.error('Error fetching video settings:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -64,7 +65,7 @@ export async function PUT(request: NextRequest) {
 
 		return NextResponse.json(updatedSettings);
 	} catch (error) {
-		console.error('Error updating video settings:', error);
+		logger.error('Error updating video settings:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

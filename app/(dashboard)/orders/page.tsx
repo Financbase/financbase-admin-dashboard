@@ -36,6 +36,7 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { OrderDetailDialog } from "@/components/orders/order-detail-dialog";
+import { logger } from '@/lib/logger';
 
 interface Order {
 	id: string;
@@ -83,7 +84,7 @@ export default function OrdersPage() {
 			const data = await response.json();
 			setOrders(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching orders:", error);
+			logger.error("Error fetching orders:", error);
 			toast.error("Failed to load orders");
 		} finally {
 			setLoading(false);
@@ -98,7 +99,7 @@ export default function OrdersPage() {
 			const data = await response.json();
 			setAnalytics(data);
 		} catch (error) {
-			console.error("Error fetching analytics:", error);
+			logger.error("Error fetching analytics:", error);
 		}
 	};
 
@@ -110,7 +111,7 @@ export default function OrdersPage() {
 			const data = await response.json();
 			setAlerts(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching alerts:", error);
+			logger.error("Error fetching alerts:", error);
 		}
 	};
 

@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { clerkClient } from '@clerk/nextjs/server';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -146,14 +147,14 @@ export async function POST(request: NextRequest) {
 			});
 		} catch (error) {
 			// If we can't verify with Clerk, the token is invalid
-			console.error('Token validation error:', error);
+			logger.error('Token validation error:', error);
 			return NextResponse.json(
 				{ valid: false, error: 'Token verification failed - user not found' },
 				{ status: 401 }
 			);
 		}
 	} catch (error) {
-		console.error('Error validating token:', error);
+		logger.error('Error validating token:', error);
 		return NextResponse.json(
 			{ valid: false, error: 'Internal server error' },
 			{ status: 500 }

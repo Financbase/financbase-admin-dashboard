@@ -14,6 +14,7 @@ import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler } from '@/lib/api-error-handler';
 import { IntegrationSyncEngine } from '@/lib/services/integrations/integration-sync-engine';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/platform/hub/connections/[id]/sync
@@ -93,7 +94,7 @@ export async function POST(
         },
       });
     } catch (error) {
-      console.error('Error starting sync:', error);
+      logger.error('Error starting sync:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to start synchronization',
@@ -101,7 +102,7 @@ export async function POST(
       }, { status: 500 });
     }
   } catch (error) {
-    console.error('Error in sync endpoint:', error);
+    logger.error('Error in sync endpoint:', error);
     return ApiErrorHandler.handle(error);
   }
 }
@@ -152,14 +153,14 @@ export async function GET(
         nextSync: connection[0].nextSyncAt,
       });
     } catch (error) {
-      console.error('Error getting sync status:', error);
+      logger.error('Error getting sync status:', error);
       return NextResponse.json({
         error: 'Failed to get sync status',
         details: error instanceof Error ? error.message : 'Unknown error',
       }, { status: 500 });
     }
   } catch (error) {
-    console.error('Error in sync status endpoint:', error);
+    logger.error('Error in sync status endpoint:', error);
     return ApiErrorHandler.handle(error);
   }
 }

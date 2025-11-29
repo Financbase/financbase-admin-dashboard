@@ -40,6 +40,7 @@ import {
 import { useRecordTaxPayment, type TaxObligation } from "@/hooks/use-tax";
 import { recordTaxPaymentSchema, type RecordTaxPaymentInput } from "@/lib/validation-schemas";
 import { Loader2 } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 const paymentMethods = [
 	{ value: "bank_transfer", label: "Bank Transfer" },
@@ -90,7 +91,7 @@ export function TaxPaymentForm({
 			onSuccess?.();
 		} catch (error) {
 			// Error handling is done in the mutation hook
-			console.error("Failed to record payment:", error);
+			logger.error("Failed to record payment:", error);
 		}
 	};
 

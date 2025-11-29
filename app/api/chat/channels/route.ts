@@ -18,7 +18,7 @@ const createChannelSchema = z.object({
 	description: z.string().optional(),
 	type: z.enum(["public", "private", "direct"]),
 	members: z.array(z.string()).optional(),
-	settings: z.record(z.any()).optional(),
+	settings: z.record(z.string(), z.any()).optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(channel, { status: 201 });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			return ApiErrorHandler.badRequest(error.errors[0].message);
+			return ApiErrorHandler.badRequest(error.issues[0]?.message || 'Validation error');
 		}
 		return ApiErrorHandler.handle(error, requestId);
 	}

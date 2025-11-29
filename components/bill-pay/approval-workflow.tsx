@@ -284,7 +284,7 @@ export function ApprovalWorkflowDashboard({ userId, billId, className }: Approva
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
               <span className="ml-2">Loading approvals...</span>
             </div>
-          ) : pendingApprovals?.length === 0 ? (
+          ) : !pendingApprovals || pendingApprovals.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
                 <CheckCircle className="h-12 w-12 mx-auto text-green-600 mb-4" />

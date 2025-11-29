@@ -43,6 +43,7 @@ import {
 	type UpdateTaxDeductionInput,
 } from "@/lib/validation-schemas";
 import { Loader2 } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 const commonCategories = [
 	"Business Expenses",
@@ -108,7 +109,7 @@ export function TaxDeductionForm({
 			onSuccess?.();
 		} catch (error) {
 			// Error handling is done in the mutation hooks
-			console.error("Failed to save tax deduction:", error);
+			logger.error("Failed to save tax deduction:", error);
 		}
 	};
 

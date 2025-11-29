@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AIFinancialService } from '@/lib/ai/financial-service';
 import { withAIDecisionLogging } from '@/lib/middleware/ai-decision-logger';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error('Financial Analysis API Error:', error);
+		logger.error('Financial Analysis API Error:', error);
 		return NextResponse.json(
 			{ error: 'Failed to analyze financial data' },
 			{ status: 500 }

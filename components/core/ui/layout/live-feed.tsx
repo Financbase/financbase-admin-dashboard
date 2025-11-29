@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
+import { logger } from '@/lib/logger';
 
 type FeedItem = LiveFeedItem;
 
@@ -113,7 +114,7 @@ export const NotificationCenterFeed = ({
 		entityTypes,
 		autoRefresh,
 		onError: (error: Error) => {
-			console.error("Live feed error:", error);
+			logger.error("Live feed error:", error);
 		},
 	});
 

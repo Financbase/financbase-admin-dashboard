@@ -37,6 +37,7 @@ import { RoleSwitcher } from '@/components/real-estate/role-switcher';
 import { useRealEstateRole } from '@/lib/hooks/use-real-estate-role';
 import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
 
 interface BuyerStats {
   preApprovedAmount: number;
@@ -351,13 +352,13 @@ export default function BuyerDashboard() {
                 property={property}
                 variant="detailed"
                 onView={(property) => {
-                  console.log('View property:', property.id);
+                  logger.info('View property:', property.id);
                 }}
                 onSchedule={(property) => {
-                  console.log('Schedule tour:', property.id);
+                  logger.info('Schedule tour:', property.id);
                 }}
                 onSave={(property) => {
-                  console.log('Save property:', property.id);
+                  logger.info('Save property:', property.id);
                 }}
               />
             ))}

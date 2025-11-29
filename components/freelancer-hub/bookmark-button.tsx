@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
 
 interface BookmarkButtonProps {
   freelancerId: string;
@@ -52,7 +53,7 @@ export function BookmarkButton({ freelancerId, freelancerName, className }: Book
       }
       
       // Here you would typically sync with your backend
-      console.log("Bookmark updated:", {
+      logger.info("Bookmark updated:", {
         freelancerId,
         freelancerName,
         isBookmarked: !isBookmarked,

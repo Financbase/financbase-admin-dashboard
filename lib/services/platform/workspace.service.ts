@@ -71,7 +71,7 @@ export class WorkspaceService {
 		limit = 20,
 	): Promise<PaginatedResult<any>> {
 		try {
-			const { userId } = auth();
+			const { userId } = await auth();
 			if (!userId) {
 				throw new Error("Unauthorized");
 			}
@@ -82,7 +82,7 @@ export class WorkspaceService {
 			const whereConditions = [];
 
 			// User must be a member or owner of the workspace
-			const memberWorkspaces = this.db
+		const memberWorkspaces = await this.db
 				.select({ workspaceId: workspaceMembers.workspaceId })
 				.from(workspaceMembers)
 				.where(
@@ -188,7 +188,7 @@ export class WorkspaceService {
 	 */
 	async getWorkspaceById(workspaceId: string | number): Promise<any> {
 		try {
-			const { userId } = auth();
+			const { userId } = await auth();
 			if (!userId) {
 				throw new Error("Unauthorized");
 			}
@@ -256,7 +256,7 @@ export class WorkspaceService {
 	 */
 	async createWorkspace(workspaceData: CreateWorkspaceInput): Promise<any> {
 		try {
-			const { userId } = auth();
+			const { userId } = await auth();
 			if (!userId) {
 				throw new Error("Unauthorized");
 			}
@@ -323,7 +323,7 @@ export class WorkspaceService {
 		updateData: UpdateWorkspaceInput,
 	): Promise<any> {
 		try {
-			const { userId } = auth();
+			const { userId } = await auth();
 			if (!userId) {
 				throw new Error("Unauthorized");
 			}
@@ -387,7 +387,7 @@ export class WorkspaceService {
 	 */
 	async deleteWorkspace(workspaceId: string | number): Promise<void> {
 		try {
-			const { userId } = auth();
+			const { userId } = await auth();
 			if (!userId) {
 				throw new Error("Unauthorized");
 			}
@@ -415,7 +415,8 @@ export class WorkspaceService {
 	 */
 	async getUserWorkspaces(userId?: string): Promise<any[]> {
 		try {
-			const currentUserId = userId || auth().userId;
+			const authResult = userId ? { userId } : await auth();
+			const currentUserId = userId || authResult.userId;
 			if (!currentUserId) {
 				throw new Error("Unauthorized");
 			}

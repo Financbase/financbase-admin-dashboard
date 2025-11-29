@@ -253,7 +253,7 @@ export default function PricingPage() {
 				<TimelineContent
 					as="p"
 					animationNum={0}
-					timelineRef={pricingRef}
+					timelineRef={pricingRef as React.RefObject<HTMLElement>}
 					customVariants={revealVariants}
 					className="md:text-base text-sm text-gray-600 w-[80%]"
 				>
@@ -264,7 +264,7 @@ export default function PricingPage() {
 				<TimelineContent
 					as="div"
 					animationNum={1}
-					timelineRef={pricingRef}
+					timelineRef={pricingRef as React.RefObject<HTMLElement>}
 					customVariants={revealVariants}
 				>
 					<PricingSwitch onSwitch={togglePricingPeriod} className="w-fit" />
@@ -277,7 +277,7 @@ export default function PricingPage() {
 						key={plan.name}
 						as="div"
 						animationNum={2 + index}
-						timelineRef={pricingRef}
+						timelineRef={pricingRef as React.RefObject<HTMLElement>}
 						customVariants={revealVariants}
 					>
 							<Card

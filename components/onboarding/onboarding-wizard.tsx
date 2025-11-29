@@ -53,6 +53,7 @@ import { FreelancerProfileStep } from "./steps/freelancer-profile-step";
 import { CreateInvoiceStep } from "./steps/create-invoice-step";
 import { ExpenseTrackingStep } from "./steps/expense-tracking-step";
 import { BusinessHealthStep } from "./steps/business-health-step";
+import { logger } from '@/lib/logger';
 
 interface OnboardingWizardProps {
 	onboarding: OnboardingProgress;
@@ -170,7 +171,7 @@ export function OnboardingWizard({
 		const interval = setInterval(() => {
 			if (Object.keys(stepData).length > 0) {
 				// Auto-save current step data
-				console.log("Auto-saving step data:", stepData);
+				logger.info("Auto-saving step data:", stepData);
 			}
 		}, 30000);
 
@@ -195,7 +196,7 @@ export function OnboardingWizard({
 			
 			toast.success("Step completed successfully!");
 		} catch (error) {
-			console.error("Error completing step:", error);
+			logger.error("Error completing step:", error);
 			toast.error("Failed to complete step. Please try again.");
 		} finally {
 			setIsLoading(false);
@@ -226,7 +227,7 @@ export function OnboardingWizard({
 			
 			toast.info("Step skipped");
 		} catch (error) {
-			console.error("Error skipping step:", error);
+			logger.error("Error skipping step:", error);
 			toast.error("Failed to skip step. Please try again.");
 		} finally {
 			setIsLoading(false);
@@ -253,7 +254,7 @@ export function OnboardingWizard({
 				router.push("/dashboard");
 				toast.info("Onboarding skipped. You can complete it later from your dashboard.");
 			} catch (error) {
-				console.error("Error skipping onboarding:", error);
+				logger.error("Error skipping onboarding:", error);
 				toast.error("Failed to skip onboarding. Please try again.");
 			} finally {
 				setIsLoading(false);

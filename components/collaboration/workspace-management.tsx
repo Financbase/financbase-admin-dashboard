@@ -44,6 +44,7 @@ import { Workspace, WorkspaceMember, Client, PracticeMetrics } from '@/types/aut
 import { workspaceService } from '@/lib/services/workspace-service';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 export function WorkspaceManagementDashboard() {
 	const { user } = useUser();
@@ -117,7 +118,7 @@ export function WorkspaceManagementDashboard() {
 			setClients(workspaceClients);
 			setPracticeMetrics(metrics);
 		} catch (error) {
-			console.error('Error loading workspace details:', error);
+			logger.error('Error loading workspace details:', error);
 		}
 	};
 

@@ -39,6 +39,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 // Import new animation library
 import {
+import { logger } from '@/lib/logger';
 	AnimatedCard,
 	StaggeredContainer,
 	cardVariants,
@@ -392,7 +393,7 @@ const ExampleUsage = () => {
 
 	const handleVisibilityChange = (newIds: string[]) => {
 		setVisibleIds(newIds);
-		console.log("New Visible Widgets:", newIds);
+		logger.info("New Visible Widgets:", newIds);
 	};
 
 	const handleLayoutReset = () => {

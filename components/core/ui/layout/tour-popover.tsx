@@ -20,6 +20,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useTour } from "@/hooks/use-tour";
 import {
+import { logger } from '@/lib/logger';
 	AlertCircle,
 	Headphones,
 	HelpCircle,
@@ -94,7 +95,7 @@ function TourPopover() {
 		try {
 			await nextStep();
 		} catch (err) {
-			console.error("Error advancing to next step:", err);
+			logger.error("Error advancing to next step:", err);
 		}
 	};
 
@@ -102,7 +103,7 @@ function TourPopover() {
 		try {
 			await prevStep();
 		} catch (err) {
-			console.error("Error going to previous step:", err);
+			logger.error("Error going to previous step:", err);
 		}
 	};
 
@@ -110,7 +111,7 @@ function TourPopover() {
 		try {
 			await restartTour();
 		} catch (err) {
-			console.error("Error restarting tour:", err);
+			logger.error("Error restarting tour:", err);
 		}
 	};
 
@@ -182,21 +183,6 @@ function TourPopover() {
 						</Button>
 					)}
 				</div>
-
-				{/* Debug info (remove in production) */}
-				{process.env.NODE_ENV === "development" && (
-					<>
-						<Separator />
-						<div className="text-xs text-muted-foreground">
-							<p>Current step: {currentStep}</p>
-							<p>
-								Completed: {completedSteps.size}/{tourSteps.length}
-							</p>
-							<p>Loading: {isLoading ? "Yes" : "No"}</p>
-							{error && <p className="text-red-500">Error: {error}</p>}
-						</div>
-					</>
-				)}
 			</PopoverContent>
 		</Popover>
 	);

@@ -18,6 +18,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/services/notification-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(
 	_req: NextRequest,
@@ -47,7 +48,7 @@ export async function POST(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('[API] Error in POST /api/notifications/[id]/read:', {
+		logger.error('[API] Error in POST /api/notifications/[id]/read:', {
 			notificationId: idParam,
 			requestId,
 			error: error instanceof Error ? error.message : String(error),

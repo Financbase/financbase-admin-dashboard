@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
+import { logger } from '@/lib/logger';
   Globe,
   Code,
   Database,
@@ -225,7 +226,7 @@ export default function APIHubPage() {
               successRate: Math.round(successRate * 10) / 10
             });
           } catch (monitoringError) {
-            console.warn('Failed to fetch monitoring data, using defaults:', monitoringError);
+            logger.warn('Failed to fetch monitoring data, using defaults:', monitoringError);
             setApiStats({
               totalEndpoints: endpointsData.endpoints?.length || sampleEndpoints.length,
               activeEndpoints: endpointsData.endpoints?.filter((ep: APIEndpoint) => ep.status === 'active').length || sampleEndpoints.filter(ep => ep.status === 'active').length,
@@ -273,7 +274,7 @@ export default function APIHubPage() {
         }
       } catch (err) {
         setError('Failed to load API data. Please try again.');
-        console.error('Error loading API data:', err);
+        logger.error('Error loading API data:', err);
         // Use fallback data
         setApiStats({
           totalEndpoints: sampleEndpoints.length,
@@ -310,7 +311,7 @@ export default function APIHubPage() {
       setWebhooks(prev => [...prev, newWebhook]);
     } catch (err) {
       setError('Failed to create webhook. Please try again.');
-      console.error('Error creating webhook:', err);
+      logger.error('Error creating webhook:', err);
     } finally {
       setLoading(false);
     }
@@ -333,7 +334,7 @@ export default function APIHubPage() {
       ));
     } catch (err) {
       setError('Failed to toggle webhook. Please try again.');
-      console.error('Error toggling webhook:', err);
+      logger.error('Error toggling webhook:', err);
     } finally {
       setLoading(false);
     }
@@ -351,7 +352,7 @@ export default function APIHubPage() {
       setWebhooks(prev => prev.filter(webhook => webhook.id !== webhookId));
     } catch (err) {
       setError('Failed to delete webhook. Please try again.');
-      console.error('Error deleting webhook:', err);
+      logger.error('Error deleting webhook:', err);
     } finally {
       setLoading(false);
     }

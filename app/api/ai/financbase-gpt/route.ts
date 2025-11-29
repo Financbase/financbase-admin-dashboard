@@ -18,6 +18,7 @@ import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 import { FinancbaseGPTService } from '@/lib/services/business/financbase-gpt-service';
 import { withAIDecisionLogging } from '@/lib/middleware/ai-decision-logger';
+import { logger } from '@/lib/logger';
 
 // Create OpenAI client
 const openai = new OpenAI({
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error('Error in enhanced Financbase GPT route:', error);
+		logger.error('Error in enhanced Financbase GPT route', { error });
 
 		if (error instanceof Error) {
 			return new Response(error.message, { status: 500 });
@@ -115,7 +116,7 @@ export async function GET(req: NextRequest) {
 			},
 		});
 	} catch (error) {
-		console.error('Error in Financbase GPT health check:', error);
+		logger.error('Error in Financbase GPT health check', { error });
 
 		return new Response('Service unavailable', { status: 503 });
 	}

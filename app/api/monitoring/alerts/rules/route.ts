@@ -9,8 +9,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { AlertService } from '@/lib/services/alert-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { MonitoringService } from '@/lib/services/monitoring-service';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -21,9 +21,18 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const organizationId = searchParams.get('organizationId');
+    const organizationId = searchParams.get('organizationId') || undefined;
+    const isActive = searchParams.get('isActive') === 'true' ? true : searchParams.get('isActive') === 'false' ? false : undefined;
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
 
-    const alertRules = await AlertService.getAlertRules(userId, organizationId || undefined);
+    const alertRules = await MonitoringService.getAlertRules(userId, {
+      organizationId,
+      isActive,
+      limit,
+      offset,
+    });
+
     return NextResponse.json(alertRules);
   } catch (error) {
     return ApiErrorHandler.handle(error, requestId);
@@ -56,6 +65,7 @@ export async function POST(request: NextRequest) {
       cooldownPeriod, 
       maxAlertsPerHour,
       organizationId,
+      timeWindow,
       labels,
       filters
     } = body;
@@ -64,18 +74,20 @@ export async function POST(request: NextRequest) {
       return ApiErrorHandler.badRequest('Missing required fields: name, metricName, condition, threshold, severity');
     }
 
-    const alertRule = await AlertService.createAlertRule(userId, organizationId, {
+    const alertRule = await MonitoringService.createAlertRule(userId, {
       name,
-      description: description || '',
+      description,
+      organizationId,
       metricName,
       condition,
       threshold,
+      timeWindow,
       severity,
-      channels: channels || ['email'],
-      cooldownPeriod: cooldownPeriod || 3600,
-      maxAlertsPerHour: maxAlertsPerHour || 10,
-      labels: labels || {},
-      filters: filters || {},
+      channels,
+      cooldownPeriod,
+      maxAlertsPerHour,
+      labels,
+      filters,
     });
 
     return NextResponse.json(alertRule, { status: 201 });

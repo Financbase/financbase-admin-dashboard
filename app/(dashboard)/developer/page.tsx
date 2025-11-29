@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
+import { logger } from '@/lib/logger';
 	Key,
 	Activity,
 	BarChart3,
@@ -158,7 +159,7 @@ export default function DeveloperPortalPage() {
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Failed to load developer portal data. Please try again.';
 				setError(errorMessage);
-				console.error('Error loading developer portal data:', err);
+				logger.error('Error loading developer portal data:', err);
 				// Use sample data as fallback
 				setApiKeys(sampleAPIKeys);
 			} finally {
@@ -195,7 +196,7 @@ export default function DeveloperPortalPage() {
 			}));
 		} catch (err) {
 			setError('Failed to create API key. Please try again.');
-			console.error('Error creating API key:', err);
+			logger.error('Error creating API key:', err);
 		} finally {
 			setLoading(false);
 		}
@@ -222,7 +223,7 @@ export default function DeveloperPortalPage() {
 			}
 		} catch (err) {
 			setError('Failed to delete API key. Please try again.');
-			console.error('Error deleting API key:', err);
+			logger.error('Error deleting API key:', err);
 		} finally {
 			setLoading(false);
 		}
@@ -247,7 +248,7 @@ export default function DeveloperPortalPage() {
 			}));
 		} catch (err) {
 			setError('Failed to revoke API key. Please try again.');
-			console.error('Error revoking API key:', err);
+			logger.error('Error revoking API key:', err);
 		} finally {
 			setLoading(false);
 		}

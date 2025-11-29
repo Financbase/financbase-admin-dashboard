@@ -9,8 +9,39 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { sql } from '@/lib/db';
+import { getRawSqlConnection } from '@/lib/db';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+
+/**
+ * Helper function to execute parameterized SQL queries
+ * Converts PostgreSQL-style parameterized queries ($1, $2, etc.) to Neon's template literal format
+ */
+async function executeQuery<T = any>(sqlQuery: string, params: any[] = []): Promise<T[]> {
+	const rawSql = getRawSqlConnection();
+	
+	// Convert $1, $2, etc. format to template literal format
+	const parts: string[] = [];
+	const values: any[] = [];
+	
+	let currentIndex = 0;
+	const paramRegex = /\$(\d+)/g;
+	let match;
+	
+	while ((match = paramRegex.exec(sqlQuery)) !== null) {
+		parts.push(sqlQuery.substring(currentIndex, match.index));
+		const paramIndex = parseInt(match[1], 10) - 1;
+		if (paramIndex >= 0 && paramIndex < params.length) {
+			values.push(params[paramIndex]);
+		} else {
+			values.push(null);
+		}
+		currentIndex = match.index + match[0].length;
+	}
+	
+	parts.push(sqlQuery.substring(currentIndex));
+	const result = await (rawSql as any)(parts as any, ...values);
+	return result as T[];
+}
 
 /**
  * GET /api/developer/api-keys/[id]
@@ -31,7 +62,8 @@ export async function GET(
 		const keyId = id;
 
 		// Get API key with usage statistics
-		const result = await sql.query(`
+		const rawSql = getRawSqlConnection();
+		const result = await rawSql`
 			SELECT
 				ak.*,
 				COALESCE(usage.monthly_requests, 0) as monthly_usage,
@@ -41,15 +73,15 @@ export async function GET(
 			FROM developer.api_keys ak
 			LEFT JOIN developer.api_usage usage ON ak.id = usage.api_key_id
 				AND usage.created_at >= DATE_TRUNC('month', CURRENT_DATE)
-			WHERE ak.id = $1 AND ak.user_id = $2 AND ak.status != 'deleted'
+			WHERE ak.id = ${keyId} AND ak.user_id = ${userId} AND ak.status != 'deleted'
 			GROUP BY ak.id, usage.monthly_requests, ak.monthly_limit
-		`, [keyId, userId]);
+		`;
 
-		if (result.rows.length === 0) {
+		if (result.length === 0) {
 			return ApiErrorHandler.notFound('API key not found');
 		}
 
-		return NextResponse.json(result.rows[0]);
+		return NextResponse.json(result[0]);
 
 	} catch (error) {
 		return ApiErrorHandler.handle(error, requestId);
@@ -82,62 +114,54 @@ export async function PATCH(
 		const { name, permissions, monthlyLimit, status } = body;
 
 		// Verify ownership
-		const keyResult = await sql.query(`
+		const rawSql = getRawSqlConnection();
+		const keyResult = await rawSql`
 			SELECT * FROM developer.api_keys
-			WHERE id = $1 AND user_id = $2 AND status != 'deleted'
-		`, [keyId, userId]);
+			WHERE id = ${keyId} AND user_id = ${userId} AND status != 'deleted'
+		`;
 
-		if (keyResult.rows.length === 0) {
+		if (keyResult.length === 0) {
 			return NextResponse.json({ error: 'API key not found' }, { status: 404 });
 		}
 
-		// Build update query
+		// Build update query dynamically
 		const updates: string[] = [];
-		const params: unknown[] = [];
-		let paramCount = 0;
-
+		const updateValues: any[] = [];
+		
 		if (name !== undefined) {
-			paramCount++;
-			updates.push(`name = $${paramCount}`);
-			params.push(name);
+			updates.push(`name = $${updates.length + 1}`);
+			updateValues.push(name);
 		}
 
 		if (permissions !== undefined) {
-			paramCount++;
-			updates.push(`permissions = $${paramCount}`);
-			params.push(JSON.stringify(permissions));
+			updates.push(`permissions = $${updates.length + 1}`);
+			updateValues.push(JSON.stringify(permissions));
 		}
 
 		if (monthlyLimit !== undefined) {
-			paramCount++;
-			updates.push(`monthly_limit = $${paramCount}`);
-			params.push(monthlyLimit);
+			updates.push(`monthly_limit = $${updates.length + 1}`);
+			updateValues.push(monthlyLimit);
 		}
 
 		if (status !== undefined) {
-			paramCount++;
-			updates.push(`status = $${paramCount}`);
-			params.push(status);
+			updates.push(`status = $${updates.length + 1}`);
+			updateValues.push(status);
 		}
 
 		if (updates.length > 0) {
-			// Always update updated_at
-			paramCount++;
-			updates.push(`updated_at = $${paramCount}`);
-			params.push(new Date());
+			updates.push(`updated_at = $${updates.length + 1}`);
+			updateValues.push(new Date());
+			updateValues.push(keyId);
 
-			// Add key ID
-			params.push(keyId);
-
-			await sql.query(`
+			await executeQuery(`
 				UPDATE developer.api_keys
 				SET ${updates.join(', ')}
-				WHERE id = $${paramCount + 1}
-			`, params);
+				WHERE id = $${updates.length}
+			`, updateValues);
 		}
 
 		// Return updated key
-		const updatedResult = await sql.query(`
+		const updatedResult = await rawSql`
 			SELECT
 				ak.*,
 				COALESCE(usage.monthly_requests, 0) as monthly_usage,
@@ -147,11 +171,11 @@ export async function PATCH(
 			FROM developer.api_keys ak
 			LEFT JOIN developer.api_usage usage ON ak.id = usage.api_key_id
 				AND usage.created_at >= DATE_TRUNC('month', CURRENT_DATE)
-			WHERE ak.id = $1 AND ak.user_id = $2 AND ak.status != 'deleted'
+			WHERE ak.id = ${keyId} AND ak.user_id = ${userId} AND ak.status != 'deleted'
 			GROUP BY ak.id, usage.monthly_requests, ak.monthly_limit
-		`, [keyId, userId]);
+		`;
 
-		return NextResponse.json(updatedResult.rows[0]);
+		return NextResponse.json(updatedResult[0]);
 
 	} catch (error) {
 		return ApiErrorHandler.handle(error, requestId);
@@ -177,21 +201,22 @@ export async function DELETE(
 		const keyId = id;
 
 		// Verify ownership
-		const keyResult = await sql.query(`
+		const rawSql = getRawSqlConnection();
+		const keyResult = await rawSql`
 			SELECT * FROM developer.api_keys
-			WHERE id = $1 AND user_id = $2 AND status != 'deleted'
-		`, [keyId, userId]);
+			WHERE id = ${keyId} AND user_id = ${userId} AND status != 'deleted'
+		`;
 
-		if (keyResult.rows.length === 0) {
+		if (keyResult.length === 0) {
 			return ApiErrorHandler.notFound('API key not found');
 		}
 
 		// Soft delete
-		await sql.query(`
+		await rawSql`
 			UPDATE developer.api_keys
 			SET status = 'deleted', updated_at = NOW()
-			WHERE id = $1
-		`, [keyId]);
+			WHERE id = ${keyId}
+		`;
 
 		return NextResponse.json({ message: 'API key deleted successfully' });
 
@@ -219,21 +244,22 @@ export async function POST(
 		const keyId = id;
 
 		// Verify ownership
-		const keyResult = await sql.query(`
+		const rawSql = getRawSqlConnection();
+		const keyResult = await rawSql`
 			SELECT * FROM developer.api_keys
-			WHERE id = $1 AND user_id = $2 AND status = 'active'
-		`, [keyId, userId]);
+			WHERE id = ${keyId} AND user_id = ${userId} AND status = 'active'
+		`;
 
-		if (keyResult.rows.length === 0) {
+		if (keyResult.length === 0) {
 			return ApiErrorHandler.notFound('API key not found or already revoked');
 		}
 
 		// Revoke key
-		await sql.query(`
+		await rawSql`
 			UPDATE developer.api_keys
 			SET status = 'revoked', updated_at = NOW()
-			WHERE id = $1
-		`, [keyId]);
+			WHERE id = ${keyId}
+		`;
 
 		return NextResponse.json({ message: 'API key revoked successfully' });
 

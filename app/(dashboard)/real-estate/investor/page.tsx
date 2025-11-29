@@ -32,6 +32,7 @@ import { useQuery } from '@tanstack/react-query';
 import { formatCurrency, formatPercentage } from '@/lib/utils/real-estate-formatting';
 import { RoleSwitcher } from '@/components/real-estate/role-switcher';
 import { useRealEstateRole } from '@/lib/hooks/use-real-estate-role';
+import { logger } from '@/lib/logger';
 
 interface InvestorStats {
   totalProperties: number;
@@ -227,11 +228,11 @@ export default function InvestorDashboard() {
                 variant="detailed"
                 onView={(property) => {
                   // Handle view action
-                  console.log('View property:', property.id);
+                  logger.info('View property:', property.id);
                 }}
                 onEdit={(property) => {
                   // Handle edit action
-                  console.log('Edit property:', property.id);
+                  logger.info('Edit property:', property.id);
                 }}
               />
             ))}

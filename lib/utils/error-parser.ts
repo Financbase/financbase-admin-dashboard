@@ -37,12 +37,14 @@ export function parseApiError(error: any): ParsedErrors {
 
   // Handle Zod validation errors
   if (error instanceof ZodError) {
-    error.errors.forEach((err) => {
-      const field = err.path.join('.');
+    // ZodError uses 'issues' property, not 'errors'
+    const issues = error.issues || error.errors || [];
+    issues.forEach((err: any) => {
+      const field = err.path?.join('.') || 'root';
       if (!result.fieldErrors[field]) {
         result.fieldErrors[field] = [];
       }
-      result.fieldErrors[field].push(err.message);
+      result.fieldErrors[field].push(err.message || 'Validation error');
     });
     return result;
   }

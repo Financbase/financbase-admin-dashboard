@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
 
 // Demo data for 5 stock categories
 const demoStockData: StockCategory[] = [
@@ -129,7 +130,7 @@ const StockCategoryListDemo = () => {
 								};
 							}
 						} catch (error) {
-							console.error(
+							logger.error(
 								`Error fetching stocks for category ${category.name}:`,
 								error,
 							);
@@ -152,7 +153,7 @@ const StockCategoryListDemo = () => {
 				setStockData(demoStockData);
 			}
 		} catch (error) {
-			console.error("Error fetching stock data:", error);
+			logger.error("Error fetching stock data:", error);
 			setError("Failed to load stock data. Using demo data instead.");
 			setStockData(demoStockData);
 			toast.error("Failed to load real stock data. Showing demo data.");

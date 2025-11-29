@@ -15,6 +15,7 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { withRLS } from '@/lib/api/with-rls';
 import { checkAdminStatus } from '@/lib/auth/check-admin-status';
 import * as blogService from '@/lib/services/blog/blog-service';
+import { createSuccessResponse } from '@/lib/api/standard-response';
 
 /**
  * GET /api/blog
@@ -50,16 +51,19 @@ export async function GET(req: NextRequest) {
 			includeArchived: isAdmin,
 		});
 
-		return NextResponse.json({
-			success: true,
-			data: result.posts,
-			pagination: {
-				page,
-				limit,
-				total: result.total,
-				pages: Math.ceil(result.total / limit),
-			},
-		});
+		return createSuccessResponse(
+			result.posts,
+			200,
+			{
+				requestId,
+				pagination: {
+					page,
+					limit,
+					total: result.total,
+					totalPages: Math.ceil(result.total / limit),
+				},
+			}
+		);
 	} catch (error) {
 		return ApiErrorHandler.handle(error, requestId);
 	}
@@ -99,11 +103,11 @@ export async function POST(req: NextRequest) {
 
 			const newPost = await blogService.createPost(validatedData);
 
-			return NextResponse.json({
-				success: true,
-				message: 'Blog post created successfully',
-				data: newPost,
-			}, { status: 201 });
+			return createSuccessResponse(
+				newPost,
+				201,
+				{ requestId }
+			);
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

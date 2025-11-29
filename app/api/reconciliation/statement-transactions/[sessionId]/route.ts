@@ -17,6 +17,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { reconciliationMatches, reconciliationSessions } from "@/lib/db/schemas/reconciliation.schema";
 import { eq, and, desc } from "drizzle-orm";
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/reconciliation/statement-transactions/[sessionId]
@@ -105,7 +106,7 @@ export async function GET(
 		});
 
 	} catch (error) {
-		console.error("Get Statement Transactions API Error:", error);
+		logger.error("Get Statement Transactions API Error:", error);
 		return NextResponse.json(
 			{ error: "Failed to fetch statement transactions" },
 			{ status: 500 }

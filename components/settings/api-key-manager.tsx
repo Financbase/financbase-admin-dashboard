@@ -28,6 +28,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Key, Plus, Copy, RefreshCw, Trash2, Eye, EyeOff, Clock, Activity } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface ApiKey {
 	id: string;
@@ -86,7 +87,7 @@ export function ApiKeyManager() {
 				setKeys(data.keys);
 			}
 		} catch (error) {
-			console.error('Error loading API keys:', error);
+			logger.error('Error loading API keys:', error);
 			toast({
 				title: 'Error',
 				description: 'Failed to load API keys',
@@ -127,7 +128,7 @@ export function ApiKeyManager() {
 				});
 			}
 		} catch (error) {
-			console.error('Error creating API key:', error);
+			logger.error('Error creating API key:', error);
 			toast({
 				title: 'Error',
 				description: 'Failed to create API key',
@@ -159,7 +160,7 @@ export function ApiKeyManager() {
 				});
 			}
 		} catch (error) {
-			console.error('Error regenerating API key:', error);
+			logger.error('Error regenerating API key:', error);
 			toast({
 				title: 'Error',
 				description: 'Failed to regenerate API key',
@@ -189,7 +190,7 @@ export function ApiKeyManager() {
 				});
 			}
 		} catch (error) {
-			console.error('Error deleting API key:', error);
+			logger.error('Error deleting API key:', error);
 			toast({
 				title: 'Error',
 				description: 'Failed to delete API key',

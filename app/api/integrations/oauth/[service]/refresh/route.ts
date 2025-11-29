@@ -13,6 +13,7 @@ import { createOAuthHandler } from '@/lib/oauth/oauth-handler';
 import { db } from '@/lib/db';
 import { integrationConnections } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -84,7 +85,7 @@ export async function POST(
   } catch (error) {
      
     // eslint-disable-next-line no-console
-    console.error('Token refresh error:', error);
+    logger.error('Token refresh error:', error);
     return NextResponse.json({ 
       error: 'Token refresh failed',
       details: error instanceof Error ? error.message : 'Unknown error'

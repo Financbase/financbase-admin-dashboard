@@ -33,6 +33,7 @@ import { useQuery } from '@tanstack/react-query';
 import { formatCurrency, formatPercentage } from '@/lib/utils/real-estate-formatting';
 import { RoleSwitcher } from '@/components/real-estate/role-switcher';
 import { useRealEstateRole } from '@/lib/hooks/use-real-estate-role';
+import { logger } from '@/lib/logger';
 
 interface RealtorStats {
   activeListings: number;
@@ -329,10 +330,10 @@ export default function RealtorDashboard() {
                 property={listing}
                 variant="detailed"
                 onView={(property) => {
-                  console.log('View listing:', property.id);
+                  logger.info('View listing:', property.id);
                 }}
                 onEdit={(property) => {
-                  console.log('Edit listing:', property.id);
+                  logger.info('Edit listing:', property.id);
                 }}
               />
             ))}

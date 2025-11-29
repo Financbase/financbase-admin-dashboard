@@ -10,6 +10,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { BYOKService } from '@/lib/services/byok-service';
+import { logger } from '@/lib/logger';
 
 /**
  * PUT /api/byok/api-keys/[keyId]
@@ -47,7 +48,7 @@ export async function PUT(
 	} catch (error) {
 		 
     // eslint-disable-next-line no-console
-    console.error('Error updating API key:', error);
+    logger.error('Error updating API key:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update API key' },
 			{ status: 500 }
@@ -82,7 +83,7 @@ export async function DELETE(
 	} catch (error) {
 		 
     // eslint-disable-next-line no-console
-    console.error('Error deleting API key:', error);
+    logger.error('Error deleting API key:', error);
 		return NextResponse.json(
 			{ error: 'Failed to delete API key' },
 			{ status: 500 }

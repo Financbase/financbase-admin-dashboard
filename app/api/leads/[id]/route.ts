@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { LeadManagementService } from '@/lib/services/lead-management-service';
 import { z } from 'zod';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 const updateLeadSchema = z.object({
 	firstName: z.string().min(1).optional(),
@@ -29,7 +30,7 @@ const updateLeadSchema = z.object({
 	assignedTo: z.string().optional(),
 	tags: z.array(z.string()).optional(),
 	notes: z.string().optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const updateStatusSchema = z.object({

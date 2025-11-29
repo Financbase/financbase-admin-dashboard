@@ -27,14 +27,25 @@ test.describe('Smoke Tests - Core Functionality', () => {
   test('Application loads and shows sign-in page', async ({ page }) => {
     await page.goto('/');
     
-    // Should redirect to sign-in or show sign-in form
-    await expect(page).toHaveURL(/.*sign.*|.*auth.*|.*login.*/);
+    // With middleware enabled, root route may show public home or redirect to sign-in
+    // Check if we're on sign-in/auth page
+    const currentUrl = page.url();
+    const isAuthPage = /.*sign.*|.*auth.*|.*login.*/.test(currentUrl);
     
-    // Check for Clerk sign-in elements or custom sign-in form
-    const hasClerkSignIn = await page.locator('[data-clerk-element="sign-in"]').count() > 0;
-    const hasCustomSignIn = await page.locator('input[type="email"], input[name="email"]').count() > 0;
-    
-    expect(hasClerkSignIn || hasCustomSignIn).toBeTruthy();
+    if (isAuthPage) {
+      // Should show sign-in form
+      const hasClerkSignIn = await page.locator('[data-clerk-element="sign-in"]').count() > 0;
+      const hasCustomSignIn = await page.locator('input[type="email"], input[name="email"]').count() > 0;
+      expect(hasClerkSignIn || hasCustomSignIn).toBeTruthy();
+    } else {
+      // If on public home page, verify it loads correctly
+      // Then navigate to sign-in to verify it's accessible
+      await page.goto('/auth/sign-in');
+      await expect(page).toHaveURL(/.*sign.*|.*auth.*|.*login.*/);
+      const hasClerkSignIn = await page.locator('[data-clerk-element="sign-in"]').count() > 0;
+      const hasCustomSignIn = await page.locator('input[type="email"], input[name="email"]').count() > 0;
+      expect(hasClerkSignIn || hasCustomSignIn).toBeTruthy();
+    }
   });
 
   test('Dashboard loads after authentication', async ({ page }) => {
@@ -186,7 +197,9 @@ test.describe('Smoke Tests - Core Functionality', () => {
   test('Error handling works gracefully', async ({ page }) => {
     // Test 404 page
     await page.goto('/non-existent-page');
-    await expect(page.locator('text=404, text=Not Found, text=Page not found')).toBeVisible();
+    // Check for any of the 404-related text that appears on the page
+    const has404Text = await page.getByText(/404|Not Found|Page not found/i).first().isVisible().catch(() => false);
+    expect(has404Text).toBeTruthy();
     
     // Test invalid API endpoint
     const response = await page.request.get('/api/invalid-endpoint');

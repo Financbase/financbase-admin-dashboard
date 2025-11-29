@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Users, Briefcase, CheckCircle, DollarSign, TrendingUp, Eye, MoreHorizontal, Star } from "lucide-react"
+import { logger } from '@/lib/logger';
 
 interface FreelancerDisplay {
   id: string
@@ -78,7 +79,7 @@ export function FreelancerDashboardOverview() {
           setRecentActivities(data.data.recentActivities || []);
         }
       } catch (err) {
-        console.error('Error fetching freelancer dashboard:', err);
+        logger.error('Error fetching freelancer dashboard:', err);
         setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
       } finally {
         setLoading(false);

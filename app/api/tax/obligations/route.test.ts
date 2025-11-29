@@ -12,26 +12,47 @@ import { GET, POST } from './route';
 import { NextRequest } from 'next/server';
 import { TaxService } from '@/lib/services/business/tax-service';
 
+const mockUserId = 'user-123';
+
 // Mock dependencies
-vi.mock('@/lib/services/business/tax-service');
+const mockGetObligations = vi.fn();
+const mockCreateObligation = vi.fn();
+
+vi.mock('@/lib/services/business/tax-service', () => ({
+	TaxService: class {
+		getObligations = mockGetObligations;
+		createObligation = mockCreateObligation;
+	},
+}));
 vi.mock('@/lib/api/with-rls', () => ({
 	withRLS: async (fn: any) => {
-		const mockUserId = 'user-123';
 		return await fn(mockUserId);
 	},
 }));
 vi.mock('@clerk/nextjs/server', () => ({
-	auth: vi.fn().mockResolvedValue({ userId: 'user-123' }),
+	auth: vi.fn().mockResolvedValue({ userId: mockUserId }),
+	currentUser: vi.fn().mockResolvedValue({
+		id: mockUserId,
+		emailAddresses: [{ emailAddress: 'test@example.com' }],
+	}),
 }));
 vi.mock('@/lib/validation-schemas', async () => {
-	const actual = await vi.importActual('@/lib/validation-schemas');
+	const actual = await vi.importActual<typeof import('@/lib/validation-schemas')>('@/lib/validation-schemas');
+	const { z } = await import('zod');
 	return {
 		...actual,
 		createTaxObligationSchema: {
 			parse: vi.fn((data: any) => {
-				// Basic validation - just return the data if it has required fields
+				// Basic validation - throw ZodError for invalid data
 				if (!data.name || !data.type || !data.amount || !data.dueDate || !data.year) {
-					throw new Error('Validation failed');
+					const error = new z.ZodError([
+						{
+							code: 'custom',
+							path: ['name'],
+							message: 'Validation failed',
+						},
+					]);
+					throw error;
 				}
 				return data;
 			}),
@@ -41,14 +62,8 @@ vi.mock('@/lib/validation-schemas', async () => {
 
 describe('Tax Obligations API', () => {
 	const mockUserId = 'user-123';
-	let mockTaxService: any;
 
 	beforeEach(() => {
-		mockTaxService = {
-			getObligations: vi.fn(),
-			createObligation: vi.fn(),
-		};
-		(TaxService as any).mockImplementation(() => mockTaxService);
 		vi.clearAllMocks();
 	});
 
@@ -70,7 +85,7 @@ describe('Tax Obligations API', () => {
 				totalPages: 1,
 			};
 
-			mockTaxService.getObligations.mockResolvedValue(mockObligations);
+			mockGetObligations.mockResolvedValue(mockObligations);
 
 			const request = new NextRequest(
 				'http://localhost/api/tax/obligations?page=1&limit=50'
@@ -95,7 +110,7 @@ describe('Tax Obligations API', () => {
 				},
 			];
 
-			mockTaxService.getObligations.mockResolvedValue(mockObligations);
+			mockGetObligations.mockResolvedValue(mockObligations);
 
 			const request = new NextRequest('http://localhost/api/tax/obligations');
 			const response = await GET(request);
@@ -107,14 +122,14 @@ describe('Tax Obligations API', () => {
 		});
 
 		it('should filter by status', async () => {
-			mockTaxService.getObligations.mockResolvedValue([]);
+			mockGetObligations.mockResolvedValue([]);
 
 			const request = new NextRequest(
 				'http://localhost/api/tax/obligations?status=pending'
 			);
 			await GET(request);
 
-			expect(mockTaxService.getObligations).toHaveBeenCalledWith(
+			expect(mockGetObligations).toHaveBeenCalledWith(
 				mockUserId,
 				expect.objectContaining({ status: 'pending' })
 			);
@@ -131,7 +146,7 @@ describe('Tax Obligations API', () => {
 				status: 'pending',
 			};
 
-			mockTaxService.createObligation.mockResolvedValue(mockObligation);
+			mockCreateObligation.mockResolvedValue(mockObligation);
 
 			const request = new NextRequest('http://localhost/api/tax/obligations', {
 				method: 'POST',

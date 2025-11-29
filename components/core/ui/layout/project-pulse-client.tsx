@@ -12,6 +12,7 @@ import { CheckCircle, Code, Key, MessageCircle, XCircle } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import RuixenCard from "./project-pulse-tracker";
+import { logger } from '@/lib/logger';
 
 interface ProjectPulseData {
 	projectName: string;
@@ -66,7 +67,7 @@ export default function ProjectPulseTracker({
 
 				setProjectData(result.data);
 			} catch (err) {
-				console.error("Error fetching project data:", err);
+				logger.error("Error fetching project data:", err);
 				setError(err instanceof Error ? err.message : "An error occurred");
 			} finally {
 				setLoading(false);

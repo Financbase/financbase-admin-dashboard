@@ -61,6 +61,7 @@ import {
   Receipt
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface ForecastData {
   id: string;
@@ -379,7 +380,7 @@ export function PredictiveAnalytics({ className, userId }: PredictiveAnalyticsPr
         setModels(sampleModels);
       } catch (err) {
         setError('Failed to load predictive analytics data');
-        console.error('Error loading data:', err);
+        logger.error('Error loading data:', err);
       } finally {
         setLoading(false);
       }

@@ -12,6 +12,7 @@ import {
 	type OpportunityCardProps,
 } from "@/components/ui/card-12";
 import { Building2, Calendar } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 const Demo = () => {
 	// Sample data to populate the card
@@ -46,12 +47,12 @@ const Demo = () => {
 
 	// Handler functions for the buttons
 	const handleAccept = () => {
-		console.log("Project Accepted!");
+		logger.info("Project Accepted!");
 		// Add your accept logic here
 	};
 
 	const handleDecline = () => {
-		console.log("Offer Declined.");
+		logger.info("Offer Declined.");
 		// Add your decline logic here
 	};
 

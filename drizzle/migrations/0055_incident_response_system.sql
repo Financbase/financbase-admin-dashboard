@@ -48,10 +48,10 @@ END $$;
 -- Security Incidents Table
 CREATE TABLE IF NOT EXISTS "financbase_security_incidents" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
   "incident_number" TEXT NOT NULL UNIQUE,
-  "reported_by" TEXT,
-  "assigned_to" TEXT,
+  "reported_by" UUID,
+  "assigned_to" UUID,
   "title" TEXT NOT NULL,
   "description" TEXT NOT NULL,
   "incident_type" "incident_type" NOT NULL,
@@ -85,16 +85,16 @@ CREATE TABLE IF NOT EXISTS "financbase_security_incidents" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_security_incidents_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_security_incidents_reported_by" FOREIGN KEY ("reported_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
-  CONSTRAINT "fk_security_incidents_assigned_to" FOREIGN KEY ("assigned_to") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_security_incidents_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_security_incidents_reported_by" FOREIGN KEY ("reported_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_security_incidents_assigned_to" FOREIGN KEY ("assigned_to") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- IR Team Members Table
 CREATE TABLE IF NOT EXISTS "financbase_ir_team_members" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "user_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
+  "user_id" UUID NOT NULL,
   "role" "ir_team_role" NOT NULL,
   "is_primary" BOOLEAN DEFAULT false NOT NULL,
   "contact_info" JSONB DEFAULT '{}'::jsonb NOT NULL,
@@ -105,8 +105,8 @@ CREATE TABLE IF NOT EXISTS "financbase_ir_team_members" (
   "notes" TEXT,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_ir_team_members_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_ir_team_members_user" FOREIGN KEY ("user_id") REFERENCES "financbase_users"("id") ON DELETE CASCADE
+  CONSTRAINT "fk_ir_team_members_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_ir_team_members_user" FOREIGN KEY ("user_id") REFERENCES "financbase"."users"("id") ON DELETE CASCADE
 );
 
 -- Incident Team Assignments Table
@@ -116,21 +116,21 @@ CREATE TABLE IF NOT EXISTS "financbase_incident_team_assignments" (
   "team_member_id" INTEGER NOT NULL,
   "role" "ir_team_role" NOT NULL,
   "assigned_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  "assigned_by" TEXT,
+  "assigned_by" UUID,
   "status" TEXT DEFAULT 'active' NOT NULL,
   "notes" TEXT,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   CONSTRAINT "fk_incident_team_assignments_incident" FOREIGN KEY ("incident_id") REFERENCES "financbase_security_incidents"("id") ON DELETE CASCADE,
   CONSTRAINT "fk_incident_team_assignments_team_member" FOREIGN KEY ("team_member_id") REFERENCES "financbase_ir_team_members"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_incident_team_assignments_assigned_by" FOREIGN KEY ("assigned_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_incident_team_assignments_assigned_by" FOREIGN KEY ("assigned_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- IR Runbooks Table
 CREATE TABLE IF NOT EXISTS "financbase_ir_runbooks" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "created_by" TEXT,
-  "approved_by" TEXT,
+  "organization_id" UUID NOT NULL,
+  "created_by" UUID,
+  "approved_by" UUID,
   "title" TEXT NOT NULL,
   "description" TEXT,
   "incident_type" "incident_type" NOT NULL,
@@ -152,9 +152,9 @@ CREATE TABLE IF NOT EXISTS "financbase_ir_runbooks" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_ir_runbooks_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_ir_runbooks_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
-  CONSTRAINT "fk_ir_runbooks_approved_by" FOREIGN KEY ("approved_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_ir_runbooks_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_ir_runbooks_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_ir_runbooks_approved_by" FOREIGN KEY ("approved_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Runbook Executions Table
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS "financbase_runbook_executions" (
   "id" SERIAL PRIMARY KEY,
   "incident_id" INTEGER NOT NULL,
   "runbook_id" INTEGER NOT NULL,
-  "executed_by" TEXT,
+  "executed_by" UUID,
   "started_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "completed_at" TIMESTAMP WITH TIME ZONE,
   "status" TEXT DEFAULT 'in_progress' NOT NULL,
@@ -175,14 +175,14 @@ CREATE TABLE IF NOT EXISTS "financbase_runbook_executions" (
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   CONSTRAINT "fk_runbook_executions_incident" FOREIGN KEY ("incident_id") REFERENCES "financbase_security_incidents"("id") ON DELETE CASCADE,
   CONSTRAINT "fk_runbook_executions_runbook" FOREIGN KEY ("runbook_id") REFERENCES "financbase_ir_runbooks"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_runbook_executions_executed_by" FOREIGN KEY ("executed_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_runbook_executions_executed_by" FOREIGN KEY ("executed_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Communication Templates Table
 CREATE TABLE IF NOT EXISTS "financbase_ir_communication_templates" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "created_by" TEXT,
+  "organization_id" UUID NOT NULL,
+  "created_by" UUID,
   "name" TEXT NOT NULL,
   "template_type" TEXT NOT NULL,
   "subject" TEXT,
@@ -196,16 +196,16 @@ CREATE TABLE IF NOT EXISTS "financbase_ir_communication_templates" (
   "tags" JSONB DEFAULT '[]'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_ir_communication_templates_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_ir_communication_templates_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_ir_communication_templates_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_ir_communication_templates_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- IR Testing and Drills Table
 CREATE TABLE IF NOT EXISTS "financbase_ir_drills" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "scheduled_by" TEXT,
-  "conducted_by" TEXT,
+  "organization_id" UUID NOT NULL,
+  "scheduled_by" UUID,
+  "conducted_by" UUID,
   "drill_name" TEXT NOT NULL,
   "drill_type" "drill_type" NOT NULL,
   "status" "drill_status" NOT NULL DEFAULT 'scheduled',
@@ -236,9 +236,9 @@ CREATE TABLE IF NOT EXISTS "financbase_ir_drills" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_ir_drills_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_ir_drills_scheduled_by" FOREIGN KEY ("scheduled_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
-  CONSTRAINT "fk_ir_drills_conducted_by" FOREIGN KEY ("conducted_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_ir_drills_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_ir_drills_scheduled_by" FOREIGN KEY ("scheduled_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_ir_drills_conducted_by" FOREIGN KEY ("conducted_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Create indexes for better query performance

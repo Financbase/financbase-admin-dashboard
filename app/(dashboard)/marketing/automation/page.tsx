@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { logger } from '@/lib/logger';
 
 interface Automation {
   id: string;
@@ -163,10 +164,10 @@ export default function MarketingAutomationPage() {
       });
       
       if (response.ok) {
-        console.log(`${action} action completed`);
+        logger.info(`${action} action completed`);
       }
     } catch (error) {
-      console.error(`Error performing ${action}:`, error);
+      logger.error(`Error performing ${action}:`, error);
     }
   };
 

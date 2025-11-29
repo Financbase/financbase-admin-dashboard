@@ -17,6 +17,9 @@ export * from "./preferences.schema";
 
 // Organization management
 export * from "./organizations.schema";
+export * from "./organization-subscriptions.schema";
+export * from "./organization-invitations.schema";
+export * from "./organization-settings.schema";
 
 // Financial entities
 export * from "./invoices.schema";
@@ -179,3 +182,6 @@ export * from "./direct-file.schema";
 
 // Newsletter Subscriptions
 export * from "./newsletter.schema";
+
+// Email Templates
+export * from "./email-templates.schema";

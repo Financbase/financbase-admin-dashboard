@@ -9,6 +9,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(analytics);
 	} catch (error) {
-		console.error('Error fetching expense analytics:', error);
+		logger.error('Error fetching expense analytics:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

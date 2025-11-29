@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 
 import { analyzeImageWithAI } from '@/lib/ai/client';
+import { logger } from '@/lib/logger';
 
 interface ImageUploadProps {
 	onImageUpdate?: (imageUrl: string | string[], analysis?: any) => void;
@@ -147,7 +148,7 @@ export function ImageUpload({
 						analysis = await analyzeImageWithAI(finalUrl, file.name);
 						toast.success("Image analyzed with AI!");
 					} catch (error) {
-						console.warn("AI analysis failed:", error);
+						logger.warn("AI analysis failed:", error);
 						// Continue without analysis
 					}
 				}
@@ -158,7 +159,7 @@ export function ImageUpload({
 				throw new Error("No URL returned");
 			}
 		} catch (error) {
-			console.error("Upload failed:", error);
+			logger.error("Upload failed:", error);
 			setPreviewUrls([]);
 			toast.error("Failed to upload image. Please try again.");
 		} finally {
@@ -208,7 +209,7 @@ export function ImageUpload({
 							const analysis = await analyzeImageWithAI(result.url, file.name);
 							analyses.push({ url: result.url, analysis });
 						} catch (error) {
-							console.warn("AI analysis failed for", file.name, error);
+							logger.warn("AI analysis failed for", file.name, error);
 							analyses.push({ url: result.url, analysis: null });
 						}
 					}
@@ -216,7 +217,7 @@ export function ImageUpload({
 					throw new Error("No URL returned");
 				}
 			} catch (error) {
-				console.error("Upload failed:", error);
+				logger.error("Upload failed:", error);
 				toast.error(`Failed to upload ${file.name}`);
 			}
 		}

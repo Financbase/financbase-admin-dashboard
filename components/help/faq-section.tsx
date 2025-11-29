@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { 
+import { logger } from '@/lib/logger';
   Search, 
   HelpCircle, 
   ChevronDown, 
@@ -81,7 +82,7 @@ export function FAQSection() {
         body: JSON.stringify({ isHelpful }),
       });
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      logger.error('Error submitting feedback:', error);
     }
   };
 

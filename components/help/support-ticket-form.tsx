@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { 
+import { logger } from '@/lib/logger';
   MessageSquare, 
   Paperclip, 
   Send, 
@@ -143,7 +144,7 @@ export function SupportTicketForm({ onSuccess, onCancel }: SupportTicketFormProp
         })),
       });
     } catch (error) {
-      console.error('Error creating ticket:', error);
+      logger.error('Error creating ticket:', error);
     } finally {
       setIsSubmitting(false);
     }

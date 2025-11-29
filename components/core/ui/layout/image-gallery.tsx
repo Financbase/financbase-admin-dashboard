@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
 
 export interface UploadedImage {
 	id: string;
@@ -112,7 +113,7 @@ export function ImageGallery({
 
 	const handleImageClick = (image: UploadedImage) => {
 		// Open image in modal or navigate to detail view
-		console.log('Image clicked:', image);
+		logger.info('Image clicked:', image);
 	};
 
 	const handleDelete = (imageId: string) => {
@@ -345,7 +346,7 @@ export function ImageGallery({
 										className="object-cover"
 										sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
 										onError={(e) => {
-											console.error('Failed to load image:', image.url);
+											logger.error('Failed to load image:', image.url);
 											// Replace with placeholder on error
 											const target = e.target as HTMLImageElement;
 											target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23ddd" width="400" height="300"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';

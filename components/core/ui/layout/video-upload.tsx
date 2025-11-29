@@ -29,6 +29,7 @@ import {
 	Film
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface VideoUploadProps {
 	onVideoUpdate?: (videoUrl: string, thumbnailUrl?: string, metadata?: any) => void;
@@ -140,7 +141,7 @@ export function VideoUpload({
 						thumbnail = await generateVideoThumbnail(videoPreviewUrl, file.name);
 						setThumbnailUrl(thumbnail);
 					} catch (error) {
-						console.warn('Thumbnail generation failed:', error);
+						logger.warn('Thumbnail generation failed:', error);
 					} finally {
 						setIsGeneratingThumbnail(false);
 					}
@@ -156,7 +157,7 @@ export function VideoUpload({
 				throw new Error('No URL returned');
 			}
 		} catch (error) {
-			console.error('Upload failed:', error);
+			logger.error('Upload failed:', error);
 			setPreviewUrl(null);
 			setThumbnailUrl(null);
 			setVideoMetadata(null);

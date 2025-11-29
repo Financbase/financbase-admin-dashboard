@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 // Simple database connection using neon directly
 async function getDbConnection() {
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
 		return NextResponse.json({ products });
 
 	} catch (error) {
-		console.error('Failed to fetch top products:', error);
+		logger.error('Failed to fetch top products:', error);
 		return ApiErrorHandler.handle(error, requestId);
 	}
 }

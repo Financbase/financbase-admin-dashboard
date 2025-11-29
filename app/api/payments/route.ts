@@ -22,7 +22,7 @@ const processPaymentSchema = z.object({
 	currency: z.string().default('USD'),
 	description: z.string().optional(),
 	reference: z.string().optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 	notes: z.string().optional(),
 });
 
@@ -238,6 +238,11 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ payment }, { status: 201 });
 	} catch (error) {
+		// Handle Zod validation errors explicitly
+		if (error instanceof z.ZodError) {
+			return ApiErrorHandler.validationError(error, requestId);
+		}
+		// ApiErrorHandler.handle already handles other errors
 		return ApiErrorHandler.handle(error, requestId);
 	}
 }

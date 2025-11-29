@@ -19,6 +19,7 @@ import { invoices } from '@/lib/db/schemas/invoices.schema';
 import { expenses } from '@/lib/db/schemas/expenses.schema';
 import { transactions } from '@/lib/db/schemas/transactions.schema';
 import { eq, and, gte, lte, sql } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -93,7 +94,7 @@ export async function GET() {
       .where(eq(invoices.userId, userId));
 
     // Get expense data
-    const [expenseData] = await db
+    const [expenseDataResult] = await db
       .select({
         lastMonth: sql<number>`sum(case when ${expenses.date} >= ${thirtyDaysAgo} then ${expenses.amount}::numeric else 0 end)`,
         lastQuarter: sql<number>`sum(case when ${expenses.date} >= ${ninetyDaysAgo} then ${expenses.amount}::numeric else 0 end)`,
@@ -107,12 +108,12 @@ export async function GET() {
       .select({
         amount: transactions.amount,
         category: transactions.category,
-        date: transactions.date,
+        date: transactions.transactionDate,
       })
       .from(transactions)
       .where(and(
         eq(transactions.userId, userId),
-        gte(transactions.date, ninetyDaysAgo)
+        gte(transactions.transactionDate, ninetyDaysAgo)
       ))
       .limit(100);
 
@@ -122,10 +123,10 @@ export async function GET() {
       lastYear: Number(revenueData?.lastYear || 0),
     };
 
-    const expenses = {
-      lastMonth: Number(expenseData?.lastMonth || 0),
-      lastQuarter: Number(expenseData?.lastQuarter || 0),
-      lastYear: Number(expenseData?.lastYear || 0),
+    const expenseTotals = {
+      lastMonth: Number(expenseDataResult?.lastMonth || 0),
+      lastQuarter: Number(expenseDataResult?.lastQuarter || 0),
+      lastYear: Number(expenseDataResult?.lastYear || 0),
     };
 
     // Calculate metrics
@@ -134,11 +135,11 @@ export async function GET() {
       : 0;
 
     const profitMargin = revenue.lastMonth > 0
-      ? ((revenue.lastMonth - expenses.lastMonth) / revenue.lastMonth) * 100
+      ? ((revenue.lastMonth - expenseTotals.lastMonth) / revenue.lastMonth) * 100
       : 0;
 
     const expenseRatio = revenue.lastMonth > 0
-      ? (expenses.lastMonth / revenue.lastMonth) * 100
+      ? (expenseTotals.lastMonth / revenue.lastMonth) * 100
       : 0;
 
     // Generate financial insights using the service
@@ -148,8 +149,8 @@ export async function GET() {
     // Prepare financial data summary for AI analysis (if needed)
     const financialDataSummary = {
       revenue: revenue.lastMonth,
-      expenses: expenses.lastMonth,
-      cashflow: revenue.lastMonth - expenses.lastMonth,
+      expenses: expenseTotals.lastMonth,
+      cashflow: revenue.lastMonth - expenseTotals.lastMonth,
       profitability: profitMargin,
       growth: monthlyGrowth,
       transactions: recentTransactions.map(t => ({
@@ -257,7 +258,7 @@ export async function GET() {
       insights: validatedInsights
     });
   } catch (error) {
-    console.error('Error generating AI insights:', error);
+    logger.error('Error generating AI insights:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

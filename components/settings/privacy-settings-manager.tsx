@@ -31,6 +31,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Database, Download, Trash2, AlertTriangle, Eye, FileText, Shield } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface PrivacySettings {
 	id: string;
@@ -89,7 +90,7 @@ export function PrivacySettingsManager() {
 				}
 			}
 		} catch (error) {
-			console.error('Error loading privacy settings:', error);
+			logger.error('Error loading privacy settings:', error);
 			toast.error('Failed to load privacy settings');
 		} finally {
 			setLoading(false);
@@ -153,7 +154,7 @@ export function PrivacySettingsManager() {
 				toast.error('Failed to export data');
 			}
 		} catch (error) {
-			console.error('Error exporting data:', error);
+			logger.error('Error exporting data:', error);
 			toast.error('Failed to export data');
 		} finally {
 			setExportLoading(false);
@@ -174,7 +175,7 @@ export function PrivacySettingsManager() {
 				toast.error('Failed to submit deletion request');
 			}
 		} catch (error) {
-			console.error('Error deleting account:', error);
+			logger.error('Error deleting account:', error);
 			toast.error('Failed to submit deletion request');
 		} finally {
 			setDeleteLoading(false);

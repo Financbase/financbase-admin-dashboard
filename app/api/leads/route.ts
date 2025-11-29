@@ -30,7 +30,7 @@ const createLeadSchema = z.object({
 	assignedTo: z.string().optional(),
 	tags: z.array(z.string()).optional(),
 	notes: z.string().optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**

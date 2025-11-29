@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AITaggingService } from '@/lib/ai/image-analysis';
 import { auth } from '@clerk/nextjs/server';
+import { logger } from '@/lib/logger';
 
 // Initialize AI service with environment configuration
 const getAIService = () => {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('AI analysis failed:', error);
+    logger.error('AI analysis failed:', error);
 
     return NextResponse.json({
       error: 'Analysis failed',
@@ -117,7 +118,7 @@ export async function PUT(request: NextRequest) {
         // Rate limiting delay
         await new Promise(resolve => setTimeout(resolve, 100));
       } catch (error) {
-        console.error('Individual image analysis failed:', image.filename, error);
+        logger.error('Individual image analysis failed:', image.filename, error);
         results.push({
           imageUrl: image.imageUrl,
           filename: image.filename,
@@ -138,7 +139,7 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Batch AI analysis failed:', error);
+    logger.error('Batch AI analysis failed:', error);
     return NextResponse.json({
       error: 'Batch analysis failed',
       details: error instanceof Error ? error.message : 'Unknown error'

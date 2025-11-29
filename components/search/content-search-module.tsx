@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 
 interface SearchResult {
   entityType: string;
@@ -243,7 +244,7 @@ export function ContentSearchModule() {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => {
             // Toggle advanced filters - you can implement this functionality
-            console.log('Advanced filters clicked');
+            logger.info('Advanced filters clicked');
           }}>
             <Filter className="mr-2 h-4 w-4" />
             Advanced Filters

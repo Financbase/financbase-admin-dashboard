@@ -8,6 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from '@/lib/logger';
 
 /**
  * API Proxy for Direct File State API
@@ -87,17 +88,37 @@ async function proxyRequest(
 			jsonBody = responseBody;
 		}
 		
+		// Get origin from request for CORS validation
+		const origin = request.headers.get("origin");
+		const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
+		const isAllowedOrigin = origin && (
+			allowedOrigins.includes(origin) ||
+			origin.includes("localhost") ||
+			origin.includes("127.0.0.1")
+		);
+
+		// Return response with secure CORS headers
+		const corsHeaders: Record<string, string> = {
+			"Content-Type": response.headers.get("Content-Type") || "application/json",
+			"Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+			"Access-Control-Allow-Headers": "Content-Type, Authorization",
+			"Access-Control-Allow-Credentials": "true",
+		};
+
+		// Only allow specific origins, not wildcard
+		if (isAllowedOrigin) {
+			corsHeaders["Access-Control-Allow-Origin"] = origin;
+		} else if (process.env.NODE_ENV === "development") {
+			// In development, allow localhost origins
+			corsHeaders["Access-Control-Allow-Origin"] = origin || "http://localhost:3000";
+		}
+
 		return NextResponse.json(jsonBody, {
 			status: response.status,
-			headers: {
-				"Content-Type": response.headers.get("Content-Type") || "application/json",
-				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-				"Access-Control-Allow-Headers": "Content-Type, Authorization",
-			},
+			headers: corsHeaders,
 		});
 	} catch (error) {
-		console.error("Direct File State API proxy error:", error);
+		logger.error("Direct File State API proxy error:", error);
 		return NextResponse.json(
 			{
 				error: "Failed to proxy request to Direct File State API",

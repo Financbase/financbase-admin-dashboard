@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { IncidentResponseService } from '@/lib/services/incident-response-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function PATCH(
   request: NextRequest,
@@ -47,8 +48,7 @@ export async function PATCH(
       reportUrl,
     } = body;
 
-    await IncidentResponseService.updateDrillResults(drillId, {
-      conductedBy,
+    await IncidentResponseService.completeDrill(drillId, {
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       duration,
@@ -67,7 +67,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, message: 'Drill results updated', requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error updating drill results:', error);
+    logger.error('Error updating drill results:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

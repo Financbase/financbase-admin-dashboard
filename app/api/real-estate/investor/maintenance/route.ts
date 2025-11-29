@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 
 interface MaintenanceRow {
 	id: string;
@@ -291,7 +292,7 @@ export async function GET(request: NextRequest) {
 		if (error instanceof z.ZodError) {
 			return ApiErrorHandler.validationError(error, requestId);
 		}
-		console.error('Failed to fetch maintenance requests:', error);
+		logger.error('Failed to fetch maintenance requests:', error);
 		return ApiErrorHandler.databaseError(error, requestId);
 	}
 }

@@ -24,8 +24,8 @@ END $$;
 -- Security Training Programs Table
 CREATE TABLE IF NOT EXISTS "financbase_security_training_programs" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "created_by" TEXT,
+  "organization_id" UUID NOT NULL,
+  "created_by" UUID,
   "title" TEXT NOT NULL,
   "description" TEXT,
   "training_type" "training_type" NOT NULL,
@@ -43,20 +43,20 @@ CREATE TABLE IF NOT EXISTS "financbase_security_training_programs" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_security_training_programs_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_security_training_programs_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_security_training_programs_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_security_training_programs_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Training Assignments Table
 CREATE TABLE IF NOT EXISTS "financbase_training_assignments" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
   "program_id" INTEGER NOT NULL,
-  "user_id" TEXT,
+  "user_id" UUID,
   "role_id" TEXT,
   "assignment_type" "assignment_type" DEFAULT 'mandatory' NOT NULL,
   "assigned_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  "assigned_by" TEXT,
+  "assigned_by" UUID,
   "deadline" TIMESTAMP WITH TIME ZONE,
   "status" "training_status" DEFAULT 'not_started' NOT NULL,
   "started_at" TIMESTAMP WITH TIME ZONE,
@@ -69,17 +69,17 @@ CREATE TABLE IF NOT EXISTS "financbase_training_assignments" (
   "notes" TEXT,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_training_assignments_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_training_assignments_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
   CONSTRAINT "fk_training_assignments_program" FOREIGN KEY ("program_id") REFERENCES "financbase_security_training_programs"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_training_assignments_user" FOREIGN KEY ("user_id") REFERENCES "financbase_users"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_training_assignments_assigned_by" FOREIGN KEY ("assigned_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_training_assignments_user" FOREIGN KEY ("user_id") REFERENCES "financbase"."users"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_training_assignments_assigned_by" FOREIGN KEY ("assigned_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Training Assessments Table
 CREATE TABLE IF NOT EXISTS "financbase_training_assessments" (
   "id" SERIAL PRIMARY KEY,
   "assignment_id" INTEGER NOT NULL,
-  "user_id" TEXT NOT NULL,
+  "user_id" UUID NOT NULL,
   "questions" JSONB NOT NULL,
   "answers" JSONB NOT NULL,
   "score" NUMERIC(5, 2) NOT NULL,
@@ -90,14 +90,14 @@ CREATE TABLE IF NOT EXISTS "financbase_training_assessments" (
   "duration" INTEGER,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   CONSTRAINT "fk_training_assessments_assignment" FOREIGN KEY ("assignment_id") REFERENCES "financbase_training_assignments"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_training_assessments_user" FOREIGN KEY ("user_id") REFERENCES "financbase_users"("id") ON DELETE CASCADE
+  CONSTRAINT "fk_training_assessments_user" FOREIGN KEY ("user_id") REFERENCES "financbase"."users"("id") ON DELETE CASCADE
 );
 
 -- Training Certificates Table
 CREATE TABLE IF NOT EXISTS "financbase_training_certificates" (
   "id" SERIAL PRIMARY KEY,
   "assignment_id" INTEGER NOT NULL,
-  "user_id" TEXT NOT NULL,
+  "user_id" UUID NOT NULL,
   "program_id" INTEGER NOT NULL,
   "certificate_number" TEXT NOT NULL UNIQUE,
   "issued_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
@@ -107,15 +107,15 @@ CREATE TABLE IF NOT EXISTS "financbase_training_certificates" (
   "certificate_data" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   CONSTRAINT "fk_training_certificates_assignment" FOREIGN KEY ("assignment_id") REFERENCES "financbase_training_assignments"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_training_certificates_user" FOREIGN KEY ("user_id") REFERENCES "financbase_users"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_training_certificates_user" FOREIGN KEY ("user_id") REFERENCES "financbase"."users"("id") ON DELETE CASCADE,
   CONSTRAINT "fk_training_certificates_program" FOREIGN KEY ("program_id") REFERENCES "financbase_security_training_programs"("id") ON DELETE CASCADE
 );
 
 -- Phishing Simulation Results Table
 CREATE TABLE IF NOT EXISTS "financbase_phishing_simulation_results" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "user_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
+  "user_id" UUID NOT NULL,
   "simulation_id" TEXT NOT NULL,
   "email_subject" TEXT NOT NULL,
   "clicked" BOOLEAN DEFAULT false NOT NULL,
@@ -124,8 +124,8 @@ CREATE TABLE IF NOT EXISTS "financbase_phishing_simulation_results" (
   "reported_at" TIMESTAMP WITH TIME ZONE,
   "result" TEXT NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_phishing_simulation_results_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_phishing_simulation_results_user" FOREIGN KEY ("user_id") REFERENCES "financbase_users"("id") ON DELETE CASCADE
+  CONSTRAINT "fk_phishing_simulation_results_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_phishing_simulation_results_user" FOREIGN KEY ("user_id") REFERENCES "financbase"."users"("id") ON DELETE CASCADE
 );
 
 -- Create indexes

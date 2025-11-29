@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ComplianceMonitoringService } from '@/lib/services/compliance-monitoring-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     const status = await ComplianceMonitoringService.getComplianceStatus(orgId);
     return NextResponse.json({ success: true, data: status, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching compliance monitoring data:', error);
+    logger.error('Error fetching compliance monitoring data:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

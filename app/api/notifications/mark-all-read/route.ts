@@ -17,6 +17,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/services/notification-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST() {
 	const requestId = generateRequestId();
@@ -37,7 +38,7 @@ export async function POST() {
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('[API] Error in POST /api/notifications/mark-all-read:', {
+		logger.error('[API] Error in POST /api/notifications/mark-all-read:', {
 			requestId,
 			error: error instanceof Error ? error.message : String(error),
 			stack: error instanceof Error ? error.stack : undefined,

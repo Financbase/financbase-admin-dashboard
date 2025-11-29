@@ -52,6 +52,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MarketplaceSystem } from '@/components/marketplace/marketplace-system';
 import { WebhookManagement } from '@/components/integrations/webhook-management';
 import { DeveloperPortal } from '@/components/integrations/developer-portal';
+import { logger } from '@/lib/logger';
 
 interface Integration {
 	id: string;
@@ -170,7 +171,7 @@ export default function IntegrationsPage() {
 				setIntegrations(SAMPLE_INTEGRATIONS);
 			} catch (err) {
 				setError('Failed to load integrations. Please try again.');
-				console.error('Error loading integrations:', err);
+				logger.error('Error loading integrations:', err);
 			} finally {
 				setLoading(false);
 			}
@@ -193,7 +194,7 @@ export default function IntegrationsPage() {
 			));
 		} catch (err) {
 			setError(`Failed to sync ${integrationId}. Please try again.`);
-			console.error('Error syncing integration:', err);
+			logger.error('Error syncing integration:', err);
 		} finally {
 			setLoading(false);
 		}
@@ -210,7 +211,7 @@ export default function IntegrationsPage() {
 			setIntegrations(prev => prev.filter(integration => integration.id !== integrationId));
 		} catch (err) {
 			setError(`Failed to delete integration. Please try again.`);
-			console.error('Error deleting integration:', err);
+			logger.error('Error deleting integration:', err);
 		} finally {
 			setLoading(false);
 		}
@@ -249,7 +250,7 @@ export default function IntegrationsPage() {
 			// Show success message or update integration
 		} catch (err) {
 			setError('Failed to save configuration. Please try again.');
-			console.error('Error saving configuration:', err);
+			logger.error('Error saving configuration:', err);
 		} finally {
 			setLoading(false);
 		}
@@ -264,7 +265,7 @@ export default function IntegrationsPage() {
 			setError(null);
 		} catch (err) {
 			setError('Failed to save settings. Please try again.');
-			console.error('Error saving settings:', err);
+			logger.error('Error saving settings:', err);
 		} finally {
 			setLoading(false);
 		}

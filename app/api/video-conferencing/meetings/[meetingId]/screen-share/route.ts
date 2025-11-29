@@ -10,6 +10,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { AdvancedVideoFeaturesService } from '@/lib/services/video-conferencing/advanced-features';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 		return NextResponse.json(screenShareSessions);
 	} catch (error) {
 		// eslint-disable-next-line no-console
-    console.error('Error fetching screen share sessions:', error);
+    logger.error('Error fetching screen share sessions:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(session, { status: 201 });
 	} catch (error) {
 		// eslint-disable-next-line no-console
-    console.error('Error starting screen share:', error);
+    logger.error('Error starting screen share:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -107,7 +108,7 @@ export async function DELETE(request: NextRequest) {
 		return NextResponse.json({ success: true });
 	} catch (error) {
 		// eslint-disable-next-line no-console
-    console.error('Error stopping screen share:', error);
+    logger.error('Error stopping screen share:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

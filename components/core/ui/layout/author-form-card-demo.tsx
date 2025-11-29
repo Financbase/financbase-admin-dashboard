@@ -20,6 +20,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { logger } from '@/lib/logger';
 
 export default function AuthorFormCardDemo() {
 	const {
@@ -81,7 +82,7 @@ export default function AuthorFormCardDemo() {
 				}
 			}
 		} catch (err) {
-			console.error("Error saving author:", err);
+			logger.error("Error saving author:", err);
 		}
 	};
 

@@ -10,6 +10,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { BYOKService } from '@/lib/services/byok-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/byok/usage
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 		return NextResponse.json({ usage });
 
 	} catch (error) {
-		console.error('Error fetching AI usage:', error);
+		logger.error('Error fetching AI usage:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch AI usage' },
 			{ status: 500 }
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error('Error tracking AI usage:', error);
+		logger.error('Error tracking AI usage:', error);
 		return NextResponse.json(
 			{ error: 'Failed to track AI usage' },
 			{ status: 500 }

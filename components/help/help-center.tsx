@@ -42,6 +42,7 @@ import { ArticleViewer } from './article-viewer';
 import { VideoTutorials } from './video-tutorials';
 import { FAQSection } from './faq-section';
 import { SupportTicketForm } from './support-ticket-form';
+import { logger } from '@/lib/logger';
 
 interface HelpCenterProps {
   onViewArticle: (article: any) => void;
@@ -395,7 +396,7 @@ export function HelpCenter({ onViewArticle, onCreateTicket }: HelpCenterProps) {
 
         {/* Videos Tab */}
         <TabsContent value="videos" className="space-y-4">
-          <VideoTutorials onViewVideo={(video) => console.log('View video:', video)} />
+          <VideoTutorials onViewVideo={(video) => logger.info('View video:', video)} />
         </TabsContent>
 
         {/* FAQ Tab */}

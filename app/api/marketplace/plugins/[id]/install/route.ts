@@ -9,8 +9,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { PluginSystem } from '@/lib/plugins/plugin-system';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { MarketplaceService } from '@/lib/services/marketplace-service';
 
 export async function POST(
   request: NextRequest,
@@ -36,20 +36,31 @@ export async function POST(
       return ApiErrorHandler.badRequest('Invalid JSON in request body');
     }
 
-    const { organizationId } = body;
+    const { organizationId, settings, permissions } = body;
 
-    // Install the plugin
-    const installationId = await PluginSystem.installPlugin(
-      pluginId,
-      userId,
-      organizationId
-    );
+    try {
+      const installation = await MarketplaceService.installPlugin(pluginId, userId, {
+        organizationId,
+        settings,
+        permissions,
+      });
 
-    return NextResponse.json({
-      success: true,
-      installationId,
-      message: 'Plugin installed successfully'
-    });
+      return NextResponse.json({
+        success: true,
+        installation,
+        message: 'Plugin installed successfully',
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Plugin not found') {
+          return ApiErrorHandler.notFound('Plugin not found');
+        }
+        if (error.message === 'Plugin is not available for installation') {
+          return ApiErrorHandler.badRequest('Plugin is not available for installation');
+        }
+      }
+      return ApiErrorHandler.handle(error, requestId);
+    }
   } catch (error) {
     if (error instanceof Error) {
       // Plugin not found or already installed

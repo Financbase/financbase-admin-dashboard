@@ -17,9 +17,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PublicHero } from "@/components/layout/public-hero";
 import { PublicCTA } from "@/components/layout/public-form";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -29,7 +29,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,

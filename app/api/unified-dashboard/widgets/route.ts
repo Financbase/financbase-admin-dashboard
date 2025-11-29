@@ -11,6 +11,7 @@ import { type NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { UnifiedDashboardService } from '@/lib/services/unified-dashboard-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json({ data: widgetData });
 	} catch (error) {
-		console.error('Error fetching widget data:', error);
+		logger.error('Error fetching widget data:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch widget data' },
 			{ status: 500 }

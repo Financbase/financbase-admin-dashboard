@@ -30,13 +30,13 @@ END $$;
 -- Assets Table
 CREATE TABLE IF NOT EXISTS "financbase_assets" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "created_by" TEXT,
+  "organization_id" UUID NOT NULL,
+  "created_by" UUID,
   "asset_name" TEXT NOT NULL,
   "asset_type" "asset_type" NOT NULL,
   "description" TEXT,
   "identifier" TEXT,
-  "owner" TEXT,
+  "owner" UUID,
   "location" TEXT,
   "criticality" TEXT DEFAULT 'medium' NOT NULL,
   "data_classification" TEXT,
@@ -48,17 +48,17 @@ CREATE TABLE IF NOT EXISTS "financbase_assets" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_assets_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_assets_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_assets_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_assets_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Risks Table
 CREATE TABLE IF NOT EXISTS "financbase_risks" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
   "risk_number" TEXT NOT NULL UNIQUE,
-  "identified_by" TEXT,
-  "owner" TEXT,
+  "identified_by" UUID,
+  "owner" UUID,
   "title" TEXT NOT NULL,
   "description" TEXT NOT NULL,
   "asset_id" INTEGER,
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS "financbase_risks" (
   "controls" JSONB DEFAULT '[]'::jsonb NOT NULL,
   "residual_risk" NUMERIC(5, 2),
   "residual_risk_level" "risk_level",
-  "accepted_by" TEXT,
+  "accepted_by" UUID,
   "accepted_at" TIMESTAMP WITH TIME ZONE,
   "acceptance_justification" TEXT,
   "last_reviewed_at" TIMESTAMP WITH TIME ZONE,
@@ -88,18 +88,18 @@ CREATE TABLE IF NOT EXISTS "financbase_risks" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_risks_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_risks_identified_by" FOREIGN KEY ("identified_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
-  CONSTRAINT "fk_risks_owner" FOREIGN KEY ("owner") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_risks_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_risks_identified_by" FOREIGN KEY ("identified_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_risks_owner" FOREIGN KEY ("owner") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
   CONSTRAINT "fk_risks_asset" FOREIGN KEY ("asset_id") REFERENCES "financbase_assets"("id") ON DELETE SET NULL,
-  CONSTRAINT "fk_risks_accepted_by" FOREIGN KEY ("accepted_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_risks_accepted_by" FOREIGN KEY ("accepted_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Risk Treatment Plans Table
 CREATE TABLE IF NOT EXISTS "financbase_risk_treatment_plans" (
   "id" SERIAL PRIMARY KEY,
   "risk_id" INTEGER NOT NULL,
-  "created_by" TEXT,
+  "created_by" UUID,
   "treatment_option" "risk_treatment" NOT NULL,
   "description" TEXT NOT NULL,
   "actions" JSONB NOT NULL,
@@ -109,13 +109,13 @@ CREATE TABLE IF NOT EXISTS "financbase_risk_treatment_plans" (
   "actual_completion_date" TIMESTAMP WITH TIME ZONE,
   "status" TEXT DEFAULT 'planned' NOT NULL,
   "progress" INTEGER DEFAULT 0 NOT NULL,
-  "responsible" TEXT,
+  "responsible" UUID,
   "budget" JSONB,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   CONSTRAINT "fk_risk_treatment_plans_risk" FOREIGN KEY ("risk_id") REFERENCES "financbase_risks"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_risk_treatment_plans_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
-  CONSTRAINT "fk_risk_treatment_plans_responsible" FOREIGN KEY ("responsible") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_risk_treatment_plans_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_risk_treatment_plans_responsible" FOREIGN KEY ("responsible") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Create indexes

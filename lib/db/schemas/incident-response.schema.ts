@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { users } from './users.schema';
 import { organizations } from './organizations.schema';
@@ -79,10 +79,10 @@ export const drillStatusEnum = pgEnum('drill_status', [
 // Incident Response Incidents Table
 export const incidentResponseIncidents = pgTable('financbase_security_incidents', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
   incidentNumber: text('incident_number').notNull().unique(), // IR-YYYY-MMDD-XXX format
-  reportedBy: text('reported_by').references(() => users.id, { onDelete: 'set null' }),
-  assignedTo: text('assigned_to').references(() => users.id, { onDelete: 'set null' }),
+  reportedBy: uuid('reported_by').references(() => users.id, { onDelete: 'set null' }),
+  assignedTo: uuid('assigned_to').references(() => users.id, { onDelete: 'set null' }),
   
   // Incident classification
   incidentType: incidentTypeEnum('incident_type').notNull(),
@@ -137,8 +137,8 @@ export const incidentResponseIncidents = pgTable('financbase_security_incidents'
 // IR Team Members Table
 export const irTeamMembers = pgTable('financbase_ir_team_members', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   role: irTeamRoleEnum('role').notNull(),
   isPrimary: boolean('is_primary').default(false).notNull(),
   contactInfo: jsonb('contact_info').default({}).notNull(), // { phone, email, slack, etc }
@@ -154,11 +154,11 @@ export const irTeamMembers = pgTable('financbase_ir_team_members', {
 // IR Runbooks Table
 export const irRunbooks = pgTable('financbase_ir_runbooks', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Runbook details
-  approvedBy: text('approved_by').references(() => users.id, { onDelete: 'set null' }),
+  approvedBy: uuid('approved_by').references(() => users.id, { onDelete: 'set null' }),
   title: text('title').notNull(),
   description: text('description'),
   incidentType: incidentTypeEnum('incident_type').notNull(),
@@ -185,9 +185,9 @@ export const irRunbooks = pgTable('financbase_ir_runbooks', {
 // IR Drills/Exercises Table
 export const irDrills = pgTable('financbase_ir_drills', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  scheduledBy: text('scheduled_by').references(() => users.id, { onDelete: 'set null' }),
-  conductedBy: text('conducted_by').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  scheduledBy: uuid('scheduled_by').references(() => users.id, { onDelete: 'set null' }),
+  conductedBy: uuid('conducted_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Drill details
   drillName: text('drill_name').notNull(),
@@ -234,9 +234,9 @@ export const irDrills = pgTable('financbase_ir_drills', {
 // IR Procedures Table (General IR procedures and policies)
 export const irProcedures = pgTable('financbase_ir_procedures', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
-  approvedBy: text('approved_by').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  approvedBy: uuid('approved_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Procedure details
   title: text('title').notNull(),
@@ -292,4 +292,29 @@ export const irProceduresRelations = relations(irProcedures, ({ one }) => ({
   organization: one(organizations, { fields: [irProcedures.organizationId], references: [organizations.id] }),
   creator: one(users, { fields: [irProcedures.createdBy], references: [users.id] }),
   approver: one(users, { fields: [irProcedures.approvedBy], references: [users.id] }),
+}));
+
+// IR Communication Templates Table
+export const irCommunicationTemplates = pgTable('financbase_ir_communication_templates', {
+  id: serial('id').primaryKey(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  name: text('name').notNull(),
+  templateType: text('template_type').notNull(),
+  subject: text('subject'),
+  body: text('body').notNull(),
+  placeholders: jsonb('placeholders').default([]).notNull(),
+  incidentType: incidentTypeEnum('incident_type'),
+  severity: incidentSeverityEnum('severity'),
+  audience: text('audience').notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  usageCount: integer('usage_count').default(0).notNull(),
+  tags: jsonb('tags').default([]).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const irCommunicationTemplatesRelations = relations(irCommunicationTemplates, ({ one }) => ({
+  organization: one(organizations, { fields: [irCommunicationTemplates.organizationId], references: [organizations.id] }),
+  creator: one(users, { fields: [irCommunicationTemplates.createdBy], references: [users.id] }),
 }));

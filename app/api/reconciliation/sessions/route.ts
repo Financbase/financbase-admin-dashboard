@@ -14,6 +14,7 @@ import { AIMatchingEngine } from "@/lib/reconciliation/ai-matching-engine";
 import { db } from "@/lib/db";
 import { reconciliationSessions, reconciliationMatches } from "@/lib/db/schemas/reconciliation.schema";
 import { eq, desc } from "drizzle-orm";
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/reconciliation/sessions
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error("Reconciliation Sessions API Error:", error);
+		logger.error("Reconciliation Sessions API Error:", error);
 		return NextResponse.json(
 			{ error: "Failed to fetch reconciliation sessions" },
 			{ status: 500 }
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error("Create Reconciliation Session API Error:", error);
+		logger.error("Create Reconciliation Session API Error:", error);
 		return NextResponse.json(
 			{ error: "Failed to create reconciliation session" },
 			{ status: 500 }

@@ -25,6 +25,9 @@ export default function NotFound() {
           <CardDescription>
             The page you're looking for doesn't exist or has been moved.
           </CardDescription>
+          <div className="text-center text-lg font-semibold mt-2">
+            404 - Not Found
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center">

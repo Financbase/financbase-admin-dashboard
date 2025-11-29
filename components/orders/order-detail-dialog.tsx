@@ -24,6 +24,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Package, Calendar, DollarSign, User, Truck, FileText, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { logger } from '@/lib/logger';
 
 interface Order {
 	id: string;
@@ -92,7 +93,7 @@ export function OrderDetailDialog({
 			const data = await response.json();
 			setOrder(data);
 		} catch (error) {
-			console.error('Error fetching order:', error);
+			logger.error('Error fetching order:', error);
 			toast.error('Failed to load order details');
 		} finally {
 			setLoading(false);

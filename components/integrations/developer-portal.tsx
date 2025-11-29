@@ -39,6 +39,7 @@ import {
 	Globe
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface APIKey {
 	id: string;
@@ -125,7 +126,7 @@ export function DeveloperPortal() {
 				}
 				return response.json();
 			} catch (error) {
-				console.error('Error fetching API keys:', error);
+				logger.error('Error fetching API keys:', error);
 				return SAMPLE_API_KEYS;
 			}
 		},
@@ -142,7 +143,7 @@ export function DeveloperPortal() {
 				}
 				return response.json();
 			} catch (error) {
-				console.error('Error fetching usage data:', error);
+				logger.error('Error fetching usage data:', error);
 				return SAMPLE_USAGE_DATA;
 			}
 		},

@@ -15,6 +15,8 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { withRLS } from '@/lib/api/with-rls';
 import { checkAdminStatus } from '@/lib/auth/check-admin-status';
 import * as blogService from '@/lib/services/blog/blog-service';
+import { createSuccessResponse } from '@/lib/api/standard-response';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/blog/[id]
@@ -22,14 +24,14 @@ import * as blogService from '@/lib/services/blog/blog-service';
  */
 export async function GET(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
 	try {
 		const { userId } = await auth();
 		const isAdmin = userId ? await checkAdminStatus() : false;
 		
-		const param = params.id;
+		const { id: param } = await params;
 		
 		// Check if param is numeric (ID) or a slug
 		const numericId = parseInt(param);
@@ -47,10 +49,7 @@ export async function GET(
 				return ApiErrorHandler.notFound('Blog post not found');
 			}
 
-			return NextResponse.json({
-				success: true,
-				data: post,
-			});
+			return createSuccessResponse(post, 200, { requestId });
 		} else {
 			// Handle slug (public for published posts, admin can see all)
 			const post = await blogService.getPostBySlug(param, isAdmin);
@@ -68,14 +67,11 @@ export async function GET(
 			if (post.status === 'published' && post.userId !== userId) {
 				// Fire and forget - don't wait for view count update
 				blogService.incrementViewCount(post.id).catch((err) => {
-					console.error('Error incrementing view count:', err);
+					logger.error('Error incrementing view count:', err);
 				});
 			}
 
-			return NextResponse.json({
-				success: true,
-				data: post,
-			});
+			return createSuccessResponse(post, 200, { requestId });
 		}
 	} catch (error) {
 		return ApiErrorHandler.handle(error, requestId);
@@ -88,7 +84,7 @@ export async function GET(
  */
 export async function PUT(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
 	return withRLS(async (clerkUserId) => {
@@ -99,7 +95,8 @@ export async function PUT(
 		}
 
 		try {
-			const id = parseInt(params.id);
+			const { id: idParam } = await params;
+			const id = parseInt(idParam);
 			if (isNaN(id)) {
 				return ApiErrorHandler.badRequest('Invalid blog post ID');
 			}
@@ -110,7 +107,11 @@ export async function PUT(
 				body = await req.json();
 			} catch (error) {
 				// Handle JSON parse errors (malformed JSON)
-				if (error instanceof SyntaxError || error instanceof TypeError) {
+				if (
+					error instanceof SyntaxError ||
+					error instanceof TypeError ||
+					(error instanceof Error && error.message.includes('Invalid JSON'))
+				) {
 					return ApiErrorHandler.badRequest('Invalid JSON in request body');
 				}
 				// Re-throw other errors to be handled by outer catch
@@ -124,11 +125,7 @@ export async function PUT(
 
 			const updatedPost = await blogService.updatePost(id, validatedData);
 
-			return NextResponse.json({
-				success: true,
-				message: 'Blog post updated successfully',
-				data: updatedPost,
-			});
+			return createSuccessResponse(updatedPost, 200, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}
@@ -141,7 +138,7 @@ export async function PUT(
  */
 export async function DELETE(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
 	return withRLS(async (clerkUserId) => {
@@ -152,7 +149,8 @@ export async function DELETE(
 		}
 
 		try {
-			const id = parseInt(params.id);
+			const { id: idParam } = await params;
+			const id = parseInt(idParam);
 			if (isNaN(id)) {
 				return ApiErrorHandler.badRequest('Invalid blog post ID');
 			}
@@ -162,10 +160,11 @@ export async function DELETE(
 
 			await blogService.deletePost(id, hardDelete);
 
-			return NextResponse.json({
-				success: true,
-				message: hardDelete ? 'Blog post deleted permanently' : 'Blog post archived successfully',
-			});
+			return createSuccessResponse(
+				{ message: hardDelete ? 'Blog post deleted permanently' : 'Blog post archived successfully' },
+				200,
+				{ requestId }
+			);
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

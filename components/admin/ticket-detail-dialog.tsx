@@ -33,6 +33,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageSquare, Send, Clock, User, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { logger } from '@/lib/logger';
 
 interface TicketMessage {
 	id: number;
@@ -111,7 +112,7 @@ export function TicketDetailDialog({
 			const data = await response.json();
 			setTicket(data);
 		} catch (error) {
-			console.error('Error fetching ticket:', error);
+			logger.error('Error fetching ticket:', error);
 			toast.error('Failed to load ticket details');
 		} finally {
 			setLoading(false);
@@ -145,7 +146,7 @@ export function TicketDetailDialog({
 			fetchTicket();
 			onUpdate();
 		} catch (error) {
-			console.error('Error sending message:', error);
+			logger.error('Error sending message:', error);
 			toast.error('Failed to send message');
 		}
 	};
@@ -167,7 +168,7 @@ export function TicketDetailDialog({
 			fetchTicket();
 			onUpdate();
 		} catch (error) {
-			console.error('Error updating status:', error);
+			logger.error('Error updating status:', error);
 			toast.error('Failed to update status');
 		} finally {
 			setUpdatingStatus(false);
@@ -191,7 +192,7 @@ export function TicketDetailDialog({
 			fetchTicket();
 			onUpdate();
 		} catch (error) {
-			console.error('Error updating priority:', error);
+			logger.error('Error updating priority:', error);
 			toast.error('Failed to update priority');
 		} finally {
 			setUpdatingPriority(false);

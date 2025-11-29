@@ -9,8 +9,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { DocumentationService } from '@/lib/services/documentation-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { HelpService } from '@/lib/services/help-service';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -22,23 +22,20 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('query') || '';
-    const category = searchParams.get('category') || 'all';
-    const sort = searchParams.get('sort') || 'relevance';
+    const categoryId = searchParams.get('categoryId') ? parseInt(searchParams.get('categoryId')!) : undefined;
+    const limit = parseInt(searchParams.get('limit') || '20');
 
     if (!query.trim()) {
       return NextResponse.json([]);
     }
 
-    const filters = {
-      category: category !== 'all' ? category : undefined,
-    };
+    const results = await HelpService.searchArticles(query, {
+      categoryId,
+      limit,
+    });
 
-    const results = await DocumentationService.searchHelpContent(
-      query,
-      filters,
-      userId,
-      'session-id' // In a real implementation, get from session
-    );
+    // Record search analytics
+    await HelpService.recordSearch(userId, query, results.length);
 
     return NextResponse.json(results);
   } catch (error) {

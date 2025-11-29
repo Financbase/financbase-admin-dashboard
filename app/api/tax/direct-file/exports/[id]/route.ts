@@ -13,6 +13,7 @@ import { directFileExports } from "@/lib/db/schemas/direct-file.schema";
 import { eq, and } from "drizzle-orm";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { withRLS } from "@/lib/api/with-rls";
+import { createSuccessResponse } from "@/lib/api/standard-response";
 
 /**
  * DELETE /api/tax/direct-file/exports/[id]
@@ -55,10 +56,11 @@ export async function DELETE(
 					)
 				);
 
-			return NextResponse.json({
-				success: true,
-				message: "Export metadata deleted successfully",
-			});
+			return createSuccessResponse(
+				{ message: "Export metadata deleted successfully" },
+				200,
+				{ requestId }
+			);
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

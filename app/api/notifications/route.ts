@@ -20,6 +20,7 @@ import { NotificationService } from '@/lib/services/notification-service';
 import { isAdmin } from '@/lib/auth/financbase-rbac';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { checkDatabaseHealth } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -108,29 +109,29 @@ import { checkDatabaseHealth } from '@/lib/db';
 export async function GET(req: NextRequest) {
 	const requestId = generateRequestId();
 	
-	console.log('[API] GET /api/notifications - Request started', { requestId });
+	logger.debug('[API] GET /api/notifications - Request started', { requestId });
 	
 	try {
 		// Check database connection health
-		console.log('[API] Checking database health...', { requestId });
+		logger.debug('[API] Checking database health...', { requestId });
 		const dbHealthy = await checkDatabaseHealth();
 		if (!dbHealthy) {
-			console.error('[API] Database health check failed for GET /api/notifications', { requestId });
+			logger.error('[API] Database health check failed for GET /api/notifications', { requestId });
 			return ApiErrorHandler.databaseError(
 				new Error('Database connection unavailable'),
 				requestId
 			);
 		}
-		console.log('[API] Database health check passed', { requestId });
+		logger.debug('[API] Database health check passed', { requestId });
 
 		const { userId } = await auth();
 
 		if (!userId) {
-			console.warn('[API] Unauthorized request - no userId', { requestId });
+			logger.warn('[API] Unauthorized request - no userId', { requestId });
 			return ApiErrorHandler.unauthorized();
 		}
 
-		console.log('[API] Authenticated user', { requestId, userId });
+		logger.debug('[API] Authenticated user', { requestId, userId });
 
 		// Parse query parameters
 		const searchParams = req.nextUrl.searchParams;
@@ -139,7 +140,7 @@ export async function GET(req: NextRequest) {
 		const unreadOnly = searchParams.get('unreadOnly') === 'true';
 		const type = searchParams.get('type') || undefined;
 
-		console.log('[API] Query parameters parsed', { requestId, limit, offset, unreadOnly, type });
+		logger.debug('[API] Query parameters parsed', { requestId, limit, offset, unreadOnly, type });
 
 		// Validate query parameters
 		if (isNaN(limit) || limit < 1 || limit > 100) {
@@ -150,18 +151,19 @@ export async function GET(req: NextRequest) {
 		}
 
 		// Fetch notifications with individual error handling
-		let notifications;
+		let notifications: any[] = [];
 		try {
-			console.log('[API] Fetching notifications for user', { requestId, userId, filters: { limit, offset, unreadOnly, type } });
-			notifications = await NotificationService.getForUser(userId, {
+			logger.debug('[API] Fetching notifications for user', { requestId, userId, filters: { limit, offset, unreadOnly, type } });
+			const fetchedNotifications = await NotificationService.getForUser(userId, {
 				limit,
 				offset,
 				unreadOnly,
 				type,
 			});
-			console.log('[API] Notifications fetched successfully', { requestId, count: notifications?.length || 0 });
+			notifications = Array.isArray(fetchedNotifications) ? fetchedNotifications : [];
+			logger.debug('[API] Notifications fetched successfully', { requestId, count: notifications.length });
 		} catch (error) {
-			console.error('[API] Error fetching notifications:', {
+			logger.error('[API] Error fetching notifications', {
 				requestId,
 				userId,
 				error: error instanceof Error ? error.message : String(error),
@@ -171,13 +173,13 @@ export async function GET(req: NextRequest) {
 		}
 
 		// Get unread count with individual error handling
-		let unreadCount;
+		let unreadCount = 0;
 		try {
-			console.log('[API] Fetching unread count for user', { requestId, userId });
+			logger.debug('[API] Fetching unread count for user', { requestId, userId });
 			unreadCount = await NotificationService.getUnreadCount(userId);
-			console.log('[API] Unread count fetched successfully', { requestId, unreadCount });
+			logger.debug('[API] Unread count fetched successfully', { requestId, unreadCount });
 		} catch (error) {
-			console.error('[API] Error fetching unread count:', {
+			logger.error('[API] Error fetching unread count', {
 				requestId,
 				userId,
 				error: error instanceof Error ? error.message : String(error),
@@ -185,12 +187,6 @@ export async function GET(req: NextRequest) {
 			});
 			// Set default value if unread count fails, but don't fail the entire request
 			unreadCount = 0;
-		}
-
-		// Ensure notifications is always an array
-		if (!Array.isArray(notifications)) {
-			console.warn('[API] Notifications is not an array, defaulting to empty array', { requestId, notifications });
-			notifications = [];
 		}
 
 		const response = {
@@ -203,11 +199,11 @@ export async function GET(req: NextRequest) {
 			},
 		};
 
-		console.log('[API] GET /api/notifications - Request completed successfully', { requestId, notificationCount: notifications.length, unreadCount });
+		logger.info('[API] GET /api/notifications - Request completed successfully', { requestId, notificationCount: notifications.length, unreadCount });
 		
 		return NextResponse.json(response);
 	} catch (error) {
-		console.error('[API] Error in GET /api/notifications:', {
+		logger.error('[API] Error in GET /api/notifications', {
 			requestId,
 			error: error instanceof Error ? error.message : String(error),
 			stack: error instanceof Error ? error.stack : undefined,
@@ -263,7 +259,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(notification, { status: 201 });
 	} catch (error) {
-		console.error('[API] Error in POST /api/notifications:', {
+		logger.error('[API] Error in POST /api/notifications', {
 			requestId,
 			error: error instanceof Error ? error.message : String(error),
 			stack: error instanceof Error ? error.stack : undefined,

@@ -22,7 +22,7 @@ const updateCampaignSchema = z.object({
 	platform: z.string().optional(),
 	audience: z.string().optional(),
 	keywords: z.array(z.string()).optional(),
-	demographics: z.record(z.unknown()).optional(),
+	demographics: z.record(z.string(), z.unknown()).optional(),
 	budget: z.number().min(0).optional(),
 	dailyBudget: z.number().min(0).optional(),
 	bidStrategy: z.string().optional(),
@@ -30,7 +30,7 @@ const updateCampaignSchema = z.object({
 	startDate: z.string().datetime().optional(),
 	endDate: z.string().datetime().optional(),
 	tags: z.array(z.string()).optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 	notes: z.string().optional(),
 });
 

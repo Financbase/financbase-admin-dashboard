@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { PluginSystem } from '@/lib/plugins/plugin-system';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(installedPlugins);
   } catch (error) {
-    console.error('Error fetching installed plugins:', error);
+    logger.error('Error fetching installed plugins:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     // Database errors

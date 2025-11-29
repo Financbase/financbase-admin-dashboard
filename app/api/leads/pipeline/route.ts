@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { LeadManagementService } from '@/lib/services/lead-management-service';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
 	try {
@@ -22,7 +23,7 @@ export async function GET() {
 
 		return NextResponse.json({ pipeline });
 	} catch (error) {
-		console.error('Error fetching pipeline metrics:', error);
+		logger.error('Error fetching pipeline metrics:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch pipeline metrics' },
 			{ status: 500 }

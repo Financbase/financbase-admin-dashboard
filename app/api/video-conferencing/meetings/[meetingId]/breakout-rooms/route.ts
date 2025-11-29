@@ -10,6 +10,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { AdvancedVideoFeaturesService } from '@/lib/services/video-conferencing/advanced-features';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
 		return NextResponse.json(breakoutRooms);
 	} catch (error) {
 		// eslint-disable-next-line no-console
-    console.error('Error fetching breakout rooms:', error);
+    logger.error('Error fetching breakout rooms:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(room, { status: 201 });
 	} catch (error) {
 		// eslint-disable-next-line no-console
-    console.error('Error creating breakout room:', error);
+    logger.error('Error creating breakout room:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

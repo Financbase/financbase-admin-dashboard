@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { IncidentResponseService } from '@/lib/services/incident-response-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -44,9 +45,7 @@ export async function POST(request: NextRequest) {
       scheduledBy: userId,
       drillName,
       drillType,
-      description,
       scenario,
-      incidentType,
       severity,
       scheduledDate: new Date(scheduledDate),
       participants,
@@ -58,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: drill, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error scheduling drill:', error);
+    logger.error('Error scheduling drill:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -86,7 +85,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: drills, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching drills:', error);
+    logger.error('Error fetching drills:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

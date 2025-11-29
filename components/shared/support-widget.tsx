@@ -39,6 +39,7 @@ import {
 	Plus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { logger } from '@/lib/logger';
 
 interface SupportTicket {
 	id: number;
@@ -82,7 +83,7 @@ export function SupportWidget({
 				
 				if (parsedError) {
 					// Log full error details for debugging
-					console.error('API Error Response:', {
+					logger.error('API Error Response:', {
 						code: parsedError.code,
 						message: parsedError.message,
 						requestId: parsedError.requestId,
@@ -97,7 +98,7 @@ export function SupportWidget({
 					throw new Error(parsedError.message);
 				} else {
 					// Fallback if parsing fails
-					console.error('API Error Response: Failed to parse error', {
+					logger.error('API Error Response: Failed to parse error', {
 						status: response.status,
 						statusText: response.statusText,
 						url: response.url,
@@ -133,7 +134,7 @@ export function SupportWidget({
 			setTickets(filteredTickets);
 		} catch (error) {
 			// Handle error fetching tickets
-			console.error('Error fetching support tickets:', error);
+			logger.error('Error fetching support tickets:', error);
 			
 			// Create standardized error from fetch error if needed
 			let parsedError;

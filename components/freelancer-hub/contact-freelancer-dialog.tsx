@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Send, Star, Clock, DollarSign } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
 
 interface ContactFreelancerDialogProps {
   freelancer: {
@@ -58,7 +59,7 @@ export function ContactFreelancerDialog({ freelancer, children }: ContactFreelan
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Here you would typically send the message to your backend
-      console.log("Sending message:", {
+      logger.info("Sending message:", {
         freelancerId: freelancer.id,
         freelancerName: freelancer.name,
         message,

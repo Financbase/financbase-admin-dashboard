@@ -13,6 +13,7 @@ import { createOAuthHandler } from '@/lib/oauth/oauth-handler';
 import { db } from '@/lib/db';
 import { integrationConnections } from '@/lib/db/schemas';
 import { eq, and } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -34,7 +35,7 @@ export async function GET(
     if (error) {
        
     // eslint-disable-next-line no-console
-    console.error('OAuth error:', error, errorDescription);
+    logger.error('OAuth error:', error, errorDescription);
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=${encodeURIComponent(error)}&description=${encodeURIComponent(errorDescription || '')}`
       );
@@ -93,7 +94,7 @@ export async function GET(
   } catch (error) {
      
     // eslint-disable-next-line no-console
-    console.error('OAuth callback error:', error);
+    logger.error('OAuth callback error:', error);
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=callback_failed&details=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`
     );
@@ -221,7 +222,7 @@ async function getExternalAccountInfo(service: string, accessToken: string) {
   } catch (error) {
      
     // eslint-disable-next-line no-console
-    console.error(`Failed to get external account info for ${service}:`, error);
+    logger.error(`Failed to get external account info for ${service}:`, error);
     return {
       id: 'unknown',
       name: `${service} Account`,

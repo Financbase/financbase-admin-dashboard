@@ -10,6 +10,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { AdvancedVideoFeaturesService } from '@/lib/services/video-conferencing/advanced-features';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
 		return NextResponse.json(polls);
 	} catch (error) {
 		// eslint-disable-next-line no-console
-    console.error('Error fetching polls:', error);
+    logger.error('Error fetching polls:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(poll, { status: 201 });
 	} catch (error) {
 		// eslint-disable-next-line no-console
-    console.error('Error creating poll:', error);
+    logger.error('Error creating poll:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

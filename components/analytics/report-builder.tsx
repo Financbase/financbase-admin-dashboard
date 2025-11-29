@@ -50,6 +50,7 @@ import {
 	RefreshCw,
 } from "lucide-react";
 import { InteractiveChart } from "./advanced-charts";
+import { logger } from '@/lib/logger';
 
 interface Widget {
 	id: string;
@@ -261,10 +262,10 @@ export function ReportBuilder() {
 			}
 
 			const savedReport = await response.json();
-			console.log("Report saved:", savedReport);
+			logger.info("Report saved:", savedReport);
 			// You might want to show a toast notification here
 		} catch (error) {
-			console.error('Error saving report:', error);
+			logger.error('Error saving report:', error);
 			// You might want to show an error toast here
 		}
 	}, [currentReport, widgets]);
@@ -281,7 +282,7 @@ export function ReportBuilder() {
 			}).flat();
 
 			if (exportData.length === 0) {
-				console.warn('No data to export');
+				logger.warn('No data to export');
 				return;
 			}
 
@@ -311,7 +312,7 @@ export function ReportBuilder() {
 			window.URL.revokeObjectURL(url);
 			document.body.removeChild(a);
 		} catch (error) {
-			console.error(`Error exporting report as ${format}:`, error);
+			logger.error(`Error exporting report as ${format}:`, error);
 		}
 	}, [currentReport, widgets]);
 

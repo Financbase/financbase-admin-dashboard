@@ -8,6 +8,7 @@
  */
 
 import { VideoUpload } from '@/components/core/ui/layout/video-upload';
+import { logger } from '@/lib/logger';
 
 // Demo videos for testing
 const demoVideos = [
@@ -27,7 +28,7 @@ const demoVideos = [
 
 export default function VideoUploadDemo() {
 	const handleVideoUpdate = (videoUrl: string, thumbnailUrl?: string, metadata?: any) => {
-		console.log('Video uploaded:', { videoUrl, thumbnailUrl, metadata });
+		logger.info('Video uploaded:', { videoUrl, thumbnailUrl, metadata });
 		// Here you would typically save the video metadata to database
 	};
 
@@ -125,7 +126,7 @@ export default function VideoUploadDemo() {
 						<pre className="text-sm bg-muted p-3 rounded overflow-x-auto">
 {`<VideoUpload
   onVideoUpdate={(url, thumbnail, metadata) => {
-    console.log('Video uploaded:', url, thumbnail, metadata);
+    logger.info('Video uploaded:', url, thumbnail, metadata);
   }}
   maxSize={100}
   generateThumbnail={true}

@@ -12,6 +12,7 @@ import { getDbOrThrow } from '@/lib/db';
 import { helpArticles, helpCategories } from '@/lib/db/schemas/documentation.schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { SecurityService } from '@/lib/security/arcjet-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(
 	request: NextRequest,
@@ -134,7 +135,7 @@ export async function GET(
 			}
 		);
 	} catch (error) {
-		console.error('Support category articles error:', error);
+		logger.error('Support category articles error:', error);
 
 		// Don't expose internal errors to client
 		return NextResponse.json(

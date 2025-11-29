@@ -12,10 +12,12 @@ import {
   alertRules,
   realTimeAlerts,
   siemEvents,
+  users,
 } from '@/lib/db/schemas';
 import { eq, and, desc, gte, lte, sql, or } from 'drizzle-orm';
 import { NotificationService } from '@/lib/services/notification-service';
 import { SIEMEvent } from './siem-integration-service';
+import { clerkClient } from '@clerk/nextjs/server';
 
 export interface AlertRule {
   id: number;
@@ -468,23 +470,113 @@ export class RealTimeAlertingService {
   }
 
   /**
+   * Resolve email address from recipient identifier
+   * Recipients can be:
+   * - Direct email addresses (contains @)
+   * - Clerk user IDs (starts with user_)
+   * - Database user IDs (UUID format)
+   */
+  private static async resolveEmailAddress(recipient: string): Promise<string | null> {
+    // If already an email address, return it
+    if (recipient.includes('@')) {
+      return recipient;
+    }
+
+    try {
+      // Try to find user in database by Clerk ID
+      const user = await db
+        .select({ email: users.email })
+        .from(users)
+        .where(
+          and(
+            eq(users.clerkId, recipient),
+            eq(users.isActive, true)
+          )
+        )
+        .limit(1);
+
+      if (user.length > 0 && user[0].email) {
+        return user[0].email;
+      }
+
+      // If not found in database, try Clerk API (for Clerk user IDs)
+      if (recipient.startsWith('user_')) {
+        try {
+          const clerk = await clerkClient();
+          const clerkUser = await clerk.users.getUser(recipient);
+          const email = clerkUser.emailAddresses[0]?.emailAddress;
+          if (email) {
+            return email;
+          }
+        } catch (clerkError) {
+          console.warn(`[AlertingService] Failed to fetch email from Clerk for ${recipient}:`, clerkError);
+        }
+      }
+
+      // If recipient is a UUID, try to find by database user ID
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (uuidPattern.test(recipient)) {
+        const userById = await db
+          .select({ email: users.email })
+          .from(users)
+          .where(
+            and(
+              eq(users.id, recipient),
+              eq(users.isActive, true)
+            )
+          )
+          .limit(1);
+
+        if (userById.length > 0 && userById[0].email) {
+          return userById[0].email;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`[AlertingService] Error resolving email for recipient ${recipient}:`, error);
+      return null;
+    }
+  }
+
+  /**
    * Send email notification
    */
   private static async sendEmailNotification(
     alert: RealTimeAlert,
     rule: AlertRule
   ): Promise<any> {
-    // Use NotificationService to send email
+    const resolvedRecipients: string[] = [];
+    const failedRecipients: string[] = [];
+
+    // Resolve email addresses for all recipients
     for (const recipient of rule.alertRecipients) {
-      await NotificationService.sendEmail({
-        to: recipient.includes('@') ? recipient : `${recipient}@example.com`, // TODO: Get actual email
-        subject: alert.title,
-        body: alert.message,
-        priority: alert.severity === 'critical' ? 'high' : 'normal',
-      });
+      const email = await this.resolveEmailAddress(recipient);
+      
+      if (email) {
+        try {
+          await NotificationService.sendEmail({
+            to: email,
+            subject: alert.title,
+            body: alert.message,
+            priority: alert.severity === 'critical' ? 'high' : 'normal',
+          });
+          resolvedRecipients.push(email);
+        } catch (error) {
+          console.error(`[AlertingService] Failed to send email to ${email}:`, error);
+          failedRecipients.push(recipient);
+        }
+      } else {
+        console.warn(`[AlertingService] Could not resolve email address for recipient: ${recipient}`);
+        failedRecipients.push(recipient);
+      }
     }
     
-    return { method: 'email', recipients: rule.alertRecipients };
+    return { 
+      method: 'email', 
+      recipients: resolvedRecipients,
+      failedRecipients: failedRecipients.length > 0 ? failedRecipients : undefined,
+    };
   }
 
   /**
@@ -494,33 +586,297 @@ export class RealTimeAlertingService {
     alert: RealTimeAlert,
     rule: AlertRule
   ): Promise<any> {
-    // TODO: Implement Slack webhook integration
-    console.log('Slack notification:', alert.title, alert.message);
-    return { method: 'slack' };
+    const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL || rule.metadata?.slackWebhookUrl;
+    
+    if (!slackWebhookUrl) {
+      console.warn('[AlertingService] Slack webhook URL not configured');
+      return { method: 'slack', error: 'Webhook URL not configured' };
+    }
+
+    try {
+      // Format Slack message with alert details
+      const slackMessage = {
+        text: alert.title,
+        blocks: [
+          {
+            type: 'header',
+            text: {
+              type: 'plain_text',
+              text: alert.title,
+              emoji: true,
+            },
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: alert.message,
+            },
+          },
+          {
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: `*Severity:* ${alert.severity.toUpperCase()} | *Status:* ${alert.status} | *Triggered:* <!date^${Math.floor(alert.triggeredAt.getTime() / 1000)}^{date_short_pretty} at {time}|${alert.triggeredAt.toISOString()}>`,
+              },
+            ],
+          },
+        ],
+        attachments: [
+          {
+            color: alert.severity === 'critical' ? '#ff0000' : 
+                   alert.severity === 'high' ? '#ff9900' :
+                   alert.severity === 'medium' ? '#ffcc00' : '#36a64f',
+            fields: [
+              {
+                title: 'Alert ID',
+                value: alert.alertId,
+                short: true,
+              },
+              {
+                title: 'Organization',
+                value: alert.organizationId,
+                short: true,
+              },
+            ],
+          },
+        ],
+      };
+
+      // Send to Slack webhook
+      const response = await fetch(slackWebhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(slackMessage),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Slack API error: ${response.status} ${errorText}`);
+      }
+
+      const responseText = await response.text();
+      return { 
+        method: 'slack', 
+        success: true,
+        response: responseText || 'ok',
+      };
+    } catch (error) {
+      console.error('[AlertingService] Failed to send Slack notification:', error);
+      return { 
+        method: 'slack', 
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
   }
 
   /**
    * Send PagerDuty notification
+   * Uses PagerDuty Events API v2
    */
   private static async sendPagerDutyNotification(
     alert: RealTimeAlert,
     rule: AlertRule
   ): Promise<any> {
-    // TODO: Implement PagerDuty API integration
-    console.log('PagerDuty notification:', alert.title, alert.message);
-    return { method: 'pagerduty' };
+    const routingKey = process.env.PAGERDUTY_ROUTING_KEY || rule.metadata?.pagerDutyRoutingKey;
+    
+    if (!routingKey) {
+      console.warn('[AlertingService] PagerDuty routing key not configured');
+      return { method: 'pagerduty', error: 'Routing key not configured' };
+    }
+
+    try {
+      // Map alert severity to PagerDuty severity
+      const pagerDutySeverity = 
+        alert.severity === 'critical' ? 'critical' :
+        alert.severity === 'high' ? 'error' :
+        alert.severity === 'medium' ? 'warning' : 'info';
+
+      // Determine event action based on alert status
+      const eventAction = 
+        alert.status === 'resolved' ? 'resolve' :
+        alert.status === 'acknowledged' ? 'acknowledge' : 'trigger';
+
+      // Build PagerDuty event payload
+      const pagerDutyEvent = {
+        routing_key: routingKey,
+        event_action: eventAction,
+        dedup_key: alert.alertId, // Use alert ID for deduplication
+        payload: {
+          summary: alert.title,
+          source: 'Financbase Alerting Service',
+          severity: pagerDutySeverity,
+          timestamp: alert.triggeredAt.toISOString(),
+          component: rule.name || 'Alert Rule',
+          group: alert.organizationId,
+          class: alert.severity,
+          custom_details: {
+            alertId: alert.alertId,
+            message: alert.message,
+            status: alert.status,
+            severity: alert.severity,
+            organizationId: alert.organizationId,
+            triggeredAt: alert.triggeredAt.toISOString(),
+            relatedEvents: alert.relatedEvents,
+            tags: alert.tags,
+            metadata: alert.metadata,
+          },
+        },
+      };
+
+      // Send to PagerDuty Events API v2
+      const response = await fetch('https://events.pagerduty.com/v2/enqueue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(pagerDutyEvent),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`PagerDuty API error: ${response.status} ${errorText}`);
+      }
+
+      const responseData = await response.json();
+      return { 
+        method: 'pagerduty', 
+        success: true,
+        eventAction,
+        dedupKey: responseData.dedup_key || alert.alertId,
+        response: responseData,
+      };
+    } catch (error) {
+      console.error('[AlertingService] Failed to send PagerDuty notification:', error);
+      return { 
+        method: 'pagerduty', 
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
   }
 
   /**
-   * Send SMS notification
+   * Resolve phone number from recipient identifier
+   * Similar to email resolution, but for phone numbers
+   */
+  private static async resolvePhoneNumber(recipient: string): Promise<string | null> {
+    // If already a phone number (starts with + or contains digits), return it
+    if (/^\+?[1-9]\d{1,14}$/.test(recipient.replace(/[\s\-\(\)]/g, ''))) {
+      // Normalize phone number (ensure it starts with +)
+      const normalized = recipient.replace(/[\s\-\(\)]/g, '');
+      return normalized.startsWith('+') ? normalized : `+${normalized}`;
+    }
+
+    try {
+      // Try to find user in database by Clerk ID or UUID
+      const user = await db
+        .select({ 
+          phone: users.email, // Note: users table may not have phone, using email as placeholder
+          clerkId: users.clerkId,
+        })
+        .from(users)
+        .where(
+          and(
+            or(
+              eq(users.clerkId, recipient),
+              eq(users.id, recipient)
+            ),
+            eq(users.isActive, true)
+          )
+        )
+        .limit(1);
+
+      // If user found, try to get phone from Clerk
+      if (user.length > 0 && user[0].clerkId) {
+        try {
+          const clerk = await clerkClient();
+          const clerkUser = await clerk.users.getUser(user[0].clerkId);
+          const phone = clerkUser.phoneNumbers[0]?.phoneNumber;
+          if (phone) {
+            return phone;
+          }
+        } catch (clerkError) {
+          console.warn(`[AlertingService] Failed to fetch phone from Clerk for ${recipient}:`, clerkError);
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`[AlertingService] Error resolving phone for recipient ${recipient}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Send SMS notification using Twilio
    */
   private static async sendSMSNotification(
     alert: RealTimeAlert,
     rule: AlertRule
   ): Promise<any> {
-    // TODO: Implement SMS integration
-    console.log('SMS notification:', alert.title, alert.message);
-    return { method: 'sms' };
+    const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID || rule.metadata?.twilioAccountSid;
+    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN || rule.metadata?.twilioAuthToken;
+    const twilioFromNumber = process.env.TWILIO_FROM_NUMBER || rule.metadata?.twilioFromNumber;
+    
+    if (!twilioAccountSid || !twilioAuthToken || !twilioFromNumber) {
+      console.warn('[AlertingService] Twilio credentials not configured');
+      return { method: 'sms', error: 'Twilio credentials not configured' };
+    }
+
+    const resolvedRecipients: string[] = [];
+    const failedRecipients: string[] = [];
+
+    // Resolve phone numbers and send SMS for all recipients
+    for (const recipient of rule.alertRecipients) {
+      const phoneNumber = await this.resolvePhoneNumber(recipient);
+      
+      if (phoneNumber) {
+        try {
+          // Format SMS message (SMS has 160 character limit, so truncate if needed)
+          const smsMessage = `${alert.title}\n\n${alert.message}`.substring(0, 1600); // Twilio supports up to 1600 chars
+          
+          // Send SMS via Twilio API
+          const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
+          
+          const formData = new URLSearchParams();
+          formData.append('From', twilioFromNumber);
+          formData.append('To', phoneNumber);
+          formData.append('Body', smsMessage);
+
+          const response = await fetch(twilioUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${Buffer.from(`${twilioAccountSid}:${twilioAuthToken}`).toString('base64')}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData.toString(),
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Twilio API error: ${response.status} ${errorText}`);
+          }
+
+          const responseData = await response.json();
+          resolvedRecipients.push(phoneNumber);
+        } catch (error) {
+          console.error(`[AlertingService] Failed to send SMS to ${phoneNumber}:`, error);
+          failedRecipients.push(recipient);
+        }
+      } else {
+        console.warn(`[AlertingService] Could not resolve phone number for recipient: ${recipient}`);
+        failedRecipients.push(recipient);
+      }
+    }
+    
+    return { 
+      method: 'sms', 
+      recipients: resolvedRecipients,
+      failedRecipients: failedRecipients.length > 0 ? failedRecipients : undefined,
+    };
   }
 
   /**

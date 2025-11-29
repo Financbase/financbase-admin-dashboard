@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
+import { logger } from '@/lib/logger';
   Workflow, 
   Webhook, 
   Monitor, 
@@ -95,7 +96,7 @@ export default function PlatformServicesDashboard() {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch services');
-      console.error('Error fetching services:', err);
+      logger.error('Error fetching services:', err);
     } finally {
       setLoading(false);
     }

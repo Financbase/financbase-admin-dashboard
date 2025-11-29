@@ -12,11 +12,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Camera } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 export function CameraPermissionRequestCard() {
   const handleRequestPermission = () => {
     // Request camera permission logic
-    console.log("Requesting camera permission");
+    logger.info("Requesting camera permission");
   };
 
   return (

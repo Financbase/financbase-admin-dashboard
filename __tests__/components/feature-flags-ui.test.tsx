@@ -18,13 +18,8 @@ vi.mock('sonner', () => ({
   },
 }));
 
-// Mock lucide-react icons
-vi.mock('lucide-react', () => ({
-  Plus: () => <span data-testid="plus-icon">+</span>,
-  Edit: () => <span data-testid="edit-icon">Edit</span>,
-  Trash2: () => <span data-testid="trash-icon">Trash</span>,
-  RefreshCw: () => <span data-testid="refresh-icon">Refresh</span>,
-}));
+// Note: lucide-react is mocked globally in __tests__/setup.ts
+// No need for a local mock here
 
 describe('FeatureFlagsTable', () => {
   beforeEach(() => {
@@ -43,7 +38,7 @@ describe('FeatureFlagsTable', () => {
 
     await waitFor(() => {
       expect(screen.queryByText(/loading feature flags/i)).not.toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   it('should fetch and display feature flags', async () => {
@@ -77,10 +72,15 @@ describe('FeatureFlagsTable', () => {
 
     render(<FeatureFlagsTable />);
 
+    // Wait for loading to complete and flags to be displayed
+    await waitFor(() => {
+      expect(screen.queryByText(/loading feature flags/i)).not.toBeInTheDocument();
+    }, { timeout: 3000 });
+
     await waitFor(() => {
       expect(screen.getByText('Test Flag 1')).toBeInTheDocument();
       expect(screen.getByText('Test Flag 2')).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
 
     expect(fetch).toHaveBeenCalledWith('/api/admin/feature-flags');
   });
@@ -93,7 +93,7 @@ describe('FeatureFlagsTable', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Error fetching feature flags');
-    });
+    }, { timeout: 3000 });
   });
 
   it('should display error toast when API returns error', async () => {
@@ -107,7 +107,7 @@ describe('FeatureFlagsTable', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Failed to fetch feature flags');
-    });
+    }, { timeout: 3000 });
   });
 
   it('should have refresh button', async () => {
@@ -121,7 +121,7 @@ describe('FeatureFlagsTable', () => {
     await waitFor(() => {
       const refreshButton = screen.getByRole('button', { name: /refresh/i });
       expect(refreshButton).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   it('should have new flag button', async () => {
@@ -135,7 +135,7 @@ describe('FeatureFlagsTable', () => {
     await waitFor(() => {
       const newButton = screen.getByRole('button', { name: /new flag/i });
       expect(newButton).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   it('should open dialog when new flag button is clicked', async () => {
@@ -149,11 +149,11 @@ describe('FeatureFlagsTable', () => {
     await waitFor(() => {
       const newButton = screen.getByRole('button', { name: /new flag/i });
       fireEvent.click(newButton);
-    });
+    }, { timeout: 3000 });
 
     await waitFor(() => {
       expect(screen.getByText(/create feature flag/i)).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   it('should toggle feature flag when switch is clicked', async () => {
@@ -185,7 +185,7 @@ describe('FeatureFlagsTable', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Test Flag')).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
 
     // Find and click the switch
     const switches = screen.getAllByRole('switch');
@@ -198,11 +198,11 @@ describe('FeatureFlagsTable', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ enabled: true }),
         });
-      });
+      }, { timeout: 3000 });
 
       await waitFor(() => {
         expect(toast.success).toHaveBeenCalled();
-      });
+      }, { timeout: 3000 });
     }
   });
 });

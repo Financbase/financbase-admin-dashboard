@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import { TestDatabase } from './test-db';
+import { TestDatabase } from '../test-db';
 
 // Mock server-only
 vi.mock('server-only', () => ({}));
@@ -23,7 +23,7 @@ describe('Database Connection Test', () => {
 
   it('should connect to database and run basic queries', async () => {
     try {
-      const { testDb } = await import('./test-db');
+      const { testDb } = await import('../test-db');
       const { bills, vendors } = await import('@/lib/db/schemas/bill-pay.schema');
 
       // Test basic query

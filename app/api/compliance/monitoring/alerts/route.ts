@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { RealTimeAlertingService } from '@/lib/services/monitoring/real-time-alerting-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: alerts, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching alerts:', error);
+    logger.error('Error fetching alerts:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

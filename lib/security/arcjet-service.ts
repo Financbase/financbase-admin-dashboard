@@ -8,10 +8,18 @@
  */
 
 import arcjet, { tokenBucket, shield, detectBot } from '@arcjet/next';
+import { logger } from '@/lib/logger';
 
 /**
  * Arcjet Security Configuration
  * Provides rate limiting, bot detection, and threat protection
+ * 
+ * Error handling follows Arcjet best practices:
+ * - Fail open: Service issues don't block requests
+ * - Timeout: 500ms in production, 1000ms in development (SDK default)
+ * - Error checking: Explicitly checks for ERROR results in rule execution
+ * 
+ * @see https://docs.arcjet.com/reference/nextjs#error-handling
  */
 
 // Rate limiting rules
@@ -78,12 +86,52 @@ export const arcjetSecurity = arcjet({
 });
 
 /**
+ * Helper function to check for errors in Arcjet decision results
+ * Logs errors but treats them as ALLOW decisions (fail open)
+ * 
+ * @param decision - Arcjet decision object
+ * @param context - Context for logging (e.g., endpoint name)
+ * @returns true if errors were found and logged
+ */
+function checkDecisionErrors(decision: any, context: string): boolean {
+	if (!decision.results || !Array.isArray(decision.results)) {
+		return false;
+	}
+
+	let hasErrors = false;
+	for (const result of decision.results) {
+		// Check if result has an error state
+		// Arcjet returns ERROR state when rule processing fails
+		if (result.state === 'ERROR' || (result as any).isError?.()) {
+			hasErrors = true;
+			const errorMessage = result.reason?.message || result.message || 'Unknown error';
+			
+			logger.warn('Arcjet rule execution error', {
+				context,
+				error: errorMessage,
+				ruleType: result.type || 'unknown',
+				// Fail open: Log but don't block
+			});
+		}
+	}
+
+	return hasErrors;
+}
+
+/**
  * Security utility functions
  */
 export class SecurityService {
 	/**
 	 * Apply rate limiting to API routes
 	 * Uses arcjetSecurity instance which applies all configured rules
+	 * 
+	 * Error handling follows Arcjet best practices:
+	 * - Fail open: Allow requests if Arcjet is unavailable
+	 * - Log errors for monitoring
+	 * - Return appropriate status codes based on decision
+	 * 
+	 * @see https://docs.arcjet.com/reference/nextjs#error-handling
 	 */
 	static async applyRateLimit(request: Request, endpoint: string) {
 		try {
@@ -109,11 +157,23 @@ export class SecurityService {
 
 			const decision = await endpointSecurity.protect(request);
 
+			// Check for errors in rule execution (fail open)
+			checkDecisionErrors(decision, `rate-limit:${endpoint}`);
+
 			if (decision.isDenied()) {
+				// Determine appropriate status code based on denial reason
+				let status = 429; // Default to rate limit
+				if (decision.reason?.toLowerCase().includes('bot')) {
+					status = 403; // Forbidden for bots
+				} else if (decision.reason?.toLowerCase().includes('shield') || 
+				           decision.reason?.toLowerCase().includes('threat')) {
+					status = 403; // Forbidden for threats
+				}
+
 				return {
 					denied: true,
-					reason: decision.reason,
-					status: 429,
+					reason: decision.reason || 'Request denied',
+					status,
 				};
 			}
 
@@ -126,22 +186,42 @@ export class SecurityService {
 				remaining,
 			};
 		} catch (error) {
-			console.error('Rate limit check error:', error);
-			// Deny request if rate limit check fails (fail secure)
+			// Fail open: Allow request if Arcjet is unavailable
+			// This follows Arcjet's recommended error handling pattern
+			// Log error for monitoring but don't block legitimate requests
+			logger.error('Arcjet rate limit check error', {
+				error: error instanceof Error ? error.message : String(error),
+				endpoint,
+				stack: error instanceof Error ? error.stack : undefined,
+				// Fail open: Service continues even if Arcjet is unavailable
+			});
+
+			// Fail open - allow the request to proceed
+			// This ensures service availability even if Arcjet is temporarily unavailable
+			// Timeout defaults: 500ms in production, 1000ms in development
 			return {
-				denied: true,
-				reason: 'Rate limit check failed',
-				status: 429,
+				denied: false,
+				remaining: null,
+				error: 'Arcjet unavailable, request allowed',
 			};
 		}
 	}
 
 	/**
 	 * Check for bot traffic
+	 * 
+	 * Error handling follows Arcjet best practices:
+	 * - Fail open: Allow requests if Arcjet is unavailable
+	 * - Log errors for monitoring
+	 * 
+	 * @see https://docs.arcjet.com/reference/nextjs#error-handling
 	 */
 	static async detectBot(request: Request) {
 		try {
 			const decision = await arcjetSecurity.protect(request);
+			
+			// Check for errors in rule execution (fail open)
+			checkDecisionErrors(decision, 'bot-detection');
 			
 			// Check if request was denied due to bot detection
 			if (decision.isDenied()) {
@@ -167,18 +247,38 @@ export class SecurityService {
 				reason: (botResult as any)?.reason,
 			};
 		} catch (error) {
-			console.error('Bot detection error:', error);
-			// Fail secure - treat as bot if detection fails
-			return { isBot: true, reason: 'Bot detection failed' };
+			// Fail open: Allow request if Arcjet is unavailable
+			// Log error for monitoring but don't block legitimate requests
+			logger.error('Arcjet bot detection error', {
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+				// Fail open: Assume not a bot if detection fails
+			});
+
+			// Fail open - assume not a bot if detection fails
+			return { 
+				isBot: false, 
+				reason: 'Bot detection unavailable, request allowed',
+				error: 'Arcjet unavailable',
+			};
 		}
 	}
 
 	/**
 	 * Check for threats
+	 * 
+	 * Error handling follows Arcjet best practices:
+	 * - Fail open: Allow requests if Arcjet is unavailable
+	 * - Log errors for monitoring
+	 * 
+	 * @see https://docs.arcjet.com/reference/nextjs#error-handling
 	 */
 	static async detectThreats(request: Request) {
 		try {
 			const decision = await arcjetSecurity.protect(request);
+			
+			// Check for errors in rule execution (fail open)
+			checkDecisionErrors(decision, 'threat-detection');
 			
 			// Check if request was denied due to threat detection
 			if (decision.isDenied()) {
@@ -207,14 +307,32 @@ export class SecurityService {
 				reason: (threatResult as any)?.reason,
 			};
 		} catch (error) {
-			console.error('Threat detection error:', error);
-			// Fail secure - treat as threat if detection fails
-			return { isThreat: true, reason: 'Threat detection failed' };
+			// Fail open: Allow request if Arcjet is unavailable
+			// Log error for monitoring but don't block legitimate requests
+			logger.error('Arcjet threat detection error', {
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+				// Fail open: Assume not a threat if detection fails
+			});
+
+			// Fail open - assume not a threat if detection fails
+			return { 
+				isThreat: false, 
+				reason: 'Threat detection unavailable, request allowed',
+				error: 'Arcjet unavailable',
+			};
 		}
 	}
 
 	/**
 	 * Comprehensive security check
+	 * 
+	 * Error handling follows Arcjet best practices:
+	 * - Fail open: Allow requests if Arcjet is unavailable
+	 * - Log errors for monitoring
+	 * - Only deny if explicitly detected by Arcjet
+	 * 
+	 * @see https://docs.arcjet.com/reference/nextjs#error-handling
 	 */
 	static async securityCheck(request: Request, endpoint: string) {
 		try {
@@ -227,7 +345,8 @@ export class SecurityService {
 			// Threat detection check
 			const threatResult = await this.detectThreats(request);
 
-			// If any check fails, deny the request
+			// If any check explicitly denies, deny the request
+			// Note: We only deny if Arcjet explicitly denies, not if it's unavailable
 			if (rateLimitResult.denied || botResult.isBot || threatResult.isThreat) {
 				return {
 					denied: true,
@@ -245,12 +364,21 @@ export class SecurityService {
 				rateLimitRemaining: rateLimitResult.remaining,
 			};
 		} catch (error) {
-			console.error('Security check error:', error);
-			// Fail secure - deny request if security check fails
+			// Fail open: Allow request if security check fails
+			// This ensures service availability even if Arcjet is temporarily unavailable
+			logger.error('Arcjet security check error', {
+				error: error instanceof Error ? error.message : String(error),
+				endpoint,
+				stack: error instanceof Error ? error.stack : undefined,
+				// Fail open: Service continues even if Arcjet is unavailable
+			});
+
+			// Fail open - allow the request to proceed
+			// Timeout defaults: 500ms in production, 1000ms in development
 			return {
-				denied: true,
-				reasons: ['Security check failed'],
-				status: 500,
+				denied: false,
+				rateLimitRemaining: null,
+				error: 'Arcjet unavailable, request allowed',
 			};
 		}
 	}

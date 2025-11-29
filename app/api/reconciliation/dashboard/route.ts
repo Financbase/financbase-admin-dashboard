@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { ReconciliationService } from "@/lib/reconciliation/reconciliation-service";
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/reconciliation/dashboard
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error("Reconciliation Dashboard API Error:", error);
+		logger.error("Reconciliation Dashboard API Error:", error);
 		return NextResponse.json(
 			{ error: "Failed to fetch dashboard data" },
 			{ status: 500 }

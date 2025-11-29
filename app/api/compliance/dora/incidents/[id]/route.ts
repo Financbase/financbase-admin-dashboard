@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { DORAComplianceService } from '@/lib/services/dora-compliance-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -39,7 +40,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: incident, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching incident:', error);
+    logger.error('Error fetching incident:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -98,7 +99,7 @@ export async function PATCH(
     const updatedIncident = await DORAComplianceService.getIncidentById(incidentId);
     return NextResponse.json({ success: true, data: updatedIncident, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error updating incident:', error);
+    logger.error('Error updating incident:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

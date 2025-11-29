@@ -28,10 +28,17 @@ coverage/
 out/
 
 # Environment files
+.env
 .env.local
 .env*.local
 .env.local.backup
 .env.staging.secure
+.env.test
+.env.staging
+.env.production
+.env.*.backup
+!.env.example
+!.env*.template
 
 # IDE
 .cursor/

@@ -9,6 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
+import { logger } from '@/lib/logger';
 
 export interface ApiError {
   code: string;
@@ -20,7 +21,7 @@ export interface ApiError {
 
 export class ApiErrorHandler {
   static handle(error: unknown, requestId?: string): NextResponse {
-    console.error('API Error:', error);
+    logger.error('API Error', { error, requestId });
 
     if (error instanceof ZodError) {
       return this.validationError(error, requestId);
@@ -59,13 +60,14 @@ export class ApiErrorHandler {
     );
   }
 
-  static notFound(message = 'Resource not found'): NextResponse {
+  static notFound(message = 'Resource not found', requestId?: string): NextResponse {
     return NextResponse.json(
       {
         error: {
           code: 'NOT_FOUND',
           message,
           timestamp: new Date().toISOString(),
+          requestId,
         }
       },
       { status: 404 }
@@ -103,7 +105,7 @@ export class ApiErrorHandler {
   }
 
   static databaseError(error: any, requestId?: string): NextResponse {
-    console.error('Database Error:', error);
+    logger.error('Database Error', { error, requestId });
     
     return NextResponse.json(
       {
@@ -145,13 +147,28 @@ export class ApiErrorHandler {
     );
   }
 
-  static badRequest(message = 'Bad request'): NextResponse {
+  static notImplemented(message = 'Feature not yet implemented', requestId?: string): NextResponse {
+    return NextResponse.json(
+      {
+        error: {
+          code: 'NOT_IMPLEMENTED',
+          message,
+          timestamp: new Date().toISOString(),
+          requestId,
+        }
+      },
+      { status: 501 }
+    );
+  }
+
+  static badRequest(message = 'Bad request', requestId?: string): NextResponse {
     return NextResponse.json(
       {
         error: {
           code: 'BAD_REQUEST',
           message,
           timestamp: new Date().toISOString(),
+          requestId,
         }
       },
       { status: 400 }

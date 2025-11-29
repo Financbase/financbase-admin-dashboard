@@ -18,8 +18,8 @@ END $$;
 -- Business Associates Table
 CREATE TABLE IF NOT EXISTS "financbase_business_associates" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "created_by" TEXT,
+  "organization_id" UUID NOT NULL,
+  "created_by" UUID,
   "vendor_name" TEXT NOT NULL,
   "vendor_type" "vendor_type" NOT NULL,
   "contact_name" TEXT,
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS "financbase_business_associates" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_business_associates_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_business_associates_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_business_associates_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_business_associates_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- BAA Compliance Checklist Table
@@ -52,12 +52,12 @@ CREATE TABLE IF NOT EXISTS "financbase_baa_compliance_checklist" (
   "completed_items" JSONB DEFAULT '[]'::jsonb NOT NULL,
   "completion_percentage" INTEGER DEFAULT 0 NOT NULL,
   "last_reviewed_at" TIMESTAMP WITH TIME ZONE,
-  "reviewed_by" TEXT,
+  "reviewed_by" UUID,
   "notes" TEXT,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   CONSTRAINT "fk_baa_compliance_checklist_business_associate" FOREIGN KEY ("business_associate_id") REFERENCES "financbase_business_associates"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_baa_compliance_checklist_reviewed_by" FOREIGN KEY ("reviewed_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_baa_compliance_checklist_reviewed_by" FOREIGN KEY ("reviewed_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Create indexes

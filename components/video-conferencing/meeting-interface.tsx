@@ -58,6 +58,7 @@ import { format } from 'date-fns';
 import { ZoomService } from '@/lib/services/integrations/zoom-service';
 import { GoogleMeetService } from '@/lib/services/integrations/google-meet-service';
 import { AdvancedMeetingInterface } from './advanced-meeting-interface';
+import { logger } from '@/lib/logger';
 
 interface Meeting {
 	id: string;
@@ -456,7 +457,7 @@ export function VideoMeetingInterface() {
 										value={settings?.defaultProvider || 'zoom'}
 										onValueChange={(value: 'zoom' | 'google_meet' | 'teams') =>
 											// updateSettingsMutation.mutate({ defaultProvider: value })
-											console.log('Update default provider:', value)
+											logger.info('Update default provider:', value)
 										}
 									>
 										<SelectTrigger>
@@ -486,7 +487,7 @@ export function VideoMeetingInterface() {
 										value={settings?.defaultDuration?.toString() || '60'}
 										onValueChange={(value) =>
 											// updateSettingsMutation.mutate({ defaultDuration: parseInt(value) })
-											console.log('Update default duration:', value)
+											logger.info('Update default duration:', value)
 										}
 									>
 										<SelectTrigger>

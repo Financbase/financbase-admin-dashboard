@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 // Simple database connection using neon directly
 async function getDbConnection() {
@@ -80,7 +81,7 @@ export async function GET() {
 		return NextResponse.json({ stats });
 
 	} catch (error) {
-		console.error('Failed to fetch realtor stats:', error);
+		logger.error('Failed to fetch realtor stats:', error);
 		return ApiErrorHandler.databaseError(error, requestId);
 	}
 }

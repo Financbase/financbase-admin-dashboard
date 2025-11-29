@@ -11,6 +11,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZoomService } from '@/lib/services/integrations/zoom-service';
 import { GoogleMeetService } from '@/lib/services/integrations/google-meet-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(meetings);
 	} catch (error) {
-		console.error('Error fetching meetings:', error);
+		logger.error('Error fetching meetings:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
 						providerData: zoomMeeting,
 					};
 				} catch (error) {
-					console.error('Error creating Zoom meeting:', error);
+					logger.error('Error creating Zoom meeting:', error);
 					return NextResponse.json({ error: 'Failed to create Zoom meeting' }, { status: 500 });
 				}
 				break;
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
 						providerData: googleMeeting,
 					};
 				} catch (error) {
-					console.error('Error creating Google Meet:', error);
+					logger.error('Error creating Google Meet:', error);
 					return NextResponse.json({ error: 'Failed to create Google Meet' }, { status: 500 });
 				}
 				break;
@@ -173,7 +174,7 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json(newMeeting, { status: 201 });
 	} catch (error) {
-		console.error('Error creating meeting:', error);
+		logger.error('Error creating meeting:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

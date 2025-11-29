@@ -50,6 +50,7 @@ export interface WorkflowResult {
 	output: Record<string, any>;
 	duration: number;
 	error?: string;
+	dryRun?: boolean;
 }
 
 export class WorkflowEngine {
@@ -781,7 +782,10 @@ export class WorkflowEngine {
 			// Test workflow steps (dry run)
 			const result = await this.executeSteps(workflow.steps as WorkflowStep[], context, workflow as any);
 
-			return result;
+			return {
+				...result,
+				dryRun: true,
+			};
 
 		} catch (error) {
 			console.error('Workflow test error:', error);
@@ -790,7 +794,8 @@ export class WorkflowEngine {
 				executionId,
 				output: {},
 				duration: Date.now() - startTime.getTime(),
-				error: error instanceof Error ? error.message : 'Unknown error'
+				error: error instanceof Error ? error.message : 'Unknown error',
+				dryRun: true,
 			};
 		}
 	}

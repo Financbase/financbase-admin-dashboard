@@ -44,7 +44,7 @@ const createPaymentMethodSchema = z.object({
 	fixedFee: z.number().min(0).optional(),
 	currency: z.string().default('USD'),
 	isTestMode: z.boolean().default(false),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 	notes: z.string().optional(),
 });
 

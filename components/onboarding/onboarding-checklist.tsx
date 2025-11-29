@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { OnboardingProgress } from "@/lib/services/onboarding/onboarding-service";
 import { getOnboardingFlow } from "@/lib/data/onboarding-flows";
+import { logger } from '@/lib/logger';
 
 interface OnboardingChecklistProps {
 	onboarding?: OnboardingProgress | null;
@@ -60,7 +61,7 @@ export function OnboardingChecklist({
 				}
 			}
 		} catch (error) {
-			console.error("Error fetching onboarding status:", error);
+			logger.error("Error fetching onboarding status:", error);
 		}
 	};
 

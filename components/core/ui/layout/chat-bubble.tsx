@@ -28,6 +28,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { logger } from '@/lib/logger';
 
 // Define the type for a single user
 interface User {
@@ -133,7 +134,7 @@ export const VoiceChat = ({
 			onJoin();
 			setIsOpen(false);
 		} catch (err) {
-			console.error("Error joining voice chat:", err);
+			logger.error("Error joining voice chat:", err);
 		}
 	};
 

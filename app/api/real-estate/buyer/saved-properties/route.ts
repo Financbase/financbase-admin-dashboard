@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 
 // Simple database connection using neon directly
 async function getDbConnection() {
@@ -174,7 +175,7 @@ export async function GET(request: NextRequest) {
 		if (error instanceof z.ZodError) {
 			return ApiErrorHandler.validationError(error, requestId);
 		}
-		console.error('Failed to fetch saved properties:', error);
+		logger.error('Failed to fetch saved properties:', error);
 		return ApiErrorHandler.databaseError(error, requestId);
 	}
 }
@@ -248,7 +249,7 @@ export async function POST(request: NextRequest) {
 		if (error instanceof z.ZodError) {
 			return ApiErrorHandler.validationError(error, requestId);
 		}
-		console.error('Failed to save property:', error);
+		logger.error('Failed to save property:', error);
 		return ApiErrorHandler.databaseError(error, requestId);
 	}
 }
@@ -292,7 +293,7 @@ export async function DELETE(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error('Failed to remove saved property:', error);
+		logger.error('Failed to remove saved property:', error);
 		return ApiErrorHandler.databaseError(error, requestId);
 	}
 }

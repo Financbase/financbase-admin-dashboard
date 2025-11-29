@@ -15,6 +15,7 @@ import CookiePreferencesModal from "@/components/ui/cookie-preferences-modal";
 import { CookieSettingsButton } from "@/components/core/ui/buttons/cookie-settings-button";
 import { useCookiePreferences } from "@/hooks/use-cookie-preferences";
 import { useState } from "react";
+import { logger } from '@/lib/logger';
 
 export default function CookieNoticeDemo() {
 	const { preferences, hasConsented, acceptAll, rejectAll, updatePreferences } =
@@ -214,8 +215,8 @@ export default function CookieNoticeDemo() {
 
 				{/* Cookie Notice Component */}
 				<CookieNotice
-					onAccept={() => console.log("Cookies accepted")}
-					onReject={() => console.log("Cookies rejected")}
+					onAccept={() => logger.info("Cookies accepted")}
+					onReject={() => logger.info("Cookies rejected")}
 				/>
 			</div>
 

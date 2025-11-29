@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { seedDashboardDataForUser } from '@/scripts/seed-dashboard-data';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/admin/seed-dashboard
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
 				
 				if (users && users.length > 0) {
 					userId = users[0].id;
-					console.log(`Found user ID ${userId} for email ${email} (total matches: ${totalCount})`);
+					logger.info(`Found user ID ${userId} for email ${email} (total matches: ${totalCount})`);
 				} else {
 					return NextResponse.json(
 						{ error: 'User not found', message: `No user found with email ${email}` },
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
 					);
 				}
 			} catch (error) {
-				console.error('Error looking up user by email:', error);
+				logger.error('Error looking up user by email:', error);
 				return NextResponse.json(
 					{ 
 						error: 'Failed to lookup user', 
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
 			);
 		}
 
-		console.log(`🌱 Seeding dashboard data for user: ${userId}`);
+		logger.info(`🌱 Seeding dashboard data for user: ${userId}`);
 
 		const result = await seedDashboardDataForUser(userId, {
 			clearExisting,
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
 			skipped: result.skipped,
 		});
 	} catch (error) {
-		console.error('❌ Error seeding dashboard data:', error);
+		logger.error('❌ Error seeding dashboard data:', error);
 		
 		return NextResponse.json(
 			{
@@ -116,7 +117,7 @@ export async function GET() {
 			details: dataStatus,
 		});
 	} catch (error) {
-		console.error('❌ Error checking data status:', error);
+		logger.error('❌ Error checking data status:', error);
 		
 		return NextResponse.json(
 			{

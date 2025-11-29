@@ -1,25 +1,55 @@
 /**
  * White Label Service Integration Tests
  * Tests the complete white label implementation
+ * 
+ * Uses testDb from test-db.ts which supports neon-serverless driver for transaction support
  */
 
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { WhiteLabelService } from '@/lib/services/white-label-service';
-import { getDbOrThrow } from '@/lib/db';
+import { testDb } from './test-db';
+import { TestDatabase } from './test-db';
 import { workspaces } from '@/drizzle/schema/workspaces';
 import { eq } from 'drizzle-orm';
+
+// Mock server-only
+vi.mock('server-only', () => ({}));
+
+// Mock getDbOrThrow to return testDb so service uses the same connection
+// This ensures both test and service use the same database instance
+vi.mock('@/lib/db', async () => {
+	const actual = await vi.importActual<typeof import('@/lib/db')>('@/lib/db');
+	// Import testDb here to avoid hoisting issues
+	const { testDb } = await import('./test-db');
+	return {
+		...actual,
+		getDbOrThrow: () => testDb,
+	};
+});
 
 describe('White Label Service', () => {
 	let service: WhiteLabelService;
 	let testWorkspaceId: string;
-	const db = getDbOrThrow();
+	let testDatabase: ReturnType<typeof TestDatabase.getInstance>;
+	const db = testDb;
 
 	beforeAll(async () => {
-		service = new WhiteLabelService();
+		// Use TestDatabase for proper test setup
+		testDatabase = TestDatabase.getInstance();
+		await testDatabase.setup();
+		
+		// Clean up any existing test workspaces
+		try {
+			await db.delete(workspaces).where(eq(workspaces.workspaceId, `ws_test_${Date.now()}`));
+		} catch (error) {
+			// Ignore cleanup errors
+		}
+		
 		testWorkspaceId = `ws_test_${Date.now()}`;
 
-		// Create test workspace
-		await db.insert(workspaces).values({
+		// Create test workspace using testDb (supports neon-serverless with transactions)
+		// Use a transaction to ensure the workspace is committed before service queries
+		const [inserted] = await db.insert(workspaces).values({
 			workspaceId: testWorkspaceId,
 			name: 'Test Enterprise Workspace',
 			slug: `test-${Date.now()}`,
@@ -39,19 +69,88 @@ describe('White Label Service', () => {
 				},
 			}),
 			ownerId: 'test-owner-id',
-		});
+		}).returning();
+
+		// Verify workspace was created
+		if (!inserted) {
+			throw new Error('Failed to create test workspace');
+		}
+
+		// Verify workspace is immediately accessible (testDb should handle this correctly)
+		// Retry a few times to handle any connection/timing issues
+		let verifyWorkspace = await db.select().from(workspaces).where(eq(workspaces.workspaceId, testWorkspaceId)).limit(1);
+		let retries = 5;
+		while (!verifyWorkspace[0] && retries > 0) {
+			await new Promise(resolve => setTimeout(resolve, 100));
+			verifyWorkspace = await db.select().from(workspaces).where(eq(workspaces.workspaceId, testWorkspaceId)).limit(1);
+			retries--;
+		}
+		
+		if (!verifyWorkspace[0]) {
+			// Debug: check what workspaces exist
+			const allWorkspaces = await db.select({ workspaceId: workspaces.workspaceId, name: workspaces.name }).from(workspaces).limit(10);
+			throw new Error(`Workspace ${testWorkspaceId} was not found after creation. Found ${allWorkspaces.length} workspaces total.`);
+		}
+
+		// Create service AFTER workspace is created and verified
+		// The mock ensures getDbOrThrow returns testDb, so service uses same connection
+		service = new WhiteLabelService();
+		
+		// Verify service can see the workspace
+		const serviceWorkspace = await service.getBranding(testWorkspaceId);
+		if (!serviceWorkspace || serviceWorkspace.companyName === 'Financbase') {
+			// Service can't see the workspace - this indicates a connection issue
+			console.warn('Service cannot see test workspace - this may indicate a database connection issue');
+		}
 	});
 
 	afterAll(async () => {
 		// Cleanup test workspace
-		await db.delete(workspaces).where(eq(workspaces.workspaceId, testWorkspaceId));
+		try {
+			await db.delete(workspaces).where(eq(workspaces.workspaceId, testWorkspaceId));
+		} catch (error) {
+			// Ignore cleanup errors
+		}
+		await testDatabase?.teardown();
 	});
 
 	describe('getBranding', () => {
 		it('should return branding for enterprise workspace', async () => {
+			// Verify workspace exists in database - query all workspaces to debug
+			const allWorkspaces = await db.select().from(workspaces).limit(10);
+			const workspaceResult = await db
+				.select({
+					settings: workspaces.settings,
+					logo: workspaces.logo,
+					name: workspaces.name,
+					plan: workspaces.plan,
+					workspaceId: workspaces.workspaceId,
+				})
+				.from(workspaces)
+				.where(eq(workspaces.workspaceId, testWorkspaceId))
+				.limit(1);
+			
+			if (!workspaceResult || workspaceResult.length === 0) {
+				// Debug: check if workspace exists with different query
+				const debugResult = await db.select().from(workspaces).where(eq(workspaces.name, 'Test Enterprise Workspace')).limit(5);
+				throw new Error(`Test workspace ${testWorkspaceId} was not found. Found ${workspaceResult?.length || 0} workspaces. Debug: ${debugResult.length} workspaces with name match.`);
+			}
+			
+			// Verify the workspace has the expected plan and settings
+			expect(workspaceResult[0].plan).toBe('enterprise');
+			const settings = JSON.parse(workspaceResult[0].settings as string);
+			expect(settings.whiteLabel?.companyName).toBe('Test Company');
+			
+			// Recreate service to ensure it uses fresh DB connection that can see the workspace
+			service = new WhiteLabelService();
+			
+			// Wait a bit more to ensure transaction is fully committed
+			await new Promise(resolve => setTimeout(resolve, 300));
+			
 			const branding = await service.getBranding(testWorkspaceId);
 
 			expect(branding).toBeDefined();
+			// The service may merge with defaults, so check that it contains our custom values
 			expect(branding.companyName).toBe('Test Company');
 			expect(branding.primaryColor).toBe('#FF5733');
 			expect(branding.logo).toBe('/test-logo.png');

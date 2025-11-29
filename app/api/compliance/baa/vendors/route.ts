@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { BAAManagementService } from '@/lib/services/baa-management-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: vendor, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating business associate:', error);
+    logger.error('Error creating business associate:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: vendors, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching business associates:', error);
+    logger.error('Error fetching business associates:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

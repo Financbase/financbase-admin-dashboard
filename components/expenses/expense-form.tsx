@@ -112,11 +112,19 @@ export function ExpenseForm({ initialData, expenseId, onCancel }: ExpenseFormPro
 		tags: initialData?.tags || [],
 	});
 
+	const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
+
 	// Form submission hook
 	const { submit, isLoading, error } = useFormSubmission(
 		async (data: ExpenseFormData) => {
 			const url = expenseId ? `/api/expenses/${expenseId}` : '/api/expenses';
 			const method = expenseId ? 'PUT' : 'POST';
+
+			// Prepare data for API - ensure date is in ISO format
+			const apiData = {
+				...data,
+				date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+			};
 
 			const response = await fetch(url, {
 				method,
@@ -124,15 +132,11 @@ export function ExpenseForm({ initialData, expenseId, onCancel }: ExpenseFormPro
 					'Content-Type': 'application/json',
 				},
 				credentials: 'include',
-				body: JSON.stringify(data),
+				body: JSON.stringify(apiData),
 			});
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				throw new Error(errorData.error || `Failed to save expense: ${response.status} ${response.statusText}`);
-			}
-
-			return response.json();
+			// Return response directly - the hook will handle parsing and error handling
+			return response;
 		},
 		{
 			onSuccess: () => {
@@ -140,6 +144,7 @@ export function ExpenseForm({ initialData, expenseId, onCancel }: ExpenseFormPro
 			},
 			successMessage: expenseId ? 'Expense updated successfully' : 'Expense created successfully',
 			errorMessage: 'Failed to save expense',
+			redirectTo: '/expenses',
 		}
 	);
 
@@ -164,16 +169,62 @@ export function ExpenseForm({ initialData, expenseId, onCancel }: ExpenseFormPro
 		}
 	};
 
-	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
-		if (file) {
-			// In a real implementation, you would upload the file to a storage service
-			// For now, we'll just store the file name
+		if (!file) return;
+
+		// Validate file type
+		const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+		if (!validTypes.includes(file.type)) {
+			toast.error('Validation Error', 'Please upload an image (JPEG, PNG, GIF, WebP) or PDF file');
+			return;
+		}
+
+		// Validate file size (max 4MB)
+		const maxSize = 4 * 1024 * 1024; // 4MB
+		if (file.size > maxSize) {
+			toast.error('Validation Error', 'File size must be less than 4MB');
+			return;
+		}
+
+		setIsUploadingReceipt(true);
+
+		try {
+			// Upload file to UploadThing receiptImage endpoint
+			const uploadFormData = new FormData();
+			uploadFormData.append('file', file);
+
+			const response = await fetch('/api/uploadthing?endpoint=receiptImage', {
+				method: 'POST',
+				body: uploadFormData,
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(errorData.message || 'Failed to upload file');
+			}
+
+			const result = await response.json();
+			// Handle both single file and array responses
+			const uploadedUrl = result?.url || result?.[0]?.url || result?.data?.[0]?.url;
+
+			if (!uploadedUrl) {
+				throw new Error('No URL returned from upload service');
+			}
+
+			// Update form data with uploaded file URL
 			setFormData({
 				...formData,
 				receiptFileName: file.name,
-				receiptUrl: URL.createObjectURL(file), // Temporary URL for demo
+				receiptUrl: uploadedUrl,
 			});
+
+			toast.success('Receipt uploaded successfully');
+		} catch (error: any) {
+			console.error('Error uploading receipt:', error);
+			toast.error('Upload Error', error.message || 'Failed to upload receipt. Please try again.');
+		} finally {
+			setIsUploadingReceipt(false);
 		}
 	};
 
@@ -293,11 +344,20 @@ export function ExpenseForm({ initialData, expenseId, onCancel }: ExpenseFormPro
 								type="file"
 								accept="image/*,.pdf"
 								onChange={handleFileUpload}
-								className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+								disabled={isUploadingReceipt}
+								className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
 							/>
-							{formData.receiptFileName && (
+							{isUploadingReceipt && (
+								<p className="text-sm text-muted-foreground">Uploading receipt...</p>
+							)}
+							{formData.receiptFileName && !isUploadingReceipt && (
 								<p className="text-sm text-green-600 dark:text-green-400">
 									✓ {formData.receiptFileName}
+								</p>
+							)}
+							{formData.receiptUrl && !isUploadingReceipt && (
+								<p className="text-xs text-muted-foreground">
+									Receipt URL: {formData.receiptUrl.substring(0, 50)}...
 								</p>
 							)}
 						</div>

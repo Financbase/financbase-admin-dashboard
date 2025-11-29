@@ -30,6 +30,7 @@ import {
 // components/ui/feedback-widget.tsx
 import * as React from "react";
 import { useState } from "react";
+import { logger } from '@/lib/logger';
 
 // Props interface for component reusability
 export interface FeedbackWidgetProps {
@@ -103,7 +104,7 @@ export const FeedbackWidget = ({
 				try {
 					await onSubmit({ rating, comment: comment.trim() });
 				} catch (err) {
-					console.error("Custom onSubmit error:", err);
+					logger.error("Custom onSubmit error:", err);
 				}
 			}
 

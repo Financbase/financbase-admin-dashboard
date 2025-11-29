@@ -17,6 +17,7 @@ import { WebhookList } from '@/components/webhooks/webhook-list';
 import { WebhookForm } from '@/components/webhooks/webhook-form';
 import { DeliveryLogs } from '@/components/webhooks/delivery-logs';
 import { 
+import { logger } from '@/lib/logger';
   Webhook, 
   Activity, 
   Settings, 
@@ -66,11 +67,11 @@ export default function WebhooksPage() {
     setSelectedWebhook(webhook);
     setActiveTab('form');
     // In a real implementation, this would trigger the test
-    console.log('Test webhook:', webhook);
+    logger.info('Test webhook:', webhook);
   };
 
   const handleWebhookSave = (webhook: any) => {
-    console.log('Webhook saved:', webhook);
+    logger.info('Webhook saved:', webhook);
     setShowCreateForm(false);
     setSelectedWebhook(null);
     setActiveTab('webhooks');
@@ -83,11 +84,11 @@ export default function WebhooksPage() {
   };
 
   const handleViewDelivery = (delivery: any) => {
-    console.log('View delivery:', delivery);
+    logger.info('View delivery:', delivery);
   };
 
   const handleRetryDelivery = (deliveryId: string) => {
-    console.log('Retry delivery:', deliveryId);
+    logger.info('Retry delivery:', deliveryId);
   };
 
   return (

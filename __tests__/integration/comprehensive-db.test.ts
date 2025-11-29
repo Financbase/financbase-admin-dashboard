@@ -12,38 +12,64 @@ vi.mock('server-only', () => ({}));
 // Import test database
 const { testDb } = await import('../test-db');
 import { bills, vendors, billPayments, approvalWorkflows, billApprovals } from '@/lib/db/schemas/bill-pay.schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
+
+// Alias testDb as db for convenience
+const db = testDb;
 
 describe('Database Integration Tests', () => {
   let testDatabase: ReturnType<typeof TestDatabase.getInstance>;
-  const testUserId = 'test-user-12345';
-  const testVendorId = 'test-vendor-12345';
+  // Use valid UUID format for test user ID (all userId fields are UUIDs)
+  const testUserId = '00000000-0000-0000-0000-000000000001';
+  const testVendorId = '00000000-0000-0000-0000-000000000002';
 
   beforeAll(async () => {
     testDatabase = TestDatabase.getInstance();
     await testDatabase.setup();
     
     // Clean up any existing test data
+    // Note: billApprovals.billId is a UUID, so we need to delete by finding bills first
     try {
-      await testDb.delete(billApprovals).where(eq(billApprovals.billId, testUserId));
+      // First, find bills for this user to get their IDs
+      const userBills = await testDb.select({ id: bills.id }).from(bills).where(eq(bills.userId, testUserId));
+      const billIds = userBills.map(b => b.id);
+      
+      // Delete billApprovals by billId (UUID)
+      if (billIds.length > 0) {
+        await testDb.delete(billApprovals).where(inArray(billApprovals.billId, billIds));
+      }
+      
       await testDb.delete(billPayments).where(eq(billPayments.userId, testUserId));
       await testDb.delete(bills).where(eq(bills.userId, testUserId));
       await testDb.delete(vendors).where(eq(vendors.userId, testUserId));
+      await testDb.delete(approvalWorkflows).where(eq(approvalWorkflows.userId, testUserId));
     } catch (error) {
       // Ignore cleanup errors if tables don't exist
       console.warn('Cleanup error (safe to ignore):', error);
     }
-    await testDb.delete(approvalWorkflows).where(eq(approvalWorkflows.userId, testUserId));
   });
 
   afterAll(async () => {
     await testDatabase?.teardown();
     // Clean up test data
-    await testDb.delete(billApprovals).where(eq(billApprovals.billId, testUserId));
-    await testDb.delete(billPayments).where(eq(billPayments.userId, testUserId));
-    await testDb.delete(bills).where(eq(bills.userId, testUserId));
-    await testDb.delete(vendors).where(eq(vendors.userId, testUserId));
-    await testDb.delete(approvalWorkflows).where(eq(approvalWorkflows.userId, testUserId));
+    try {
+      // Find bills for this user to get their IDs
+      const userBills = await testDb.select({ id: bills.id }).from(bills).where(eq(bills.userId, testUserId));
+      const billIds = userBills.map(b => b.id);
+      
+      // Delete billApprovals by billId (UUID)
+      if (billIds.length > 0) {
+        await testDb.delete(billApprovals).where(inArray(billApprovals.billId, billIds));
+      }
+      
+      await testDb.delete(billPayments).where(eq(billPayments.userId, testUserId));
+      await testDb.delete(bills).where(eq(bills.userId, testUserId));
+      await testDb.delete(vendors).where(eq(vendors.userId, testUserId));
+      await testDb.delete(approvalWorkflows).where(eq(approvalWorkflows.userId, testUserId));
+    } catch (error) {
+      // Ignore cleanup errors
+      console.warn('Cleanup error (safe to ignore):', error);
+    }
   });
 
   describe('Vendor Operations', () => {
@@ -76,7 +102,7 @@ describe('Database Integration Tests', () => {
         updatedAt: new Date()
       };
 
-      const [vendor] = await db.insert(vendors).values(vendorData).returning();
+      const [vendor] = await testDb.insert(vendors).values(vendorData).returning();
       expect(vendor).toBeDefined();
       expect(vendor.id).toBeDefined();
       expect(vendor.name).toBe('Test Vendor Inc');
@@ -150,7 +176,7 @@ describe('Database Integration Tests', () => {
           updatedAt: new Date()
         };
 
-        const [bill] = await db.insert(bills).values(billData).returning();
+        const [bill] = await testDb.insert(bills).values(billData).returning();
         expect(bill).toBeDefined();
         expect(bill.id).toBeDefined();
         expect(bill.billNumber).toBe('TEST-BILL-001');
@@ -214,7 +240,7 @@ describe('Database Integration Tests', () => {
           updatedAt: new Date()
         };
 
-        const [payment] = await db.insert(billPayments).values(paymentData).returning();
+        const [payment] = await testDb.insert(billPayments).values(paymentData).returning();
         expect(payment).toBeDefined();
         expect(payment.id).toBeDefined();
         expect(payment.billId).toBe(bill.id);
@@ -251,7 +277,7 @@ describe('Database Integration Tests', () => {
         updatedAt: new Date()
       };
 
-      const [workflow] = await db.insert(approvalWorkflows).values(workflowData).returning();
+      const [workflow] = await testDb.insert(approvalWorkflows).values(workflowData).returning();
       expect(workflow).toBeDefined();
       expect(workflow.id).toBeDefined();
       expect(workflow.name).toBe('Test Approval Workflow');
@@ -304,7 +330,7 @@ describe('Database Integration Tests', () => {
           updatedAt: new Date()
         };
 
-        const [approval] = await db.insert(billApprovals).values(approvalData).returning();
+        const [approval] = await testDb.insert(billApprovals).values(approvalData).returning();
         expect(approval).toBeDefined();
         expect(approval.id).toBeDefined();
         expect(approval.billId).toBe(bill.id);
@@ -316,7 +342,7 @@ describe('Database Integration Tests', () => {
   describe('Data Consistency', () => {
     it('should maintain referential integrity', async () => {
       // Test that foreign key relationships work correctly
-      const [bill] = await db
+      const [bill] = await testDb
         .select({
           bill: bills,
           vendor: vendors,
@@ -362,7 +388,7 @@ describe('Database Integration Tests', () => {
           updatedAt: new Date()
         };
 
-        return db.insert(bills).values(billData).returning();
+        return testDb.insert(bills).values(billData).returning();
       });
 
       const results = await Promise.all(promises);

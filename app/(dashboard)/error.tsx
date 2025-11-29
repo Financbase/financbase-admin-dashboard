@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertTriangle, RefreshCw, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect } from 'react'
+import { logger } from '@/lib/logger';
 
 export default function DashboardError({
   error,
@@ -24,7 +25,7 @@ export default function DashboardError({
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error('Dashboard Error:', error)
+    logger.error('Dashboard Error:', error)
   }, [error])
 
   return (

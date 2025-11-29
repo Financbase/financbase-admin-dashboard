@@ -15,6 +15,7 @@ import { ThemeProvider } from 'next-themes';
 import { ClerkProvider } from '@clerk/nextjs';
 import { DashboardProvider } from '@/contexts/dashboard-context';
 import { BrandingProvider } from '@/contexts/branding-context';
+import { OrganizationProvider } from '@/contexts/organization-context';
 import { setupChunkErrorHandler } from '@/lib/utils/chunk-error-handler';
 import { setupWebpackChunkHandler } from '@/lib/utils/webpack-chunk-handler';
 import { ChunkErrorBoundary } from '@/components/errors/chunk-error-boundary';
@@ -94,9 +95,11 @@ export function Providers({ children }: ProvidersProps) {
 					{/* Wrap with ChunkErrorBoundary to catch React-level chunk errors */}
 					<ChunkErrorBoundary autoRecover={true}>
 						<BrandingProvider>
-							<DashboardProvider>
-								{children}
-							</DashboardProvider>
+							<OrganizationProvider>
+								<DashboardProvider>
+									{children}
+								</DashboardProvider>
+							</OrganizationProvider>
 						</BrandingProvider>
 					</ChunkErrorBoundary>
 				</ThemeProvider>

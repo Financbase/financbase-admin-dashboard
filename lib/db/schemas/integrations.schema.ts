@@ -13,6 +13,7 @@ import { users } from './users.schema';
 import { organizations } from './organizations.schema';
 
 // Integrations Table - Available integration services
+// Table exists in financbase schema - queries should use search_path or schema qualification
 export const integrations = pgTable('financbase_integrations', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(), // e.g., 'Stripe', 'Slack', 'QuickBooks'

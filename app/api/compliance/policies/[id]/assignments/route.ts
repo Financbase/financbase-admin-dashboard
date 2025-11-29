@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { PolicyManagementService } from '@/lib/services/policy-management-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -51,7 +52,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, message: 'Policy assigned', requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error assigning policy:', error);
+    logger.error('Error assigning policy:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -83,7 +84,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: assignments, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching policy assignments:', error);
+    logger.error('Error fetching policy assignments:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

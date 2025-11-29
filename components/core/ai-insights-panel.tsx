@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { logger } from '@/lib/logger';
 // Define local FinancialInsight type based on component usage
 interface FinancialInsight {
 	id: string;
@@ -61,7 +62,7 @@ export function AIInsightsPanel() {
 				toast.error(data.error || "Failed to fetch AI insights.");
 			}
 		} catch (err) {
-			console.error("Error fetching AI insights:", err);
+			logger.error("Error fetching AI insights:", err);
 			setError("Network error or server unreachable.");
 			toast.error("Network error while fetching AI insights.");
 		} finally {

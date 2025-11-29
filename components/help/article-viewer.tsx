@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { formatDistanceToNow } from 'date-fns';
 import { 
+import { logger } from '@/lib/logger';
   ArrowLeft, 
   Star, 
   ThumbsUp, 
@@ -103,7 +104,7 @@ export function ArticleViewer({ article, onBack, onRelatedArticle }: ArticleView
           url: window.location.href,
         });
       } catch (error) {
-        console.log('Error sharing:', error);
+        logger.info('Error sharing:', error);
       }
     } else {
       // Fallback: copy to clipboard

@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { PolicyManagementService } from '@/lib/services/policy-management-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -39,7 +40,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: policy, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching policy:', error);
+    logger.error('Error fetching policy:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -91,7 +92,7 @@ export async function PATCH(
     const updatedPolicy = await PolicyManagementService.getPolicyById(policyId);
     return NextResponse.json({ success: true, data: updatedPolicy, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error updating policy:', error);
+    logger.error('Error updating policy:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

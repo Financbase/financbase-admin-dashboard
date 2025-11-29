@@ -16,14 +16,15 @@ import {
 } from "@/components/ui/user-profile-card";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useState } from "react";
+import { logger } from '@/lib/logger';
 
 export default function UserProfileCardDemo() {
 	const { user, isLoading, error, refetch, updateProfile } = useUserProfile({
 		onError: (error) => {
-			console.error("Profile error:", error);
+			logger.error("Profile error:", error);
 		},
 		onSuccess: (user) => {
-			console.log("Profile loaded:", user);
+			logger.info("Profile loaded:", user);
 		},
 	});
 
@@ -32,7 +33,7 @@ export default function UserProfileCardDemo() {
 
 	const handleViewProfile = () => {
 		// In a real app, this would navigate to the full profile page
-		console.log("View full profile clicked");
+		logger.info("View full profile clicked");
 	};
 
 	const handleUpdateProfile = async () => {
@@ -43,7 +44,7 @@ export default function UserProfileCardDemo() {
 				firstName: user.firstName || "Updated",
 			});
 		} catch (error) {
-			console.error("Failed to update profile:", error);
+			logger.error("Failed to update profile:", error);
 		}
 	};
 

@@ -8,11 +8,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { webhooks } from '@/lib/db/schemas';
-import { eq, desc, and, like, or } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { WebhookService } from '@/lib/services/webhook-service';
 
 /**
  * @swagger
@@ -84,6 +82,8 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
  *       500:
  *         description: Internal server error
  */
+import { WebhookService } from '@/lib/services/webhook-service';
+
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   try {
@@ -93,35 +93,17 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search');
+    const search = searchParams.get('search') || undefined;
     const status = searchParams.get('status');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // Build where conditions array
-    const whereConditions = [eq(webhooks.userId, userId)];
-
-    if (search) {
-      whereConditions.push(
-        or(
-          like(webhooks.name, `%${search}%`),
-          like(webhooks.url, `%${search}%`)
-        )
-      );
-    }
-
-    if (status) {
-      whereConditions.push(eq(webhooks.isActive, status === 'active'));
-    }
-
-    // Apply all conditions at once
-    const userWebhooks = await db
-      .select()
-      .from(webhooks)
-      .where(and(...whereConditions))
-      .orderBy(desc(webhooks.createdAt))
-      .limit(limit)
-      .offset(offset);
+    const userWebhooks = await WebhookService.getWebhooks(userId, {
+      isActive: status ? status === 'active' : undefined,
+      search,
+      limit,
+      offset,
+    });
 
     return NextResponse.json(userWebhooks);
   } catch (error) {
@@ -252,36 +234,21 @@ export async function POST(request: NextRequest) {
       return ApiErrorHandler.badRequest('Invalid URL format');
     }
 
-    // Generate secret if not provided
-    const webhookSecret = secret || generateWebhookSecret();
-
-    const newWebhook = await db.insert(webhooks).values({
-      userId,
-      organizationId,
+    const newWebhook = await WebhookService.createWebhook(userId, {
       name,
       description,
       url,
-      secret: webhookSecret,
       events,
-      retryPolicy: retryPolicy || {
-        maxRetries: 3,
-        retryDelay: 1000,
-        backoffMultiplier: 2
-      },
-      headers: headers || {},
-      filters: filters || {},
-      timeout: timeout || 30000,
-      isActive: true,
-    }).returning();
+      organizationId,
+      secret,
+      retryPolicy,
+      headers,
+      filters,
+      timeout,
+    });
 
-    return NextResponse.json(newWebhook[0], { status: 201 });
+    return NextResponse.json(newWebhook, { status: 201 });
   } catch (error) {
     return ApiErrorHandler.handle(error, requestId);
   }
-}
-
-function generateWebhookSecret(): string {
-  // Use Node.js crypto module for secure random generation
-  const crypto = require('crypto');
-  return crypto.randomBytes(32).toString('hex');
 }

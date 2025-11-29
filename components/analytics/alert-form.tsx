@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Save, X, Bell, AlertTriangle, Info, CheckCircle } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 interface AlertFormProps {
 	mode?: "create" | "edit";
@@ -49,7 +50,7 @@ export function AlertForm({ mode = "create", alertId, onSubmit, onCancel }: Aler
 			await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
 			onSubmit?.(formData);
 		} catch (error) {
-			console.error("Error saving alert:", error);
+			logger.error("Error saving alert:", error);
 		} finally {
 			setIsLoading(false);
 		}

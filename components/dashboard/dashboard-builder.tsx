@@ -69,6 +69,7 @@ import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
+import { logger } from '@/lib/logger';
 
 // Dashboard types and interfaces
 export interface DashboardWidget {
@@ -1356,7 +1357,7 @@ async function fetchWidgetData(widget: DashboardWidget, globalFilters: Record<st
             }
           }
         } catch (error) {
-          console.warn('Failed to fetch historical chart data:', error);
+          logger.warn('Failed to fetch historical chart data:', error);
         }
         
         // Fallback: try to use existing API data if available
@@ -1374,7 +1375,7 @@ async function fetchWidgetData(widget: DashboardWidget, globalFilters: Record<st
               }
             }
           } catch (error) {
-            console.warn('Fallback chart data fetch failed:', error);
+            logger.warn('Fallback chart data fetch failed:', error);
           }
         }
         
@@ -1405,7 +1406,7 @@ async function fetchWidgetData(widget: DashboardWidget, globalFilters: Record<st
             }
           }
         } catch (error) {
-          console.warn('Failed to fetch bar chart historical data:', error);
+          logger.warn('Failed to fetch bar chart historical data:', error);
         }
         
         // Last resort: return empty structure if no data available
@@ -1486,7 +1487,7 @@ async function fetchWidgetData(widget: DashboardWidget, globalFilters: Record<st
             }
           }
         } catch (error) {
-          console.error('Error fetching table data:', error);
+          logger.error('Error fetching table data:', error);
         }
         
         // Fallback to overview data if table fetch failed
@@ -1524,7 +1525,7 @@ async function fetchWidgetData(widget: DashboardWidget, globalFilters: Record<st
         return apiData.data || apiData.overview || apiData;
     }
   } catch (error) {
-    console.error(`Error fetching widget data for ${widget.type}:`, error);
+    logger.error(`Error fetching widget data for ${widget.type}:`, error);
     // Return empty/default data on error
     return widget.type === 'kpi_card' 
       ? { value: 0, comparison: { enabled: false } }

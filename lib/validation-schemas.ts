@@ -46,7 +46,7 @@ export const createInvoiceSchema = z.object({
   recurringFrequency: z.string().optional(),
   recurringEndDate: z.string().datetime().optional(),
   parentInvoiceId: z.number().optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 export const updateInvoiceSchema = createInvoiceSchema.partial().extend({
@@ -56,10 +56,19 @@ export const updateInvoiceSchema = createInvoiceSchema.partial().extend({
 // Expense validation schemas
 export const createExpenseSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
-  description: z.string().min(1, 'Description is required'),
+  description: z.string().optional().default('Expense'),
   amount: z.number().positive('Amount must be positive'),
   currency: z.string().default('USD'),
-  date: z.string().datetime('Valid date is required'),
+  date: z.union([
+    z.string().datetime('Valid ISO 8601 datetime string is required'),
+    z.string().transform((str) => {
+      const date = new Date(str);
+      if (isNaN(date.getTime())) {
+        throw new Error('Invalid date format. Expected ISO 8601 datetime string or valid date string.');
+      }
+      return date.toISOString();
+    })
+  ]),
   category: z.string().min(1, 'Category is required'),
   vendor: z.string().optional(),
   paymentMethod: z.string().optional(),
@@ -82,7 +91,7 @@ export const createExpenseSchema = z.object({
   mileageRate: z.number().min(0).optional(),
   notes: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 export const updateExpenseSchema = createExpenseSchema.partial().extend({
@@ -104,7 +113,7 @@ const baseBudgetSchema = z.object({
   status: z.enum(['active', 'archived', 'paused']).default('active'),
   notes: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 export const createBudgetSchema = baseBudgetSchema.refine((data) => {
@@ -381,7 +390,7 @@ export const createTaxObligationSchema = z.object({
   quarter: z.string().optional(), // e.g., "Q1 2025"
   year: z.number().int().min(2000).max(2100),
   notes: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export const updateTaxObligationSchema = createTaxObligationSchema.partial().extend({
@@ -404,7 +413,7 @@ export const createTaxDeductionSchema = z.object({
   transactionCount: z.number().int().min(0).default(0),
   year: z.number().int().min(2000).max(2100),
   description: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export const updateTaxDeductionSchema = createTaxDeductionSchema.partial().extend({
@@ -421,7 +430,7 @@ export const createTaxDocumentSchema = z.object({
   fileName: z.string().optional(),
   mimeType: z.string().optional(),
   description: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 // Type exports

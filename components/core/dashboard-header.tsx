@@ -19,6 +19,7 @@ import { toast } from "@/lib/toast";
 import { Clock, Download, LayoutDashboard, RefreshCw } from "lucide-react";
 import { memo, useCallback } from "react";
 import DateRangePicker from "./date-range-picker";
+import { logger } from '@/lib/logger';
 
 interface DashboardHeaderProps {
 	className?: string;
@@ -62,7 +63,7 @@ const DashboardHeader = memo(function DashboardHeader({
 				'Your dashboard data has been exported successfully.'
 			);
 		} catch (error) {
-			console.error('Error exporting dashboard:', error);
+			logger.error('Error exporting dashboard:', error);
 			toast.error(
 				'Export failed',
 				'Unable to export dashboard data. Please try again.'

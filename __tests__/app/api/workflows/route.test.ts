@@ -88,8 +88,10 @@ describe('/api/workflows', () => {
       const data = await response.json()
 
       expect(response.status).toBe(500)
-      expect(data.success).toBe(false)
-      expect(data.error).toContain('Database error')
+      // ApiErrorHandler returns { error: {...} } format, not { success: false }
+      expect(data).toHaveProperty('error')
+      expect(data.error).toHaveProperty('message')
+      expect(data.error.message).toContain('Database error')
     })
 
     it('should filter workflows by status', async () => {
@@ -126,10 +128,22 @@ describe('/api/workflows', () => {
       const workflowData = {
         name: 'Test Workflow',
         description: 'A test workflow',
-        category: 'automation',
-        triggerType: 'manual',
-        triggerConfig: {},
-        steps: [],
+        organizationId: null,
+        triggerConfig: { type: 'manual', config: {} },
+        actions: [
+          {
+            id: 'action-1',
+            type: 'send_email',
+            config: {
+              to: 'test@example.com',
+              subject: 'Test',
+              body: 'Test body',
+            },
+          },
+        ],
+        conditions: null,
+        status: 'draft',
+        metadata: null,
       }
 
       const mockWorkflow = {
@@ -246,9 +260,22 @@ describe('/api/workflows', () => {
       const workflowData = {
         name: 'Test Workflow',
         description: 'A test workflow',
-        triggerType: 'manual',
-        triggerConfig: {},
-        steps: [],
+        organizationId: null,
+        triggerConfig: { type: 'manual', config: {} },
+        actions: [
+          {
+            id: 'action-1',
+            type: 'send_email',
+            config: {
+              to: 'test@example.com',
+              subject: 'Test',
+              body: 'Test body',
+            },
+          },
+        ],
+        conditions: null,
+        status: 'draft',
+        metadata: null,
       }
 
       mockDb.insert.mockReturnValue({

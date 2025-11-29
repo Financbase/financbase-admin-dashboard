@@ -8,12 +8,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { integrationConnections } from '@/lib/db/schemas';
-import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
-import { IntegrationSyncEngine } from '@/lib/services/integrations/integration-sync-engine';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { IntegrationService } from '@/lib/services/integration-service';
 
 export async function POST(
   request: NextRequest,
@@ -39,38 +36,30 @@ export async function POST(
       return ApiErrorHandler.badRequest('Invalid JSON in request body');
     }
 
-    const { entityTypes, direction, filters, forceFullSync } = body;
+    const { entityTypes, direction, type } = body;
 
     // Verify connection exists and belongs to user
-    const connection = await db
-      .select()
-      .from(integrationConnections)
-      .where(and(
-        eq(integrationConnections.id, connectionId),
-        eq(integrationConnections.userId, userId)
-      ))
-      .limit(1);
-
-    if (connection.length === 0) {
+    const connection = await IntegrationService.getConnection(connectionId, userId);
+    if (!connection) {
       return ApiErrorHandler.notFound('Connection not found');
     }
 
-    if (!connection[0].isActive) {
+    if (!connection.isActive) {
       return ApiErrorHandler.badRequest('Connection is not active');
     }
 
-    // Start sync process
-    const syncId = await IntegrationSyncEngine.startSync(connectionId, userId, {
+    // Create sync operation
+    const sync = await IntegrationService.createSync(connectionId, userId, {
+      type: type || 'manual',
+      direction: direction || 'bidirectional',
       entityTypes,
-      direction,
-      filters,
-      forceFullSync,
     });
 
     return NextResponse.json({
       success: true,
-      syncId,
+      syncId: sync.syncId,
       message: 'Sync started successfully',
+      sync,
     });
   } catch (error) {
     if (error instanceof Error && (error.message.includes('DATABASE_URL') || error.message.includes('connection'))) {

@@ -29,7 +29,7 @@ const updateProjectSchema = z.object({
 	requireApproval: z.boolean().optional(),
 	estimatedHours: z.number().min(0).optional(),
 	tags: z.array(z.string()).optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 	notes: z.string().optional(),
 });
 

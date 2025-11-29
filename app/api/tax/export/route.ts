@@ -12,6 +12,7 @@ import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { withRLS } from "@/lib/api/with-rls";
 import { formatCurrency } from "@/lib/utils/tax-utils";
+import { createSuccessResponse } from "@/lib/api/standard-response";
 
 /**
  * GET /api/tax/export
@@ -116,17 +117,7 @@ export async function GET(request: NextRequest) {
 			} else if (format === "pdf") {
 				// PDF export would require a PDF library like pdfkit or puppeteer
 				// For now, return a JSON response indicating PDF export is not yet implemented
-				return NextResponse.json(
-					{
-						success: false,
-						error: {
-							message: "PDF export is not yet implemented",
-							code: "NOT_IMPLEMENTED",
-							statusCode: 501,
-						},
-					},
-					{ status: 501 }
-				);
+				return ApiErrorHandler.notImplemented("PDF export is not yet implemented", requestId);
 			}
 
 			return ApiErrorHandler.badRequest("Invalid format or type");

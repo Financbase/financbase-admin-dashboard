@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { FinancialIntelligenceService } from '@/lib/services/ai/financial-intelligence-service';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
 	try {
@@ -22,7 +23,7 @@ export async function GET() {
 
 		return NextResponse.json({ recommendations });
 	} catch (error) {
-		console.error('Error generating financial recommendations:', error);
+		logger.error('Error generating financial recommendations:', error);
 		return NextResponse.json(
 			{ error: 'Failed to generate financial recommendations' },
 			{ status: 500 }

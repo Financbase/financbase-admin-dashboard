@@ -30,6 +30,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import * as React from "react";
+import { logger } from '@/lib/logger';
 
 // Generic workspace interface - can be extended
 export interface WorkspaceInterface extends Workspace {}
@@ -178,7 +179,7 @@ function WorkspaceProvider<T extends WorkspaceInterface>({
 				}
 				return result as T;
 			} catch (error) {
-				console.error("Failed to create workspace:", error);
+				logger.error("Failed to create workspace:", error);
 				throw error;
 			}
 		},
@@ -361,7 +362,7 @@ function WorkspaceContent({
 				description: "A new workspace",
 			});
 		} catch (error) {
-			console.error("Failed to create workspace:", error);
+			logger.error("Failed to create workspace:", error);
 		} finally {
 			setCreatingWorkspace(false);
 		}

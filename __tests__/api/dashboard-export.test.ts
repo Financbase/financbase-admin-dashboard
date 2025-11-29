@@ -49,12 +49,12 @@ describe('GET /api/dashboard/export', () => {
 	});
 
 	it('should export dashboard data as CSV', async () => {
+		// The route expects overview.revenue.total, not totalRevenue
 		const mockOverview = {
-			totalRevenue: 10000,
-			totalExpenses: 5000,
-			netIncome: 5000,
-			totalClients: 10,
-			activeProjects: 5,
+			revenue: { total: 10000 },
+			expenses: { total: 5000 },
+			netIncome: { thisMonth: 5000 },
+			clients: { total: 10, active: 5 },
 		};
 
 		const mockActivity = [
@@ -64,7 +64,7 @@ describe('GET /api/dashboard/export', () => {
 				description: 'Invoice #123',
 				amount: 1000,
 				status: 'paid',
-				timestamp: new Date('2025-01-01').toISOString(),
+				createdAt: new Date('2025-01-01').toISOString(),
 			},
 		];
 

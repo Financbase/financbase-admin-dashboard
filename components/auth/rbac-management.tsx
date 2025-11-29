@@ -23,6 +23,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Users, Shield, Settings, UserPlus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import { FINANCIAL_PERMISSIONS, DEFAULT_ROLES, FinancbaseUserMetadata } from '@/types/auth';
+import { logger } from '@/lib/logger';
 
 interface UserWithPermissions extends FinancbaseUserMetadata {
 	id: string;
@@ -47,13 +48,13 @@ async function updateUserPermissions(userId: string, permissions: string[], role
 
 		if (!response.ok) {
 			const error = await response.json();
-			console.error('Failed to update permissions:', error);
+			logger.error('Failed to update permissions:', error);
 			return false;
 		}
 
 		return true;
 	} catch (error) {
-		console.error('Error updating permissions:', error);
+		logger.error('Error updating permissions:', error);
 		return false;
 	}
 }
@@ -77,7 +78,7 @@ export function RBACManagementDashboard() {
 			const metadata = user?.publicMetadata as FinancbaseUserMetadata | undefined;
 			setIsAdminUser(metadata?.role === 'admin');
 		} catch (error) {
-			console.error('Error checking admin status:', error);
+			logger.error('Error checking admin status:', error);
 		}
 	};
 
@@ -91,7 +92,7 @@ export function RBACManagementDashboard() {
 				setUsers(userData);
 			}
 		} catch (error) {
-			console.error('Error loading users:', error);
+			logger.error('Error loading users:', error);
 		} finally {
 			setLoading(false);
 		}
@@ -127,7 +128,7 @@ export function RBACManagementDashboard() {
 				));
 			}
 		} catch (error) {
-			console.error('Error updating permissions:', error);
+			logger.error('Error updating permissions:', error);
 		} finally {
 			setSaving(false);
 		}
@@ -151,7 +152,7 @@ export function RBACManagementDashboard() {
 				));
 			}
 		} catch (error) {
-			console.error('Error updating role:', error);
+			logger.error('Error updating role:', error);
 		} finally {
 			setSaving(false);
 		}

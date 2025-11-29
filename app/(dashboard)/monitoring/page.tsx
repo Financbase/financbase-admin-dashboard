@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MonitoringDashboard } from '@/components/monitoring/monitoring-dashboard';
 import { AlertConfiguration } from '@/components/monitoring/alert-configuration';
 import { 
+import { logger } from '@/lib/logger';
   Activity, 
   Bell, 
   BarChart3, 
@@ -33,7 +34,7 @@ export default function MonitoringPage() {
   };
 
   const handleViewMetrics = (metricType: string) => {
-    console.log('View metrics:', metricType);
+    logger.info('View metrics:', metricType);
     // In a real implementation, this would navigate to a detailed metrics view
   };
 

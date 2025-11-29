@@ -26,6 +26,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CreditCard, Plus, Trash2, Star, Calendar, DollarSign } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { logger } from '@/lib/logger';
 
 interface PaymentMethod {
 	id: string;
@@ -87,7 +88,7 @@ export function PaymentMethodsManager() {
 				setBillingHistory(historyData.history);
 			}
 		} catch (error) {
-			console.error('Error loading payment data:', error);
+			logger.error('Error loading payment data:', error);
 			toast.error('Failed to load payment information');
 		} finally {
 			setLoading(false);
@@ -127,7 +128,7 @@ export function PaymentMethodsManager() {
 				toast.error(error.error || 'Failed to add payment method');
 			}
 		} catch (error) {
-			console.error('Error adding payment method:', error);
+			logger.error('Error adding payment method:', error);
 			toast.error('Failed to add payment method');
 		}
 	};
@@ -141,7 +142,7 @@ export function PaymentMethodsManager() {
 			loadData();
 			toast.success('Payment method removed successfully');
 		} catch (error) {
-			console.error('Error removing payment method:', error);
+			logger.error('Error removing payment method:', error);
 			toast.error('Failed to remove payment method');
 		}
 	};

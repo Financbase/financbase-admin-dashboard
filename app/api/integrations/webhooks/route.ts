@@ -16,6 +16,7 @@ import { GustoIntegration } from '@/lib/services/integrations/gusto.service';
 import { QuickBooksIntegration } from '@/lib/services/integrations/quickbooks.service';
 import { XeroIntegration } from '@/lib/services/integrations/xero.service';
 import { PayPalIntegration } from '@/lib/services/integrations/paypal.service';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/integrations/webhooks
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error('Webhook processing error:', error);
+		logger.error('Webhook processing error:', error);
 		return NextResponse.json({
 			error: 'Webhook processing failed',
 			message: error.message
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest) {
 		return NextResponse.json(result.rows);
 
 	} catch (error) {
-		console.error('Error fetching webhook events:', error);
+		logger.error('Error fetching webhook events:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

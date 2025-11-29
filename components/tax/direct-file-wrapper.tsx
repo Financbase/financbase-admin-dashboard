@@ -18,6 +18,7 @@ import { createRoot, Root } from "react-dom/client";
 import { DirectFileDisclosure } from "./direct-file-disclosure";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 interface DirectFileWrapperProps {
 	/**
@@ -68,7 +69,7 @@ export function DirectFileWrapper({ onExportComplete }: DirectFileWrapperProps) 
 
 				setIsLoading(false);
 			} catch (err) {
-				console.error("Failed to initialize Direct File:", err);
+				logger.error("Failed to initialize Direct File:", err);
 				setError(
 					err instanceof Error 
 						? err.message 

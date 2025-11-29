@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { IncidentResponseService } from '@/lib/services/incident-response-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -42,23 +43,25 @@ export async function POST(request: NextRequest) {
 
     const runbook = await IncidentResponseService.createRunbook(orgId, {
       createdBy: userId,
-      title,
+      name: title,
       description,
       incidentType,
       severity,
-      procedures,
-      checklists,
-      escalationPaths,
-      communicationTemplates,
-      toolsAndResources,
-      reviewFrequency,
+      detectionProcedures: Array.isArray(procedures) ? [] : (procedures?.detection || []),
+      triageProcedures: Array.isArray(procedures) ? [] : (procedures?.triage || []),
+      containmentProcedures: Array.isArray(procedures) ? [] : (procedures?.containment || []),
+      eradicationProcedures: Array.isArray(procedures) ? [] : (procedures?.eradication || []),
+      recoveryProcedures: Array.isArray(procedures) ? [] : (procedures?.recovery || []),
+      communicationTemplates: communicationTemplates || {},
+      escalationCriteria: escalationPaths || [],
+      tools: toolsAndResources?.tools || [],
+      references: toolsAndResources?.references || [],
       tags,
-      metadata,
     });
 
     return NextResponse.json({ success: true, data: runbook, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating runbook:', error);
+    logger.error('Error creating runbook:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -79,12 +82,12 @@ export async function GET(request: NextRequest) {
     const runbooks = await IncidentResponseService.getRunbooks(orgId, {
       incidentType,
       severity,
-      status,
+      isActive: status === 'active' ? true : status === 'archived' ? false : undefined,
     });
 
     return NextResponse.json({ success: true, data: runbooks, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching runbooks:', error);
+    logger.error('Error fetching runbooks:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

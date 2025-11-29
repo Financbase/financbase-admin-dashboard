@@ -15,6 +15,7 @@ import { useActions } from "@/hooks/use-actions";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, AudioLines, BarChart2, Globe, Loader2, PlaneTakeoff, Search, Send, Video } from "lucide-react";
 import { useEffect, useState } from "react";
+import { logger } from '@/lib/logger';
 
 function useDebounce<T>(value: T, delay = 500): T {
 	const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -100,7 +101,7 @@ export function ActionSearchBar({ actions: providedActions }: ActionSearchBarPro
 		setQuery("");
 
 		// Here you can add action execution logic
-		console.log("Action selected:", action);
+		logger.info("Action selected:", action);
 
 		// Example: Execute different actions based on type
 		const actionAny = action as any;
@@ -115,20 +116,20 @@ export function ActionSearchBar({ actions: providedActions }: ActionSearchBarPro
 				case "function":
 					if (actionAny.actionData?.functionName) {
 						// Execute custom function
-						console.log("Executing function:", actionAny.actionData.functionName);
+						logger.info("Executing function:", actionAny.actionData.functionName);
 					}
 					break;
 				case "api":
 					if (actionAny.actionData?.endpoint) {
 						// Make API call
-						console.log("Calling API:", actionAny.actionData.endpoint);
+						logger.info("Calling API:", actionAny.actionData.endpoint);
 					}
 					break;
 				default:
-					console.log("Command action:", actionAny.label || action.name);
+					logger.info("Command action:", actionAny.label || action.name);
 			}
 		} else {
-			console.log("Command action:", actionAny.label || action.name);
+			logger.info("Command action:", actionAny.label || action.name);
 		}
 	};
 

@@ -108,8 +108,12 @@ export async function setRLSContext(context: UserContext): Promise<void> {
 /**
  * Convenience function: Set RLS context from Clerk user ID
  * Fetches user from database and sets all available context
+ * Now supports active organization from session/preference
  */
-export async function setRLSContextFromClerkId(clerkId: string): Promise<boolean> {
+export async function setRLSContextFromClerkId(
+  clerkId: string,
+  sessionOrgId?: string | null
+): Promise<boolean> {
   try {
     const user = await getUserFromDatabase(clerkId);
     
@@ -120,10 +124,28 @@ export async function setRLSContextFromClerkId(clerkId: string): Promise<boolean
       return false;
     }
 
+    // Get active organization ID using fallback logic: session -> preference -> primary
+    let activeOrgId: string | undefined;
+    
+    if (sessionOrgId) {
+      // Verify user is member of session organization
+      const { isUserMemberOfOrganization } = await import('@/lib/services/organization.service');
+      const isMember = await isUserMemberOfOrganization(user.id, sessionOrgId);
+      if (isMember) {
+        activeOrgId = sessionOrgId;
+      }
+    }
+
+    // If no valid session org, get from service (which checks preference and primary)
+    if (!activeOrgId) {
+      const { getActiveOrganizationId } = await import('@/lib/services/organization.service');
+      activeOrgId = await getActiveOrganizationId(user.id, sessionOrgId || undefined) || undefined;
+    }
+
     await setRLSContext({
       clerkId: user.clerk_id,
       userId: user.id,
-      organizationId: user.organization_id || undefined,
+      organizationId: activeOrgId,
     });
 
     return true;

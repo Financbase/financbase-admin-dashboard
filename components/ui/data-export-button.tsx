@@ -11,10 +11,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 export function DataExportButton() {
   const handleExport = () => {
-    console.log("Exporting data...");
+    logger.info("Exporting data...");
   };
 
   return (

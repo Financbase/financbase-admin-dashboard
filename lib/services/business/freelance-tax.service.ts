@@ -19,16 +19,9 @@ import {
 	Filter,
 	TrendingDown,
 } from "lucide-react";
-import { db } from "../db/connection";
-import { income, invoices } from "../db/schema-actual";
-import {
-	type Project,
-	type ProjectExpense,
-	type ProjectTimeEntry,
-	projectExpenses,
-	projectTimeEntries,
-	projects,
-} from "../db/schema-freelance";
+import { db } from "@/lib/db";
+import { propertyIncome, invoices, projects, expenses, timeEntries } from "@/lib/db/schemas";
+import type { Project } from "@/lib/db/schemas";
 
 export interface TaxCalculation {
 	grossIncome: number;
@@ -82,25 +75,25 @@ export class FreelanceTaxService {
 	): Promise<TaxCalculation> {
 		// Get gross income for the period
 		const incomeResult = await db
-			.select({ total: sum(income.amount) })
-			.from(income)
+			.select({ total: sum(propertyIncome.amount) })
+			.from(propertyIncome)
 			.where(
 				and(
-					eq(income.userId, userId),
-					gte(income.date, startDate),
-					lte(income.date, endDate),
+					eq(propertyIncome.userId, userId),
+					gte(propertyIncome.date, startDate),
+					lte(propertyIncome.date, endDate),
 				),
 			);
 
 		// Get business expenses for the period
 		const expensesResult = await db
-			.select({ total: sum(projectExpenses.amount) })
-			.from(projectExpenses)
+			.select({ total: sum(expenses.amount) })
+			.from(expenses)
 			.where(
 				and(
-					eq(projectExpenses.userId, userId),
-					gte(projectExpenses.date, startDate),
-					lte(projectExpenses.date, endDate),
+					eq(expenses.userId, userId),
+					gte(expenses.date, startDate),
+					lte(expenses.date, endDate),
 				),
 			);
 
@@ -132,18 +125,18 @@ export class FreelanceTaxService {
 		// Get expenses grouped by category
 		const expenseCategories = await db
 			.select({
-				category: projectExpenses.category,
-				amount: sum(projectExpenses.amount),
+				category: expenses.category,
+				amount: sum(expenses.amount),
 			})
-			.from(projectExpenses)
+			.from(expenses)
 			.where(
 				and(
-					eq(projectExpenses.userId, userId),
-					gte(projectExpenses.date, startDate),
-					lte(projectExpenses.date, endDate),
+					eq(expenses.userId, userId),
+					gte(expenses.date, startDate),
+					lte(expenses.date, endDate),
 				),
 			)
-			.groupBy(projectExpenses.category);
+			.groupBy(expenses.category);
 
 		const deductions: DeductionCategory[] = [];
 
@@ -271,9 +264,9 @@ export class FreelanceTaxService {
 		}
 
 		const { TaxService } = await import("./tax-service");
-		const { db } = await import("../db/connection");
-		const { taxPayments } = await import("../db/schemas");
-		const { withTransaction } = await import("../../utils/db-transaction");
+		const { db } = await import("@/lib/db");
+		const { taxPayments } = await import("@/lib/db/schemas");
+		const { withTransaction } = await import("@/lib/utils/db-transaction");
 		const { eq, and } = await import("drizzle-orm");
 		const taxService = new TaxService();
 
@@ -281,59 +274,71 @@ export class FreelanceTaxService {
 		const dueDate = this.getQuarterlyDueDate(quarter, year);
 
 		return await withTransaction(async (tx) => {
-		// Check if obligation already exists for this quarter
-		const existingObligations = await taxService.getObligations(userId, {
-			quarter: quarterLabel,
-			year,
-			type: "self_employment",
-		});
+			// Check if obligation already exists for this quarter
+			const existingObligations = await taxService.getObligations(userId, {
+				quarter: quarterLabel,
+				year,
+				type: "self_employment",
+			});
 
-		// Handle array or paginated result
-		const obligations = Array.isArray(existingObligations)
-			? existingObligations
+			// Handle array or paginated result
+			const obligations = Array.isArray(existingObligations)
+				? existingObligations
 				: existingObligations.data || [];
 
 			let obligationId: string;
 
-		if (obligations.length > 0) {
+			if (obligations.length > 0) {
 				obligationId = obligations[0].id;
-		} else {
-			// Create new obligation for quarterly payment
-				const newObligation = await taxService.createObligation({
-				userId,
-				name: `Q${quarter} ${year} Estimated Tax Payment`,
-				type: "self_employment",
-				amount,
-				dueDate: dueDate.toISOString(),
-				status: "pending",
-				quarter: quarterLabel,
-				year,
-				notes: `Quarterly estimated tax payment for ${quarterLabel}`,
-			});
-
-			// Record the payment
-			const newObligations = await taxService.getObligations(userId, {
-				quarter: quarterLabel,
-				year,
-				type: "self_employment",
-			});
-			const newObligationsList = Array.isArray(newObligations)
-				? newObligations
-				: newObligations.data;
-
-			if (newObligationsList.length > 0) {
+				// Record the payment for existing obligation
 				await taxService.recordPayment(
 					{
-						obligationId: newObligationsList[0].id,
+						obligationId,
 						amount,
 						paymentDate: paymentDate.toISOString(),
-						paymentMethod: "quarterly_estimate",
+						paymentMethod: paymentMethod || "quarterly_estimate",
 						notes: `Quarterly estimated tax payment for ${quarterLabel}`,
 					},
 					userId
 				);
+			} else {
+				// Create new obligation for quarterly payment
+				const newObligation = await taxService.createObligation({
+					userId,
+					name: `Q${quarter} ${year} Estimated Tax Payment`,
+					type: "self_employment",
+					amount,
+					dueDate: dueDate.toISOString(),
+					status: "pending",
+					quarter: quarterLabel,
+					year,
+					notes: `Quarterly estimated tax payment for ${quarterLabel}`,
+				});
+
+				// Record the payment
+				const newObligations = await taxService.getObligations(userId, {
+					quarter: quarterLabel,
+					year,
+					type: "self_employment",
+				});
+				const newObligationsList = Array.isArray(newObligations)
+					? newObligations
+					: newObligations.data || [];
+
+				if (newObligationsList.length > 0) {
+					await taxService.recordPayment(
+						{
+							obligationId: newObligationsList[0].id,
+							amount,
+							paymentDate: paymentDate.toISOString(),
+							paymentMethod: paymentMethod || "quarterly_estimate",
+							notes: `Quarterly estimated tax payment for ${quarterLabel}`,
+						},
+						userId
+					);
+				}
 			}
-		}
+		});
 	}
 
 	/**
@@ -424,14 +429,14 @@ export class FreelanceTaxService {
 	}> {
 		// Get actual business miles from time entries or expense records
 		const mileageExpenses = await db
-			.select({ amount: sum(projectExpenses.amount) })
-			.from(projectExpenses)
+			.select({ amount: sum(expenses.amount) })
+			.from(expenses)
 			.where(
 				and(
-					eq(projectExpenses.userId, userId),
-					eq(projectExpenses.category, "travel"),
-					gte(projectExpenses.date, startDate),
-					lte(projectExpenses.date, endDate),
+					eq(expenses.userId, userId),
+					eq(expenses.category, "travel"),
+					gte(expenses.date, startDate),
+					lte(expenses.date, endDate),
 				),
 			);
 

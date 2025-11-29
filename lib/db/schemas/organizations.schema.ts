@@ -12,8 +12,11 @@ import {
 	text,
 	timestamp,
 	uuid,
+	boolean,
+	jsonb,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.schema";
+import { subscriptionPlans } from "./billing.schema";
 
 // Schema location: public.organizations (not financbase.organizations)
 // Updated to use UUID to match migrations and users.organizationId requirements
@@ -23,7 +26,13 @@ export const organizations = pgTable("organizations", {
 	slug: text("slug").unique(),
 	description: text("description"),
 	logo: text("logo"),
-	settings: text("settings"), // JSON string for org settings
+	settings: jsonb("settings").default({}), // JSONB for organization-specific settings
+	subscriptionPlanId: uuid("subscription_plan_id").references(() => subscriptionPlans.id, { onDelete: "set null" }),
+	billingEmail: text("billing_email"),
+	taxId: text("tax_id"),
+	address: text("address"),
+	phone: text("phone"),
+	isActive: boolean("is_active").default(true).notNull(),
 	ownerId: uuid("owner_id").references(() => users.id),
 	createdAt: timestamp("created_at").defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),

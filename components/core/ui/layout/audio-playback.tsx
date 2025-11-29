@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { logger } from '@/lib/logger';
 
 interface AudioPlaybackProps {
 	audioUrl: string;
@@ -128,7 +129,7 @@ export const AudioPlayback: React.FC<AudioPlaybackProps> = ({
 				setIsPlaying(true);
 			}
 		} catch (error) {
-			console.error("Error playing audio:", error);
+			logger.error("Error playing audio:", error);
 			setError("Failed to play audio");
 		}
 	};

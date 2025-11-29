@@ -23,6 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Monitor, Smartphone, Tablet, MapPin, Clock, Trash2, Shield } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { logger } from '@/lib/logger';
 
 interface Session {
 	id: string;
@@ -52,7 +53,7 @@ export function SessionManager() {
 				setSessionData(data);
 			}
 		} catch (error) {
-			console.error('Error loading sessions:', error);
+			logger.error('Error loading sessions:', error);
 			toast.error('Failed to load sessions');
 		} finally {
 			setLoading(false);
@@ -79,7 +80,7 @@ export function SessionManager() {
 				toast.error(error.error || 'Failed to revoke session');
 			}
 		} catch (error) {
-			console.error('Error revoking session:', error);
+			logger.error('Error revoking session:', error);
 			toast.error('Failed to revoke session');
 		}
 	};
@@ -98,7 +99,7 @@ export function SessionManager() {
 				toast.error(error.error || 'Failed to revoke sessions');
 			}
 		} catch (error) {
-			console.error('Error revoking all sessions:', error);
+			logger.error('Error revoking all sessions:', error);
 			toast.error('Failed to revoke sessions');
 		}
 	};

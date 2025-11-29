@@ -12,6 +12,7 @@ import { db } from '@/lib/db';
 import { workflows, workflowLogs } from '@/lib/db/schemas';
 import { eq, and, desc } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -73,7 +74,7 @@ export async function GET(
     return NextResponse.json(logs);
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Error fetching workflow logs:', error);
+    logger.error('Error fetching workflow logs:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

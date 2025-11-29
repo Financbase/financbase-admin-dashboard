@@ -11,6 +11,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { logger } from '@/lib/logger';
 
 interface PageTrackerProps {
 	children: React.ReactNode;
@@ -54,7 +55,7 @@ export default function PageTracker({ children }: PageTrackerProps) {
 					};
 
 					// Send metrics to analytics service (implement based on your needs)
-					console.log("Page Performance Metrics:", metrics);
+					logger.info("Page Performance Metrics:", metrics);
 
 					// Example: Send to analytics API
 					// fetch("/api/analytics/page-metrics", {
@@ -85,7 +86,7 @@ export default function PageTracker({ children }: PageTrackerProps) {
 			visibility: isVisible ? "visible" : "hidden",
 		};
 
-		console.log("Route Change:", routeChangeData);
+		logger.info("Route Change:", routeChangeData);
 
 		// Example: Send to analytics API
 		// fetch("/api/analytics/route-change", {
@@ -109,7 +110,7 @@ export default function PageTracker({ children }: PageTrackerProps) {
 				viewport: `${window.innerWidth}x${window.innerHeight}`,
 			};
 
-			console.log("User Interaction:", interactionData);
+			logger.info("User Interaction:", interactionData);
 
 			// Example: Send to analytics API (throttled)
 			// if (Math.random() < 0.1) { // Sample 10% of interactions
@@ -144,7 +145,7 @@ export function usePageTracker() {
 			userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
 		};
 
-		console.log("Custom Event:", eventData);
+		logger.info("Custom Event:", eventData);
 
 		// Example: Send to analytics API
 		// fetch("/api/analytics/custom-event", {
@@ -167,7 +168,7 @@ export function usePageTracker() {
 			userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
 		};
 
-		console.error("Tracked Error:", errorData);
+		logger.error("Tracked Error:", errorData);
 
 		// Send to error tracking service
 		// fetch("/api/analytics/error", {

@@ -13,6 +13,7 @@ import { directFileExports } from "@/lib/db/schemas/direct-file.schema";
 import { eq, desc } from "drizzle-orm";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { withRLS } from "@/lib/api/with-rls";
+import { createSuccessResponse } from "@/lib/api/standard-response";
 
 /**
  * GET /api/tax/direct-file/exports
@@ -29,10 +30,7 @@ export async function GET(request: NextRequest) {
 				.where(eq(directFileExports.userId, clerkUserId))
 				.orderBy(desc(directFileExports.exportDate));
 
-			return NextResponse.json({
-				success: true,
-				data: exports,
-			});
+			return createSuccessResponse(exports, 200, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}
@@ -75,13 +73,10 @@ export async function POST(request: NextRequest) {
 				})
 				.returning();
 
-			return NextResponse.json(
-				{
-					success: true,
-					message: "Export metadata stored successfully",
-					data: exportRecord[0],
-				},
-				{ status: 201 }
+			return createSuccessResponse(
+				exportRecord[0],
+				201,
+				{ requestId }
 			);
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);

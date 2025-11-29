@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { PolicyManagementService } from '@/lib/services/policy-management-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: policy, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating policy:', error);
+    logger.error('Error creating policy:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: policies, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching policies:', error);
+    logger.error('Error fetching policies:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

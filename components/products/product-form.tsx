@@ -34,6 +34,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { X } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface Product {
 	id: string;
@@ -156,7 +157,7 @@ export function ProductForm({ open, onOpenChange, product, onSuccess }: ProductF
 			const data = await response.json();
 			setCategories(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error('Error fetching categories:', error);
+			logger.error('Error fetching categories:', error);
 		}
 	};
 

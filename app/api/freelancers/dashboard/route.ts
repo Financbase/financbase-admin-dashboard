@@ -16,6 +16,7 @@ import { projects } from '@/lib/db/schemas/projects.schema';
 import { tasks } from '@/lib/db/schemas/tasks.schema';
 import { invoices } from '@/lib/db/schemas/invoices.schema';
 import { eq, and, desc, sql, gte, count } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 // GET /api/freelancers/dashboard - Get freelancer platform dashboard statistics
 export async function GET(request: NextRequest) {
@@ -164,7 +165,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Failed to fetch freelancer dashboard data:', error);
+    logger.error('Failed to fetch freelancer dashboard data:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

@@ -60,7 +60,7 @@ export const dashboardToasts = {
 		validationError: (errors?: Record<string, string[]>) => {
 			const errorCount = errors ? Object.keys(errors).length : 0;
 			const message = errorCount > 0
-				? `Validation failed: ${errorCount} field${errorCount > 1 ? 's' : ''} need attention`
+				? `Validation failed: ${errorCount} field${errorCount > 1 ? 's' : ''} ${errorCount > 1 ? 'need' : 'needs'} attention`
 				: 'Validation failed';
 			toast.error(message, {
 				description: 'Please check the form fields and try again.',

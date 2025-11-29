@@ -25,6 +25,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { FreelancerProfileCard } from "@/components/freelancer-hub/freelancer-profile-card";
+import { logger } from '@/lib/logger';
 
 // Mock data for demonstration - in production, this would come from your API
 const mockFreelancers = [
@@ -224,7 +225,7 @@ export default function FreelancePage() {
 
 	const handleSearch = () => {
 		// In production, this would trigger an API call
-		console.log("Searching for:", { searchQuery, selectedSpecialty, selectedCountry, sortBy });
+		logger.info("Searching for:", { searchQuery, selectedSpecialty, selectedCountry, sortBy });
 	};
 
 	const handleClearFilters = () => {

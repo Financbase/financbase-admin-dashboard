@@ -11,6 +11,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZoomService } from '@/lib/services/integrations/zoom-service';
 import { GoogleMeetService } from '@/lib/services/integrations/google-meet-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(integrations);
 	} catch (error) {
-		console.error('Error fetching integrations:', error);
+		logger.error('Error fetching integrations:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
 				try {
 					result = await ZoomService.authenticate(code, clientId, clientSecret, redirectUri);
 				} catch (error) {
-					console.error('Zoom authentication error:', error);
+					logger.error('Zoom authentication error:', error);
 					return NextResponse.json({ error: 'Zoom authentication failed' }, { status: 400 });
 				}
 				break;
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
 				try {
 					result = await GoogleMeetService.authenticate(code, clientId, clientSecret, redirectUri);
 				} catch (error) {
-					console.error('Google authentication error:', error);
+					logger.error('Google authentication error:', error);
 					return NextResponse.json({ error: 'Google authentication failed' }, { status: 400 });
 				}
 				break;
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json(newIntegration, { status: 201 });
 	} catch (error) {
-		console.error('Error creating integration:', error);
+		logger.error('Error creating integration:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
 }

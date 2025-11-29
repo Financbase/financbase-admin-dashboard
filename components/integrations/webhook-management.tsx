@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DeliveryLogs } from '@/components/webhooks/delivery-logs';
+import { logger } from '@/lib/logger';
 
 interface WebhookEndpoint {
 	id: string;
@@ -154,7 +155,7 @@ export function WebhookManagement() {
 
 			// Check if user is signed in
 			if (!isSignedIn) {
-				console.warn('User is not authenticated');
+				logger.warn('User is not authenticated');
 				return SAMPLE_WEBHOOK_ENDPOINTS;
 			}
 
@@ -162,7 +163,7 @@ export function WebhookManagement() {
 				const response = await authenticatedFetch('/api/integrations/webhooks/endpoints');
 				if (!response.ok) {
 					if (response.status === 401) {
-						console.error('Unauthorized - authentication token may be invalid');
+						logger.error('Unauthorized - authentication token may be invalid');
 						throw new Error('Your session has expired. Please sign in again.');
 					}
 					throw new Error(`Failed to fetch webhook endpoints: ${response.statusText}`);
@@ -181,10 +182,10 @@ export function WebhookManagement() {
 				})) : SAMPLE_WEBHOOK_ENDPOINTS;
 			} catch (error) {
 				if (error instanceof Error && error.message.includes('not authenticated')) {
-					console.error('Authentication error:', error);
+					logger.error('Authentication error:', error);
 					throw error;
 				}
-				console.error('Error fetching webhook endpoints:', error);
+				logger.error('Error fetching webhook endpoints:', error);
 				// Return sample data if fetch fails (for development/demo)
 				return SAMPLE_WEBHOOK_ENDPOINTS;
 			}
@@ -203,7 +204,7 @@ export function WebhookManagement() {
 
 			// Check if user is signed in
 			if (!isSignedIn) {
-				console.warn('User is not authenticated');
+				logger.warn('User is not authenticated');
 				return SAMPLE_WEBHOOK_EVENTS;
 			}
 
@@ -211,7 +212,7 @@ export function WebhookManagement() {
 				const response = await authenticatedFetch('/api/integrations/webhooks');
 				if (!response.ok) {
 					if (response.status === 401) {
-						console.error('Unauthorized - authentication token may be invalid');
+						logger.error('Unauthorized - authentication token may be invalid');
 						throw new Error('Your session has expired. Please sign in again.');
 					}
 					throw new Error(`Failed to fetch webhook events: ${response.statusText}`);
@@ -220,10 +221,10 @@ export function WebhookManagement() {
 				return Array.isArray(data) ? data : SAMPLE_WEBHOOK_EVENTS;
 			} catch (error) {
 				if (error instanceof Error && error.message.includes('not authenticated')) {
-					console.error('Authentication error:', error);
+					logger.error('Authentication error:', error);
 					throw error;
 				}
-				console.error('Error fetching webhook events:', error);
+				logger.error('Error fetching webhook events:', error);
 				return SAMPLE_WEBHOOK_EVENTS;
 			}
 		},
@@ -687,7 +688,7 @@ export function WebhookManagement() {
 							webhookId={parseInt(selectedEndpoint.id)}
 							onViewDelivery={(delivery) => {
 								// Handle viewing delivery details
-								console.log('View delivery:', delivery);
+								logger.info('View delivery:', delivery);
 							}}
 							onRetryDelivery={async (deliveryId) => {
 								try {
@@ -701,7 +702,7 @@ export function WebhookManagement() {
 										queryClient.invalidateQueries({ queryKey: ['webhookDeliveries'] });
 									}
 								} catch (error) {
-									console.error('Failed to retry delivery:', error);
+									logger.error('Failed to retry delivery:', error);
 								}
 							}}
 						/>

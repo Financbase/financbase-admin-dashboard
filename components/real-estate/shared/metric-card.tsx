@@ -34,6 +34,7 @@ interface MetricCardProps {
 export function MetricCard({ metric, variant = 'default', className = '' }: MetricCardProps) {
   const formatValue = (value: number | string, format?: string) => {
     if (typeof value === 'string') return value;
+    if (value === null || value === undefined) return '0';
     
     switch (format) {
       case 'currency':

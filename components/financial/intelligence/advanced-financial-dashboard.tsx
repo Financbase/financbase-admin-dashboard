@@ -49,6 +49,7 @@ import {
   CheckCircle2 as SuccessIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 // Enhanced interfaces for comprehensive financial intelligence
 interface FinancialInsight {
@@ -457,7 +458,7 @@ export function AdvancedFinancialDashboard() {
         setScenarios(sampleScenarios);
       } catch (err) {
         setError('Failed to load financial intelligence data');
-        console.error('Error loading data:', err);
+        logger.error('Error loading data:', err);
       } finally {
         setLoading(false);
       }

@@ -16,6 +16,7 @@ import { createInvoiceSchema } from '@/lib/validation-schemas';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { eq, count } from 'drizzle-orm';
 import { withRLS } from '@/lib/api/with-rls';
+import { createSuccessResponse } from '@/lib/api/standard-response';
 
 /**
  * @swagger
@@ -114,16 +115,19 @@ export async function GET(req: NextRequest) {
       .from(invoices)
       .where(eq(invoices.userId, clerkUserId));
 
-    return NextResponse.json({
-      success: true,
-      data: userInvoices,
-      pagination: {
-        page,
-        limit,
-        total: totalCount[0]?.count || 0,
-        pages: Math.ceil((totalCount[0]?.count || 0) / limit)
+    return createSuccessResponse(
+      userInvoices,
+      200,
+      {
+        requestId,
+        pagination: {
+          page,
+          limit,
+          total: totalCount[0]?.count || 0,
+          totalPages: Math.ceil((totalCount[0]?.count || 0) / limit),
+        },
       }
-    });
+    );
     } catch (error) {
       return ApiErrorHandler.handle(error, requestId);
     }
@@ -210,24 +214,172 @@ export async function POST(req: NextRequest) {
       try {
         body = await req.json();
       } catch (error) {
-        return ApiErrorHandler.badRequest('Invalid JSON in request body');
+        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
       }
-    const validatedData = createInvoiceSchema.parse({
-      ...body,
-      userId: clerkUserId // Ensure userId comes from auth, not request body
-    });
+    // Validate numeric fields
+    const validateNumericField = (value: any, fieldName: string, allowNegative = false): number => {
+      if (value === undefined || value === null || value === '') {
+        return 0;
+      }
+      const num = typeof value === 'string' ? parseFloat(value) : Number(value);
+      if (isNaN(num)) {
+        throw new Error(`Invalid ${fieldName} format. Expected a valid number.`);
+      }
+      if (!allowNegative && num < 0) {
+        throw new Error(`${fieldName} must be a non-negative number.`);
+      }
+      return num;
+    };
+
+    // Validate date fields
+    const validateDateField = (value: any, fieldName: string, required = false): Date | undefined => {
+      if (!value) {
+        if (required) {
+          throw new Error(`${fieldName} is required.`);
+        }
+        return undefined;
+      }
+      try {
+        const date = new Date(value);
+        if (isNaN(date.getTime())) {
+          throw new Error(`Invalid ${fieldName} format. Expected valid date string or ISO 8601 datetime.`);
+        }
+        return date;
+      } catch (error) {
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error(`Invalid ${fieldName} format. Expected valid date string or ISO 8601 datetime.`);
+      }
+    };
+
+    // Validate clientId if provided
+    let parsedClientId: number | undefined;
+    if (body.clientId) {
+      parsedClientId = parseInt(String(body.clientId), 10);
+      if (isNaN(parsedClientId)) {
+        return ApiErrorHandler.badRequest('Invalid clientId format. Expected a valid integer.', requestId);
+      }
+    }
+
+    // Validate parentInvoiceId if provided
+    let parsedParentInvoiceId: number | undefined;
+    if (body.parentInvoiceId) {
+      parsedParentInvoiceId = parseInt(String(body.parentInvoiceId), 10);
+      if (isNaN(parsedParentInvoiceId)) {
+        return ApiErrorHandler.badRequest('Invalid parentInvoiceId format. Expected a valid integer.', requestId);
+      }
+    }
+
+    // Validate numeric amounts
+    let subtotal: number;
+    let taxRate: number;
+    let taxAmount: number;
+    let discountAmount: number;
+    let total: number;
+    let amountPaid: number;
+
+    try {
+      subtotal = validateNumericField(body.subtotal, 'subtotal');
+      taxRate = validateNumericField(body.taxRate, 'taxRate');
+      taxAmount = validateNumericField(body.taxAmount, 'taxAmount');
+      discountAmount = validateNumericField(body.discountAmount, 'discountAmount');
+      total = validateNumericField(body.total, 'total');
+      amountPaid = validateNumericField(body.amountPaid, 'amountPaid');
+    } catch (error) {
+      if (error instanceof Error) {
+        return ApiErrorHandler.badRequest(error.message, requestId);
+      }
+      return ApiErrorHandler.badRequest('Invalid numeric field format.', requestId);
+    }
+
+    // Validate date fields
+    let issueDate: Date;
+    let dueDate: Date;
+    let paidDate: Date | undefined;
+    let sentDate: Date | undefined;
+    let recurringEndDate: Date | undefined;
+
+    try {
+      issueDate = validateDateField(body.issueDate, 'issueDate') || new Date();
+      dueDate = validateDateField(body.dueDate, 'dueDate') || new Date();
+      paidDate = validateDateField(body.paidDate, 'paidDate');
+      sentDate = validateDateField(body.sentDate, 'sentDate');
+      recurringEndDate = validateDateField(body.recurringEndDate, 'recurringEndDate');
+    } catch (error) {
+      if (error instanceof Error) {
+        return ApiErrorHandler.badRequest(error.message, requestId);
+      }
+      return ApiErrorHandler.badRequest('Invalid date field format.', requestId);
+    }
+
+    // Validate status enum
+    const validStatuses = ['draft', 'sent', 'viewed', 'paid', 'overdue', 'cancelled'];
+    const status = body.status || 'draft';
+    if (!validStatuses.includes(status)) {
+      return ApiErrorHandler.badRequest(`Invalid status. Must be one of: ${validStatuses.join(', ')}.`, requestId);
+    }
+
+    // Validate items array
+    if (!Array.isArray(body.items)) {
+      return ApiErrorHandler.badRequest('Items must be an array.', requestId);
+    }
+
+    // Transform form data to match database schema
+    const invoiceData = {
+      userId: clerkUserId,
+      invoiceNumber: body.invoiceNumber || `INV-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      reference: body.reference,
+      clientId: parsedClientId,
+      clientName: body.clientName || '',
+      clientEmail: body.clientEmail || '',
+      clientAddress: body.clientAddress,
+      clientPhone: body.clientPhone,
+      currency: body.currency || 'USD',
+      subtotal: String(subtotal),
+      taxRate: String(taxRate / 100), // Convert percentage to decimal
+      taxAmount: String(taxAmount),
+      discountAmount: String(discountAmount),
+      total: String(total),
+      status: status as 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue' | 'cancelled',
+      issueDate,
+      dueDate,
+      paidDate,
+      sentDate,
+      amountPaid: String(amountPaid),
+      paymentMethod: body.paymentMethod,
+      paymentReference: body.paymentReference,
+      notes: body.notes,
+      terms: body.terms,
+      footer: body.footer,
+      items: body.items || [],
+      isRecurring: body.isRecurring || false,
+      recurringFrequency: body.recurringFrequency,
+      recurringEndDate,
+      parentInvoiceId: parsedParentInvoiceId,
+      metadata: body.metadata,
+    };
+
+    // Basic validation
+    if (!invoiceData.clientName || !invoiceData.clientEmail) {
+      return ApiErrorHandler.badRequest('Client name and email are required', requestId);
+    }
+
+    if (!invoiceData.items || invoiceData.items.length === 0) {
+      return ApiErrorHandler.badRequest('At least one invoice item is required', requestId);
+    }
 
     // Create the invoice - RLS will ensure user can only create invoices for themselves
     const [newInvoice] = await db
       .insert(invoices)
-      .values(validatedData)
+      .values(invoiceData)
       .returning();
 
-    return NextResponse.json({
-      success: true,
-      message: 'Invoice created successfully',
-      data: newInvoice
-    }, { status: 201 });
+    return createSuccessResponse(
+      newInvoice,
+      201,
+      { requestId }
+    );
     } catch (error) {
       return ApiErrorHandler.handle(error, requestId);
     }

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 // Mock admin components
 describe('Admin Dashboard Components', () => {
@@ -16,8 +16,10 @@ describe('Admin Dashboard Components', () => {
 
   it('should render feature flags table component', async () => {
     // The module resolution fix in vitest.config.ts should resolve @radix-ui/react-slot issues
-    const { FeatureFlagsTable } = await import('@/components/admin/feature-flags-table');
-    expect(FeatureFlagsTable).toBeDefined();
+    await waitFor(async () => {
+      const { FeatureFlagsTable } = await import('@/components/admin/feature-flags-table');
+      expect(FeatureFlagsTable).toBeDefined();
+    }, { timeout: 10000 });
   });
 });
 

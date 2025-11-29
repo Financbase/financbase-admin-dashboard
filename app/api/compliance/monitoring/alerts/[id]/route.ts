@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { RealTimeAlertingService } from '@/lib/services/monitoring/real-time-alerting-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function PATCH(
   request: NextRequest,
@@ -41,7 +42,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, message: `Alert ${action}d`, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error updating alert:', error);
+    logger.error('Error updating alert:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

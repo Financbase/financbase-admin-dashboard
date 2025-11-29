@@ -72,6 +72,7 @@ import { cn } from '@/lib/utils';
 import { bookkeepingEngine } from '@/lib/services/bookkeeping/ai-bookkeeping-engine';
 import { aiOrchestrator } from '@/lib/services/ai/unified-ai-orchestrator';
 import { TransactionCategorization } from '@/components/transactions/transaction-categorization';
+import { logger } from '@/lib/logger';
 
 // Utility functions (module level)
 const getConfidenceColor = (confidence?: number) => {
@@ -188,7 +189,7 @@ export function TransactionCategorizationDashboard({
       queryClient.invalidateQueries({ queryKey: ['categorization-stats'] });
     },
     onError: (error) => {
-      console.error('Categorization failed:', error);
+      logger.error('Categorization failed:', error);
     }
   });
 
@@ -306,7 +307,7 @@ export function TransactionCategorizationDashboard({
       // This would process the uploaded file and extract transactions
       await new Promise(resolve => setTimeout(resolve, 2000));
     } catch (error) {
-      console.error('File upload failed:', error);
+      logger.error('File upload failed:', error);
     }
   };
 

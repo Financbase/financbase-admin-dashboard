@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { TransactionService } from '@/lib/services/transaction-service';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
 	try {
@@ -22,7 +23,7 @@ export async function GET() {
 
 		return NextResponse.json({ stats });
 	} catch (error) {
-		console.error('Error fetching transaction stats:', error);
+		logger.error('Error fetching transaction stats:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch transaction statistics' },
 			{ status: 500 }

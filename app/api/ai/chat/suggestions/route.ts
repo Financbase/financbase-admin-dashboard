@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AIAssistantService } from '@/lib/services/ai/ai-assistant-service';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
 	try {
@@ -22,7 +23,7 @@ export async function GET() {
 
 		return NextResponse.json({ suggestions });
 	} catch (error) {
-		console.error('Error fetching conversation suggestions:', error);
+		logger.error('Error fetching conversation suggestions:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch conversation suggestions' },
 			{ status: 500 }

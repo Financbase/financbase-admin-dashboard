@@ -31,6 +31,7 @@ import {
   Filter,
   Search
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface Bill {
   id: string;
@@ -112,7 +113,7 @@ export default function BillPayDashboard() {
       });
 
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      logger.error('Failed to fetch dashboard data:', error);
     } finally {
       setLoading(false);
     }

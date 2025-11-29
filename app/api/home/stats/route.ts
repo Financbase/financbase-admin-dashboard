@@ -15,6 +15,7 @@
 import { NextResponse } from 'next/server';
 import { getPlatformStats } from '@/lib/services/home-metrics-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -70,7 +71,7 @@ export async function GET() {
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error fetching home stats:', error);
+		logger.error('Error fetching home stats:', error);
 		return ApiErrorHandler.handle(error, requestId);
 	}
 }

@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { RiskAssessmentService } from '@/lib/services/risk-assessment-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: risk, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating risk:', error);
+    logger.error('Error creating risk:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: risks, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching risks:', error);
+    logger.error('Error fetching risks:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

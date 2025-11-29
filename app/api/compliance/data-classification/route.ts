@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { DataClassificationService } from '@/lib/services/data-classification-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: classification, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error classifying data:', error);
+    logger.error('Error classifying data:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -92,7 +93,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: classifications, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching data classifications:', error);
+    logger.error('Error fetching data classifications:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

@@ -139,7 +139,7 @@ export async function PUT(
 		return NextResponse.json({ job: updated[0] });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			return ApiErrorHandler.badRequest(error.errors.map(e => e.message).join(', '));
+			return ApiErrorHandler.badRequest(error.issues.map((e: z.ZodIssue) => e.message).join(', '));
 		}
 		return ApiErrorHandler.handle(error, requestId);
 	}

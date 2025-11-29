@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
 import { auditLogger, AuditEventType, RiskLevel, ComplianceFramework } from '@/lib/services/security/audit-logging-service';
+import { logger } from '@/lib/logger';
 
 // POST /api/bills/process - Process uploaded document
 export async function POST(request: NextRequest) {
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Document processing failed:', error);
+    logger.error('Document processing failed:', error);
 
     await auditLogger.logEvent({
       userId: 'unknown', // Will be set from auth if available
@@ -134,7 +135,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Failed to get processing status:', error);
+    logger.error('Failed to get processing status:', error);
     return NextResponse.json(
       { error: 'Failed to get processing status' },
       { status: 500 }

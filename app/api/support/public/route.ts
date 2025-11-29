@@ -13,6 +13,8 @@ import { getDbOrThrow } from '@/lib/db';
 import { contactSubmissions } from '@/lib/db/schemas/marketing-analytics.schema';
 import { SecurityService } from '@/lib/security/arcjet-service';
 import { EmailService } from '@/lib/email/service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 // Validation schema for support form
 const supportFormSchema = z.object({
@@ -94,6 +96,7 @@ function generateTicketNumber(): string {
 }
 
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		// Apply security checks (rate limiting, bot detection, threat protection)
 		const securityCheck = await SecurityService.securityCheck(
@@ -102,10 +105,17 @@ export async function POST(request: NextRequest) {
 		);
 
 		if (securityCheck.denied) {
+			// Keep security-specific response format for rate limiting
+			if (securityCheck.status === 429) {
+				return ApiErrorHandler.rateLimitExceeded(
+					securityCheck.reasons?.join(', ') || 'Too many requests'
+				);
+			}
 			return NextResponse.json(
 				{
 					error: 'Request denied for security reasons',
 					details: securityCheck.reasons,
+					requestId,
 				},
 				{
 					status: securityCheck.status || 403,
@@ -118,22 +128,18 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (error) {
+			return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+		}
 
 		// Validate request body
 		const validationResult = supportFormSchema.safeParse(body);
 
 		if (!validationResult.success) {
-			return NextResponse.json(
-				{
-					error: 'Validation failed',
-					details: validationResult.error.errors.map((e) => ({
-						field: e.path.join('.'),
-						message: e.message,
-					})),
-				},
-				{ status: 400 }
-			);
+			return ApiErrorHandler.validationError(validationResult.error, requestId);
 		}
 
 		const { name, email, subject, message, category, priority, website } =
@@ -141,15 +147,12 @@ export async function POST(request: NextRequest) {
 
 		// Additional honeypot check (should be empty)
 		if (website && website.length > 0) {
-			return NextResponse.json({ error: 'Spam detected' }, { status: 400 });
+			return ApiErrorHandler.badRequest('Spam detected', requestId);
 		}
 
 		// Additional email validation
 		if (!validateEmail(email)) {
-			return NextResponse.json(
-				{ error: 'Invalid email address format' },
-				{ status: 400 }
-			);
+			return ApiErrorHandler.badRequest('Invalid email address format', requestId);
 		}
 
 		// Sanitize inputs
@@ -164,10 +167,7 @@ export async function POST(request: NextRequest) {
 		// Check for potential spam patterns in message
 		const urlCount = (sanitizedMessage.match(/http[s]?:\/\//gi) || []).length;
 		if (urlCount > 3) {
-			return NextResponse.json(
-				{ error: 'Message contains too many links' },
-				{ status: 400 }
-			);
+			return ApiErrorHandler.badRequest('Message contains too many links', requestId);
 		}
 
 		// Get client information
@@ -238,7 +238,7 @@ IP Address: ${ipAddress}
 			replyTo: sanitizedEmail,
 		}).catch((error) => {
 			// Log email error but don't fail the request
-			console.error('Failed to send support notification email:', error);
+			logger.error('Failed to send support notification email:', error);
 		});
 
 		// Return success response
@@ -249,6 +249,7 @@ IP Address: ${ipAddress}
 					'Thank you for contacting support! We will respond within 24 hours.',
 				submissionId: submission.id,
 				ticketNumber,
+				requestId,
 			},
 			{
 				status: 200,
@@ -260,14 +261,6 @@ IP Address: ${ipAddress}
 			}
 		);
 	} catch (error) {
-		console.error('Support form error:', error);
-
-		// Don't expose internal errors to client
-		return NextResponse.json(
-			{
-				error: 'Failed to process support request. Please try again later.',
-			},
-			{ status: 500 }
-		);
+		return ApiErrorHandler.handle(error, requestId);
 	}
 }

@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
 
 interface RuixenMenuOptionsProps {
 	entityType: string;
@@ -69,7 +70,7 @@ export default function RuixenMenuOptions({
 			}
 		} catch (error) {
 			// Silently fail if API is not available yet - this is expected during development
-			console.log("API not available yet, defaulting to unpinned state");
+			logger.info("API not available yet, defaulting to unpinned state");
 		}
 	};
 
@@ -119,7 +120,7 @@ export default function RuixenMenuOptions({
 			// Call completion callback
 			onActionComplete?.();
 		} catch (error) {
-			console.error(`Error ${action}ing ${entityName}:`, error);
+			logger.error(`Error ${action}ing ${entityName}:`, error);
 
 			// For development, show a helpful message instead of error
 			if (error instanceof Error && error.message.includes("fetch")) {
@@ -207,7 +208,7 @@ export default function RuixenMenuOptions({
 
 			alert(`Recent activity for ${entityName}:\n\n${logsText}`);
 		} catch (error) {
-			console.error("Error fetching logs:", error);
+			logger.error("Error fetching logs:", error);
 			toast.error(
 				error instanceof Error ? error.message : "Failed to fetch logs",
 			);

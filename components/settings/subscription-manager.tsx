@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Check, Crown, Zap, Star, Calendar, CreditCard, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { logger } from '@/lib/logger';
 
 interface SubscriptionPlan {
 	id: string;
@@ -81,7 +82,7 @@ export function SubscriptionManager() {
 				setPlans(plansData.plans);
 			}
 		} catch (error) {
-			console.error('Error loading subscription data:', error);
+			logger.error('Error loading subscription data:', error);
 			toast.error('Failed to load subscription information');
 		} finally {
 			setLoading(false);
@@ -109,7 +110,7 @@ export function SubscriptionManager() {
 				toast.error(error.error || 'Failed to update subscription');
 			}
 		} catch (error) {
-			console.error('Error upgrading subscription:', error);
+			logger.error('Error upgrading subscription:', error);
 			toast.error('Failed to update subscription');
 		} finally {
 			setUpgrading(false);

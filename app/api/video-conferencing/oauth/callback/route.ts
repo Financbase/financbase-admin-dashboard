@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZoomService } from '@/lib/services/integrations/zoom-service';
 import { GoogleMeetService } from '@/lib/services/integrations/google-meet-service';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
 	try {
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
 				try {
 					result = await ZoomService.authenticate(code, clientId, clientSecret, redirectUri);
 				} catch (error) {
-					console.error('Zoom authentication error:', error);
+					logger.error('Zoom authentication error:', error);
 					return NextResponse.json({ error: 'Zoom authentication failed' }, { status: 400 });
 				}
 				break;
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 				try {
 					result = await GoogleMeetService.authenticate(code, clientId, clientSecret, redirectUri);
 				} catch (error) {
-					console.error('Google authentication error:', error);
+					logger.error('Google authentication error:', error);
 					return NextResponse.json({ error: 'Google authentication failed' }, { status: 400 });
 				}
 				break;
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error('OAuth callback error:', error);
+		logger.error('OAuth callback error:', error);
 		return NextResponse.json({ error: 'Authentication failed' }, { status: 500 });
 	}
 }

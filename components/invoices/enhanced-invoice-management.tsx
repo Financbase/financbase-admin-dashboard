@@ -47,6 +47,7 @@ import { FinancbaseGPTService } from '@/lib/services/business/financbase-gpt-ser
 import { NotificationService } from '@/lib/services/notification-service';
 import { formatDistanceToNow, format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface Invoice {
 	id: number;
@@ -161,7 +162,7 @@ export function EnhancedInvoiceManagement() {
 		},
 		onSuccess: (response) => {
 			// Show insights in a dialog or toast
-			console.log('Invoice insights:', response.analysis);
+			logger.info('Invoice insights:', response.analysis);
 		},
 	});
 

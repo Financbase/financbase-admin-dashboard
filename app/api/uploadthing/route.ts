@@ -11,6 +11,8 @@ import { createRouteHandler } from 'uploadthing/next';
 import { ourFileRouter } from '@/lib/upload/uploadthing';
 
 // Export routes for Next.js App Router
+// Note: createRouteHandler from uploadthing/next handles errors internally
+// and provides proper error responses, so no additional error handling is needed
 export const { GET, POST } = createRouteHandler({
 	router: ourFileRouter,
 });

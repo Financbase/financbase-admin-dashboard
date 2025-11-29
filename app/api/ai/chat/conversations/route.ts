@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AIAssistantService } from '@/lib/services/ai/ai-assistant-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json({ conversations });
 	} catch (error) {
-		console.error('Error fetching conversations:', error);
+		logger.error('Error fetching conversations:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch conversations' },
 			{ status: 500 }
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ conversation }, { status: 201 });
 	} catch (error) {
-		console.error('Error creating conversation:', error);
+		logger.error('Error creating conversation:', error);
 		return NextResponse.json(
 			{ error: 'Failed to create conversation' },
 			{ status: 500 }

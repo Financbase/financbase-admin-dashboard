@@ -1,0 +1,64 @@
+# Terraform Backend Configuration Examples
+# Copy the appropriate backend configuration to backend.tf
+
+# ============================================
+# Option 1: AWS S3 Backend (Recommended)
+# ============================================
+terraform {
+  backend "s3" {
+    bucket         = "financbase-terraform-state"
+    key            = "production/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform-state-lock"
+    
+    # Optional: Use different backends per environment
+    # key = "${terraform.workspace}/terraform.tfstate"
+  }
+}
+
+# ============================================
+# Option 2: Terraform Cloud
+# ============================================
+# terraform {
+#   backend "remote" {
+#     organization = "financbase"
+#     
+#     workspaces {
+#       name = "financbase-production"
+#     }
+#   }
+# }
+
+# ============================================
+# Option 3: Local Backend (Development Only)
+# ============================================
+# terraform {
+#   backend "local" {
+#     path = "terraform.tfstate"
+#   }
+# }
+
+# ============================================
+# Option 4: Azure Storage Backend
+# ============================================
+# terraform {
+#   backend "azurerm" {
+#     resource_group_name  = "terraform-state"
+#     storage_account_name  = "financbasetfstate"
+#     container_name        = "tfstate"
+#     key                   = "production.terraform.tfstate"
+#   }
+# }
+
+# ============================================
+# Option 5: Google Cloud Storage Backend
+# ============================================
+# terraform {
+#   backend "gcs" {
+#     bucket  = "financbase-terraform-state"
+#     prefix  = "production/terraform.tfstate"
+#     project = "financbase-project"
+#   }
+# }
+

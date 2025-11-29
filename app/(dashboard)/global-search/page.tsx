@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { logger } from '@/lib/logger';
 
 const searchStats = [
 	{
@@ -242,7 +243,7 @@ export default function SearchPage() {
 				];
 				localStorage.setItem("searchHistory", JSON.stringify(updated));
 			} catch (error) {
-				console.error("Search error:", error);
+				logger.error("Search error:", error);
 				toast.error("Failed to perform search");
 			} finally {
 				setLoading(false);
@@ -258,7 +259,7 @@ export default function SearchPage() {
 			try {
 				setSearchHistory(JSON.parse(stored));
 			} catch (error) {
-				console.error("Error loading search history:", error);
+				logger.error("Error loading search history:", error);
 			}
 		}
 
@@ -267,7 +268,7 @@ export default function SearchPage() {
 			try {
 				setSavedSearches(JSON.parse(saved));
 			} catch (error) {
-				console.error("Error loading saved searches:", error);
+				logger.error("Error loading saved searches:", error);
 			}
 		}
 	}, []);

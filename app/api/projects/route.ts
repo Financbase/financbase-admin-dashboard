@@ -30,7 +30,7 @@ const createProjectSchema = z.object({
 	requireApproval: z.boolean().default(false),
 	estimatedHours: z.number().min(0).optional(),
 	tags: z.array(z.string()).optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 	notes: z.string().optional(),
 });
 

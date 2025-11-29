@@ -17,6 +17,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { UserProfile } from '@clerk/nextjs';
 import { AvatarUpload } from '@/components/core/ui/layout/avatar-upload';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { logger } from '@/lib/logger';
 
 export default async function ProfileSettingsPage() {
 	const user = await currentUser();
@@ -45,7 +46,7 @@ export default async function ProfileSettingsPage() {
 							currentAvatarUrl={user.imageUrl}
 							onAvatarUpdate={(avatarUrl) => {
 								// Here you could update the user's avatar in your database
-								console.log('Avatar updated:', avatarUrl);
+								logger.info('Avatar updated:', avatarUrl);
 							}}
 							size={120}
 						/>

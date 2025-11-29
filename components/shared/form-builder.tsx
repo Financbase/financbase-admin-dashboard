@@ -51,6 +51,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import { useState } from "react";
+import { logger } from '@/lib/logger';
 
 export type FieldType =
 	| "text"
@@ -145,13 +146,13 @@ export function FormBuilder({
 				}
 			} else if (pattern) {
 				// Fallback: validate custom pattern with safety checks
-				console.warn(
+				logger.warn(
 					`[Security] Using custom regex pattern for field "${field.label}". Consider using predefined patterns via 'patternKey' instead.`,
 				);
 
 				const validationRegex = safeRegex(pattern);
 				if (validationRegex === null) {
-					console.error(
+					logger.error(
 						`[Security] Unsafe regex pattern rejected for field "${field.label}": ${pattern}`,
 					);
 					return message || `${field.label} validation pattern is unsafe`;

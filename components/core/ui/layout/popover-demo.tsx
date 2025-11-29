@@ -37,6 +37,7 @@ import {
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
 
 interface SharePopoverDemoProps {
 	// Example item data - in real usage, this would come from props or context
@@ -98,7 +99,7 @@ export default function SharePopoverDemo({
 			}
 		} catch (err) {
 			toast.error("Failed to share item");
-			console.error("Share error:", err);
+			logger.error("Share error:", err);
 		}
 	};
 
@@ -128,7 +129,7 @@ export default function SharePopoverDemo({
 			setIsEmailDialogOpen(false);
 		} catch (err) {
 			toast.error("Failed to send email");
-			console.error("Email share error:", err);
+			logger.error("Email share error:", err);
 		}
 	};
 
@@ -150,7 +151,7 @@ export default function SharePopoverDemo({
 			toast.success("Message sent successfully!");
 		} catch (err) {
 			toast.error("Failed to send message");
-			console.error("Message share error:", err);
+			logger.error("Message share error:", err);
 		}
 	};
 

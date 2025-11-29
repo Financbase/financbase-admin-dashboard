@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { FreelanceHubService } from '@/lib/services/freelance-hub-service';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -27,7 +28,7 @@ export async function POST(
 	} catch (error) {
 		 
     // eslint-disable-next-line no-console
-    console.error('Error stopping time tracking:', error);
+    logger.error('Error stopping time tracking:', error);
 		return NextResponse.json(
 			{ error: 'Failed to stop time tracking' },
 			{ status: 500 }

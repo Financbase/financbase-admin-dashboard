@@ -23,7 +23,7 @@ export const users = pgTable("financbase.users", {
 	lastName: text("last_name"),
 	role: text("role", { enum: ["admin", "user", "viewer"] }).notNull().default("user"),
 	isActive: boolean("is_active").notNull().default(true),
-	organizationId: uuid("organization_id").notNull(),
+	organizationId: uuid("organization_id"), // Made nullable to support multi-organization membership
 	createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

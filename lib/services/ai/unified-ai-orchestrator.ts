@@ -17,6 +17,7 @@
 import { logger } from '@/lib/logger';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 import { db } from '@/lib/db';
 import { transactions } from '@/lib/db/schemas/transactions.schema';
 import { eq, and, desc, gte, lte } from 'drizzle-orm';
@@ -555,7 +556,9 @@ Provide response in JSON format:
 
     // Keyword evidence
     const keywords = this.extractKeywords(transactionData.description);
-    evidence.push(`Keywords found: ${keywords.join(', ')}`);
+    if (keywords.length > 0) {
+      evidence.push(`Keywords found: ${keywords.join(', ')}`);
+    }
 
     // Amount-based evidence
     if (transactionData.amount > 1000) {
@@ -569,6 +572,32 @@ Provide response in JSON format:
     evidence.push('Consistent with user\'s previous categorizations');
 
     return evidence;
+  }
+
+  /**
+   * Extract keywords from transaction description
+   */
+  private extractKeywords(description: string): string[] {
+    // Simple keyword extraction - split by common delimiters and filter
+    const words = description
+      .toLowerCase()
+      .split(/[\s,\-_]+/)
+      .filter(word => word.length > 3) // Filter out short words
+      .filter(word => !['the', 'and', 'for', 'with', 'from', 'that', 'this'].includes(word)); // Filter common words
+    return words.slice(0, 5); // Return top 5 keywords
+  }
+
+  /**
+   * Test if a rule matches transaction data
+   */
+  private testRule(rule: CategorizationRule, transactionData: TransactionData): boolean {
+    try {
+      const regex = new RegExp(rule.pattern, 'i');
+      return regex.test(transactionData.description);
+    } catch (error) {
+      // If pattern is invalid, fall back to simple string matching
+      return transactionData.description.toLowerCase().includes(rule.pattern.toLowerCase());
+    }
   }
 
   /**
@@ -627,6 +656,106 @@ Provide response in JSON format:
       }
     };
   }
+
+  /**
+   * Wrapper for fallback categorization with startTime parameter
+   */
+  private getFallbackCategorization(transactionData: TransactionData, startTime: number): CategorizationResult {
+    const result = this.fallbackCategorization(transactionData);
+    result.metadata.processingTime = Date.now() - startTime;
+    return result;
+  }
+
+  /**
+   * Fallback insights when AI providers fail
+   */
+  private getFallbackInsights(dataType: string): any {
+    return {
+      insights: [
+        {
+          title: 'Default Insight',
+          description: `Unable to generate ${dataType} insights due to AI provider failure`,
+          impact: 'low' as const,
+          explanation: {
+            reasoning: 'Fallback insights due to AI provider failure',
+            evidence: [],
+            confidence: 0.5,
+            sources: ['system_fallback'],
+            timestamp: new Date(),
+            model: 'fallback',
+            provider: AIProvider.OPENAI,
+          },
+        },
+      ],
+      confidence: 0.5,
+    };
+  }
+
+  /**
+   * Get user's categorization history
+   */
+  private async getUserCategorizationHistory(userId: string): Promise<any[]> {
+    // Implementation would query database for user's historical categorizations
+    return [];
+  }
+
+  /**
+   * Store feedback in database
+   */
+  private async storeFeedback(feedback: AIFeedback): Promise<void> {
+    // Implementation would store feedback in database
+    // For now, just store in memory
+    const userId = feedback.userId;
+    if (!this.feedbackHistory.has(userId)) {
+      this.feedbackHistory.set(userId, []);
+    }
+    this.feedbackHistory.get(userId)!.push(feedback);
+  }
+
+  /**
+   * Improve AI models based on user feedback
+   */
+  private async improveModelsFromFeedback(feedback: AIFeedback): Promise<void> {
+    // Implementation would update model weights, retrain, etc.
+    // For now, this is a placeholder
+  }
+
+  /**
+   * Update categorization rules based on feedback
+   */
+  private async updateCategorizationRules(feedback: AIFeedback): Promise<void> {
+    // Implementation would create or update categorization rules
+    // For now, this is a placeholder
+  }
+
+  /**
+   * Store categorization attempt for learning
+   */
+  private async storeCategorizationAttempt(
+    userId: string,
+    transactionData: TransactionData,
+    result: CategorizationResult
+  ): Promise<void> {
+    // Implementation would store categorization attempt in database
+    // For now, this is a placeholder
+  }
+
+  /**
+   * Generate rule explanation
+   */
+  private generateRuleExplanation(rule: CategorizationRule, transactionData: TransactionData): AIExplanation {
+    return {
+      reasoning: `Matched rule pattern: ${rule.pattern}`,
+      evidence: [transactionData.description],
+      confidence: rule.confidence,
+      sources: ['rule_engine'],
+      timestamp: new Date(),
+      model: 'rule-engine',
+      provider: AIProvider.OPENAI,
+      alternatives: []
+    };
+  }
+
   private async retrieveExplanation(
     decisionId: string,
     decisionType: AICapability

@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AIGovernanceService } from '@/lib/services/ai-governance-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -39,7 +40,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: check, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching bias check:', error);
+    logger.error('Error fetching bias check:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

@@ -1,16 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AIFinancialService } from '@/lib/ai/financial-service'
+import OpenAI from 'openai'
 
-// Mock OpenAI to simulate errors to test fallback behavior
-vi.mock('openai', () => {
-	return {
-		default: vi.fn().mockImplementation(() => ({
-			chat: {
-				completions: {
-					create: vi.fn().mockRejectedValue(new Error('API Error')),
-				},
-			},
-		})),
+// Override the global OpenAI mock to simulate errors for this test
+// The global mock in setup.ts provides a working mock, but we want to test error handling
+beforeEach(() => {
+	// Get the mocked OpenAI instance and override its behavior
+	const mockOpenAI = new OpenAI({ apiKey: 'test' }) as any;
+	if (mockOpenAI.chat?.completions?.create) {
+		vi.mocked(mockOpenAI.chat.completions.create).mockRejectedValue(new Error('API Error'));
 	}
 })
 

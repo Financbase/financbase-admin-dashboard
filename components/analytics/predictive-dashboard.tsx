@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { InteractiveChart, ChartDataPoint } from "./advanced-charts";
 import { AIPredictiveAnalyticsService } from "@/lib/services/analytics/ai-predictive-analytics.service";
+import { logger } from '@/lib/logger';
 
 interface ForecastScenario {
 	name: string;
@@ -145,7 +146,7 @@ export default function PredictiveDashboard() {
 			}
 
 		} catch (error) {
-			console.error("Error generating forecast:", error);
+			logger.error("Error generating forecast:", error);
 		} finally {
 			setIsGenerating(false);
 		}

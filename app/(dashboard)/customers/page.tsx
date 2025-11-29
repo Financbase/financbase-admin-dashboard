@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { logger } from '@/lib/logger';
 
 interface Customer {
 	id: number;
@@ -92,7 +93,7 @@ export default function CustomersPage() {
 			const data = await response.json();
 			setCustomers(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching customers:", error);
+			logger.error("Error fetching customers:", error);
 			toast.error("Failed to load customers");
 		} finally {
 			setLoading(false);
@@ -107,7 +108,7 @@ export default function CustomersPage() {
 			const data = await response.json();
 			setSegments(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching segments:", error);
+			logger.error("Error fetching segments:", error);
 		}
 	};
 
@@ -119,7 +120,7 @@ export default function CustomersPage() {
 			const data = await response.json();
 			setAnalytics(data);
 		} catch (error) {
-			console.error("Error fetching analytics:", error);
+			logger.error("Error fetching analytics:", error);
 		}
 	};
 

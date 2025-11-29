@@ -56,6 +56,7 @@ import {
 } from 'lucide-react';
 import { PluginCard } from './plugin-card';
 import { PluginDetails } from './plugin-details';
+import { logger } from '@/lib/logger';
 
 interface Plugin {
   id: number;
@@ -121,7 +122,7 @@ export function MarketplaceSystem() {
 
       // Check if user is signed in
       if (!isSignedIn) {
-        console.warn('User is not authenticated');
+        logger.warn('User is not authenticated');
         return { plugins: [], pagination: { total: 0, limit: 20, offset: 0, hasMore: false } };
       }
 
@@ -134,7 +135,7 @@ export function MarketplaceSystem() {
         const response = await authenticatedFetch(`/api/marketplace/plugins?${params}`);
         if (!response.ok) {
           if (response.status === 401) {
-            console.error('Unauthorized - authentication token may be invalid');
+            logger.error('Unauthorized - authentication token may be invalid');
             throw new Error('Your session has expired. Please sign in again.');
           }
           throw new Error(`Failed to fetch plugins: ${response.statusText}`);
@@ -143,10 +144,10 @@ export function MarketplaceSystem() {
         return data.plugins ? data : { plugins: Array.isArray(data) ? data : [], pagination: { total: 0, limit: 20, offset: 0, hasMore: false } };
       } catch (error) {
         if (error instanceof Error && error.message.includes('not authenticated')) {
-          console.error('Authentication error:', error);
+          logger.error('Authentication error:', error);
           throw error;
         }
-        console.error('Error fetching plugins:', error);
+        logger.error('Error fetching plugins:', error);
         return { plugins: [], pagination: { total: 0, limit: 20, offset: 0, hasMore: false } };
       }
     },
@@ -166,7 +167,7 @@ export function MarketplaceSystem() {
 
       // Check if user is signed in
       if (!isSignedIn) {
-        console.warn('User is not authenticated');
+        logger.warn('User is not authenticated');
         return [];
       }
 
@@ -174,7 +175,7 @@ export function MarketplaceSystem() {
         const response = await authenticatedFetch('/api/marketplace/plugins/installed');
         if (!response.ok) {
           if (response.status === 401) {
-            console.error('Unauthorized - authentication token may be invalid');
+            logger.error('Unauthorized - authentication token may be invalid');
             throw new Error('Your session has expired. Please sign in again.');
           }
           throw new Error(`Failed to fetch installed plugins: ${response.statusText}`);
@@ -183,10 +184,10 @@ export function MarketplaceSystem() {
         return Array.isArray(data) ? data : [];
       } catch (error) {
         if (error instanceof Error && error.message.includes('not authenticated')) {
-          console.error('Authentication error:', error);
+          logger.error('Authentication error:', error);
           throw error;
         }
-        console.error('Error fetching installed plugins:', error);
+        logger.error('Error fetching installed plugins:', error);
         return [];
       }
     },
@@ -236,12 +237,12 @@ export function MarketplaceSystem() {
 
   const handleInstall = (pluginId: number) => {
     // In a real implementation, this would trigger the install mutation
-    console.log('Installing plugin:', pluginId);
+    logger.info('Installing plugin:', pluginId);
   };
 
   const handleUninstall = (pluginId: number) => {
     // In a real implementation, this would trigger the uninstall mutation
-    console.log('Uninstalling plugin:', pluginId);
+    logger.info('Uninstalling plugin:', pluginId);
   };
 
   const handleViewDetails = (plugin: Plugin) => {

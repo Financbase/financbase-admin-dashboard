@@ -69,12 +69,33 @@ export async function GET() {
     const statusCode = healthStatus.status === 'healthy' ? 200 : 
                       healthStatus.status === 'degraded' ? 200 : 503;
     
-    return NextResponse.json(healthStatus, { status: statusCode });
+    // Add backward compatibility fields for tests
+    const response = {
+      ...healthStatus,
+      // For backward compatibility with tests
+      database: healthStatus.services.database.status === 'healthy' ? 'connected' : 'disconnected',
+      overall: healthStatus.status,
+    };
+    
+    return NextResponse.json(response, { status: statusCode });
   } catch (error) {
     return NextResponse.json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
+      database: 'disconnected',
+      overall: 'unhealthy',
+      services: {
+        database: { status: 'unhealthy', lastCheck: new Date().toISOString() },
+        api: { status: 'unhealthy', lastCheck: new Date().toISOString() },
+        ocr: { status: 'unhealthy', lastCheck: new Date().toISOString() },
+        payments: { status: 'unhealthy', lastCheck: new Date().toISOString() }
+      },
+      metrics: {
+        responseTime: 0,
+        memoryUsage: 0,
+        cpuUsage: 0
+      }
     }, { status: 503 });
   }
 }

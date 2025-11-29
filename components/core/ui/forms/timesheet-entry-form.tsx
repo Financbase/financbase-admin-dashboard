@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { Clock, Mic, Minus, Play, Plus, Save } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { logger } from '@/lib/logger';
 
 interface TimeEntry {
 	id: string;
@@ -173,7 +174,7 @@ export const TimesheetEntryForm: React.FC<TimesheetEntryFormProps> = ({
 		try {
 			await onSubmit(entries);
 		} catch (error) {
-			console.error("Error submitting timesheet:", error);
+			logger.error("Error submitting timesheet:", error);
 		} finally {
 			setIsSubmitting(false);
 		}

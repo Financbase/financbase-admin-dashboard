@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { AlertTriangle, RefreshCw, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isChunkLoadError, handleChunkLoadError, reloadPageWithCacheBust } from "@/lib/utils/chunk-error-handler";
+import { logger } from '@/lib/logger';
 
 interface ChunkErrorBoundaryProps {
 	children: ReactNode;
@@ -68,7 +69,7 @@ export class ChunkErrorBoundary extends Component<ChunkErrorBoundaryProps, Chunk
 
 	componentDidCatch(error: Error, errorInfo: ErrorInfo) {
 		// Log error for debugging
-		console.error("[ChunkErrorBoundary] Chunk load error caught:", error, errorInfo);
+		logger.error("[ChunkErrorBoundary] Chunk load error caught:", error, errorInfo);
 
 		// Call custom callback if provided
 		if (this.props.onChunkError) {
@@ -104,7 +105,7 @@ export class ChunkErrorBoundary extends Component<ChunkErrorBoundaryProps, Chunk
 				this.setState({ isRecovering: true });
 			},
 		}).catch((finalError) => {
-			console.error("[ChunkErrorBoundary] Auto-recovery failed:", finalError);
+			logger.error("[ChunkErrorBoundary] Auto-recovery failed:", finalError);
 			this.setState({ isRecovering: false });
 		});
 	};

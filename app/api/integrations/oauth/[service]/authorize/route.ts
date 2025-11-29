@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createOAuthHandler } from '@/lib/oauth/oauth-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -56,7 +57,7 @@ export async function GET(
   } catch (error) {
      
     // eslint-disable-next-line no-console
-    console.error('OAuth authorization error:', error);
+    logger.error('OAuth authorization error:', error);
     return NextResponse.json({ 
       error: 'OAuth authorization failed',
       details: error instanceof Error ? error.message : 'Unknown error'

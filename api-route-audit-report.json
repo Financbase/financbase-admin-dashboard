@@ -1,0 +1,4197 @@
+{
+  "total": 396,
+  "withAuth": 361,
+  "withoutAuth": 35,
+  "withErrorHandling": 388,
+  "withoutErrorHandling": 8,
+  "jsonResponses": 376,
+  "unknownResponses": 20,
+  "routes": [
+    {
+      "path": "/api/accounts/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/accounts/balances.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/accounts/reconcile.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/accounts.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/accounts/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/careers/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/careers.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/feature-flags/[key].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/feature-flags.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/seed-dashboard.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/subscription-rbac-mappings.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/support/analytics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/support/tickets/[id]/assign.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/support/tickets/[id]/messages.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/support/tickets/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/support/tickets.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/users/[id]/permissions.ts",
+      "methods": [
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/admin/users.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/ai/analyze.ts",
+      "methods": [
+        "POST",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/ai/categorize.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/ai/chat/conversations/[id].ts",
+      "methods": [
+        "GET",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/ai/chat/conversations.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/ai/chat/messages.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/ai/chat.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/ai/chat/suggestions.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/ai/financbase-gpt.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/ai/financial-analysis.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/analytics/clients.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/analytics/expenses.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/analytics/performance.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/analytics/revenue.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/analytics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/analytics/upload.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/approval-workflows.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/auth/admin-status.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/auth/me.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/auth/sync-user.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/auth/user.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/auth/validate-token.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/bills/attention.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/bills/process.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/bills.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/blog/[id]/like.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/blog/[id]/publish.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/blog/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/blog/categories.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/blog.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/blog/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/budgets/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/budgets/alerts.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/budgets.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/budgets/summary.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/byok/api-keys/[keyId].ts",
+      "methods": [
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/byok/api-keys.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/byok/preferences.ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/byok/providers.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/byok/usage.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/campaigns/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/campaigns/performance.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/campaigns.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/campaigns/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/careers/[id].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/careers.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/chat/channels/[id]/messages.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/chat/channels/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/chat/channels.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/chat/messages/[id]/read.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/chat/messages/[id].ts",
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/clients/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/clients.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/clients/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/ai-governance/bias-checks/[id].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/ai-governance/bias-checks.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/ai-governance/decisions/[id].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/ai-governance/decisions.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/baa/vendors.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/data-classification/bulk.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/data-classification.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/dora/incidents/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/dora/incidents.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/dora/resilience-tests/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/dora/resilience-tests.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/dora/third-party-risks/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/dora/third-party-risks.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/gdpr/data-subject-requests/[id]/fulfill.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/gdpr/data-subject-requests/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/gdpr/data-subject-requests.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/incident-response/communication-templates.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/incident-response/drills/[id].ts",
+      "methods": [
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/incident-response/drills.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/incident-response/incidents/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/incident-response/incidents.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/incident-response/runbooks.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/incident-response/team.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/monitoring/alerts/[id].ts",
+      "methods": [
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/monitoring/alerts.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/monitoring/alerts/rules.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/monitoring.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/monitoring/siem/events.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/monitoring/siem/integrations.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/policies/[id]/assignments.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/policies/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/policies.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/reports/[id].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/reports/dashboard.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/reports.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/risk-assessment/assets.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/risk-assessment/risks.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/training/assignments.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/compliance/training/programs.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/contact.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/cron/subscription-grace-period.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/customers/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/customers/analytics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/customers.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/customers/segments.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/dashboard/ai-insights.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/dashboard/chart-data.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/dashboard/executive-metrics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/dashboard/export.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/dashboard/overview.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/dashboard/recent-activity.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/dashboard/top-products.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/dashboards/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/dashboards.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/dashboards/widgets/templates.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/developer/api-keys/[id].ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/developer/endpoints.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/developer.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/direct-file/[...path].ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/direct-file/state-api/[...path].ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/docs.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/email/send-invoice.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/employees/[id]/attendance.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/employees/[id]/leave.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/employees/[id]/payroll.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/employees/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/employees/analytics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/employees/departments.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/employees.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/expenses/[id]/approve.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/expenses/[id]/reject.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/expenses/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/expenses/analytics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/expenses/categories.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/expenses.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/expenses/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/feature-flags/[key]/disable.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/feature-flags/[key]/enable.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/feature-flags/[key].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/feature-flags/check.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/feature-flags.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/financial-intelligence/health.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/financial-intelligence/insights.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/financial-intelligence/predictions.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/financial-intelligence/recommendations.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/freelancers/dashboard.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/freelancers.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/gallery/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/gallery/categories.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/gallery.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/guides/[id].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/guides.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/guides/slug/[slug].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/health.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/help/articles/[id]/feedback.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/help/articles/[id].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/help/articles.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/help/categories.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/help/search.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/help/tickets.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/home/metrics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/home/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/home/testimonials.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/hr/attendance/clock-in.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/attendance/clock-out.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/attendance/records.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/attendance/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/attendance/time-cards/[id].ts",
+      "methods": [
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/attendance/time-cards.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/contractors/[id]/performance.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/contractors/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/contractors.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/leave/balances/[employeeId].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/leave/calendar.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/leave/requests/[id].ts",
+      "methods": [
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/leave/requests.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/leave/types.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll/benefits.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll/deductions.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll/employees/[id]/history.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll/employees/[id]/paystub.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll/export.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll/runs/[id]/entries.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll/runs/[id].ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll/runs.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/hr/payroll/taxes.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/incident-response/drills/[id]/complete.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/incident-response/drills.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/incident-response/incidents/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/incident-response/incidents.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/incident-response/metrics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/incident-response/runbooks.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/incident-response/team.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/[id].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/connections/[id]/health.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/connections/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/connections/[id]/sync.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/connections/[id]/syncs.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/connections/[id]/test.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/connections.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/oauth/[service]/authorize.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/oauth/[service]/callback.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/oauth/[service]/refresh.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/providers.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/integrations/webhooks.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/investor-portal/[portalId].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/investor-portal.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/invoices.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/leads/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/leads/activities.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/leads/pipeline.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/leads.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/leads/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketing/analytics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketing/automation.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins/[id]/approve.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins/[id]/install.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins/[id]/reject.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins/[id].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins/[id]/uninstall.ts",
+      "methods": [
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins/installed.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins/my-plugins.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins/pending.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/plugins/submit.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/revenue.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/marketplace/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/alerts.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/alerts/rules/[id].ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/alerts/rules.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/alerts/summary.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/errors.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/events.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/health.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/metrics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/metrics/trends.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/rate-limits.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/monitoring/snapshot-queries.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/newsletter/subscribe.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/notifications/[id]/read.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/notifications/[id].ts",
+      "methods": [
+        "POST",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/notifications/mark-all-read.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/notifications/preferences.ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/notifications.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/onboarding.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/onboarding/skip.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/onboarding/steps/[stepId].ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/orders/[id]/fulfill.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/orders/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/orders/alerts.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/orders/analytics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/orders.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/payment-methods/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/payment-methods.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/payments.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/payments/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/performance/database-size.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/performance/health.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/performance/slow-queries.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/platform/hub/connections/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/platform/hub/connections/[id]/sync.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/platform/hub/connections.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/platform/hub/integrations.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/platform/hub.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/platform/services.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/products/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/products/[id]/stock.ts",
+      "methods": [
+        "PATCH"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/products/analytics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/products/categories.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/products.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/projects/[id].ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/projects.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/projects/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/buyer/saved-properties.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/buyer/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/investor/cash-flow.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/investor/expenses.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/investor/maintenance.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/investor/tenants.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/properties.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/realtor/leads.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/realtor/listings.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/realtor/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/real-estate/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/reconciliation/dashboard.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/reconciliation/match.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/reconciliation/rules.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/reconciliation/sessions.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/reconciliation/statement-transactions/[sessionId].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/reports/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/reports/[id]/run.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/reports.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/reports/templates.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/search/content/popular.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/search/content.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/search.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/security/audit-logs.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/security/audit-statistics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/security/events.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/security/mfa.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/security/mfa/setup.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/security/mfa/verify.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/security/overview.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/billing/history.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/billing/payment-methods.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/billing/plans.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/settings/billing/subscription.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/notifications.ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/preferences/notifications.ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/preferences/privacy.ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/preferences.ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/security/api-keys/[id]/regenerate.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/security/api-keys/[id].ts",
+      "methods": [
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/security/api-keys.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/security/sessions.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/settings/white-label.ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/support/category/[slug].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/support/public.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/support/search.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/deductions/[id].ts",
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/deductions.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/direct-file/exports/[id].ts",
+      "methods": [
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/direct-file/exports.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/documents/[id].ts",
+      "methods": [
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/documents.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/export.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/obligations/[id]/payment.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/obligations/[id].ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/obligations.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/tax/summary.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test-dashboard/ai-insights.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": false,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test-dashboard/overview.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": false,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test-dashboard/recent-activity.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": false,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test-dashboard-activity.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": false,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test-dashboard-insights.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": false,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test-dashboard-overview.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": false,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test-db.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test-invoice-service.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/test-minimal-final.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": false,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/time-entries/[id]/stop.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/time-entries.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/time-entries/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/training/paths.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/training/paths-with-progress.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/training/programs/[id].ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/training/programs.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/training/programs-with-progress.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/training/progress.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/training/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/transactions/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/transactions.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/transactions/stats.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/unified-dashboard/metrics.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/unified-dashboard/widgets.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/uploadthing.ts",
+      "methods": [],
+      "hasAuth": false,
+      "hasErrorHandling": false,
+      "responseFormat": "unknown",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/v1/health.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/vendors.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/video-conferencing/integrations.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/video-conferencing/meetings/[meetingId]/breakout-rooms.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/video-conferencing/meetings/[meetingId]/polls.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/video-conferencing/meetings/[meetingId]/screen-share.ts",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/video-conferencing/meetings.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/video-conferencing/oauth/callback.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/video-conferencing/settings.ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/webhooks/[id]/deliveries.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/webhooks/[id]/retry.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/webhooks/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/webhooks/[id]/test.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/webhooks/clerk.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": false,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": true
+    },
+    {
+      "path": "/api/webhooks.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/[id]/duplicate.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/[id]/execute.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/[id]/executions.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/[id]/logs.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/[id].ts",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/[id]/test.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/actions.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/executions/[id]/rerun.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/templates/[id]/instantiate.ts",
+      "methods": [
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/templates.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    },
+    {
+      "path": "/api/workflows/triggers.ts",
+      "methods": [
+        "GET"
+      ],
+      "hasAuth": true,
+      "hasErrorHandling": true,
+      "responseFormat": "json",
+      "needsAttention": false
+    }
+  ]
+}

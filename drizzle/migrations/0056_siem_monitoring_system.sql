@@ -30,7 +30,7 @@ END $$;
 -- SIEM Events Table
 CREATE TABLE IF NOT EXISTS "financbase_siem_events" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
   "event_id" TEXT NOT NULL UNIQUE,
   "correlation_id" TEXT,
   "source_event_id" TEXT,
@@ -71,14 +71,14 @@ CREATE TABLE IF NOT EXISTS "financbase_siem_events" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_siem_events_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE
+  CONSTRAINT "fk_siem_events_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE
 );
 
 -- SIEM Integrations Table
 CREATE TABLE IF NOT EXISTS "financbase_siem_integrations" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "created_by" TEXT,
+  "organization_id" UUID NOT NULL,
+  "created_by" UUID,
   "name" TEXT NOT NULL,
   "integration_type" "siem_integration_type" NOT NULL,
   "description" TEXT,
@@ -101,15 +101,15 @@ CREATE TABLE IF NOT EXISTS "financbase_siem_integrations" (
   "last_forwarded_at" TIMESTAMP WITH TIME ZONE,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_siem_integrations_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_siem_integrations_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_siem_integrations_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_siem_integrations_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Alert Rules Table
 CREATE TABLE IF NOT EXISTS "financbase_alert_rules" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
-  "created_by" TEXT,
+  "organization_id" UUID NOT NULL,
+  "created_by" UUID,
   "name" TEXT NOT NULL,
   "description" TEXT,
   "rule_type" "alert_rule_type" NOT NULL,
@@ -132,14 +132,14 @@ CREATE TABLE IF NOT EXISTS "financbase_alert_rules" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_alert_rules_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_alert_rules_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_alert_rules_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_alert_rules_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Real-time Alerts Table
 CREATE TABLE IF NOT EXISTS "financbase_real_time_alerts" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
   "alert_rule_id" INTEGER,
   "alert_id" TEXT NOT NULL UNIQUE,
   "severity" "siem_event_severity" NOT NULL,
@@ -149,9 +149,9 @@ CREATE TABLE IF NOT EXISTS "financbase_real_time_alerts" (
   "triggered_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "triggered_by" TEXT,
   "related_events" JSONB DEFAULT '[]'::jsonb NOT NULL,
-  "acknowledged_by" TEXT,
+  "acknowledged_by" UUID,
   "acknowledged_at" TIMESTAMP WITH TIME ZONE,
-  "resolved_by" TEXT,
+  "resolved_by" UUID,
   "resolved_at" TIMESTAMP WITH TIME ZONE,
   "resolution_notes" TEXT,
   "notifications_sent" JSONB DEFAULT '[]'::jsonb NOT NULL,
@@ -160,16 +160,16 @@ CREATE TABLE IF NOT EXISTS "financbase_real_time_alerts" (
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_real_time_alerts_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_real_time_alerts_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
   CONSTRAINT "fk_real_time_alerts_rule" FOREIGN KEY ("alert_rule_id") REFERENCES "financbase_alert_rules"("id") ON DELETE SET NULL,
-  CONSTRAINT "fk_real_time_alerts_acknowledged_by" FOREIGN KEY ("acknowledged_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
-  CONSTRAINT "fk_real_time_alerts_resolved_by" FOREIGN KEY ("resolved_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_real_time_alerts_acknowledged_by" FOREIGN KEY ("acknowledged_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_real_time_alerts_resolved_by" FOREIGN KEY ("resolved_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Immutable Audit Trail Table (WORM - Write Once Read Many)
 CREATE TABLE IF NOT EXISTS "financbase_immutable_audit_trail" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
   "event_hash" TEXT NOT NULL UNIQUE,
   "event_id" TEXT NOT NULL,
   "event_type" TEXT NOT NULL,
@@ -183,13 +183,13 @@ CREATE TABLE IF NOT EXISTS "financbase_immutable_audit_trail" (
   "retention_until" TIMESTAMP WITH TIME ZONE NOT NULL,
   "source_system" TEXT NOT NULL,
   "tags" JSONB DEFAULT '[]'::jsonb NOT NULL,
-  CONSTRAINT "fk_immutable_audit_trail_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE
+  CONSTRAINT "fk_immutable_audit_trail_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE
 );
 
 -- Log Aggregation Configuration Table
 CREATE TABLE IF NOT EXISTS "financbase_log_aggregation_config" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
   "config_name" TEXT NOT NULL,
   "description" TEXT,
   "is_active" BOOLEAN DEFAULT true NOT NULL,
@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS "financbase_log_aggregation_config" (
   "storage_format" TEXT DEFAULT 'json' NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  CONSTRAINT "fk_log_aggregation_config_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE
+  CONSTRAINT "fk_log_aggregation_config_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE
 );
 
 -- Create indexes for better query performance

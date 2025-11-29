@@ -59,6 +59,7 @@ import {
 import { cn } from '@/lib/utils';
 import { aiOrchestrator } from '@/lib/services/ai/unified-ai-orchestrator';
 import type {
+import { logger } from '@/lib/logger';
   CategorizationResult,
   AIExplanation,
   AIFeedback
@@ -182,7 +183,7 @@ export function TransactionCategorization({
       setShowFeedbackDialog(false);
       feedbackForm.reset();
     } catch (err) {
-      console.error('Failed to submit feedback:', err);
+      logger.error('Failed to submit feedback:', err);
     }
   };
 
@@ -564,7 +565,7 @@ export function BulkTransactionCategorization({
         newResults.set(transactions[i].id, result);
         setProgress((i + 1) / transactions.length * 100);
       } catch (error) {
-        console.error(`Failed to categorize transaction ${transactions[i].id}:`, error);
+        logger.error(`Failed to categorize transaction ${transactions[i].id}:`, error);
       }
     }
 

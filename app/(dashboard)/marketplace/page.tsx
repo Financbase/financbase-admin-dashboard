@@ -57,6 +57,7 @@ import {
 	BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { logger } from '@/lib/logger';
 
 // Enhanced Plugin Interface
 interface Plugin {
@@ -372,12 +373,12 @@ export default function EnhancedMarketplacePage() {
 
 	const handleInstall = (item: Plugin | Integration) => {
 		// Handle installation logic
-		console.log("Installing:", item.name);
+		logger.info("Installing:", item.name);
 	};
 
 	const handleViewDetails = (item: Plugin | Integration) => {
 		// Handle view details
-		console.log("Viewing details:", item.name);
+		logger.info("Viewing details:", item.name);
 	};
 
 	return (

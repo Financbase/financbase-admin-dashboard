@@ -12,6 +12,7 @@ import { auth } from "@clerk/nextjs/server";
 import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { withRLS } from "@/lib/api/with-rls";
+import { createSuccessResponse } from "@/lib/api/standard-response";
 
 /**
  * GET /api/tax/summary
@@ -30,13 +31,14 @@ export async function GET(request: NextRequest) {
 			const summary = await service.getTaxSummary(clerkUserId, year);
 			const alerts = await service.getTaxAlerts(clerkUserId);
 
-			return NextResponse.json({
-				success: true,
-				data: {
+			return createSuccessResponse(
+				{
 					summary,
 					alerts,
 				},
-			});
+				200,
+				{ requestId }
+			);
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

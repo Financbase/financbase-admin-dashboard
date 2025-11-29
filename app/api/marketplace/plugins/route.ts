@@ -14,6 +14,7 @@ import { marketplacePlugins } from '@/lib/db/schemas';
 import { eq, and, like, desc, asc, sql } from 'drizzle-orm';
 import { isAdmin } from '@/lib/auth/financbase-rbac';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -117,7 +118,7 @@ export async function GET(request: NextRequest) {
     const total = totalCount[0]?.count || 0;
     
     // Debug logging
-    console.log('Marketplace Plugins API:', {
+    logger.info('Marketplace Plugins API:', {
       queryParams: { category, search, sort, limit, offset },
       pluginsReturned: plugins.length,
       totalPlugins: total,

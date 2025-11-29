@@ -11,6 +11,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/services/notification-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -38,7 +39,7 @@ export async function POST(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('[API] Error in POST /api/notifications/[id]:', {
+		logger.error('[API] Error in POST /api/notifications/[id]:', {
 			notificationId: id,
 			requestId,
 			error: error instanceof Error ? error.message : String(error),
@@ -74,7 +75,7 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('[API] Error in DELETE /api/notifications/[id]:', {
+		logger.error('[API] Error in DELETE /api/notifications/[id]:', {
 			notificationId: id,
 			requestId,
 			error: error instanceof Error ? error.message : String(error),

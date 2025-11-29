@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useWebSocket, WebSocketProvider } from "@/contexts/websocket-context";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { logger } from '@/lib/logger';
 
 interface ChatChannel {
 	id: string;
@@ -80,7 +81,7 @@ export default function ChatPage() {
 			const data = await response.json();
 			setChannels(Array.isArray(data) ? data : []);
 		} catch (error) {
-			console.error("Error fetching channels:", error);
+			logger.error("Error fetching channels:", error);
 			toast.error("Failed to load channels");
 		} finally {
 			setLoading(false);
@@ -95,7 +96,7 @@ export default function ChatPage() {
 			const data = await response.json();
 			setMessages(Array.isArray(data) ? data.reverse() : []); // Reverse to show oldest first
 		} catch (error) {
-			console.error("Error fetching messages:", error);
+			logger.error("Error fetching messages:", error);
 			toast.error("Failed to load messages");
 		}
 	};
@@ -159,7 +160,7 @@ export default function ChatPage() {
 			// Refresh channels to update lastMessageAt
 			fetchChannels();
 		} catch (error) {
-			console.error("Error sending message:", error);
+			logger.error("Error sending message:", error);
 			toast.error("Failed to send message");
 		}
 	};

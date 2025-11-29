@@ -169,7 +169,7 @@ export function calculateAppreciation(
 } {
   const totalAppreciation = currentValue - purchasePrice;
   const annualAppreciationAmount = yearsOwned > 0 ? totalAppreciation / yearsOwned : 0;
-  const annualAppreciationRate = purchasePrice > 0 ? 
+  const annualAppreciationRate = (purchasePrice > 0 && yearsOwned > 0) ? 
     (Math.pow(currentValue / purchasePrice, 1 / yearsOwned) - 1) * 100 : 0;
   
   return {

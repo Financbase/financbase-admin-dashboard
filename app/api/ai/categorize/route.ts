@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { AIFinancialService } from '@/lib/ai/financial-service';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/ai/categorize
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error('Transaction Categorization API Error:', error);
+		logger.error('Transaction Categorization API Error:', error);
 		return NextResponse.json(
 			{ error: 'Failed to categorize transaction' },
 			{ status: 500 }

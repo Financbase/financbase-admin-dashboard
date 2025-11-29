@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { RiskAssessmentService } from '@/lib/services/risk-assessment-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: asset, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating asset:', error);
+    logger.error('Error creating asset:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: assets, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching assets:', error);
+    logger.error('Error fetching assets:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

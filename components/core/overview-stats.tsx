@@ -167,9 +167,9 @@ export default function OverviewStats() {
 								)}
 								<span
 									className={
-										`font-medium ${stat.changeType}` === "increase"
-											? "text-green-600"
-											: "text-red-600"
+										stat.changeType === "increase"
+											? "font-medium text-green-600"
+											: "font-medium text-red-600"
 									}
 								>
 									{stat.change}

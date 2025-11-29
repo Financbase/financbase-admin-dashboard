@@ -11,6 +11,7 @@
 
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { logger } from '@/lib/logger';
 
 export type CompanyLogoName = 
   | "quickbooks" 
@@ -65,7 +66,7 @@ export function CompanyLogo({
 }: CompanyLogoProps) {
   const logoPath = LOGO_PATHS[name]
   if (!logoPath) {
-    console.warn(`Logo not found for company: ${name}`)
+    logger.warn(`Logo not found for company: ${name}`)
     return null
   }
 

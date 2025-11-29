@@ -17,6 +17,7 @@ import {
 import { eq, and, desc, gte, lte, sql } from 'drizzle-orm';
 import { createHash } from 'crypto';
 import { AuditLoggingService } from '@/lib/services/security/audit-logging-service';
+import { EncryptionService } from '@/lib/services/integration/encryption.service';
 
 export interface SIEMEvent {
   id: number;
@@ -92,6 +93,54 @@ export interface SIEMIntegration {
 }
 
 export class SIEMIntegrationService {
+  /**
+   * Get encryption key from environment variable
+   */
+  private static getEncryptionKey(): string {
+    const key = process.env.SIEM_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+    if (!key) {
+      throw new Error('SIEM_ENCRYPTION_KEY or ENCRYPTION_KEY environment variable is required for encrypting credentials');
+    }
+    if (!EncryptionService.validateKey(key)) {
+      throw new Error('Encryption key must be a 64-character hex string');
+    }
+    return key;
+  }
+
+  /**
+   * Encrypt sensitive credential
+   */
+  private static async encryptCredential(credential: string | undefined): Promise<string | undefined> {
+    if (!credential) {
+      return undefined;
+    }
+    try {
+      const key = this.getEncryptionKey();
+      return await EncryptionService.encrypt(credential, key);
+    } catch (error) {
+      console.error('[SIEMIntegration] Failed to encrypt credential:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Decrypt sensitive credential
+   */
+  private static async decryptCredential(encryptedCredential: string | undefined): Promise<string | undefined> {
+    if (!encryptedCredential) {
+      return undefined;
+    }
+    try {
+      const key = this.getEncryptionKey();
+      return await EncryptionService.decrypt(encryptedCredential, key);
+    } catch (error) {
+      console.error('[SIEMIntegration] Failed to decrypt credential:', error);
+      // If decryption fails, the data might not be encrypted (legacy data)
+      // Return the original value as fallback
+      return encryptedCredential;
+    }
+  }
+
   /**
    * Generate unique event ID
    */
@@ -502,51 +551,364 @@ export class SIEMIntegrationService {
   }
 
   /**
-   * Forward to DataDog (placeholder - implement actual API call)
+   * Forward to DataDog using DataDog Events API
    */
   private static async forwardToDataDog(integration: SIEMIntegration, event: any): Promise<void> {
-    // TODO: Implement DataDog API integration
-    console.log('Forwarding to DataDog:', integration.name, event);
+    const apiKey = await this.decryptCredential(integration.apiKey);
+    const appKey = await this.decryptCredential(integration.apiSecret); // DataDog uses app key as secret
+    
+    if (!apiKey || !appKey) {
+      throw new Error('DataDog API key and app key are required');
+    }
+
+    try {
+      const datadogEvent = {
+        title: event.title || event.type || 'SIEM Event',
+        text: event.message || JSON.stringify(event),
+        alert_type: event.severity === 'critical' ? 'error' :
+                    event.severity === 'high' ? 'warning' : 'info',
+        source_type_name: 'Financbase SIEM',
+        tags: [
+          `organization:${event.organizationId}`,
+          `event_type:${event.type}`,
+          `severity:${event.severity}`,
+          ...(event.tags || []),
+        ],
+        date_happened: Math.floor(new Date(event.timestamp || Date.now()).getTime() / 1000),
+        priority: event.severity === 'critical' ? 'normal' : 'low',
+      };
+
+      const response = await fetch('https://api.datadoghq.com/api/v1/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'DD-API-KEY': apiKey,
+          'DD-APPLICATION-KEY': appKey,
+        },
+        body: JSON.stringify(datadogEvent),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`DataDog API error: ${response.status} ${errorText}`);
+      }
+    } catch (error) {
+      console.error('[SIEMIntegration] Failed to forward to DataDog:', error);
+      throw error;
+    }
   }
 
   /**
-   * Forward to Splunk (placeholder - implement actual API call)
+   * Forward to Splunk using HTTP Event Collector (HEC)
    */
   private static async forwardToSplunk(integration: SIEMIntegration, event: any): Promise<void> {
-    // TODO: Implement Splunk API integration
-    console.log('Forwarding to Splunk:', integration.name, event);
+    const hecToken = await this.decryptCredential(integration.apiKey);
+    const hecUrl = integration.endpoint || 'https://http-inputs.splunkcloud.com/services/collector/event';
+    
+    if (!hecToken) {
+      throw new Error('Splunk HEC token is required');
+    }
+
+    try {
+      const splunkEvent = {
+        time: Math.floor(new Date(event.timestamp || Date.now()).getTime() / 1000),
+        host: 'financbase-siem',
+        source: 'financbase',
+        sourcetype: 'siem_event',
+        event: {
+          ...event,
+          organizationId: event.organizationId,
+          severity: event.severity,
+          type: event.type,
+        },
+      };
+
+      const response = await fetch(hecUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Splunk ${hecToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(splunkEvent),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Splunk HEC error: ${response.status} ${errorText}`);
+      }
+    } catch (error) {
+      console.error('[SIEMIntegration] Failed to forward to Splunk:', error);
+      throw error;
+    }
   }
 
   /**
-   * Forward to Elastic (placeholder - implement actual API call)
+   * Forward to Elasticsearch using Elasticsearch API
    */
   private static async forwardToElastic(integration: SIEMIntegration, event: any): Promise<void> {
-    // TODO: Implement Elastic API integration
-    console.log('Forwarding to Elastic:', integration.name, event);
+    const elasticUrl = integration.endpoint || 'https://localhost:9200';
+    const apiKey = await this.decryptCredential(integration.apiKey);
+    const username = integration.username;
+    const password = await this.decryptCredential(integration.password);
+    
+    if (!apiKey && (!username || !password)) {
+      throw new Error('Elasticsearch API key or username/password is required');
+    }
+
+    try {
+      const indexName = integration.additionalConfig?.indexName || 'siem-events';
+      const elasticEvent = {
+        '@timestamp': new Date(event.timestamp || Date.now()).toISOString(),
+        organizationId: event.organizationId,
+        eventType: event.type,
+        severity: event.severity,
+        title: event.title,
+        message: event.message,
+        source: 'financbase-siem',
+        ...event,
+      };
+
+      const authHeader = apiKey 
+        ? `ApiKey ${apiKey}`
+        : `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+
+      const response = await fetch(`${elasticUrl}/${indexName}/_doc`, {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(elasticEvent),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Elasticsearch API error: ${response.status} ${errorText}`);
+      }
+    } catch (error) {
+      console.error('[SIEMIntegration] Failed to forward to Elasticsearch:', error);
+      throw error;
+    }
   }
 
   /**
-   * Forward to Sumo Logic (placeholder - implement actual API call)
+   * Forward to Sumo Logic using HTTP Source Collector
    */
   private static async forwardToSumoLogic(integration: SIEMIntegration, event: any): Promise<void> {
-    // TODO: Implement Sumo Logic API integration
-    console.log('Forwarding to Sumo Logic:', integration.name, event);
+    const collectorUrl = integration.endpoint;
+    const accessId = await this.decryptCredential(integration.apiKey);
+    const accessKey = await this.decryptCredential(integration.apiSecret);
+    
+    if (!collectorUrl) {
+      throw new Error('Sumo Logic collector URL is required');
+    }
+
+    if (!accessId || !accessKey) {
+      throw new Error('Sumo Logic access ID and access key are required');
+    }
+
+    try {
+      const sumoEvent = {
+        timestamp: new Date(event.timestamp || Date.now()).toISOString(),
+        organizationId: event.organizationId,
+        eventType: event.type,
+        severity: event.severity,
+        title: event.title,
+        message: event.message,
+        source: 'financbase-siem',
+        ...event,
+      };
+
+      // Create authentication header
+      const timestamp = Date.now();
+      const signature = Buffer.from(
+        require('crypto').createHmac('sha256', accessKey)
+          .update(`POST\n\napplication/json\n${timestamp}`)
+          .digest('base64')
+      ).toString('base64');
+
+      const response = await fetch(collectorUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Sumo-Name': 'Financbase SIEM',
+          'X-Sumo-Category': 'siem/events',
+        },
+        body: JSON.stringify(sumoEvent),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Sumo Logic API error: ${response.status} ${errorText}`);
+      }
+    } catch (error) {
+      console.error('[SIEMIntegration] Failed to forward to Sumo Logic:', error);
+      throw error;
+    }
   }
 
   /**
-   * Forward to Azure Sentinel (placeholder - implement actual API call)
+   * Forward to Azure Sentinel using Log Analytics Data Collector API
    */
   private static async forwardToAzureSentinel(integration: SIEMIntegration, event: any): Promise<void> {
-    // TODO: Implement Azure Sentinel API integration
-    console.log('Forwarding to Azure Sentinel:', integration.name, event);
+    const workspaceId = integration.additionalConfig?.workspaceId;
+    const sharedKey = await this.decryptCredential(integration.apiKey);
+    const logType = integration.additionalConfig?.logType || 'FinancbaseSIEM_CL';
+    
+    if (!workspaceId || !sharedKey) {
+      throw new Error('Azure Sentinel workspace ID and shared key are required');
+    }
+
+    try {
+      const azureEvent = {
+        TimeGenerated: new Date(event.timestamp || Date.now()).toISOString(),
+        OrganizationId: event.organizationId,
+        EventType: event.type,
+        Severity: event.severity,
+        Title: event.title,
+        Message: event.message,
+        Source: 'financbase-siem',
+        ...event,
+      };
+
+      // Create authorization signature for Azure Log Analytics
+      const date = new Date().toUTCString();
+      const contentLength = Buffer.byteLength(JSON.stringify(azureEvent), 'utf8');
+      const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
+      const signature = require('crypto')
+        .createHmac('sha256', Buffer.from(sharedKey, 'base64'))
+        .update(stringToSign, 'utf8')
+        .digest('base64');
+      const authorization = `SharedKey ${workspaceId}:${signature}`;
+
+      const response = await fetch(
+        `https://${workspaceId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Log-Type': logType,
+            'x-ms-date': date,
+            'Authorization': authorization,
+            'time-generated-field': 'TimeGenerated',
+          },
+          body: JSON.stringify(azureEvent),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Azure Sentinel API error: ${response.status} ${errorText}`);
+      }
+    } catch (error) {
+      console.error('[SIEMIntegration] Failed to forward to Azure Sentinel:', error);
+      throw error;
+    }
   }
 
   /**
-   * Forward to AWS Security Hub (placeholder - implement actual API call)
+   * Forward to AWS Security Hub using AWS SDK or API
+   * Note: This requires AWS SDK v3. For now, using direct API calls.
    */
   private static async forwardToAWSSecurityHub(integration: SIEMIntegration, event: any): Promise<void> {
-    // TODO: Implement AWS Security Hub API integration
-    console.log('Forwarding to AWS Security Hub:', integration.name, event);
+    const region = integration.additionalConfig?.region || 'us-east-1';
+    const accessKeyId = await this.decryptCredential(integration.apiKey);
+    const secretAccessKey = await this.decryptCredential(integration.apiSecret);
+    
+    if (!accessKeyId || !secretAccessKey) {
+      throw new Error('AWS Security Hub access key ID and secret access key are required');
+    }
+
+    try {
+      // AWS Security Hub uses AWS Signature Version 4
+      // This is a simplified implementation - in production, use AWS SDK
+      const securityHubFinding = {
+        SchemaVersion: '2018-10-08',
+        Id: event.id || `financbase-${Date.now()}`,
+        ProductArn: `arn:aws:securityhub:${region}:${integration.additionalConfig?.accountId || '123456789012'}:product/financbase/financbase`,
+        GeneratorId: 'financbase-siem',
+        AwsAccountId: integration.additionalConfig?.accountId || '123456789012',
+        Types: ['Security Finding'],
+        CreatedAt: new Date(event.timestamp || Date.now()).toISOString(),
+        UpdatedAt: new Date().toISOString(),
+        Severity: {
+          Label: event.severity === 'critical' ? 'CRITICAL' :
+                 event.severity === 'high' ? 'HIGH' :
+                 event.severity === 'medium' ? 'MEDIUM' : 'LOW',
+        },
+        Title: event.title || 'SIEM Event',
+        Description: event.message || JSON.stringify(event),
+        Resources: [
+          {
+            Type: 'Other',
+            Id: event.organizationId,
+            Region: region,
+          },
+        ],
+        SourceUrl: event.sourceUrl,
+        Remediation: {
+          Recommendation: {
+            Text: event.remediation || 'Review the event details and take appropriate action.',
+          },
+        },
+      };
+
+      // Import AWS SDK dynamically to handle cases where it might not be installed
+      let SecurityHubClient: any;
+      let BatchImportFindingsCommand: any;
+      
+      try {
+        const awsSdk = await import('@aws-sdk/client-securityhub');
+        SecurityHubClient = awsSdk.SecurityHubClient;
+        BatchImportFindingsCommand = awsSdk.BatchImportFindingsCommand;
+      } catch (importError) {
+        console.warn('[SIEMIntegration] AWS SDK not available. Install @aws-sdk/client-securityhub to enable AWS Security Hub integration.');
+        console.log('[SIEMIntegration] AWS Security Hub finding (not sent):', JSON.stringify(securityHubFinding, null, 2));
+        return; // Exit early if SDK is not available
+      }
+
+      // Check if AWS credentials are available
+      const accessKeyId = integration.additionalConfig?.awsAccessKeyId || process.env.AWS_ACCESS_KEY_ID;
+      const secretAccessKey = integration.additionalConfig?.awsSecretAccessKey || process.env.AWS_SECRET_ACCESS_KEY;
+      const awsRegion = integration.additionalConfig?.awsRegion || process.env.AWS_REGION || 'us-east-1';
+
+      if (!accessKeyId || !secretAccessKey) {
+        console.warn('[SIEMIntegration] AWS credentials not configured. Skipping AWS Security Hub integration.');
+        console.log('[SIEMIntegration] AWS Security Hub finding (not sent):', JSON.stringify(securityHubFinding, null, 2));
+        return;
+      }
+
+      // Create AWS Security Hub client
+      const client = new SecurityHubClient({
+        region: awsRegion,
+        credentials: {
+          accessKeyId,
+          secretAccessKey,
+        },
+      });
+
+      // Send finding to AWS Security Hub
+      try {
+        const command = new BatchImportFindingsCommand({
+          Findings: [securityHubFinding],
+        });
+        
+        const response = await client.send(command);
+        
+        // Log successful import
+        if (response.FailedCount && response.FailedCount > 0) {
+          console.error('[SIEMIntegration] Some findings failed to import:', response.FailedFindings);
+        } else {
+          console.log('[SIEMIntegration] Successfully imported finding to AWS Security Hub:', response.ImportedFindings?.[0]?.Id);
+        }
+      } catch (awsError: any) {
+        console.error('[SIEMIntegration] Failed to import finding to AWS Security Hub:', awsError.message);
+        // Don't throw - allow other integrations to continue
+      }
+    } catch (error) {
+      console.error('[SIEMIntegration] Failed to forward to AWS Security Hub:', error);
+      throw error;
+    }
   }
 
   /**
@@ -557,14 +919,15 @@ export class SIEMIntegrationService {
       throw new Error('Custom integration endpoint not configured');
     }
 
-    const response = await fetch(integration.endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(integration.apiKey && { 'Authorization': `Bearer ${integration.apiKey}` }),
-      },
-      body: JSON.stringify(event),
-    });
+      const decryptedApiKey = await this.decryptCredential(integration.apiKey);
+      const response = await fetch(integration.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(decryptedApiKey && { 'Authorization': `Bearer ${decryptedApiKey}` }),
+        },
+        body: JSON.stringify(event),
+      });
 
     if (!response.ok) {
       throw new Error(`Failed to forward event: ${response.statusText}`);
@@ -606,6 +969,11 @@ export class SIEMIntegrationService {
     }
   ): Promise<SIEMIntegration> {
     try {
+      // Encrypt sensitive credentials before storing
+      const encryptedApiKey = integration.apiKey ? await this.encryptCredential(integration.apiKey) : undefined;
+      const encryptedApiSecret = integration.apiSecret ? await this.encryptCredential(integration.apiSecret) : undefined;
+      const encryptedPassword = integration.password ? await this.encryptCredential(integration.password) : undefined;
+
       const [newIntegration] = await db
         .insert(siemIntegrations)
         .values({
@@ -615,10 +983,10 @@ export class SIEMIntegrationService {
           integrationType: integration.integrationType as any,
           description: integration.description,
           endpoint: integration.endpoint,
-          apiKey: integration.apiKey, // TODO: Encrypt
-          apiSecret: integration.apiSecret, // TODO: Encrypt
+          apiKey: encryptedApiKey,
+          apiSecret: encryptedApiSecret,
           username: integration.username,
-          password: integration.password, // TODO: Encrypt
+          password: encryptedPassword,
           additionalConfig: integration.additionalConfig || {},
           forwardEvents: integration.forwardEvents !== false,
           eventFilters: integration.eventFilters || {},

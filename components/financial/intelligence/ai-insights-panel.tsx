@@ -53,6 +53,7 @@ import {
   Pause
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface AIInsight {
   id: string;
@@ -401,7 +402,7 @@ export function AIInsightsPanel({
         setInsights(sampleInsights);
       } catch (err) {
         setError('Failed to load AI insights');
-        console.error('Error loading insights:', err);
+        logger.error('Error loading insights:', err);
       } finally {
         setLoading(false);
       }

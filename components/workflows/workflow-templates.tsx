@@ -90,7 +90,7 @@ export function WorkflowTemplates({
   const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplate | null>(null);
 
   // Fetch templates
-  const { data: templates = [], isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['workflow-templates', categoryFilter, searchTerm, sortBy],
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -103,6 +103,9 @@ export function WorkflowTemplates({
       return response.json();
     },
   });
+
+  // Ensure templates is always an array (handle null/undefined)
+  const templates = data || [];
 
   const getCategoryIcon = (category: string) => {
     const Icon = TEMPLATE_ICONS[category as keyof typeof TEMPLATE_ICONS] || TEMPLATE_ICONS.general;

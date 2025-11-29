@@ -262,10 +262,46 @@ export class TestDataCleanup {
 
     for (const tableName of tablesToClean) {
       try {
-        await testDb.execute(dsql.raw(`DELETE FROM "${tableName}" WHERE id LIKE '${prefix}%'`));
-      } catch (error) {
-        // Ignore constraint errors during cleanup
-        console.warn(`Could not delete from ${tableName}:`, error);
+        // Use id::text LIKE for UUID columns to avoid type errors
+        await testDb.execute(dsql.raw(`DELETE FROM "${tableName}" WHERE id::text LIKE '${prefix}%'`));
+      } catch (error: any) {
+        // Extract underlying error if it's a DrizzleQueryError
+        const underlyingError = error?.cause || error?.sourceError || error;
+        const errorCode = underlyingError?.code || error?.code;
+        const errorMessage = underlyingError?.message || error?.message || '';
+        
+        // If table doesn't exist (42P01), skip it silently
+        if (errorCode === '42P01' || errorMessage.includes('does not exist') || errorMessage.includes('relation') || errorMessage.includes('table')) {
+          // Table doesn't exist - skip silently
+          continue;
+        }
+        // If type casting fails (e.g., integer id columns or UUID type issues), try different approaches
+        if (error?.code === '42883' || error?.message?.includes('operator does not exist') || error?.message?.includes('uuid ~~')) {
+          // For UUID columns that don't support LIKE, skip cleanup
+          // These will be cleaned up by foreign key relationships or explicit deletes
+          if (error?.message?.includes('uuid')) {
+            continue;
+          }
+          try {
+            // Try without casting for integer id columns
+            await testDb.execute(dsql.raw(`DELETE FROM "${tableName}" WHERE id::text LIKE '${prefix}%'`));
+          } catch (e2: any) {
+            // If still fails, skip this table - it has a different id type
+            if (e2?.code === '42883' || e2?.message?.includes('operator does not exist') || e2?.message?.includes('uuid ~~')) {
+              continue;
+            }
+            // If table doesn't exist, skip it
+            if (e2?.code === '42P01' || e2?.message?.includes('does not exist')) {
+              continue;
+            }
+            throw e2;
+          }
+        } else {
+          // Ignore constraint errors during cleanup, but log other errors
+          if (error?.code !== '42P01') {
+            console.warn(`Could not delete from ${tableName}:`, error);
+          }
+        }
       }
     }
   }

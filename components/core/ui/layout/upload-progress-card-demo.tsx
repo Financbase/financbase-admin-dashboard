@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { UploadProgressCard } from "@/components/ui/progress-card";
 import { FileText } from "lucide-react";
 import React, { useState, useEffect } from "react";
+import { logger } from '@/lib/logger';
 
 export default function UploadProgressCardDemo() {
 	const [progress, setProgress] = useState(0);
@@ -47,7 +48,7 @@ export default function UploadProgressCardDemo() {
 
 	const handleCancel = () => {
 		setIsUploading(false);
-		console.log("Upload cancelled by user.");
+		logger.info("Upload cancelled by user.");
 	};
 
 	return (

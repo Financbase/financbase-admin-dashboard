@@ -10,6 +10,7 @@
 import { type NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -206,7 +207,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error fetching payroll data:', error);
+    logger.error('Error fetching payroll data:', error);
     return NextResponse.json(
       { error: 'Failed to fetch payroll data' },
       { status: 500 }
@@ -260,7 +261,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Error processing payroll action:', error);
+    logger.error('Error processing payroll action:', error);
     return NextResponse.json(
       { error: 'Failed to process payroll action' },
       { status: 500 }

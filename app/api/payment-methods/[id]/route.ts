@@ -20,7 +20,7 @@ const updatePaymentMethodSchema = z.object({
 	processingFee: z.number().min(0).max(100).optional(),
 	fixedFee: z.number().min(0).optional(),
 	isDefault: z.boolean().optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 	notes: z.string().optional(),
 });
 

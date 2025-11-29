@@ -139,7 +139,7 @@ export class WhiteLabelService {
 						eq(workspaces.plan, 'enterprise'),
 						or(
 							eq(workspaces.domain, normalizedDomain),
-							ilike(workspaces.domain, `%${normalizedDomain}%`),
+							ilike(workspaces.domain, normalizedDomain),
 						),
 					),
 				)
@@ -164,6 +164,37 @@ export class WhiteLabelService {
 						),
 					)
 					.limit(1);
+			}
+
+			// If still no match, search in settings JSON for customDomain
+			if (!workspace[0]) {
+				// Get all enterprise workspaces and check their settings
+				const allWorkspaces = await this.db
+					.select({
+						workspaceId: workspaces.workspaceId,
+						settings: workspaces.settings,
+						logo: workspaces.logo,
+						name: workspaces.name,
+						plan: workspaces.plan,
+					})
+					.from(workspaces)
+					.where(eq(workspaces.plan, 'enterprise'));
+
+				// Check each workspace's settings for customDomain match
+				for (const ws of allWorkspaces) {
+					const settings = this.parseSettings(ws.settings);
+					if (settings?.whiteLabel?.customDomain) {
+						const customDomain = settings.whiteLabel.customDomain
+							.replace(/^https?:\/\//, '')
+							.replace(/^www\./, '')
+							.replace(/\/$/, '')
+							.toLowerCase();
+						if (customDomain === normalizedDomain) {
+							workspace = [ws];
+							break;
+						}
+					}
+				}
 			}
 
 			if (!workspace[0]) {
@@ -253,6 +284,11 @@ export class WhiteLabelService {
 	 * Validate branding configuration
 	 */
 	validateBranding(branding: Partial<WhiteLabelBranding>): void {
+		// Validate company name
+		if (branding.companyName !== undefined && !branding.companyName.trim()) {
+			throw new Error('Company name cannot be empty');
+		}
+
 		// Validate colors
 		if (branding.primaryColor && !this.isValidColor(branding.primaryColor)) {
 			throw new Error('Invalid primary color format');

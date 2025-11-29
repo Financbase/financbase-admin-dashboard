@@ -24,6 +24,16 @@ NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 ```
 
+### CORS Configuration
+
+```env
+# Allowed Origins for CORS - Required for Direct File API routes
+# Comma-separated list of allowed origins (no spaces)
+ALLOWED_ORIGINS=https://financbase.com,https://app.financbase.com,https://staging.financbase.com
+```
+
+**Note:** This environment variable is required for the Direct File API proxy routes. In development, localhost origins are automatically allowed. In production, only origins listed in this variable will be permitted.
+
 ## Contact & Support Form Variables
 
 ### Required

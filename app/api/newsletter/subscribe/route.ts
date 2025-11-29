@@ -16,6 +16,7 @@ import { EmailService } from '@/lib/email/service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { eq } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
+import { logger } from '@/lib/logger';
 
 // Validation schema for newsletter subscription
 const newsletterSubscriptionSchema = z.object({
@@ -213,7 +214,7 @@ Unsubscribe: ${unsubscribeUrl}
 
 		// Don't fail the subscription if email fails - log but continue
 		if (!emailResult.success) {
-			console.error('Failed to send confirmation email:', emailResult.error);
+			logger.error('Failed to send confirmation email:', emailResult.error);
 		}
 
 		return NextResponse.json({

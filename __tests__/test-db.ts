@@ -76,6 +76,14 @@ export class TestDatabase {
       throw new Error('TestDatabase should only be used in test environment');
     }
 
+    // Set search_path to include financbase schema so tables in that schema are accessible
+    try {
+      await testDb.execute(dsql`SET search_path TO financbase, public;`);
+    } catch (error) {
+      // If setting search_path fails, continue anyway (might not have permission or schema might not exist)
+      console.warn('Could not set search_path, continuing without it:', error);
+    }
+
     // Run any test-specific setup (migrations, etc.)
     this.isInitialized = true;
   }
@@ -113,22 +121,57 @@ export class TestDatabase {
         // Only delete if we can identify test data safely
         if (useLocalPostgres && sql && typeof sql.query === 'function') {
           // For local PostgreSQL, use the Pool directly
-          // Skip cleanup for tables with UUID columns - they need explicit test data tracking
-          if (!['lead_tasks', 'lead_activities', 'leads', 'transactions', 'invoices', 'expenses', 
-                'time_entries', 'tasks', 'projects', 'clients', 'campaigns', 'ads', 'ad_groups',
-                'accounts', 'payment_methods', 'organizations', 'organization_members', 'users'].includes(tableName)) {
-            await sql.query(`DELETE FROM "${tableName}" WHERE id::text LIKE 'test-%' OR id::text LIKE 'user-%' OR id::text LIKE 'client-%'`);
-          }
-        } else {
-          // For Neon, skip cleanup for tables that might have UUID columns
-          // These tables should be cleaned up by test-specific cleanup code
+          // Skip tables that are known to have UUID id columns that don't support LIKE
           if (!['lead_tasks', 'lead_activities', 'leads', 'transactions', 'invoices', 'expenses', 
                 'time_entries', 'tasks', 'projects', 'clients', 'campaigns', 'ads', 'ad_groups',
                 'accounts', 'payment_methods', 'organizations', 'organization_members', 'users'].includes(tableName)) {
             try {
+              // Try with text casting first for UUID columns
+              await sql.query(`DELETE FROM "${tableName}" WHERE id::text LIKE 'test-%' OR id::text LIKE 'user-%' OR id::text LIKE 'client-%'`);
+            } catch (error: any) {
+              // If id::text casting fails (e.g., integer id columns or UUID type issues), try different approaches
+              if (error?.code === '42883' || error?.message?.includes('operator does not exist') || error?.message?.includes('uuid ~~')) {
+                try {
+                  // For UUID columns, use CAST explicitly or skip if it's a UUID type issue
+                  if (error?.message?.includes('uuid')) {
+                    // UUID columns - skip LIKE, use direct comparison or skip cleanup for this table
+                    // These tables will be cleaned up by their foreign key relationships
+                    return;
+                  }
+                  // For integer columns, try without casting
+                  await sql.query(`DELETE FROM "${tableName}" WHERE id::text LIKE 'test-%' OR id::text LIKE 'user-%' OR id::text LIKE 'client-%'`);
+                } catch (e2: any) {
+                  // If still fails, skip this table - it has a different id type
+                  if (e2?.code === '42883' || e2?.message?.includes('operator does not exist') || e2?.message?.includes('uuid ~~')) {
+                    return;
+                  }
+                  throw e2;
+                }
+              } else {
+                throw error;
+              }
+            }
+          }
+        } else {
+          // For Neon, use id::text LIKE for UUID columns
+          // Skip cleanup for tables that are explicitly excluded
+          if (!['lead_tasks', 'lead_activities', 'leads', 'transactions', 'invoices', 'expenses', 
+                'time_entries', 'tasks', 'projects', 'clients', 'campaigns', 'ads', 'ad_groups',
+                'accounts', 'payment_methods', 'organizations', 'organization_members', 'users'].includes(tableName)) {
+            try {
+              // Try with id::text casting first (for UUID columns)
               await testDb.execute(dsql.raw(`DELETE FROM "${tableName}" WHERE id::text LIKE 'test-%' OR id::text LIKE 'user-%' OR id::text LIKE 'client-%'`));
-            } catch (e) {
-              // If type casting fails, just skip this table
+            } catch (e: any) {
+              // If type casting fails (e.g., integer id columns), try without casting or skip
+              if (e?.code === '42883' || e?.message?.includes('operator does not exist')) {
+                // This table has a different id type (likely integer), skip it
+                // These tables should be cleaned up by test-specific cleanup code
+                return;
+              }
+              // For other errors, log but don't fail
+              if (e && typeof e === 'object' && 'code' in e && e.code !== '42883') {
+                console.warn(`Could not clean table ${tableName}:`, e);
+              }
             }
           }
         }

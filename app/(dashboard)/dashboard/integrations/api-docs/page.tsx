@@ -210,10 +210,11 @@ const response = await fetch('/api/campaigns', {
 });
 
 const data = await response.json();
-console.log(data);`,
+logger.info(data);`,
     
     python: `# Python Example
 import requests
+import { logger } from '@/lib/logger';
 
 url = 'https://api.financbase.com/campaigns'
 headers = {

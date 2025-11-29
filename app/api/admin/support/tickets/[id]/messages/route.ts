@@ -79,7 +79,8 @@ export async function POST(
     // Get user agent and IP from request
     const userAgent = request.headers.get('user-agent') || undefined;
     const forwarded = request.headers.get('x-forwarded-for');
-    const ipAddress = forwarded ? forwarded.split(',')[0].trim() : request.ip || undefined;
+    const realIp = request.headers.get('x-real-ip');
+    const ipAddress = forwarded ? forwarded.split(',')[0].trim() : realIp || undefined;
 
     const message = await DocumentationService.addTicketMessage(
       ticketId,

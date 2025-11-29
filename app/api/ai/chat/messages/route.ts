@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { AIAssistantService } from '@/lib/services/ai/ai-assistant-service';
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 
 const sendMessageSchema = z.object({
 	conversationId: z.string().min(1, 'Conversation ID is required'),
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		console.error('Error sending message:', error);
+		logger.error('Error sending message:', error);
 		return NextResponse.json(
 			{ error: 'Failed to send message' },
 			{ status: 500 }

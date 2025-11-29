@@ -50,6 +50,7 @@ import { FinancbaseGPTService } from '@/lib/services/business/financbase-gpt-ser
 import { NotificationService } from '@/lib/services/notification-service';
 import { formatDistanceToNow, format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface Report {
 	id: number;
@@ -166,7 +167,7 @@ export function EnhancedReportsSystem() {
 			});
 		},
 		onSuccess: (response) => {
-			console.log('Report insights:', response.analysis);
+			logger.info('Report insights:', response.analysis);
 		},
 	});
 

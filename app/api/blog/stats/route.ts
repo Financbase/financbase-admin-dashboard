@@ -13,6 +13,7 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { withRLS } from '@/lib/api/with-rls';
 import { checkAdminStatus } from '@/lib/auth/check-admin-status';
 import * as blogService from '@/lib/services/blog/blog-service';
+import { createSuccessResponse } from '@/lib/api/standard-response';
 
 /**
  * GET /api/blog/stats
@@ -30,10 +31,7 @@ export async function GET(req: NextRequest) {
 		try {
 			const stats = await blogService.getBlogStats();
 
-			return NextResponse.json({
-				success: true,
-				data: stats,
-			});
+			return createSuccessResponse(stats, 200, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

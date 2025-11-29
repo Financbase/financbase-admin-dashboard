@@ -36,7 +36,10 @@ import {
 	BarChart3,
 	Brain,
 	CreditCard,
-	Link
+	Link,
+	Eye,
+	Bookmark,
+	Share2
 } from "lucide-react";
 
 export const metadata: Metadata = {

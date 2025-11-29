@@ -8,11 +8,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { workflowTemplates } from '@/lib/db/schemas';
-import { eq, desc, and, like, or } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { WorkflowService } from '@/lib/services/workflow-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -23,41 +22,18 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const search = searchParams.get('search');
-    const isOfficial = searchParams.get('isOfficial');
-    const isPopular = searchParams.get('isPopular');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const category = searchParams.get('category') || undefined;
+    const isOfficial = searchParams.get('isOfficial') === 'true';
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50;
+    const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0;
 
-    let whereConditions = [eq(workflowTemplates.isActive, true)];
-
-    if (category) {
-      whereConditions.push(eq(workflowTemplates.category, category));
-    }
-
-    if (search) {
-      whereConditions.push(or(
-        like(workflowTemplates.name, `%${search}%`),
-        like(workflowTemplates.description, `%${search}%`)
-      ));
-    }
-
-    if (isOfficial === 'true') {
-      whereConditions.push(eq(workflowTemplates.isOfficial, true));
-    }
-
-    if (isPopular === 'true') {
-      whereConditions.push(eq(workflowTemplates.isPopular, true));
-    }
-
-    const templates = await db
-      .select()
-      .from(workflowTemplates)
-      .where(and(...whereConditions))
-      .orderBy(desc(workflowTemplates.usageCount))
-      .limit(limit)
-      .offset(offset);
+    const templates = await WorkflowService.getWorkflowTemplates({
+      category,
+      isPublic: true,
+      isOfficial: isOfficial || undefined,
+      limit,
+      offset,
+    });
 
     return NextResponse.json(templates);
   } catch (error) {
@@ -101,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newTemplate[0], { status: 201 });
   } catch (error) {
-    console.error('Error creating workflow template:', error);
+    logger.error('Error creating workflow template:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

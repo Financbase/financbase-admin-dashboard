@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { IncidentResponseService } from '@/lib/services/incident-response-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: incident, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating incident:', error);
+    logger.error('Error creating incident:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: incidents, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error getting incidents:', error);
+    logger.error('Error getting incidents:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

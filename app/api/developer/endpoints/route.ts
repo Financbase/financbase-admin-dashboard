@@ -12,6 +12,7 @@ import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { readdir, readFile, stat } from 'fs/promises';
 import { join } from 'path';
+import { logger } from '@/lib/logger';
 
 interface APIEndpoint {
 	id: string;
@@ -149,12 +150,12 @@ async function scanAPIRoutes(
 						endpoints.push(endpoint);
 					}
 				} catch (error) {
-					console.error(`Error reading route file ${fullPath}:`, error);
+					logger.error(`Error reading route file ${fullPath}:`, error);
 				}
 			}
 		}
 	} catch (error) {
-		console.error(`Error scanning directory ${dir}:`, error);
+		logger.error(`Error scanning directory ${dir}:`, error);
 	}
 	
 	return endpoints;
@@ -197,7 +198,7 @@ export async function GET(request: NextRequest) {
 			stats,
 		});
 	} catch (error) {
-		console.error('Error scanning API endpoints:', error);
+		logger.error('Error scanning API endpoints:', error);
 		return ApiErrorHandler.handle(error, requestId);
 	}
 }

@@ -16,6 +16,7 @@ import { ImageUpload } from '@/components/core/ui/layout/image-upload';
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { logger } from '@/lib/logger';
 
 interface GalleryImage {
 	id: string;
@@ -60,7 +61,7 @@ export default function ImageGalleryDemo() {
 			
 			setImages(convertedImages);
 		} catch (error) {
-			console.error("Error fetching images:", error);
+			logger.error("Error fetching images:", error);
 			toast.error("Failed to load images");
 		} finally {
 			setLoading(false);
@@ -80,7 +81,7 @@ export default function ImageGalleryDemo() {
 			toast.success("Image deleted");
 			fetchImages();
 		} catch (error) {
-			console.error("Error deleting image:", error);
+			logger.error("Error deleting image:", error);
 			toast.error("Failed to delete image");
 		}
 	};
@@ -96,7 +97,7 @@ export default function ImageGalleryDemo() {
 			toast.success("Image updated");
 			fetchImages();
 		} catch (error) {
-			console.error("Error updating image:", error);
+			logger.error("Error updating image:", error);
 			toast.error("Failed to update image");
 		}
 	};
@@ -119,7 +120,7 @@ export default function ImageGalleryDemo() {
 			toast.success("Image uploaded successfully");
 			fetchImages();
 		} catch (error) {
-			console.error("Error saving image:", error);
+			logger.error("Error saving image:", error);
 			toast.error("Failed to save image");
 		}
 	};

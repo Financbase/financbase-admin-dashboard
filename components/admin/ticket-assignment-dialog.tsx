@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface User {
 	id: string;
@@ -83,7 +84,7 @@ export function TicketAssignmentDialog({
 			const data = await response.json();
 			setUsers(data || []);
 		} catch (error) {
-			console.error('Error fetching users:', error);
+			logger.error('Error fetching users:', error);
 			toast.error('Failed to load users');
 		} finally {
 			setFetchingUsers(false);
@@ -111,7 +112,7 @@ export function TicketAssignmentDialog({
 			onUpdate();
 			onOpenChange(false);
 		} catch (error) {
-			console.error('Error assigning ticket:', error);
+			logger.error('Error assigning ticket:', error);
 			toast.error('Failed to assign ticket');
 		} finally {
 			setLoading(false);

@@ -14,6 +14,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkAndRevertExpiredGracePeriods } from "@/lib/cron/subscription-grace-period-check";
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/cron/subscription-grace-period
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
 			status: result.success ? 200 : 500,
 		});
 	} catch (error) {
-		console.error("Error in grace period check cron job:", error);
+		logger.error("Error in grace period check cron job:", error);
 		return NextResponse.json(
 			{
 				success: false,

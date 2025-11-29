@@ -24,7 +24,7 @@ const createTimeEntrySchema = z.object({
 	hourlyRate: z.number().min(0).optional(),
 	requiresApproval: z.boolean().default(false),
 	tags: z.array(z.string()).optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 	notes: z.string().optional(),
 });
 

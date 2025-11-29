@@ -15,6 +15,7 @@ import { AIGovernanceService } from '@/lib/services/ai-governance-service';
 import { StatePrivacyService } from '@/lib/services/state-privacy-service';
 import { DataClassificationService } from '@/lib/services/data-classification-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: dashboard, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching compliance dashboard:', error);
+    logger.error('Error fetching compliance dashboard:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

@@ -8,11 +8,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { webhooks } from '@/lib/db/schemas';
-import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { WebhookService } from '@/lib/services/webhook-service';
 
 export async function GET(
   request: NextRequest,
@@ -31,23 +29,18 @@ export async function GET(
       return ApiErrorHandler.badRequest('Invalid webhook ID');
     }
 
-    const webhook = await db
-      .select()
-      .from(webhooks)
-      .where(and(eq(webhooks.id, webhookId), eq(webhooks.userId, userId)))
-      .limit(1);
-
-    if (webhook.length === 0) {
+    const webhook = await WebhookService.getWebhook(webhookId, userId);
+    if (!webhook) {
       return ApiErrorHandler.notFound('Webhook not found');
     }
 
-    return NextResponse.json(webhook[0]);
+    return NextResponse.json(webhook);
   } catch (error) {
     return ApiErrorHandler.handle(error, requestId);
   }
 }
 
-export async function PATCH(
+export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -71,41 +64,21 @@ export async function PATCH(
       return ApiErrorHandler.badRequest('Invalid JSON in request body');
     }
 
-    const updateData: Record<string, unknown> = {};
-
-    // Only update provided fields
-    if (body.name !== undefined) updateData.name = body.name;
-    if (body.description !== undefined) updateData.description = body.description;
-    if (body.url !== undefined) {
-      // Validate URL
+    // Validate URL if provided
+    if (body.url) {
       try {
         new URL(body.url);
-        updateData.url = body.url;
       } catch {
         return ApiErrorHandler.badRequest('Invalid URL format');
       }
     }
-    if (body.events !== undefined) updateData.events = body.events;
-    if (body.secret !== undefined) updateData.secret = body.secret;
-    if (body.retryPolicy !== undefined) updateData.retryPolicy = body.retryPolicy;
-    if (body.headers !== undefined) updateData.headers = body.headers;
-    if (body.filters !== undefined) updateData.filters = body.filters;
-    if (body.timeout !== undefined) updateData.timeout = body.timeout;
-    if (body.isActive !== undefined) updateData.isActive = body.isActive;
 
-    updateData.updatedAt = new Date();
-
-    const updatedWebhook = await db
-      .update(webhooks)
-      .set(updateData)
-      .where(and(eq(webhooks.id, webhookId), eq(webhooks.userId, userId)))
-      .returning();
-
-    if (updatedWebhook.length === 0) {
+    const webhook = await WebhookService.updateWebhook(webhookId, userId, body);
+    if (!webhook) {
       return ApiErrorHandler.notFound('Webhook not found');
     }
 
-    return NextResponse.json(updatedWebhook[0]);
+    return NextResponse.json(webhook);
   } catch (error) {
     return ApiErrorHandler.handle(error, requestId);
   }
@@ -128,12 +101,8 @@ export async function DELETE(
       return ApiErrorHandler.badRequest('Invalid webhook ID');
     }
 
-    const deletedWebhook = await db
-      .delete(webhooks)
-      .where(and(eq(webhooks.id, webhookId), eq(webhooks.userId, userId)))
-      .returning();
-
-    if (deletedWebhook.length === 0) {
+    const deleted = await WebhookService.deleteWebhook(webhookId, userId);
+    if (!deleted) {
       return ApiErrorHandler.notFound('Webhook not found');
     }
 

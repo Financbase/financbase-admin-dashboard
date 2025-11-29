@@ -18,6 +18,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { logger } from '@/lib/logger';
 
 const DIRECT_FILE_API_URL = process.env.DIRECT_FILE_API_URL || "http://localhost:8080";
 const DIRECT_FILE_STATE_API_URL = process.env.DIRECT_FILE_STATE_API_URL || "http://localhost:8081";
@@ -125,32 +126,67 @@ async function handleRequest(
 			jsonBody = responseBody;
 		}
 
-		// Return response with CORS headers
+		// Get origin from request for CORS validation
+		const origin = request.headers.get("origin");
+		const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
+		const isAllowedOrigin = origin && (
+			allowedOrigins.includes(origin) ||
+			origin.includes("localhost") ||
+			origin.includes("127.0.0.1")
+		);
+
+		// Return response with secure CORS headers
+		const corsHeaders: Record<string, string> = {
+			"Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+			"Access-Control-Allow-Headers": "Content-Type, Authorization",
+			"Access-Control-Allow-Credentials": "true",
+		};
+
+		// Only allow specific origins, not wildcard
+		if (isAllowedOrigin) {
+			corsHeaders["Access-Control-Allow-Origin"] = origin;
+		} else if (process.env.NODE_ENV === "development") {
+			// In development, allow localhost origins
+			corsHeaders["Access-Control-Allow-Origin"] = origin || "http://localhost:3000";
+		}
+
 		return NextResponse.json(jsonBody, {
 			status: response.status,
-			headers: {
-				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-				"Access-Control-Allow-Headers": "Content-Type, Authorization",
-			},
+			headers: corsHeaders,
 		});
 	} catch (error: any) {
-		console.error("Direct File API Proxy Error:", error);
+		logger.error("Direct File API Proxy Error:", error);
 		return NextResponse.json(
-			{ error: "Internal server error", message: error.message },
+			{ success: false, error: "Internal server error", message: error.message },
 			{ status: 500 }
 		);
 	}
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+	const origin = request.headers.get("origin");
+	const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
+	const isAllowedOrigin = origin && (
+		allowedOrigins.includes(origin) ||
+		origin.includes("localhost") ||
+		origin.includes("127.0.0.1")
+	);
+
+	const corsHeaders: Record<string, string> = {
+		"Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+		"Access-Control-Allow-Headers": "Content-Type, Authorization",
+		"Access-Control-Allow-Credentials": "true",
+	};
+
+	if (isAllowedOrigin) {
+		corsHeaders["Access-Control-Allow-Origin"] = origin;
+	} else if (process.env.NODE_ENV === "development") {
+		corsHeaders["Access-Control-Allow-Origin"] = origin || "http://localhost:3000";
+	}
+
 	return new NextResponse(null, {
 		status: 200,
-		headers: {
-			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-			"Access-Control-Allow-Headers": "Content-Type, Authorization",
-		},
+		headers: corsHeaders,
 	});
 }
 

@@ -11,6 +11,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { IncidentResponseService } from '@/lib/services/incident-response-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { db } from '@/lib/db';
+import { irCommunicationTemplates } from '@/lib/db/schemas/incident-response.schema';
+import { eq, and, desc } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -37,22 +41,26 @@ export async function POST(request: NextRequest) {
       return ApiErrorHandler.badRequest('Missing required fields: name, templateType, body, audience');
     }
 
-    const template = await IncidentResponseService.createCommunicationTemplate(orgId, {
+    // Insert communication template into database
+    const [template] = await db.insert(irCommunicationTemplates).values({
+      organizationId: orgId,
       createdBy: userId,
       name,
       templateType,
-      subject,
+      subject: subject || null,
       body: templateBody,
-      placeholders,
-      incidentType,
-      severity,
+      placeholders: placeholders || [],
+      incidentType: incidentType || null,
+      severity: severity || null,
       audience,
-      tags,
-    });
+      tags: tags || [],
+      isActive: true,
+      usageCount: 0,
+    }).returning();
 
     return NextResponse.json({ success: true, data: template, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating communication template:', error);
+    logger.error('Error creating communication template:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -70,17 +78,41 @@ export async function GET(request: NextRequest) {
     const incidentType = searchParams.get('incidentType') || undefined;
     const severity = searchParams.get('severity') || undefined;
     const audience = searchParams.get('audience') || undefined;
+    const isActive = searchParams.get('isActive');
 
-    const templates = await IncidentResponseService.getCommunicationTemplates(orgId, {
-      templateType,
-      incidentType,
-      severity,
-      audience,
-    });
+    // Build where conditions
+    const conditions = [eq(irCommunicationTemplates.organizationId, orgId)];
+    
+    if (templateType) {
+      conditions.push(eq(irCommunicationTemplates.templateType, templateType));
+    }
+    
+    if (incidentType) {
+      conditions.push(eq(irCommunicationTemplates.incidentType, incidentType as any));
+    }
+    
+    if (severity) {
+      conditions.push(eq(irCommunicationTemplates.severity, severity as any));
+    }
+    
+    if (audience) {
+      conditions.push(eq(irCommunicationTemplates.audience, audience));
+    }
+    
+    if (isActive !== null && isActive !== undefined) {
+      conditions.push(eq(irCommunicationTemplates.isActive, isActive === 'true'));
+    }
+
+    // Query templates from database
+    const templates = await db
+      .select()
+      .from(irCommunicationTemplates)
+      .where(and(...conditions))
+      .orderBy(desc(irCommunicationTemplates.createdAt));
 
     return NextResponse.json({ success: true, data: templates, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching communication templates:', error);
+    logger.error('Error fetching communication templates:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

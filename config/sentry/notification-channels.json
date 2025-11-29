@@ -1,0 +1,41 @@
+{
+  "email": [
+    {
+      "name": "Engineering Team",
+      "address": "engineering@financbase.com",
+      "type": "email"
+    },
+    {
+      "name": "On-Call Team",
+      "address": "oncall@financbase.com",
+      "type": "email"
+    },
+    {
+      "name": "Database Team",
+      "address": "dba@financbase.com",
+      "type": "email"
+    }
+  ],
+  "slack": [
+    {
+      "name": "Production Alerts",
+      "channel": "#alerts-production",
+      "workspace": "financbase"
+    },
+    {
+      "name": "Critical Alerts",
+      "channel": "#alerts-critical",
+      "workspace": "financbase"
+    },
+    {
+      "name": "Database Alerts",
+      "channel": "#alerts-database",
+      "workspace": "financbase"
+    },
+    {
+      "name": "Release Alerts",
+      "channel": "#alerts-releases",
+      "workspace": "financbase"
+    }
+  ]
+}

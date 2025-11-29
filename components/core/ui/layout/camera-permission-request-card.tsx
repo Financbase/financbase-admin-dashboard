@@ -38,6 +38,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
+import { logger } from '@/lib/logger';
 	Card,
 	CardContent,
 	CardDescription,
@@ -70,7 +71,7 @@ export const Component = ({
 			onPermissionChange?.(granted);
 		},
 		onError: (errorMessage: string) => {
-			console.error("Camera permission error:", errorMessage);
+			logger.error("Camera permission error:", errorMessage);
 		},
 	});
 
@@ -88,7 +89,7 @@ export const Component = ({
 						}),
 					});
 				} catch (error) {
-					console.error("Failed to save camera permission preference:", error);
+					logger.error("Failed to save camera permission preference:", error);
 				}
 			};
 

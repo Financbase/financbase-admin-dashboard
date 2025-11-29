@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ComplianceTrainingService } from '@/lib/services/compliance-training-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: program, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating training program:', error);
+    logger.error('Error creating training program:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

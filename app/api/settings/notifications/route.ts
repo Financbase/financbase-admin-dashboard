@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { notificationPreferences } from '@/lib/db/schema/settings';
 import { eq } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
 	try {
@@ -57,7 +58,7 @@ export async function GET() {
 
 		return NextResponse.json(prefs);
 	} catch (error) {
-		console.error('Error fetching notification preferences:', error);
+		logger.error('Error fetching notification preferences:', error);
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 }
@@ -97,7 +98,7 @@ export async function PUT(req: NextRequest) {
 
 		return NextResponse.json(updated);
 	} catch (error) {
-		console.error('Error updating notification preferences:', error);
+		logger.error('Error updating notification preferences:', error);
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 }

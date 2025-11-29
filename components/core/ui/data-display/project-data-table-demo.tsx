@@ -37,6 +37,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import React, { useState, useMemo, useEffect } from "react";
+import { logger } from '@/lib/logger';
 
 // Project type for API response
 interface ProjectFromAPI {
@@ -101,7 +102,7 @@ const Demo = () => {
 
 				setProjects(data.data || []);
 			} catch (err) {
-				console.error("Error fetching projects:", err);
+				logger.error("Error fetching projects:", err);
 				setError(
 					err instanceof Error ? err.message : "Failed to load projects",
 				);

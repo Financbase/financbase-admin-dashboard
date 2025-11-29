@@ -13,17 +13,23 @@ const mockResponse = (data: any, status = 200) => ({
   text: vi.fn().mockResolvedValue(JSON.stringify(data)),
 });
 
-// Mock crypto
-const mockRandomBytes = vi.fn(() => Buffer.from('mock-random-bytes'));
-const mockCreateHmac = vi.fn(() => ({
-  update: vi.fn().mockReturnThis(),
-  digest: vi.fn().mockReturnValue('mock-hmac-signature'),
-}));
-
-vi.mock('crypto', () => ({
-  createHmac: mockCreateHmac,
-  randomBytes: mockRandomBytes,
-}));
+// Mock crypto - must be defined inline to avoid hoisting issues
+vi.mock('crypto', () => {
+  const mockRandomBytes = vi.fn(() => Buffer.from('mock-random-bytes'));
+  const mockCreateHmac = vi.fn(() => ({
+    update: vi.fn().mockReturnThis(),
+    digest: vi.fn().mockReturnValue('mock-hmac-signature'),
+  }));
+  
+  return {
+    default: {
+      createHmac: mockCreateHmac,
+      randomBytes: mockRandomBytes,
+    },
+    createHmac: mockCreateHmac,
+    randomBytes: mockRandomBytes,
+  };
+});
 
 describe('OAuthHandler Integration', () => {
   let oauthHandler: OAuthHandler;

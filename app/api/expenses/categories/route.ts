@@ -17,6 +17,7 @@ import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { ExpenseService } from '@/lib/services/expense-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/expenses/categories
@@ -34,7 +35,7 @@ export async function GET() {
 
 		return NextResponse.json(categories);
 	} catch (error) {
-		console.error('Error fetching categories:', error);
+		logger.error('Error fetching categories:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch categories' },
 			{ status: 500 }
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(category, { status: 201 });
 	} catch (error) {
-		console.error('Error creating category:', error);
+		logger.error('Error creating category:', error);
 		return NextResponse.json(
 			{ error: 'Failed to create category' },
 			{ status: 500 }

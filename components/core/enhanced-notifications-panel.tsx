@@ -31,6 +31,7 @@ import { validateSafeUrl } from '@/lib/utils/security';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/lib/logger';
 
 interface Notification {
 	id: string | number; // Serial ID from database (integer, but can be string in JS)
@@ -75,11 +76,11 @@ export function EnhancedNotificationsPanel() {
 						}
 					} catch (jsonError) {
 						// If JSON parsing fails, use status text or default message
-						console.error('[Notifications] Failed to parse error response:', jsonError);
+						logger.error('[Notifications] Failed to parse error response:', jsonError);
 						errorMessage = response.statusText || `Server error (${response.status})`;
 					}
 					
-					console.error('[Notifications] API Error:', {
+					logger.error('[Notifications] API Error:', {
 						status: response.status,
 						statusText: response.statusText,
 						errorData,
@@ -90,7 +91,7 @@ export function EnhancedNotificationsPanel() {
 				}
 				
 				const result = await response.json();
-				console.log('[Notifications] Fetched:', result);
+				logger.info('[Notifications] Fetched:', result);
 				return result;
 			} catch (fetchError) {
 				// Handle network errors or other fetch failures
@@ -111,7 +112,7 @@ export function EnhancedNotificationsPanel() {
 
 	// Debug logging
 	useEffect(() => {
-		console.log('[Notifications] State:', {
+		logger.info('[Notifications] State:', {
 			userLoaded: isLoaded,
 			userId: user?.id,
 			isLoading,
@@ -161,7 +162,7 @@ export function EnhancedNotificationsPanel() {
 		// Check if PartyKit host is configured
 		const partyKitHost = process.env.NEXT_PUBLIC_PARTYKIT_HOST;
 		if (!partyKitHost) {
-			console.warn('[Notifications] NEXT_PUBLIC_PARTYKIT_HOST is not configured. Real-time notifications disabled.');
+			logger.warn('[Notifications] NEXT_PUBLIC_PARTYKIT_HOST is not configured. Real-time notifications disabled.');
 			return;
 		}
 
@@ -186,7 +187,7 @@ export function EnhancedNotificationsPanel() {
 						socket?.close();
 						return;
 					}
-					console.log('[Notifications] WebSocket connected');
+					logger.info('[Notifications] WebSocket connected');
 					reconnectAttempts = 0; // Reset reconnect attempts on successful connection
 				};
 
@@ -226,14 +227,14 @@ export function EnhancedNotificationsPanel() {
 							toast.info(data.data.title, toastOptions);
 						}
 					} catch (error) {
-						console.error('[Notifications] Error parsing notification data:', error);
+						logger.error('[Notifications] Error parsing notification data:', error);
 					}
 				};
 
 				socket.onerror = () => {
 					// WebSocket error events don't provide detailed error information
 					// Log what we can - the error object itself is empty, so we log context
-					console.error('[Notifications] WebSocket error occurred', {
+					logger.error('[Notifications] WebSocket error occurred', {
 						url: wsUrl,
 						readyState: socket?.readyState,
 						reconnectAttempts,
@@ -243,7 +244,7 @@ export function EnhancedNotificationsPanel() {
 				socket.onclose = (event) => {
 					if (!isMounted) return;
 
-					console.log('[Notifications] WebSocket closed', {
+					logger.info('[Notifications] WebSocket closed', {
 						code: event.code,
 						reason: event.reason || 'No reason provided',
 						wasClean: event.wasClean,
@@ -252,7 +253,7 @@ export function EnhancedNotificationsPanel() {
 					// Attempt reconnection if not a clean close and we haven't exceeded max attempts
 					if (event.code !== 1000 && reconnectAttempts < MAX_RECONNECT_ATTEMPTS && isMounted) {
 						reconnectAttempts++;
-						console.log(`[Notifications] Attempting to reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+						logger.info(`[Notifications] Attempting to reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
 						
 						reconnectTimeout = setTimeout(() => {
 							if (isMounted) {
@@ -260,14 +261,14 @@ export function EnhancedNotificationsPanel() {
 							}
 						}, RECONNECT_DELAY);
 					} else if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-						console.error('[Notifications] Max reconnection attempts reached. WebSocket connection failed.');
+						logger.error('[Notifications] Max reconnection attempts reached. WebSocket connection failed.');
 					}
 				};
 
 			} catch (error) {
-				console.error('[Notifications] Error setting up WebSocket:', error);
+				logger.error('[Notifications] Error setting up WebSocket:', error);
 				if (error instanceof Error) {
-					console.error('[Notifications] Error details:', {
+					logger.error('[Notifications] Error details:', {
 						message: error.message,
 						stack: error.stack,
 					});
@@ -311,7 +312,7 @@ export function EnhancedNotificationsPanel() {
 			const safeUrl = validateSafeUrl(notification.actionUrl);
 			
 			if (!safeUrl) {
-				console.warn('Blocked redirect to unsafe URL:', notification.actionUrl);
+				logger.warn('Blocked redirect to unsafe URL:', notification.actionUrl);
 				toast.error('Invalid redirect URL');
 				return;
 			}

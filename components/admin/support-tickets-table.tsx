@@ -45,6 +45,7 @@ import { Search, MoreVertical, Eye, UserPlus, MessageSquare, RefreshCw, Filter }
 import { toast } from 'sonner';
 import { TicketDetailDialog } from './ticket-detail-dialog';
 import { TicketAssignmentDialog } from './ticket-assignment-dialog';
+import { logger } from '@/lib/logger';
 
 interface SupportTicket {
 	id: number;
@@ -128,7 +129,7 @@ export function SupportTicketsAdminTable() {
 			// Estimate total pages (in a real app, you'd get this from the API)
 			setTotalPages(Math.ceil((data.tickets?.length || 0) / limit) || 1);
 		} catch (error) {
-			console.error('Error fetching tickets:', error);
+			logger.error('Error fetching tickets:', error);
 			toast.error('Failed to load support tickets');
 		} finally {
 			setLoading(false);
@@ -150,7 +151,7 @@ export function SupportTicketsAdminTable() {
 			toast.success('Ticket status updated');
 			fetchTickets();
 		} catch (error) {
-			console.error('Error updating status:', error);
+			logger.error('Error updating status:', error);
 			toast.error('Failed to update ticket status');
 		}
 	};
@@ -170,7 +171,7 @@ export function SupportTicketsAdminTable() {
 			toast.success('Ticket priority updated');
 			fetchTickets();
 		} catch (error) {
-			console.error('Error updating priority:', error);
+			logger.error('Error updating priority:', error);
 			toast.error('Failed to update ticket priority');
 		}
 	};

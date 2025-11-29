@@ -10,6 +10,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { BYOKService } from '@/lib/services/byok-service';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/byok/validate
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json({ validation });
 
 	} catch (error) {
-		console.error('Error validating API key:', error);
+		logger.error('Error validating API key:', error);
 		return NextResponse.json(
 			{ error: 'Failed to validate API key' },
 			{ status: 500 }
@@ -58,7 +59,7 @@ export async function GET() {
 		return NextResponse.json({ providers });
 
 	} catch (error) {
-		console.error('Error fetching providers:', error);
+		logger.error('Error fetching providers:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch providers' },
 			{ status: 500 }

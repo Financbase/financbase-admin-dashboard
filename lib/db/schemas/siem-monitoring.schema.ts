@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { organizations } from './organizations.schema';
 import { users } from './users.schema';
@@ -61,7 +61,7 @@ export const alertRuleTypeEnum = pgEnum('alert_rule_type', [
 // SIEM Events Table - Centralized security event log
 export const siemEvents = pgTable('financbase_siem_events', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
   
   // Event identification
   eventId: text('event_id').notNull().unique(), // Unique event identifier
@@ -129,8 +129,8 @@ export const siemEvents = pgTable('financbase_siem_events', {
 // SIEM Integrations Table
 export const siemIntegrations = pgTable('financbase_siem_integrations', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Integration details
   name: text('name').notNull(),
@@ -170,8 +170,8 @@ export const siemIntegrations = pgTable('financbase_siem_integrations', {
 // Real-time Alert Rules Table
 export const alertRules = pgTable('financbase_alert_rules', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   
   // Rule details
   name: text('name').notNull(),
@@ -211,7 +211,7 @@ export const alertRules = pgTable('financbase_alert_rules', {
 // Real-time Alerts Table
 export const realTimeAlerts = pgTable('financbase_real_time_alerts', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
   alertRuleId: integer('alert_rule_id').references(() => alertRules.id, { onDelete: 'set null' }),
   
   // Alert details
@@ -227,9 +227,9 @@ export const realTimeAlerts = pgTable('financbase_real_time_alerts', {
   relatedEvents: jsonb('related_events').default([]).notNull(), // Array of related event IDs
   
   // Response
-  acknowledgedBy: text('acknowledged_by').references(() => users.id, { onDelete: 'set null' }),
+  acknowledgedBy: uuid('acknowledged_by').references(() => users.id, { onDelete: 'set null' }),
   acknowledgedAt: timestamp('acknowledged_at', { withTimezone: true }),
-  resolvedBy: text('resolved_by').references(() => users.id, { onDelete: 'set null' }),
+  resolvedBy: uuid('resolved_by').references(() => users.id, { onDelete: 'set null' }),
   resolvedAt: timestamp('resolved_at', { withTimezone: true }),
   resolutionNotes: text('resolution_notes'),
   
@@ -247,7 +247,7 @@ export const realTimeAlerts = pgTable('financbase_real_time_alerts', {
 // Immutable Audit Trail Table (WORM - Write Once Read Many)
 export const immutableAuditTrail = pgTable('financbase_immutable_audit_trail', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
   
   // Event identification
   eventHash: text('event_hash').notNull().unique(), // Cryptographic hash of event data
@@ -278,7 +278,7 @@ export const immutableAuditTrail = pgTable('financbase_immutable_audit_trail', {
 // Log Aggregation Configuration Table
 export const logAggregationConfig = pgTable('financbase_log_aggregation_config', {
   id: serial('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
+  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
   
   // Configuration
   configName: text('config_name').notNull(),

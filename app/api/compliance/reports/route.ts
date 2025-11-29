@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ComplianceService } from '@/lib/services/compliance-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: reports, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching compliance reports:', error);
+    logger.error('Error fetching compliance reports:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: report, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error generating compliance report:', error);
+    logger.error('Error generating compliance report:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

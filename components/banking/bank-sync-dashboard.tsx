@@ -66,6 +66,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { bookkeepingEngine } from '@/lib/services/bookkeeping/ai-bookkeeping-engine';
+import { logger } from '@/lib/logger';
 
 // Bank provider interfaces
 interface BankProvider {
@@ -187,7 +188,7 @@ export function BankSyncDashboard({ userId, className }: BankSyncProps) {
       setShowAddAccount(false);
     },
     onError: (error) => {
-      console.error('Account connection failed:', error);
+      logger.error('Account connection failed:', error);
     }
   });
 

@@ -14,6 +14,7 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { db } from '@/lib/db';
 import { complianceReports } from '@/lib/db/schemas';
 import { eq } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -47,7 +48,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: report[0], requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching compliance report:', error);
+    logger.error('Error fetching compliance report:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

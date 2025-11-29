@@ -12,6 +12,7 @@ import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -207,7 +208,7 @@ export async function GET(request: NextRequest) {
 				});
 			}
 		} catch (error) {
-			console.error('Error searching transactions:', error);
+			logger.error('Error searching transactions:', error);
 		}
 
 		// Search invoices
@@ -245,7 +246,7 @@ export async function GET(request: NextRequest) {
 				});
 			}
 		} catch (error) {
-			console.error('Error searching invoices:', error);
+			logger.error('Error searching invoices:', error);
 		}
 
 		// Search clients
@@ -283,7 +284,7 @@ export async function GET(request: NextRequest) {
 				});
 			}
 		} catch (error) {
-			console.error('Error searching clients:', error);
+			logger.error('Error searching clients:', error);
 		}
 
 		// Sort results by relevance (exact matches first, then partial matches)
@@ -304,7 +305,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json({ results: limitedResults });
 	} catch (error) {
-		console.error('Search API error:', error);
+		logger.error('Search API error:', error);
 		return ApiErrorHandler.handle(error, requestId);
 	}
 }

@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import { Mail, Volume2, VolumeX, Smartphone, Monitor, Clock } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { logger } from '@/lib/logger';
 
 interface NotificationPreferences {
 	id: string;
@@ -95,7 +96,7 @@ export function NotificationPreferencesManager() {
 				}
 			}
 		} catch (error) {
-			console.error('Error loading notification preferences:', error);
+			logger.error('Error loading notification preferences:', error);
 			toast.error('Failed to load notification preferences');
 		} finally {
 			setLoading(false);

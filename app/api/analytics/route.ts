@@ -12,6 +12,7 @@ import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -319,7 +320,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(analyticsData);
   } catch (error) {
-    console.error('Analytics API error:', error);
+    logger.error('Analytics API error:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

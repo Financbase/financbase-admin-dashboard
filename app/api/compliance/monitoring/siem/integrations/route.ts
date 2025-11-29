@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { SIEMIntegrationService } from '@/lib/services/monitoring/siem-integration-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: integration, requestId }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating SIEM integration:', error);
+    logger.error('Error creating SIEM integration:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: integrations, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching SIEM integrations:', error);
+    logger.error('Error fetching SIEM integrations:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

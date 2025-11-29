@@ -13,7 +13,8 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { expenses } from '@/lib/db/schemas/expenses.schema';
 import { createExpenseSchema } from '@/lib/validation-schemas';
-import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { withRLS } from '@/lib/api/with-rls';
 import { eq, count, and, gte, lte, like } from 'drizzle-orm';
 
 /**
@@ -110,11 +111,9 @@ import { eq, count, and, gte, lte, like } from 'drizzle-orm';
  *         description: Internal server error
  */
 export async function GET(req: NextRequest) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return ApiErrorHandler.unauthorized();
-    }
+  const requestId = generateRequestId();
+  return withRLS(async (userId) => {
+    try {
 
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -165,11 +164,13 @@ export async function GET(req: NextRequest) {
         limit,
         total: totalCount[0]?.count || 0,
         pages: Math.ceil((totalCount[0]?.count || 0) / limit)
-      }
+      },
+      requestId
     });
-  } catch (error) {
-    return ApiErrorHandler.handle(error);
-  }
+    } catch (error) {
+      return ApiErrorHandler.handle(error, requestId);
+    }
+  });
 }
 
 /**
@@ -245,31 +246,127 @@ export async function GET(req: NextRequest) {
  *         description: Internal server error
  */
 export async function POST(req: NextRequest) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return ApiErrorHandler.unauthorized();
+  const requestId = generateRequestId();
+  return withRLS(async (userId) => {
+    try {
+      let body;
+      try {
+        body = await req.json();
+      } catch (error) {
+        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+      }
+    
+      // Handle expenseDate as alias for date
+      if (body.expenseDate && !body.date) {
+        body.date = body.expenseDate;
+      }
+      
+      // Validate and convert date to ISO format if needed
+      if (body.date) {
+        try {
+          // If it's already an ISO string, validate it
+          if (typeof body.date === 'string' && body.date.includes('T')) {
+            const testDate = new Date(body.date);
+            if (isNaN(testDate.getTime())) {
+              return ApiErrorHandler.badRequest('Invalid date format. Expected valid ISO 8601 datetime string.', requestId);
+            }
+          } else if (typeof body.date === 'string') {
+            // Try to convert plain date string to ISO
+            const dateObj = new Date(body.date);
+            if (isNaN(dateObj.getTime())) {
+              return ApiErrorHandler.badRequest('Invalid date format. Expected valid date string or ISO 8601 datetime.', requestId);
+            }
+            body.date = dateObj.toISOString();
+          } else if (body.date instanceof Date) {
+            // Already a Date object, convert to ISO
+            body.date = body.date.toISOString();
+          }
+        } catch (error) {
+          return ApiErrorHandler.badRequest('Invalid date format. Expected valid date string or ISO 8601 datetime.', requestId);
+        }
+      }
+      
+      // Validate and convert amount from string to number if needed
+      if (typeof body.amount === 'string') {
+        const parsedAmount = parseFloat(body.amount);
+        if (isNaN(parsedAmount)) {
+          return ApiErrorHandler.badRequest('Invalid amount format. Expected a valid number.', requestId);
+        }
+        if (parsedAmount <= 0) {
+          return ApiErrorHandler.badRequest('Amount must be a positive number.', requestId);
+        }
+        body.amount = parsedAmount;
+      } else if (typeof body.amount !== 'number') {
+        return ApiErrorHandler.badRequest('Amount must be a number.', requestId);
+      } else if (body.amount <= 0) {
+        return ApiErrorHandler.badRequest('Amount must be a positive number.', requestId);
+      }
+      
+      // Provide default description if missing
+      if (!body.description) {
+        body.description = 'Expense';
+      }
+      
+      const validatedData = createExpenseSchema.parse({
+        ...body,
+        userId // Ensure userId comes from auth, not request body
+      });
+
+      // Convert date strings to Date objects for database
+      // validatedData.date is already an ISO string from schema validation
+      let expenseDate: Date;
+      try {
+        expenseDate = new Date(validatedData.date);
+        if (isNaN(expenseDate.getTime())) {
+          return ApiErrorHandler.badRequest('Invalid date value. Could not parse date.', requestId);
+        }
+      } catch (error) {
+        return ApiErrorHandler.badRequest('Invalid date value. Could not parse date.', requestId);
+      }
+
+      const expenseData = {
+        ...validatedData,
+        date: expenseDate,
+        approvedAt: validatedData.approvedAt ? (() => {
+          try {
+            const date = new Date(validatedData.approvedAt);
+            return isNaN(date.getTime()) ? undefined : date;
+          } catch {
+            return undefined;
+          }
+        })() : undefined,
+        recurringEndDate: validatedData.recurringEndDate ? (() => {
+          try {
+            const date = new Date(validatedData.recurringEndDate);
+            return isNaN(date.getTime()) ? undefined : date;
+          } catch {
+            return undefined;
+          }
+        })() : undefined,
+        // Convert amount to string for decimal column
+        amount: validatedData.amount.toString(),
+        taxAmount: (validatedData.taxAmount ?? 0).toString(),
+        mileage: validatedData.mileage?.toString(),
+        mileageRate: validatedData.mileageRate?.toString(),
+        // Ensure description is provided
+        description: validatedData.description || 'Expense',
+      };
+
+      // Create the expense
+      const [newExpense] = await db
+        .insert(expenses)
+        .values(expenseData)
+        .returning();
+
+      return NextResponse.json({
+        success: true,
+        message: 'Expense created successfully',
+        data: newExpense,
+        requestId
+      }, { status: 201 });
+    } catch (error) {
+      return ApiErrorHandler.handle(error, requestId);
     }
-
-    const body = await req.json();
-    const validatedData = createExpenseSchema.parse({
-      ...body,
-      userId // Ensure userId comes from auth, not request body
-    });
-
-    // Create the expense
-    const [newExpense] = await db
-      .insert(expenses)
-      .values(validatedData)
-      .returning();
-
-    return NextResponse.json({
-      success: true,
-      message: 'Expense created successfully',
-      data: newExpense
-    }, { status: 201 });
-  } catch (error) {
-    return ApiErrorHandler.handle(error);
-  }
+  });
 }
 

@@ -124,7 +124,6 @@ export default function StatusPage() {
 			hero={{
 				title: "System Status",
 				description: "Real-time status of Financbase services and infrastructure",
-				size: "sm",
 			}}
 		>
 			{/* Main Status Section */}
@@ -199,33 +198,36 @@ export default function StatusPage() {
 					description="Detailed status of individual services"
 				>
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{Object.entries(healthStatus.services).map(([serviceName, serviceStatus]) => (
-							<PublicCard key={serviceName}>
-								<div className="flex items-start justify-between mb-4">
-									<div className="flex items-center gap-3">
-										{serviceName === 'database' && <Database className="w-5 h-5 text-blue-600" />}
-										{serviceName === 'api' && <Server className="w-5 h-5 text-blue-600" />}
-										{!['database', 'api'].includes(serviceName) && <Globe className="w-5 h-5 text-blue-600" />}
-										<h3 className="font-semibold text-gray-900 dark:text-white capitalize">
-											{serviceName}
-										</h3>
+						{Object.entries(healthStatus.services).map(([serviceName, serviceStatus]) => {
+							if (!serviceStatus) return null;
+							return (
+								<PublicCard key={serviceName}>
+									<div className="flex items-start justify-between mb-4">
+										<div className="flex items-center gap-3">
+											{serviceName === 'database' && <Database className="w-5 h-5 text-blue-600" />}
+											{serviceName === 'api' && <Server className="w-5 h-5 text-blue-600" />}
+											{!['database', 'api'].includes(serviceName) && <Globe className="w-5 h-5 text-blue-600" />}
+											<h3 className="font-semibold text-gray-900 dark:text-white capitalize">
+												{serviceName}
+											</h3>
+										</div>
+										{getStatusIcon(serviceStatus.status)}
 									</div>
-									{serviceStatus && getStatusIcon(serviceStatus.status)}
-								</div>
-								<div className={cn(
-									"px-3 py-1 rounded-full text-xs font-medium inline-block mb-2",
-									getStatusColor(serviceStatus.status)
-								)}>
-									{serviceStatus.status}
-								</div>
-								{serviceStatus.responseTime && (
-									<div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-										<Clock className="w-4 h-4" />
-										<span>{serviceStatus.responseTime}ms</span>
+									<div className={cn(
+										"px-3 py-1 rounded-full text-xs font-medium inline-block mb-2",
+										getStatusColor(serviceStatus.status)
+									)}>
+										{serviceStatus.status}
 									</div>
-								)}
-							</PublicCard>
-						))}
+									{serviceStatus.responseTime && (
+										<div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+											<Clock className="w-4 h-4" />
+											<span>{serviceStatus.responseTime}ms</span>
+										</div>
+									)}
+								</PublicCard>
+							);
+						})}
 					</div>
 				</PublicSection>
 			)}

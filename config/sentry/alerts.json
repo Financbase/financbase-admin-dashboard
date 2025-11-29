@@ -1,0 +1,157 @@
+{
+  "errorRate": {
+    "name": "High Error Rate",
+    "description": "Alert when error rate exceeds 0.1%",
+    "conditions": [
+      {
+        "type": "error_rate",
+        "threshold": 0.001,
+        "window": "1h",
+        "comparison": "above"
+      }
+    ],
+    "actions": [
+      {
+        "type": "email",
+        "targets": [
+          "engineering@financbase.com",
+          "oncall@financbase.com"
+        ]
+      },
+      {
+        "type": "slack",
+        "channel": "#alerts-production"
+      }
+    ]
+  },
+  "performance": {
+    "name": "Slow API Response Time",
+    "description": "Alert when API response time exceeds 200ms (95th percentile)",
+    "conditions": [
+      {
+        "type": "performance",
+        "metric": "p95",
+        "threshold": 200,
+        "window": "5m",
+        "comparison": "above"
+      }
+    ],
+    "actions": [
+      {
+        "type": "email",
+        "targets": [
+          "engineering@financbase.com"
+        ]
+      }
+    ]
+  },
+  "criticalErrors": {
+    "name": "Critical Errors",
+    "description": "Alert on critical errors (authentication failures, payment errors, etc.)",
+    "conditions": [
+      {
+        "type": "error",
+        "tags": {
+          "level": "error",
+          "category": [
+            "authentication",
+            "payment",
+            "database"
+          ]
+        },
+        "threshold": 1,
+        "window": "5m"
+      }
+    ],
+    "actions": [
+      {
+        "type": "email",
+        "targets": [
+          "engineering@financbase.com",
+          "oncall@financbase.com"
+        ]
+      },
+      {
+        "type": "slack",
+        "channel": "#alerts-critical"
+      },
+      {
+        "type": "pagerduty",
+        "service": "production-critical"
+      }
+    ]
+  },
+  "databaseErrors": {
+    "name": "Database Connection Errors",
+    "description": "Alert on database connection failures",
+    "conditions": [
+      {
+        "type": "error",
+        "message": [
+          "ECONNREFUSED",
+          "connection",
+          "database",
+          "timeout"
+        ],
+        "threshold": 5,
+        "window": "10m"
+      }
+    ],
+    "actions": [
+      {
+        "type": "email",
+        "targets": [
+          "engineering@financbase.com",
+          "dba@financbase.com"
+        ]
+      },
+      {
+        "type": "slack",
+        "channel": "#alerts-database"
+      }
+    ]
+  },
+  "memoryLeaks": {
+    "name": "Memory Leak Detection",
+    "description": "Alert on potential memory leaks",
+    "conditions": [
+      {
+        "type": "memory",
+        "threshold": 80,
+        "window": "15m",
+        "comparison": "above"
+      }
+    ],
+    "actions": [
+      {
+        "type": "email",
+        "targets": [
+          "engineering@financbase.com"
+        ]
+      }
+    ]
+  },
+  "releaseHealth": {
+    "name": "Release Health Degradation",
+    "description": "Alert when new release has higher error rate than previous",
+    "conditions": [
+      {
+        "type": "release_health",
+        "threshold": 0.5,
+        "window": "1h"
+      }
+    ],
+    "actions": [
+      {
+        "type": "email",
+        "targets": [
+          "engineering@financbase.com"
+        ]
+      },
+      {
+        "type": "slack",
+        "channel": "#alerts-releases"
+      }
+    ]
+  }
+}

@@ -14,6 +14,7 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { db } from '@/lib/db';
 import { gdprDataRequests, auditLogs, dataAccessLogs } from '@/lib/db/schemas';
 import { eq, and, like } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 /**
  * Automatically fulfill GDPR data subject request
@@ -87,7 +88,7 @@ export async function POST(
         .where(
           and(
             eq(dataAccessLogs.organizationId, orgId),
-            like(dataAccessLogs.dataIdentifier, `%${dataSubjectEmail}%`)
+            like(dataAccessLogs.dataSubject, `%${dataSubjectEmail}%`)
           )
         )
         .limit(1000);
@@ -107,7 +108,7 @@ export async function POST(
           dataType: log.dataType,
           accessType: log.accessType,
           timestamp: log.timestamp,
-          dataIdentifier: log.dataIdentifier,
+          dataSubject: log.dataSubject,
         })),
         summary: {
           totalAuditEvents: subjectAuditLogs.length,
@@ -153,7 +154,7 @@ export async function POST(
       requestId,
     }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fulfilling GDPR data request:', error);
+    logger.error('Error fulfilling GDPR data request:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

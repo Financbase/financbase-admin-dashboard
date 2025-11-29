@@ -61,6 +61,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 // Types based on our new schema
 interface ReconciliationSession {
@@ -225,7 +226,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
       // Get session details to fetch transactions for the date range
       const session = sessions?.find((s: any) => s.id === selectedSession);
       if (!session) {
-        console.error('Session not found');
+        logger.error('Session not found');
         return;
       }
 
@@ -255,7 +256,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
           }
         }
       } catch (error) {
-        console.warn('Could not fetch statement transactions, using transactions API:', error);
+        logger.warn('Could not fetch statement transactions, using transactions API:', error);
       }
 
       // If no statement transactions found, fetch from transactions API as fallback
@@ -292,7 +293,7 @@ export function ReconciliationDashboard({ userId, className }: ReconciliationDas
         statementTransactions
       });
     } catch (error) {
-      console.error('Error fetching statement transactions:', error);
+      logger.error('Error fetching statement transactions:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch statement transactions. Please try again.',

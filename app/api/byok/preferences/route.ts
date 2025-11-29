@@ -10,6 +10,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { BYOKService } from '@/lib/services/byok-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/byok/preferences
@@ -28,7 +29,7 @@ export async function GET() {
 		return NextResponse.json({ preferences });
 
 	} catch (error) {
-		console.error('Error fetching AI preferences:', error);
+		logger.error('Error fetching AI preferences:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch AI preferences' },
 			{ status: 500 }
@@ -66,7 +67,7 @@ export async function PUT(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error('Error updating AI preferences:', error);
+		logger.error('Error updating AI preferences:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update AI preferences' },
 			{ status: 500 }

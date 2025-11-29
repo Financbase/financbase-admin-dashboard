@@ -38,6 +38,7 @@ interface BatchUploadItem {
 }
 
 import { analyzeImageWithAI } from '@/lib/ai/client';
+import { logger } from '@/lib/logger';
 
 interface BatchImageUploadProps {
 	onImagesUpdate?: (imageUrls: string[], analyses?: any[]) => void;
@@ -136,7 +137,7 @@ export function BatchImageUpload({
 				throw new Error("No URL returned");
 			}
 		} catch (error) {
-			console.error("Upload failed:", error);
+			logger.error("Upload failed:", error);
 			throw error;
 		}
 	};
@@ -220,7 +221,7 @@ export function BatchImageUpload({
 								)
 							);
 						} catch (error) {
-							console.warn("AI analysis failed for", item.file.name, error);
+							logger.warn("AI analysis failed for", item.file.name, error);
 							setUploadItems(prev =>
 								prev.map(uploadItem =>
 									uploadItem.id === item.id

@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+import { logger } from '@/lib/logger';
 	BarChart3,
 	TrendingUp,
 	Users,
@@ -105,7 +106,7 @@ export default function UploadAnalyticsDashboard() {
 				
 				setMetrics(formattedMetrics);
 			} catch (error) {
-				console.error('Error fetching upload analytics:', error);
+				logger.error('Error fetching upload analytics:', error);
 			} finally {
 				setIsLoading(false);
 			}

@@ -13,49 +13,57 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BudgetDetailsDialog } from '@/components/budgets/budget-details-dialog';
+import { useQuery } from '@tanstack/react-query';
+import { createMockUseQueryResult } from '@/src/test/test-utils';
 
 // Mock fetch
 global.fetch = vi.fn();
 
-// Create a test query client
-const createTestQueryClient = () =>
-	new QueryClient({
-		defaultOptions: {
-			queries: {
-				retry: false,
-			},
-		},
-	});
+// Mock useQuery to return proper structure
+vi.mock('@tanstack/react-query', async () => {
+	const actual = await vi.importActual('@tanstack/react-query');
+	return {
+		...actual,
+		useQuery: vi.fn(),
+	};
+});
 
 describe('BudgetDetailsDialog', () => {
-	let queryClient: QueryClient;
-
 	beforeEach(() => {
-		queryClient = createTestQueryClient();
 		vi.clearAllMocks();
 	});
 
-	it('should render loading state when fetching budget details', () => {
-		vi.mocked(fetch).mockImplementation(
-			() =>
-				new Promise(() => {
-					// Never resolves to keep loading state
-				})
+	it('should render loading state when fetching budget details', async () => {
+		// Mock useQuery to return loading state
+		vi.mocked(useQuery).mockReturnValue(
+			createMockUseQueryResult({
+				data: undefined,
+				isLoading: true,
+				isPending: true,
+				isSuccess: false,
+				error: null,
+			})
 		);
 
 		render(
-			<QueryClientProvider client={queryClient}>
-				<BudgetDetailsDialog
-					budgetId={1}
-					open={true}
-					onOpenChange={vi.fn()}
-				/>
-			</QueryClientProvider>
+			<BudgetDetailsDialog
+				budgetId={1}
+				open={true}
+				onOpenChange={vi.fn()}
+			/>
 		);
 
-		expect(screen.getByText(/loading/i)).toBeInTheDocument();
+		// The component uses Skeleton components for loading, not text
+		// Check that the dialog is open and contains skeleton elements
+		await waitFor(() => {
+			expect(screen.getByText('Budget Details')).toBeInTheDocument();
+		}, { timeout: 3000 });
+		// Skeleton components render as divs with "animate-pulse" class
+		await waitFor(() => {
+			const skeletons = document.querySelectorAll('.animate-pulse');
+			expect(skeletons.length).toBeGreaterThan(0);
+		}, { timeout: 3000 });
 	});
 
 	it('should display budget details when data is loaded', async () => {
@@ -76,19 +84,38 @@ describe('BudgetDetailsDialog', () => {
 			},
 		};
 
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			json: async () => mockBudget,
-		} as Response);
+		// Mock useQuery to return success state with data
+		vi.mocked(useQuery).mockReturnValue({
+			data: mockBudget,
+			isLoading: false,
+			error: null,
+			dataUpdatedAt: Date.now(),
+			errorUpdatedAt: 0,
+			failureCount: 0,
+			failureReason: null,
+			fetchStatus: 'idle' as const,
+			isError: false,
+			isFetched: true,
+			isFetchedAfterMount: true,
+			isFetching: false,
+			isInitialLoading: false,
+			isLoadingError: false,
+			isPaused: false,
+			isPlaceholderData: false,
+			isRefetching: false,
+			isRefetchError: false,
+			isStale: false,
+			isSuccess: true,
+			refetch: vi.fn(),
+			status: 'success' as const,
+		} as any);
 
 		render(
-			<QueryClientProvider client={queryClient}>
-				<BudgetDetailsDialog
-					budgetId={1}
-					open={true}
-					onOpenChange={vi.fn()}
-				/>
-			</QueryClientProvider>
+			<BudgetDetailsDialog
+				budgetId={1}
+				open={true}
+				onOpenChange={vi.fn()}
+			/>
 		);
 
 		await waitFor(() => {
@@ -98,16 +125,38 @@ describe('BudgetDetailsDialog', () => {
 	});
 
 	it('should display error message when fetch fails', async () => {
-		vi.mocked(fetch).mockRejectedValueOnce(new Error('Failed to fetch'));
+		// Mock useQuery to return error state
+		vi.mocked(useQuery).mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			error: new Error('Failed to fetch budget details'),
+			dataUpdatedAt: 0,
+			errorUpdatedAt: Date.now(),
+			failureCount: 1,
+			failureReason: new Error('Failed to fetch budget details'),
+			fetchStatus: 'idle' as const,
+			isError: true,
+			isFetched: true,
+			isFetchedAfterMount: true,
+			isFetching: false,
+			isInitialLoading: false,
+			isLoadingError: true,
+			isPaused: false,
+			isPlaceholderData: false,
+			isRefetching: false,
+			isRefetchError: false,
+			isStale: false,
+			isSuccess: false,
+			refetch: vi.fn(),
+			status: 'error' as const,
+		} as any);
 
 		render(
-			<QueryClientProvider client={queryClient}>
-				<BudgetDetailsDialog
-					budgetId={1}
-					open={true}
-					onOpenChange={vi.fn()}
-				/>
-			</QueryClientProvider>
+			<BudgetDetailsDialog
+				budgetId={1}
+				open={true}
+				onOpenChange={vi.fn()}
+			/>
 		);
 
 		await waitFor(() => {
@@ -116,14 +165,38 @@ describe('BudgetDetailsDialog', () => {
 	});
 
 	it('should not render when closed', () => {
+		// Mock useQuery to return idle state when closed
+		vi.mocked(useQuery).mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			error: null,
+			dataUpdatedAt: 0,
+			errorUpdatedAt: 0,
+			failureCount: 0,
+			failureReason: null,
+			fetchStatus: 'idle' as const,
+			isError: false,
+			isFetched: false,
+			isFetchedAfterMount: false,
+			isFetching: false,
+			isInitialLoading: false,
+			isLoadingError: false,
+			isPaused: false,
+			isPlaceholderData: false,
+			isRefetching: false,
+			isRefetchError: false,
+			isStale: false,
+			isSuccess: false,
+			refetch: vi.fn(),
+			status: 'idle' as const,
+		} as any);
+
 		render(
-			<QueryClientProvider client={queryClient}>
-				<BudgetDetailsDialog
-					budgetId={1}
-					open={false}
-					onOpenChange={vi.fn()}
-				/>
-			</QueryClientProvider>
+			<BudgetDetailsDialog
+				budgetId={1}
+				open={false}
+				onOpenChange={vi.fn()}
+			/>
 		);
 
 		expect(screen.queryByText('Budget Details')).not.toBeInTheDocument();

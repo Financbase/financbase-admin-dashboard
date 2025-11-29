@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { IncidentResponseService } from '@/lib/services/incident-response-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -59,7 +60,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, message: 'Drill completed successfully', requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error completing drill:', error);
+    logger.error('Error completing drill:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

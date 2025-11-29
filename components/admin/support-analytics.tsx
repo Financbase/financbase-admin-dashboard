@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Ticket, Clock, CheckCircle, XCircle, Star, TrendingUp } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface Analytics {
 	totalTickets: number;
@@ -62,7 +63,7 @@ export function SupportAnalytics() {
 			const data = await response.json();
 			setAnalytics(data);
 		} catch (error) {
-			console.error('Error fetching analytics:', error);
+			logger.error('Error fetching analytics:', error);
 		} finally {
 			setLoading(false);
 		}

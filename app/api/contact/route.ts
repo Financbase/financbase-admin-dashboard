@@ -14,6 +14,7 @@ import { contactSubmissions } from '@/lib/db/schemas/marketing-analytics.schema'
 import { SecurityService } from '@/lib/security/arcjet-service';
 import { EmailService } from '@/lib/email/service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 // Validation schema for contact form
 const contactFormSchema = z.object({
@@ -47,7 +48,7 @@ const contactFormSchema = z.object({
 		.trim()
 		.optional(),
 	metadata: z
-		.record(z.unknown())
+		.record(z.string(), z.unknown())
 		.optional(),
 });
 
@@ -276,7 +277,7 @@ IP Address: ${ipAddress}
 			replyTo: sanitizedEmail,
 		}).catch((error) => {
 			// Log email error but don't fail the request
-			console.error('Failed to send contact notification email:', error);
+			logger.error('Failed to send contact notification email:', error);
 		});
 
 		// Return success response

@@ -14,6 +14,7 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { AlertCircle, RefreshCw, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { logger } from '@/lib/logger';
 
 interface AuthErrorBoundaryProps {
   children: ReactNode;
@@ -35,7 +36,7 @@ export class AuthErrorBoundary extends Component<AuthErrorBoundaryProps, AuthErr
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("AuthErrorBoundary caught an error:", error, errorInfo);
+    logger.error("AuthErrorBoundary caught an error:", error, errorInfo);
   }
 
   handleReset = () => {

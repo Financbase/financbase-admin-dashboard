@@ -13,6 +13,7 @@ import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { recordTaxPaymentSchema } from "@/lib/validation-schemas";
 import { withRLS } from "@/lib/api/with-rls";
+import { createSuccessResponse } from "@/lib/api/standard-response";
 
 /**
  * POST /api/tax/obligations/[id]/payment
@@ -41,11 +42,7 @@ export async function POST(
 			const service = new TaxService();
 			const obligation = await service.recordPayment(validatedData, clerkUserId);
 
-			return NextResponse.json({
-				success: true,
-				message: "Tax payment recorded successfully",
-				data: obligation,
-			});
+			return createSuccessResponse(obligation, 200, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

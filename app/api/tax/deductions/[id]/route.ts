@@ -13,6 +13,7 @@ import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { updateTaxDeductionSchema } from "@/lib/validation-schemas";
 import { withRLS } from "@/lib/api/with-rls";
+import { createSuccessResponse } from "@/lib/api/standard-response";
 
 /**
  * PATCH /api/tax/deductions/[id]
@@ -45,11 +46,7 @@ export async function PATCH(
 				clerkUserId
 			);
 
-			return NextResponse.json({
-				success: true,
-				message: "Tax deduction updated successfully",
-				data: deduction,
-			});
+			return createSuccessResponse(deduction, 200, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}
@@ -71,10 +68,11 @@ export async function DELETE(
 			const service = new TaxService();
 			await service.deleteDeduction(id, clerkUserId);
 
-			return NextResponse.json({
-				success: true,
-				message: "Tax deduction deleted successfully",
-			});
+			return createSuccessResponse(
+				{ message: "Tax deduction deleted successfully" },
+				200,
+				{ requestId }
+			);
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

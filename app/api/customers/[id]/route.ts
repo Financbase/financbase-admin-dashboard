@@ -85,7 +85,7 @@ export async function PATCH(
 		return NextResponse.json(customer);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			return ApiErrorHandler.badRequest(error.errors[0].message);
+			return ApiErrorHandler.badRequest(error.issues[0]?.message || 'Validation error');
 		}
 		return ApiErrorHandler.handle(error, requestId);
 	}

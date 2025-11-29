@@ -49,6 +49,7 @@ import { FinancbaseGPTService } from '@/lib/services/business/financbase-gpt-ser
 import { NotificationService } from '@/lib/services/notification-service';
 import { formatDistanceToNow, format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface Expense {
 	id: number;
@@ -252,7 +253,7 @@ export function EnhancedExpenseManagement() {
 			});
 		},
 		onSuccess: (response) => {
-			console.log('Expense insights:', response.analysis);
+			logger.info('Expense insights:', response.analysis);
 		},
 	});
 

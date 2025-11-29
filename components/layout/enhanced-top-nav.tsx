@@ -27,6 +27,7 @@ import { AnimatedNavbar, navbarItems } from "@/components/ui/animated-navbar";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 import { SearchComponent } from "@/components/ui/search-component";
 import { EnhancedNotificationsPanel } from "@/components/core/enhanced-notifications-panel";
+import { OrganizationSwitcher } from "@/components/organizations/organization-switcher";
 import {
 	Sheet,
 	SheetContent,
@@ -119,6 +120,11 @@ export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 
 					{/* Right Section - Actions & User Menu */}
 					<div className="flex items-center gap-2 flex-shrink-0">
+						{/* Organization Switcher */}
+						<div className="hidden md:block">
+							<OrganizationSwitcher />
+						</div>
+
 						{/* Desktop Search */}
 						<div className="hidden md:block md:w-64 lg:w-72 xl:w-80">
 							<SearchComponent placeholder="Search financial data..." />
@@ -248,7 +254,7 @@ export const EnhancedTopNav = React.memo<EnhancedTopNavProps>(({
 									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
-								<DropdownMenuItem className="flex items-center text-red-600">
+								<DropdownMenuItem className="flex items-center text-red-600" data-testid="sign-out">
 									<LogOut className="mr-2 h-4 w-4" />
 									Sign out
 								</DropdownMenuItem>

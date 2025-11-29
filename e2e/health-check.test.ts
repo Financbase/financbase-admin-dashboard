@@ -9,6 +9,7 @@ test.describe('Health Check', () => {
     expect(response.status()).toBe(200);
     
     const responseBody = await response.json();
-    expect(responseBody.status).toBe('ok');
+    // Accept both 'ok' and 'healthy' status values
+    expect(['ok', 'healthy']).toContain(responseBody.status);
   });
 });

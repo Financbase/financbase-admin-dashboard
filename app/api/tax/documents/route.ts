@@ -13,6 +13,7 @@ import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { createTaxDocumentSchema } from "@/lib/validation-schemas";
 import { withRLS } from "@/lib/api/with-rls";
+import { createSuccessResponse } from "@/lib/api/standard-response";
 
 /**
  * GET /api/tax/documents
@@ -46,16 +47,19 @@ export async function GET(request: NextRequest) {
 
 			// Check if result is paginated
 			if (limit !== undefined && "data" in result) {
-				return NextResponse.json({
-					success: true,
-					data: result.data,
-					pagination: {
-						page: result.page,
-						limit: result.limit,
-						total: result.total,
-						totalPages: result.totalPages,
-					},
-				});
+				return createSuccessResponse(
+					result.data,
+					200,
+					{
+						requestId,
+						pagination: {
+							page: result.page,
+							limit: result.limit,
+							total: result.total,
+							totalPages: result.totalPages,
+						},
+					}
+				);
 			}
 
 			// Filter by type if provided and not paginated
@@ -64,10 +68,7 @@ export async function GET(request: NextRequest) {
 				documents = documents.filter((d) => d.type === type);
 			}
 
-			return NextResponse.json({
-				success: true,
-				data: documents,
-			});
+			return createSuccessResponse(documents, 200, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}
@@ -97,14 +98,7 @@ export async function POST(request: NextRequest) {
 			const service = new TaxService();
 			const document = await service.createDocument(validatedData);
 
-			return NextResponse.json(
-				{
-					success: true,
-					message: "Tax document created successfully",
-					data: document,
-				},
-				{ status: 201 }
-			);
+			return createSuccessResponse(document, 201, { requestId });
 		} catch (error) {
 			return ApiErrorHandler.handle(error, requestId);
 		}

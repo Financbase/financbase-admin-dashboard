@@ -342,14 +342,14 @@ export async function getPerformanceMetrics(userId: string): Promise<Performance
 
 	const [expenseData] = await db
 		.select({
-			expenses: sql<number>`sum(${expenses.amount}::numeric)`,
+			totalExpenses: sql<number>`sum(${expenses.amount}::numeric)`,
 		})
 		.from(expenses)
 		.where(eq(expenses.userId, userId));
 
 	const revenue = Number(revenueData?.revenue || 0);
-	const expenses = Number(expenseData?.expenses || 0);
-	const profitMargin = revenue > 0 ? ((revenue - expenses) / revenue) * 100 : 0;
+	const totalExpenses = Number(expenseData?.totalExpenses || 0);
+	const profitMargin = revenue > 0 ? ((revenue - totalExpenses) / revenue) * 100 : 0;
 
 	// Get cash flow (simplified)
 	const [cashFlowData] = await db

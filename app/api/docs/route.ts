@@ -18,6 +18,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import { swaggerOptions } from '@/lib/openapi/config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
 	try {
@@ -37,7 +38,7 @@ export async function GET() {
 			}
 		} catch (staticError) {
 			// Fall back to dynamic generation if static file doesn't exist
-			console.log('Static OpenAPI file not found, generating dynamically...');
+			logger.info('Static OpenAPI file not found, generating dynamically...');
 		}
 
 		// Generate dynamically from source files
@@ -50,7 +51,7 @@ export async function GET() {
 			},
 		});
 	} catch (error) {
-		console.error('Error generating OpenAPI spec:', error);
+		logger.error('Error generating OpenAPI spec:', error);
 		return NextResponse.json(
 			{
 				error: 'Failed to generate API documentation',

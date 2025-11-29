@@ -12,6 +12,7 @@ import { auth } from '@clerk/nextjs/server';
 import { whiteLabelService } from '@/lib/services/white-label-service';
 import { WorkspaceService } from '@/lib/services/platform/workspace.service';
 import type { WhiteLabelBranding } from '@/types/white-label';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/settings/white-label
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(branding);
 	} catch (error) {
-		console.error('Error fetching white label branding:', error);
+		logger.error('Error fetching white label branding:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch branding configuration' },
 			{ status: 500 }
@@ -126,7 +127,7 @@ export async function PUT(request: NextRequest) {
 
 		return NextResponse.json(updatedBranding);
 	} catch (error) {
-		console.error('Error updating white label branding:', error);
+		logger.error('Error updating white label branding:', error);
 		return NextResponse.json(
 			{ error: 'Failed to update branding configuration' },
 			{ status: 500 }

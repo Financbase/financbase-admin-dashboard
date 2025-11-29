@@ -9,6 +9,7 @@
 
 import { VoiceChat } from "@/components/ui/chat-bubble";
 import { MessageCircle } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 // Mock user data for the demo with working Unsplash stock images
 const mockUsers = [
@@ -71,7 +72,7 @@ const VoiceChatDemo = () => {
 	// Handler for the join action
 	const handleJoinChat = () => {
 		// In a real app, this would contain logic to join the voice channel
-		console.log("Attempting to join the voice chat...");
+		logger.info("Attempting to join the voice chat...");
 		alert("Joining voice chat!");
 	};
 

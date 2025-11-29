@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { billPayService } from '@/lib/services/bill-pay/bill-pay-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(attentionBills);
 
   } catch (error) {
-    console.error('Failed to fetch bills requiring attention:', error);
+    logger.error('Failed to fetch bills requiring attention:', error);
     return NextResponse.json(
       { error: 'Failed to fetch bills requiring attention' },
       { status: 500 }

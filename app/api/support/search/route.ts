@@ -12,6 +12,7 @@ import { getDbOrThrow } from '@/lib/db';
 import { helpArticles, helpCategories } from '@/lib/db/schemas/documentation.schema';
 import { eq, and, or, like, desc } from 'drizzle-orm';
 import { SecurityService } from '@/lib/security/arcjet-service';
+import { logger } from '@/lib/logger';
 
 export interface PublicSearchResult {
 	type: 'article';
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
 			}
 		);
 	} catch (error) {
-		console.error('Support search error:', error);
+		logger.error('Support search error:', error);
 
 		// Don't expose internal errors to client
 		return NextResponse.json(

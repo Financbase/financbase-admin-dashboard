@@ -22,7 +22,7 @@ const createCampaignSchema = z.object({
 	platform: z.string().min(1, 'Platform is required'),
 	audience: z.string().optional(),
 	keywords: z.array(z.string()).optional(),
-	demographics: z.record(z.unknown()).optional(),
+	demographics: z.record(z.string(), z.unknown()).optional(),
 	budget: z.number().min(0, 'Budget must be positive'),
 	dailyBudget: z.number().min(0).optional(),
 	bidStrategy: z.string().optional(),
@@ -30,7 +30,7 @@ const createCampaignSchema = z.object({
 	startDate: z.string().datetime(),
 	endDate: z.string().datetime().optional(),
 	tags: z.array(z.string()).optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 	notes: z.string().optional(),
 });
 

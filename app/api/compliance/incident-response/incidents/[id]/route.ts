@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { IncidentResponseService } from '@/lib/services/incident-response-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -39,7 +40,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: incident, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching incident:', error);
+    logger.error('Error fetching incident:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }
@@ -89,26 +90,17 @@ export async function PATCH(
 
     if (status) {
       await IncidentResponseService.updateIncidentStatus(incidentId, status, {
-        analyzedAt: analyzedAt ? new Date(analyzedAt) : undefined,
-        containedAt: containedAt ? new Date(containedAt) : undefined,
-        eradicatedAt: eradicatedAt ? new Date(eradicatedAt) : undefined,
-        recoveredAt: recoveredAt ? new Date(recoveredAt) : undefined,
-        closedAt: closedAt ? new Date(closedAt) : undefined,
         containmentActions,
         eradicationActions,
         recoveryActions,
         rootCause,
-        contributingFactors,
-        remediationPlan,
-        lessonsLearned,
-        followUpActions,
       });
     }
 
     const updatedIncident = await IncidentResponseService.getIncidentById(incidentId);
     return NextResponse.json({ success: true, data: updatedIncident, requestId }, { status: 200 });
   } catch (error: any) {
-    console.error('Error updating incident:', error);
+    logger.error('Error updating incident:', error);
     return ApiErrorHandler.handle(error, requestId);
   }
 }

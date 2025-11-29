@@ -27,8 +27,8 @@ const updateFeatureFlagSchema = z.object({
 	rolloutPercentage: z.number().min(0).max(100).optional(),
 	targetOrganizations: z.array(z.string()).optional(),
 	targetUsers: z.array(z.string()).optional(),
-	conditions: z.record(z.unknown()).optional(),
-	metadata: z.record(z.unknown()).optional(),
+	conditions: z.record(z.string(), z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // GET /api/admin/feature-flags/[key] - Get a specific feature flag

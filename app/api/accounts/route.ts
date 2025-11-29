@@ -28,7 +28,7 @@ const createAccountSchema = z.object({
 	creditLimit: z.number().optional(),
 	interestRate: z.number().optional(),
 	notes: z.string().optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**

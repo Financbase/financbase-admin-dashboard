@@ -33,11 +33,15 @@ export function sanitizeHtml(html: string): string {
 	try {
 		// Dynamic import to avoid SSR issues
 		const DOMPurify = require('dompurify');
-		return DOMPurify.sanitize(html, {
+		let sanitized = DOMPurify.sanitize(html, {
 			ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre'],
 			ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
-			ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+			ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data:image):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
 		});
+		// Post-process to remove data:text/html URLs (DOMPurify might allow data: protocol)
+		sanitized = sanitized.replace(/href\s*=\s*["']data:text\/html[^"']*["']/gi, 'href=""');
+		sanitized = sanitized.replace(/data:text\/html[^"'\s<>]*/gi, '');
+		return sanitized;
 	} catch (error) {
 		console.warn('DOMPurify not available, using basic sanitization:', error);
 		return sanitizeHtmlBasic(html);
@@ -62,9 +66,18 @@ function sanitizeHtmlBasic(html: string): string {
 	sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
 	sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '');
 	
-	// Remove javascript: and data: URLs
-	sanitized = sanitized.replace(/javascript:/gi, '');
-	sanitized = sanitized.replace(/data:text\/html/gi, '');
+	// Remove javascript: and data: URLs from href attributes
+	// Use a more permissive pattern that handles quoted values with any content
+	sanitized = sanitized.replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href=""');
+	// For data:text/html, match the entire href value including any content after the colon
+	// Handle both double and single quotes, and match until the closing quote
+	sanitized = sanitized.replace(/href\s*=\s*["']data:text\/html[^"']*["']/gi, 'href=""');
+	// Also handle unquoted href attributes
+	sanitized = sanitized.replace(/href\s*=\s*javascript:[^\s>]*/gi, 'href=""');
+	sanitized = sanitized.replace(/href\s*=\s*data:text\/html[^\s>]*/gi, 'href=""');
+	// Remove any remaining data:text/html references anywhere in the string (fallback)
+	// This catches any that weren't in href attributes
+	sanitized = sanitized.replace(/data:text\/html[^"'\s<>]*/gi, '');
 	
 	return sanitized;
 }

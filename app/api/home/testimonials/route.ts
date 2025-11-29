@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTestimonials } from '@/lib/services/home-metrics-service';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 /**
  * @swagger
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error fetching testimonials:', error);
+		logger.error('Error fetching testimonials:', error);
 		return ApiErrorHandler.handle(error, requestId);
 	}
 }

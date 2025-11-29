@@ -14,6 +14,7 @@ import { db } from '@/lib/db';
 import { clients } from '@/lib/db/schemas/clients.schema';
 import { createClientSchema } from '@/lib/validation-schemas';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { withRLS } from '@/lib/api/with-rls';
 import { eq, count, and, like, or } from 'drizzle-orm';
 
 /**
@@ -103,11 +104,8 @@ import { eq, count, and, like, or } from 'drizzle-orm';
  */
 export async function GET(req: NextRequest) {
   const requestId = generateRequestId();
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return ApiErrorHandler.unauthorized();
-    }
+  return withRLS(async (userId) => {
+    try {
 
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -162,11 +160,13 @@ export async function GET(req: NextRequest) {
         limit,
         total: totalCount[0]?.count || 0,
         pages: Math.ceil((totalCount[0]?.count || 0) / limit)
-      }
+      },
+      requestId
     });
-  } catch (error) {
-    return ApiErrorHandler.handle(error, requestId);
-  }
+    } catch (error) {
+      return ApiErrorHandler.handle(error, requestId);
+    }
+  });
 }
 
 /**
@@ -248,18 +248,14 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId();
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return ApiErrorHandler.unauthorized();
-    }
-
-    let body;
+  return withRLS(async (userId) => {
     try {
-      body = await req.json();
-    } catch (error) {
-      return ApiErrorHandler.badRequest('Invalid JSON in request body');
-    }
+      let body;
+      try {
+        body = await req.json();
+      } catch (error) {
+        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+      }
     const validatedData = createClientSchema.parse({
       ...body,
       userId // Ensure userId comes from auth, not request body
@@ -280,9 +276,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Client created successfully',
-      data: newClient
+      data: newClient,
+      requestId
     }, { status: 201 });
-  } catch (error) {
-    return ApiErrorHandler.handle(error, requestId);
-  }
+    } catch (error) {
+      return ApiErrorHandler.handle(error, requestId);
+    }
+  });
 }

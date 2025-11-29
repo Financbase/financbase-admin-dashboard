@@ -46,6 +46,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { logger } from '@/lib/logger';
 
 export default function InvestorTenantsPage() {
   const router = useRouter();
@@ -118,7 +119,7 @@ export default function InvestorTenantsPage() {
       // Refresh tenant list
       await refetch();
     } catch (error) {
-      console.error('Error creating tenant:', error);
+      logger.error('Error creating tenant:', error);
       alert(error instanceof Error ? error.message : 'Failed to create tenant');
     } finally {
       setIsSubmitting(false);

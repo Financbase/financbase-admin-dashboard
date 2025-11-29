@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 // components/ui/economic-calendar.tsx
 import * as React from "react";
+import { logger } from '@/lib/logger';
 
 // Type definition for a single economic event
 export interface EconomicEvent {
@@ -135,7 +136,7 @@ export const EconomicCalendar = React.forwardRef<
 
 			setEvents(data.data.events);
 		} catch (err) {
-			console.error("Error fetching economic events:", err);
+			logger.error("Error fetching economic events:", err);
 			setError(
 				err instanceof Error ? err.message : "Failed to fetch economic events",
 			);

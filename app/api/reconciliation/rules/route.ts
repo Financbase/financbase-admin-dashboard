@@ -13,6 +13,7 @@ import { ReconciliationService } from "@/lib/reconciliation/reconciliation-servi
 import { db } from "@/lib/db";
 import { reconciliationRules } from "@/lib/db/schemas/reconciliation.schema";
 import { eq, and } from "drizzle-orm";
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/reconciliation/rules
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error("Reconciliation Rules API Error:", error);
+		logger.error("Reconciliation Rules API Error:", error);
 		return NextResponse.json(
 			{ error: "Failed to fetch reconciliation rules" },
 			{ status: 500 }
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error("Create Reconciliation Rule API Error:", error);
+		logger.error("Create Reconciliation Rule API Error:", error);
 		return NextResponse.json(
 			{ error: "Failed to create reconciliation rule" },
 			{ status: 500 }

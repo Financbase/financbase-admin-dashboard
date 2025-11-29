@@ -182,13 +182,18 @@ export function WorkflowBuilder() {
 	const queryClient = useQueryClient();
 
 	// Fetch workflows
-	const { data: workflows = [], isLoading } = useQuery({
+	const queryResult = useQuery({
 		queryKey: ['workflows'],
 		queryFn: async () => {
 			const response = await fetch('/api/workflows');
+			if (!response.ok) {
+				throw new Error('Failed to fetch workflows');
+			}
 			return response.json();
 		},
 	});
+	const workflows = queryResult?.data ?? [];
+	const isLoading = queryResult?.isLoading ?? false;
 
 	// Create workflow mutation
 	const createWorkflowMutation = useMutation({
@@ -239,7 +244,7 @@ export function WorkflowBuilder() {
 	const handleCreateWorkflow = () => {
 		if (!newWorkflow.name.trim()) return;
 
-		createWorkflowMutation.mutate({
+		createWorkflowMutation?.mutate({
 			...newWorkflow,
 			steps: [],
 			triggers: [],
@@ -273,7 +278,7 @@ export function WorkflowBuilder() {
 	};
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6" data-testid="workflow-builder">
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
@@ -715,7 +720,7 @@ export function WorkflowBuilder() {
 							<Button
 								className="flex-1"
 								onClick={handleCreateWorkflow}
-								disabled={!newWorkflow.name.trim() || createWorkflowMutation.isPending}
+								disabled={!newWorkflow.name.trim() || createWorkflowMutation?.isPending}
 							>
 								<Plus className="mr-2 h-4 w-4" />
 								Create Workflow

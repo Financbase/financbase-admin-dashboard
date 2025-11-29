@@ -12,6 +12,7 @@ import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
 	const requestId = generateRequestId();
@@ -261,7 +262,7 @@ export async function GET(request: NextRequest) {
 			recentActivity,
 		});
 	} catch (error) {
-		console.error('Executive metrics API error:', error);
+		logger.error('Executive metrics API error:', error);
 		return ApiErrorHandler.handle(error, requestId);
 	}
 }

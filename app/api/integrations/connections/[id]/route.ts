@@ -8,11 +8,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { integrationConnections } from '@/lib/db/schemas';
-import { eq, and } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { IntegrationService } from '@/lib/services/integration-service';
 
 export async function GET(
   request: NextRequest,
@@ -31,17 +29,12 @@ export async function GET(
       return ApiErrorHandler.badRequest('Invalid connection ID');
     }
 
-    const connection = await db
-      .select()
-      .from(integrationConnections)
-      .where(and(eq(integrationConnections.id, connectionId), eq(integrationConnections.userId, userId)))
-      .limit(1);
-
-    if (connection.length === 0) {
+    const connection = await IntegrationService.getConnection(connectionId, userId);
+    if (!connection) {
       return ApiErrorHandler.notFound('Connection not found');
     }
 
-    return NextResponse.json(connection[0]);
+    return NextResponse.json(connection);
   } catch (error) {
     if (error instanceof Error && (error.message.includes('DATABASE_URL') || error.message.includes('connection'))) {
       return ApiErrorHandler.databaseError(
@@ -76,27 +69,13 @@ export async function PATCH(
     } catch (error) {
       return ApiErrorHandler.badRequest('Invalid JSON in request body');
     }
-    const updateData: Record<string, unknown> = {};
 
-    // Only update provided fields
-    if (body.name !== undefined) updateData.name = body.name;
-    if (body.isActive !== undefined) updateData.isActive = body.isActive;
-    if (body.settings !== undefined) updateData.settings = body.settings;
-    if (body.mappings !== undefined) updateData.mappings = body.mappings;
-
-    updateData.updatedAt = new Date();
-
-    const updatedConnection = await db
-      .update(integrationConnections)
-      .set(updateData)
-      .where(and(eq(integrationConnections.id, connectionId), eq(integrationConnections.userId, userId)))
-      .returning();
-
-    if (updatedConnection.length === 0) {
+    const connection = await IntegrationService.updateConnection(connectionId, userId, body);
+    if (!connection) {
       return ApiErrorHandler.notFound('Connection not found');
     }
 
-    return NextResponse.json(updatedConnection[0]);
+    return NextResponse.json(connection);
   } catch (error) {
     if (error instanceof Error && (error.message.includes('DATABASE_URL') || error.message.includes('connection'))) {
       return ApiErrorHandler.databaseError(
@@ -125,12 +104,8 @@ export async function DELETE(
       return ApiErrorHandler.badRequest('Invalid connection ID');
     }
 
-    const deletedConnection = await db
-      .delete(integrationConnections)
-      .where(and(eq(integrationConnections.id, connectionId), eq(integrationConnections.userId, userId)))
-      .returning();
-
-    if (deletedConnection.length === 0) {
+    const deleted = await IntegrationService.deleteConnection(connectionId, userId);
+    if (!deleted) {
       return ApiErrorHandler.notFound('Connection not found');
     }
 

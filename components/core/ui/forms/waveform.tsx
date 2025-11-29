@@ -21,6 +21,7 @@ import {
 } from "react";
 
 import { cn } from "@/lib/utils";
+import { logger } from '@/lib/logger';
 
 export type WaveformProps = HTMLAttributes<HTMLDivElement> & {
 	data?: number[];
@@ -919,7 +920,7 @@ export const LiveMicrophoneWaveform = ({
 				audioBufferRef.current = audioBuffer;
 			}
 		} catch (error) {
-			console.error("Error processing audio:", error);
+			logger.error("Error processing audio:", error);
 		}
 	};
 

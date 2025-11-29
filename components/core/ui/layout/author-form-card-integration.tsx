@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AuthorFormCard } from "@/components/core/ui/layout/author-form-card";
+import { logger } from '@/lib/logger';
 /**
  * AuthorFormCard Integration Example
  *
@@ -53,7 +54,7 @@ export function AuthorManagementModal() {
 
 	const handleCreateAuthor = (data: any) => {
 		// Here you would typically make an API call to save the author
-		console.log("Creating author:", data);
+		logger.info("Creating author:", data);
 		setAuthors((prev: any[]) => [...prev, { id: Date.now(), ...data }]);
 		setIsOpen(false);
 		toast.success(`Author "${data.name}" has been created!`);
@@ -103,7 +104,7 @@ export function EditAuthorModal({ author, onUpdate }: { author: any; onUpdate: (
 export function CreateAuthorPage() {
 	const handleCreateAuthor = (data: any) => {
 		// API call to create author
-		console.log("Creating author:", data);
+		logger.info("Creating author:", data);
 		// Redirect or show success message
 	};
 
@@ -125,7 +126,7 @@ export function AuthorQuickAdd() {
 	const [showForm, setShowForm] = useState(false);
 
 	const handleQuickAdd = (data: any) => {
-		console.log("Quick add author:", data);
+		logger.info("Quick add author:", data);
 		setShowForm(false);
 		toast.success("Author added successfully!");
 	};

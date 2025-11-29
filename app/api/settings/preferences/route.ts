@@ -19,6 +19,7 @@ import { db } from '@/lib/db';
 import { userPreferences } from '@/lib/db/schemas';
 import { eq } from 'drizzle-orm';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 // GET /api/settings/preferences
 // Get user's current preferences
@@ -85,7 +86,7 @@ export async function GET() {
 			    errorMessage.includes('column "compact_mode" does not exist') ||
 			    errorMessage.includes('column "time_format" does not exist') ||
 			    errorMessage.includes('column "currency" does not exist')) {
-				console.warn('[Preferences API] Retrying without problematic columns due to missing columns');
+				logger.warn('[Preferences API] Retrying without problematic columns due to missing columns');
 				// Retry with a minimal select that excludes problematic columns
 				preferences = await db
 					.select({

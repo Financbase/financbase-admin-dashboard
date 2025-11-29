@@ -10,6 +10,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { BYOKService } from '@/lib/services/byok-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/byok/api-keys
@@ -46,7 +47,7 @@ export async function GET() {
 		return NextResponse.json({ apiKeys: sanitizedKeys });
 
 	} catch (error) {
-		console.error('Error fetching API keys:', error);
+		logger.error('Error fetching API keys:', error);
 		return NextResponse.json(
 			{ error: 'Failed to fetch API keys' },
 			{ status: 500 }
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
 		});
 
 	} catch (error) {
-		console.error('Error storing API key:', error);
+		logger.error('Error storing API key:', error);
 		return NextResponse.json(
 			{ error: 'Failed to store API key' },
 			{ status: 500 }

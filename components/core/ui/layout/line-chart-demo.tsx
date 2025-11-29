@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import {
+import { logger } from '@/lib/logger';
 	CartesianGrid,
 	Line,
 	LineChart,
@@ -247,7 +248,7 @@ export default function LineChartDemo({ className }: LineChartDemoProps) {
 					throw new Error(result.error || "Failed to fetch analytics data");
 				}
 			} catch (err) {
-				console.error("Error fetching analytics data:", err);
+				logger.error("Error fetching analytics data:", err);
 				setError(
 					err instanceof Error
 						? err.message

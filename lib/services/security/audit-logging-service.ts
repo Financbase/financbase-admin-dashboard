@@ -16,7 +16,7 @@
 
 import { db } from '@/lib/db';
 import { activities } from '@/lib/db/schemas/activities.schema';
-import { eq, and, gte, desc, sql } from 'drizzle-orm';
+import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
 import { NextRequest } from 'next/server';
 
 // Audit event types for comprehensive tracking
@@ -403,6 +403,28 @@ export class AuditLoggingService {
   }
 
   /**
+   * Get security alerts for an organization
+   */
+  private async getSecurityAlerts(
+    organizationId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<SecurityAlert[]> {
+    // Return alerts from the securityAlerts Map that match the criteria
+    const alerts: SecurityAlert[] = [];
+    for (const alert of this.securityAlerts.values()) {
+      if (
+        alert.organizationId === organizationId &&
+        alert.timestamp >= startDate &&
+        alert.timestamp <= endDate
+      ) {
+        alerts.push(alert);
+      }
+    }
+    return alerts;
+  }
+
+  /**
    * Detect suspicious activity patterns
    */
   async detectSuspiciousActivity(
@@ -567,7 +589,7 @@ export class AuditLoggingService {
       ))
       .orderBy(desc(activities.createdAt));
 
-    return events.map(this.transformActivityToAuditEvent);
+    return events.map((activity) => this.transformActivityToAuditEvent(activity));
   }
 
   private transformActivityToAuditEvent(activity: any): AuditEvent {

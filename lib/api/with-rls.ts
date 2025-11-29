@@ -26,6 +26,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import type { NextRequest, NextResponse } from 'next/server';
 import { setRLSContextFromClerkId } from '@/lib/db/rls-context';
 import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { logger } from '@/lib/logger';
 
 export interface WithRLSOptions {
   /**
@@ -42,10 +43,11 @@ export interface WithRLSOptions {
 
 /**
  * Wraps an API route handler and automatically sets RLS context
+ * Now supports active organization from cookies/session
  */
 export async function withRLS<T = unknown>(
-  handler: (userId: string, clerkUser?: Awaited<ReturnType<typeof currentUser>>) => Promise<NextResponse<T>>,
-  options: WithRLSOptions = {}
+  handler: (userId: string, clerkUser?: Awaited<ReturnType<typeof currentUser>>, request?: NextRequest) => Promise<NextResponse<T>>,
+  options: WithRLSOptions & { request?: NextRequest } = {}
 ): Promise<NextResponse<T | { error: string }>> {
   try {
     const { userId } = await auth();
@@ -57,8 +59,15 @@ export async function withRLS<T = unknown>(
     // Fetch Clerk user for additional context
     const clerkUser = await currentUser();
 
-    // Set RLS context using Clerk user ID
-    const userFound = await setRLSContextFromClerkId(userId);
+    // Get active organization from cookie if available
+    let sessionOrgId: string | null = null;
+    if (options.request) {
+      const cookie = options.request.cookies.get('active_organization_id');
+      sessionOrgId = cookie?.value || null;
+    }
+
+    // Set RLS context using Clerk user ID and active organization
+    const userFound = await setRLSContextFromClerkId(userId, sessionOrgId);
     
     if (options.requireDatabaseUser && !userFound) {
       return NextResponse.json(
@@ -71,9 +80,9 @@ export async function withRLS<T = unknown>(
     }
 
     // Execute the handler with RLS context already set
-    return await handler(userId, clerkUser || undefined);
+    return await handler(userId, clerkUser || undefined, options.request);
   } catch (error) {
-    console.error('[withRLS] Error:', error);
+    logger.error('[withRLS] Error', { error });
     return ApiErrorHandler.handle(error);
   }
 }
@@ -93,7 +102,7 @@ export async function getCurrentUserId(): Promise<string | null> {
     
     return user?.id || null;
   } catch (error) {
-    console.error('[getCurrentUserId] Error:', error);
+    logger.error('[getCurrentUserId] Error', { error });
     return null;
   }
 }

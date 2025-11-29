@@ -18,10 +18,10 @@ END $$;
 -- Policy Documents Table
 CREATE TABLE IF NOT EXISTS "financbase_policy_documents" (
   "id" SERIAL PRIMARY KEY,
-  "organization_id" TEXT NOT NULL,
+  "organization_id" UUID NOT NULL,
   "policy_number" TEXT NOT NULL UNIQUE,
-  "created_by" TEXT,
-  "approved_by" TEXT,
+  "created_by" UUID,
+  "approved_by" UUID,
   "title" TEXT NOT NULL,
   "policy_type" "policy_type" NOT NULL,
   "description" TEXT,
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS "financbase_policy_documents" (
   "summary" TEXT,
   "version" INTEGER DEFAULT 1 NOT NULL,
   "status" "policy_status" NOT NULL DEFAULT 'draft',
-  "current_approver" TEXT,
+  "current_approver" UUID,
   "approval_history" JSONB DEFAULT '[]'::jsonb NOT NULL,
   "review_history" JSONB DEFAULT '[]'::jsonb NOT NULL,
   "requires_acknowledgment" BOOLEAN DEFAULT false NOT NULL,
@@ -48,9 +48,9 @@ CREATE TABLE IF NOT EXISTS "financbase_policy_documents" (
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "published_at" TIMESTAMP WITH TIME ZONE,
   "archived_at" TIMESTAMP WITH TIME ZONE,
-  CONSTRAINT "fk_policy_documents_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_policy_documents_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
-  CONSTRAINT "fk_policy_documents_approved_by" FOREIGN KEY ("approved_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_policy_documents_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_policy_documents_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_policy_documents_approved_by" FOREIGN KEY ("approved_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
   CONSTRAINT "fk_policy_documents_supersedes" FOREIGN KEY ("supersedes_policy_id") REFERENCES "financbase_policy_documents"("id") ON DELETE SET NULL
 );
 
@@ -62,13 +62,13 @@ CREATE TABLE IF NOT EXISTS "financbase_policy_versions" (
   "content" TEXT NOT NULL,
   "summary" TEXT,
   "changelog" TEXT,
-  "created_by" TEXT,
+  "created_by" UUID,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "published_at" TIMESTAMP WITH TIME ZONE,
   "is_current" BOOLEAN DEFAULT false NOT NULL,
   "metadata" JSONB DEFAULT '{}'::jsonb NOT NULL,
   CONSTRAINT "fk_policy_versions_policy" FOREIGN KEY ("policy_id") REFERENCES "financbase_policy_documents"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_policy_versions_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL,
+  CONSTRAINT "fk_policy_versions_created_by" FOREIGN KEY ("created_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL,
   UNIQUE("policy_id", "version")
 );
 
@@ -76,11 +76,11 @@ CREATE TABLE IF NOT EXISTS "financbase_policy_versions" (
 CREATE TABLE IF NOT EXISTS "financbase_policy_assignments" (
   "id" SERIAL PRIMARY KEY,
   "policy_id" INTEGER NOT NULL,
-  "user_id" TEXT,
+  "user_id" UUID,
   "role_id" TEXT,
-  "organization_id" TEXT,
+  "organization_id" UUID,
   "assigned_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  "assigned_by" TEXT,
+  "assigned_by" UUID,
   "requires_acknowledgment" BOOLEAN DEFAULT false NOT NULL,
   "deadline" TIMESTAMP WITH TIME ZONE,
   "acknowledged_at" TIMESTAMP WITH TIME ZONE,
@@ -91,9 +91,9 @@ CREATE TABLE IF NOT EXISTS "financbase_policy_assignments" (
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   CONSTRAINT "fk_policy_assignments_policy" FOREIGN KEY ("policy_id") REFERENCES "financbase_policy_documents"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_policy_assignments_user" FOREIGN KEY ("user_id") REFERENCES "financbase_users"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_policy_assignments_organization" FOREIGN KEY ("organization_id") REFERENCES "financbase_organizations"("id") ON DELETE CASCADE,
-  CONSTRAINT "fk_policy_assignments_assigned_by" FOREIGN KEY ("assigned_by") REFERENCES "financbase_users"("id") ON DELETE SET NULL
+  CONSTRAINT "fk_policy_assignments_user" FOREIGN KEY ("user_id") REFERENCES "financbase"."users"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_policy_assignments_organization" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE,
+  CONSTRAINT "fk_policy_assignments_assigned_by" FOREIGN KEY ("assigned_by") REFERENCES "financbase"."users"("id") ON DELETE SET NULL
 );
 
 -- Policy Approval Workflows Table
