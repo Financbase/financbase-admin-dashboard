@@ -13,6 +13,100 @@ import { getRawSqlConnection } from '@/lib/db';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
+ * @swagger
+ * /api/developer/api-keys/{id}:
+ *   get:
+ *     summary: Get API key by ID
+ *     description: Retrieves a specific API key with usage statistics
+ *     tags:
+ *       - Developer
+ *       - API Keys
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: API key ID
+ *     responses:
+ *       200:
+ *         description: API key retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: API key not found
+ *       500:
+ *         description: Internal server error
+ *   patch:
+ *     summary: Update API key
+ *     description: Updates an API key's name, permissions, or status
+ *     tags:
+ *       - Developer
+ *       - API Keys
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: API key ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               permissions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive, revoked]
+ *     responses:
+ *       200:
+ *         description: API key updated successfully
+ *       400:
+ *         description: Invalid request data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: API key not found
+ *       500:
+ *         description: Internal server error
+ *   delete:
+ *     summary: Delete API key
+ *     description: Soft deletes an API key by setting its status to deleted
+ *     tags:
+ *       - Developer
+ *       - API Keys
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: API key ID
+ *     responses:
+ *       200:
+ *         description: API key deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: API key not found
+ *       500:
+ *         description: Internal server error
+ */
+/**
  * Helper function to execute parameterized SQL queries
  * Converts PostgreSQL-style parameterized queries ($1, $2, etc.) to Neon's template literal format
  */
@@ -75,13 +169,16 @@ export async function GET(
 				AND usage.created_at >= DATE_TRUNC('month', CURRENT_DATE)
 			WHERE ak.id = ${keyId} AND ak.user_id = ${userId} AND ak.status != 'deleted'
 			GROUP BY ak.id, usage.monthly_requests, ak.monthly_limit
-		`;
+		` as any[];
 
-		if (result.length === 0) {
+		if (!Array.isArray(result) || result.length === 0) {
 			return ApiErrorHandler.notFound('API key not found');
 		}
 
-		return NextResponse.json(result[0]);
+		const response = NextResponse.json(result[0]);
+		// Cache for 1 minute - API key details don't change frequently
+		response.headers.set('Cache-Control', 'private, s-maxage=60, stale-while-revalidate=120');
+		return response;
 
 	} catch (error) {
 		return ApiErrorHandler.handle(error, requestId);
@@ -120,8 +217,9 @@ export async function PATCH(
 			WHERE id = ${keyId} AND user_id = ${userId} AND status != 'deleted'
 		`;
 
-		if (keyResult.length === 0) {
-			return NextResponse.json({ error: 'API key not found' }, { status: 404 });
+		const keyResultArray = Array.isArray(keyResult) ? keyResult : [];
+		if (keyResultArray.length === 0) {
+			return ApiErrorHandler.notFound('API key not found');
 		}
 
 		// Build update query dynamically
@@ -175,7 +273,8 @@ export async function PATCH(
 			GROUP BY ak.id, usage.monthly_requests, ak.monthly_limit
 		`;
 
-		return NextResponse.json(updatedResult[0]);
+		const updatedResultArray = Array.isArray(updatedResult) ? updatedResult : [];
+		return NextResponse.json(updatedResultArray[0] || null);
 
 	} catch (error) {
 		return ApiErrorHandler.handle(error, requestId);
@@ -207,7 +306,8 @@ export async function DELETE(
 			WHERE id = ${keyId} AND user_id = ${userId} AND status != 'deleted'
 		`;
 
-		if (keyResult.length === 0) {
+		const keyResultArray = Array.isArray(keyResult) ? keyResult : [];
+		if (keyResultArray.length === 0) {
 			return ApiErrorHandler.notFound('API key not found');
 		}
 
@@ -250,7 +350,8 @@ export async function POST(
 			WHERE id = ${keyId} AND user_id = ${userId} AND status = 'active'
 		`;
 
-		if (keyResult.length === 0) {
+		const keyResultArray = Array.isArray(keyResult) ? keyResult : [];
+		if (keyResultArray.length === 0) {
 			return ApiErrorHandler.notFound('API key not found or already revoked');
 		}
 

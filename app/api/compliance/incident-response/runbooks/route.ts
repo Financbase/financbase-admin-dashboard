@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       metadata,
     } = body;
 
-    if (!title || !incidentType || !severity || !procedures || !Array.isArray(procedures)) {
+    if (!title || !incidentType || !severity || !procedures || typeof procedures !== 'object' || Array.isArray(procedures)) {
       return ApiErrorHandler.badRequest('Missing required fields: title, incidentType, severity, procedures');
     }
 
@@ -47,11 +47,11 @@ export async function POST(request: NextRequest) {
       description,
       incidentType,
       severity,
-      detectionProcedures: Array.isArray(procedures) ? [] : (procedures?.detection || []),
-      triageProcedures: Array.isArray(procedures) ? [] : (procedures?.triage || []),
-      containmentProcedures: Array.isArray(procedures) ? [] : (procedures?.containment || []),
-      eradicationProcedures: Array.isArray(procedures) ? [] : (procedures?.eradication || []),
-      recoveryProcedures: Array.isArray(procedures) ? [] : (procedures?.recovery || []),
+      detectionProcedures: Array.isArray(procedures?.detection) ? procedures.detection : [],
+      triageProcedures: Array.isArray(procedures?.triage) ? procedures.triage : [],
+      containmentProcedures: Array.isArray(procedures?.containment) ? procedures.containment : [],
+      eradicationProcedures: Array.isArray(procedures?.eradication) ? procedures.eradication : [],
+      recoveryProcedures: Array.isArray(procedures?.recovery) ? procedures.recovery : [],
       communicationTemplates: communicationTemplates || {},
       escalationCriteria: escalationPaths || [],
       tools: toolsAndResources?.tools || [],
