@@ -21,6 +21,7 @@ import { db } from '@/lib/db';
 import { invoices, expenses, clients, transactions } from '@/lib/db/schemas';
 import { eq, desc, sql } from 'drizzle-orm';
 import { NotificationService } from '@/lib/services/notification-service';
+import { logger } from '@/lib/logger';
 
 export class FinancbaseGPTService {
 	private openai: OpenAI;
@@ -65,7 +66,7 @@ export class FinancbaseGPTService {
 
 			// Log if enabled
 			if (this.config.enableLogging) {
-				console.log(`FinancbaseGPT query processed in ${Date.now() - startTime}ms`);
+				logger.info(`FinancbaseGPT query processed in ${Date.now() - startTime}ms`);
 			}
 
 			// Send notification for important insights
@@ -197,7 +198,7 @@ export class FinancbaseGPTService {
 				},
 			};
 		} catch (error) {
-			console.error('Error getting financial context:', error);
+			logger.error('Error getting financial context', { error });
 			throw new Error('Failed to retrieve financial context');
 		}
 	}
@@ -250,7 +251,7 @@ export class FinancbaseGPTService {
 				},
 			};
 		} catch (error) {
-			console.error('Error generating AI response:', error);
+			logger.error('Error generating AI response', { error });
 			throw new Error('Failed to generate AI response');
 		}
 	}
@@ -325,7 +326,7 @@ Format responses professionally and conversationally. Use the financial data to 
 				questions,
 			};
 		} catch (error) {
-			console.error('Error parsing AI response:', error);
+			logger.error('Error parsing AI response', { error });
 			return {
 				insights: [],
 				recommendations: [],
@@ -574,7 +575,7 @@ Format responses professionally and conversationally. Use the financial data to 
 				'/dashboard'
 			);
 		} catch (error) {
-			console.error('Error sending insight notification:', error);
+			logger.error('Error sending insight notification', { error });
 		}
 	}
 
@@ -673,7 +674,7 @@ Format responses professionally and conversationally. Use the financial data to 
 	 */
 	private handleError(error: any, defaultMessage: string): Error {
 		if (this.config.enableLogging) {
-			console.error('FinancbaseGPT Error:', error);
+			logger.error('FinancbaseGPT Error', { error });
 		}
 
 		if (error instanceof Error) {
@@ -692,9 +693,20 @@ Format responses professionally and conversationally. Use the financial data to 
 			await this.makeRequest('/health', { method: 'GET' });
 			const responseTime = Date.now() - startTime;
 
-			// Use Date.now() instead of process.uptime() for Edge runtime compatibility
-			// Calculate uptime as time since service start (or use 0 if not available)
-			const uptime = typeof process !== 'undefined' && process.uptime ? process.uptime() : 0;
+		// Calculate uptime - use process.uptime() if available (Node.js runtime)
+		// Fallback to 0 for Edge runtime or if process.uptime is not available
+		// Use dynamic property access to avoid Edge runtime bundler issues
+		let uptime = 0;
+		if (typeof process !== 'undefined') {
+			const processObj = process as any;
+			if (processObj.uptime && typeof processObj.uptime === 'function') {
+				try {
+					uptime = processObj.uptime();
+				} catch {
+					uptime = 0;
+				}
+			}
+		}
 
 			return {
 				status: 'healthy',
