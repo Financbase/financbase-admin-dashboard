@@ -17,6 +17,7 @@ import {
 	serial,
 	index,
 	decimal,
+	numeric,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -138,5 +139,74 @@ export const workflowTemplates = pgTable(
 			table.category,
 			table.isPublic
 		),
+	})
+);
+
+/**
+ * Workflow triggers table - Stores workflow trigger configurations
+ */
+export const workflowTriggers = pgTable(
+	"financbase_workflow_triggers",
+	{
+		id: serial("id").primaryKey(),
+		workflowId: integer("workflow_id")
+			.notNull()
+			.references(() => workflows.id, { onDelete: "cascade" }),
+		userId: text("user_id").notNull(),
+		type: text("type").notNull(), // invoice_created, expense_approved, report_generated, webhook, schedule, manual
+		name: text("name").notNull(),
+		description: text("description"),
+		conditions: jsonb("conditions").notNull(), // Specific conditions for triggering
+		filters: jsonb("filters"), // Additional filtering logic
+		eventType: text("event_type"), // invoice, expense, user, system, etc.
+		entityId: text("entity_id"), // ID of the entity that triggered
+		entityType: text("entity_type"), // invoice, expense, user, etc.
+		webhookUrl: text("webhook_url"),
+		webhookSecret: text("webhook_secret"),
+		webhookHeaders: jsonb("webhook_headers"),
+		isActive: boolean("is_active").notNull().default(true),
+		priority: text("priority").default("normal"), // low, normal, high, urgent
+		maxExecutionsPerHour: integer("max_executions_per_hour").default(100),
+		executionsThisHour: integer("executions_this_hour").default(0),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		workflowIdIdx: index("workflow_triggers_workflow_id_idx").on(table.workflowId),
+		userIdIdx: index("workflow_triggers_user_id_idx").on(table.userId),
+		typeIdx: index("workflow_triggers_type_idx").on(table.type),
+		isActiveIdx: index("workflow_triggers_is_active_idx").on(table.isActive),
+	})
+);
+
+/**
+ * Workflow logs table - Stores workflow execution logs
+ */
+export const workflowLogs = pgTable(
+	"financbase_workflow_logs",
+	{
+		id: serial("id").primaryKey(),
+		workflowId: integer("workflow_id")
+			.references(() => workflows.id, { onDelete: "cascade" }),
+		executionId: text("execution_id"),
+		userId: text("user_id").notNull(),
+		level: text("level").default("info"), // info, warning, error, debug
+		message: text("message").notNull(),
+		details: jsonb("details"),
+		stepId: text("step_id"),
+		entityId: text("entity_id"),
+		entityType: text("entity_type"),
+		executionTime: numeric("execution_time", { precision: 10, scale: 3 }),
+		memoryUsage: numeric("memory_usage", { precision: 10, scale: 2 }),
+		errorCode: text("error_code"),
+		errorStack: text("error_stack"),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		workflowIdIdx: index("workflow_logs_workflow_id_idx").on(table.workflowId),
+		executionIdIdx: index("workflow_logs_execution_id_idx").on(table.executionId),
+		userIdIdx: index("workflow_logs_user_id_idx").on(table.userId),
+		levelIdx: index("workflow_logs_level_idx").on(table.level),
+		createdAtIdx: index("workflow_logs_created_at_idx").on(table.createdAt),
 	})
 );

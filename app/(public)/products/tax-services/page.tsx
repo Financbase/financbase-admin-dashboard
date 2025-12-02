@@ -43,7 +43,6 @@ const TaxServicesDisclosure = dynamic(
 		default: mod.TaxServicesDisclosure,
 	})),
 	{
-		ssr: false,
 		loading: () => <div className="h-32 animate-pulse bg-gray-100 rounded-lg" />,
 	}
 );
