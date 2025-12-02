@@ -10,7 +10,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { sql } from '@/lib/db';
+import { getRawSqlConnection } from '@/lib/db';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
@@ -26,7 +26,8 @@ export async function GET(_request: NextRequest) {
 		}
 
 		// Get API keys with usage statistics
-		const result = await sql`
+		const rawSql = getRawSqlConnection();
+		const result = await rawSql`
 			SELECT
 				ak.*,
 				COALESCE(usage.monthly_requests, 0) as monthly_usage,
@@ -77,7 +78,8 @@ export async function POST(request: NextRequest) {
 		const keyId = generateRandomString(16);
 
 		// Store API key
-		await sql`
+		const rawSql = getRawSqlConnection();
+		await rawSql`
 			INSERT INTO developer.api_keys
 			(id, user_id, name, key, permissions, monthly_limit, status, created_at, updated_at)
 			VALUES (${keyId}, ${userId}, ${name}, ${apiKey}, ${JSON.stringify(permissions)}, ${monthlyLimit}, ${'active'}, NOW(), NOW())
@@ -114,7 +116,8 @@ export async function PATCH(request: NextRequest) {
 		const days = parseInt(searchParams.get('days') || '30', 10);
 
 		// Get usage data for the last N days
-		const result = await sql`
+		const rawSql = getRawSqlConnection();
+		const result = await rawSql`
 			SELECT
 				DATE(usage.created_at) as date,
 				COUNT(*) as requests,
@@ -156,7 +159,8 @@ export async function PUT(request: NextRequest) {
 		}
 
 		// Find API key
-		const keyResult = await sql`
+		const rawSql = getRawSqlConnection();
+		const keyResult = await rawSql`
 			SELECT id, user_id FROM developer.api_keys
 			WHERE key = ${apiKey} AND status = 'active'
 		`;
@@ -168,7 +172,7 @@ export async function PUT(request: NextRequest) {
 		const keyId = keyResult[0].id;
 
 		// Record usage
-		await sql`
+		await rawSql`
 			INSERT INTO developer.api_usage
 			(api_key_id, endpoint, method, status_code, response_time, error, created_at, completed_at)
 			VALUES (${keyId}, ${endpoint}, ${method}, ${statusCode}, ${responseTime}, ${errorData || null}, NOW(), NOW())
@@ -176,7 +180,7 @@ export async function PUT(request: NextRequest) {
 
 		// Check rate limits (simplified)
 		const today = new Date().toISOString().split('T')[0];
-		const dailyUsage = await sql`
+		const dailyUsage = await rawSql`
 			SELECT COUNT(*) as count FROM developer.api_usage
 			WHERE api_key_id = ${keyId} AND DATE(created_at) = ${today}
 		`;
