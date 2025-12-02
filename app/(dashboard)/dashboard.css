@@ -1,32 +1,69 @@
+@import "tailwindcss";
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+}
+
 /* Dashboard-specific styles */
 .dashboard-container {
-	@apply min-h-screen bg-background;
+	min-height: 100vh;
+	background-color: oklch(var(--background));
 }
 
 .dashboard-nav {
-	@apply border-b bg-card;
+	border-bottom: 1px solid oklch(var(--border));
+	background-color: oklch(var(--card));
 }
 
 .dashboard-main {
-	@apply flex-1;
+	flex: 1;
 }
 
 .dashboard-card {
-	@apply rounded-lg border bg-card p-6;
+	border-radius: calc(var(--radius) - 2px);
+	border: 1px solid oklch(var(--border));
+	padding: 1.5rem;
+	background-color: oklch(var(--card));
 }
 
 .dashboard-stat {
-	@apply flex items-center space-x-2;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 }
 
 .dashboard-stat-value {
-	@apply text-2xl font-bold;
+	font-size: 1.5rem;
+	line-height: 2rem;
+	font-weight: 700;
 }
 
 .dashboard-stat-label {
-	@apply text-sm font-medium;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	font-weight: 500;
 }
 
 .dashboard-stat-change {
-	@apply text-xs text-muted-foreground;
+	font-size: 0.75rem;
+	line-height: 1rem;
+	color: oklch(var(--muted-foreground));
 }
