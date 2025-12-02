@@ -65,10 +65,14 @@ export async function GET(request: NextRequest) {
 
 		// Add rate filters
 		if (minRate) {
-			conditions.push(gte(freelancers.hourlyRate, parseFloat(minRate)));
+			conditions.push(
+				sql`${freelancers.hourlyRate}::numeric >= ${parseFloat(minRate)}`
+			);
 		}
 		if (maxRate) {
-			conditions.push(lte(freelancers.hourlyRate, parseFloat(maxRate)));
+			conditions.push(
+				sql`${freelancers.hourlyRate}::numeric <= ${parseFloat(maxRate)}`
+			);
 		}
 
 		// Add status filter
