@@ -27,7 +27,7 @@ export async function GET(_request: NextRequest) {
 
 		// Get API keys with usage statistics
 		const rawSql = getRawSqlConnection();
-		const result = await rawSql`
+		const result = (await rawSql`
 			SELECT
 				ak.*,
 				COALESCE(usage.monthly_requests, 0) as monthly_usage,
@@ -40,7 +40,7 @@ export async function GET(_request: NextRequest) {
 			WHERE ak.user_id = ${userId} AND ak.status != 'deleted'
 			GROUP BY ak.id, usage.monthly_requests, ak.monthly_limit
 			ORDER BY ak.created_at DESC
-		`;
+		`) as any[];
 
 		return NextResponse.json(result);
 	} catch (error) {
@@ -117,7 +117,7 @@ export async function PATCH(request: NextRequest) {
 
 		// Get usage data for the last N days
 		const rawSql = getRawSqlConnection();
-		const result = await rawSql`
+		const result = (await rawSql`
 			SELECT
 				DATE(usage.created_at) as date,
 				COUNT(*) as requests,
@@ -129,7 +129,7 @@ export async function PATCH(request: NextRequest) {
 				AND usage.created_at >= CURRENT_DATE - INTERVAL '${days} days'
 			GROUP BY DATE(usage.created_at)
 			ORDER BY date DESC
-		`;
+		`) as any[];
 
 		return NextResponse.json(result);
 
@@ -160,10 +160,10 @@ export async function PUT(request: NextRequest) {
 
 		// Find API key
 		const rawSql = getRawSqlConnection();
-		const keyResult = await rawSql`
+		const keyResult = (await rawSql`
 			SELECT id, user_id FROM developer.api_keys
 			WHERE key = ${apiKey} AND status = 'active'
-		`;
+		`) as Array<{ id: string; user_id: string }>;
 
 		if (keyResult.length === 0) {
 			return ApiErrorHandler.unauthorized('Invalid API key');
@@ -180,10 +180,10 @@ export async function PUT(request: NextRequest) {
 
 		// Check rate limits (simplified)
 		const today = new Date().toISOString().split('T')[0];
-		const dailyUsage = await rawSql`
+		const dailyUsage = (await rawSql`
 			SELECT COUNT(*) as count FROM developer.api_usage
 			WHERE api_key_id = ${keyId} AND DATE(created_at) = ${today}
-		`;
+		`) as Array<{ count: string }>;
 
 		if (parseInt(dailyUsage[0].count, 10) > 1000) { // Example daily limit
 			return ApiErrorHandler.rateLimitExceeded('Rate limit exceeded');
