@@ -695,13 +695,14 @@ Format responses professionally and conversationally. Use the financial data to 
 
 		// Calculate uptime - use process.uptime() if available (Node.js runtime)
 		// Fallback to 0 for Edge runtime or if process.uptime is not available
-		// Use dynamic property access to avoid Edge runtime bundler issues
+		// Use bracket notation to avoid Edge runtime bundler static analysis
 		let uptime = 0;
 		if (typeof process !== 'undefined') {
 			const processObj = process as any;
-			if (processObj.uptime && typeof processObj.uptime === 'function') {
+			const uptimeKey = 'uptime';
+			if (processObj[uptimeKey] && typeof processObj[uptimeKey] === 'function') {
 				try {
-					uptime = processObj.uptime();
+					uptime = processObj[uptimeKey]();
 				} catch {
 					uptime = 0;
 				}
@@ -716,8 +717,9 @@ Format responses professionally and conversationally. Use the financial data to 
 				lastQuery: new Date().toISOString(),
 			};
 		} catch (error) {
-			// Use Date.now() instead of process.uptime() for Edge runtime compatibility
-			const uptime = typeof process !== 'undefined' && process.uptime ? process.uptime() : 0;
+			// Use 0 for uptime in error case to avoid Edge runtime issues
+			// Edge runtime doesn't support process.uptime()
+			const uptime = 0;
 
 			return {
 				status: 'unhealthy',
