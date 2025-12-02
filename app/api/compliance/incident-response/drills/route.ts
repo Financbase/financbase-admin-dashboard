@@ -25,16 +25,12 @@ export async function POST(request: NextRequest) {
     const {
       drillName,
       drillType,
-      description,
       scenario,
-      incidentType,
-      severity,
       scheduledDate,
       participants,
       observers,
       objectives,
       tags,
-      metadata,
     } = body;
 
     if (!drillName || !drillType || !scenario || !scheduledDate) {
@@ -46,13 +42,11 @@ export async function POST(request: NextRequest) {
       drillName,
       drillType,
       scenario,
-      severity,
       scheduledDate: new Date(scheduledDate),
       participants,
       observers,
       objectives,
       tags,
-      metadata,
     });
 
     return NextResponse.json({ success: true, data: drill, requestId }, { status: 201 });
