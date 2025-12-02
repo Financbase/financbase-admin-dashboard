@@ -12,7 +12,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { freelancers } from '@/lib/db/schemas/freelancers.schema';
-import { eq, and, desc, ilike, or, sql, gte, lte, inArray } from 'drizzle-orm';
+import { eq, and, desc, ilike, or, sql, gte, lte, inArray, type SQL } from 'drizzle-orm';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
@@ -45,14 +45,15 @@ export async function GET(request: NextRequest) {
 
 		// Add search condition
 		if (search) {
-			conditions.push(
-				or(
-					ilike(freelancers.displayName, `%${search}%`),
-					ilike(freelancers.title, `%${search}%`),
-					ilike(freelancers.bio, `%${search}%`),
-					sql`${freelancers.skills}::text ILIKE ${`%${search}%`}`
-				)
-			);
+			const searchCondition = or(
+				ilike(freelancers.displayName, `%${search}%`),
+				ilike(freelancers.title, `%${search}%`),
+				ilike(freelancers.bio, `%${search}%`),
+				sql`${freelancers.skills}::text ILIKE ${`%${search}%`}`
+			) as SQL<unknown>;
+			if (searchCondition) {
+				conditions.push(searchCondition);
+			}
 		}
 
 		// Add specialty filter
