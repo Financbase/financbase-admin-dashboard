@@ -46,11 +46,11 @@ export async function GET(request: NextRequest) {
 		// Add search condition
 		if (search) {
 			const searchCondition = or(
-				ilike(freelancers.displayName, `%${search}%`),
-				ilike(freelancers.title, `%${search}%`),
-				ilike(freelancers.bio, `%${search}%`),
-				sql`${freelancers.skills}::text ILIKE ${`%${search}%`}`
-			) as SQL<unknown>;
+				ilike(freelancers.displayName, `%${search}%`) as SQL<unknown>,
+				ilike(freelancers.title, `%${search}%`) as SQL<unknown>,
+				ilike(freelancers.bio, `%${search}%`) as SQL<unknown>,
+				sql`${freelancers.skills}::text ILIKE ${`%${search}%`}` as SQL<unknown>
+			);
 			if (searchCondition) {
 				conditions.push(searchCondition);
 			}
