@@ -82,8 +82,6 @@ import { WebhookService } from '@/lib/services/webhook-service';
  *       500:
  *         description: Internal server error
  */
-import { WebhookService } from '@/lib/services/webhook-service';
-
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   try {

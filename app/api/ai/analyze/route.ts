@@ -118,7 +118,7 @@ export async function PUT(request: NextRequest) {
         // Rate limiting delay
         await new Promise(resolve => setTimeout(resolve, 100));
       } catch (error) {
-        logger.error('Individual image analysis failed:', image.filename, error);
+        logger.error('Individual image analysis failed:', { filename: image.filename, error });
         results.push({
           imageUrl: image.imageUrl,
           filename: image.filename,

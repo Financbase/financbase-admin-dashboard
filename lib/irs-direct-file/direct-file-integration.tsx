@@ -61,10 +61,41 @@ export async function initializeDirectFileApp(
 		// 2. Fact graph compiled from Scala
 		// 3. Environment variables set
 		
+		// Skip import during build time or if files are not available
+		// This prevents build errors when the integration is incomplete
+		if (typeof window === "undefined") {
+			// Server-side: render placeholder
+			root.render(
+				<StrictMode>
+					<MemoryRouter initialEntries={["/flow"]} initialIndex={0}>
+						<div style={{ padding: "2rem", textAlign: "center" }}>
+							<h2>IRS Direct File Integration</h2>
+							<p style={{ marginTop: "1rem", color: "#666" }}>
+								The Direct File application is only available in the browser.
+							</p>
+						</div>
+					</MemoryRouter>
+				</StrictMode>
+			);
+			return;
+		}
+		
 		// Try to load the adapted app
 		let DirectFileApp;
 		try {
-			const appModule = await import("./df-client/df-client-app/src/App.adapted");
+			// Use fully dynamic import path to prevent static analysis during build
+			// This prevents Turbopack from trying to resolve missing modules
+			const importPath = "./df-client/df-client-app/src/App.adapted";
+			const appModule = await import(
+				/* webpackIgnore: true */
+				/* @vite-ignore */
+				importPath
+			).catch(() => null);
+			
+			if (!appModule || !appModule.DirectFileApp) {
+				throw new Error("Direct File app module not available");
+			}
+			
 			DirectFileApp = appModule.DirectFileApp;
 		} catch (importError) {
 			// Fallback to placeholder if adapted app not available

@@ -11,45 +11,45 @@
 import { Navigate, Route, MemoryRouter as Router, Routes, Outlet } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
-import Head from './components/Head/Head.js';
-import NotFound from './pages/NotFound.js';
-import NotPermitted from './pages/NotPermitted.js';
-import AccessLimited from './pages/AccessLimited.js';
-import Account from './auth/Account/Account.js';
-import useNetworkConnectionStatus from './hooks/useNetworkConnectionStatus.js';
-import { NetworkConnectionContext } from './context/networkConnectionContext.js';
+import Head from './components/Head/Head';
+import NotFound from './pages/NotFound';
+import NotPermitted from './pages/NotPermitted';
+import AccessLimited from './pages/AccessLimited';
+import Account from './auth/Account/Account';
+import useNetworkConnectionStatus from './hooks/useNetworkConnectionStatus';
+import { NetworkConnectionContext } from './context/networkConnectionContext';
 import { Suspense } from 'react';
-import { About } from './pages/About.js';
-import AuthorizeStateScreen from './screens/AuthorizeStateScreen/AuthorizeStateScreen.js';
-import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.js';
-import TaxReturnIntro from './components/TaxReturnIntro/TaxReturnIntro.js';
-import ErrorBoundary from './utils/errorBoundary.js';
-import { TaxReturnDetails } from './pages/TaxReturnDetails/TaxReturnDetails.js';
-import { SubmissionStatusContextProvider } from './context/SubmissionStatusContext/SubmissionStatusContext.js';
-import LoadingVerify from './pages/LoadingVerify.js';
+import { About } from './pages/About';
+import AuthorizeStateScreen from './screens/AuthorizeStateScreen/AuthorizeStateScreen';
+import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator';
+import TaxReturnIntro from './components/TaxReturnIntro/TaxReturnIntro';
+import ErrorBoundary from './utils/errorBoundary';
+import { TaxReturnDetails } from './pages/TaxReturnDetails/TaxReturnDetails';
+import { SubmissionStatusContextProvider } from './context/SubmissionStatusContext/SubmissionStatusContext';
+import LoadingVerify from './pages/LoadingVerify';
 import { v4 as uuidv4 } from 'uuid';
-import ResetTaxReturns from './auth/Account/ResetTaxReturns.js';
-import PreviewTaxReturns from './auth/Account/PreviewTaxReturns.js';
-import { ScreenHeader } from './screens/ScreenHeader.js';
-import { SystemAlertContextProvider } from './context/SystemAlertContext/SystemAlertContext.js';
-import { TaxReturnsContextProvider } from './context/TaxReturnsContext.js';
+import ResetTaxReturns from './auth/Account/ResetTaxReturns';
+import PreviewTaxReturns from './auth/Account/PreviewTaxReturns';
+import { ScreenHeader } from './screens/ScreenHeader';
+import { SystemAlertContextProvider } from './context/SystemAlertContext/SystemAlertContext';
+import { TaxReturnsContextProvider } from './context/TaxReturnsContext';
 import { Provider } from 'react-redux';
 
-import BaseScreen from './screens/BaseScreen.js';
-import Checklist from './screens/Checklist.js';
-import { TaxProfileContextOrSpinnerGate } from './screens/TaxProfileContextOrSpinnerGate.js';
-import DataView from './screens/DataView.js';
-import CollectionItemDataView from './screens/data-view/CollectionItemDataView.js';
-import GlobalLayout from './components/GlobalLayout.js';
-import Home from './components/Home.js';
-import { isFlowEnabled } from './constants/pageConstants.js';
-import { store } from './redux/store.js';
+import BaseScreen from './screens/BaseScreen';
+import Checklist from './screens/Checklist';
+import { TaxProfileContextOrSpinnerGate } from './screens/TaxProfileContextOrSpinnerGate';
+import DataView from './screens/DataView';
+import CollectionItemDataView from './screens/data-view/CollectionItemDataView';
+import GlobalLayout from './components/GlobalLayout';
+import Home from './components/Home';
+import { isFlowEnabled } from './constants/pageConstants';
+import { store } from './redux/store';
 
 // These styles are global so we make sure it is imported at the root
 import '@trussworks/react-uswds/lib/index.css';
-import FileYourStateTaxesDetails from './components/FileYourStateTaxesDetails/FileYourStateTaxesDetails.js';
-import { FactGraphTranslationContext } from './context/FactGraphTranslationContext.js';
-import { DataImportMagicScreen } from './components/DataImportMagicScreen/DataImportMagicScreen.js';
+import FileYourStateTaxesDetails from './components/FileYourStateTaxesDetails/FileYourStateTaxesDetails';
+import { FactGraphTranslationContext } from './context/FactGraphTranslationContext';
+import { DataImportMagicScreen } from './components/DataImportMagicScreen/DataImportMagicScreen';
 
 interface AdaptedAppProps {
 	initialPath?: string;

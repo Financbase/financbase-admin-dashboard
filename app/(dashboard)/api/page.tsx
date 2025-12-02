@@ -17,7 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
-import { logger } from '@/lib/logger';
   Globe,
   Code,
   Database,
@@ -49,6 +48,7 @@ import { logger } from '@/lib/logger';
   Lock,
   Unlock
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface APIEndpoint {
   id: string;

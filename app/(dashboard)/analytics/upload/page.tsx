@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-import { logger } from '@/lib/logger';
 	BarChart3,
 	TrendingUp,
 	Users,
@@ -37,6 +36,7 @@ import { logger } from '@/lib/logger';
 	Target,
 	Zap
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface UploadMetrics {
 	totalUploads: number;

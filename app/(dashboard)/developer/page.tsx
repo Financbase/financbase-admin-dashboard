@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-import { logger } from '@/lib/logger';
 	Key,
 	Activity,
 	BarChart3,
@@ -53,6 +52,7 @@ import { logger } from '@/lib/logger';
 	Lock,
 	Unlock
 } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 interface APIKey {
 	id: string;

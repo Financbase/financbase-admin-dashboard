@@ -17,7 +17,6 @@ import { WebhookList } from '@/components/webhooks/webhook-list';
 import { WebhookForm } from '@/components/webhooks/webhook-form';
 import { DeliveryLogs } from '@/components/webhooks/delivery-logs';
 import { 
-import { logger } from '@/lib/logger';
   Webhook, 
   Activity, 
   Settings, 
@@ -25,6 +24,7 @@ import { logger } from '@/lib/logger';
   Eye,
   Plus
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface Webhook {
   id: number;

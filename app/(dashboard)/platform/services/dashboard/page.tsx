@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-import { logger } from '@/lib/logger';
   Workflow, 
   Webhook, 
   Monitor, 
@@ -27,6 +26,7 @@ import { logger } from '@/lib/logger';
   TrendingUp,
   AlertTriangle
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface PlatformService {
   id: number;

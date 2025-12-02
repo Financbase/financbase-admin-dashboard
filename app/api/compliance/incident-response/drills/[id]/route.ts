@@ -31,37 +31,30 @@ export async function PATCH(
 
     const body = await request.json();
     const {
-      conductedBy,
-      startDate,
-      endDate,
-      duration,
-      objectivesMet,
       findings,
       strengths,
       weaknesses,
       recommendations,
       actionItems,
-      overallScore,
-      responseTimeScore,
-      communicationScore,
-      technicalScore,
+      responseTime,
+      containmentTime,
+      recoveryTime,
+      score,
+      lessonsLearned,
       reportUrl,
     } = body;
 
     await IncidentResponseService.completeDrill(drillId, {
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
-      duration,
-      objectivesMet,
       findings,
       strengths,
       weaknesses,
       recommendations,
       actionItems,
-      overallScore,
-      responseTimeScore,
-      communicationScore,
-      technicalScore,
+      responseTime,
+      containmentTime,
+      recoveryTime,
+      score,
+      lessonsLearned,
       reportUrl,
     });
 

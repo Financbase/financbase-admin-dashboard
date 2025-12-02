@@ -26,8 +26,12 @@ const nextConfig = {
 		optimizeCss: false,
 	},
 	
-	// Use webpack instead of Turbopack (we have custom webpack config)
-	turbopack: {},
+	// Disable Turbopack to use webpack (we have custom webpack config)
+	// Note: Next.js 16 uses Turbopack by default, but we need webpack for IRS Direct File integration
+	webpack: (config, { dev, isServer, webpack }) => {
+		// This is defined below, but we need to ensure webpack is used
+		return config;
+	},
 
 	// Image optimization
 	images: {
@@ -101,6 +105,7 @@ const nextConfig = {
 	},
 
 	// Webpack configuration for module resolution
+	// This replaces the default webpack function above
 	webpack: (config, { dev, isServer, webpack }) => {
 		// Handle Node.js modules in browser environment
 		config.resolve.fallback = {
@@ -128,14 +133,17 @@ const nextConfig = {
 		};
 
 		// Enhanced module resolution to prevent undefined module errors
+		// Configure module resolution for IRS Direct File integration
+		// Allow .js imports to resolve to .tsx/.ts files (TypeScript feature)
 		config.resolve = {
 			...config.resolve,
 			// Ensure proper module resolution
 			fullySpecified: false,
 			// Add extensions for better module resolution
+			// This allows .js imports to resolve to .ts/.tsx files (used by IRS Direct File)
 			extensionAlias: {
-				'.js': ['.js', '.ts', '.tsx'],
-				'.jsx': ['.jsx', '.tsx'],
+				'.js': ['.ts', '.tsx', '.js', '.jsx'],
+				'.jsx': ['.tsx', '.jsx'],
 			},
 			// Ensure modules are properly resolved
 			modules: [

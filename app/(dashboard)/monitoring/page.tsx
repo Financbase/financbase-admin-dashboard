@@ -15,7 +15,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MonitoringDashboard } from '@/components/monitoring/monitoring-dashboard';
 import { AlertConfiguration } from '@/components/monitoring/alert-configuration';
 import { 
-import { logger } from '@/lib/logger';
   Activity, 
   Bell, 
   BarChart3, 
@@ -25,6 +24,7 @@ import { logger } from '@/lib/logger';
   Server,
   Database
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 export default function MonitoringPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
