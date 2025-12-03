@@ -26,7 +26,7 @@ export async function GET(
 	request: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
-	return withRLS(async (clerkId, clerkUser, req) => {
+	return withRLS<{ success: boolean; data: unknown[] } | { error: string }>(async (clerkId, clerkUser, req) => {
 		try {
 			const userId = await getCurrentUserId();
 			if (!userId) {
@@ -60,7 +60,7 @@ export async function POST(
 	request: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
-	return withRLS(async (clerkId, clerkUser, req) => {
+	return withRLS<{ success: boolean; data: unknown } | { error: string }>(async (clerkId, clerkUser, req) => {
 		try {
 			const userId = await getCurrentUserId();
 			if (!userId) {
