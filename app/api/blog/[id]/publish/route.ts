@@ -25,25 +25,25 @@ export async function POST(
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
-	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId, clerkUser, request) => {
 		// Check if user is admin
 		const isAdmin = await checkAdminStatus();
 		if (!isAdmin) {
-			return ApiErrorHandler.forbidden('Only administrators can publish blog posts');
+			return ApiErrorHandler.forbidden('Only administrators can publish blog posts') as NextResponse<StandardApiResponse<unknown>>;
 		}
 
 		try {
 			const { id: idParam } = await params;
 			const id = parseInt(idParam);
 			if (isNaN(id)) {
-				return ApiErrorHandler.badRequest('Invalid blog post ID');
+				return ApiErrorHandler.badRequest('Invalid blog post ID', requestId) as NextResponse<StandardApiResponse<unknown>>;
 			}
 
 			const publishedPost = await blogService.publishPost(id);
 
 			return createSuccessResponse(publishedPost, 200, { requestId });
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }

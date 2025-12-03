@@ -87,7 +87,7 @@ export async function PUT(
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
-	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId, clerkUser, request) => {
 		// Check if user is admin
 		const isAdmin = await checkAdminStatus();
 		if (!isAdmin) {
@@ -141,7 +141,7 @@ export async function DELETE(
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
-	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId, clerkUser, request) => {
 		// Check if user is admin
 		const isAdmin = await checkAdminStatus();
 		if (!isAdmin) {
