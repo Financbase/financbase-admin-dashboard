@@ -104,10 +104,10 @@ import { eq, count, and, like, or } from 'drizzle-orm';
  */
 export async function GET(req: NextRequest) {
   const requestId = generateRequestId();
-  return withRLS<{ success: boolean; data: unknown[]; pagination?: unknown; requestId?: string }>(async (userId) => {
+  return withRLS<{ success: boolean; data: unknown[]; pagination?: unknown; requestId?: string }>(async (userId, clerkUser, request) => {
     try {
 
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL((request || req).url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
@@ -164,7 +164,7 @@ export async function GET(req: NextRequest) {
       requestId
     });
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<{ success: boolean; data: unknown[]; pagination?: unknown; requestId?: string }>;
     }
   });
 }
@@ -248,13 +248,13 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId();
-  return withRLS<{ success: boolean; message?: string; data: unknown; requestId?: string }>(async (userId) => {
+  return withRLS<{ success: boolean; message?: string; data: unknown; requestId?: string }>(async (userId, clerkUser, request) => {
     try {
       let body;
       try {
-        body = await req.json();
+        body = await (request || req).json();
       } catch (error) {
-        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
       }
     const validatedData = createClientSchema.parse({
       ...body,
@@ -280,7 +280,7 @@ export async function POST(req: NextRequest) {
       requestId
     }, { status: 201 });
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
     }
   });
 }

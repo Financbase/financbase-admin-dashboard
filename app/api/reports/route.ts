@@ -99,9 +99,9 @@ function validateReportData(data: any): { error: string } | null {
  */
 export async function GET(req: Request) {
   const requestId = generateRequestId();
-  return withRLS<{ success: boolean; data: unknown[]; total?: number; page?: number; totalPages?: number; requestId?: string }>(async (userId) => {
+  return withRLS<{ success: boolean; data: unknown[]; total?: number; page?: number; totalPages?: number; requestId?: string }>(async (userId, clerkUser, request) => {
     try {
-      const { searchParams } = new URL(req.url);
+      const { searchParams } = new URL((request || req).url);
       const type = searchParams.get('type');
       const isFavorite = searchParams.get('isFavorite') === 'true';
       const limit = parseInt(searchParams.get('limit') || '50');
@@ -148,7 +148,7 @@ export async function GET(req: Request) {
         requestId
       });
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<{ success: boolean; data: unknown[]; total?: number; page?: number; totalPages?: number; requestId?: string }>;
     }
   });
 }
@@ -159,19 +159,19 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   const requestId = generateRequestId();
-  return withRLS<{ success: boolean; data: unknown; requestId?: string }>(async (userId) => {
+  return withRLS<{ success: boolean; data: unknown; requestId?: string }>(async (userId, clerkUser, request) => {
     try {
       let body;
       try {
-        body = await req.json();
+        body = await (request || req).json();
       } catch (error) {
-        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId) as NextResponse<{ success: boolean; data: unknown; requestId?: string }>;
       }
       
       // Validate request body
       const validation = validateReportData(body);
       if (validation) {
-        return ApiErrorHandler.badRequest(validation.error, requestId);
+        return ApiErrorHandler.badRequest(validation.error, requestId) as NextResponse<{ success: boolean; data: unknown; requestId?: string }>;
       }
       
       // Create new report in the database
@@ -194,7 +194,7 @@ export async function POST(req: Request) {
         requestId
       }, { status: 201 });
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<{ success: boolean; data: unknown; requestId?: string }>;
     }
   });
 }
@@ -208,14 +208,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   const requestId = generateRequestId();
-  return withRLS<{ success: boolean; data: unknown; requestId?: string }>(async (userId) => {
+  return withRLS<{ success: boolean; data: unknown; requestId?: string }>(async (userId, clerkUser, request) => {
     try {
       const { id } = await Promise.resolve(params);
       let body;
       try {
-        body = await req.json();
+        body = await (request || req).json();
       } catch (error) {
-        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId) as NextResponse<{ success: boolean; data: unknown; requestId?: string }>;
       }
       
       // Check if report exists and belongs to user
@@ -265,7 +265,7 @@ export async function PATCH(
         requestId
       });
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<{ success: boolean; data: unknown; requestId?: string }>;
     }
   });
 }
@@ -279,7 +279,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   const requestId = generateRequestId();
-  return withRLS<{ success: boolean; message?: string; requestId?: string }>(async (userId) => {
+  return withRLS<{ success: boolean; message?: string; requestId?: string }>(async (userId, clerkUser, request) => {
     try {
       const { id } = await Promise.resolve(params);
       
@@ -296,7 +296,7 @@ export async function DELETE(
         .limit(1);
       
       if (!existingReport) {
-        return ApiErrorHandler.notFound('Report not found', requestId);
+        return ApiErrorHandler.notFound('Report not found', requestId) as NextResponse<{ success: boolean; message?: string; requestId?: string }>;
       }
       
       // Delete the report (hard delete since no soft delete field)
@@ -309,9 +309,13 @@ export async function DELETE(
           )
         );
       
-      return new NextResponse(null, { status: 204 });
+      return NextResponse.json({
+        success: true,
+        message: 'Report deleted successfully',
+        requestId
+      });
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<{ success: boolean; message?: string; requestId?: string }>;
     }
   });
 }

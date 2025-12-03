@@ -112,10 +112,10 @@ import { eq, count, and, gte, lte, like } from 'drizzle-orm';
  */
 export async function GET(req: NextRequest) {
   const requestId = generateRequestId();
-  return withRLS(async (userId) => {
+  return withRLS<{ success: boolean; data: unknown[]; pagination?: unknown; requestId?: string }>(async (userId, clerkUser, request) => {
     try {
 
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL((request || req).url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
@@ -168,7 +168,7 @@ export async function GET(req: NextRequest) {
       requestId
     });
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<{ success: boolean; data: unknown[]; pagination?: unknown; requestId?: string }>;
     }
   });
 }
@@ -247,13 +247,13 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId();
-  return withRLS<{ success: boolean; message?: string; data: unknown; requestId?: string }>(async (userId) => {
+  return withRLS<{ success: boolean; message?: string; data: unknown; requestId?: string }>(async (userId, clerkUser, request) => {
     try {
       let body;
       try {
-        body = await req.json();
+        body = await (request || req).json();
       } catch (error) {
-        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
       }
     
       // Handle expenseDate as alias for date
@@ -268,13 +268,13 @@ export async function POST(req: NextRequest) {
           if (typeof body.date === 'string' && body.date.includes('T')) {
             const testDate = new Date(body.date);
             if (isNaN(testDate.getTime())) {
-              return ApiErrorHandler.badRequest('Invalid date format. Expected valid ISO 8601 datetime string.', requestId);
+              return ApiErrorHandler.badRequest('Invalid date format. Expected valid ISO 8601 datetime string.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
             }
           } else if (typeof body.date === 'string') {
             // Try to convert plain date string to ISO
             const dateObj = new Date(body.date);
             if (isNaN(dateObj.getTime())) {
-              return ApiErrorHandler.badRequest('Invalid date format. Expected valid date string or ISO 8601 datetime.', requestId);
+              return ApiErrorHandler.badRequest('Invalid date format. Expected valid date string or ISO 8601 datetime.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
             }
             body.date = dateObj.toISOString();
           } else if (body.date instanceof Date) {
@@ -318,7 +318,7 @@ export async function POST(req: NextRequest) {
       try {
         expenseDate = new Date(validatedData.date);
         if (isNaN(expenseDate.getTime())) {
-          return ApiErrorHandler.badRequest('Invalid date value. Could not parse date.', requestId);
+          return ApiErrorHandler.badRequest('Invalid date value. Could not parse date.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
         }
       } catch (error) {
         return ApiErrorHandler.badRequest('Invalid date value. Could not parse date.', requestId);
@@ -365,7 +365,7 @@ export async function POST(req: NextRequest) {
         requestId
       }, { status: 201 });
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
     }
   });
 }
