@@ -282,7 +282,7 @@ export async function POST(req: NextRequest) {
             body.date = body.date.toISOString();
           }
         } catch (error) {
-          return ApiErrorHandler.badRequest('Invalid date format. Expected valid date string or ISO 8601 datetime.', requestId);
+          return ApiErrorHandler.badRequest('Invalid date format. Expected valid date string or ISO 8601 datetime.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
         }
       }
       
@@ -290,16 +290,16 @@ export async function POST(req: NextRequest) {
       if (typeof body.amount === 'string') {
         const parsedAmount = parseFloat(body.amount);
         if (isNaN(parsedAmount)) {
-          return ApiErrorHandler.badRequest('Invalid amount format. Expected a valid number.', requestId);
+          return ApiErrorHandler.badRequest('Invalid amount format. Expected a valid number.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
         }
         if (parsedAmount <= 0) {
-          return ApiErrorHandler.badRequest('Amount must be a positive number.', requestId);
+          return ApiErrorHandler.badRequest('Amount must be a positive number.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
         }
         body.amount = parsedAmount;
       } else if (typeof body.amount !== 'number') {
-        return ApiErrorHandler.badRequest('Amount must be a number.', requestId);
+        return ApiErrorHandler.badRequest('Amount must be a number.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
       } else if (body.amount <= 0) {
-        return ApiErrorHandler.badRequest('Amount must be a positive number.', requestId);
+        return ApiErrorHandler.badRequest('Amount must be a positive number.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
       }
       
       // Provide default description if missing
@@ -321,7 +321,7 @@ export async function POST(req: NextRequest) {
           return ApiErrorHandler.badRequest('Invalid date value. Could not parse date.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
         }
       } catch (error) {
-        return ApiErrorHandler.badRequest('Invalid date value. Could not parse date.', requestId);
+        return ApiErrorHandler.badRequest('Invalid date value. Could not parse date.', requestId) as NextResponse<{ success: boolean; message?: string; data: unknown; requestId?: string }>;
       }
 
       const expenseData = {
