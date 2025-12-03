@@ -24,7 +24,7 @@ export async function PATCH(
 	request: NextRequest,
 	{ params }: { params: { id: string; invitationId: string } }
 ) {
-	return withRLS(async (clerkId, clerkUser, req) => {
+	return withRLS<{ success: boolean; data?: unknown; message: string } | { error: string }>(async (clerkId, clerkUser, req) => {
 		try {
 			const userId = await getCurrentUserId();
 			if (!userId) {
