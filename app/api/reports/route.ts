@@ -99,7 +99,7 @@ function validateReportData(data: any): { error: string } | null {
  */
 export async function GET(req: Request) {
   const requestId = generateRequestId();
-  return withRLS(async (userId) => {
+  return withRLS<{ success: boolean; data: unknown[]; total?: number; page?: number; totalPages?: number; requestId?: string }>(async (userId) => {
     try {
       const { searchParams } = new URL(req.url);
       const type = searchParams.get('type');
@@ -159,7 +159,7 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   const requestId = generateRequestId();
-  return withRLS(async (userId) => {
+  return withRLS<{ success: boolean; data: unknown; requestId?: string }>(async (userId) => {
     try {
       let body;
       try {
@@ -208,7 +208,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   const requestId = generateRequestId();
-  return withRLS(async (userId) => {
+  return withRLS<{ success: boolean; data: unknown; requestId?: string }>(async (userId) => {
     try {
       const { id } = await Promise.resolve(params);
       let body;
@@ -279,7 +279,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   const requestId = generateRequestId();
-  return withRLS(async (userId) => {
+  return withRLS<{ success: boolean; message?: string; requestId?: string }>(async (userId) => {
     try {
       const { id } = await Promise.resolve(params);
       

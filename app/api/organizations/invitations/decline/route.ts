@@ -19,7 +19,7 @@ import { logger } from '@/lib/logger';
  * Decline invitation by token
  */
 export async function POST(request: NextRequest) {
-	return withRLS(async (clerkId, clerkUser, req) => {
+	return withRLS<{ success: boolean; message: string } | { error: string }>(async (clerkId, clerkUser, req) => {
 		try {
 			const body = await request.json();
 			const { token } = body;

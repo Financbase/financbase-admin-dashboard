@@ -1,0 +1,1058 @@
+{
+  "summary": {
+    "totalRoutes": 407,
+    "highRisk": 29,
+    "mediumRisk": 62,
+    "lowRisk": 316,
+    "withPagination": 142,
+    "withCaching": 1,
+    "withDatabaseQueries": 100,
+    "withComplexQueries": 70
+  },
+  "byCategory": {
+    "financial": {
+      "total": 32,
+      "highRisk": 4,
+      "mediumRisk": 7,
+      "lowRisk": 21,
+      "withPagination": 11,
+      "withCaching": 0
+    },
+    "admin": {
+      "total": 66,
+      "highRisk": 10,
+      "mediumRisk": 4,
+      "lowRisk": 52,
+      "withPagination": 18,
+      "withCaching": 0
+    },
+    "analytics": {
+      "total": 39,
+      "highRisk": 2,
+      "mediumRisk": 6,
+      "lowRisk": 31,
+      "withPagination": 11,
+      "withCaching": 0
+    },
+    "ai": {
+      "total": 36,
+      "highRisk": 0,
+      "mediumRisk": 1,
+      "lowRisk": 35,
+      "withPagination": 8,
+      "withCaching": 0
+    },
+    "core": {
+      "total": 33,
+      "highRisk": 3,
+      "mediumRisk": 2,
+      "lowRisk": 28,
+      "withPagination": 10,
+      "withCaching": 0
+    },
+    "other": {
+      "total": 167,
+      "highRisk": 9,
+      "mediumRisk": 36,
+      "lowRisk": 122,
+      "withPagination": 67,
+      "withCaching": 1
+    },
+    "integrations": {
+      "total": 34,
+      "highRisk": 1,
+      "mediumRisk": 6,
+      "lowRisk": 27,
+      "withPagination": 17,
+      "withCaching": 0
+    }
+  },
+  "highRiskRoutes": [
+    {
+      "route": "/admin/careers",
+      "category": "careers",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "admin/careers/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching",
+        "Complex queries"
+      ]
+    },
+    {
+      "route": "/admin/feature-flags/{key}",
+      "category": "feature-flags",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "admin/feature-flags/[key]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/admin/users",
+      "category": "users",
+      "methods": [
+        "GET"
+      ],
+      "file": "admin/users/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/analytics",
+      "category": "root",
+      "methods": [
+        "GET"
+      ],
+      "file": "analytics/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching",
+        "Complex queries"
+      ]
+    },
+    {
+      "route": "/careers",
+      "category": "root",
+      "methods": [
+        "GET"
+      ],
+      "file": "careers/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/clients/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "clients/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/compliance/incident-response/communication-templates",
+      "category": "incident-response",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/incident-response/communication-templates/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/customers/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "customers/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/employees/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "employees/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/expenses/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "expenses/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/gallery/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "gallery/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/hr/contractors/{id}",
+      "category": "contractors",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "hr/contractors/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/hr/payroll/benefits",
+      "category": "payroll",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/payroll/benefits/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/hr/payroll/deductions",
+      "category": "payroll",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/payroll/deductions/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/hr/payroll/taxes",
+      "category": "payroll",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/payroll/taxes/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/marketplace/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "file": "marketplace/stats/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching",
+        "Complex queries"
+      ]
+    },
+    {
+      "route": "/orders/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "orders/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/products/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "products/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/real-estate/buyer/stats",
+      "category": "buyer",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/buyer/stats/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching",
+        "Complex queries"
+      ]
+    },
+    {
+      "route": "/real-estate/investor/cash-flow",
+      "category": "investor",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/investor/cash-flow/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching",
+        "Complex queries"
+      ]
+    },
+    {
+      "route": "/real-estate/realtor/stats",
+      "category": "realtor",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/realtor/stats/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching",
+        "Complex queries"
+      ]
+    },
+    {
+      "route": "/real-estate/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/stats/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching",
+        "Complex queries"
+      ]
+    },
+    {
+      "route": "/reconciliation/match",
+      "category": "match",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "reconciliation/match/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/reconciliation/sessions",
+      "category": "sessions",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "reconciliation/sessions/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/reports/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "reports/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/settings/billing/payment-methods",
+      "category": "billing",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "settings/billing/payment-methods/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/settings/notifications",
+      "category": "notifications",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "file": "settings/notifications/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/tax/direct-file/exports",
+      "category": "direct-file",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "tax/direct-file/exports/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    },
+    {
+      "route": "/transactions/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "transactions/[id]/route.ts",
+      "issues": [
+        "Missing pagination",
+        "No caching"
+      ]
+    }
+  ],
+  "mediumRiskRoutes": [
+    {
+      "route": "/accounts/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "accounts/[id]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/accounts/reconcile",
+      "category": "reconcile",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "accounts/reconcile/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/accounts",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "accounts/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/admin/careers/{id}",
+      "category": "careers",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "admin/careers/[id]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/admin/subscription-rbac-mappings",
+      "category": "subscription-rbac-mappings",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "admin/subscription-rbac-mappings/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/analytics/upload",
+      "category": "upload",
+      "methods": [
+        "GET"
+      ],
+      "file": "analytics/upload/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/auth/validate-token",
+      "category": "validate-token",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "auth/validate-token/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/blog/{id}/like",
+      "category": "{id}",
+      "methods": [
+        "POST"
+      ],
+      "file": "blog/[id]/like/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/blog/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "blog/[id]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/clients",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "clients/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/compliance/gdpr/data-subject-requests",
+      "category": "gdpr",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/gdpr/data-subject-requests/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/contact",
+      "category": "root",
+      "methods": [
+        "POST"
+      ],
+      "file": "contact/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/dashboard/ai-insights",
+      "category": "ai-insights",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/ai-insights/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/dashboard/executive-metrics",
+      "category": "executive-metrics",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/executive-metrics/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/dashboard/export",
+      "category": "export",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/export/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/dashboard/top-products",
+      "category": "top-products",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/top-products/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/developer/api-keys/{id}",
+      "category": "api-keys",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "developer/api-keys/[id]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/developer/endpoints",
+      "category": "endpoints",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "developer/endpoints/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/developer",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH"
+      ],
+      "file": "developer/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/direct-file/{...path}",
+      "category": "{...path}",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "direct-file/[...path]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/direct-file/state-api/{...path}",
+      "category": "state-api",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "direct-file/state-api/[...path]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/expenses",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "expenses/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/freelancers/dashboard",
+      "category": "dashboard",
+      "methods": [
+        "GET"
+      ],
+      "file": "freelancers/dashboard/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/freelancers",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "freelancers/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/guides/{id}",
+      "category": "{id}",
+      "methods": [
+        "GET"
+      ],
+      "file": "guides/[id]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/guides/slug/{slug}",
+      "category": "slug",
+      "methods": [
+        "GET"
+      ],
+      "file": "guides/slug/[slug]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/home/metrics",
+      "category": "metrics",
+      "methods": [
+        "GET"
+      ],
+      "file": "home/metrics/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/home/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "file": "home/stats/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/integrations/webhooks",
+      "category": "webhooks",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "integrations/webhooks/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/investor-portal/{portalId}",
+      "category": "{portalId}",
+      "methods": [
+        "GET"
+      ],
+      "file": "investor-portal/[portalId]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/investor-portal",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "investor-portal/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/invoices",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "invoices/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/marketplace/plugins/my-plugins",
+      "category": "plugins",
+      "methods": [
+        "GET"
+      ],
+      "file": "marketplace/plugins/my-plugins/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/marketplace/plugins/pending",
+      "category": "plugins",
+      "methods": [
+        "GET"
+      ],
+      "file": "marketplace/plugins/pending/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/marketplace/plugins",
+      "category": "plugins",
+      "methods": [
+        "GET"
+      ],
+      "file": "marketplace/plugins/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/monitoring/snapshot-queries",
+      "category": "snapshot-queries",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "monitoring/snapshot-queries/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/newsletter/subscribe",
+      "category": "subscribe",
+      "methods": [
+        "POST"
+      ],
+      "file": "newsletter/subscribe/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/notifications",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "notifications/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/organizations/{id}/billing",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "organizations/[id]/billing/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/organizations/{id}/invitations",
+      "category": "{id}",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "organizations/[id]/invitations/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/platform/hub/connections/{id}",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "platform/hub/connections/[id]/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/platform/hub/connections/{id}/sync",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "platform/hub/connections/[id]/sync/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/platform/hub/connections",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "platform/hub/connections/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/platform/hub/integrations",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "platform/hub/integrations/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/platform/hub",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "platform/hub/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/platform/services",
+      "category": "services",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "platform/services/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/real-estate/buyer/saved-properties",
+      "category": "buyer",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "file": "real-estate/buyer/saved-properties/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/real-estate/investor/expenses",
+      "category": "investor",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/investor/expenses/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/real-estate/investor/maintenance",
+      "category": "investor",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/investor/maintenance/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    },
+    {
+      "route": "/real-estate/investor/tenants",
+      "category": "investor",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "real-estate/investor/tenants/route.ts",
+      "issues": [
+        "Consider caching"
+      ]
+    }
+  ]
+}

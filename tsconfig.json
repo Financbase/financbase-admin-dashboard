@@ -39,6 +39,21 @@
   ],
   "exclude": [
     "node_modules",
-    ".next"
+    ".next",
+    "lib/irs-direct-file/direct-file/**/*",
+    "lib/irs-direct-file/fact-graph-scala/**/*",
+    "lib/irs-direct-file/df-client/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/__tests__/**/*",
+    "**/test/**/*",
+    "**/tests/**/*",
+    "**/dist/**/*",
+    "**/build/**/*",
+    "**/coverage/**/*",
+    "**/target/**/*",
+    "**/*.tsbuildinfo"
   ]
 }

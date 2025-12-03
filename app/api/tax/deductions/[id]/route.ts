@@ -13,7 +13,7 @@ import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { updateTaxDeductionSchema } from "@/lib/validation-schemas";
 import { withRLS } from "@/lib/api/with-rls";
-import { createSuccessResponse } from "@/lib/api/standard-response";
+import { createSuccessResponse, type StandardApiResponse } from "@/lib/api/standard-response";
 
 /**
  * PATCH /api/tax/deductions/[id]
@@ -24,7 +24,7 @@ export async function PATCH(
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		try {
 			const { id } = await params;
 			let body;
@@ -62,7 +62,7 @@ export async function DELETE(
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		try {
 			const { id } = await params;
 			const service = new TaxService();

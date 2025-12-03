@@ -247,7 +247,7 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId();
-  return withRLS(async (userId) => {
+  return withRLS<{ success: boolean; message?: string; data: unknown; requestId?: string }>(async (userId) => {
     try {
       let body;
       try {

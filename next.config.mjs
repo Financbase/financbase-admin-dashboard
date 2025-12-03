@@ -9,6 +9,8 @@ const nextConfig = {
 	reactStrictMode: true,
 	typescript: {
 		ignoreBuildErrors: false,
+		// Exclude IRS Direct File directories from type checking during build
+		tsconfigPath: './tsconfig.json',
 	},
 	// Disable OpenTelemetry to prevent API compatibility issues
 	env: {
@@ -21,16 +23,25 @@ const nextConfig = {
 	},
 	experimental: {
 		// Server actions are enabled by default in Next.js 16
-		optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
+		optimizePackageImports: [
+			'@radix-ui/react-icons',
+			'lucide-react',
+			'@radix-ui/react-dialog',
+			'@radix-ui/react-dropdown-menu',
+			'@radix-ui/react-select',
+			'@radix-ui/react-tabs',
+			'@radix-ui/react-toast',
+		],
 		// Disable experimental features that might cause module resolution issues
 		optimizeCss: false,
 	},
 	
-	// Disable Turbopack to use webpack (we have custom webpack config)
-	// Note: Next.js 16 uses Turbopack by default, but we need webpack for IRS Direct File integration
-	webpack: (config, { dev, isServer, webpack }) => {
-		// This is defined below, but we need to ensure webpack is used
-		return config;
+	// Use Turbopack for faster builds (Next.js 16 default)
+	// Only use webpack for specific IRS Direct File integration needs
+	// Note: Turbopack is significantly faster than webpack
+	turbopack: {
+		// Turbopack configuration (empty for now, using defaults)
+		// Webpack config below is kept as fallback for compatibility
 	},
 
 	// Image optimization
@@ -104,8 +115,9 @@ const nextConfig = {
 		];
 	},
 
-	// Webpack configuration for module resolution
-	// This replaces the default webpack function above
+	// Webpack configuration (only used if --webpack flag is explicitly set)
+	// Note: By default, Next.js 16 uses Turbopack which is significantly faster
+	// This config is kept as a fallback for compatibility
 	webpack: (config, { dev, isServer, webpack }) => {
 		// Handle Node.js modules in browser environment
 		config.resolve.fallback = {

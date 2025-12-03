@@ -104,7 +104,7 @@ import { eq, count, and, like, or } from 'drizzle-orm';
  */
 export async function GET(req: NextRequest) {
   const requestId = generateRequestId();
-  return withRLS(async (userId) => {
+  return withRLS<{ success: boolean; data: unknown[]; pagination?: unknown; requestId?: string }>(async (userId) => {
     try {
 
     const { searchParams } = new URL(req.url);
@@ -248,7 +248,7 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId();
-  return withRLS(async (userId) => {
+  return withRLS<{ success: boolean; message?: string; data: unknown; requestId?: string }>(async (userId) => {
     try {
       let body;
       try {

@@ -13,7 +13,7 @@ import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { recordTaxPaymentSchema } from "@/lib/validation-schemas";
 import { withRLS } from "@/lib/api/with-rls";
-import { createSuccessResponse } from "@/lib/api/standard-response";
+import { createSuccessResponse, type StandardApiResponse } from "@/lib/api/standard-response";
 
 /**
  * POST /api/tax/obligations/[id]/payment
@@ -24,7 +24,7 @@ export async function POST(
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		try {
 			const { id } = await params;
 			let body;

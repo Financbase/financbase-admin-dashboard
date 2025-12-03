@@ -13,7 +13,7 @@ import { directFileExports } from "@/lib/db/schemas/direct-file.schema";
 import { eq, desc } from "drizzle-orm";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { withRLS } from "@/lib/api/with-rls";
-import { createSuccessResponse } from "@/lib/api/standard-response";
+import { createSuccessResponse, type StandardApiResponse } from "@/lib/api/standard-response";
 
 /**
  * GET /api/tax/direct-file/exports
@@ -21,7 +21,7 @@ import { createSuccessResponse } from "@/lib/api/standard-response";
  */
 export async function GET(request: NextRequest) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		try {
 			// Fetch export metadata for user (no PII/FTI)
 			const exports = await db
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		try {
 			let body;
 			try {

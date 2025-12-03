@@ -13,7 +13,7 @@ import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { createTaxDocumentSchema } from "@/lib/validation-schemas";
 import { withRLS } from "@/lib/api/with-rls";
-import { createSuccessResponse } from "@/lib/api/standard-response";
+import { createSuccessResponse, type StandardApiResponse } from "@/lib/api/standard-response";
 
 /**
  * GET /api/tax/documents
@@ -21,7 +21,7 @@ import { createSuccessResponse } from "@/lib/api/standard-response";
  */
 export async function GET(request: NextRequest) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		try {
 			const { searchParams } = new URL(request.url);
 			const year = searchParams.get("year")
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		try {
 			let body;
 			try {

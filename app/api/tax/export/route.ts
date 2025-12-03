@@ -12,7 +12,7 @@ import { TaxService } from "@/lib/services/business/tax-service";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { withRLS } from "@/lib/api/with-rls";
 import { formatCurrency } from "@/lib/utils/tax-utils";
-import { createSuccessResponse } from "@/lib/api/standard-response";
+import { createSuccessResponse, type StandardApiResponse } from "@/lib/api/standard-response";
 
 /**
  * GET /api/tax/export
@@ -25,7 +25,7 @@ import { createSuccessResponse } from "@/lib/api/standard-response";
  */
 export async function GET(request: NextRequest) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		try {
 			const { searchParams } = new URL(request.url);
 			const format = searchParams.get("format") || "csv";

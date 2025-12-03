@@ -20,7 +20,7 @@ import { logger } from '@/lib/logger';
  * Accept invitation by token
  */
 export async function POST(request: NextRequest) {
-	return withRLS(async (clerkId, clerkUser, req) => {
+	return withRLS<{ success: boolean; data: unknown; message: string } | { error: string }>(async (clerkId, clerkUser, req) => {
 		try {
 			const userId = await getCurrentUserId();
 			if (!userId) {

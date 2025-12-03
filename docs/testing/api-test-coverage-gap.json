@@ -1,0 +1,4520 @@
+{
+  "summary": {
+    "totalRoutes": 407,
+    "tested": 86,
+    "untested": 321,
+    "coverage": "21.1%",
+    "totalOperations": 641,
+    "testedOperations": 130
+  },
+  "byCategory": {
+    "financial": {
+      "total": 32,
+      "tested": 18,
+      "untested": 14
+    },
+    "admin": {
+      "total": 66,
+      "tested": 10,
+      "untested": 56
+    },
+    "analytics": {
+      "total": 39,
+      "tested": 8,
+      "untested": 31
+    },
+    "ai": {
+      "total": 36,
+      "tested": 2,
+      "untested": 34
+    },
+    "core": {
+      "total": 33,
+      "tested": 11,
+      "untested": 22
+    },
+    "other": {
+      "total": 167,
+      "tested": 23,
+      "untested": 144
+    },
+    "integrations": {
+      "total": 34,
+      "tested": 14,
+      "untested": 20
+    }
+  },
+  "byPriority": {
+    "high": {
+      "total": 65,
+      "tested": 29,
+      "untested": 36
+    },
+    "low": {
+      "total": 269,
+      "tested": 35,
+      "untested": 234
+    },
+    "medium": {
+      "total": 73,
+      "tested": 22,
+      "untested": 51
+    }
+  },
+  "untestedRoutes": [
+    {
+      "route": "/accounts/{id}",
+      "category": "{id}",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "accounts/[id]/route.ts",
+      "expectedTestName": "accounts-{id}-api.test.ts"
+    },
+    {
+      "route": "/accounts",
+      "category": "root",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "accounts/route.ts",
+      "expectedTestName": "accounts-api.test.ts"
+    },
+    {
+      "route": "/budgets/{id}",
+      "category": "{id}",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "budgets/[id]/route.ts",
+      "expectedTestName": "budgets-{id}-api.test.ts"
+    },
+    {
+      "route": "/clients/{id}",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "clients/[id]/route.ts",
+      "expectedTestName": "clients-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/baa/vendors",
+      "category": "baa",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/baa/vendors/route.ts",
+      "expectedTestName": "compliance-baa-vendors-api.test.ts"
+    },
+    {
+      "route": "/dashboard/top-products",
+      "category": "top-products",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/top-products/route.ts",
+      "expectedTestName": "dashboard-top-products-api.test.ts"
+    },
+    {
+      "route": "/expenses/{id}/approve",
+      "category": "{id}",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "POST"
+      ],
+      "file": "expenses/[id]/approve/route.ts",
+      "expectedTestName": "expenses-{id}-approve-api.test.ts"
+    },
+    {
+      "route": "/expenses/{id}/reject",
+      "category": "{id}",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "POST"
+      ],
+      "file": "expenses/[id]/reject/route.ts",
+      "expectedTestName": "expenses-{id}-reject-api.test.ts"
+    },
+    {
+      "route": "/expenses/{id}",
+      "category": "{id}",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "expenses/[id]/route.ts",
+      "expectedTestName": "expenses-{id}-api.test.ts"
+    },
+    {
+      "route": "/expenses/categories",
+      "category": "categories",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "expenses/categories/route.ts",
+      "expectedTestName": "expenses-categories-api.test.ts"
+    },
+    {
+      "route": "/expenses",
+      "category": "root",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "expenses/route.ts",
+      "expectedTestName": "expenses-api.test.ts"
+    },
+    {
+      "route": "/orders/{id}/fulfill",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "POST"
+      ],
+      "file": "orders/[id]/fulfill/route.ts",
+      "expectedTestName": "orders-{id}-fulfill-api.test.ts"
+    },
+    {
+      "route": "/orders/{id}",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "orders/[id]/route.ts",
+      "expectedTestName": "orders-{id}-api.test.ts"
+    },
+    {
+      "route": "/orders",
+      "category": "root",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "orders/route.ts",
+      "expectedTestName": "orders-api.test.ts"
+    },
+    {
+      "route": "/products/{id}",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "products/[id]/route.ts",
+      "expectedTestName": "products-{id}-api.test.ts"
+    },
+    {
+      "route": "/products/{id}/stock",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "PATCH"
+      ],
+      "file": "products/[id]/stock/route.ts",
+      "expectedTestName": "products-{id}-stock-api.test.ts"
+    },
+    {
+      "route": "/products/categories",
+      "category": "categories",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "products/categories/route.ts",
+      "expectedTestName": "products-categories-api.test.ts"
+    },
+    {
+      "route": "/products",
+      "category": "root",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "products/route.ts",
+      "expectedTestName": "products-api.test.ts"
+    },
+    {
+      "route": "/projects/{id}",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "file": "projects/[id]/route.ts",
+      "expectedTestName": "projects-{id}-api.test.ts"
+    },
+    {
+      "route": "/projects",
+      "category": "root",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "projects/route.ts",
+      "expectedTestName": "projects-api.test.ts"
+    },
+    {
+      "route": "/real-estate/investor/expenses",
+      "category": "investor",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/investor/expenses/route.ts",
+      "expectedTestName": "real-estate-investor-expenses-api.test.ts"
+    },
+    {
+      "route": "/reconciliation/match",
+      "category": "match",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "reconciliation/match/route.ts",
+      "expectedTestName": "reconciliation-match-api.test.ts"
+    },
+    {
+      "route": "/reconciliation/rules",
+      "category": "rules",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "reconciliation/rules/route.ts",
+      "expectedTestName": "reconciliation-rules-api.test.ts"
+    },
+    {
+      "route": "/reconciliation/sessions",
+      "category": "sessions",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "reconciliation/sessions/route.ts",
+      "expectedTestName": "reconciliation-sessions-api.test.ts"
+    },
+    {
+      "route": "/reconciliation/statement-transactions/{sessionId}",
+      "category": "statement-transactions",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET"
+      ],
+      "file": "reconciliation/statement-transactions/[sessionId]/route.ts",
+      "expectedTestName": "reconciliation-statement-transactions-{sessionId}-api.test.ts"
+    },
+    {
+      "route": "/transactions/{id}",
+      "category": "{id}",
+      "categoryGroup": "financial",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "transactions/[id]/route.ts",
+      "expectedTestName": "transactions-{id}-api.test.ts"
+    },
+    {
+      "route": "/workflows/{id}/duplicate",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "POST"
+      ],
+      "file": "workflows/[id]/duplicate/route.ts",
+      "expectedTestName": "workflows-{id}-duplicate-api.test.ts"
+    },
+    {
+      "route": "/workflows/{id}/execute",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "POST"
+      ],
+      "file": "workflows/[id]/execute/route.ts",
+      "expectedTestName": "workflows-{id}-execute-api.test.ts"
+    },
+    {
+      "route": "/workflows/{id}/executions",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET"
+      ],
+      "file": "workflows/[id]/executions/route.ts",
+      "expectedTestName": "workflows-{id}-executions-api.test.ts"
+    },
+    {
+      "route": "/workflows/{id}/logs",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET"
+      ],
+      "file": "workflows/[id]/logs/route.ts",
+      "expectedTestName": "workflows-{id}-logs-api.test.ts"
+    },
+    {
+      "route": "/workflows/{id}",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "workflows/[id]/route.ts",
+      "expectedTestName": "workflows-{id}-api.test.ts"
+    },
+    {
+      "route": "/workflows/{id}/test",
+      "category": "{id}",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "POST"
+      ],
+      "file": "workflows/[id]/test/route.ts",
+      "expectedTestName": "workflows-{id}-test-api.test.ts"
+    },
+    {
+      "route": "/workflows/executions/{id}/rerun",
+      "category": "executions",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "POST"
+      ],
+      "file": "workflows/executions/[id]/rerun/route.ts",
+      "expectedTestName": "workflows-executions-{id}-rerun-api.test.ts"
+    },
+    {
+      "route": "/workflows/templates/{id}/instantiate",
+      "category": "templates",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "POST"
+      ],
+      "file": "workflows/templates/[id]/instantiate/route.ts",
+      "expectedTestName": "workflows-templates-{id}-instantiate-api.test.ts"
+    },
+    {
+      "route": "/workflows/templates",
+      "category": "templates",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "workflows/templates/route.ts",
+      "expectedTestName": "workflows-templates-api.test.ts"
+    },
+    {
+      "route": "/workflows/triggers",
+      "category": "triggers",
+      "categoryGroup": "core",
+      "priority": "high",
+      "methods": [
+        "GET"
+      ],
+      "file": "workflows/triggers/route.ts",
+      "expectedTestName": "workflows-triggers-api.test.ts"
+    },
+    {
+      "route": "/admin/seed-dashboard",
+      "category": "seed-dashboard",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "admin/seed-dashboard/route.ts",
+      "expectedTestName": "admin-seed-dashboard-api.test.ts"
+    },
+    {
+      "route": "/analytics/performance",
+      "category": "performance",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "analytics/performance/route.ts",
+      "expectedTestName": "analytics-performance-api.test.ts"
+    },
+    {
+      "route": "/analytics",
+      "category": "root",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "analytics/route.ts",
+      "expectedTestName": "analytics-api.test.ts"
+    },
+    {
+      "route": "/campaigns/performance",
+      "category": "performance",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "campaigns/performance/route.ts",
+      "expectedTestName": "campaigns-performance-api.test.ts"
+    },
+    {
+      "route": "/compliance/monitoring/siem/integrations",
+      "category": "monitoring",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/monitoring/siem/integrations/route.ts",
+      "expectedTestName": "compliance-monitoring-siem-integrations-api.test.ts"
+    },
+    {
+      "route": "/compliance/reports/{id}",
+      "category": "reports",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "compliance/reports/[id]/route.ts",
+      "expectedTestName": "compliance-reports-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/reports/dashboard",
+      "category": "reports",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "compliance/reports/dashboard/route.ts",
+      "expectedTestName": "compliance-reports-dashboard-api.test.ts"
+    },
+    {
+      "route": "/compliance/reports",
+      "category": "reports",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/reports/route.ts",
+      "expectedTestName": "compliance-reports-api.test.ts"
+    },
+    {
+      "route": "/dashboard/ai-insights",
+      "category": "ai-insights",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/ai-insights/route.ts",
+      "expectedTestName": "dashboard-ai-insights-api.test.ts"
+    },
+    {
+      "route": "/dashboard/chart-data",
+      "category": "chart-data",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/chart-data/route.ts",
+      "expectedTestName": "dashboard-chart-data-api.test.ts"
+    },
+    {
+      "route": "/dashboard/executive-metrics",
+      "category": "executive-metrics",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/executive-metrics/route.ts",
+      "expectedTestName": "dashboard-executive-metrics-api.test.ts"
+    },
+    {
+      "route": "/dashboard/overview",
+      "category": "overview",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/overview/route.ts",
+      "expectedTestName": "dashboard-overview-api.test.ts"
+    },
+    {
+      "route": "/dashboard/recent-activity",
+      "category": "recent-activity",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboard/recent-activity/route.ts",
+      "expectedTestName": "dashboard-recent-activity-api.test.ts"
+    },
+    {
+      "route": "/dashboards/{id}",
+      "category": "{id}",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "dashboards/[id]/route.ts",
+      "expectedTestName": "dashboards-{id}-api.test.ts"
+    },
+    {
+      "route": "/dashboards",
+      "category": "root",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "dashboards/route.ts",
+      "expectedTestName": "dashboards-api.test.ts"
+    },
+    {
+      "route": "/dashboards/widgets/templates",
+      "category": "widgets",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "dashboards/widgets/templates/route.ts",
+      "expectedTestName": "dashboards-widgets-templates-api.test.ts"
+    },
+    {
+      "route": "/hr/contractors/{id}/performance",
+      "category": "contractors",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "hr/contractors/[id]/performance/route.ts",
+      "expectedTestName": "hr-contractors-{id}-performance-api.test.ts"
+    },
+    {
+      "route": "/integrations/{id}",
+      "category": "{id}",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "integrations/[id]/route.ts",
+      "expectedTestName": "integrations-{id}-api.test.ts"
+    },
+    {
+      "route": "/integrations/oauth/{service}/authorize",
+      "category": "oauth",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "integrations/oauth/[service]/authorize/route.ts",
+      "expectedTestName": "integrations-oauth-{service}-authorize-api.test.ts"
+    },
+    {
+      "route": "/integrations/oauth/{service}/callback",
+      "category": "oauth",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "integrations/oauth/[service]/callback/route.ts",
+      "expectedTestName": "integrations-oauth-{service}-callback-api.test.ts"
+    },
+    {
+      "route": "/integrations/oauth/{service}/refresh",
+      "category": "oauth",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "POST"
+      ],
+      "file": "integrations/oauth/[service]/refresh/route.ts",
+      "expectedTestName": "integrations-oauth-{service}-refresh-api.test.ts"
+    },
+    {
+      "route": "/integrations/providers",
+      "category": "providers",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "integrations/providers/route.ts",
+      "expectedTestName": "integrations-providers-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins/{id}/approve",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "POST"
+      ],
+      "file": "marketplace/plugins/[id]/approve/route.ts",
+      "expectedTestName": "marketplace-plugins-{id}-approve-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins/{id}/install",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "POST"
+      ],
+      "file": "marketplace/plugins/[id]/install/route.ts",
+      "expectedTestName": "marketplace-plugins-{id}-install-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins/{id}/reject",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "POST"
+      ],
+      "file": "marketplace/plugins/[id]/reject/route.ts",
+      "expectedTestName": "marketplace-plugins-{id}-reject-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins/{id}",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "marketplace/plugins/[id]/route.ts",
+      "expectedTestName": "marketplace-plugins-{id}-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins/{id}/uninstall",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "DELETE"
+      ],
+      "file": "marketplace/plugins/[id]/uninstall/route.ts",
+      "expectedTestName": "marketplace-plugins-{id}-uninstall-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins/installed",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "marketplace/plugins/installed/route.ts",
+      "expectedTestName": "marketplace-plugins-installed-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins/my-plugins",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "marketplace/plugins/my-plugins/route.ts",
+      "expectedTestName": "marketplace-plugins-my-plugins-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins/pending",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "marketplace/plugins/pending/route.ts",
+      "expectedTestName": "marketplace-plugins-pending-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "marketplace/plugins/route.ts",
+      "expectedTestName": "marketplace-plugins-api.test.ts"
+    },
+    {
+      "route": "/marketplace/plugins/submit",
+      "category": "plugins",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "POST"
+      ],
+      "file": "marketplace/plugins/submit/route.ts",
+      "expectedTestName": "marketplace-plugins-submit-api.test.ts"
+    },
+    {
+      "route": "/performance/database-size",
+      "category": "database-size",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "performance/database-size/route.ts",
+      "expectedTestName": "performance-database-size-api.test.ts"
+    },
+    {
+      "route": "/performance/health",
+      "category": "health",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "performance/health/route.ts",
+      "expectedTestName": "performance-health-api.test.ts"
+    },
+    {
+      "route": "/performance/slow-queries",
+      "category": "slow-queries",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "performance/slow-queries/route.ts",
+      "expectedTestName": "performance-slow-queries-api.test.ts"
+    },
+    {
+      "route": "/reports/{id}",
+      "category": "{id}",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "reports/[id]/route.ts",
+      "expectedTestName": "reports-{id}-api.test.ts"
+    },
+    {
+      "route": "/reports/{id}/run",
+      "category": "{id}",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "POST"
+      ],
+      "file": "reports/[id]/run/route.ts",
+      "expectedTestName": "reports-{id}-run-api.test.ts"
+    },
+    {
+      "route": "/reports",
+      "category": "root",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "reports/route.ts",
+      "expectedTestName": "reports-api.test.ts"
+    },
+    {
+      "route": "/reports/templates",
+      "category": "templates",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "reports/templates/route.ts",
+      "expectedTestName": "reports-templates-api.test.ts"
+    },
+    {
+      "route": "/test-dashboard/ai-insights",
+      "category": "ai-insights",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "test-dashboard/ai-insights/route.ts",
+      "expectedTestName": "test-dashboard-ai-insights-api.test.ts"
+    },
+    {
+      "route": "/test-dashboard/overview",
+      "category": "overview",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "test-dashboard/overview/route.ts",
+      "expectedTestName": "test-dashboard-overview-api.test.ts"
+    },
+    {
+      "route": "/test-dashboard/recent-activity",
+      "category": "recent-activity",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "test-dashboard/recent-activity/route.ts",
+      "expectedTestName": "test-dashboard-recent-activity-api.test.ts"
+    },
+    {
+      "route": "/test-dashboard-activity",
+      "category": "root",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "test-dashboard-activity/route.ts",
+      "expectedTestName": "test-dashboard-activity-api.test.ts"
+    },
+    {
+      "route": "/test-dashboard-insights",
+      "category": "root",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "test-dashboard-insights/route.ts",
+      "expectedTestName": "test-dashboard-insights-api.test.ts"
+    },
+    {
+      "route": "/test-dashboard-overview",
+      "category": "root",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "test-dashboard-overview/route.ts",
+      "expectedTestName": "test-dashboard-overview-api.test.ts"
+    },
+    {
+      "route": "/unified-dashboard/metrics",
+      "category": "metrics",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "unified-dashboard/metrics/route.ts",
+      "expectedTestName": "unified-dashboard-metrics-api.test.ts"
+    },
+    {
+      "route": "/unified-dashboard/widgets",
+      "category": "widgets",
+      "categoryGroup": "analytics",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "unified-dashboard/widgets/route.ts",
+      "expectedTestName": "unified-dashboard-widgets-api.test.ts"
+    },
+    {
+      "route": "/webhooks/{id}/deliveries",
+      "category": "{id}",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET"
+      ],
+      "file": "webhooks/[id]/deliveries/route.ts",
+      "expectedTestName": "webhooks-{id}-deliveries-api.test.ts"
+    },
+    {
+      "route": "/webhooks/{id}/retry",
+      "category": "{id}",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "POST"
+      ],
+      "file": "webhooks/[id]/retry/route.ts",
+      "expectedTestName": "webhooks-{id}-retry-api.test.ts"
+    },
+    {
+      "route": "/webhooks/{id}",
+      "category": "{id}",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "webhooks/[id]/route.ts",
+      "expectedTestName": "webhooks-{id}-api.test.ts"
+    },
+    {
+      "route": "/webhooks/{id}/test",
+      "category": "{id}",
+      "categoryGroup": "integrations",
+      "priority": "medium",
+      "methods": [
+        "POST"
+      ],
+      "file": "webhooks/[id]/test/route.ts",
+      "expectedTestName": "webhooks-{id}-test-api.test.ts"
+    },
+    {
+      "route": "/admin/careers/{id}",
+      "category": "careers",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "admin/careers/[id]/route.ts",
+      "expectedTestName": "admin-careers-{id}-api.test.ts"
+    },
+    {
+      "route": "/admin/careers",
+      "category": "careers",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "admin/careers/route.ts",
+      "expectedTestName": "admin-careers-api.test.ts"
+    },
+    {
+      "route": "/admin/subscription-rbac-mappings",
+      "category": "subscription-rbac-mappings",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "admin/subscription-rbac-mappings/route.ts",
+      "expectedTestName": "admin-subscription-rbac-mappings-api.test.ts"
+    },
+    {
+      "route": "/ai/analyze",
+      "category": "analyze",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "POST",
+        "PUT"
+      ],
+      "file": "ai/analyze/route.ts",
+      "expectedTestName": "ai-analyze-api.test.ts"
+    },
+    {
+      "route": "/ai/categorize",
+      "category": "categorize",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "ai/categorize/route.ts",
+      "expectedTestName": "ai-categorize-api.test.ts"
+    },
+    {
+      "route": "/ai/chat/conversations/{id}",
+      "category": "chat",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "DELETE"
+      ],
+      "file": "ai/chat/conversations/[id]/route.ts",
+      "expectedTestName": "ai-chat-conversations-{id}-api.test.ts"
+    },
+    {
+      "route": "/ai/chat/conversations",
+      "category": "chat",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "ai/chat/conversations/route.ts",
+      "expectedTestName": "ai-chat-conversations-api.test.ts"
+    },
+    {
+      "route": "/ai/chat/messages",
+      "category": "chat",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "ai/chat/messages/route.ts",
+      "expectedTestName": "ai-chat-messages-api.test.ts"
+    },
+    {
+      "route": "/ai/chat",
+      "category": "chat",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "ai/chat/route.ts",
+      "expectedTestName": "ai-chat-api.test.ts"
+    },
+    {
+      "route": "/ai/chat/suggestions",
+      "category": "chat",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "ai/chat/suggestions/route.ts",
+      "expectedTestName": "ai-chat-suggestions-api.test.ts"
+    },
+    {
+      "route": "/ai/financbase-gpt",
+      "category": "financbase-gpt",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "ai/financbase-gpt/route.ts",
+      "expectedTestName": "ai-financbase-gpt-api.test.ts"
+    },
+    {
+      "route": "/ai/financial-analysis",
+      "category": "financial-analysis",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "ai/financial-analysis/route.ts",
+      "expectedTestName": "ai-financial-analysis-api.test.ts"
+    },
+    {
+      "route": "/blog/{id}/like",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "blog/[id]/like/route.ts",
+      "expectedTestName": "blog-{id}-like-api.test.ts"
+    },
+    {
+      "route": "/blog/{id}/publish",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "blog/[id]/publish/route.ts",
+      "expectedTestName": "blog-{id}-publish-api.test.ts"
+    },
+    {
+      "route": "/blog/{id}",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "blog/[id]/route.ts",
+      "expectedTestName": "blog-{id}-api.test.ts"
+    },
+    {
+      "route": "/blog/categories",
+      "category": "categories",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "blog/categories/route.ts",
+      "expectedTestName": "blog-categories-api.test.ts"
+    },
+    {
+      "route": "/blog",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "blog/route.ts",
+      "expectedTestName": "blog-api.test.ts"
+    },
+    {
+      "route": "/byok/api-keys/{keyId}",
+      "category": "api-keys",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "PUT",
+        "DELETE"
+      ],
+      "file": "byok/api-keys/[keyId]/route.ts",
+      "expectedTestName": "byok-api-keys-{keyId}-api.test.ts"
+    },
+    {
+      "route": "/byok/api-keys",
+      "category": "api-keys",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "byok/api-keys/route.ts",
+      "expectedTestName": "byok-api-keys-api.test.ts"
+    },
+    {
+      "route": "/byok/preferences",
+      "category": "preferences",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "file": "byok/preferences/route.ts",
+      "expectedTestName": "byok-preferences-api.test.ts"
+    },
+    {
+      "route": "/byok/providers",
+      "category": "providers",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "byok/providers/route.ts",
+      "expectedTestName": "byok-providers-api.test.ts"
+    },
+    {
+      "route": "/byok/usage",
+      "category": "usage",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "byok/usage/route.ts",
+      "expectedTestName": "byok-usage-api.test.ts"
+    },
+    {
+      "route": "/campaigns/{id}",
+      "category": "{id}",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "campaigns/[id]/route.ts",
+      "expectedTestName": "campaigns-{id}-api.test.ts"
+    },
+    {
+      "route": "/campaigns",
+      "category": "root",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "campaigns/route.ts",
+      "expectedTestName": "campaigns-api.test.ts"
+    },
+    {
+      "route": "/careers/{id}",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "careers/[id]/route.ts",
+      "expectedTestName": "careers-{id}-api.test.ts"
+    },
+    {
+      "route": "/careers",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "careers/route.ts",
+      "expectedTestName": "careers-api.test.ts"
+    },
+    {
+      "route": "/chat/channels/{id}/messages",
+      "category": "channels",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "chat/channels/[id]/messages/route.ts",
+      "expectedTestName": "chat-channels-{id}-messages-api.test.ts"
+    },
+    {
+      "route": "/chat/channels/{id}",
+      "category": "channels",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "chat/channels/[id]/route.ts",
+      "expectedTestName": "chat-channels-{id}-api.test.ts"
+    },
+    {
+      "route": "/chat/channels",
+      "category": "channels",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "chat/channels/route.ts",
+      "expectedTestName": "chat-channels-api.test.ts"
+    },
+    {
+      "route": "/chat/messages/{id}/read",
+      "category": "messages",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "chat/messages/[id]/read/route.ts",
+      "expectedTestName": "chat-messages-{id}-read-api.test.ts"
+    },
+    {
+      "route": "/chat/messages/{id}",
+      "category": "messages",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "chat/messages/[id]/route.ts",
+      "expectedTestName": "chat-messages-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/ai-governance/bias-checks/{id}",
+      "category": "ai-governance",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "compliance/ai-governance/bias-checks/[id]/route.ts",
+      "expectedTestName": "compliance-ai-governance-bias-checks-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/ai-governance/bias-checks",
+      "category": "ai-governance",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/ai-governance/bias-checks/route.ts",
+      "expectedTestName": "compliance-ai-governance-bias-checks-api.test.ts"
+    },
+    {
+      "route": "/compliance/ai-governance/decisions/{id}",
+      "category": "ai-governance",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "compliance/ai-governance/decisions/[id]/route.ts",
+      "expectedTestName": "compliance-ai-governance-decisions-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/ai-governance/decisions",
+      "category": "ai-governance",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/ai-governance/decisions/route.ts",
+      "expectedTestName": "compliance-ai-governance-decisions-api.test.ts"
+    },
+    {
+      "route": "/compliance/data-classification/bulk",
+      "category": "data-classification",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "compliance/data-classification/bulk/route.ts",
+      "expectedTestName": "compliance-data-classification-bulk-api.test.ts"
+    },
+    {
+      "route": "/compliance/data-classification",
+      "category": "data-classification",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/data-classification/route.ts",
+      "expectedTestName": "compliance-data-classification-api.test.ts"
+    },
+    {
+      "route": "/compliance/dora/incidents/{id}",
+      "category": "dora",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "compliance/dora/incidents/[id]/route.ts",
+      "expectedTestName": "compliance-dora-incidents-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/dora/incidents",
+      "category": "dora",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/dora/incidents/route.ts",
+      "expectedTestName": "compliance-dora-incidents-api.test.ts"
+    },
+    {
+      "route": "/compliance/dora/resilience-tests/{id}",
+      "category": "dora",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "compliance/dora/resilience-tests/[id]/route.ts",
+      "expectedTestName": "compliance-dora-resilience-tests-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/dora/resilience-tests",
+      "category": "dora",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/dora/resilience-tests/route.ts",
+      "expectedTestName": "compliance-dora-resilience-tests-api.test.ts"
+    },
+    {
+      "route": "/compliance/dora/third-party-risks/{id}",
+      "category": "dora",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "compliance/dora/third-party-risks/[id]/route.ts",
+      "expectedTestName": "compliance-dora-third-party-risks-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/dora/third-party-risks",
+      "category": "dora",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/dora/third-party-risks/route.ts",
+      "expectedTestName": "compliance-dora-third-party-risks-api.test.ts"
+    },
+    {
+      "route": "/compliance/gdpr/data-subject-requests/{id}/fulfill",
+      "category": "gdpr",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "compliance/gdpr/data-subject-requests/[id]/fulfill/route.ts",
+      "expectedTestName": "compliance-gdpr-data-subject-requests-{id}-fulfill-api.test.ts"
+    },
+    {
+      "route": "/compliance/gdpr/data-subject-requests/{id}",
+      "category": "gdpr",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "compliance/gdpr/data-subject-requests/[id]/route.ts",
+      "expectedTestName": "compliance-gdpr-data-subject-requests-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/gdpr/data-subject-requests",
+      "category": "gdpr",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/gdpr/data-subject-requests/route.ts",
+      "expectedTestName": "compliance-gdpr-data-subject-requests-api.test.ts"
+    },
+    {
+      "route": "/compliance/incident-response/communication-templates",
+      "category": "incident-response",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/incident-response/communication-templates/route.ts",
+      "expectedTestName": "compliance-incident-response-communication-templates-api.test.ts"
+    },
+    {
+      "route": "/compliance/incident-response/drills/{id}",
+      "category": "incident-response",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "PATCH"
+      ],
+      "file": "compliance/incident-response/drills/[id]/route.ts",
+      "expectedTestName": "compliance-incident-response-drills-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/incident-response/drills",
+      "category": "incident-response",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/incident-response/drills/route.ts",
+      "expectedTestName": "compliance-incident-response-drills-api.test.ts"
+    },
+    {
+      "route": "/compliance/incident-response/incidents/{id}",
+      "category": "incident-response",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "compliance/incident-response/incidents/[id]/route.ts",
+      "expectedTestName": "compliance-incident-response-incidents-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/incident-response/incidents",
+      "category": "incident-response",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/incident-response/incidents/route.ts",
+      "expectedTestName": "compliance-incident-response-incidents-api.test.ts"
+    },
+    {
+      "route": "/compliance/incident-response/runbooks",
+      "category": "incident-response",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/incident-response/runbooks/route.ts",
+      "expectedTestName": "compliance-incident-response-runbooks-api.test.ts"
+    },
+    {
+      "route": "/compliance/incident-response/team",
+      "category": "incident-response",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/incident-response/team/route.ts",
+      "expectedTestName": "compliance-incident-response-team-api.test.ts"
+    },
+    {
+      "route": "/compliance/monitoring/alerts/{id}",
+      "category": "monitoring",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "PATCH"
+      ],
+      "file": "compliance/monitoring/alerts/[id]/route.ts",
+      "expectedTestName": "compliance-monitoring-alerts-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/monitoring/alerts",
+      "category": "monitoring",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "compliance/monitoring/alerts/route.ts",
+      "expectedTestName": "compliance-monitoring-alerts-api.test.ts"
+    },
+    {
+      "route": "/compliance/monitoring/alerts/rules",
+      "category": "monitoring",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "compliance/monitoring/alerts/rules/route.ts",
+      "expectedTestName": "compliance-monitoring-alerts-rules-api.test.ts"
+    },
+    {
+      "route": "/compliance/monitoring",
+      "category": "monitoring",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "compliance/monitoring/route.ts",
+      "expectedTestName": "compliance-monitoring-api.test.ts"
+    },
+    {
+      "route": "/compliance/monitoring/siem/events",
+      "category": "monitoring",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/monitoring/siem/events/route.ts",
+      "expectedTestName": "compliance-monitoring-siem-events-api.test.ts"
+    },
+    {
+      "route": "/compliance/policies/{id}/assignments",
+      "category": "policies",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/policies/[id]/assignments/route.ts",
+      "expectedTestName": "compliance-policies-{id}-assignments-api.test.ts"
+    },
+    {
+      "route": "/compliance/policies/{id}",
+      "category": "policies",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "compliance/policies/[id]/route.ts",
+      "expectedTestName": "compliance-policies-{id}-api.test.ts"
+    },
+    {
+      "route": "/compliance/policies",
+      "category": "policies",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/policies/route.ts",
+      "expectedTestName": "compliance-policies-api.test.ts"
+    },
+    {
+      "route": "/compliance/risk-assessment/assets",
+      "category": "risk-assessment",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/risk-assessment/assets/route.ts",
+      "expectedTestName": "compliance-risk-assessment-assets-api.test.ts"
+    },
+    {
+      "route": "/compliance/risk-assessment/risks",
+      "category": "risk-assessment",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/risk-assessment/risks/route.ts",
+      "expectedTestName": "compliance-risk-assessment-risks-api.test.ts"
+    },
+    {
+      "route": "/compliance/training/assignments",
+      "category": "training",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "compliance/training/assignments/route.ts",
+      "expectedTestName": "compliance-training-assignments-api.test.ts"
+    },
+    {
+      "route": "/compliance/training/programs",
+      "category": "training",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "compliance/training/programs/route.ts",
+      "expectedTestName": "compliance-training-programs-api.test.ts"
+    },
+    {
+      "route": "/contact",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "contact/route.ts",
+      "expectedTestName": "contact-api.test.ts"
+    },
+    {
+      "route": "/cron/subscription-grace-period",
+      "category": "subscription-grace-period",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "cron/subscription-grace-period/route.ts",
+      "expectedTestName": "cron-subscription-grace-period-api.test.ts"
+    },
+    {
+      "route": "/customers/{id}",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "customers/[id]/route.ts",
+      "expectedTestName": "customers-{id}-api.test.ts"
+    },
+    {
+      "route": "/customers",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "customers/route.ts",
+      "expectedTestName": "customers-api.test.ts"
+    },
+    {
+      "route": "/customers/segments",
+      "category": "segments",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "customers/segments/route.ts",
+      "expectedTestName": "customers-segments-api.test.ts"
+    },
+    {
+      "route": "/developer/api-keys/{id}",
+      "category": "api-keys",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "developer/api-keys/[id]/route.ts",
+      "expectedTestName": "developer-api-keys-{id}-api.test.ts"
+    },
+    {
+      "route": "/developer",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH"
+      ],
+      "file": "developer/route.ts",
+      "expectedTestName": "developer-api.test.ts"
+    },
+    {
+      "route": "/direct-file/{...path}",
+      "category": "{...path}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "direct-file/[...path]/route.ts",
+      "expectedTestName": "direct-file-{...path}-api.test.ts"
+    },
+    {
+      "route": "/direct-file/state-api/{...path}",
+      "category": "state-api",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "direct-file/state-api/[...path]/route.ts",
+      "expectedTestName": "direct-file-state-api-{...path}-api.test.ts"
+    },
+    {
+      "route": "/docs",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "docs/route.ts",
+      "expectedTestName": "docs-api.test.ts"
+    },
+    {
+      "route": "/email/send-invoice",
+      "category": "send-invoice",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "email/send-invoice/route.ts",
+      "expectedTestName": "email-send-invoice-api.test.ts"
+    },
+    {
+      "route": "/employees/{id}/attendance",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "employees/[id]/attendance/route.ts",
+      "expectedTestName": "employees-{id}-attendance-api.test.ts"
+    },
+    {
+      "route": "/employees/{id}/leave",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "employees/[id]/leave/route.ts",
+      "expectedTestName": "employees-{id}-leave-api.test.ts"
+    },
+    {
+      "route": "/employees/{id}/payroll",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "employees/[id]/payroll/route.ts",
+      "expectedTestName": "employees-{id}-payroll-api.test.ts"
+    },
+    {
+      "route": "/employees/{id}",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "employees/[id]/route.ts",
+      "expectedTestName": "employees-{id}-api.test.ts"
+    },
+    {
+      "route": "/employees/departments",
+      "category": "departments",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "employees/departments/route.ts",
+      "expectedTestName": "employees-departments-api.test.ts"
+    },
+    {
+      "route": "/employees",
+      "category": "root",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "employees/route.ts",
+      "expectedTestName": "employees-api.test.ts"
+    },
+    {
+      "route": "/feature-flags/{key}/disable",
+      "category": "{key}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "feature-flags/[key]/disable/route.ts",
+      "expectedTestName": "feature-flags-{key}-disable-api.test.ts"
+    },
+    {
+      "route": "/feature-flags/{key}/enable",
+      "category": "{key}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "feature-flags/[key]/enable/route.ts",
+      "expectedTestName": "feature-flags-{key}-enable-api.test.ts"
+    },
+    {
+      "route": "/feature-flags/{key}",
+      "category": "{key}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "feature-flags/[key]/route.ts",
+      "expectedTestName": "feature-flags-{key}-api.test.ts"
+    },
+    {
+      "route": "/feature-flags/check",
+      "category": "check",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "feature-flags/check/route.ts",
+      "expectedTestName": "feature-flags-check-api.test.ts"
+    },
+    {
+      "route": "/financial-intelligence/health",
+      "category": "health",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "financial-intelligence/health/route.ts",
+      "expectedTestName": "financial-intelligence-health-api.test.ts"
+    },
+    {
+      "route": "/financial-intelligence/insights",
+      "category": "insights",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "financial-intelligence/insights/route.ts",
+      "expectedTestName": "financial-intelligence-insights-api.test.ts"
+    },
+    {
+      "route": "/financial-intelligence/predictions",
+      "category": "predictions",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "financial-intelligence/predictions/route.ts",
+      "expectedTestName": "financial-intelligence-predictions-api.test.ts"
+    },
+    {
+      "route": "/financial-intelligence/recommendations",
+      "category": "recommendations",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "financial-intelligence/recommendations/route.ts",
+      "expectedTestName": "financial-intelligence-recommendations-api.test.ts"
+    },
+    {
+      "route": "/freelancers",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "freelancers/route.ts",
+      "expectedTestName": "freelancers-api.test.ts"
+    },
+    {
+      "route": "/gallery/{id}",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "gallery/[id]/route.ts",
+      "expectedTestName": "gallery-{id}-api.test.ts"
+    },
+    {
+      "route": "/gallery/categories",
+      "category": "categories",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "gallery/categories/route.ts",
+      "expectedTestName": "gallery-categories-api.test.ts"
+    },
+    {
+      "route": "/gallery",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "gallery/route.ts",
+      "expectedTestName": "gallery-api.test.ts"
+    },
+    {
+      "route": "/guides/{id}",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "guides/[id]/route.ts",
+      "expectedTestName": "guides-{id}-api.test.ts"
+    },
+    {
+      "route": "/guides",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "guides/route.ts",
+      "expectedTestName": "guides-api.test.ts"
+    },
+    {
+      "route": "/guides/slug/{slug}",
+      "category": "slug",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "guides/slug/[slug]/route.ts",
+      "expectedTestName": "guides-slug-{slug}-api.test.ts"
+    },
+    {
+      "route": "/health",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "health/route.ts",
+      "expectedTestName": "health-api.test.ts"
+    },
+    {
+      "route": "/help/articles/{id}/feedback",
+      "category": "articles",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "help/articles/[id]/feedback/route.ts",
+      "expectedTestName": "help-articles-{id}-feedback-api.test.ts"
+    },
+    {
+      "route": "/help/articles/{id}",
+      "category": "articles",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "help/articles/[id]/route.ts",
+      "expectedTestName": "help-articles-{id}-api.test.ts"
+    },
+    {
+      "route": "/help/articles",
+      "category": "articles",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "help/articles/route.ts",
+      "expectedTestName": "help-articles-api.test.ts"
+    },
+    {
+      "route": "/help/categories",
+      "category": "categories",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "help/categories/route.ts",
+      "expectedTestName": "help-categories-api.test.ts"
+    },
+    {
+      "route": "/help/search",
+      "category": "search",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "help/search/route.ts",
+      "expectedTestName": "help-search-api.test.ts"
+    },
+    {
+      "route": "/help/tickets",
+      "category": "tickets",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "help/tickets/route.ts",
+      "expectedTestName": "help-tickets-api.test.ts"
+    },
+    {
+      "route": "/home/metrics",
+      "category": "metrics",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "home/metrics/route.ts",
+      "expectedTestName": "home-metrics-api.test.ts"
+    },
+    {
+      "route": "/home/testimonials",
+      "category": "testimonials",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "home/testimonials/route.ts",
+      "expectedTestName": "home-testimonials-api.test.ts"
+    },
+    {
+      "route": "/hr/attendance/clock-in",
+      "category": "attendance",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "hr/attendance/clock-in/route.ts",
+      "expectedTestName": "hr-attendance-clock-in-api.test.ts"
+    },
+    {
+      "route": "/hr/attendance/clock-out",
+      "category": "attendance",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "hr/attendance/clock-out/route.ts",
+      "expectedTestName": "hr-attendance-clock-out-api.test.ts"
+    },
+    {
+      "route": "/hr/attendance/records",
+      "category": "attendance",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "hr/attendance/records/route.ts",
+      "expectedTestName": "hr-attendance-records-api.test.ts"
+    },
+    {
+      "route": "/hr/attendance/stats",
+      "category": "attendance",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "hr/attendance/stats/route.ts",
+      "expectedTestName": "hr-attendance-stats-api.test.ts"
+    },
+    {
+      "route": "/hr/attendance/time-cards/{id}",
+      "category": "attendance",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "PATCH"
+      ],
+      "file": "hr/attendance/time-cards/[id]/route.ts",
+      "expectedTestName": "hr-attendance-time-cards-{id}-api.test.ts"
+    },
+    {
+      "route": "/hr/attendance/time-cards",
+      "category": "attendance",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/attendance/time-cards/route.ts",
+      "expectedTestName": "hr-attendance-time-cards-api.test.ts"
+    },
+    {
+      "route": "/hr/contractors/{id}",
+      "category": "contractors",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "hr/contractors/[id]/route.ts",
+      "expectedTestName": "hr-contractors-{id}-api.test.ts"
+    },
+    {
+      "route": "/hr/contractors",
+      "category": "contractors",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/contractors/route.ts",
+      "expectedTestName": "hr-contractors-api.test.ts"
+    },
+    {
+      "route": "/hr/leave/balances/{employeeId}",
+      "category": "leave",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "hr/leave/balances/[employeeId]/route.ts",
+      "expectedTestName": "hr-leave-balances-{employeeId}-api.test.ts"
+    },
+    {
+      "route": "/hr/leave/calendar",
+      "category": "leave",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "hr/leave/calendar/route.ts",
+      "expectedTestName": "hr-leave-calendar-api.test.ts"
+    },
+    {
+      "route": "/hr/leave/requests/{id}",
+      "category": "leave",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "PATCH"
+      ],
+      "file": "hr/leave/requests/[id]/route.ts",
+      "expectedTestName": "hr-leave-requests-{id}-api.test.ts"
+    },
+    {
+      "route": "/hr/leave/requests",
+      "category": "leave",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/leave/requests/route.ts",
+      "expectedTestName": "hr-leave-requests-api.test.ts"
+    },
+    {
+      "route": "/hr/leave/types",
+      "category": "leave",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/leave/types/route.ts",
+      "expectedTestName": "hr-leave-types-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll/benefits",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/payroll/benefits/route.ts",
+      "expectedTestName": "hr-payroll-benefits-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll/deductions",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/payroll/deductions/route.ts",
+      "expectedTestName": "hr-payroll-deductions-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll/employees/{id}/history",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "hr/payroll/employees/[id]/history/route.ts",
+      "expectedTestName": "hr-payroll-employees-{id}-history-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll/employees/{id}/paystub",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "hr/payroll/employees/[id]/paystub/route.ts",
+      "expectedTestName": "hr-payroll-employees-{id}-paystub-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll/export",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "hr/payroll/export/route.ts",
+      "expectedTestName": "hr-payroll-export-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/payroll/route.ts",
+      "expectedTestName": "hr-payroll-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll/runs/{id}/entries",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "hr/payroll/runs/[id]/entries/route.ts",
+      "expectedTestName": "hr-payroll-runs-{id}-entries-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll/runs/{id}",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/payroll/runs/[id]/route.ts",
+      "expectedTestName": "hr-payroll-runs-{id}-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll/runs",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/payroll/runs/route.ts",
+      "expectedTestName": "hr-payroll-runs-api.test.ts"
+    },
+    {
+      "route": "/hr/payroll/taxes",
+      "category": "payroll",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "hr/payroll/taxes/route.ts",
+      "expectedTestName": "hr-payroll-taxes-api.test.ts"
+    },
+    {
+      "route": "/incident-response/drills/{id}/complete",
+      "category": "drills",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "incident-response/drills/[id]/complete/route.ts",
+      "expectedTestName": "incident-response-drills-{id}-complete-api.test.ts"
+    },
+    {
+      "route": "/incident-response/drills",
+      "category": "drills",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "incident-response/drills/route.ts",
+      "expectedTestName": "incident-response-drills-api.test.ts"
+    },
+    {
+      "route": "/incident-response/incidents/{id}",
+      "category": "incidents",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "incident-response/incidents/[id]/route.ts",
+      "expectedTestName": "incident-response-incidents-{id}-api.test.ts"
+    },
+    {
+      "route": "/incident-response/incidents",
+      "category": "incidents",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "incident-response/incidents/route.ts",
+      "expectedTestName": "incident-response-incidents-api.test.ts"
+    },
+    {
+      "route": "/incident-response/metrics",
+      "category": "metrics",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "incident-response/metrics/route.ts",
+      "expectedTestName": "incident-response-metrics-api.test.ts"
+    },
+    {
+      "route": "/incident-response/runbooks",
+      "category": "runbooks",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "incident-response/runbooks/route.ts",
+      "expectedTestName": "incident-response-runbooks-api.test.ts"
+    },
+    {
+      "route": "/incident-response/team",
+      "category": "team",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "incident-response/team/route.ts",
+      "expectedTestName": "incident-response-team-api.test.ts"
+    },
+    {
+      "route": "/investor-portal/{portalId}",
+      "category": "{portalId}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "investor-portal/[portalId]/route.ts",
+      "expectedTestName": "investor-portal-{portalId}-api.test.ts"
+    },
+    {
+      "route": "/investor-portal",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "investor-portal/route.ts",
+      "expectedTestName": "investor-portal-api.test.ts"
+    },
+    {
+      "route": "/leads/{id}",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "leads/[id]/route.ts",
+      "expectedTestName": "leads-{id}-api.test.ts"
+    },
+    {
+      "route": "/leads/activities",
+      "category": "activities",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "leads/activities/route.ts",
+      "expectedTestName": "leads-activities-api.test.ts"
+    },
+    {
+      "route": "/leads/pipeline",
+      "category": "pipeline",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "leads/pipeline/route.ts",
+      "expectedTestName": "leads-pipeline-api.test.ts"
+    },
+    {
+      "route": "/leads",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "leads/route.ts",
+      "expectedTestName": "leads-api.test.ts"
+    },
+    {
+      "route": "/marketing/automation",
+      "category": "automation",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "marketing/automation/route.ts",
+      "expectedTestName": "marketing-automation-api.test.ts"
+    },
+    {
+      "route": "/monitoring/errors",
+      "category": "errors",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "monitoring/errors/route.ts",
+      "expectedTestName": "monitoring-errors-api.test.ts"
+    },
+    {
+      "route": "/monitoring/events",
+      "category": "events",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "monitoring/events/route.ts",
+      "expectedTestName": "monitoring-events-api.test.ts"
+    },
+    {
+      "route": "/monitoring/health",
+      "category": "health",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "monitoring/health/route.ts",
+      "expectedTestName": "monitoring-health-api.test.ts"
+    },
+    {
+      "route": "/monitoring/metrics",
+      "category": "metrics",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "monitoring/metrics/route.ts",
+      "expectedTestName": "monitoring-metrics-api.test.ts"
+    },
+    {
+      "route": "/monitoring/metrics/trends",
+      "category": "metrics",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "monitoring/metrics/trends/route.ts",
+      "expectedTestName": "monitoring-metrics-trends-api.test.ts"
+    },
+    {
+      "route": "/monitoring/snapshot-queries",
+      "category": "snapshot-queries",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "monitoring/snapshot-queries/route.ts",
+      "expectedTestName": "monitoring-snapshot-queries-api.test.ts"
+    },
+    {
+      "route": "/newsletter/subscribe",
+      "category": "subscribe",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "newsletter/subscribe/route.ts",
+      "expectedTestName": "newsletter-subscribe-api.test.ts"
+    },
+    {
+      "route": "/notifications/{id}/read",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "notifications/[id]/read/route.ts",
+      "expectedTestName": "notifications-{id}-read-api.test.ts"
+    },
+    {
+      "route": "/notifications/{id}",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST",
+        "DELETE"
+      ],
+      "file": "notifications/[id]/route.ts",
+      "expectedTestName": "notifications-{id}-api.test.ts"
+    },
+    {
+      "route": "/notifications/mark-all-read",
+      "category": "mark-all-read",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "notifications/mark-all-read/route.ts",
+      "expectedTestName": "notifications-mark-all-read-api.test.ts"
+    },
+    {
+      "route": "/notifications/preferences",
+      "category": "preferences",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "file": "notifications/preferences/route.ts",
+      "expectedTestName": "notifications-preferences-api.test.ts"
+    },
+    {
+      "route": "/onboarding",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "file": "onboarding/route.ts",
+      "expectedTestName": "onboarding-api.test.ts"
+    },
+    {
+      "route": "/onboarding/skip",
+      "category": "skip",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "onboarding/skip/route.ts",
+      "expectedTestName": "onboarding-skip-api.test.ts"
+    },
+    {
+      "route": "/onboarding/steps/{stepId}",
+      "category": "steps",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "file": "onboarding/steps/[stepId]/route.ts",
+      "expectedTestName": "onboarding-steps-{stepId}-api.test.ts"
+    },
+    {
+      "route": "/organizations/{id}/billing",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "organizations/[id]/billing/route.ts",
+      "expectedTestName": "organizations-{id}-billing-api.test.ts"
+    },
+    {
+      "route": "/organizations/{id}/invitations/{invitationId}",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "PATCH"
+      ],
+      "file": "organizations/[id]/invitations/[invitationId]/route.ts",
+      "expectedTestName": "organizations-{id}-invitations-{invitationId}-api.test.ts"
+    },
+    {
+      "route": "/organizations/{id}/invitations",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "organizations/[id]/invitations/route.ts",
+      "expectedTestName": "organizations-{id}-invitations-api.test.ts"
+    },
+    {
+      "route": "/organizations/{id}/members/{memberId}/role",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "organizations/[id]/members/[memberId]/role/route.ts",
+      "expectedTestName": "organizations-{id}-members-{memberId}-role-api.test.ts"
+    },
+    {
+      "route": "/organizations/{id}/members",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "organizations/[id]/members/route.ts",
+      "expectedTestName": "organizations-{id}-members-api.test.ts"
+    },
+    {
+      "route": "/organizations/{id}",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "organizations/[id]/route.ts",
+      "expectedTestName": "organizations-{id}-api.test.ts"
+    },
+    {
+      "route": "/organizations/{id}/settings",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "file": "organizations/[id]/settings/route.ts",
+      "expectedTestName": "organizations-{id}-settings-api.test.ts"
+    },
+    {
+      "route": "/organizations/{id}/switch",
+      "category": "{id}",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "organizations/[id]/switch/route.ts",
+      "expectedTestName": "organizations-{id}-switch-api.test.ts"
+    },
+    {
+      "route": "/organizations/invitations/accept",
+      "category": "invitations",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "organizations/invitations/accept/route.ts",
+      "expectedTestName": "organizations-invitations-accept-api.test.ts"
+    },
+    {
+      "route": "/organizations/invitations/decline",
+      "category": "invitations",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "organizations/invitations/decline/route.ts",
+      "expectedTestName": "organizations-invitations-decline-api.test.ts"
+    },
+    {
+      "route": "/organizations",
+      "category": "root",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "organizations/route.ts",
+      "expectedTestName": "organizations-api.test.ts"
+    },
+    {
+      "route": "/payment-methods/{id}",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "file": "payment-methods/[id]/route.ts",
+      "expectedTestName": "payment-methods-{id}-api.test.ts"
+    },
+    {
+      "route": "/payment-methods",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "payment-methods/route.ts",
+      "expectedTestName": "payment-methods-api.test.ts"
+    },
+    {
+      "route": "/platform/services",
+      "category": "services",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "platform/services/route.ts",
+      "expectedTestName": "platform-services-api.test.ts"
+    },
+    {
+      "route": "/real-estate/buyer/saved-properties",
+      "category": "buyer",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "file": "real-estate/buyer/saved-properties/route.ts",
+      "expectedTestName": "real-estate-buyer-saved-properties-api.test.ts"
+    },
+    {
+      "route": "/real-estate/buyer/stats",
+      "category": "buyer",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/buyer/stats/route.ts",
+      "expectedTestName": "real-estate-buyer-stats-api.test.ts"
+    },
+    {
+      "route": "/real-estate/investor/cash-flow",
+      "category": "investor",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/investor/cash-flow/route.ts",
+      "expectedTestName": "real-estate-investor-cash-flow-api.test.ts"
+    },
+    {
+      "route": "/real-estate/investor/maintenance",
+      "category": "investor",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/investor/maintenance/route.ts",
+      "expectedTestName": "real-estate-investor-maintenance-api.test.ts"
+    },
+    {
+      "route": "/real-estate/investor/tenants",
+      "category": "investor",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "real-estate/investor/tenants/route.ts",
+      "expectedTestName": "real-estate-investor-tenants-api.test.ts"
+    },
+    {
+      "route": "/real-estate/properties",
+      "category": "properties",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/properties/route.ts",
+      "expectedTestName": "real-estate-properties-api.test.ts"
+    },
+    {
+      "route": "/real-estate/realtor/leads",
+      "category": "realtor",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "real-estate/realtor/leads/route.ts",
+      "expectedTestName": "real-estate-realtor-leads-api.test.ts"
+    },
+    {
+      "route": "/real-estate/realtor/listings",
+      "category": "realtor",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "real-estate/realtor/listings/route.ts",
+      "expectedTestName": "real-estate-realtor-listings-api.test.ts"
+    },
+    {
+      "route": "/real-estate/realtor/stats",
+      "category": "realtor",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "real-estate/realtor/stats/route.ts",
+      "expectedTestName": "real-estate-realtor-stats-api.test.ts"
+    },
+    {
+      "route": "/search/content/popular",
+      "category": "content",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "search/content/popular/route.ts",
+      "expectedTestName": "search-content-popular-api.test.ts"
+    },
+    {
+      "route": "/search/content",
+      "category": "content",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "search/content/route.ts",
+      "expectedTestName": "search-content-api.test.ts"
+    },
+    {
+      "route": "/search",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "search/route.ts",
+      "expectedTestName": "search-api.test.ts"
+    },
+    {
+      "route": "/security/audit-logs",
+      "category": "audit-logs",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "security/audit-logs/route.ts",
+      "expectedTestName": "security-audit-logs-api.test.ts"
+    },
+    {
+      "route": "/security/audit-statistics",
+      "category": "audit-statistics",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "security/audit-statistics/route.ts",
+      "expectedTestName": "security-audit-statistics-api.test.ts"
+    },
+    {
+      "route": "/security/events",
+      "category": "events",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "security/events/route.ts",
+      "expectedTestName": "security-events-api.test.ts"
+    },
+    {
+      "route": "/security/mfa",
+      "category": "mfa",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "security/mfa/route.ts",
+      "expectedTestName": "security-mfa-api.test.ts"
+    },
+    {
+      "route": "/security/mfa/setup",
+      "category": "mfa",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "security/mfa/setup/route.ts",
+      "expectedTestName": "security-mfa-setup-api.test.ts"
+    },
+    {
+      "route": "/security/mfa/verify",
+      "category": "mfa",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "security/mfa/verify/route.ts",
+      "expectedTestName": "security-mfa-verify-api.test.ts"
+    },
+    {
+      "route": "/security/overview",
+      "category": "overview",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "security/overview/route.ts",
+      "expectedTestName": "security-overview-api.test.ts"
+    },
+    {
+      "route": "/settings/billing/history",
+      "category": "billing",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "settings/billing/history/route.ts",
+      "expectedTestName": "settings-billing-history-api.test.ts"
+    },
+    {
+      "route": "/settings/billing/payment-methods",
+      "category": "billing",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "settings/billing/payment-methods/route.ts",
+      "expectedTestName": "settings-billing-payment-methods-api.test.ts"
+    },
+    {
+      "route": "/settings/billing/plans",
+      "category": "billing",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "settings/billing/plans/route.ts",
+      "expectedTestName": "settings-billing-plans-api.test.ts"
+    },
+    {
+      "route": "/settings/billing/subscription",
+      "category": "billing",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "settings/billing/subscription/route.ts",
+      "expectedTestName": "settings-billing-subscription-api.test.ts"
+    },
+    {
+      "route": "/settings/preferences/notifications",
+      "category": "preferences",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "file": "settings/preferences/notifications/route.ts",
+      "expectedTestName": "settings-preferences-notifications-api.test.ts"
+    },
+    {
+      "route": "/settings/preferences/privacy",
+      "category": "preferences",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "file": "settings/preferences/privacy/route.ts",
+      "expectedTestName": "settings-preferences-privacy-api.test.ts"
+    },
+    {
+      "route": "/settings/preferences",
+      "category": "preferences",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "file": "settings/preferences/route.ts",
+      "expectedTestName": "settings-preferences-api.test.ts"
+    },
+    {
+      "route": "/settings/security/api-keys/{id}/regenerate",
+      "category": "security",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "settings/security/api-keys/[id]/regenerate/route.ts",
+      "expectedTestName": "settings-security-api-keys-{id}-regenerate-api.test.ts"
+    },
+    {
+      "route": "/settings/security/api-keys/{id}",
+      "category": "security",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "PUT",
+        "DELETE"
+      ],
+      "file": "settings/security/api-keys/[id]/route.ts",
+      "expectedTestName": "settings-security-api-keys-{id}-api.test.ts"
+    },
+    {
+      "route": "/settings/security/api-keys",
+      "category": "security",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "settings/security/api-keys/route.ts",
+      "expectedTestName": "settings-security-api-keys-api.test.ts"
+    },
+    {
+      "route": "/settings/security/sessions",
+      "category": "security",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "file": "settings/security/sessions/route.ts",
+      "expectedTestName": "settings-security-sessions-api.test.ts"
+    },
+    {
+      "route": "/settings/white-label",
+      "category": "white-label",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "file": "settings/white-label/route.ts",
+      "expectedTestName": "settings-white-label-api.test.ts"
+    },
+    {
+      "route": "/support/category/{slug}",
+      "category": "category",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "support/category/[slug]/route.ts",
+      "expectedTestName": "support-category-{slug}-api.test.ts"
+    },
+    {
+      "route": "/support/public",
+      "category": "public",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "support/public/route.ts",
+      "expectedTestName": "support-public-api.test.ts"
+    },
+    {
+      "route": "/support/search",
+      "category": "search",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "support/search/route.ts",
+      "expectedTestName": "support-search-api.test.ts"
+    },
+    {
+      "route": "/tax/deductions/{id}",
+      "category": "deductions",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "tax/deductions/[id]/route.ts",
+      "expectedTestName": "tax-deductions-{id}-api.test.ts"
+    },
+    {
+      "route": "/tax/deductions",
+      "category": "deductions",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "tax/deductions/route.ts",
+      "expectedTestName": "tax-deductions-api.test.ts"
+    },
+    {
+      "route": "/tax/direct-file/exports/{id}",
+      "category": "direct-file",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "DELETE"
+      ],
+      "file": "tax/direct-file/exports/[id]/route.ts",
+      "expectedTestName": "tax-direct-file-exports-{id}-api.test.ts"
+    },
+    {
+      "route": "/tax/direct-file/exports",
+      "category": "direct-file",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "tax/direct-file/exports/route.ts",
+      "expectedTestName": "tax-direct-file-exports-api.test.ts"
+    },
+    {
+      "route": "/tax/documents/{id}",
+      "category": "documents",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "DELETE"
+      ],
+      "file": "tax/documents/[id]/route.ts",
+      "expectedTestName": "tax-documents-{id}-api.test.ts"
+    },
+    {
+      "route": "/tax/documents",
+      "category": "documents",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "tax/documents/route.ts",
+      "expectedTestName": "tax-documents-api.test.ts"
+    },
+    {
+      "route": "/tax/obligations/{id}/payment",
+      "category": "obligations",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "tax/obligations/[id]/payment/route.ts",
+      "expectedTestName": "tax-obligations-{id}-payment-api.test.ts"
+    },
+    {
+      "route": "/tax/obligations/{id}",
+      "category": "obligations",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "file": "tax/obligations/[id]/route.ts",
+      "expectedTestName": "tax-obligations-{id}-api.test.ts"
+    },
+    {
+      "route": "/tax/obligations",
+      "category": "obligations",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "tax/obligations/route.ts",
+      "expectedTestName": "tax-obligations-api.test.ts"
+    },
+    {
+      "route": "/test",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "test/route.ts",
+      "expectedTestName": "test-api.test.ts"
+    },
+    {
+      "route": "/test-db",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "test-db/route.ts",
+      "expectedTestName": "test-db-api.test.ts"
+    },
+    {
+      "route": "/test-invoice-service",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "test-invoice-service/route.ts",
+      "expectedTestName": "test-invoice-service-api.test.ts"
+    },
+    {
+      "route": "/test-minimal-final",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "test-minimal-final/route.ts",
+      "expectedTestName": "test-minimal-final-api.test.ts"
+    },
+    {
+      "route": "/time-entries/{id}/stop",
+      "category": "{id}",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "time-entries/[id]/stop/route.ts",
+      "expectedTestName": "time-entries-{id}-stop-api.test.ts"
+    },
+    {
+      "route": "/time-entries",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "time-entries/route.ts",
+      "expectedTestName": "time-entries-api.test.ts"
+    },
+    {
+      "route": "/training/paths",
+      "category": "paths",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "training/paths/route.ts",
+      "expectedTestName": "training-paths-api.test.ts"
+    },
+    {
+      "route": "/training/paths-with-progress",
+      "category": "paths-with-progress",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "training/paths-with-progress/route.ts",
+      "expectedTestName": "training-paths-with-progress-api.test.ts"
+    },
+    {
+      "route": "/training/programs/{id}",
+      "category": "programs",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "training/programs/[id]/route.ts",
+      "expectedTestName": "training-programs-{id}-api.test.ts"
+    },
+    {
+      "route": "/training/programs",
+      "category": "programs",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "training/programs/route.ts",
+      "expectedTestName": "training-programs-api.test.ts"
+    },
+    {
+      "route": "/training/programs-with-progress",
+      "category": "programs-with-progress",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "training/programs-with-progress/route.ts",
+      "expectedTestName": "training-programs-with-progress-api.test.ts"
+    },
+    {
+      "route": "/training/progress",
+      "category": "progress",
+      "categoryGroup": "ai",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "training/progress/route.ts",
+      "expectedTestName": "training-progress-api.test.ts"
+    },
+    {
+      "route": "/uploadthing",
+      "category": "root",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [],
+      "file": "uploadthing/route.ts",
+      "expectedTestName": "uploadthing-api.test.ts"
+    },
+    {
+      "route": "/v1/health",
+      "category": "health",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET"
+      ],
+      "file": "v1/health/route.ts",
+      "expectedTestName": "v1-health-api.test.ts"
+    },
+    {
+      "route": "/video-conferencing/meetings/{meetingId}/breakout-rooms",
+      "category": "meetings",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "video-conferencing/meetings/[meetingId]/breakout-rooms/route.ts",
+      "expectedTestName": "video-conferencing-meetings-{meetingId}-breakout-rooms-api.test.ts"
+    },
+    {
+      "route": "/video-conferencing/meetings/{meetingId}/polls",
+      "category": "meetings",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "video-conferencing/meetings/[meetingId]/polls/route.ts",
+      "expectedTestName": "video-conferencing-meetings-{meetingId}-polls-api.test.ts"
+    },
+    {
+      "route": "/video-conferencing/meetings/{meetingId}/screen-share",
+      "category": "meetings",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "file": "video-conferencing/meetings/[meetingId]/screen-share/route.ts",
+      "expectedTestName": "video-conferencing-meetings-{meetingId}-screen-share-api.test.ts"
+    },
+    {
+      "route": "/video-conferencing/meetings",
+      "category": "meetings",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "file": "video-conferencing/meetings/route.ts",
+      "expectedTestName": "video-conferencing-meetings-api.test.ts"
+    },
+    {
+      "route": "/video-conferencing/oauth/callback",
+      "category": "oauth",
+      "categoryGroup": "other",
+      "priority": "low",
+      "methods": [
+        "POST"
+      ],
+      "file": "video-conferencing/oauth/callback/route.ts",
+      "expectedTestName": "video-conferencing-oauth-callback-api.test.ts"
+    },
+    {
+      "route": "/video-conferencing/settings",
+      "category": "settings",
+      "categoryGroup": "admin",
+      "priority": "low",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "file": "video-conferencing/settings/route.ts",
+      "expectedTestName": "video-conferencing-settings-api.test.ts"
+    }
+  ],
+  "testedRoutes": [
+    {
+      "route": "/accounts/balances",
+      "category": "balances",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/accounts/reconcile",
+      "category": "reconcile",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/accounts/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/admin/feature-flags/{key}",
+      "category": "feature-flags",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "testFile": "__tests__/api/feature-flags-api.test.ts"
+    },
+    {
+      "route": "/admin/feature-flags",
+      "category": "feature-flags",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/feature-flags-api.test.ts"
+    },
+    {
+      "route": "/admin/support/analytics",
+      "category": "support",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/admin/support/tickets/{id}/assign",
+      "category": "support",
+      "methods": [
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/admin/support/tickets/{id}/messages",
+      "category": "support",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/admin/support/tickets/{id}",
+      "category": "support",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/admin/support/tickets",
+      "category": "support",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/admin/users/{id}/permissions",
+      "category": "users",
+      "methods": [
+        "PUT"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/admin/users",
+      "category": "users",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/analytics/clients",
+      "category": "clients",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/analytics/expenses",
+      "category": "expenses",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/analytics/revenue",
+      "category": "revenue",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/analytics/upload",
+      "category": "upload",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/approval-workflows",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH"
+      ],
+      "testFile": "__tests__/api/approval-workflows-api.test.ts"
+    },
+    {
+      "route": "/auth/admin-status",
+      "category": "admin-status",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/auth-admin-status.test.ts"
+    },
+    {
+      "route": "/auth/me",
+      "category": "me",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/auth/sync-user",
+      "category": "sync-user",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/auth-sync-user.test.ts"
+    },
+    {
+      "route": "/auth/user",
+      "category": "user",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/auth/validate-token",
+      "category": "validate-token",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/auth-validate-token.test.ts"
+    },
+    {
+      "route": "/bills/attention",
+      "category": "attention",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/bills/process",
+      "category": "process",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/bills",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/bills-api.test.ts"
+    },
+    {
+      "route": "/blog/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/budgets/alerts",
+      "category": "alerts",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/budgets",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/budgets-api.test.ts"
+    },
+    {
+      "route": "/budgets/summary",
+      "category": "summary",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/campaigns/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/clients",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/clients-api.test.ts"
+    },
+    {
+      "route": "/clients/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/customers/analytics",
+      "category": "analytics",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/dashboard/export",
+      "category": "export",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/developer/endpoints",
+      "category": "endpoints",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/employees/analytics",
+      "category": "analytics",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/expenses/analytics",
+      "category": "analytics",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/expenses/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/feature-flags",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/feature-flags-api.test.ts"
+    },
+    {
+      "route": "/freelancers/dashboard",
+      "category": "dashboard",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/home/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/integrations/connections/{id}/health",
+      "category": "connections",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/integrations/connections/{id}",
+      "category": "connections",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/integrations/connections/{id}/sync",
+      "category": "connections",
+      "methods": [
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/integrations/connections/{id}/syncs",
+      "category": "connections",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/integrations/connections/{id}/test",
+      "category": "connections",
+      "methods": [
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/integrations/connections",
+      "category": "connections",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/integrations",
+      "category": "root",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/integrations-api.test.ts"
+    },
+    {
+      "route": "/integrations/webhooks",
+      "category": "webhooks",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/invoices",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/invoices-api.test.ts"
+    },
+    {
+      "route": "/leads/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/marketing/analytics",
+      "category": "analytics",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/marketplace/revenue",
+      "category": "revenue",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/marketplace/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/monitoring/alerts",
+      "category": "alerts",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/monitoring/alerts/rules/{id}",
+      "category": "alerts",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/monitoring/alerts/rules",
+      "category": "alerts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/monitoring/alerts/summary",
+      "category": "alerts",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/monitoring/rate-limits",
+      "category": "rate-limits",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/rate-limits-api.test.ts"
+    },
+    {
+      "route": "/notifications",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/notifications-api.test.ts"
+    },
+    {
+      "route": "/orders/alerts",
+      "category": "alerts",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/orders/analytics",
+      "category": "analytics",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/payments",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/payments-api.test.ts"
+    },
+    {
+      "route": "/payments/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/platform/hub/connections/{id}",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/platform/hub/connections/{id}/sync",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/platform/hub/connections",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/platform/hub/integrations",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/platform/hub",
+      "category": "hub",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/products/analytics",
+      "category": "analytics",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/projects/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/real-estate/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/reconciliation/dashboard",
+      "category": "dashboard",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/settings/notifications",
+      "category": "notifications",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/tax/export",
+      "category": "export",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/tax/summary",
+      "category": "summary",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/time-entries/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/training/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/transactions",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/transactions-api.test.ts"
+    },
+    {
+      "route": "/transactions/stats",
+      "category": "stats",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/vendors",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/vendors-api.test.ts"
+    },
+    {
+      "route": "/video-conferencing/integrations",
+      "category": "integrations",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/webhooks/clerk",
+      "category": "clerk",
+      "methods": [
+        "POST"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/webhooks",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/webhooks-api.test.ts"
+    },
+    {
+      "route": "/workflows/actions",
+      "category": "actions",
+      "methods": [
+        "GET"
+      ],
+      "testFile": "__tests__/api/_template.test.ts"
+    },
+    {
+      "route": "/workflows",
+      "category": "root",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "testFile": "__tests__/api/workflows-api.test.ts"
+    }
+  ]
+}

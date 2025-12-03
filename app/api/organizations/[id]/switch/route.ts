@@ -25,7 +25,7 @@ export async function POST(
 	request: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
-	return withRLS(async (clerkId, clerkUser, req) => {
+	return withRLS<{ success: boolean; data: unknown; message: string }>(async (clerkId, clerkUser, req) => {
 		try {
 			const userId = await getCurrentUserId();
 			if (!userId) {

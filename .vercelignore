@@ -1,0 +1,53 @@
+# Exclude large directories that aren't needed for Next.js build
+lib/irs-direct-file/direct-file/**
+lib/irs-direct-file/fact-graph-scala/**
+lib/irs-direct-file/df-client/df-client-app/node_modules/**
+lib/irs-direct-file/df-client/df-client-app/dist/**
+lib/irs-direct-file/df-client/df-static-site/node_modules/**
+lib/irs-direct-file/df-client/df-static-site/dist/**
+
+# Exclude test files and directories
+**/__tests__/**
+**/test/**
+**/tests/**
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Exclude build artifacts
+**/dist/**
+**/build/**
+**/coverage/**
+**/target/**
+**/*.tsbuildinfo
+
+# Exclude documentation
+docs/**
+
+# Exclude scripts that aren't needed for build
+scripts/performance-tests/**
+scripts/audit-test-coverage.js
+scripts/analyze-test-coverage.sh
+scripts/check-coverage-thresholds.js
+scripts/generate-coverage-summary.js
+scripts/generate-weekly-coverage-report.js
+
+# Exclude Terraform configs
+terraform/**
+
+# Exclude Docker files
+Dockerfile*
+docker-compose*.yml
+docker-compose*.yaml
+
+# Exclude CI/CD configs
+.github/workflows/**
+.gitlab-ci.yml
+.circleci/**
+
+# Exclude development tools
+.vscode/**
+.idea/**
+*.log
+

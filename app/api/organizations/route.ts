@@ -22,7 +22,7 @@ import { logger } from '@/lib/logger';
  * List all organizations the current user belongs to
  */
 export async function GET(request: NextRequest) {
-	return withRLS(async (clerkId, clerkUser, req) => {
+	return withRLS<{ success: boolean; data: unknown[] } | { error: string }>(async (clerkId, clerkUser, req) => {
 		try {
 			const userId = await getCurrentUserId();
 			if (!userId) {
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
  * Create a new organization
  */
 export async function POST(request: NextRequest) {
-	return withRLS(async (clerkId, clerkUser, req) => {
+	return withRLS<{ success: boolean; data: unknown } | { error: string }>(async (clerkId, clerkUser, req) => {
 		try {
 			const userId = await getCurrentUserId();
 			if (!userId) {

@@ -16,7 +16,7 @@ import { createInvoiceSchema } from '@/lib/validation-schemas';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { eq, count } from 'drizzle-orm';
 import { withRLS } from '@/lib/api/with-rls';
-import { createSuccessResponse } from '@/lib/api/standard-response';
+import { createSuccessResponse, type StandardApiResponse } from '@/lib/api/standard-response';
 
 /**
  * @swagger
@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
   const requestId = generateRequestId();
   // Using withRLS wrapper automatically sets RLS context
   // RLS policies will ensure users can only see their own invoices
-  return withRLS(async (clerkUserId) => {
+  return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
     try {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -208,7 +208,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId();
   // Using withRLS wrapper automatically sets RLS context
-  return withRLS(async (clerkUserId) => {
+  return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
     try {
       let body;
       try {

@@ -13,7 +13,7 @@ import { directFileExports } from "@/lib/db/schemas/direct-file.schema";
 import { eq, and } from "drizzle-orm";
 import { ApiErrorHandler, generateRequestId } from "@/lib/api-error-handler";
 import { withRLS } from "@/lib/api/with-rls";
-import { createSuccessResponse } from "@/lib/api/standard-response";
+import { createSuccessResponse, type StandardApiResponse } from "@/lib/api/standard-response";
 
 /**
  * DELETE /api/tax/direct-file/exports/[id]
@@ -24,7 +24,7 @@ export async function DELETE(
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		try {
 			const { id } = await params;
 

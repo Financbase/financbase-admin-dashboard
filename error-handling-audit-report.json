@@ -1,0 +1,3641 @@
+{
+  "generatedAt": "2025-11-29T11:07:40.754Z",
+  "summary": {
+    "total": 407,
+    "usingApiErrorHandler": 406,
+    "needsUpdate": 1,
+    "withTryCatch": 406,
+    "withManualHandling": 0
+  },
+  "routes": [
+    {
+      "path": "/app/api/accounts/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/accounts/balances/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/accounts/reconcile/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/accounts/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/accounts/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/careers/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/careers/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/feature-flags/[key]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/feature-flags/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/seed-dashboard/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/subscription-rbac-mappings/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/support/analytics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/support/tickets/[id]/assign/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/support/tickets/[id]/messages/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/support/tickets/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/support/tickets/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/users/[id]/permissions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/admin/users/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/ai/analyze/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/ai/categorize/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/ai/chat/conversations/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/ai/chat/conversations/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/ai/chat/messages/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/ai/chat/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/ai/chat/suggestions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/ai/financbase-gpt/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/ai/financial-analysis/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/analytics/clients/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/analytics/expenses/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/analytics/performance/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/analytics/revenue/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/analytics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/analytics/upload/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/approval-workflows/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/auth/admin-status/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/auth/me/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/auth/sync-user/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/auth/user/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/auth/validate-token/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error",
+        "Manual status codes"
+      ]
+    },
+    {
+      "path": "/app/api/bills/attention/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/bills/process/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/bills/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/blog/[id]/like/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/blog/[id]/publish/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/blog/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/blog/categories/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/blog/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/blog/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/budgets/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error",
+        "Manual status codes"
+      ]
+    },
+    {
+      "path": "/app/api/budgets/alerts/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/budgets/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/budgets/summary/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/byok/api-keys/[keyId]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/byok/api-keys/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/byok/preferences/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/byok/providers/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/byok/usage/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/campaigns/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/campaigns/performance/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/campaigns/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/campaigns/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/careers/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/careers/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/chat/channels/[id]/messages/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/chat/channels/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/chat/channels/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/chat/messages/[id]/read/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/chat/messages/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/clients/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/clients/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/clients/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/ai-governance/bias-checks/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/ai-governance/bias-checks/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/ai-governance/decisions/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/ai-governance/decisions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/baa/vendors/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/data-classification/bulk/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/data-classification/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/dora/incidents/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/dora/incidents/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/dora/resilience-tests/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/dora/resilience-tests/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/dora/third-party-risks/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/dora/third-party-risks/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/gdpr/data-subject-requests/[id]/fulfill/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/gdpr/data-subject-requests/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/gdpr/data-subject-requests/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/incident-response/communication-templates/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/incident-response/drills/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/incident-response/drills/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/incident-response/incidents/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/incident-response/incidents/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/incident-response/runbooks/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/incident-response/team/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/monitoring/alerts/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/monitoring/alerts/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/monitoring/alerts/rules/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/monitoring/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/monitoring/siem/events/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/monitoring/siem/integrations/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/policies/[id]/assignments/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/policies/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/policies/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/reports/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/reports/dashboard/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/reports/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/risk-assessment/assets/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/risk-assessment/risks/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/training/assignments/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/compliance/training/programs/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/contact/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/cron/subscription-grace-period/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/customers/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/customers/analytics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/customers/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/customers/segments/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/dashboard/ai-insights/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/dashboard/chart-data/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/dashboard/executive-metrics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/dashboard/export/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/dashboard/overview/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/dashboard/recent-activity/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/dashboard/top-products/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/dashboards/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/dashboards/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/dashboards/widgets/templates/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/developer/api-keys/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/developer/endpoints/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/developer/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/direct-file/[...path]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/direct-file/state-api/[...path]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/docs/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/email/send-invoice/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/employees/[id]/attendance/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/employees/[id]/leave/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/employees/[id]/payroll/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/employees/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/employees/analytics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/employees/departments/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/employees/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/expenses/[id]/approve/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/expenses/[id]/reject/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/expenses/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/expenses/analytics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/expenses/categories/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/expenses/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/expenses/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/feature-flags/[key]/disable/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/feature-flags/[key]/enable/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/feature-flags/[key]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/feature-flags/check/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/feature-flags/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/financial-intelligence/health/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/financial-intelligence/insights/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/financial-intelligence/predictions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/financial-intelligence/recommendations/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/freelancers/dashboard/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/freelancers/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/gallery/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/gallery/categories/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/gallery/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/guides/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/guides/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/guides/slug/[slug]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/health/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/help/articles/[id]/feedback/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/help/articles/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/help/articles/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/help/categories/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/help/search/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/help/tickets/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/home/metrics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/home/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/home/testimonials/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/attendance/clock-in/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/attendance/clock-out/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/attendance/records/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/attendance/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/attendance/time-cards/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/attendance/time-cards/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/contractors/[id]/performance/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/contractors/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/contractors/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/leave/balances/[employeeId]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/leave/calendar/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/leave/requests/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/leave/requests/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/leave/types/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/benefits/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/deductions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/employees/[id]/history/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/employees/[id]/paystub/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/export/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/runs/[id]/entries/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/runs/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/runs/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/hr/payroll/taxes/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/incident-response/drills/[id]/complete/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/incident-response/drills/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/incident-response/incidents/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/incident-response/incidents/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/incident-response/metrics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/incident-response/runbooks/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/incident-response/team/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/connections/[id]/health/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/connections/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/connections/[id]/sync/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/connections/[id]/syncs/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/connections/[id]/test/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/connections/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/oauth/[service]/authorize/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/integrations/oauth/[service]/callback/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/integrations/oauth/[service]/refresh/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/providers/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/integrations/webhooks/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/investor-portal/[portalId]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/investor-portal/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/invoices/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/leads/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/leads/activities/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/leads/pipeline/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/leads/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/leads/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketing/analytics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketing/automation/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/[id]/approve/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/[id]/install/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/[id]/reject/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/[id]/uninstall/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/installed/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/my-plugins/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/pending/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/plugins/submit/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/revenue/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/marketplace/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/alerts/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/alerts/rules/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/alerts/rules/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/alerts/summary/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/errors/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/events/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/health/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/metrics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/metrics/trends/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/rate-limits/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/monitoring/snapshot-queries/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/newsletter/subscribe/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/notifications/[id]/read/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/notifications/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/notifications/mark-all-read/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/notifications/preferences/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/notifications/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/onboarding/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/onboarding/skip/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/onboarding/steps/[stepId]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/orders/[id]/fulfill/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/orders/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/orders/alerts/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/orders/analytics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/orders/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/[id]/billing/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/[id]/invitations/[invitationId]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/[id]/invitations/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/[id]/members/[memberId]/role/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/[id]/members/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/[id]/settings/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/[id]/switch/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/invitations/accept/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/invitations/decline/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/organizations/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/payment-methods/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/payment-methods/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/payments/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/payments/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/performance/database-size/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/performance/health/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/performance/slow-queries/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/platform/hub/connections/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/platform/hub/connections/[id]/sync/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/platform/hub/connections/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/platform/hub/integrations/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/platform/hub/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/platform/services/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/products/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/products/[id]/stock/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/products/analytics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/products/categories/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/products/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/projects/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/projects/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/projects/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/buyer/saved-properties/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/buyer/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/investor/cash-flow/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/investor/expenses/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/investor/maintenance/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/investor/tenants/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/properties/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/realtor/leads/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/realtor/listings/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/realtor/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/real-estate/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/reconciliation/dashboard/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/reconciliation/match/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/reconciliation/rules/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/reconciliation/sessions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/reconciliation/statement-transactions/[sessionId]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/reports/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/reports/[id]/run/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/reports/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/reports/templates/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/search/content/popular/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/search/content/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/search/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/security/audit-logs/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/security/audit-statistics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/security/events/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/security/mfa/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/security/mfa/setup/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/security/mfa/verify/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/security/overview/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/billing/history/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/billing/payment-methods/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/billing/plans/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/billing/subscription/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/notifications/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/preferences/notifications/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/preferences/privacy/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/preferences/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/security/api-keys/[id]/regenerate/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/security/api-keys/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/security/api-keys/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/security/sessions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/settings/white-label/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/support/category/[slug]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/support/public/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/support/search/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/tax/deductions/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/deductions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/direct-file/exports/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/direct-file/exports/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/documents/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/documents/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/export/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/obligations/[id]/payment/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/obligations/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/obligations/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/tax/summary/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/test/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/test-dashboard/ai-insights/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/test-dashboard/overview/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/test-dashboard/recent-activity/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/test-dashboard-activity/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/test-dashboard-insights/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/test-dashboard-overview/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/test-db/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/test-invoice-service/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/test-minimal-final/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/time-entries/[id]/stop/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/time-entries/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/time-entries/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/training/paths/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/training/paths-with-progress/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/training/programs/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/training/programs/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/training/programs-with-progress/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/training/progress/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/training/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/transactions/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/transactions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/transactions/stats/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/unified-dashboard/metrics/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/unified-dashboard/widgets/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/uploadthing/route.ts",
+      "usesApiErrorHandler": false,
+      "hasTryCatch": false,
+      "hasManualErrorHandling": false,
+      "errorPatterns": []
+    },
+    {
+      "path": "/app/api/v1/health/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/vendors/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/video-conferencing/integrations/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/video-conferencing/meetings/[meetingId]/breakout-rooms/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/video-conferencing/meetings/[meetingId]/polls/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/video-conferencing/meetings/[meetingId]/screen-share/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/video-conferencing/meetings/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/video-conferencing/oauth/callback/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/video-conferencing/settings/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/webhooks/[id]/deliveries/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/webhooks/[id]/retry/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/webhooks/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/webhooks/[id]/test/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/webhooks/clerk/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error",
+        "Manual status codes"
+      ]
+    },
+    {
+      "path": "/app/api/webhooks/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/[id]/duplicate/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/[id]/execute/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/[id]/executions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/[id]/logs/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/[id]/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/[id]/test/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error",
+        "Manual status codes"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/actions/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/executions/[id]/rerun/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/templates/[id]/instantiate/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/templates/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error",
+        "Manual status codes"
+      ]
+    },
+    {
+      "path": "/app/api/workflows/triggers/route.ts",
+      "usesApiErrorHandler": true,
+      "hasTryCatch": true,
+      "hasManualErrorHandling": false,
+      "errorPatterns": [
+        "NextResponse.json with error"
+      ]
+    }
+  ],
+  "routesNeedingUpdate": [
+    {
+      "path": "/app/api/uploadthing/route.ts",
+      "errorPatterns": [],
+      "hasTryCatch": false
+    }
+  ]
+}

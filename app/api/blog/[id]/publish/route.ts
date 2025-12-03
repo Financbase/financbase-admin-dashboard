@@ -14,7 +14,7 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { withRLS } from '@/lib/api/with-rls';
 import { checkAdminStatus } from '@/lib/auth/check-admin-status';
 import * as blogService from '@/lib/services/blog/blog-service';
-import { createSuccessResponse } from '@/lib/api/standard-response';
+import { createSuccessResponse, type StandardApiResponse } from '@/lib/api/standard-response';
 
 /**
  * POST /api/blog/[id]/publish
@@ -25,7 +25,7 @@ export async function POST(
 	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const requestId = generateRequestId();
-	return withRLS(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
 		// Check if user is admin
 		const isAdmin = await checkAdminStatus();
 		if (!isAdmin) {
