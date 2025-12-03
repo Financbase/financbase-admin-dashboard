@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     `;
 
     // Get snapshot stats
-    const stats = await sql`
+    const statsResult = await sql`
       SELECT 
         COUNT(*) as total_snapshots,
         MAX(captured_at) as latest_snapshot,
@@ -59,10 +59,17 @@ export async function POST(request: NextRequest) {
       WHERE captured_at > now() - interval '1 day'
     `;
 
+    const statsArray = Array.isArray(statsResult) ? statsResult : [];
+    const stats = statsArray.length > 0 ? statsArray[0] : null;
+
     return NextResponse.json({
       success: true,
       message: 'Query snapshot captured successfully',
-      stats: stats[0],
+      stats: stats || {
+        total_snapshots: 0,
+        latest_snapshot: null,
+        unique_queries: 0,
+      },
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -83,7 +90,7 @@ export async function GET(request: NextRequest) {
 
     const sql = getRawSqlConnection();
 
-    const stats = await sql`
+    const statsResult = await sql`
       SELECT 
         DATE(captured_at) as date,
         COUNT(*) as snapshot_count,
@@ -96,7 +103,7 @@ export async function GET(request: NextRequest) {
       ORDER BY date DESC
     `;
 
-    const recentQueries = await sql`
+    const recentQueriesResult = await sql`
       SELECT 
         query,
         calls,
@@ -107,6 +114,9 @@ export async function GET(request: NextRequest) {
       ORDER BY mean_exec_ms DESC
       LIMIT 10
     `;
+
+    const stats = Array.isArray(statsResult) ? statsResult : [];
+    const recentQueries = Array.isArray(recentQueriesResult) ? recentQueriesResult : [];
 
     return NextResponse.json({
       success: true,
