@@ -26,7 +26,7 @@ export const trainingTypeEnum = pgEnum('training_type', [
 ]);
 
 // Training Status Enum
-export const trainingStatusEnum = pgEnum('training_status', [
+export const complianceTrainingStatusEnum = pgEnum('training_status', [
   'not_started',
   'in_progress',
   'completed',
@@ -91,7 +91,7 @@ export const trainingAssignments = pgTable('financbase_training_assignments', {
   deadline: timestamp('deadline', { withTimezone: true }),
   
   // Progress
-  status: trainingStatusEnum('status').default('not_started').notNull(),
+  status: complianceTrainingStatusEnum('status').default('not_started').notNull(),
   startedAt: timestamp('started_at', { withTimezone: true }),
   completedAt: timestamp('completed_at', { withTimezone: true }),
   expiresAt: timestamp('expires_at', { withTimezone: true }),

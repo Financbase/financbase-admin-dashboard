@@ -168,7 +168,7 @@ export const siemIntegrations = pgTable('financbase_siem_integrations', {
 });
 
 // Real-time Alert Rules Table
-export const alertRules = pgTable('financbase_alert_rules', {
+export const siemAlertRules = pgTable('financbase_alert_rules', {
   id: serial('id').primaryKey(),
   organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
   createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
@@ -212,7 +212,7 @@ export const alertRules = pgTable('financbase_alert_rules', {
 export const realTimeAlerts = pgTable('financbase_real_time_alerts', {
   id: serial('id').primaryKey(),
   organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
-  alertRuleId: integer('alert_rule_id').references(() => alertRules.id, { onDelete: 'set null' }),
+  alertRuleId: integer('alert_rule_id').references(() => siemAlertRules.id, { onDelete: 'set null' }),
   
   // Alert details
   alertId: text('alert_id').notNull().unique(),
@@ -319,9 +319,9 @@ export const siemIntegrationsRelations = relations(siemIntegrations, ({ one }) =
   }),
 }));
 
-export const alertRulesRelations = relations(alertRules, ({ one, many }) => ({
+export const siemAlertRulesRelations = relations(siemAlertRules, ({ one, many }) => ({
   organization: one(organizations, {
-    fields: [alertRules.organizationId],
+    fields: [siemAlertRules.organizationId],
     references: [organizations.id],
   }),
   alerts: many(realTimeAlerts),
@@ -332,9 +332,9 @@ export const realTimeAlertsRelations = relations(realTimeAlerts, ({ one }) => ({
     fields: [realTimeAlerts.organizationId],
     references: [organizations.id],
   }),
-  alertRule: one(alertRules, {
+  alertRule: one(siemAlertRules, {
     fields: [realTimeAlerts.alertRuleId],
-    references: [alertRules.id],
+    references: [siemAlertRules.id],
   }),
 }));
 

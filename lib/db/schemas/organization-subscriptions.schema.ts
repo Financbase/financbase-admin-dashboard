@@ -7,13 +7,10 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { pgTable, uuid, text, timestamp, boolean, jsonb, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { organizations } from "./organizations.schema";
-import { subscriptionPlans } from "./billing.schema";
-
-// Reuse existing enums from billing schema
-export const subscriptionStatus = pgEnum("subscription_status", ["active", "inactive", "cancelled", "expired", "suspended", "trial"]);
+import { subscriptionPlans, subscriptionStatus } from "./billing.schema";
 
 // Organization Subscriptions table - links subscriptions to organizations instead of users
 export const organizationSubscriptions = pgTable("organization_subscriptions", {
