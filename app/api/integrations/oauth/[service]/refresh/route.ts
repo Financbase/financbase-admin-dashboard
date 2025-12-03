@@ -25,6 +25,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { service } = await params;
     const body = await request.json();
     const { connectionId } = body;
 
@@ -62,7 +63,16 @@ export async function POST(
     const oauthHandler = createOAuthHandler(service, oauthConfig);
 
     // Refresh the token
-    const newToken = await oauthHandler.refreshAccessToken(connectionData.refreshToken);
+    const result = await oauthHandler.refreshToken(connectionData.refreshToken);
+    
+    if (!result.success || !result.tokens) {
+      return NextResponse.json({ 
+        error: 'Token refresh failed',
+        details: result.error || 'Unknown error'
+      }, { status: 400 });
+    }
+
+    const newToken = result.tokens;
 
     // Update connection with new token
     await db

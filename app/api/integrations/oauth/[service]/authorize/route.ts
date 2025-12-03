@@ -22,6 +22,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { service } = await params;
     const { searchParams } = new URL(request.url);
     const integrationId = searchParams.get('integrationId');
     const organizationId = searchParams.get('organizationId');

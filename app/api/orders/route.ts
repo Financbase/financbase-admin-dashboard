@@ -27,8 +27,8 @@ const createOrderSchema = z.object({
 	),
 	status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled", "refunded"]).optional(),
 	priority: z.enum(["low", "normal", "high", "urgent"]).optional(),
-	shippingAddress: z.record(z.any()).optional(),
-	billingAddress: z.record(z.any()).optional(),
+	shippingAddress: z.record(z.string(), z.unknown()).optional(),
+	billingAddress: z.record(z.string(), z.unknown()).optional(),
 	shippingMethod: z.string().optional(),
 	dueDate: z.string().transform((s) => new Date(s)).optional(),
 	notes: z.string().optional(),
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(order, { status: 201 });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			return ApiErrorHandler.badRequest(error.errors[0].message);
+			return ApiErrorHandler.badRequest(error.issues[0].message);
 		}
 		return ApiErrorHandler.handle(error, requestId);
 	}

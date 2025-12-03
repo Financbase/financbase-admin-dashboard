@@ -62,7 +62,7 @@ export async function GET(
 		await db.insert(investorAccessLogs).values({
 			portalId: portalData.id,
 			accessToken: accessToken,
-			ipAddress: request.ip || 'unknown',
+			ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown',
 			userAgent: request.headers.get('user-agent') || 'unknown',
 			accessedAt: new Date(),
 		});
@@ -78,7 +78,7 @@ export async function GET(
 
 		// Fetch metrics based on allowed metrics
 		const allowedMetrics = portalData.allowedMetrics || [];
-		const metrics: unknown = {};
+		const metrics: Record<string, any> = {};
 
 		if (allowedMetrics.includes('revenue') || allowedMetrics.length === 0) {
 			const [revenueData] = await db
@@ -134,8 +134,8 @@ export async function GET(
 				.where(eq(expenses.userId, portalData.userId));
 
 			const revenue = Number(revenueData?.revenue || 0);
-			const expenses = Number(expenseData?.expenses || 0);
-			metrics.profitMargin = revenue > 0 ? ((revenue - expenses) / revenue) * 100 : 0;
+			const totalExpenses = Number(expenseData?.expenses || 0);
+			metrics.profitMargin = revenue > 0 ? ((revenue - totalExpenses) / revenue) * 100 : 0;
 		}
 
 		if (allowedMetrics.includes('customers') || allowedMetrics.length === 0) {

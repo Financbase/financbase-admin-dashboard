@@ -118,8 +118,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             automation: {
-              id: `AUTO-${String(automation.id).padStart(3, '0')}`,
               ...automation,
+              id: `AUTO-${String(automation.id).padStart(3, '0')}`,
               createdAt: automation.createdAt.toISOString(),
               updatedAt: automation.updatedAt.toISOString(),
             },
@@ -145,8 +145,8 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           automation: {
-            id: `AUTO-${String(updatedAutomation.id).padStart(3, '0')}`,
             ...updatedAutomation,
+            id: `AUTO-${String(updatedAutomation.id).padStart(3, '0')}`,
             createdAt: updatedAutomation.createdAt.toISOString(),
             updatedAt: updatedAutomation.updatedAt.toISOString(),
           },
@@ -166,8 +166,8 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           automation: {
-            id: `AUTO-${String(activatedAutomation.id).padStart(3, '0')}`,
             ...activatedAutomation,
+            id: `AUTO-${String(activatedAutomation.id).padStart(3, '0')}`,
             createdAt: activatedAutomation.createdAt.toISOString(),
             updatedAt: activatedAutomation.updatedAt.toISOString(),
           },
@@ -184,8 +184,8 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           automation: {
-            id: `AUTO-${String(pausedAutomation.id).padStart(3, '0')}`,
             ...pausedAutomation,
+            id: `AUTO-${String(pausedAutomation.id).padStart(3, '0')}`,
             createdAt: pausedAutomation.createdAt.toISOString(),
             updatedAt: pausedAutomation.updatedAt.toISOString(),
           },

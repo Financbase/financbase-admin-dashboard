@@ -257,14 +257,13 @@ export async function GET(request: NextRequest) {
  *         description: Internal server error
  */
 export async function POST(request: NextRequest) {
+	const requestId = generateRequestId();
 	try {
 		// Authenticate user
 		const { userId } = await auth();
 		if (!userId) {
 			return ApiErrorHandler.unauthorized();
 		}
-
-		const requestId = generateRequestId();
 
 		let body;
 		try {

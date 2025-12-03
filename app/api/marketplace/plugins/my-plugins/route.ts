@@ -51,20 +51,16 @@ export async function GET(request: NextRequest) {
     }
     // 'all' or no status: show all
 
-    let query = db
+    // Build query with sorting and pagination
+    const baseQuery = db
       .select()
       .from(marketplacePlugins)
       .where(and(...whereConditions));
 
-    // Apply sorting
-    if (sort === 'oldest') {
-      query = query.orderBy(asc(marketplacePlugins.createdAt));
-    } else {
-      query = query.orderBy(desc(marketplacePlugins.createdAt));
-    }
-
-    // Apply pagination
-    const userPlugins = await query.limit(limit).offset(offset);
+    // Apply sorting and pagination
+    const userPlugins = sort === 'oldest'
+      ? await baseQuery.orderBy(asc(marketplacePlugins.createdAt)).limit(limit).offset(offset)
+      : await baseQuery.orderBy(desc(marketplacePlugins.createdAt)).limit(limit).offset(offset);
 
     // Get total count (same conditions)
     const totalResult = await db

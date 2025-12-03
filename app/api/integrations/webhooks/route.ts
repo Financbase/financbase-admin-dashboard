@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
 		logger.error('Webhook processing error:', error);
 		return NextResponse.json({
 			error: 'Webhook processing failed',
-			message: error.message
+			message: error instanceof Error ? error.message : 'Unknown error'
 		}, { status: 500 });
 	}
 }
@@ -131,25 +131,35 @@ export async function GET(request: NextRequest) {
 		const limit = parseInt(searchParams.get('limit') || '50');
 		const offset = parseInt(searchParams.get('offset') || '0');
 
-		let query = `
+		// Build query using template literal syntax for Neon SQL client
+		let query = sql`
 			SELECT we.*, pi.partner
 			FROM integrations.webhook_events we
 			JOIN integrations.partner_integrations pi ON we.integration_id = pi.id
-			WHERE pi.user_id = $1
+			WHERE pi.user_id = ${userId}
 		`;
-		const params: (string | number)[] = [userId];
 
 		if (integrationId) {
-			query += ` AND we.integration_id = $${params.length + 1}`;
-			params.push(integrationId);
+			query = sql`
+				SELECT we.*, pi.partner
+				FROM integrations.webhook_events we
+				JOIN integrations.partner_integrations pi ON we.integration_id = pi.id
+				WHERE pi.user_id = ${userId} AND we.integration_id = ${integrationId}
+				ORDER BY we.created_at DESC LIMIT ${limit} OFFSET ${offset}
+			`;
+		} else {
+			query = sql`
+				SELECT we.*, pi.partner
+				FROM integrations.webhook_events we
+				JOIN integrations.partner_integrations pi ON we.integration_id = pi.id
+				WHERE pi.user_id = ${userId}
+				ORDER BY we.created_at DESC LIMIT ${limit} OFFSET ${offset}
+			`;
 		}
 
-		query += ` ORDER BY we.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-		params.push(limit, offset);
+		const result = await query;
 
-		const result = await sql.query(query, params);
-
-		return NextResponse.json(result.rows);
+		return NextResponse.json(result);
 
 	} catch (error) {
 		logger.error('Error fetching webhook events:', error);

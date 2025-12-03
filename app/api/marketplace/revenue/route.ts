@@ -12,6 +12,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { isAdmin } from '@/lib/auth/financbase-rbac';
 import { RevenueSharingService } from '@/lib/services/integration/revenue-sharing.service';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * GET /api/marketplace/revenue

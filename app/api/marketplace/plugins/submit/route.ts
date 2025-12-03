@@ -159,8 +159,7 @@ export async function POST(request: NextRequest) {
       // Handle unique constraint violations
       if (error.message.includes('unique') || error.message.includes('duplicate')) {
         return ApiErrorHandler.conflict(
-          'A plugin with this name already exists. Please choose a different name.',
-          requestId
+          'A plugin with this name already exists. Please choose a different name.'
         );
       }
     }

@@ -20,7 +20,7 @@ const createImageSchema = z.object({
 	type: z.string().min(1),
 	category: z.string().optional(),
 	tags: z.array(z.string()).optional(),
-	metadata: z.record(z.any()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(image, { status: 201 });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			return ApiErrorHandler.badRequest(error.errors[0].message);
+			return ApiErrorHandler.badRequest(error.issues[0].message);
 		}
 		return ApiErrorHandler.handle(error, requestId);
 	}

@@ -39,40 +39,35 @@ export async function GET(request: NextRequest) {
     const startTime = new Date(Date.now() - timeRanges[timeRange as keyof typeof timeRanges]);
 
     // Build query conditions
-    let query = db
-      .select()
-      .from(systemMetrics)
-      .where(and(
-        eq(systemMetrics.userId, userId),
-        gte(systemMetrics.timestamp, startTime)
-      ));
-
-    // Filter by severity if provided
-    if (severity) {
-      query = query.where(and(
-        eq(systemMetrics.userId, userId),
-        gte(systemMetrics.timestamp, startTime),
-        eq(systemMetrics.category, 'error')
-      ));
-    }
+    const whereConditions = [
+      eq(systemMetrics.userId, userId),
+      gte(systemMetrics.timestamp, startTime),
+      eq(systemMetrics.category, 'error')
+    ];
 
     // Get error metrics
-    const errors = await query
+    const errors = await db
+      .select()
+      .from(systemMetrics)
+      .where(and(...whereConditions))
       .orderBy(desc(systemMetrics.timestamp))
       .limit(limit)
       .offset(offset);
 
     // Transform error data
-    const transformedErrors = errors.map(error => ({
-      id: error.id,
-      message: error.labels?.message || 'Unknown error',
-      type: error.labels?.type || 'system',
-      severity: error.labels?.severity || 'medium',
-      timestamp: error.timestamp,
-      value: error.value,
-      labels: error.labels,
-      tags: error.tags,
-    }));
+    const transformedErrors = errors.map(error => {
+      const labels = error.labels as Record<string, any> | null;
+      return {
+        id: error.id,
+        message: labels?.message || 'Unknown error',
+        type: labels?.type || 'system',
+        severity: labels?.severity || 'medium',
+        timestamp: error.timestamp,
+        value: error.value,
+        labels: error.labels,
+        tags: error.tags,
+      };
+    });
 
     // Get error statistics
     const errorStats = {

@@ -25,6 +25,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { service } = await params;
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
     const state = searchParams.get('state');
@@ -35,7 +36,7 @@ export async function GET(
     if (error) {
        
     // eslint-disable-next-line no-console
-    logger.error('OAuth error:', error, errorDescription);
+    logger.error('OAuth error:', { error, errorDescription });
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=${encodeURIComponent(error)}&description=${encodeURIComponent(errorDescription || '')}`
       );
@@ -58,8 +59,16 @@ export async function GET(
     // Create OAuth handler
     const oauthHandler = createOAuthHandler(service, oauthConfig);
 
-    // Exchange code for token
-    const token = await oauthHandler.exchangeCodeForToken(code, state);
+    // Handle callback and exchange code for token
+    const result = await oauthHandler.handleCallback(code, state);
+    
+    if (!result.success || !result.tokens) {
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=${encodeURIComponent(result.error || 'token_exchange_failed')}`
+      );
+    }
+
+    const token = result.tokens;
 
     // Parse state to get connection details
     const stateData = JSON.parse(Buffer.from(state, 'base64').toString());

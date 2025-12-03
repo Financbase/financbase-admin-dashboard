@@ -16,7 +16,7 @@ import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 // Validation schemas
 const completeStepSchema = z.object({
-	stepData: z.record(z.any()).optional(),
+	stepData: z.record(z.string(), z.unknown()).optional(),
 	timeSpent: z.number().optional()
 });
 

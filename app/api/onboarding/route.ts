@@ -22,7 +22,7 @@ const initializeOnboardingSchema = z.object({
 const updateOnboardingSchema = z.object({
 	status: z.enum(["in_progress", "completed", "skipped"]).optional(),
 	currentStep: z.string().optional(),
-	metadata: z.record(z.any()).optional()
+	metadata: z.record(z.string(), z.unknown()).optional()
 });
 
 /**

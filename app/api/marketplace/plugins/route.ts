@@ -60,34 +60,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Build query with all conditions
-    let query = db
+    // Build base query with all conditions
+    const baseQuery = db
       .select()
       .from(marketplacePlugins)
       .where(and(...whereConditions));
 
-    // Apply sorting
+    // Apply sorting and pagination
+    let plugins;
     switch (sort) {
       case 'newest':
-        query = query.orderBy(desc(marketplacePlugins.createdAt));
+        plugins = await baseQuery.orderBy(desc(marketplacePlugins.createdAt)).limit(limit).offset(offset);
         break;
       case 'rating':
-        query = query.orderBy(desc(marketplacePlugins.rating));
+        plugins = await baseQuery.orderBy(desc(marketplacePlugins.rating)).limit(limit).offset(offset);
         break;
       case 'downloads':
-        query = query.orderBy(desc(marketplacePlugins.downloadCount));
+        plugins = await baseQuery.orderBy(desc(marketplacePlugins.downloadCount)).limit(limit).offset(offset);
         break;
       case 'name':
-        query = query.orderBy(asc(marketplacePlugins.name));
+        plugins = await baseQuery.orderBy(asc(marketplacePlugins.name)).limit(limit).offset(offset);
         break;
       case 'popular':
       default:
-        query = query.orderBy(desc(marketplacePlugins.installCount));
+        plugins = await baseQuery.orderBy(desc(marketplacePlugins.installCount)).limit(limit).offset(offset);
         break;
     }
-
-    // Apply pagination
-    const plugins = await query.limit(limit).offset(offset);
 
     // Get total count for pagination (matching the same where conditions)
     const countConditions = [eq(marketplacePlugins.isActive, true)];
