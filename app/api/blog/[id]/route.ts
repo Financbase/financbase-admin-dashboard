@@ -91,20 +91,20 @@ export async function PUT(
 		// Check if user is admin
 		const isAdmin = await checkAdminStatus();
 		if (!isAdmin) {
-			return ApiErrorHandler.forbidden('Only administrators can update blog posts');
+			return ApiErrorHandler.forbidden('Only administrators can update blog posts') as NextResponse<StandardApiResponse<unknown>>;
 		}
 
 		try {
 			const { id: idParam } = await params;
 			const id = parseInt(idParam);
 			if (isNaN(id)) {
-				return ApiErrorHandler.badRequest('Invalid blog post ID');
+				return ApiErrorHandler.badRequest('Invalid blog post ID', requestId) as NextResponse<StandardApiResponse<unknown>>;
 			}
 
 			// Parse JSON body with proper error handling
 			let body;
 			try {
-				body = await req.json();
+				body = await (request || req).json();
 			} catch (error) {
 				// Handle JSON parse errors (malformed JSON)
 				if (
@@ -112,7 +112,7 @@ export async function PUT(
 					error instanceof TypeError ||
 					(error instanceof Error && error.message.includes('Invalid JSON'))
 				) {
-					return ApiErrorHandler.badRequest('Invalid JSON in request body');
+					return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId) as NextResponse<StandardApiResponse<unknown>>;
 				}
 				// Re-throw other errors to be handled by outer catch
 				throw error;
@@ -127,7 +127,7 @@ export async function PUT(
 
 			return createSuccessResponse(updatedPost, 200, { requestId });
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }
@@ -145,17 +145,17 @@ export async function DELETE(
 		// Check if user is admin
 		const isAdmin = await checkAdminStatus();
 		if (!isAdmin) {
-			return ApiErrorHandler.forbidden('Only administrators can delete blog posts');
+			return ApiErrorHandler.forbidden('Only administrators can delete blog posts') as NextResponse<StandardApiResponse<unknown>>;
 		}
 
 		try {
 			const { id: idParam } = await params;
 			const id = parseInt(idParam);
 			if (isNaN(id)) {
-				return ApiErrorHandler.badRequest('Invalid blog post ID');
+				return ApiErrorHandler.badRequest('Invalid blog post ID', requestId) as NextResponse<StandardApiResponse<unknown>>;
 			}
 
-			const { searchParams } = new URL(req.url);
+			const { searchParams } = new URL((request || req).url);
 			const hardDelete = searchParams.get('hardDelete') === 'true';
 
 			await blogService.deletePost(id, hardDelete);
@@ -166,7 +166,7 @@ export async function DELETE(
 				{ requestId }
 			);
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }
