@@ -94,9 +94,9 @@ export async function GET(req: NextRequest) {
   const requestId = generateRequestId();
   // Using withRLS wrapper automatically sets RLS context
   // RLS policies will ensure users can only see their own invoices
-  return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
+  return withRLS<StandardApiResponse<unknown>>(async (clerkUserId, clerkUser, request) => {
     try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL((request || req).url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
@@ -129,7 +129,7 @@ export async function GET(req: NextRequest) {
       }
     );
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
     }
   });
 }
@@ -208,13 +208,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId();
   // Using withRLS wrapper automatically sets RLS context
-  return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
+  return withRLS<StandardApiResponse<unknown>>(async (clerkUserId, clerkUser, request) => {
     try {
       let body;
       try {
-        body = await req.json();
+        body = await (request || req).json();
       } catch (error) {
-        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId);
+        return ApiErrorHandler.badRequest('Invalid JSON in request body', requestId) as NextResponse<StandardApiResponse<unknown>>;
       }
     // Validate numeric fields
     const validateNumericField = (value: any, fieldName: string, allowNegative = false): number => {
@@ -258,7 +258,7 @@ export async function POST(req: NextRequest) {
     if (body.clientId) {
       parsedClientId = parseInt(String(body.clientId), 10);
       if (isNaN(parsedClientId)) {
-        return ApiErrorHandler.badRequest('Invalid clientId format. Expected a valid integer.', requestId);
+        return ApiErrorHandler.badRequest('Invalid clientId format. Expected a valid integer.', requestId) as NextResponse<StandardApiResponse<unknown>>;
       }
     }
 
@@ -267,7 +267,7 @@ export async function POST(req: NextRequest) {
     if (body.parentInvoiceId) {
       parsedParentInvoiceId = parseInt(String(body.parentInvoiceId), 10);
       if (isNaN(parsedParentInvoiceId)) {
-        return ApiErrorHandler.badRequest('Invalid parentInvoiceId format. Expected a valid integer.', requestId);
+        return ApiErrorHandler.badRequest('Invalid parentInvoiceId format. Expected a valid integer.', requestId) as NextResponse<StandardApiResponse<unknown>>;
       }
     }
 
@@ -288,9 +288,9 @@ export async function POST(req: NextRequest) {
       amountPaid = validateNumericField(body.amountPaid, 'amountPaid');
     } catch (error) {
       if (error instanceof Error) {
-        return ApiErrorHandler.badRequest(error.message, requestId);
+        return ApiErrorHandler.badRequest(error.message, requestId) as NextResponse<StandardApiResponse<unknown>>;
       }
-      return ApiErrorHandler.badRequest('Invalid numeric field format.', requestId);
+      return ApiErrorHandler.badRequest('Invalid numeric field format.', requestId) as NextResponse<StandardApiResponse<unknown>>;
     }
 
     // Validate date fields
@@ -308,21 +308,21 @@ export async function POST(req: NextRequest) {
       recurringEndDate = validateDateField(body.recurringEndDate, 'recurringEndDate');
     } catch (error) {
       if (error instanceof Error) {
-        return ApiErrorHandler.badRequest(error.message, requestId);
+        return ApiErrorHandler.badRequest(error.message, requestId) as NextResponse<StandardApiResponse<unknown>>;
       }
-      return ApiErrorHandler.badRequest('Invalid date field format.', requestId);
+      return ApiErrorHandler.badRequest('Invalid date field format.', requestId) as NextResponse<StandardApiResponse<unknown>>;
     }
 
     // Validate status enum
     const validStatuses = ['draft', 'sent', 'viewed', 'paid', 'overdue', 'cancelled'];
     const status = body.status || 'draft';
     if (!validStatuses.includes(status)) {
-      return ApiErrorHandler.badRequest(`Invalid status. Must be one of: ${validStatuses.join(', ')}.`, requestId);
+      return ApiErrorHandler.badRequest(`Invalid status. Must be one of: ${validStatuses.join(', ')}.`, requestId) as NextResponse<StandardApiResponse<unknown>>;
     }
 
     // Validate items array
     if (!Array.isArray(body.items)) {
-      return ApiErrorHandler.badRequest('Items must be an array.', requestId);
+      return ApiErrorHandler.badRequest('Items must be an array.', requestId) as NextResponse<StandardApiResponse<unknown>>;
     }
 
     // Transform form data to match database schema
@@ -362,11 +362,11 @@ export async function POST(req: NextRequest) {
 
     // Basic validation
     if (!invoiceData.clientName || !invoiceData.clientEmail) {
-      return ApiErrorHandler.badRequest('Client name and email are required', requestId);
+      return ApiErrorHandler.badRequest('Client name and email are required', requestId) as NextResponse<StandardApiResponse<unknown>>;
     }
 
     if (!invoiceData.items || invoiceData.items.length === 0) {
-      return ApiErrorHandler.badRequest('At least one invoice item is required', requestId);
+      return ApiErrorHandler.badRequest('At least one invoice item is required', requestId) as NextResponse<StandardApiResponse<unknown>>;
     }
 
     // Create the invoice - RLS will ensure user can only create invoices for themselves
@@ -381,7 +381,7 @@ export async function POST(req: NextRequest) {
       { requestId }
     );
     } catch (error) {
-      return ApiErrorHandler.handle(error, requestId);
+      return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
     }
   });
 }
