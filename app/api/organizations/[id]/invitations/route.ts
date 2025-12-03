@@ -101,18 +101,19 @@ export async function POST(
 				m.getOrganizationById(params.id, userId)
 			);
 
+			const orgName = (org as { name?: string } | null)?.name || 'an organization';
 			await sendEmail({
 				to: email,
-				subject: `You're invited to join ${org?.name || 'an organization'}`,
+				subject: `You're invited to join ${orgName}`,
 				html: `
 					<h2>You're Invited!</h2>
-					<p>You've been invited to join <strong>${org?.name || 'an organization'}</strong> on Financbase.</p>
+					<p>You've been invited to join <strong>${orgName}</strong> on Financbase.</p>
 					${message ? `<p>${message}</p>` : ''}
 					<p>Click the link below to accept your invitation:</p>
 					<p><a href="${invitationUrl}">${invitationUrl}</a></p>
 					<p>This invitation will expire in 7 days.</p>
 				`,
-				text: `You've been invited to join ${org?.name || 'an organization'} on Financbase. ${message ? `\n\n${message}` : ''}\n\nAccept your invitation: ${invitationUrl}\n\nThis invitation will expire in 7 days.`,
+				text: `You've been invited to join ${orgName} on Financbase. ${message ? `\n\n${message}` : ''}\n\nAccept your invitation: ${invitationUrl}\n\nThis invitation will expire in 7 days.`,
 			});
 
 			return NextResponse.json({
