@@ -38,21 +38,21 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
 	const requestId = generateRequestId();
-	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId, clerkUser, request) => {
 		// Check if user is admin
 		const isAdmin = await checkAdminStatus();
 		if (!isAdmin) {
-			return ApiErrorHandler.forbidden('Only administrators can create blog categories');
+			return ApiErrorHandler.forbidden('Only administrators can create blog categories') as NextResponse<StandardApiResponse<unknown>>;
 		}
 
 		// Parse JSON body with proper error handling
 		let body;
 		try {
-			body = await req.json();
+			body = await (request || req).json();
 		} catch (error) {
 			// Handle JSON parse errors (malformed JSON)
 			if (error instanceof SyntaxError || error instanceof TypeError || (error instanceof Error && error.message.includes('Invalid JSON'))) {
-				return ApiErrorHandler.badRequest('Invalid JSON in request body');
+				return ApiErrorHandler.badRequest('Invalid JSON in request body') as NextResponse<StandardApiResponse<unknown>>;
 			}
 			// Re-throw other errors to be handled by outer catch
 			throw error;
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 
 			return createSuccessResponse(newCategory, 201, { requestId });
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }

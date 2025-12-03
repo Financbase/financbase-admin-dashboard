@@ -21,11 +21,11 @@ import { createSuccessResponse, type StandardApiResponse } from '@/lib/api/stand
  */
 export async function GET(req: NextRequest) {
 	const requestId = generateRequestId();
-	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId) => {
+	return withRLS<StandardApiResponse<unknown>>(async (clerkUserId, clerkUser, request) => {
 		// Check if user is admin
 		const isAdmin = await checkAdminStatus();
 		if (!isAdmin) {
-			return ApiErrorHandler.forbidden('Only administrators can view blog statistics');
+			return ApiErrorHandler.forbidden('Only administrators can view blog statistics') as NextResponse<StandardApiResponse<unknown>>;
 		}
 
 		try {
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
 			return createSuccessResponse(stats, 200, { requestId });
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }
