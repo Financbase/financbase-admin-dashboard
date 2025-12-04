@@ -144,7 +144,7 @@ export async function GET(
 
     try {
       // Get sync status
-      const syncStatus = await IntegrationSyncEngine.getSyncStatus(connectionId, userId);
+      const syncStatus = await IntegrationSyncEngine.getSyncStatus(String(connectionId));
 
       return NextResponse.json({
         connectionId,

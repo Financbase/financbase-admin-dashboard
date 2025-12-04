@@ -10,15 +10,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { integrationConnections, integrations } from '@/lib/db/schemas';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, or, like } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
-import { ApiErrorHandler } from '@/lib/api-error-handler';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 
 /**
  * GET /api/platform/hub/connections
  * Get all integration connections for the user
  */
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -43,25 +44,20 @@ export async function GET(request: NextRequest) {
       whereConditions.push(eq(integrationConnections.status, status));
     }
 
+    // Filter by category if provided
+    if (category) {
+      whereConditions.push(eq(integrations.category, category));
+    }
+
     // Get connections with integration details
-    let query = db
+    const connections = await db
       .select({
         connection: integrationConnections,
         integration: integrations,
       })
       .from(integrationConnections)
       .innerJoin(integrations, eq(integrationConnections.integrationId, integrations.id))
-      .where(and(...whereConditions));
-
-    // Filter by category if provided
-    if (category) {
-      query = query.where(and(
-        ...whereConditions,
-        eq(integrations.category, category)
-      ));
-    }
-
-    const connections = await query
+      .where(and(...whereConditions))
       .orderBy(desc(integrationConnections.createdAt))
       .limit(limit)
       .offset(offset);

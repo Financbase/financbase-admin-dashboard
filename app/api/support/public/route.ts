@@ -40,14 +40,10 @@ const supportFormSchema = z.object({
 		.max(5000, 'Message must be less than 5000 characters')
 		.trim(),
 	category: z
-		.enum(['technical', 'billing', 'feature_request', 'bug_report', 'general'], {
-			errorMap: () => ({ message: 'Invalid category selected' }),
-		})
+		.enum(['technical', 'billing', 'feature_request', 'bug_report', 'general'])
 		.default('general'),
 	priority: z
-		.enum(['low', 'medium', 'high', 'critical'], {
-			errorMap: () => ({ message: 'Invalid priority selected' }),
-		})
+		.enum(['low', 'medium', 'high', 'critical'])
 		.default('medium'),
 	// Honeypot field for spam protection
 	website: z.string().max(0, 'Bot detected').optional().default(''),
@@ -80,7 +76,8 @@ function getClientIP(request: NextRequest): string {
 		return realIP;
 	}
 	
-	return request.ip || 'unknown';
+	// NextRequest doesn't have .ip property, use 'unknown' as fallback
+	return 'unknown';
 }
 
 function generateTicketNumber(): string {

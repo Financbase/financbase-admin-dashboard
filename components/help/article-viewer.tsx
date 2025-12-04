@@ -20,7 +20,6 @@ import { cn } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { formatDistanceToNow } from 'date-fns';
 import { 
-import { logger } from '@/lib/logger';
   ArrowLeft, 
   Star, 
   ThumbsUp, 
@@ -37,6 +36,7 @@ import { logger } from '@/lib/logger';
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface ArticleViewerProps {
   article: any;

@@ -42,7 +42,7 @@ export async function GET() {
     const eventsArray = Array.isArray(securityEvents) ? securityEvents : [];
 
     // Transform events to match expected format
-    const events = eventsArray.map((event: SecurityEvent) => ({
+    const events = eventsArray.map((event: any) => ({
       id: event.id,
       eventType: event.eventType,
       description: event.description || `${event.eventType} event`,

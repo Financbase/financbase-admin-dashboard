@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
 		let savedPropertiesResult: SavedPropertyRow[];
 		
 		if (params.status) {
-			savedPropertiesResult = await sql`
+			savedPropertiesResult = (await sql`
 				SELECT *
 				FROM saved_properties
 				WHERE user_id = ${userId}
@@ -109,35 +109,35 @@ export async function GET(request: NextRequest) {
 					AND status = ${params.status}
 				ORDER BY saved_date DESC, created_at DESC
 				LIMIT ${params.limit || 50} OFFSET ${params.offset || 0}
-			`;
+			`) as SavedPropertyRow[];
 		} else {
-			savedPropertiesResult = await sql`
+			savedPropertiesResult = (await sql`
 				SELECT *
 				FROM saved_properties
 				WHERE user_id = ${userId}
 					AND is_active = true
 				ORDER BY saved_date DESC, created_at DESC
 				LIMIT ${params.limit || 50} OFFSET ${params.offset || 0}
-			`;
+			`) as SavedPropertyRow[];
 		}
 
 		// Get total count
 		let countResult: CountResult[];
 		if (params.status) {
-			countResult = await sql`
+			countResult = (await sql`
 				SELECT COUNT(*)::int as total
 				FROM saved_properties
 				WHERE user_id = ${userId}
 					AND is_active = true
 					AND status = ${params.status}
-			`;
+			`) as CountResult[];
 		} else {
-			countResult = await sql`
+			countResult = (await sql`
 				SELECT COUNT(*)::int as total
 				FROM saved_properties
 				WHERE user_id = ${userId}
 					AND is_active = true
-			`;
+			`) as CountResult[];
 		}
 
 		const total = Number(countResult[0]?.total || 0);

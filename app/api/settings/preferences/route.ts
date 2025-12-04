@@ -108,9 +108,9 @@ export async function GET() {
 				
 				// Add default values for missing columns
 				if (preferences.length > 0) {
+					// Remove sidebarCollapsed as it doesn't exist in the schema
 					preferences[0] = {
 						...preferences[0],
-						sidebarCollapsed: false,
 						compactMode: false,
 						highContrast: false,
 						fontSize: 'medium',
@@ -248,44 +248,7 @@ export async function PUT(request: NextRequest) {
 				.update(userPreferences)
 				.set(updateData)
 				.where(eq(userPreferences.userId, userId))
-				.returning({
-					id: userPreferences.id,
-					userId: userPreferences.userId,
-					theme: userPreferences.theme,
-					sidebarCollapsed: userPreferences.sidebarCollapsed,
-					compactMode: userPreferences.compactMode,
-					highContrast: userPreferences.highContrast,
-					fontSize: userPreferences.fontSize,
-					language: userPreferences.language,
-					timezone: userPreferences.timezone,
-					dateFormat: userPreferences.dateFormat,
-					timeFormat: userPreferences.timeFormat,
-					currency: userPreferences.currency,
-					numberFormat: userPreferences.numberFormat,
-					defaultDashboard: userPreferences.defaultDashboard,
-					chartsEnabled: userPreferences.chartsEnabled,
-					analyticsEnabled: userPreferences.analyticsEnabled,
-					autoRefresh: userPreferences.autoRefresh,
-					refreshInterval: userPreferences.refreshInterval,
-					emailNotifications: userPreferences.emailNotifications,
-					pushNotifications: userPreferences.pushNotifications,
-					desktopNotifications: userPreferences.desktopNotifications,
-					notificationSounds: userPreferences.notificationSounds,
-					weeklyDigest: userPreferences.weeklyDigest,
-					monthlyReport: userPreferences.monthlyReport,
-					analyticsTracking: userPreferences.analyticsTracking,
-					errorReporting: userPreferences.errorReporting,
-					usageStats: userPreferences.usageStats,
-					marketingEmails: userPreferences.marketingEmails,
-					dataExport: userPreferences.dataExport,
-					betaFeatures: userPreferences.betaFeatures,
-					experimentalFeatures: userPreferences.experimentalFeatures,
-					developerMode: userPreferences.developerMode,
-					apiAccess: userPreferences.apiAccess,
-					customPreferences: userPreferences.customPreferences,
-					createdAt: userPreferences.createdAt,
-					updatedAt: userPreferences.updatedAt,
-				});
+				.returning();
 
 			return NextResponse.json({ preferences: updatedPreferences[0] });
 		} else {
@@ -296,44 +259,7 @@ export async function PUT(request: NextRequest) {
 					userId,
 					...updateData,
 				})
-				.returning({
-					id: userPreferences.id,
-					userId: userPreferences.userId,
-					theme: userPreferences.theme,
-					sidebarCollapsed: userPreferences.sidebarCollapsed,
-					compactMode: userPreferences.compactMode,
-					highContrast: userPreferences.highContrast,
-					fontSize: userPreferences.fontSize,
-					language: userPreferences.language,
-					timezone: userPreferences.timezone,
-					dateFormat: userPreferences.dateFormat,
-					timeFormat: userPreferences.timeFormat,
-					currency: userPreferences.currency,
-					numberFormat: userPreferences.numberFormat,
-					defaultDashboard: userPreferences.defaultDashboard,
-					chartsEnabled: userPreferences.chartsEnabled,
-					analyticsEnabled: userPreferences.analyticsEnabled,
-					autoRefresh: userPreferences.autoRefresh,
-					refreshInterval: userPreferences.refreshInterval,
-					emailNotifications: userPreferences.emailNotifications,
-					pushNotifications: userPreferences.pushNotifications,
-					desktopNotifications: userPreferences.desktopNotifications,
-					notificationSounds: userPreferences.notificationSounds,
-					weeklyDigest: userPreferences.weeklyDigest,
-					monthlyReport: userPreferences.monthlyReport,
-					analyticsTracking: userPreferences.analyticsTracking,
-					errorReporting: userPreferences.errorReporting,
-					usageStats: userPreferences.usageStats,
-					marketingEmails: userPreferences.marketingEmails,
-					dataExport: userPreferences.dataExport,
-					betaFeatures: userPreferences.betaFeatures,
-					experimentalFeatures: userPreferences.experimentalFeatures,
-					developerMode: userPreferences.developerMode,
-					apiAccess: userPreferences.apiAccess,
-					customPreferences: userPreferences.customPreferences,
-					createdAt: userPreferences.createdAt,
-					updatedAt: userPreferences.updatedAt,
-				});
+				.returning();
 
 			return NextResponse.json({ preferences: newPreferences[0] });
 		}

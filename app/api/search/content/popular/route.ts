@@ -10,6 +10,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { searchService } from '@/lib/services/content/search-service';
 
 /**

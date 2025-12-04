@@ -110,17 +110,7 @@ export async function POST(request: NextRequest) {
 				status: 'active',
 				metadata: metadata || {},
 			})
-			.returning({
-				id: userPaymentMethods.id,
-				type: userPaymentMethods.type,
-				last4: userPaymentMethods.last4,
-				brand: userPaymentMethods.brand,
-				expiryMonth: userPaymentMethods.expiryMonth,
-				expiryYear: userPaymentMethods.expiryYear,
-				isDefault: userPaymentMethods.isDefault,
-				status: userPaymentMethods.status,
-				createdAt: userPaymentMethods.createdAt,
-			});
+			.returning();
 
 		return NextResponse.json({ paymentMethod: newPaymentMethod[0] });
 	} catch (error) {

@@ -55,12 +55,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      whereConditions.push(
-        or(
+      const searchCondition = or(
           like(integrations.name, `%${search}%`),
           like(integrations.description, `%${search}%`)
-        )
       );
+      if (searchCondition) {
+        whereConditions.push(searchCondition);
+      }
     }
 
     // Get integrations using raw SQL with schema qualification
@@ -161,12 +162,12 @@ export async function GET(request: NextRequest) {
       pagination: {
         limit,
         offset,
-        total: totalCount[0]?.count || 0,
-        hasMore: (offset + limit) < (totalCount[0]?.count || 0),
+        total: totalCount,
+        hasMore: (offset + limit) < totalCount,
       },
       categories: categoryStats,
       metadata: {
-        totalIntegrations: totalCount[0]?.count || 0,
+        totalIntegrations: totalCount,
         officialIntegrations: availableIntegrations.filter(i => i.isOfficial).length,
         communityIntegrations: availableIntegrations.filter(i => !i.isOfficial).length,
       },

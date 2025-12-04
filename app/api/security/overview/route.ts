@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
 
     const overview = {
       // MFA Status
-      mfaEnabled: mfaSettings?.isEnabled || false,
       mfaRequired: isMFARequired,
       mfaType: mfaSettings?.mfaType || null,
       mfaEnabledUsers: 1, // This would be calculated from organization

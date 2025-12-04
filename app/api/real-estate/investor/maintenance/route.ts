@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 		let maintenanceResult: MaintenanceRow[];
 		
 		if (params.status && params.priority) {
-			maintenanceResult = await sql`
+			maintenanceResult = (await sql`
 				SELECT
 					mr.id,
 					mr.title,
@@ -116,9 +116,9 @@ export async function GET(request: NextRequest) {
 					END,
 					mr.reported_date DESC
 				LIMIT ${params.limit || 20}
-			`;
+			`) as MaintenanceRow[];
 		} else if (params.status) {
-			maintenanceResult = await sql`
+			maintenanceResult = (await sql`
 				SELECT
 					mr.id,
 					mr.title,
@@ -154,9 +154,9 @@ export async function GET(request: NextRequest) {
 					END,
 					mr.reported_date DESC
 				LIMIT ${params.limit || 20}
-			`;
+			`) as MaintenanceRow[];
 		} else if (params.priority) {
-			maintenanceResult = await sql`
+			maintenanceResult = (await sql`
 				SELECT
 					mr.id,
 					mr.title,
@@ -192,9 +192,9 @@ export async function GET(request: NextRequest) {
 					END,
 					mr.reported_date DESC
 				LIMIT ${params.limit || 20}
-			`;
+			`) as MaintenanceRow[];
 		} else {
-			maintenanceResult = await sql`
+			maintenanceResult = (await sql`
 				SELECT
 					mr.id,
 					mr.title,
@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
 					END,
 					mr.reported_date DESC
 				LIMIT ${params.limit || 20}
-			`;
+			`) as MaintenanceRow[];
 		}
 
 		const maintenanceRequests = maintenanceResult.map((row: MaintenanceRow) => ({

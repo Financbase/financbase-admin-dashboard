@@ -32,7 +32,6 @@ import {
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import {
-import { logger } from '@/lib/logger';
 	CartesianGrid,
 	Line,
 	LineChart,
@@ -40,6 +39,7 @@ import { logger } from '@/lib/logger';
 	XAxis,
 	YAxis,
 } from "recharts";
+import { logger } from '@/lib/logger';
 
 // Analytics data types
 interface AnalyticsMetrics {

@@ -156,34 +156,7 @@ export async function PUT(request: NextRequest) {
 				.update(notificationPreferences)
 				.set(updateData)
 				.where(eq(notificationPreferences.userId, userId))
-				.returning({
-					id: notificationPreferences.id,
-					userId: notificationPreferences.userId,
-					emailInvoices: notificationPreferences.emailInvoices,
-					emailPayments: notificationPreferences.emailPayments,
-					emailReports: notificationPreferences.emailReports,
-					emailSecurity: notificationPreferences.emailSecurity,
-					emailUpdates: notificationPreferences.emailUpdates,
-					emailMarketing: notificationPreferences.emailMarketing,
-					pushInvoices: notificationPreferences.pushInvoices,
-					pushPayments: notificationPreferences.pushPayments,
-					pushReports: notificationPreferences.pushReports,
-					pushSecurity: notificationPreferences.pushSecurity,
-					pushUpdates: notificationPreferences.pushUpdates,
-					inAppInvoices: notificationPreferences.inAppInvoices,
-					inAppPayments: notificationPreferences.inAppPayments,
-					inAppReports: notificationPreferences.inAppReports,
-					inAppSecurity: notificationPreferences.inAppSecurity,
-					inAppUpdates: notificationPreferences.inAppUpdates,
-					inAppComments: notificationPreferences.inAppComments,
-					inAppMentions: notificationPreferences.inAppMentions,
-					quietHoursEnabled: notificationPreferences.quietHoursEnabled,
-					quietHoursStart: notificationPreferences.quietHoursStart,
-					quietHoursEnd: notificationPreferences.quietHoursEnd,
-					quietHoursTimezone: notificationPreferences.quietHoursTimezone,
-					createdAt: notificationPreferences.createdAt,
-					updatedAt: notificationPreferences.updatedAt,
-				});
+				.returning();
 
 			return NextResponse.json({ preferences: updatedPreferences[0] });
 		} else {
@@ -194,34 +167,7 @@ export async function PUT(request: NextRequest) {
 					userId,
 					...updateData,
 				})
-				.returning({
-					id: notificationPreferences.id,
-					userId: notificationPreferences.userId,
-					emailInvoices: notificationPreferences.emailInvoices,
-					emailPayments: notificationPreferences.emailPayments,
-					emailReports: notificationPreferences.emailReports,
-					emailSecurity: notificationPreferences.emailSecurity,
-					emailUpdates: notificationPreferences.emailUpdates,
-					emailMarketing: notificationPreferences.emailMarketing,
-					pushInvoices: notificationPreferences.pushInvoices,
-					pushPayments: notificationPreferences.pushPayments,
-					pushReports: notificationPreferences.pushReports,
-					pushSecurity: notificationPreferences.pushSecurity,
-					pushUpdates: notificationPreferences.pushUpdates,
-					inAppInvoices: notificationPreferences.inAppInvoices,
-					inAppPayments: notificationPreferences.inAppPayments,
-					inAppReports: notificationPreferences.inAppReports,
-					inAppSecurity: notificationPreferences.inAppSecurity,
-					inAppUpdates: notificationPreferences.inAppUpdates,
-					inAppComments: notificationPreferences.inAppComments,
-					inAppMentions: notificationPreferences.inAppMentions,
-					quietHoursEnabled: notificationPreferences.quietHoursEnabled,
-					quietHoursStart: notificationPreferences.quietHoursStart,
-					quietHoursEnd: notificationPreferences.quietHoursEnd,
-					quietHoursTimezone: notificationPreferences.quietHoursTimezone,
-					createdAt: notificationPreferences.createdAt,
-					updatedAt: notificationPreferences.updatedAt,
-				});
+				.returning();
 
 			return NextResponse.json({ preferences: newPreferences[0] });
 		}

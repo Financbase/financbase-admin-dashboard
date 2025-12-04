@@ -142,27 +142,7 @@ export async function PUT(request: NextRequest) {
 				.update(privacySettings)
 				.set(updateData)
 				.where(eq(privacySettings.userId, userId))
-				.returning({
-					id: privacySettings.id,
-					userId: privacySettings.userId,
-					analyticsTracking: privacySettings.analyticsTracking,
-					errorReporting: privacySettings.errorReporting,
-					performanceMonitoring: privacySettings.performanceMonitoring,
-					usageStatistics: privacySettings.usageStatistics,
-					crashReports: privacySettings.crashReports,
-					shareWithPartners: privacySettings.shareWithPartners,
-					shareForResearch: privacySettings.shareForResearch,
-					shareForMarketing: privacySettings.shareForMarketing,
-					allowPersonalization: privacySettings.allowPersonalization,
-					dataRetentionPeriod: privacySettings.dataRetentionPeriod,
-					autoDeleteInactive: privacySettings.autoDeleteInactive,
-					downloadData: privacySettings.downloadData,
-					deleteAccount: privacySettings.deleteAccount,
-					allowThirdPartyIntegrations: privacySettings.allowThirdPartyIntegrations,
-					requireConsentForNewIntegrations: privacySettings.requireConsentForNewIntegrations,
-					createdAt: privacySettings.createdAt,
-					updatedAt: privacySettings.updatedAt,
-				});
+				.returning();
 
 			return NextResponse.json({ settings: updatedSettings[0] });
 		} else {
@@ -173,27 +153,7 @@ export async function PUT(request: NextRequest) {
 					userId,
 					...updateData,
 				})
-				.returning({
-					id: privacySettings.id,
-					userId: privacySettings.userId,
-					analyticsTracking: privacySettings.analyticsTracking,
-					errorReporting: privacySettings.errorReporting,
-					performanceMonitoring: privacySettings.performanceMonitoring,
-					usageStatistics: privacySettings.usageStatistics,
-					crashReports: privacySettings.crashReports,
-					shareWithPartners: privacySettings.shareWithPartners,
-					shareForResearch: privacySettings.shareForResearch,
-					shareForMarketing: privacySettings.shareForMarketing,
-					allowPersonalization: privacySettings.allowPersonalization,
-					dataRetentionPeriod: privacySettings.dataRetentionPeriod,
-					autoDeleteInactive: privacySettings.autoDeleteInactive,
-					downloadData: privacySettings.downloadData,
-					deleteAccount: privacySettings.deleteAccount,
-					allowThirdPartyIntegrations: privacySettings.allowThirdPartyIntegrations,
-					requireConsentForNewIntegrations: privacySettings.requireConsentForNewIntegrations,
-					createdAt: privacySettings.createdAt,
-					updatedAt: privacySettings.updatedAt,
-				});
+				.returning();
 
 			return NextResponse.json({ settings: newSettings[0] });
 		}

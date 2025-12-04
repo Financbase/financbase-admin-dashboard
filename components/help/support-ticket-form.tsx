@@ -20,7 +20,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { 
-import { logger } from '@/lib/logger';
   MessageSquare, 
   Paperclip, 
   Send, 
@@ -33,6 +32,7 @@ import { logger } from '@/lib/logger';
   Video,
   Archive
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface SupportTicketFormProps {
   onSuccess: (ticket: any) => void;

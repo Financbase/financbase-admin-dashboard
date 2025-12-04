@@ -69,21 +69,7 @@ export async function PUT(
 				updatedAt: new Date(),
 			})
 			.where(eq(userApiKeys.id, idParam))
-			.returning({
-				id: userApiKeys.id,
-				name: userApiKeys.name,
-				description: userApiKeys.description,
-				type: userApiKeys.type,
-				scopes: userApiKeys.scopes,
-				status: userApiKeys.status,
-				expiresAt: userApiKeys.expiresAt,
-				createdAt: userApiKeys.createdAt,
-				updatedAt: userApiKeys.updatedAt,
-				keyPrefix: userApiKeys.keyPrefix,
-				keySuffix: userApiKeys.keySuffix,
-				rateLimitPerMinute: userApiKeys.rateLimitPerMinute,
-				rateLimitPerHour: userApiKeys.rateLimitPerHour,
-			});
+			.returning();
 
 		return NextResponse.json({ key: updatedKey[0] });
 	} catch (error) {

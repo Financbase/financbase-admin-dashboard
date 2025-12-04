@@ -18,7 +18,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { 
-import { logger } from '@/lib/logger';
   Search, 
   HelpCircle, 
   ChevronDown, 
@@ -30,6 +29,7 @@ import { logger } from '@/lib/logger';
   Clock,
   Star
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 export function FAQSection() {
   const [searchQuery, setSearchQuery] = useState('');

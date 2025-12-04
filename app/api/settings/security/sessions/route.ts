@@ -58,7 +58,7 @@ export async function GET() {
 		// Add additional sessions if needed (mock data for demonstration)
 		if (securitySettings.length > 0) {
 			const settings = securitySettings[0];
-			if (settings.maxConcurrentSessions > 1) {
+			if (settings.maxConcurrentSessions && settings.maxConcurrentSessions > 1) {
 				sessions.push({
 					id: 'mobile_session',
 					userAgent: 'Mozilla/5.0 (Mobile Safari)',

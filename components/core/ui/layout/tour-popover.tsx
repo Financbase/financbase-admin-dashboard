@@ -20,7 +20,6 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useTour } from "@/hooks/use-tour";
 import {
-import { logger } from '@/lib/logger';
 	AlertCircle,
 	Headphones,
 	HelpCircle,
@@ -33,6 +32,7 @@ import { logger } from '@/lib/logger';
 	Users,
 	XCircle,
 } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 interface TourStep {
 	icon: LucideIcon;

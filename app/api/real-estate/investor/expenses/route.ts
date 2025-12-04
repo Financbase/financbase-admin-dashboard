@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 		const sql = await getDbConnection();
 
 		// Get expense breakdown by category with parameterized query
-		const expenseBreakdownResult = await sql`
+		const expenseBreakdownResult = (await sql`
 			SELECT
 				pe.category,
 				SUM(pe.amount)::decimal as total_amount,
@@ -78,10 +78,10 @@ export async function GET(request: NextRequest) {
 				AND pe.date >= CURRENT_DATE - INTERVAL '1 month' * ${months}::int
 			GROUP BY pe.category
 			ORDER BY total_amount DESC
-		`;
+		`) as ExpenseBreakdownRow[];
 
 		// Get monthly expense trends
-		const monthlyExpensesResult = await sql`
+		const monthlyExpensesResult = (await sql`
 			SELECT
 				date_trunc('month', pe.date)::date as month,
 				SUM(pe.amount)::decimal as total_expenses
@@ -90,10 +90,10 @@ export async function GET(request: NextRequest) {
 				AND pe.date >= CURRENT_DATE - INTERVAL '1 month' * ${months}::int
 			GROUP BY date_trunc('month', pe.date)
 			ORDER BY month
-		`;
+		`) as MonthlyExpenseRow[];
 
 		// Get top vendors
-		const topVendorsResult = await sql`
+		const topVendorsResult = (await sql`
 			SELECT
 				pe.vendor,
 				SUM(pe.amount)::decimal as total_amount,
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
 			GROUP BY pe.vendor
 			ORDER BY total_amount DESC
 			LIMIT 10
-		`;
+		`) as TopVendorRow[];
 
 		const expenseBreakdown = expenseBreakdownResult.map((row: ExpenseBreakdownRow) => ({
 			category: row.category,

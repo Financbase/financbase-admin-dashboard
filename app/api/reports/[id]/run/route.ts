@@ -16,6 +16,7 @@
 import { auth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { ReportService } from '@/lib/services/report-service';
 
 /**

@@ -59,11 +59,11 @@ import {
 import { cn } from '@/lib/utils';
 import { aiOrchestrator } from '@/lib/services/ai/unified-ai-orchestrator';
 import type {
-import { logger } from '@/lib/logger';
   CategorizationResult,
   AIExplanation,
   AIFeedback
 } from '@/lib/services/ai/unified-ai-orchestrator';
+import { logger } from '@/lib/logger';
 
 // Transaction categories for manual override
 const TRANSACTION_CATEGORIES = [

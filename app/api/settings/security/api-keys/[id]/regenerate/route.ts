@@ -78,21 +78,7 @@ export async function POST(
 				lastUsedUserAgent: null,
 			})
 			.where(eq(userApiKeys.id, id))
-			.returning({
-				id: userApiKeys.id,
-				name: userApiKeys.name,
-				description: userApiKeys.description,
-				type: userApiKeys.type,
-				scopes: userApiKeys.scopes,
-				status: userApiKeys.status,
-				expiresAt: userApiKeys.expiresAt,
-				createdAt: userApiKeys.createdAt,
-				updatedAt: userApiKeys.updatedAt,
-				keyPrefix: userApiKeys.keyPrefix,
-				keySuffix: userApiKeys.keySuffix,
-				rateLimitPerMinute: userApiKeys.rateLimitPerMinute,
-				rateLimitPerHour: userApiKeys.rateLimitPerHour,
-			});
+			.returning();
 
 		// Return the full key only once (on regeneration)
 		return NextResponse.json({

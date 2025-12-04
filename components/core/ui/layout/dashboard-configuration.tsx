@@ -39,7 +39,6 @@ import { CSS } from "@dnd-kit/utilities";
 
 // Import new animation library
 import {
-import { logger } from '@/lib/logger';
 	AnimatedCard,
 	StaggeredContainer,
 	cardVariants,
@@ -47,6 +46,7 @@ import { logger } from '@/lib/logger';
 	smoothTransition,
 	staggerContainerVariants,
 } from "@/lib/animations";
+import { logger } from '@/lib/logger';
 
 // Note: This component requires 'framer-motion'.
 

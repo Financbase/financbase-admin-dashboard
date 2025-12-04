@@ -118,20 +118,7 @@ export async function POST(request: NextRequest) {
 			rateLimitPerMinute: rateLimitPerMinute || 1000,
 			rateLimitPerHour: rateLimitPerHour || 10000,
 			createdBy: userId,
-		}).returning({
-			id: userApiKeys.id,
-			name: userApiKeys.name,
-			description: userApiKeys.description,
-			type: userApiKeys.type,
-			scopes: userApiKeys.scopes,
-			status: userApiKeys.status,
-			expiresAt: userApiKeys.expiresAt,
-			createdAt: userApiKeys.createdAt,
-			keyPrefix: userApiKeys.keyPrefix,
-			keySuffix: userApiKeys.keySuffix,
-			rateLimitPerMinute: userApiKeys.rateLimitPerMinute,
-			rateLimitPerHour: userApiKeys.rateLimitPerHour,
-		});
+		}).returning();
 
 		// Return the full key only once (on creation)
 		return NextResponse.json({

@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 		const sql = await getDbConnection();
 
 		// Get monthly cash flow data for the last N months with parameterized query
-		const cashFlowResult = await sql`
+		const cashFlowResult = (await sql`
 			WITH monthly_data AS (
 				SELECT
 					date_trunc('month', generate_series(
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
 			LEFT JOIN income_data id ON md.month = id.month
 			LEFT JOIN expense_data ed ON md.month = ed.month
 			ORDER BY md.month
-		`;
+		`) as CashFlowRow[];
 
 		const cashFlowData = cashFlowResult.map((row: CashFlowRow) => ({
 			month: row.month instanceof Date ? row.month.toISOString().split('T')[0] : row.month,

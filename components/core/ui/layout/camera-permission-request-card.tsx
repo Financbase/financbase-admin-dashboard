@@ -38,12 +38,12 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
-import { logger } from '@/lib/logger';
 	Card,
 	CardContent,
 	CardDescription,
 	CardTitle,
 } from "@/components/ui/card";
+import { logger } from '@/lib/logger';
 
 interface CameraPermissionCardProps {
 	onPermissionChange?: (granted: boolean) => void;
