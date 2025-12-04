@@ -15,6 +15,7 @@ overrides:
   js-yaml: '>=4.1.1'
   glob@>=10.2.0 <10.5.0: '>=10.5.0'
   express@<4.22.0: '>=4.22.0'
+  validator@<13.15.22: '>=13.15.22'
 
 importers:
 
@@ -9659,8 +9660,8 @@ packages:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
 
-  validator@13.15.20:
-    resolution: {integrity: sha512-KxPOq3V2LmfQPP4eqf3Mq/zrT0Dqp2Vmx2Bn285LwVahLc+CsxOM0crBHczm8ijlcjZ0Q5Xd6LW3z3odTPnlrw==}
+  validator@13.15.23:
+    resolution: {integrity: sha512-4yoz1kEWqUjzi5zsPbAS/903QXSYp0UOtHsPpp7p9rHAw/W+dkInskAE386Fat3oKRROwO98d9ZB0G4cObgUyw==}
     engines: {node: '>= 0.10'}
 
   vary@1.1.2:
@@ -20818,7 +20819,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
-  validator@13.15.20: {}
+  validator@13.15.23: {}
 
   vary@1.1.2: {}
 
@@ -21198,7 +21199,7 @@ snapshots:
     dependencies:
       lodash.get: 4.4.2
       lodash.isequal: 4.5.0
-      validator: 13.15.20
+      validator: 13.15.23
     optionalDependencies:
       commander: 9.5.0
 
