@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
 			return createSuccessResponse(exports, 200, { requestId });
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 			try {
 				body = await request.json();
 			} catch (error) {
-				return ApiErrorHandler.badRequest("Invalid JSON in request body");
+				return ApiErrorHandler.badRequest("Invalid JSON in request body") as NextResponse<StandardApiResponse<unknown>>;
 			}
 
 			const { filename, format, fileSize } = body;
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 			if (!filename || !format || (format !== "mef-xml" && format !== "json")) {
 				return ApiErrorHandler.badRequest(
 					"Invalid export metadata: filename and format (mef-xml or json) are required"
-				);
+				) as NextResponse<StandardApiResponse<unknown>>;
 			}
 
 			// Store only metadata
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 				{ requestId }
 			);
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }

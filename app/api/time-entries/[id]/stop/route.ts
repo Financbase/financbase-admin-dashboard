@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { FreelanceHubService } from '@/lib/services/freelance-hub-service';
 import { logger } from '@/lib/logger';
@@ -22,6 +22,7 @@ export async function POST(
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
+		const { id } = await params;
 		const timeEntry = await FreelanceHubService.stopTimeTracking(id, userId);
 
 		return NextResponse.json({ timeEntry });

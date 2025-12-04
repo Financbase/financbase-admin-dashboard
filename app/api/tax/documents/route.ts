@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 
 			return createSuccessResponse(documents, 200, { requestId });
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 			try {
 				body = await request.json();
 			} catch (error) {
-				return ApiErrorHandler.badRequest("Invalid JSON in request body");
+				return ApiErrorHandler.badRequest("Invalid JSON in request body") as NextResponse<StandardApiResponse<unknown>>;
 			}
 
 			const validatedData = createTaxDocumentSchema.parse({
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 
 			return createSuccessResponse(document, 201, { requestId });
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }

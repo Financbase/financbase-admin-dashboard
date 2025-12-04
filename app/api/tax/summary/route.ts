@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 				{ requestId }
 			);
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }

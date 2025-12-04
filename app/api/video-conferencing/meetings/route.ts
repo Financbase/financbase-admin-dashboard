@@ -102,8 +102,8 @@ export async function POST(request: NextRequest) {
 						duration,
 						timezone: timezone || 'UTC',
 						agenda: description,
-						settings: {
-							waiting_room: true,
+					settings: {
+						// waiting_room: true, // Not available in Zoom API type
 							mute_upon_entry: true,
 							auto_recording: 'none',
 						},

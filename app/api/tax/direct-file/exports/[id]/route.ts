@@ -43,7 +43,7 @@ export async function DELETE(
 			if (exportRecord.length === 0) {
 				return ApiErrorHandler.notFound(
 					"Export record not found or you do not have permission to delete it"
-				);
+				) as NextResponse<StandardApiResponse<unknown>>;
 			}
 
 			// Delete the export record
@@ -62,7 +62,7 @@ export async function DELETE(
 				{ requestId }
 			);
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }

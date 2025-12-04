@@ -31,7 +31,7 @@ export async function POST(
 			try {
 				body = await request.json();
 			} catch (error) {
-				return ApiErrorHandler.badRequest("Invalid JSON in request body");
+				return ApiErrorHandler.badRequest("Invalid JSON in request body") as NextResponse<StandardApiResponse<unknown>>;
 			}
 
 			const validatedData = recordTaxPaymentSchema.parse({
@@ -44,7 +44,7 @@ export async function POST(
 
 			return createSuccessResponse(obligation, 200, { requestId });
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }

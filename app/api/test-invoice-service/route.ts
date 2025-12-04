@@ -20,7 +20,7 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json({ 
       error: 'Failed to import InvoiceService',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

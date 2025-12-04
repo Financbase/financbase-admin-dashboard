@@ -117,12 +117,12 @@ export async function GET(request: NextRequest) {
 			} else if (format === "pdf") {
 				// PDF export would require a PDF library like pdfkit or puppeteer
 				// For now, return a JSON response indicating PDF export is not yet implemented
-				return ApiErrorHandler.notImplemented("PDF export is not yet implemented", requestId);
+				return ApiErrorHandler.notImplemented("PDF export is not yet implemented", requestId) as NextResponse<StandardApiResponse<unknown>>;
 			}
 
-			return ApiErrorHandler.badRequest("Invalid format or type");
+			return ApiErrorHandler.badRequest("Invalid format or type") as NextResponse<StandardApiResponse<unknown>>;
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }
