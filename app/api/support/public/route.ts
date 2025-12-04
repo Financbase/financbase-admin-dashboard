@@ -200,8 +200,9 @@ export async function POST(request: NextRequest) {
 			.returning();
 
 		// Send notification email (async - don't wait for it)
+		const supportEmail = process.env.SUPPORT_NOTIFICATION_EMAIL || process.env.CONTACT_NOTIFICATION_EMAIL || 'support@financbase.com';
 		EmailService.sendEmail({
-			to: process.env.SUPPORT_NOTIFICATION_EMAIL || process.env.CONTACT_NOTIFICATION_EMAIL || 'support@financbase.com',
+			to: { email: supportEmail },
 			subject: `[${ticketNumber}] Support Request: ${sanitizedSubject}`,
 			html: `
 				<h2>New Support Request - ${ticketNumber}</h2>

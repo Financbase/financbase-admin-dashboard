@@ -107,37 +107,8 @@ export async function GET() {
 					.limit(1);
 				
 				// Add default values for missing columns
-				if (preferences.length > 0) {
-					// Remove sidebarCollapsed as it doesn't exist in the schema
-					preferences[0] = {
-						...preferences[0],
-						compactMode: false,
-						highContrast: false,
-						fontSize: 'medium',
-						timeFormat: '12h',
-						currency: 'USD',
-						chartsEnabled: true,
-						analyticsEnabled: true,
-						autoRefresh: true,
-						refreshInterval: '5m',
-						emailNotifications: true,
-						pushNotifications: true,
-						desktopNotifications: false,
-						notificationSounds: true,
-						weeklyDigest: true,
-						monthlyReport: true,
-						analyticsTracking: true,
-						errorReporting: true,
-						usageStats: false,
-						marketingEmails: false,
-						dataExport: true,
-						betaFeatures: false,
-						experimentalFeatures: false,
-						developerMode: false,
-						apiAccess: false,
-						customPreferences: {},
-					};
-				}
+				// Preferences exist, return them as-is
+			// No need to mutate the readonly query result
 			} else {
 				// Re-throw if it's a different error
 				throw selectError;

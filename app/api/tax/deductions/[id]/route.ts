@@ -31,7 +31,7 @@ export async function PATCH(
 			try {
 				body = await request.json();
 			} catch (error) {
-				return ApiErrorHandler.badRequest("Invalid JSON in request body");
+				return ApiErrorHandler.badRequest("Invalid JSON in request body") as NextResponse<StandardApiResponse<unknown>>;
 			}
 
 			const validatedData = updateTaxDeductionSchema.parse({
@@ -48,7 +48,7 @@ export async function PATCH(
 
 			return createSuccessResponse(deduction, 200, { requestId });
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }
@@ -74,7 +74,7 @@ export async function DELETE(
 				{ requestId }
 			);
 		} catch (error) {
-			return ApiErrorHandler.handle(error, requestId);
+			return ApiErrorHandler.handle(error, requestId) as NextResponse<StandardApiResponse<unknown>>;
 		}
 	});
 }
