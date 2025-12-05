@@ -39,7 +39,7 @@ export function validateFileSize(size: number): FileValidationResult {
  * Validate MIME type
  */
 export function validateMimeType(mimeType: string): FileValidationResult {
-	if (!FILE_UPLOAD.ALLOWED_MIME_TYPES.includes(mimeType)) {
+	if (!(FILE_UPLOAD.ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)) {
 		return {
 			valid: false,
 			error: `MIME type ${mimeType} is not allowed. Allowed types: ${FILE_UPLOAD.ALLOWED_MIME_TYPES.join(', ')}`,
@@ -55,7 +55,7 @@ export function validateMimeType(mimeType: string): FileValidationResult {
 export function validateFileExtension(filename: string): FileValidationResult {
 	const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
 	
-	if (!FILE_UPLOAD.ALLOWED_EXTENSIONS.includes(extension)) {
+	if (!(FILE_UPLOAD.ALLOWED_EXTENSIONS as readonly string[]).includes(extension)) {
 		return {
 			valid: false,
 			error: `File extension ${extension} is not allowed. Allowed extensions: ${FILE_UPLOAD.ALLOWED_EXTENSIONS.join(', ')}`,
