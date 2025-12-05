@@ -26,7 +26,7 @@ import {
 	Filter,
 	Search,
 } from "lucide-react";
-import { memo, useMemo, useState } from "react";
+import React, { memo, useMemo, useState } from "react";
 
 interface Column<T> {
 	key: keyof T;
@@ -189,4 +189,4 @@ export const DataTable = memo(function DataTable<
 	);
 }) as <T extends Record<string, unknown>>(
 	props: DataTableProps<T>,
-) => JSX.Element;
+) => React.ReactElement;
