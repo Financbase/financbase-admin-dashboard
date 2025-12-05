@@ -326,7 +326,7 @@ export const requestLeaveSchema = z.object({
   startDate: z.string().datetime('Valid start date is required'),
   endDate: z.string().datetime('Valid end date is required'),
   duration: z.string(),
-  durationUnit: z.enum(['hours', 'days']).default('hours'),
+  durationUnit: z.enum(['hours', 'days']).optional(),
   reason: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -410,7 +410,7 @@ export const createTaxDeductionSchema = z.object({
   category: z.string().min(1, 'Category is required'),
   amount: z.number().positive('Amount must be positive'),
   percentage: z.number().min(0).max(100).optional(),
-  transactionCount: z.number().int().min(0).default(0),
+  transactionCount: z.number().int().min(0).optional(),
   year: z.number().int().min(2000).max(2100),
   description: z.string().optional(),
   metadata: z.record(z.string(), z.any()).optional(),

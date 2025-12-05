@@ -79,9 +79,7 @@ export function TaxDeductionForm({
 	const currentYear = new Date().getFullYear();
 
 	const form = useForm<CreateTaxDeductionInput>({
-		resolver: zodResolver(
-			isEditing ? updateTaxDeductionSchema : createTaxDeductionSchema
-		),
+		resolver: zodResolver(createTaxDeductionSchema),
 		defaultValues: {
 			userId: user?.id || "",
 			category: deduction?.category || "",
