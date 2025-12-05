@@ -39,7 +39,7 @@ export function DirectFileDisclosure() {
 				</AlertDescription>
 			</Alert>
 
-			<Alert variant="outline">
+			<Alert variant="default">
 				<Info className="h-4 w-4" />
 				<AlertTitle>About IRS Direct File</AlertTitle>
 				<AlertDescription className="mt-2">
