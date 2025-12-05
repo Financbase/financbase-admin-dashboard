@@ -95,7 +95,7 @@ const FraudCard = ({ blockedEmails }: FraudCardProps) => {
 		close: {
 			rotate: 0,
 			transition: {
-				ease: "easeInOut",
+				
 				duration: 0.1,
 				repeat: 0,
 			},

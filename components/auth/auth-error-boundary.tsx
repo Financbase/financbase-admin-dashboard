@@ -36,7 +36,7 @@ export class AuthErrorBoundary extends Component<AuthErrorBoundaryProps, AuthErr
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error("AuthErrorBoundary caught an error:", error, errorInfo);
+    logger.error("AuthErrorBoundary caught an error:", { error, errorInfo });
   }
 
   handleReset = () => {

@@ -54,6 +54,7 @@ interface GoogleMeetEvent {
 	created: string;
 	updated: string;
 	status?: 'confirmed' | 'tentative' | 'cancelled';
+	hangoutLink?: string; // Legacy property for older Google Calendar events
 }
 
 interface GoogleCalendar {
@@ -121,6 +122,15 @@ interface GoogleFreeBusyResponse {
 			end: string;
 		}>;
 	}>;
+}
+
+interface GoogleWebhookPayload {
+	id: string;
+	resourceId: string;
+	resourceState: string;
+	resourceUri: string;
+	channelId: string;
+	expiration?: string;
 }
 
 export class GoogleMeetService {

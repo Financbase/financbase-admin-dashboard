@@ -70,9 +70,9 @@ export function SimpleTooltip({
 }: SimpleTooltipProps) {
 	if (useNative) {
 		return React.cloneElement(children, {
+			...(typeof children.props === 'object' && children.props !== null ? children.props : {}),
 			title: content,
-			...children.props,
-		});
+		} as any);
 	}
 
 	return (

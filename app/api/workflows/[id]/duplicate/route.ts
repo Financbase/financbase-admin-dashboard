@@ -49,18 +49,17 @@ export async function POST(
       .insert(workflows)
       .values({
         userId,
+        organizationId: workflow.organizationId,
         name: `${workflow.name} (Copy)`,
         description: workflow.description,
-        category: workflow.category,
-        type: workflow.type,
+        triggerConfig: workflow.triggerConfig,
+        actions: workflow.actions,
+        conditions: workflow.conditions,
         status: 'draft',
-        isActive: false,
-        steps: workflow.steps,
-        triggers: workflow.triggers,
-        variables: workflow.variables,
-        settings: workflow.settings,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        isTemplate: workflow.isTemplate,
+        templateCategory: workflow.templateCategory,
+        isPublic: false,
+        metadata: workflow.metadata,
       })
       .returning();
 

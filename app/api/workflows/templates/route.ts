@@ -12,6 +12,8 @@ import { auth } from '@clerk/nextjs/server';
 import { ApiErrorHandler, generateRequestId } from '@/lib/api-error-handler';
 import { WorkflowService } from '@/lib/services/workflow-service';
 import { logger } from '@/lib/logger';
+import { db } from '@/lib/db';
+import { workflowTemplates } from '@/lib/db/schemas';
 
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
@@ -56,23 +58,23 @@ export async function POST(request: NextRequest) {
       return ApiErrorHandler.badRequest('Invalid JSON in request body');
     }
 
-    const { name, description, category, templateConfig, tags } = body;
+    const { name, description, category, triggerConfig, actions, conditions, metadata } = body;
 
-    if (!name || !description || !category || !templateConfig) {
-      return ApiErrorHandler.badRequest('Name, description, category, and templateConfig are required');
+    if (!name || !description || !category || !triggerConfig || !actions) {
+      return ApiErrorHandler.badRequest('Name, description, category, triggerConfig, and actions are required');
     }
 
     const newTemplate = await db.insert(workflowTemplates).values({
       name,
       description,
       category,
-      templateConfig,
-      tags: tags || [],
-      authorId: userId,
+      triggerConfig,
+      actions,
+      conditions: conditions || null,
+      isPublic: true,
       isOfficial: false,
-      isPopular: false,
-      usageCount: 0,
-      isActive: true,
+      createdBy: userId,
+      metadata: metadata || null,
     }).returning();
 
     return NextResponse.json(newTemplate[0], { status: 201 });

@@ -160,7 +160,7 @@ const EmailClientCard = React.forwardRef<HTMLDivElement, EmailClientCardProps>(
 									key={index}
 									whileHover={{ scale: 1.2, rotate: -5 }}
 									whileTap={{ scale: 0.9 }}
-									transition={{ type: "spring", stiffness: 400, damping: 15 }}
+									transition={{ type: "spring" as const, stiffness: 400, damping: 15 }}
 								>
 									<Button
 										variant="ghost"

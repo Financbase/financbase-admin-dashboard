@@ -64,7 +64,7 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
 		visible: {
 			opacity: 1,
 			y: 0,
-			transition: { duration: 0.7, ease: "easeOut" },
+			transition: { duration: 0.7,  },
 		},
 	};
 
@@ -165,7 +165,7 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
 							whileInView={{
 								y: reverseLayout || data?.layout === "reverse" ? -20 : -30,
 							}}
-							transition={{ duration: 1.2, ease: "easeOut" }}
+							transition={{ duration: 1.2,  }}
 							viewport={{ once: true, amount: 0.5 }}
 						>
 							{secondaryImage && (
@@ -187,7 +187,7 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
 							whileInView={{
 								y: reverseLayout || data?.layout === "reverse" ? 20 : 30,
 							}}
-							transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
+							transition={{ duration: 1.2,  delay: 0.1 }}
 							viewport={{ once: true, amount: 0.5 }}
 						>
 							<div className="p-0 h-full">

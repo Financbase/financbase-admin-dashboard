@@ -72,7 +72,7 @@ export function TimesheetConfirmation({
 						initial={{ scale: 0.95, y: 20, opacity: 0 }}
 						animate={{ scale: 1, y: 0, opacity: 1 }}
 						exit={{ scale: 0.95, y: 20, opacity: 0 }}
-						transition={{ duration: 0.3, ease: "easeInOut" }}
+						transition={{ duration: 0.3,  }}
 						className={cn(
 							"relative m-4 w-full max-w-4xl overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg",
 							className,
@@ -88,7 +88,7 @@ export function TimesheetConfirmation({
 										scale: 1,
 										transition: {
 											delay: 0.2,
-											type: "spring",
+											type: "spring" as const,
 											stiffness: 200,
 											damping: 15,
 										},

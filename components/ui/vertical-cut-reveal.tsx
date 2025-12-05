@@ -30,7 +30,7 @@ export const VerticalCutReveal = ({
   reverse = false,
   containerClassName = "",
   transition = {
-    type: "spring",
+    type: "spring" as const,
     stiffness: 100,
     damping: 20,
   },

@@ -83,7 +83,22 @@ export function CareersTable() {
 	const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [statusFilter, setStatusFilter] = useState<string>('all');
-	const [formData, setFormData] = useState({
+	const [formData, setFormData] = useState<{
+		title: string;
+		department: string;
+		location: string;
+		type: string;
+		experience: string;
+		description: string;
+		fullDescription: string;
+		requirements: string[];
+		responsibilities: string[];
+		qualifications: string[];
+		salary: string;
+		benefits: string[];
+		status: 'draft' | 'published' | 'closed' | 'archived';
+		isFeatured: boolean;
+	}>({
 		title: '',
 		department: '',
 		location: '',
@@ -91,12 +106,12 @@ export function CareersTable() {
 		experience: '',
 		description: '',
 		fullDescription: '',
-		requirements: [] as string[],
-		responsibilities: [] as string[],
-		qualifications: [] as string[],
+		requirements: [],
+		responsibilities: [],
+		qualifications: [],
 		salary: '',
-		benefits: [] as string[],
-		status: 'draft' as const,
+		benefits: [],
+		status: 'draft',
 		isFeatured: false,
 	});
 	const [requirementInput, setRequirementInput] = useState('');
@@ -143,7 +158,7 @@ export function CareersTable() {
 			qualifications: job.qualifications || [],
 			salary: job.salary || '',
 			benefits: job.benefits || [],
-			status: (job.status === 'draft' || job.status === 'published' || job.status === 'closed' || job.status === 'archived') ? job.status : 'draft',
+			status: (job.status === 'draft' || job.status === 'published' || job.status === 'closed' || job.status === 'archived') ? job.status as 'draft' | 'published' | 'closed' | 'archived' : 'draft',
 			isFeatured: job.isFeatured,
 		});
 		setIsDialogOpen(true);

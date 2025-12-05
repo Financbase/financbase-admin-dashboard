@@ -115,7 +115,7 @@ export default function AdboardPricing() {
                   backgroundColor: 'var(--brand-primary)',
                   boxShadow: '0 0 0 1px var(--brand-primary)',
                 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                transition={{ type: "spring" as const, stiffness: 500, damping: 30 }}
               />
             )}
             <span className="relative">Monthly Billing</span>
@@ -140,7 +140,7 @@ export default function AdboardPricing() {
                   backgroundColor: 'var(--brand-primary)',
                   boxShadow: '0 0 0 1px var(--brand-primary)',
                 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                transition={{ type: "spring" as const, stiffness: 500, damping: 30 }}
               />
             )}
             <span className="relative flex items-center gap-2">

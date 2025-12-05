@@ -106,9 +106,18 @@ export async function GET() {
 					.where(eq(userPreferences.userId, userId))
 					.limit(1);
 				
-				// Add default values for missing columns
-				// Preferences exist, return them as-is
-			// No need to mutate the readonly query result
+				// Merge default values for missing columns into a new object (don't mutate readonly result)
+				if (preferences.length > 0) {
+					preferences = [{
+						...preferences[0],
+						sidebarCollapsed: false,
+						compactMode: false,
+						highContrast: false,
+						fontSize: 'medium' as const,
+						timeFormat: '12h' as const,
+						currency: 'USD' as const,
+					}];
+				}
 			} else {
 				// Re-throw if it's a different error
 				throw selectError;

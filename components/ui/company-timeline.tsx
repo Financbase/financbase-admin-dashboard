@@ -93,7 +93,7 @@ export function CompanyTimeline({ items, className }: CompanyTimelineProps) {
 					animate={isInView ? { scaleY: 1 } : { scaleY: 0 }}
 					transition={{
 						duration: 1.2,
-						ease: "easeOut",
+						
 						delay: 0.2,
 					}}
 					aria-hidden="true"
@@ -255,7 +255,7 @@ export function CompanyTimeline({ items, className }: CompanyTimelineProps) {
 														transition={{
 															duration: 1.2,
 															delay: index * 0.2 + 0.8,
-															ease: "easeOut",
+															
 														}}
 													/>
 												</div>
@@ -280,7 +280,7 @@ export function CompanyTimeline({ items, className }: CompanyTimelineProps) {
 					transition={{
 						duration: 0.4,
 						delay: items.length * 0.1 + 0.3,
-						type: "spring",
+						type: "spring" as const,
 						stiffness: 400,
 					}}
 					aria-hidden="true"

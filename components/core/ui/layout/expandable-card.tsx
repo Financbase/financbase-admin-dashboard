@@ -238,7 +238,7 @@ export function ProjectStatusCard({
 
 					<motion.div
 						animate={{ height: isExpanded ? (contentRef.current?.scrollHeight ?? "auto") : 0 }}
-						transition={{ type: "spring", stiffness: 300, damping: 30 }}
+						transition={{ type: "spring" as const, stiffness: 300, damping: 30 }}
 						className="overflow-hidden"
 					>
 						<div ref={contentRef}>

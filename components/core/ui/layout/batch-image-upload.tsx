@@ -221,7 +221,7 @@ export function BatchImageUpload({
 								)
 							);
 						} catch (error) {
-							logger.warn("AI analysis failed for", item.file.name, error);
+							logger.warn("AI analysis failed", { fileName: item.file.name, error });
 							setUploadItems(prev =>
 								prev.map(uploadItem =>
 									uploadItem.id === item.id

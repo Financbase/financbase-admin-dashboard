@@ -96,7 +96,7 @@ export function ChatInterface() {
 	const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 	const [isTyping, setIsTyping] = useState(false);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
-	const typingTimeoutRef = useRef<NodeJS.Timeout>();
+	const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	useEffect(() => {
 		// Auto-join first channel if available

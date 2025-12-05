@@ -120,7 +120,7 @@ export const AuthorFormCard: React.FC<AuthorFormCardProps> = ({
 	// --- Animation Variants for Framer Motion ---
 	const FADE_IN_VARIANTS = {
 		hidden: { opacity: 0, y: 10 },
-		show: { opacity: 1, y: 0, transition: { type: "spring" } },
+		show: { opacity: 1, y: 0, transition: { type: "spring" as const } },
 	};
 
 	return (

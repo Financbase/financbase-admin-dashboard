@@ -67,7 +67,7 @@ export const NotificationCenterStack = ({
 									: "0 2px 8px rgba(0,0,0,0.06)",
 							}}
 							transition={{
-								type: "spring",
+								type: "spring" as const,
 								stiffness: 280,
 								damping: 22,
 								delay: i * 0.05,

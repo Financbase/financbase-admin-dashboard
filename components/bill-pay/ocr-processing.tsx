@@ -81,8 +81,8 @@ const documentProcessSchema = z.object({
   documentType: z.enum(['invoice', 'receipt', 'bill', 'auto']),
   vendorId: z.string().optional(),
   category: z.string().optional(),
-  priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
-  autoProcess: z.boolean().default(true)
+  priority: z.enum(['low', 'medium', 'high', 'urgent']),
+  autoProcess: z.boolean()
 });
 
 type DocumentProcessFormData = z.infer<typeof documentProcessSchema>;

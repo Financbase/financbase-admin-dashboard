@@ -34,7 +34,7 @@ export class ProjectPulseErrorBoundary extends Component<Props, State> {
 	}
 
 	componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-		logger.error("Project Pulse Tracker Error:", error, errorInfo);
+		logger.error("Project Pulse Tracker Error:", { error, errorInfo });
 	}
 
 	render() {

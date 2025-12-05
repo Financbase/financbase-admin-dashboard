@@ -209,7 +209,7 @@ export function ImageUpload({
 							const analysis = await analyzeImageWithAI(result.url, file.name);
 							analyses.push({ url: result.url, analysis });
 						} catch (error) {
-							logger.warn("AI analysis failed for", file.name, error);
+							logger.warn("AI analysis failed for", { fileName: file.name, error });
 							analyses.push({ url: result.url, analysis: null });
 						}
 					}

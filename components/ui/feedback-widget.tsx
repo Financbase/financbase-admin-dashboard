@@ -125,7 +125,7 @@ export const FeedbackWidget = ({
 			opacity: 1,
 			y: 0,
 			scale: 1,
-			transition: { type: "spring", duration: 0.6, bounce: 0.4 },
+			transition: { type: "spring" as const, duration: 0.6, bounce: 0.4 },
 		},
 		exit: { opacity: 0, y: 30, scale: 0.95, transition: { duration: 0.2 } },
 	};

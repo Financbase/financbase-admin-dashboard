@@ -268,7 +268,7 @@ const TestimonialCard = React.forwardRef<HTMLDivElement, TestimonialCardProps>(
 							initial={{ opacity: 0, x: 50 }}
 							animate={{ opacity: 1, x: 0 }}
 							exit={{ opacity: 0, x: -50 }}
-							transition={{ duration: 0.3, ease: "easeInOut" }}
+							transition={{ duration: 0.3,  }}
 							className="space-y-3"
 						>
 							{currentTestimonial.rating && <StarRating rating={currentTestimonial.rating} />}

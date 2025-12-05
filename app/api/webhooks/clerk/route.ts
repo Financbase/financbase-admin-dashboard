@@ -79,12 +79,12 @@ async function getOrCreateDefaultOrganization(): Promise<string> {
       
       // Validate type based on actual database schema
       if (actualType === 'uuid' && !isValidUUID(orgId)) {
-        logger.error('Schema mismatch: Expected UUID but got:', typeof orgId, orgId);
+        logger.error('Schema mismatch: Expected UUID but got:', { type: typeof orgId, value: orgId });
         throw new Error(`Schema type mismatch: organizations.id should be UUID but value is ${typeof orgId}`);
       }
       
       if (actualType === 'integer' && typeof orgId !== 'number') {
-        logger.error('Schema mismatch: Expected integer but got:', typeof orgId, orgId);
+        logger.error('Schema mismatch: Expected integer but got:', { type: typeof orgId, value: orgId });
         throw new Error(`Schema type mismatch: organizations.id should be integer but value is ${typeof orgId}`);
       }
       
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
         'svix-id': svix_id,
         'svix-timestamp': svix_timestamp,
         'svix-signature': svix_signature,
-      });
+      }) as typeof evt;
     } catch (err) {
       logger.error('Error verifying webhook:', err);
       return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 400 });
@@ -272,14 +272,14 @@ export async function POST(request: NextRequest) {
                 logger.error('Type mismatch error when creating user:', {
                   error: insertError.message,
                   errorCode: insertError.code,
-                  organizationId: defaultOrgId,
-                  organizationIdType: typeof defaultOrgId,
-                  organizationIdValidUUID: isValidUUID(defaultOrgId),
+                  organizationId: personalOrgId,
+                  organizationIdType: typeof personalOrgId,
+                  organizationIdValidUUID: isValidUUID(personalOrgId),
                   userSchema: {
                     organizationId: 'uuid (required)',
                   },
                 });
-                throw new Error(`User creation failed due to type mismatch. OrganizationId: ${defaultOrgId} (${typeof defaultOrgId}). Error: ${insertError.message}`);
+                throw new Error(`User creation failed due to type mismatch. OrganizationId: ${personalOrgId} (${typeof personalOrgId}). Error: ${insertError.message}`);
               }
               throw insertError;
             }
@@ -358,7 +358,7 @@ export async function POST(request: NextRequest) {
             firstName,
             lastName,
             email,
-            source: 'signup',
+            source: 'website',
             priority: 'high', // New signups are high priority
             notes: 'Lead created from user signup',
             metadata: {

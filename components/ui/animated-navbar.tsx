@@ -47,7 +47,7 @@ export function AnimatedNavbar({ items, className }: AnimatedNavbarProps) {
               )}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              transition={{ type: "spring" as const, stiffness: 400, damping: 17 }}
             >
               {item.icon && <item.icon className="h-4 w-4" />}
               <span>{item.name}</span>
@@ -61,7 +61,7 @@ export function AnimatedNavbar({ items, className }: AnimatedNavbarProps) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    transition={{ type: "spring" as const, stiffness: 500, damping: 30 }}
                   />
                 )}
               </AnimatePresence>
@@ -74,7 +74,7 @@ export function AnimatedNavbar({ items, className }: AnimatedNavbarProps) {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  transition={{ type: "spring" as const, stiffness: 400, damping: 17 }}
                   className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-2 bg-gray-900/90 text-white text-xs rounded-lg backdrop-blur-sm border border-gray-700/50 whitespace-nowrap z-50"
                 >
                   {item.description}

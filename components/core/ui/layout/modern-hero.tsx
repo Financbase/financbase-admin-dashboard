@@ -456,7 +456,7 @@ const FinancbaseLandingPage = () => {
 														: `bg-${feature.color}-100 text-${feature.color}-600`
 												}`}
 												whileHover={{ rotate: 5, scale: 1.1 }}
-												transition={{ type: "spring", stiffness: 300 }}
+												transition={{ type: "spring" as const, stiffness: 300 }}
 											>
 												<feature.icon className="h-6 w-6" />
 											</motion.div>
@@ -784,7 +784,7 @@ const FinancbaseLandingPage = () => {
 									<motion.div
 										initial={{ scale: 0 }}
 										animate={{ scale: 1 }}
-										transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+										transition={{ delay: 0.5, type: "spring" as const, stiffness: 200 }}
 										className="inline-flex p-4 bg-blue-600 rounded-2xl mb-6"
 									>
 										<Mail className="h-8 w-8 text-white" />
@@ -867,7 +867,7 @@ const FinancbaseLandingPage = () => {
 						initial={{ opacity: 0, y: 100, scale: 0.8 }}
 						animate={{ opacity: 1, y: 0, scale: 1 }}
 						exit={{ opacity: 0, y: 100, scale: 0.8 }}
-						transition={{ type: "spring", stiffness: 300, damping: 30 }}
+						transition={{ type: "spring" as const, stiffness: 300, damping: 30 }}
 						className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50"
 					>
 						<div className="relative bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl ring-1 ring-white/20 p-3">

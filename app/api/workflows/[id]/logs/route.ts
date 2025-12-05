@@ -47,29 +47,24 @@ export async function GET(
     const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = db
-      .select()
-      .from(workflowLogs)
-      .where(eq(workflowLogs.workflowId, workflowId))
-      .orderBy(desc(workflowLogs.createdAt))
-      .limit(limit)
-      .offset(offset);
-
+    // Build all where conditions
+    const whereConditions = [eq(workflowLogs.workflowId, workflowId)];
+    
     if (executionId) {
-      query = query.where(and(
-        eq(workflowLogs.workflowId, workflowId),
-        eq(workflowLogs.executionId, executionId)
-      ));
+      whereConditions.push(eq(workflowLogs.executionId, executionId));
     }
 
     if (level) {
-      query = query.where(and(
-        eq(workflowLogs.workflowId, workflowId),
-        eq(workflowLogs.level, level as any)
-      ));
+      whereConditions.push(eq(workflowLogs.level, level as any));
     }
 
-    const logs = await query;
+    const logs = await db
+      .select()
+      .from(workflowLogs)
+      .where(and(...whereConditions))
+      .orderBy(desc(workflowLogs.createdAt))
+      .limit(limit)
+      .offset(offset);
 
     return NextResponse.json(logs);
   } catch (error) {

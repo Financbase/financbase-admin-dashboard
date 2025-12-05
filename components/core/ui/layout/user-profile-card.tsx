@@ -23,9 +23,9 @@ import {
 } from "lucide-react";
 import type * as React from "react";
 
-const transition: Transition = { type: "spring", stiffness: 300, damping: 30 };
+const transition: Transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-const textSwitchTransition: Transition = { duration: 0.22, ease: "easeInOut" };
+const textSwitchTransition: Transition = { duration: 0.22 };
 const summaryTextVariants = {
 	collapsed: { opacity: 1, y: 0 },
 	expanded: { opacity: 0, y: -16 },

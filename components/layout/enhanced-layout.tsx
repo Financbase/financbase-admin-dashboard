@@ -130,7 +130,7 @@ export const EnhancedLayout = React.memo<EnhancedLayoutProps>(({
 			<motion.div
 				initial={{ x: -300 }}
 				animate={{ x: isMenuOpen ? 0 : -300 }}
-				transition={{ duration: 0.3, ease: "easeInOut" }}
+				transition={{ duration: 0.3,  }}
 				className="fixed inset-y-0 left-0 z-50 w-64 lg:hidden"
 				onTouchStart={touchHandlers?.onTouchStart}
 				onTouchMove={touchHandlers?.onTouchMove}

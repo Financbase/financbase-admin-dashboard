@@ -89,7 +89,7 @@ export const InteractiveTrendCard: React.FC<InteractiveTrendCardProps> = ({
 							initial={{ opacity: 0, y: -10, scale: 0.95 }}
 							animate={{ opacity: 1, y: 0, scale: 1 }}
 							exit={{ opacity: 0, y: -10, scale: 0.95 }}
-							transition={{ duration: 0.2, ease: "easeOut" }}
+							transition={{ duration: 0.2,  }}
 							className="pointer-events-none absolute -top-8 left-centre w-10"
 							style={{
 								transform: `translateX(${(hoveredIndex / (chartData.length - 1)) * 100}%) translateX(-50%)`,
@@ -132,7 +132,7 @@ export const InteractiveTrendCard: React.FC<InteractiveTrendCardProps> = ({
 													? adjacentBarColor
 													: defaultBarColor,
 										}}
-										transition={{ duration: 0.3, ease: "easeInOut" }}
+										transition={{ duration: 0.3,  }}
 									/>
 								</div>
 								<span className="mt-2 text-xs text-muted-foreground">

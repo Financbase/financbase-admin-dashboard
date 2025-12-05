@@ -142,8 +142,8 @@ export async function POST(request: NextRequest) {
 
 					meetingData = {
 						providerMeetingId: googleMeeting.id,
-						joinUrl: googleMeeting.conferenceData?.entryPoints?.[0]?.uri || googleMeeting.hangoutLink,
-						meetingId: googleMeeting.conferenceData?.conferenceId || googleMeeting.id,
+						joinUrl: googleMeeting.conferenceData?.entryPoints?.[0]?.uri || googleMeeting.hangoutLink || '',
+						meetingId: googleMeeting.id,
 						providerData: googleMeeting,
 					};
 				} catch (error) {

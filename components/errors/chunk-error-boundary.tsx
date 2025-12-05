@@ -69,7 +69,7 @@ export class ChunkErrorBoundary extends Component<ChunkErrorBoundaryProps, Chunk
 
 	componentDidCatch(error: Error, errorInfo: ErrorInfo) {
 		// Log error for debugging
-		logger.error("[ChunkErrorBoundary] Chunk load error caught:", error, errorInfo);
+		logger.error("[ChunkErrorBoundary] Chunk load error caught:", { error, errorInfo });
 
 		// Call custom callback if provided
 		if (this.props.onChunkError) {

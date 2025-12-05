@@ -50,7 +50,7 @@ export const Component = ({
 					y: [Math.random() * 80 - 40, 0, Math.random() * 80 - 40],
 					transition: {
 						duration: 2,
-						ease: "easeInOut",
+						
 						delay: i * 0.3,
 					},
 				}));
@@ -134,7 +134,7 @@ export const Component = ({
 							borderColor: isThrottled
 								? themeColors.destructiveWithOpacity
 								: themeColors.successWithOpacity,
-							transition: { duration: 0.5, ease: "easeInOut" },
+							transition: { duration: 0.5,  },
 						}}
 					>
 						<LuServerCog className="size-8 text-neutral-400" />
@@ -157,7 +157,7 @@ export const Component = ({
 						animate={{
 							opacity: isThrottled ? 1 : 0,
 							scale: isThrottled ? 1 : 0.8,
-							transition: { duration: 0.3, ease: "easeOut" },
+							transition: { duration: 0.3,  },
 						}}
 					>
 						<HiOutlineShieldExclamation className="size-32 text-red-500/50" />

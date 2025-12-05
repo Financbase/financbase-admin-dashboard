@@ -175,7 +175,7 @@ export function CommunityHubCard({
 								className="absolute top-0 h-2 rounded-full bg-primary"
 								initial={{ width: 0 }}
 								animate={{ width: `${currentBook.progress}%` }}
-								transition={{ duration: 1, ease: "easeInOut" }}
+								transition={{ duration: 1,  }}
 							/>
 						</div>
 						<div className="flex justify-between text-sm">

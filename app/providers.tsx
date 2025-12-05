@@ -90,7 +90,7 @@ export function Providers({ children }: ProvidersProps) {
 					enableSystem={false}
 					disableTransitionOnChange
 					storageKey="financbase-theme"
-					suppressHydrationWarning
+					// suppressHydrationWarning // Not supported by ThemeProvider
 				>
 					{/* Wrap with ChunkErrorBoundary to catch React-level chunk errors */}
 					<ChunkErrorBoundary autoRecover={true}>

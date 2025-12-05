@@ -141,14 +141,12 @@ export class ReactQueryDevtoolsWrapper extends Component<
 		if (isChunkLoadError(error)) {
 			logger.warn(
 				'[ReactQueryDevtoolsWrapper] Caught chunk load error in error boundary:',
-				error,
-				errorInfo
+				{ error, errorInfo }
 			);
 		} else {
 			logger.error(
 				'[ReactQueryDevtoolsWrapper] Caught non-chunk error:',
-				error,
-				errorInfo
+				{ error, errorInfo }
 			);
 		}
 	}

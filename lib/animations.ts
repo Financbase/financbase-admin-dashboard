@@ -21,7 +21,7 @@ export const fadeInUpVariants: Variants = {
 
 export const smoothTransition = {
   duration: 0.3,
-  ease: [0.4, 0, 0.2, 1],
+  ease: [0.4, 0, 0.2, 1] as const,
 };
 
 export const staggerContainerVariants: Variants = {
