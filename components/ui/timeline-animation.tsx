@@ -10,10 +10,10 @@
 "use client";
 
 import { motion, useInView, type Variants } from "framer-motion";
-import { useRef, type ReactNode } from "react";
+import React, { useRef, type ReactNode } from "react";
 
 interface TimelineContentProps {
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
   animationNum?: number;
   timelineRef?: React.RefObject<HTMLElement>;
   customVariants?: Variants;
