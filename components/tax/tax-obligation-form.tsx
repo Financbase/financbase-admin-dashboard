@@ -91,9 +91,7 @@ export function TaxObligationForm({
 	const currentYear = new Date().getFullYear();
 
 	const form = useForm<CreateTaxObligationInput>({
-		resolver: zodResolver(
-			isEditing ? updateTaxObligationSchema : createTaxObligationSchema
-		),
+		resolver: zodResolver(createTaxObligationSchema),
 		defaultValues: {
 			userId: user?.id || "",
 			name: obligation?.name || "",

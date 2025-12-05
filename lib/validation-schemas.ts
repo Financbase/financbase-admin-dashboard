@@ -386,7 +386,7 @@ export const createTaxObligationSchema = z.object({
   type: z.enum(['federal_income', 'state_income', 'local_income', 'self_employment', 'sales_tax', 'property_tax', 'payroll_tax', 'other']),
   amount: z.number().positive('Amount must be positive'),
   dueDate: z.string().datetime('Valid due date is required'),
-  status: z.enum(['pending', 'paid', 'overdue', 'cancelled']).default('pending'),
+  status: z.enum(['pending', 'paid', 'overdue', 'cancelled']).optional(),
   quarter: z.string().optional(), // e.g., "Q1 2025"
   year: z.number().int().min(2000).max(2100),
   notes: z.string().optional(),
