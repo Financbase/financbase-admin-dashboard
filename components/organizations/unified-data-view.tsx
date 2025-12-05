@@ -114,12 +114,12 @@ export function UnifiedDataView({ children, title, description }: UnifiedDataVie
 				</Card>
 			)}
 
-			<div className={viewMode === 'unified' ? 'opacity-75' : ''}>
-				{React.cloneElement(children as React.ReactElement, {
-					viewMode,
-					organizationFilter: viewMode === 'unified' ? selectedOrgFilter : activeOrganization?.id,
-				})}
-			</div>
+		<div className={viewMode === 'unified' ? 'opacity-75' : ''}>
+			{React.cloneElement(children as React.ReactElement, {
+				viewMode,
+				organizationFilter: viewMode === 'unified' ? selectedOrgFilter : activeOrganization?.id,
+			} as any)}
+		</div>
 
 			{viewMode === 'unified' && (
 				<Card>
