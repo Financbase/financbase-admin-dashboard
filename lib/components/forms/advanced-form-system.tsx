@@ -155,8 +155,10 @@ export function useAdvancedForm<T extends FieldValues = FieldValues>(
   config: FormConfig<T>,
   options?: UseFormProps<T>
 ) {
+  // zodResolver automatically infers types from the schema
+  // We need to assert the resolver type to match our generic T
   const form = useForm<T>({
-    resolver: zodResolver(config.validationSchema) as Resolver<T, any, T>,
+    resolver: zodResolver(config.validationSchema) as Resolver<T>,
     defaultValues: (config.defaultValues as DefaultValues<T> | undefined) ?? options?.defaultValues,
     mode: 'onChange',
     ...options,
