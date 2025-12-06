@@ -218,8 +218,8 @@ export function handleApiVersioning(request: NextRequest): NextResponse | null {
     if (versionInfo) {
       addVersionHeader(response, extractedVersion);
       
-      // Add deprecation warning if version is deprecated
-      if (versionInfo.status === 'deprecated' && versionInfo.sunsetDate) {
+      // Add deprecation warning if version has a deprecation date
+      if (versionInfo.deprecationDate && versionInfo.sunsetDate) {
         addDeprecationWarning(response, extractedVersion, versionInfo.sunsetDate);
       }
     }

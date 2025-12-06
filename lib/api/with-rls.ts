@@ -23,7 +23,8 @@
 
 
 import { auth, currentUser } from '@clerk/nextjs/server';
-import type { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { setRLSContextFromClerkId } from '@/lib/db/rls-context';
 import { ApiErrorHandler } from '@/lib/api-error-handler';
 import { logger } from '@/lib/logger';
@@ -53,7 +54,7 @@ export async function withRLS<T = unknown>(
     const { userId } = await auth();
     
     if (!userId) {
-      return ApiErrorHandler.unauthorized();
+      return ApiErrorHandler.unauthorized() as NextResponse<T | { error: string }>;
     }
 
     // Fetch Clerk user for additional context
@@ -83,7 +84,7 @@ export async function withRLS<T = unknown>(
     return await handler(userId, clerkUser || undefined, options.request);
   } catch (error) {
     logger.error('[withRLS] Error', { error });
-    return ApiErrorHandler.handle(error);
+    return ApiErrorHandler.handle(error) as NextResponse<T | { error: string }>;
   }
 }
 

@@ -84,7 +84,6 @@ export const videoConferencingMeetings = pgTable('video_conferencing_meetings', 
 	// Meeting access
 	joinUrl: text('join_url'),
 	meetingPassword: text('meeting_password'),
-	meetingId: text('meeting_id'), // For display
 	dialInNumbers: jsonb('dial_in_numbers'),
 
 	// Recording and notes

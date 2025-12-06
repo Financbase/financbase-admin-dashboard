@@ -8,8 +8,9 @@
  */
 
 // Legacy database schemas (singular schema directory)
+// Using explicit exports to avoid conflicts with lib/db/schemas
 export * from "./notifications";
-export * from "./clients";
+export { clients as legacyClients, type Client as LegacyClient, type NewClient as LegacyNewClient } from "./clients";
 export * from "./invoices";
 export * from "./expenses";
 export * from "./reports";
