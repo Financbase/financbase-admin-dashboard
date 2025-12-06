@@ -7,7 +7,32 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import posthog from 'posthog-js';
+// Dynamic import for posthog-js (may not be installed)
+let posthog: any;
+if (typeof window !== 'undefined') {
+	try {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		posthog = require('posthog-js');
+	} catch {
+		// posthog-js not installed, use no-op implementation
+		posthog = {
+			init: () => {},
+			capture: () => {},
+			identify: () => {},
+			reset: () => {},
+			people: { set: () => {} },
+		};
+	}
+} else {
+	// Server-side, use no-op
+	posthog = {
+		init: () => {},
+		capture: () => {},
+		identify: () => {},
+		reset: () => {},
+		people: { set: () => {} },
+	};
+}
 
 export interface AnalyticsEvent {
 	event: string;
@@ -28,7 +53,7 @@ export class AnalyticsService {
 			capture_pageview: true,
 			capture_pageleave: true,
 			persistence: 'localStorage',
-			loaded: (posthog) => {
+			loaded: (_posthog: any) => {
 				console.log('PostHog analytics loaded');
 			},
 		});

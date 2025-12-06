@@ -3,6 +3,8 @@
  * Run: npx tsx e2e/check-setup.ts
  */
 
+export {};
+
 const requiredEnvVars = [
 	'TEST_USER_EMAIL',
 	'TEST_USER_PASSWORD',

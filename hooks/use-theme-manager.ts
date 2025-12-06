@@ -121,7 +121,7 @@ export function useThemeManager(): UseThemeManagerReturn {
     const nextThemeMode = (nextTheme as ThemeMode) || 'light';
     const currentMode = themeManager.getMode();
     
-    if (nextThemeMode !== currentMode && setNextTheme) {
+    if (nextThemeMode !== currentMode) {
       themeManager.setTheme(nextThemeMode, false).catch((err) => {
         setError(err as Error);
       });

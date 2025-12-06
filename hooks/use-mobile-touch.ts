@@ -272,7 +272,7 @@ export function useMobileScroll() {
 	const [isScrolling, setIsScrolling] = useState(false);
 	const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null);
 	const [lastScrollY, setLastScrollY] = useState(0);
-	const scrollTimeout = useRef<NodeJS.Timeout>();
+	const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
 	const handleScroll = useCallback(() => {
 		const currentScrollY = window.scrollY;

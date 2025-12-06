@@ -298,8 +298,8 @@ export function useRecentOrders(limit: number = 10) {
 			
 			// Transform activities to order format for backward compatibility
 			return activities
-				.filter(activity => activity.type === 'invoice')
-				.map(activity => ({
+				.filter((activity: any) => activity.type === 'invoice')
+				.map((activity: any) => ({
 					id: activity.id,
 					orderNumber: `INV-${activity.id.slice(-6)}`,
 					customerName: 'Client', // Would need to join with client data
@@ -327,7 +327,7 @@ export function useActivityFeed() {
 			const activities = data.activities || [];
 			
 			// Transform activities to feed format
-			return activities.map(activity => ({
+			return activities.map((activity: any) => ({
 				id: activity.id,
 				type: activity.type,
 				message: activity.description,

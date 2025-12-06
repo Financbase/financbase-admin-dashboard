@@ -7,7 +7,7 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import { users } from "@/drizzle/schema/cms-user-management";
+import { users } from "@/lib/db/schemas";
 import {
 	workspaceInvitations,
 	workspaceMembers,

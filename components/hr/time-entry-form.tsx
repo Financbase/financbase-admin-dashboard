@@ -44,7 +44,7 @@ const timeEntryFormSchema = z.object({
 	contractorId: z.string().uuid().optional(),
 	taskId: z.string().uuid().optional(),
 	taskName: z.string().optional(),
-	isBillable: z.boolean().optional(),
+	isBillable: z.boolean(),
 	hourlyRate: z.number().min(0).optional(),
 	notes: z.string().optional(),
 });

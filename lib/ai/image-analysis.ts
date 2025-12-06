@@ -292,7 +292,7 @@ Focus on:
     return 'General';
   }
 
-  private getMimeType(filename?: string): string {
+  private getMimeType(filename?: string): 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' {
     if (!filename) return 'image/jpeg';
 
     const ext = filename.toLowerCase().split('.').pop();

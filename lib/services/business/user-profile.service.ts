@@ -8,7 +8,7 @@
  */
 
 import { LogIn, XCircle } from "lucide-react";
-import type { CmsUser } from "../../drizzle/schema/cms-user-management";
+import type { User } from "../../db/schemas";
 import { query } from "../db/neon-connection";
 import { AppError } from "../middleware/error-handler";
 
@@ -42,7 +42,7 @@ export class UserProfileService {
 	 */
 	async getUserProfile(clerkUserId: string): Promise<UserProfile | null> {
 		try {
-			const users = await query<CmsUser>(
+			const users = await query<User>(
 				"SELECT * FROM cms_users WHERE clerk_user_id = $1",
 				[clerkUserId],
 			);
@@ -87,7 +87,7 @@ export class UserProfileService {
 	 */
 	async updateUserProfile(
 		clerkUserId: string,
-		updates: Partial<Pick<CmsUser, "firstName" | "lastName" | "metadata">>,
+		updates: Partial<Pick<User, "firstName" | "lastName">>,
 	): Promise<UserProfile> {
 		try {
 			const updateFields = [];
@@ -127,7 +127,7 @@ export class UserProfileService {
 
 			values.push(clerkUserId);
 
-			const result = await query<CmsUser>(queryStr, values);
+			const result = await query<User>(queryStr, values);
 
 			if (result.length === 0) {
 				throw new AppError("User not found", 404, "USER_NOT_FOUND");
@@ -187,7 +187,7 @@ export class UserProfileService {
 
 			queryStr += " ORDER BY last_login_at DESC NULLS LAST";
 
-			const users = await query<CmsUser>(queryStr, params);
+			const users = await query<User>(queryStr, params);
 
 			const profiles = await Promise.all(
 				users.map(async (user) => {

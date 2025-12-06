@@ -133,7 +133,7 @@ export function useFormValidation<T extends Record<string, string>>(
 		setErrors((prev) => {
 			if (error === null) {
 				const { [name]: _, ...rest } = prev;
-				return rest;
+				return rest as Partial<Record<keyof T, string>>;
 			}
 			return { ...prev, [name]: error };
 		});

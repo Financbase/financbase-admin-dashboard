@@ -80,7 +80,7 @@ export class ApiErrorHandler {
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Invalid request data',
-          details: error.errors,
+          details: error.issues || [],
           timestamp: new Date().toISOString(),
           requestId,
         }

@@ -38,7 +38,7 @@ export function useUserPermissions(): UseUserPermissionsReturn {
 			return null;
 		}
 
-		return user.publicMetadata as FinancbaseUserMetadata | undefined;
+		return user.publicMetadata as unknown as FinancbaseUserMetadata | undefined;
 	}, [user, isLoaded]);
 
 	const role = useMemo(() => {
