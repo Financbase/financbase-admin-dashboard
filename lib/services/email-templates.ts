@@ -315,3 +315,75 @@ Manage your notification preferences: ${baseUrl}/settings/notifications
 			};
 	}
 }
+
+/**
+ * Render folder invitation email HTML
+ */
+export function renderFolderInvitation(props: {
+	inviterName: string;
+	folderName: string;
+	workspaceName: string;
+	permissionLevel: string;
+	invitationToken: string;
+	invitationUrl: string;
+	message?: string;
+}): string {
+	const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://financbase.com';
+	return `
+		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+			<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
+				<h1 style="color: white; margin: 0; font-size: 28px;">Folder Invitation</h1>
+				<p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Financbase Collaboration</p>
+			</div>
+			<div style="padding: 30px 20px; background: #f9f9f9;">
+				<h2 style="color: #333; margin: 0 0 20px 0;">${props.inviterName} invited you to collaborate</h2>
+				<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+					<p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+						${props.inviterName} has invited you to collaborate on <strong>${props.folderName}</strong> in ${props.workspaceName}.
+					</p>
+					${props.message ? `<p style="font-size: 14px; color: #666; margin: 0 0 20px 0;">${props.message}</p>` : ''}
+					<div style="background: #f0f8ff; padding: 15px; border-radius: 6px; margin: 20px 0;">
+						<strong>Permission Level:</strong> ${props.permissionLevel}
+					</div>
+					<div style="text-align: center; margin: 30px 0;">
+						<a href="${props.invitationUrl}"
+						   style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+							Accept Invitation
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	`;
+}
+
+/**
+ * Render folder invitation email text version
+ */
+export function renderFolderInvitationText(props: {
+	inviterName: string;
+	folderName: string;
+	workspaceName: string;
+	permissionLevel: string;
+	invitationToken: string;
+	invitationUrl: string;
+	message?: string;
+}): string {
+	return `
+${props.inviterName} invited you to collaborate
+
+${props.inviterName} has invited you to collaborate on ${props.folderName} in ${props.workspaceName}.
+
+${props.message ? `${props.message}\n\n` : ''}Permission Level: ${props.permissionLevel}
+
+Accept Invitation: ${props.invitationUrl}
+
+This is an automated invitation from Financbase.
+	`.trim();
+}
+
+// Export EmailTemplates object for backward compatibility
+export const EmailTemplates = {
+	renderFolderInvitation,
+	renderFolderInvitationText,
+};
