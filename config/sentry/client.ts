@@ -6,21 +6,12 @@ Sentry.init({
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
   debug: process.env.NODE_ENV === 'development',
   
-  // Performance monitoring
-  integrations: [
-    new Sentry.BrowserTracing({
-      // Set sampling rate for performance monitoring
-      tracePropagationTargets: [
-        'localhost',
-        /^https:\/\/yourserver\.io\/api/,
-        /^https:\/\/api\.financbase\.com/,
-      ],
-    }),
-    new Sentry.Replay({
-      // Capture 10% of all sessions, plus 100% of sessions with an error
-      sessionSampleRate: 0.1,
-      errorSampleRate: 1.0,
-    }),
+  // Performance monitoring - BrowserTracing is automatically included in Sentry v7+
+  // Trace propagation targets for performance monitoring
+  tracePropagationTargets: [
+    'localhost',
+    /^https:\/\/yourserver\.io\/api/,
+    /^https:\/\/api\.financbase\.com/,
   ],
 
   // Custom error filtering
