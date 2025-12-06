@@ -6,15 +6,8 @@ Sentry.init({
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
   debug: process.env.NODE_ENV === 'development',
 
-  // Performance monitoring
-  integrations: [
-    new Sentry.Integrations.Http({ tracing: true }),
-    new Sentry.Integrations.Express({ app: undefined }),
-    new Sentry.Integrations.OnUncaughtException({
-      exitEvenIfOtherHandlersAreRegistered: false,
-    }),
-    new Sentry.Integrations.OnUnhandledRejection({ mode: 'warn' }),
-  ],
+  // Performance monitoring - Integrations are automatically included in Sentry v7+
+  // Http tracing, Express, and error handlers are included by default
 
   // Custom error filtering
   beforeSend(event, hint) {
