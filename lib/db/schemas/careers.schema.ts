@@ -34,11 +34,11 @@ export const jobPostings = pgTable(
 		experience: text("experience").notNull(), // e.g., "5+ years", "3+ years"
 		description: text("description").notNull(), // Short description
 		fullDescription: text("full_description"), // Full job description
-		requirements: jsonb("requirements").$type<string[]>().notNull().default("[]"), // Array of requirements
-		responsibilities: jsonb("responsibilities").$type<string[]>().default("[]"), // Array of responsibilities
-		qualifications: jsonb("qualifications").$type<string[]>().default("[]"), // Array of qualifications
+		requirements: jsonb("requirements").$type<string[]>().notNull().default([]), // Array of requirements
+		responsibilities: jsonb("responsibilities").$type<string[]>().default([]), // Array of responsibilities
+		qualifications: jsonb("qualifications").$type<string[]>().default([]), // Array of qualifications
 		salary: text("salary"), // e.g., "$140,000 - $180,000"
-		benefits: jsonb("benefits").$type<string[]>().default("[]"), // Array of benefits
+		benefits: jsonb("benefits").$type<string[]>().default([]), // Array of benefits
 		status: text("status", {
 			enum: ["draft", "published", "closed", "archived"],
 		})

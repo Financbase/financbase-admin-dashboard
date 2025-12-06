@@ -88,14 +88,15 @@ export const products = pgTable("products", {
 		.defaultNow(),
 });
 
-export const productCategories = pgTable("product_categories", {
+// Define product categories with self-reference
+const productCategoriesTable = pgTable("product_categories", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	organizationId: uuid("organization_id")
 		.notNull()
 		.references(() => organizations.id, { onDelete: "cascade" }),
 	name: text("name").notNull(),
 	description: text("description"),
-	parentId: uuid("parent_id").references(() => productCategories.id, {
+	parentId: uuid("parent_id").references(() => productCategoriesTable, {
 		onDelete: "set null",
 	}), // For category hierarchy
 	metadata: jsonb("metadata"),
@@ -109,6 +110,9 @@ export const productCategories = pgTable("product_categories", {
 
 export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
+// Export the table
+export const productCategories = productCategoriesTable;
+
 export type ProductCategory = typeof productCategories.$inferSelect;
 export type NewProductCategory = typeof productCategories.$inferInsert;
 

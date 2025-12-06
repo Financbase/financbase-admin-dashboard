@@ -21,11 +21,12 @@ import { users } from "./users.schema";
 // Projects table uses INTEGER id, not UUID
 // Using text with CHECK constraint to match existing enum values
 
-export const tasks = pgTable("tasks", {
+// Define tasks table with self-reference
+const tasksTable = pgTable("tasks", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: uuid("user_id").notNull().references(() => users.id),
 	projectId: integer("project_id").notNull(), // INTEGER reference to projects(id)
-	parentTaskId: uuid("parent_task_id").references(() => tasks.id), // For subtasks
+	parentTaskId: uuid("parent_task_id").references(() => tasksTable), // For subtasks
 	
 	// Task details
 	title: text("title").notNull(),
@@ -52,6 +53,9 @@ export const tasks = pgTable("tasks", {
 	createdAt: timestamp("created_at").defaultNow(),
 	updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// Export the table
+export const tasks = tasksTable;
 
 export type Task = typeof tasks.$inferSelect;
 export type NewTask = typeof tasks.$inferInsert;

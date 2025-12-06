@@ -34,7 +34,8 @@ export const performanceRatingEnum = pgEnum("performance_rating", [
 	"poor",
 ]);
 
-export const employees = pgTable("employees", {
+// Define employees table with self-reference
+const employeesTable = pgTable("employees", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: text("user_id").notNull(), // Clerk user ID
 	organizationId: uuid("organization_id")
@@ -51,7 +52,7 @@ export const employees = pgTable("employees", {
 	// Employment details
 	position: text("position").notNull(),
 	department: text("department").notNull(),
-	managerId: uuid("manager_id").references(() => employees.id, {
+	managerId: uuid("manager_id").references(() => employeesTable, {
 		onDelete: "set null",
 	}),
 	employeeNumber: text("employee_number").unique(),
@@ -127,6 +128,9 @@ export const departments = pgTable("departments", {
 		.notNull()
 		.defaultNow(),
 });
+
+// Export the table
+export const employees = employeesTable;
 
 export type Employee = typeof employees.$inferSelect;
 export type NewEmployee = typeof employees.$inferInsert;

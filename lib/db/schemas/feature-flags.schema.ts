@@ -14,6 +14,7 @@
 
 
 import { pgTable, serial, varchar, text, boolean, integer, jsonb, timestamp, check } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 export const featureFlags = pgTable('feature_flags', {
 	id: serial('id').primaryKey(),
@@ -29,7 +30,7 @@ export const featureFlags = pgTable('feature_flags', {
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
-	rolloutPercentageCheck: check('rollout_percentage_check', `rollout_percentage >= 0 AND rollout_percentage <= 100`),
+	rolloutPercentageCheck: check('rollout_percentage_check', sql`rollout_percentage >= 0 AND rollout_percentage <= 100`),
 }));
 
 export type FeatureFlag = typeof featureFlags.$inferSelect;

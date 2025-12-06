@@ -63,7 +63,8 @@ const createDatabaseConnection = () => {
 		
 		case 'neon-serverless': {
 			const neonSql = neon(process.env.DATABASE_URL);
-			const db = drizzleNode(neonSql, { schema });
+			// drizzleNode expects the connection string or client, not the query function
+			const db = drizzleNode(process.env.DATABASE_URL, { schema });
 			// Set search_path for serverless connections
 			// Note: This might not persist across connections, but helps for session-based queries
 			return db;

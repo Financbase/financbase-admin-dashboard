@@ -87,12 +87,12 @@ export const propertyValuations = pgTable("property_valuations", {
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Tenants table
-export const tenants = pgTable("tenants", {
+// Tenants table - using explicit type to break circular reference
+const tenantsTable = pgTable("tenants", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: text("user_id").notNull(),
 	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }), // VARCHAR reference
-	unitId: uuid("unit_id").references(() => propertyUnits.id),
+	unitId: uuid("unit_id"),
 	firstName: text("first_name").notNull(),
 	lastName: text("last_name").notNull(),
 	email: text("email"),
@@ -112,8 +112,8 @@ export const tenants = pgTable("tenants", {
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Property units table
-export const propertyUnits = pgTable("property_units", {
+// Property units table - using explicit type to break circular reference
+const propertyUnitsTable = pgTable("property_units", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(), // VARCHAR reference
 	userId: text("user_id").notNull(),
@@ -123,7 +123,7 @@ export const propertyUnits = pgTable("property_units", {
 	squareFootage: integer("square_footage"),
 	monthlyRent: decimal("monthly_rent", { precision: 8, scale: 2 }),
 	isOccupied: boolean("is_occupied").default(false),
-	tenantId: uuid("tenant_id").references(() => tenants.id),
+	tenantId: uuid("tenant_id"), // Will be set after tenants is defined
 	leaseStartDate: timestamp("lease_start_date"),
 	leaseEndDate: timestamp("lease_end_date"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -213,6 +213,10 @@ export type NewPropertyIncome = typeof propertyIncome.$inferInsert;
 
 export type PropertyValuation = typeof propertyValuations.$inferSelect;
 export type NewPropertyValuation = typeof propertyValuations.$inferInsert;
+
+// Export the tables
+export const tenants = tenantsTable;
+export const propertyUnits = propertyUnitsTable;
 
 export type Tenant = typeof tenants.$inferSelect;
 export type NewTenant = typeof tenants.$inferInsert;
