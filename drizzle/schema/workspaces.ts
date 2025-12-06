@@ -8,7 +8,7 @@
  */
 
 import { pgTable, serial, text, timestamp, boolean, integer } from 'drizzle-orm/pg-core';
-import { users } from './cms-user-management';
+import { users } from '@/lib/db/schemas';
 
 export const workspaces = pgTable('workspaces', {
 	id: serial('id').primaryKey(),
