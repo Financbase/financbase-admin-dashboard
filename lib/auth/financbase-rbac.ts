@@ -95,7 +95,7 @@ export async function getUserPermissions(): Promise<FinancialPermission[]> {
 	try {
 		const { sessionClaims } = await auth();
 		const metadata = sessionClaims?.publicMetadata as FinancbaseUserMetadata | undefined;
-		return metadata?.permissions ?? [];
+		return (metadata?.permissions ?? []) as FinancialPermission[];
 	} catch (error) {
 		console.error('Error getting user permissions:', error);
 		return [];
