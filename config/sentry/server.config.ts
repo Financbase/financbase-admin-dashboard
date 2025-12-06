@@ -24,32 +24,9 @@ Sentry.init({
 		return event;
 	},
 
-	// Error filtering for server-side
+	// Error filtering and alert configuration for server-side
 	beforeSend(event, hint) {
 		// Filter out database connection errors in development
-		if (process.env.NODE_ENV === 'development') {
-			const error = hint.originalException;
-			if (error && typeof error === 'object' && 'code' in error) {
-				const dbError = error as any;
-				if (dbError.code === 'ECONNREFUSED' || dbError.code === 'ENOTFOUND') {
-					return null;
-				}
-			}
-		}
-
-		return event;
-	},
-
-	// Set server-specific tags
-	initialScope: {
-		tags: {
-			component: 'financbase-admin-dashboard-server',
-		},
-	},
-
-	// Alert configuration
-	beforeSend(event, hint) {
-		// Filter out non-critical errors
 		if (process.env.NODE_ENV === 'development') {
 			const error = hint.originalException;
 			if (error && typeof error === 'object' && 'code' in error) {
@@ -84,5 +61,12 @@ Sentry.init({
 		}
 
 		return event;
+	},
+
+	// Set server-specific tags
+	initialScope: {
+		tags: {
+			component: 'financbase-admin-dashboard-server',
+		},
 	},
 });
