@@ -54,7 +54,7 @@ export async function withRLS<T = unknown>(
     const { userId } = await auth();
     
     if (!userId) {
-      return ApiErrorHandler.unauthorized() as NextResponse<T | { error: string }>;
+      return ApiErrorHandler.unauthorized() as unknown as NextResponse<T | { error: string }>;
     }
 
     // Fetch Clerk user for additional context

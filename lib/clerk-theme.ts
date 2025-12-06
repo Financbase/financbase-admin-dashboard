@@ -7,7 +7,11 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import type { Appearance } from "@clerk/nextjs";
+// Appearance type is not exported from @clerk/nextjs, define locally if needed
+type Appearance = {
+	variables?: Record<string, string>;
+	elements?: Record<string, any>;
+};
 
 /**
  * Get Clerk theme colors from CSS variables.
