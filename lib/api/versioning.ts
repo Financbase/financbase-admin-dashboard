@@ -167,7 +167,17 @@ export const API_VERSIONS = {
  * @returns Version information or null if version doesn't exist
  */
 export function getVersionInfo(version: ApiVersion) {
-  return API_VERSIONS[version] || null;
+  // Handle 'latest' by mapping to v2 (or v1 if v2 is not stable)
+  if (version === 'latest') {
+    return API_VERSIONS.v2; // Return latest version (v2)
+  }
+  
+  // Type guard to ensure version is a valid key
+  if (version in API_VERSIONS) {
+    return API_VERSIONS[version as keyof typeof API_VERSIONS] || null;
+  }
+  
+  return null;
 }
 
 /**
