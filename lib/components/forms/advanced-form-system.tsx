@@ -15,7 +15,7 @@
 
 
 import React from 'react';
-import { useForm, UseFormProps, FieldValues, Path, DefaultValues } from 'react-hook-form';
+import { useForm, UseFormProps, FieldValues, Path, DefaultValues, Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
@@ -106,17 +106,17 @@ export interface FormSection {
 }
 
 // Complete form configuration
-export interface FormConfig {
+export interface FormConfig<T extends FieldValues = FieldValues> {
   id: string;
   title: string;
   description?: string;
   sections: FormSection[];
-  validationSchema: z.ZodSchema;
-  defaultValues?: Record<string, any>;
+  validationSchema: z.ZodType<T>;
+  defaultValues?: Partial<T>;
   submitLabel?: string;
   cancelLabel?: string;
   className?: string;
-  onSubmit?: (data: any) => Promise<void>;
+  onSubmit?: (data: T) => Promise<void>;
   onCancel?: () => void;
   mode?: 'create' | 'edit' | 'view';
   permissions?: {
@@ -140,19 +140,19 @@ export type FormField =
   | RichTextField;
 
 // Form context for sharing state between components
-interface FormContextValue {
-  config: FormConfig;
+interface FormContextValue<T extends FieldValues = FieldValues> {
+  config: FormConfig<T>;
   watch: any;
   setValue: any;
   getValues: any;
   formState: any;
 }
 
-const FormContext = React.createContext<FormContextValue | null>(null);
+const FormContext = React.createContext<FormContextValue<any> | null>(null);
 
 // Custom hook for form management
 export function useAdvancedForm<T extends FieldValues = FieldValues>(
-  config: FormConfig,
+  config: FormConfig<T>,
   options?: UseFormProps<T>
 ) {
   const form = useForm<T>({
@@ -162,7 +162,7 @@ export function useAdvancedForm<T extends FieldValues = FieldValues>(
     ...options,
   });
 
-  const contextValue: FormContextValue = {
+  const contextValue: FormContextValue<T> = {
     config,
     watch: form.watch,
     setValue: form.setValue,
@@ -177,18 +177,18 @@ export function useAdvancedForm<T extends FieldValues = FieldValues>(
 }
 
 // Main form component
-export function AdvancedForm({
+export function AdvancedForm<T extends FieldValues = FieldValues>({
   config,
   className,
   children
 }: {
-  config: FormConfig;
+  config: FormConfig<T>;
   className?: string;
   children?: React.ReactNode;
 }) {
-  const { form, contextValue } = useAdvancedForm(config);
+  const { form, contextValue } = useAdvancedForm<T>(config);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: T) => {
     try {
       await config.onSubmit?.(data);
     } catch (error) {
@@ -582,25 +582,27 @@ function evaluateCondition(fieldValue: any, condition: ConditionalField): boolea
 
 // Pre-built form configurations for common financial modules
 
-export const INVOICE_FORM_CONFIG: FormConfig = {
+const invoiceFormSchema = z.object({
+  clientId: z.string().min(1, 'Client is required'),
+  invoiceNumber: z.string().min(1, 'Invoice number is required'),
+  issueDate: z.date(),
+  dueDate: z.date(),
+  items: z.array(z.object({
+    description: z.string().min(1, 'Description is required'),
+    quantity: z.number().min(0.1, 'Quantity must be greater than 0'),
+    unitPrice: z.number().min(0, 'Unit price must be positive'),
+    total: z.number().min(0, 'Total must be positive')
+  })).min(1, 'At least one item is required'),
+  taxRate: z.number().min(0).max(100).optional(),
+  notes: z.string().optional(),
+  terms: z.string().optional()
+});
+
+export const INVOICE_FORM_CONFIG: FormConfig<z.infer<typeof invoiceFormSchema>> = {
   id: 'invoice-form',
   title: 'Create Invoice',
   description: 'Generate a professional invoice for your client',
-  validationSchema: z.object({
-    clientId: z.string().min(1, 'Client is required'),
-    invoiceNumber: z.string().min(1, 'Invoice number is required'),
-    issueDate: z.date(),
-    dueDate: z.date(),
-    items: z.array(z.object({
-      description: z.string().min(1, 'Description is required'),
-      quantity: z.number().min(0.1, 'Quantity must be greater than 0'),
-      unitPrice: z.number().min(0, 'Unit price must be positive'),
-      total: z.number().min(0, 'Total must be positive')
-    })).min(1, 'At least one item is required'),
-    taxRate: z.number().min(0).max(100).optional(),
-    notes: z.string().optional(),
-    terms: z.string().optional()
-  }),
+  validationSchema: invoiceFormSchema,
   defaultValues: {
     issueDate: new Date(),
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
@@ -667,23 +669,25 @@ export const INVOICE_FORM_CONFIG: FormConfig = {
   ]
 };
 
-export const EXPENSE_FORM_CONFIG: FormConfig = {
+const expenseFormSchema = z.object({
+  amount: z.number().min(0.01, 'Amount must be greater than 0'),
+  currency: z.string().default('USD'),
+  description: z.string().min(1, 'Description is required'),
+  category: z.string().min(1, 'Category is required'),
+  date: z.date(),
+  vendor: z.string().optional(),
+  receipt: z.any().optional(),
+  paymentMethod: z.string().optional(),
+  tags: z.string().optional(),
+  isRecurring: z.boolean().default(false),
+  projectId: z.string().optional()
+});
+
+export const EXPENSE_FORM_CONFIG: FormConfig<z.infer<typeof expenseFormSchema>> = {
   id: 'expense-form',
   title: 'Add Expense',
   description: 'Record a business expense with receipt upload',
-  validationSchema: z.object({
-    amount: z.number().min(0.01, 'Amount must be greater than 0'),
-    currency: z.string().default('USD'),
-    description: z.string().min(1, 'Description is required'),
-    category: z.string().min(1, 'Category is required'),
-    date: z.date(),
-    vendor: z.string().optional(),
-    receipt: z.any().optional(),
-    paymentMethod: z.string().optional(),
-    tags: z.string().optional(),
-    isRecurring: z.boolean().default(false),
-    projectId: z.string().optional()
-  }),
+  validationSchema: expenseFormSchema,
   sections: [
     {
       id: 'expense-details',
@@ -756,9 +760,9 @@ export const EXPENSE_FORM_CONFIG: FormConfig = {
 
 // Form builder utility for creating dynamic forms
 export function createFormConfig(
-  baseConfig: Partial<FormConfig>,
+  baseConfig: Partial<FormConfig<FieldValues>>,
   dynamicFields: FormField[]
-): FormConfig {
+): FormConfig<FieldValues> {
   const schemaFields: Record<string, z.ZodTypeAny> = {};
 
   dynamicFields.forEach(field => {
@@ -843,6 +847,8 @@ export function createFormConfig(
     schemaFields[field.name] = fieldSchema;
   });
 
+  const validationSchema = z.object(schemaFields) as z.ZodType<FieldValues>;
+
   return {
     id: baseConfig.id || 'dynamic-form',
     title: baseConfig.title || 'Dynamic Form',
@@ -853,8 +859,8 @@ export function createFormConfig(
         fields: dynamicFields
       }
     ],
-    validationSchema: z.object(schemaFields),
+    validationSchema,
     defaultValues: baseConfig.defaultValues,
     ...baseConfig
-  };
+  } as FormConfig<FieldValues>;
 }
