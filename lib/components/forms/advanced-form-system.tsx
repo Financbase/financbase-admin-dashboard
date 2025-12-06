@@ -111,7 +111,7 @@ export interface FormConfig<T extends FieldValues = FieldValues> {
   title: string;
   description?: string;
   sections: FormSection[];
-  validationSchema: z.ZodType<T, z.ZodTypeDef, unknown>;
+  validationSchema: z.ZodType<T>;
   defaultValues?: Partial<T>;
   submitLabel?: string;
   cancelLabel?: string;
@@ -158,7 +158,7 @@ export function useAdvancedForm<T extends FieldValues = FieldValues>(
   // zodResolver automatically infers types from the schema
   // We need to assert the resolver type to match our generic T
   const form = useForm<T>({
-    resolver: zodResolver(config.validationSchema) as Resolver<T>,
+    resolver: zodResolver(config.validationSchema as any) as any,
     defaultValues: (config.defaultValues as DefaultValues<T> | undefined) ?? options?.defaultValues,
     mode: 'onChange',
     ...options,
