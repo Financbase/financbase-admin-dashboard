@@ -31,7 +31,7 @@ interface ThemeContextProviderProps {
   /**
    * Attribute name for theme class (default: 'class')
    */
-  attribute?: string;
+  attribute?: "class" | "data-theme" | "data-mode";
   /**
    * Default theme (default: 'light')
    */
@@ -94,7 +94,6 @@ export function ThemeContextProvider({
       enableSystem={enableSystem}
       disableTransitionOnChange={disableTransitionOnChange}
       storageKey={storageKey}
-      suppressHydrationWarning
     >
       <ThemeContextProviderInternal>{children}</ThemeContextProviderInternal>
     </NextThemesProvider>
