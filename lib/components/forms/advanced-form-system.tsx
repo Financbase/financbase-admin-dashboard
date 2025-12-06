@@ -111,7 +111,7 @@ export interface FormConfig<T extends FieldValues = FieldValues> {
   title: string;
   description?: string;
   sections: FormSection[];
-  validationSchema: z.ZodType<T>;
+  validationSchema: z.ZodType<T, z.ZodTypeDef, unknown>;
   defaultValues?: Partial<T>;
   submitLabel?: string;
   cancelLabel?: string;
@@ -156,7 +156,7 @@ export function useAdvancedForm<T extends FieldValues = FieldValues>(
   options?: UseFormProps<T>
 ) {
   const form = useForm<T>({
-    resolver: zodResolver(config.validationSchema),
+    resolver: zodResolver(config.validationSchema) as Resolver<T, any, T>,
     defaultValues: (config.defaultValues as DefaultValues<T> | undefined) ?? options?.defaultValues,
     mode: 'onChange',
     ...options,
