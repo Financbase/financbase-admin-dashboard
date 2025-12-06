@@ -11,6 +11,11 @@
 type Appearance = {
 	variables?: Record<string, string>;
 	elements?: Record<string, any>;
+	layout?: {
+		socialButtonsPlacement?: "top" | "bottom";
+		socialButtonsVariant?: "blockButton" | "iconButton";
+		showOptionalFields?: boolean;
+	};
 };
 
 /**
