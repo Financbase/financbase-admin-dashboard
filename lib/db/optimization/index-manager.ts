@@ -59,7 +59,13 @@ export class IndexManager {
       // Group by index name
       const indexMap = new Map<string, IndexInfo>();
       
-      indexes.forEach((row: any) => {
+      // Handle different result formats from db.execute
+      // NeonHttpQueryResult has a 'rows' property, QueryResult is an array-like object
+      const indexRows = Array.isArray(indexes) 
+        ? indexes 
+        : ('rows' in indexes ? indexes.rows : []);
+      
+      indexRows.forEach((row: any) => {
         const indexName = row.index_name;
         
         if (!indexMap.has(indexName)) {
@@ -103,7 +109,10 @@ export class IndexManager {
         ORDER BY pg_relation_size(indexrelid) DESC
       `);
 
-      return unusedIndexes.map((row: any) => ({
+      // Handle different result formats from db.execute
+      const unusedRows = Array.isArray(unusedIndexes) ? unusedIndexes : (unusedIndexes as any)?.rows || [];
+      
+      return unusedRows.map((row: any) => ({
         tableName: row.tablename,
         indexName: row.indexname,
         columns: [], // Would need separate query to get columns
@@ -149,7 +158,8 @@ export class IndexManager {
         ORDER BY duplicate_count DESC
       `);
 
-      return duplicates;
+      // Handle different result formats from db.execute
+      return Array.isArray(duplicates) ? duplicates : (duplicates as any)?.rows || [];
     } catch (error) {
       console.error('Error getting duplicate indexes:', error);
       return [];
@@ -181,7 +191,8 @@ export class IndexManager {
         ORDER BY idx_scan DESC
       `);
 
-      return usage;
+      // Handle different result formats from db.execute
+      return Array.isArray(usage) ? usage : (usage as any)?.rows || [];
     } catch (error) {
       console.error('Error analyzing index usage:', error);
       return [];
@@ -256,7 +267,10 @@ export class IndexManager {
         ORDER BY estimated_improvement DESC
       `);
 
-      return recommendations.map((row: any) => ({
+      // Handle different result formats from db.execute
+      const recommendationRows = Array.isArray(recommendations) ? recommendations : (recommendations as any)?.rows || [];
+      
+      return recommendationRows.map((row: any) => ({
         table: row.table,
         columns: row.columns,
         type: row.type,
@@ -362,7 +376,8 @@ export class IndexManager {
         ORDER BY pg_relation_size(indexrelid) DESC
       `);
 
-      return bloat;
+      // Handle different result formats from db.execute
+      return Array.isArray(bloat) ? bloat : (bloat as any)?.rows || [];
     } catch (error) {
       console.error('Error getting index bloat:', error);
       return [];
@@ -398,15 +413,15 @@ export class IndexManager {
         .map((table: any) => table.tablename);
 
       // Indexes that need reindexing (high bloat)
-      const indexesToReindex = await this.getIndexBloat()
-        .then(bloat => bloat
-          .filter((index: any) => index.bloat_size && index.bloat_size !== '0 bytes')
-          .map((index: any) => index.indexname)
-        );
+      const bloat = await this.getIndexBloat();
+      const indexesToReindex = Array.isArray(bloat) ? bloat : (bloat as any)?.rows || [];
+      const filteredIndexes = indexesToReindex
+        .filter((index: any) => index.bloat_size && index.bloat_size !== '0 bytes')
+        .map((index: any) => index.indexname);
 
       return {
         tablesToAnalyze,
-        indexesToReindex,
+        indexesToReindex: filteredIndexes,
         unusedIndexes: unusedIndexes.map(idx => idx.indexName),
         duplicateIndexes,
       };
@@ -440,7 +455,8 @@ export class IndexManager {
         WHERE schemaname = 'public'
       `);
 
-      return stats;
+      // Handle different result formats from db.execute
+      return Array.isArray(stats) ? stats : (stats as any)?.rows || [];
     } catch (error) {
       console.error('Error analyzing table stats:', error);
       return [];
