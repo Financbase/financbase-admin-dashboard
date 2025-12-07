@@ -47,7 +47,13 @@ export class QueryOptimizer {
         LIMIT ${limit}
       `);
 
-      return slowQueries.map((row: any) => ({
+      // Handle different result formats from db.execute
+      // NeonHttpQueryResult has a 'rows' property, QueryResult is an array-like object
+      const slowQueryRows = Array.isArray(slowQueries) 
+        ? slowQueries 
+        : ('rows' in slowQueries ? slowQueries.rows : []);
+      
+      return slowQueryRows.map((row: any) => ({
         query: row.query,
         executionTime: parseFloat(row.mean_exec_time),
         rowsReturned: parseInt(row.rows),
@@ -118,7 +124,10 @@ export class QueryOptimizer {
         ORDER BY estimated_improvement DESC
       `);
 
-      return recommendations.map((row: any) => ({
+      // Handle different result formats from db.execute
+      const recommendationRows = Array.isArray(recommendations) ? recommendations : (recommendations as any)?.rows || [];
+      
+      return recommendationRows.map((row: any) => ({
         table: row.table,
         columns: [row.column],
         type: row.type,
@@ -153,7 +162,8 @@ export class QueryOptimizer {
         ORDER BY n_live_tup DESC
       `);
 
-      return stats;
+      // Handle different result formats from db.execute
+      return Array.isArray(stats) ? stats : (stats as any)?.rows || [];
     } catch (error) {
       console.error('Error analyzing table stats:', error);
       return [];
@@ -173,7 +183,9 @@ export class QueryOptimizer {
           pg_size_pretty(pg_total_relation_size('public.expenses')) as expenses_table_size
       `);
 
-      return sizeInfo[0];
+      // Handle different result formats from db.execute
+      const sizeRows = Array.isArray(sizeInfo) ? sizeInfo : (sizeInfo as any)?.rows || [];
+      return sizeRows[0] || null;
     } catch (error) {
       console.error('Error getting database size:', error);
       return null;
@@ -202,7 +214,8 @@ export class QueryOptimizer {
         ORDER BY n_distinct DESC
       `);
 
-      return missingIndexes;
+      // Handle different result formats from db.execute
+      return Array.isArray(missingIndexes) ? missingIndexes : (missingIndexes as any)?.rows || [];
     } catch (error) {
       console.error('Error checking missing indexes:', error);
       return [];
@@ -218,7 +231,9 @@ export class QueryOptimizer {
         EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${sql.raw(query)}
       `);
 
-      return explainResult[0];
+      // Handle different result formats from db.execute
+      const explainRows = Array.isArray(explainResult) ? explainResult : (explainResult as any)?.rows || [];
+      return explainRows[0] || null;
     } catch (error) {
       console.error('Error analyzing query performance:', error);
       return null;
@@ -239,7 +254,8 @@ export class QueryOptimizer {
         GROUP BY state
       `);
 
-      return stats;
+      // Handle different result formats from db.execute
+      return Array.isArray(stats) ? stats : (stats as any)?.rows || [];
     } catch (error) {
       console.error('Error getting connection stats:', error);
       return [];
@@ -309,7 +325,8 @@ export class QueryOptimizer {
         recommendations.push(`${missingIndexes.length} potential missing indexes`);
       }
 
-      const deadTuples = tableStats.reduce((sum, table) => sum + parseInt(table.dead_tuples), 0);
+      const tableStatsRows = Array.isArray(tableStats) ? tableStats : (tableStats as any)?.rows || [];
+      const deadTuples = tableStatsRows.reduce((sum: number, table: any) => sum + parseInt(table.dead_tuples || '0'), 0);
       if (deadTuples > 1000) {
         recommendations.push('High number of dead tuples - consider VACUUM');
       }
@@ -317,7 +334,7 @@ export class QueryOptimizer {
       return {
         slowQueries: slowQueries.length,
         missingIndexes: missingIndexes.length,
-        totalTables: tableStats.length,
+        totalTables: tableStatsRows.length,
         databaseSize: sizeInfo?.database_size || 'Unknown',
         recommendations,
       };
