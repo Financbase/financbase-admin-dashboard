@@ -34,7 +34,7 @@ export const performanceRatingEnum = pgEnum("performance_rating", [
 	"poor",
 ]);
 
-// Define employees table with self-reference
+// Define employees table with self-reference - using const first to break circular reference
 const employeesTable = pgTable("employees", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: text("user_id").notNull(), // Clerk user ID
@@ -52,9 +52,7 @@ const employeesTable = pgTable("employees", {
 	// Employment details
 	position: text("position").notNull(),
 	department: text("department").notNull(),
-	managerId: uuid("manager_id").references(() => employeesTable, {
-		onDelete: "set null",
-	}),
+	managerId: uuid("manager_id"), // Self-reference - foreign key constraint added separately
 	employeeNumber: text("employee_number").unique(),
 
 	// Compensation
@@ -110,6 +108,9 @@ const employeesTable = pgTable("employees", {
 		.defaultNow(),
 });
 
+// Export to break circular reference (departments references employees)
+export const employees = employeesTable;
+
 export const departments = pgTable("departments", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	organizationId: uuid("organization_id")
@@ -128,9 +129,6 @@ export const departments = pgTable("departments", {
 		.notNull()
 		.defaultNow(),
 });
-
-// Export the table
-export const employees = employeesTable;
 
 export type Employee = typeof employees.$inferSelect;
 export type NewEmployee = typeof employees.$inferInsert;
