@@ -15,7 +15,7 @@
  */
 
 
-import { sql, getRawSqlConnection } from '@/lib/db';
+import { sql, getRawSqlConnection, db } from '@/lib/db';
 
 export interface UserContext {
   clerkId: string;
@@ -42,7 +42,7 @@ export interface DatabaseUser {
  */
 export async function getUserFromDatabase(clerkId: string): Promise<DatabaseUser | null> {
   try {
-    const result = await sql`
+    const result = await db.execute(sql`
       SELECT 
         id, 
         clerk_id, 
@@ -58,13 +58,19 @@ export async function getUserFromDatabase(clerkId: string): Promise<DatabaseUser
       WHERE clerk_id = ${clerkId} 
       AND is_active = true
       LIMIT 1
-    `;
+    `);
 
-    if (result.length === 0) {
+    // Handle different result formats from db.execute
+    // NeonHttpQueryResult has a 'rows' property, QueryResult is an array-like object
+    const resultRows = Array.isArray(result) 
+      ? result 
+      : ('rows' in result ? result.rows : []);
+    
+    if (resultRows.length === 0) {
       return null;
     }
 
-    return result[0] as DatabaseUser;
+    return resultRows[0] as DatabaseUser;
   } catch (error) {
     console.error('[RLS] Error fetching user from database:', error);
     return null;
