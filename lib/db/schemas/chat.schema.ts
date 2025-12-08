@@ -60,8 +60,8 @@ export const chatChannels = pgTable("chat_channels", {
 	lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
 });
 
-// Chat messages table - using const first to break circular reference
-const chatMessagesTable = pgTable("chat_messages", {
+// Chat messages table - defined directly to avoid circular reference issues
+export const chatMessages = pgTable("chat_messages", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	channelId: uuid("channel_id")
 		.notNull()
@@ -75,8 +75,8 @@ const chatMessagesTable = pgTable("chat_messages", {
 	message: text("message").notNull(),
 	type: messageTypeEnum("type").notNull().default("message"),
 
-	// Threading and replies - using string literal to avoid circular reference
-	replyTo: uuid("reply_to"), // For reply threads - foreign key constraint added separately
+	// Threading and replies - using uuid without reference to avoid circular reference
+	replyTo: uuid("reply_to"), // For reply threads - references chat_messages.id (foreign key constraint added separately)
 
 	// Mentions and reactions
 	mentions: jsonb("mentions").default("[]"), // Array of user IDs mentioned
@@ -100,9 +100,6 @@ const chatMessagesTable = pgTable("chat_messages", {
 		.defaultNow(),
 	deletedAt: timestamp("deleted_at", { withTimezone: true }), // Soft delete
 });
-
-// Export to break circular reference
-export const chatMessages = chatMessagesTable;
 
 export type ChatChannel = typeof chatChannels.$inferSelect;
 export type NewChatChannel = typeof chatChannels.$inferInsert;

@@ -38,7 +38,8 @@ interface CreateClientInput {
 }
 
 interface UpdateClientInput extends Partial<CreateClientInput> {
-	id: string;
+	id: number;
+	isActive?: boolean;
 }
 
 interface ClientStats {
@@ -60,8 +61,8 @@ interface ClientStats {
 export async function createClient(input: CreateClientInput): Promise<Client> {
 	const [client] = await db.insert(clients).values({
 		userId: input.userId,
-		companyName: input.companyName,
-		contactName: input.contactName,
+		name: input.contactName || input.companyName || '',
+		company: input.companyName,
 		email: input.email,
 		phone: input.phone,
 		address: input.address,
@@ -73,8 +74,6 @@ export async function createClient(input: CreateClientInput): Promise<Client> {
 		currency: input.currency || 'USD',
 		paymentTerms: input.paymentTerms || 'net30',
 		notes: input.notes,
-		metadata: input.metadata,
-		updatedAt: new Date(),
 	}).returning();
 
 	// Send notification
@@ -92,7 +91,7 @@ export async function createClient(input: CreateClientInput): Promise<Client> {
 export async function getClientById(id: string, userId: string): Promise<Client | null> {
 	const client = await db.query.clients.findFirst({
 		where: and(
-			eq(clients.id, id),
+			eq(clients.id, parseInt(id, 10)),
 			eq(clients.userId, userId)
 		),
 	});
@@ -115,17 +114,18 @@ export async function getClients(
 	const conditions = [eq(clients.userId, userId)];
 
 	if (options?.search) {
-		conditions.push(
-			or(
-				ilike(clients.companyName, `%${options.search}%`),
-				ilike(clients.contactName, `%${options.search}%`),
-				ilike(clients.email, `%${options.search}%`)
-			)
+		const searchCondition = or(
+			sql`COALESCE(${clients.company}, '') ILIKE ${`%${options.search}%`}`,
+			sql`COALESCE(${clients.name}, '') ILIKE ${`%${options.search}%`}`,
+			ilike(clients.email, `%${options.search}%`)
 		);
+		if (searchCondition) {
+			conditions.push(searchCondition);
+		}
 	}
 
 	if (options?.isActive !== undefined) {
-		conditions.push(eq(clients.isActive, options.isActive));
+		conditions.push(eq(clients.status, options.isActive ? 'active' : 'inactive'));
 	}
 
 	const results = await db.query.clients.findMany({
@@ -142,15 +142,32 @@ export async function getClients(
  * Update client
  */
 export async function updateClient(input: UpdateClientInput): Promise<Client> {
-	const { id, userId, ...updateData } = input;
+	const { id, userId, companyName, contactName, isActive, ...updateData } = input;
+
+	const updateFields: any = {
+		...updateData,
+		updatedAt: new Date(),
+	};
+
+	// Map companyName to company field
+	if (companyName !== undefined) {
+		updateFields.company = companyName;
+	}
+
+	// Map contactName to name field
+	if (contactName !== undefined) {
+		updateFields.name = contactName;
+	}
+
+	// Map isActive to status field
+	if (isActive !== undefined) {
+		updateFields.status = isActive ? 'active' : 'inactive';
+	}
 
 	const [updated] = await db.update(clients)
-		.set({
-			...updateData,
-			updatedAt: new Date(),
-		})
+		.set(updateFields)
 		.where(and(
-			eq(clients.id, id),
+			eq(clients.id, typeof id === 'string' ? parseInt(id, 10) : id),
 			eq(clients.userId, userId || '')
 		))
 		.returning();
@@ -164,7 +181,7 @@ export async function updateClient(input: UpdateClientInput): Promise<Client> {
 export async function deleteClient(id: string, userId: string): Promise<void> {
 	await db.delete(clients)
 		.where(and(
-			eq(clients.id, id),
+			eq(clients.id, parseInt(id, 10)),
 			eq(clients.userId, userId)
 		));
 }
@@ -185,7 +202,7 @@ export async function getClientStats(userId: string): Promise<ClientStats> {
 		.from(clients)
 		.where(and(
 			eq(clients.userId, userId),
-			eq(clients.isActive, true)
+			eq(clients.status, 'active')
 		));
 
 	// Get revenue data from invoices
@@ -213,7 +230,7 @@ export async function getClientStats(userId: string): Promise<ClientStats> {
 		.sort((a, b) => Number(b.totalAmount) - Number(a.totalAmount))
 		.slice(0, 5)
 		.map(row => ({
-			id: row.clientId || '',
+			id: String(row.clientId || ''),
 			companyName: row.clientName || '',
 			totalInvoices: Number(row.invoiceCount),
 			totalAmount: Number(row.totalAmount),
@@ -240,8 +257,8 @@ export async function searchClients(
 		where: and(
 			eq(clients.userId, userId),
 			or(
-				ilike(clients.companyName, `%${query}%`),
-				ilike(clients.contactName, `%${query}%`),
+				ilike(clients.company, `%${query}%`),
+				ilike(clients.name, `%${query}%`),
 				ilike(clients.email, `%${query}%`)
 			)
 		),
@@ -262,7 +279,7 @@ export async function getClientInvoiceHistory(
 ) {
 	const clientInvoices = await db.query.invoices.findMany({
 		where: and(
-			eq(invoices.clientId, clientId),
+			eq(invoices.clientId, typeof clientId === 'string' ? parseInt(clientId, 10) : clientId),
 			eq(invoices.userId, userId)
 		),
 		orderBy: [desc(invoices.createdAt)],
@@ -282,11 +299,11 @@ export async function toggleClientStatus(
 ): Promise<Client> {
 	const [updated] = await db.update(clients)
 		.set({
-			isActive,
+			status: isActive ? 'active' : 'inactive',
 			updatedAt: new Date(),
 		})
 		.where(and(
-			eq(clients.id, id),
+			eq(clients.id, typeof id === 'string' ? parseInt(id, 10) : id),
 			eq(clients.userId, userId)
 		))
 		.returning();

@@ -447,11 +447,11 @@ export class TaxService {
 				amount: input.amount.toString(),
 				paymentDate: new Date(input.paymentDate),
 				paymentMethod: input.paymentMethod || null,
-				reference: input.reference || null,
+				reference: (input as any).reference || null,
 				quarter,
 				year: obligationData.year,
 				notes: input.notes || null,
-				metadata: input.metadata || null,
+				metadata: (input as any).metadata || null,
 			});
 
 			// Audit log
@@ -1032,9 +1032,13 @@ export class TaxService {
 
 		const document = results[0];
 		
+		// Soft delete by setting deletedAt timestamp
 		await db
 			.update(taxDocuments)
-			.set({ deletedAt: new Date() })
+			.set({ 
+				deletedAt: new Date(),
+				updatedAt: new Date() 
+			})
 			.where(and(eq(taxDocuments.id, id), eq(taxDocuments.userId, userId)));
 
 		// Audit log
@@ -1061,7 +1065,10 @@ export class TaxService {
 	async restoreDocument(id: string, userId: string): Promise<TaxDocument> {
 		const result = await db
 			.update(taxDocuments)
-			.set({ deletedAt: null })
+			.set({ 
+				deletedAt: null,
+				updatedAt: new Date() 
+			})
 			.where(and(eq(taxDocuments.id, id), eq(taxDocuments.userId, userId)))
 			.returning();
 

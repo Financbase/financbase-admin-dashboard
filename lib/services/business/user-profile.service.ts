@@ -13,7 +13,7 @@ import { query } from "../db/neon-connection";
 import { AppError } from "../middleware/error-handler";
 
 export interface UserProfile {
-	id: number;
+	id: string | number;
 	clerkUserId: string;
 	email: string;
 	firstName?: string;
@@ -54,21 +54,21 @@ export class UserProfileService {
 			const user = users[0];
 
 			// Calculate profile statistics
-			const stats = await this.calculateUserStats(user.id);
+			const stats = await this.calculateUserStats(user.id as string);
 
 			return {
-				id: user.id,
-				clerkUserId: user.clerkUserId,
+				id: user.id as string,
+				clerkUserId: user.clerkId,
 				email: user.email,
 				firstName: user.firstName || undefined,
 				lastName: user.lastName || undefined,
 				role: user.role,
-				permissions: Array.isArray(user.permissions) ? user.permissions : [],
+				permissions: [] as string[],
 				isActive: user.isActive,
-				lastLoginAt: user.lastLoginAt || undefined,
+				lastLoginAt: undefined,
 				createdAt: user.createdAt,
 				updatedAt: user.updatedAt,
-				metadata: user.metadata,
+				metadata: undefined,
 				...stats,
 			};
 		} catch (error) {
@@ -106,12 +106,6 @@ export class UserProfileService {
 				paramIndex++;
 			}
 
-			if (updates.metadata !== undefined) {
-				updateFields.push(`metadata = $${paramIndex}`);
-				values.push(JSON.stringify(updates.metadata));
-				paramIndex++;
-			}
-
 			if (updateFields.length === 0) {
 				throw new AppError("No fields to update", 400, "NO_UPDATE_FIELDS");
 			}
@@ -137,18 +131,18 @@ export class UserProfileService {
 			const stats = await this.calculateUserStats(user.id);
 
 			return {
-				id: user.id,
-				clerkUserId: user.clerkUserId,
+				id: user.id as string,
+				clerkUserId: user.clerkId,
 				email: user.email,
 				firstName: user.firstName || undefined,
 				lastName: user.lastName || undefined,
 				role: user.role,
-				permissions: Array.isArray(user.permissions) ? user.permissions : [],
+				permissions: [] as string[],
 				isActive: user.isActive,
-				lastLoginAt: user.lastLoginAt || undefined,
+				lastLoginAt: undefined,
 				createdAt: user.createdAt,
 				updatedAt: user.updatedAt,
-				metadata: user.metadata,
+				metadata: undefined,
 				...stats,
 			};
 		} catch (error) {
@@ -168,7 +162,7 @@ export class UserProfileService {
 	/**
 	 * Get multiple user profiles
 	 */
-	async getUserProfiles(userIds?: number[]): Promise<UserProfile[]> {
+	async getUserProfiles(userIds?: string[]): Promise<UserProfile[]> {
 		try {
 			let queryStr = `
         SELECT * FROM cms_users
@@ -182,7 +176,7 @@ export class UserProfileService {
 					.map((_, index) => `$${index + 1}`)
 					.join(",");
 				queryStr += ` AND id IN (${placeholders})`;
-				params.push(...userIds);
+				params.push(...userIds.map(id => id));
 			}
 
 			queryStr += " ORDER BY last_login_at DESC NULLS LAST";
@@ -193,20 +187,18 @@ export class UserProfileService {
 				users.map(async (user) => {
 					const stats = await this.calculateUserStats(user.id);
 					return {
-						id: user.id,
-						clerkUserId: user.clerkUserId,
+						id: user.id as string,
+						clerkUserId: user.clerkId,
 						email: user.email,
 						firstName: user.firstName || undefined,
 						lastName: user.lastName || undefined,
 						role: user.role,
-						permissions: Array.isArray(user.permissions)
-							? user.permissions
-							: [],
+						permissions: [] as string[],
 						isActive: user.isActive,
-						lastLoginAt: user.lastLoginAt || undefined,
+						lastLoginAt: undefined,
 						createdAt: user.createdAt,
 						updatedAt: user.updatedAt,
-						metadata: user.metadata,
+						metadata: undefined,
 						...stats,
 					};
 				}),
@@ -226,7 +218,7 @@ export class UserProfileService {
 	/**
 	 * Calculate user statistics based on their activity
 	 */
-	private async calculateUserStats(userId: number): Promise<UserProfileStats> {
+	private async calculateUserStats(userId: string | number): Promise<UserProfileStats> {
 		try {
 			// For now, return mock stats - in a real implementation,
 			// you would calculate these based on actual user activity data

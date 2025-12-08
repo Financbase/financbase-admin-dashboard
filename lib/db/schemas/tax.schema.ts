@@ -155,6 +155,7 @@ export const taxDocuments = pgTable("tax_documents", {
 	updatedAt: timestamp("updated_at", { withTimezone: true })
 		.notNull()
 		.defaultNow(),
+	deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
 // Type exports

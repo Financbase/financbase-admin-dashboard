@@ -11,7 +11,7 @@ import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
 import { db } from '@/lib/db';
 import { userApiKeys, userAiPreferences, aiUsageTracking, aiProviderConfigs, supportedAiProviders } from '@/lib/db/schemas/byok-api-keys';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, gte, sql } from 'drizzle-orm';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
@@ -333,14 +333,20 @@ export class BYOKService {
       })) as any
     });
 
+    // Find the first text block (skip thinking blocks)
+    const textBlock = response.content.find((block: any) => {
+      return block && typeof block === 'object' && 'text' in block;
+    }) as { text: string } | undefined;
+    const content = textBlock?.text || '';
+
     return {
-      content: response.content[0].text,
-      tokensUsed: response.usage?.input_tokens + response.usage?.output_tokens,
+      content,
+      tokensUsed: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0),
       tokensInput: response.usage?.input_tokens,
       tokensOutput: response.usage?.output_tokens,
       model: response.model,
       provider: 'anthropic',
-      finishReason: response.stop_reason
+      finishReason: response.stop_reason ?? undefined
     };
   }
 
@@ -756,12 +762,20 @@ export class BYOKService {
    * Update user's AI preferences
    */
   async updateUserAiPreferences(userId: string, preferences: Partial<typeof userAiPreferences.$inferInsert>): Promise<void> {
+    const defaultProvider = preferences.defaultProvider || 'openai';
     await db
       .insert(userAiPreferences)
-      .values({ userId, ...preferences })
+      .values({ 
+        userId, 
+        defaultProvider,
+        ...preferences 
+      })
       .onConflictDoUpdate({
         target: userAiPreferences.userId,
-        set: preferences
+        set: {
+          ...preferences,
+          defaultProvider: preferences.defaultProvider ?? defaultProvider
+        }
       });
   }
 
@@ -785,8 +799,9 @@ export class BYOKService {
     const providerInfo = supportedAiProviders.find(p => p.provider === provider);
     let estimatedCost = '0';
 
-    if (providerInfo?.costPer1kTokens?.[model]) {
-      const costInfo = providerInfo.costPer1kTokens[model];
+    if (providerInfo?.costPer1kTokens && model in providerInfo.costPer1kTokens) {
+      const costPer1kTokens = providerInfo.costPer1kTokens as unknown as Record<string, { input: number; output: number }>;
+      const costInfo = costPer1kTokens[model];
       const inputCost = (tokensInput / 1000) * costInfo.input;
       const outputCost = (tokensOutput / 1000) * costInfo.output;
       estimatedCost = (inputCost + outputCost).toFixed(6);
@@ -821,7 +836,9 @@ export class BYOKService {
       id: modelId,
       name: this.getModelDisplayName(modelId),
       provider,
-      costPer1kTokens: providerInfo.costPer1kTokens?.[modelId],
+      costPer1kTokens: providerInfo.costPer1kTokens && modelId in providerInfo.costPer1kTokens 
+        ? (providerInfo.costPer1kTokens as unknown as Record<string, { input: number; output: number }>)[modelId]
+        : undefined,
       supportsStreaming: providerInfo.provider !== 'anthropic', // Claude doesn't support streaming well
       supportsVision: modelId.includes('vision'),
       supportsFunctionCalling: true // Most modern models support this
@@ -882,19 +899,19 @@ export class BYOKService {
 
     const usage = await db
       .select({
-        totalTokens: db.fn.sum(aiUsageTracking.tokensUsed).as('totalTokens'),
-        totalCost: db.fn.sum(aiUsageTracking.estimatedCost).as('totalCost'),
-        requestCount: db.fn.count().as('requestCount')
+        totalTokens: sql<number>`SUM(${aiUsageTracking.tokensUsed})`.as('totalTokens'),
+        totalCost: sql<number>`SUM(CAST(${aiUsageTracking.estimatedCost} AS DECIMAL))`.as('totalCost'),
+        requestCount: sql<number>`COUNT(*)`.as('requestCount')
       })
       .from(aiUsageTracking)
       .where(and(
         ...whereConditions,
-        db.gte(aiUsageTracking.timestamp, startOfMonth)
+        gte(aiUsageTracking.timestamp, startOfMonth)
       ));
 
     return {
       totalTokens: Number(usage[0]?.totalTokens) || 0,
-      totalCost: parseFloat(usage[0]?.totalCost || '0'),
+      totalCost: typeof usage[0]?.totalCost === 'string' ? parseFloat(usage[0].totalCost) : (usage[0]?.totalCost || 0),
       requestCount: Number(usage[0]?.requestCount) || 0,
       monthStart: startOfMonth
     };
