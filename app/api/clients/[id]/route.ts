@@ -75,8 +75,13 @@ export async function PUT(
 
 		const validatedData = updateClientSchema.parse(body);
 
+		const clientId = parseInt(id, 10);
+		if (isNaN(clientId)) {
+			return ApiErrorHandler.badRequest('Invalid client ID');
+		}
+
 		const client = await ClientService.update({
-			id: id,
+			id: clientId,
 			userId,
 			...validatedData,
 		});
