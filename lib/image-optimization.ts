@@ -7,7 +7,27 @@
  * @see LICENSE file in the root directory for full license terms.
  */
 
-import sharp from 'sharp';
+// Optional import - sharp may not be installed
+// Type declaration in types/sharp.d.ts allows compilation without sharp installed
+let sharp: typeof import('sharp') | null = null;
+try {
+  sharp = require('sharp');
+} catch {
+  // sharp not installed, will throw helpful error when used
+  sharp = null;
+}
+
+/**
+ * Get sharp instance or throw helpful error
+ */
+function getSharp(): typeof import('sharp') {
+  if (!sharp) {
+    throw new Error(
+      'sharp is not installed. Install it with: pnpm add sharp'
+    );
+  }
+  return sharp;
+}
 
 export interface ImageOptimizationOptions {
   maxWidth?: number;
@@ -46,7 +66,8 @@ export async function optimizeImage(
   } = options;
 
   try {
-    let sharpInstance = sharp(inputBuffer);
+    const sharpLib = getSharp();
+    let sharpInstance = sharpLib(inputBuffer);
 
     // Get original image metadata
     const originalMetadata = await sharpInstance.metadata();
@@ -96,7 +117,8 @@ export async function optimizeImage(
     }
 
     // Get optimized image metadata
-    const optimizedMetadata = await sharp(optimizedBuffer).metadata();
+    const sharpLib = getSharp();
+    const optimizedMetadata = await sharpLib(optimizedBuffer).metadata();
 
     return {
       buffer: optimizedBuffer,
@@ -180,9 +202,10 @@ export async function generateThumbnails(
  */
 export async function validateImage(
   inputBuffer: Buffer | string
-): Promise<{ isValid: boolean; metadata?: sharp.Metadata; error?: string }> {
+): Promise<{ isValid: boolean; metadata?: any; error?: string }> {
   try {
-    const metadata = await sharp(inputBuffer).metadata();
+    const sharpLib = getSharp();
+    const metadata = await sharpLib(inputBuffer).metadata();
 
     // Check if it's a valid image
     if (!metadata.format) {
