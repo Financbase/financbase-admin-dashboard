@@ -45,7 +45,7 @@ export const policyTypeEnum = pgEnum('policy_type', [
 ]);
 
 // Policy Documents Table - using explicit type to break circular reference
-const policyDocumentsTable = pgTable('financbase_policy_documents', {
+export const policyDocuments = pgTable('financbase_policy_documents', {
   id: serial('id').primaryKey(),
   organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }).notNull(),
   createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
@@ -79,7 +79,7 @@ const policyDocumentsTable = pgTable('financbase_policy_documents', {
   reviewRequired: boolean('review_required').default(true).notNull(),
   
 	// Related policies
-	supersedesPolicyId: integer('supersedes_policy_id').references(() => policyDocumentsTable, { onDelete: 'set null' }),
+	supersedesPolicyId: integer('supersedes_policy_id'), // Self-reference - foreign key constraint added separately
   relatedPolicies: jsonb('related_policies').default([]).notNull(), // Array of related policy IDs
   
   // Compliance
@@ -168,8 +168,6 @@ export const policyApprovalWorkflows = pgTable('financbase_policy_approval_workf
 });
 
 // Relations
-// Export the table
-export const policyDocuments = policyDocumentsTable;
 
 export const policyDocumentsRelations = relations(policyDocuments, ({ one, many }) => ({
   organization: one(organizations, {
