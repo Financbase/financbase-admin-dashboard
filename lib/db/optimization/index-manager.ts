@@ -110,7 +110,10 @@ export class IndexManager {
       `);
 
       // Handle different result formats from db.execute
-      const unusedRows = Array.isArray(unusedIndexes) ? unusedIndexes : (unusedIndexes as any)?.rows || [];
+      // NeonHttpQueryResult has a 'rows' property, QueryResult is an array-like object
+      const unusedRows = Array.isArray(unusedIndexes) 
+        ? unusedIndexes 
+        : ('rows' in unusedIndexes ? unusedIndexes.rows : []);
       
       return unusedRows.map((row: any) => ({
         tableName: row.tablename,
@@ -268,7 +271,10 @@ export class IndexManager {
       `);
 
       // Handle different result formats from db.execute
-      const recommendationRows = Array.isArray(recommendations) ? recommendations : (recommendations as any)?.rows || [];
+      // NeonHttpQueryResult has a 'rows' property, QueryResult is an array-like object
+      const recommendationRows = Array.isArray(recommendations) 
+        ? recommendations 
+        : ('rows' in recommendations ? recommendations.rows : []);
       
       return recommendationRows.map((row: any) => ({
         table: row.table,

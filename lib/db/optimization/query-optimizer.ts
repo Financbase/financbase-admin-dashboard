@@ -125,7 +125,10 @@ export class QueryOptimizer {
       `);
 
       // Handle different result formats from db.execute
-      const recommendationRows = Array.isArray(recommendations) ? recommendations : (recommendations as any)?.rows || [];
+      // NeonHttpQueryResult has a 'rows' property, QueryResult is an array-like object
+      const recommendationRows = Array.isArray(recommendations) 
+        ? recommendations 
+        : ('rows' in recommendations ? recommendations.rows : []);
       
       return recommendationRows.map((row: any) => ({
         table: row.table,
@@ -325,7 +328,8 @@ export class QueryOptimizer {
         recommendations.push(`${missingIndexes.length} potential missing indexes`);
       }
 
-      const tableStatsRows = Array.isArray(tableStats) ? tableStats : (tableStats as any)?.rows || [];
+      // tableStats is already an array from analyzeTableStats()
+      const tableStatsRows = Array.isArray(tableStats) ? tableStats : [];
       const deadTuples = tableStatsRows.reduce((sum: number, table: any) => sum + parseInt(table.dead_tuples || '0'), 0);
       if (deadTuples > 1000) {
         recommendations.push('High number of dead tuples - consider VACUUM');
