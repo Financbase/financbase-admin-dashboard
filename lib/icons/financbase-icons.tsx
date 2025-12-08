@@ -252,7 +252,7 @@ const iconMap: Record<string, LucideIcon> = {
   "calendar-days": LucideIcons.CalendarDays,
   hourglass: LucideIcons.Hourglass,
   timer: LucideIcons.Timer,
-  stopwatch: LucideIcons.Stopwatch,
+  stopwatch: LucideIcons.Timer, // Stopwatch not available, using Timer instead
 
   // Security icons
   shield: LucideIcons.Shield,
@@ -356,7 +356,7 @@ const categoryIconMap: Record<string, Record<string, LucideIcon>> = {
     "calendar-days": LucideIcons.CalendarDays,
     hourglass: LucideIcons.Hourglass,
     timer: LucideIcons.Timer,
-    stopwatch: LucideIcons.Stopwatch,
+    stopwatch: LucideIcons.Timer, // Stopwatch not available, using Timer instead
   },
   security: {
     shield: LucideIcons.Shield,
