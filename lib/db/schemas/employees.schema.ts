@@ -34,8 +34,8 @@ export const performanceRatingEnum = pgEnum("performance_rating", [
 	"poor",
 ]);
 
-// Define employees table with self-reference - using const first to break circular reference
-const employeesTable = pgTable("employees", {
+// Define employees table with self-reference - export directly to avoid circular reference
+export const employees = pgTable("employees", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: text("user_id").notNull(), // Clerk user ID
 	organizationId: uuid("organization_id")
@@ -107,9 +107,6 @@ const employeesTable = pgTable("employees", {
 		.notNull()
 		.defaultNow(),
 });
-
-// Export to break circular reference (departments references employees)
-export const employees = employeesTable;
 
 export const departments = pgTable("departments", {
 	id: uuid("id").primaryKey().defaultRandom(),

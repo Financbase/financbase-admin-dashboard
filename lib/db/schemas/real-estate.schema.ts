@@ -87,8 +87,8 @@ export const propertyValuations = pgTable("property_valuations", {
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Tenants table - using explicit type to break circular reference
-const tenantsTable = pgTable("tenants", {
+// Tenants table - export directly to avoid circular reference
+export const tenants = pgTable("tenants", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: text("user_id").notNull(),
 	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }), // VARCHAR reference
@@ -112,8 +112,8 @@ const tenantsTable = pgTable("tenants", {
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Property units table - using explicit type to break circular reference
-const propertyUnitsTable = pgTable("property_units", {
+// Property units table - export directly to avoid circular reference
+export const propertyUnits = pgTable("property_units", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }).notNull(), // VARCHAR reference
 	userId: text("user_id").notNull(),
@@ -215,8 +215,6 @@ export type PropertyValuation = typeof propertyValuations.$inferSelect;
 export type NewPropertyValuation = typeof propertyValuations.$inferInsert;
 
 // Export the tables
-export const tenants = tenantsTable;
-export const propertyUnits = propertyUnitsTable;
 
 export type Tenant = typeof tenants.$inferSelect;
 export type NewTenant = typeof tenants.$inferInsert;
