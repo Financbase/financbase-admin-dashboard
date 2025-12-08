@@ -124,13 +124,13 @@ function validateEnv(): Env {
     return parsed;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errors = error.errors.map((err) => {
+      const errors = error.issues.map((err) => {
         const path = err.path.join('.');
         return `${path}: ${err.message}`;
       });
 
       const errorMessage = `Environment variable validation failed:\n${errors.join('\n')}`;
-      logger.error(errorMessage, { errors: error.errors });
+      logger.error(errorMessage, { errors: error.issues });
       
       // In production, throw to prevent app from starting with invalid config
       if (rawEnv.NODE_ENV === 'production') {
