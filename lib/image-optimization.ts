@@ -117,7 +117,6 @@ export async function optimizeImage(
     }
 
     // Get optimized image metadata
-    const sharpLib = getSharp();
     const optimizedMetadata = await sharpLib(optimizedBuffer).metadata();
 
     return {
