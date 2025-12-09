@@ -163,23 +163,24 @@ export class SecurityService {
 			if (decision.isDenied()) {
 				// Determine appropriate status code based on denial reason
 				let status = 429; // Default to rate limit
-				if (decision.reason?.toLowerCase().includes('bot')) {
+				const reasonStr = String(decision.reason || '');
+				if (reasonStr.toLowerCase().includes('bot')) {
 					status = 403; // Forbidden for bots
-				} else if (decision.reason?.toLowerCase().includes('shield') || 
-				           decision.reason?.toLowerCase().includes('threat')) {
+				} else if (reasonStr.toLowerCase().includes('shield') || 
+				           reasonStr.toLowerCase().includes('threat')) {
 					status = 403; // Forbidden for threats
 				}
 
 				return {
 					denied: true,
-					reason: decision.reason || 'Request denied',
+					reason: reasonStr || 'Request denied',
 					status,
 				};
 			}
 
 			// Extract remaining tokens from the decision
 			// Arcjet returns remaining in the decision object or results array
-			const remaining = (decision as any).remaining ?? decision.results?.[0]?.remaining ?? null;
+			const remaining = (decision as any).remaining ?? (decision.results?.[0] as any)?.remaining ?? null;
 
 			return {
 				denied: false,
@@ -225,12 +226,12 @@ export class SecurityService {
 			
 			// Check if request was denied due to bot detection
 			if (decision.isDenied()) {
-				const reason = decision.reason || '';
+				const reason = String(decision.reason || '');
 				// Check if the denial reason indicates bot detection
 				if (reason.toLowerCase().includes('bot') || reason.toLowerCase().includes('automated')) {
 					return {
 						isBot: true,
-						reason: decision.reason,
+						reason: String(decision.reason || ''),
 					};
 				}
 			}
@@ -282,14 +283,14 @@ export class SecurityService {
 			
 			// Check if request was denied due to threat detection
 			if (decision.isDenied()) {
-				const reason = decision.reason || '';
+				const reason = String(decision.reason || '');
 				// Check if the denial reason indicates threat detection
 				if (reason.toLowerCase().includes('shield') || 
 					reason.toLowerCase().includes('threat') ||
 					reason.toLowerCase().includes('attack')) {
 					return {
 						isThreat: true,
-						reason: decision.reason,
+						reason: String(decision.reason || ''),
 					};
 				}
 			}
