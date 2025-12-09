@@ -57,6 +57,7 @@ export interface PluginAPI {
     createInvoice: (data: CreateInvoiceData) => Promise<Invoice>;
     updateInvoice: (id: string, data: UpdateInvoiceData) => Promise<Invoice>;
     createExpense: (data: CreateExpenseData) => Promise<Expense>;
+    updateExpense: (id: string, data: UpdateExpenseData) => Promise<Expense>;
     createPayment: (data: CreatePaymentData) => Promise<Payment>;
     createCustomer: (data: CreateCustomerData) => Promise<Customer>;
   };
@@ -187,6 +188,7 @@ export interface PaymentFilters {
 }
 
 export interface CustomerFilters {
+  id?: string;
   name?: string;
   email?: string;
   phone?: string;
@@ -218,6 +220,9 @@ export interface UpdateInvoiceData {
   dueDate?: Date;
   description?: string;
   status?: string;
+  taxAmount?: number;
+  total?: number;
+  metadata?: Record<string, any>;
 }
 
 export interface CreateExpenseData {
@@ -227,6 +232,17 @@ export interface CreateExpenseData {
   category: string;
   date: Date;
   receipt?: string;
+}
+
+export interface UpdateExpenseData {
+  description?: string;
+  amount?: number;
+  currency?: string;
+  category?: string;
+  date?: Date;
+  status?: string;
+  taxAmount?: number;
+  metadata?: Record<string, any>;
 }
 
 export interface CreatePaymentData {
