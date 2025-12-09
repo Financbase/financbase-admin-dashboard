@@ -520,7 +520,7 @@ export class ReconciliationService {
 				bookBalance: data.bookBalance?.toString(),
 				difference: difference.toString(),
 				aiRecommendations: data.aiRecommendations,
-				aiConfidence: this.calculateSessionConfidence(matches, discrepancies),
+				aiConfidence: this.calculateSessionConfidence(matches, discrepancies).toString(),
 				notes: data.notes,
 				completedAt: new Date(),
 			})
