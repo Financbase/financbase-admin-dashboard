@@ -155,7 +155,7 @@ export class AIMatchingEngine {
 							confidence: "manual",
 							reason: `Matched by rule: ${rule.name}`,
 							criteria: ["rule_match"],
-							aiExplanation: rule.description,
+							aiExplanation: rule.description || undefined,
 						});
 					}
 				}
