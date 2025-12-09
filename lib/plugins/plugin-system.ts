@@ -61,6 +61,7 @@ export interface PluginAPI {
   createInvoice: (data: any) => Promise<any>;
   updateInvoice: (id: string, data: any) => Promise<any>;
   createExpense: (data: any) => Promise<any>;
+  updateExpense: (id: string, data: any) => Promise<any>;
   createPayment: (data: any) => Promise<any>;
   
   // Notifications
@@ -117,7 +118,7 @@ export class PluginSystem {
       
       await this.logPlugin(pluginId, 'info', 'Plugin registered successfully');
     } catch (error) {
-      await this.logPlugin(pluginId, 'error', 'Failed to register plugin', { error: error.message });
+      await this.logPlugin(pluginId, 'error', 'Failed to register plugin', { error: error instanceof Error ? error.message : String(error) });
       throw error;
     }
   }
@@ -178,8 +179,9 @@ export class PluginSystem {
         .where(eq(marketplacePlugins.id, pluginId));
 
       // Initialize plugin settings
-      if (plugin[0].manifest?.settings) {
-        for (const setting of plugin[0].manifest.settings) {
+      const manifest = plugin[0].manifest as any;
+      if (manifest?.settings) {
+        for (const setting of manifest.settings) {
           await db.insert(pluginSettings).values({
             installationId: installation[0].id,
             userId,
@@ -205,7 +207,7 @@ export class PluginSystem {
 
       return installation[0].id;
     } catch (error) {
-      await this.logPlugin(pluginId, 'error', 'Failed to install plugin', { error: error.message });
+      await this.logPlugin(pluginId, 'error', 'Failed to install plugin', { error: error instanceof Error ? error.message : String(error) });
       throw error;
     }
   }
@@ -217,6 +219,7 @@ export class PluginSystem {
     installationId: number,
     userId: string
   ): Promise<void> {
+    let pluginId: number | undefined;
     try {
       // Get installation details
       const installation = await db
@@ -232,7 +235,7 @@ export class PluginSystem {
         throw new Error('Plugin installation not found');
       }
 
-      const pluginId = installation[0].pluginId;
+      pluginId = installation[0].pluginId;
 
       // Deactivate plugin
       await db
@@ -283,8 +286,8 @@ export class PluginSystem {
         userId 
       });
     } catch (error) {
-      await this.logPlugin(installation[0]?.pluginId || 0, 'error', 'Failed to uninstall plugin', { 
-        error: error.message 
+      await this.logPlugin(pluginId || 0, 'error', 'Failed to uninstall plugin', { 
+        error: error instanceof Error ? error.message : String(error)
       });
       throw error;
     }
@@ -317,7 +320,7 @@ export class PluginSystem {
       });
     } catch (error) {
       await this.logPlugin(installationId, 'error', 'Failed to toggle plugin', { 
-        error: error.message 
+        error: error instanceof Error ? error.message : String(error)
       });
       throw error;
     }
@@ -349,12 +352,12 @@ export class PluginSystem {
       } catch (error) {
         await this.logPlugin(context.pluginId, 'error', `Hook ${hookName} failed`, {
           hookName,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           pluginId: context.pluginId,
         });
         
         // Continue with other hooks even if one fails
-        results.push({ error: error.message });
+        results.push({ error: error instanceof Error ? error.message : String(error) });
       }
     }
 
@@ -399,7 +402,7 @@ export class PluginSystem {
       pluginId: installation[0].pluginId,
       installationId,
       settings: settingsMap,
-      permissions: installation[0].permissions || [],
+      permissions: (Array.isArray(installation[0].permissions) ? installation[0].permissions : []) as string[],
     };
 
     return {
@@ -426,6 +429,9 @@ export class PluginSystem {
         return {};
       },
       createExpense: async (data) => {
+        return {};
+      },
+      updateExpense: async (id, data) => {
         return {};
       },
       createPayment: async (data) => {
@@ -494,14 +500,39 @@ export class PluginSystem {
    * Log plugin activity
    */
   private static async logPlugin(
-    pluginId: number,
+    pluginIdOrInstallationId: number,
     level: 'info' | 'warn' | 'error' | 'debug',
     message: string,
     context?: any
   ): Promise<void> {
     try {
+      // Try to find installationId if pluginId is provided
+      // If context has installationId, use it; otherwise try to find it
+      let installationId: number | undefined = context?.installationId;
+      
+      if (!installationId) {
+        // Try to find installation by pluginId
+        const installations = await db
+          .select({ id: installedPlugins.id })
+          .from(installedPlugins)
+          .where(eq(installedPlugins.pluginId, pluginIdOrInstallationId))
+          .limit(1);
+        
+        if (installations.length > 0) {
+          installationId = installations[0].id;
+        } else {
+          // Assume it's already an installationId
+          installationId = pluginIdOrInstallationId;
+        }
+      }
+      
+      if (!installationId) {
+        console.warn('Cannot log plugin activity: no installationId found');
+        return;
+      }
+      
       await db.insert(pluginLogs).values({
-        pluginId,
+        installationId,
         userId: 'system', // System log
         level,
         message,
