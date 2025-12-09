@@ -3,11 +3,6 @@
  * This allows the code to compile even if sharp is not in dependencies
  */
 declare module 'sharp' {
-  interface Sharp {
-    (input?: string | Buffer): SharpInstance;
-    metadata(): Promise<ImageMetadata>;
-  }
-
   interface SharpInstance {
     resize(width?: number, height?: number, options?: ResizeOptions): SharpInstance;
     webp(options?: WebpOptions): SharpInstance;
@@ -47,6 +42,11 @@ declare module 'sharp' {
     width?: number;
     height?: number;
     format?: string;
+  }
+
+  // sharp is a callable function (default export)
+  interface Sharp {
+    (input?: string | Buffer): SharpInstance;
   }
 
   const sharp: Sharp;

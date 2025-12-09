@@ -9,7 +9,7 @@
 
 // Optional import - sharp may not be installed
 // Type declaration in types/sharp.d.ts allows compilation without sharp installed
-let sharp: typeof import('sharp') | null = null;
+let sharp: typeof import('sharp').default | null = null;
 try {
   sharp = require('sharp');
 } catch {
@@ -20,7 +20,7 @@ try {
 /**
  * Get sharp instance or throw helpful error
  */
-function getSharp(): typeof import('sharp') {
+function getSharp(): typeof import('sharp').default {
   if (!sharp) {
     throw new Error(
       'sharp is not installed. Install it with: pnpm add sharp'
