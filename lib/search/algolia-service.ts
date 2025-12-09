@@ -153,13 +153,13 @@ export class AlgoliaSearchService {
 
 			return {
 				hits: response.hits as SearchResult[],
-				nbHits: response.nbHits,
-				page: response.page,
-				nbPages: response.nbPages,
-				hitsPerPage: response.hitsPerPage,
-				processingTimeMS: response.processingTimeMS,
-				query: response.query,
-				params: response.params,
+				nbHits: Number(response.nbHits ?? 0),
+				page: Number(response.page ?? 0),
+				nbPages: Number(response.nbPages ?? 0),
+				hitsPerPage: Number(response.hitsPerPage ?? 20),
+				processingTimeMS: Number(response.processingTimeMS ?? 0),
+				query: response.query ?? '',
+				params: response.params ?? '',
 			};
 		} catch (error) {
 			// Enhanced error logging for Algolia-specific errors
@@ -262,18 +262,21 @@ export class AlgoliaSearchService {
 	async getSuggestions(query: string, indexName: string = SEARCH_INDICES.PRODUCTS): Promise<string[]> {
 		const client = this.getClient();
 
-		// Algolia v5 API: client.searchSingleIndex({ indexName, query, ...options })
+		// Algolia v5 API: client.searchSingleIndex({ indexName, requests: [{ query, ...options }] })
 		const response = await client.searchSingleIndex({
 			indexName,
-			query,
-			hitsPerPage: 5,
-			attributesToRetrieve: ['name', 'description'],
-			attributesToHighlight: ['name'],
-		});
+			requests: [{
+				query,
+				hitsPerPage: 5,
+				attributesToRetrieve: ['name', 'description'],
+				attributesToHighlight: ['name'],
+			}],
+		} as any);
 
 		// Extract unique suggestions from results
 		const suggestions = new Set<string>();
-		response.hits.forEach(hit => {
+		const hits = (response as any).results?.[0]?.hits || (response as any).hits || [];
+		hits.forEach((hit: any) => {
 			if (hit.name) suggestions.add(hit.name);
 			if (hit.description) suggestions.add(hit.description);
 		});
