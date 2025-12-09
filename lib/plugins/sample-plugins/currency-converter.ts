@@ -106,7 +106,7 @@ export class CurrencyConverterPlugin extends BasePlugin {
         });
       }
     } catch (error) {
-      await this.api.log.error('Failed to convert invoice currency', { error: error.message });
+      await this.api.log.error('Failed to convert invoice currency', { error: error instanceof Error ? error.message : String(error) });
     }
   }
 
@@ -138,7 +138,7 @@ export class CurrencyConverterPlugin extends BasePlugin {
         });
       }
     } catch (error) {
-      await this.api.log.error('Failed to update invoice currency', { error: error.message });
+      await this.api.log.error('Failed to update invoice currency', { error: error instanceof Error ? error.message : String(error) });
     }
   }
 
@@ -191,7 +191,7 @@ export class CurrencyConverterPlugin extends BasePlugin {
         lastUpdate: this.lastUpdate
       });
     } catch (error) {
-      await this.api.log.error('Failed to load exchange rates', { error: error.message });
+      await this.api.log.error('Failed to load exchange rates', { error: error instanceof Error ? error.message : String(error) });
     }
   }
 
