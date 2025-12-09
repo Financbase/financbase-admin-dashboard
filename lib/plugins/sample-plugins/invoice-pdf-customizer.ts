@@ -105,7 +105,10 @@ export class InvoicePdfCustomizerPlugin extends BasePlugin {
       
       // Store PDF URL in invoice metadata
       await this.api.create.updateInvoice(invoice.id, {
-        customPdfUrl: pdfUrl
+        metadata: {
+          ...(invoice.metadata || {}),
+          customPdfUrl: pdfUrl
+        }
       });
 
       await this.api.log.info('Custom PDF generated for invoice', {
@@ -113,7 +116,7 @@ export class InvoicePdfCustomizerPlugin extends BasePlugin {
         pdfUrl
       });
     } catch (error) {
-      await this.api.log.error('Failed to generate custom PDF', { error: error.message });
+      await this.api.log.error('Failed to generate custom PDF', { error: error instanceof Error ? error.message : String(error) });
     }
   }
 
@@ -129,7 +132,10 @@ export class InvoicePdfCustomizerPlugin extends BasePlugin {
         const pdfUrl = await this.generateCustomPdf(invoice);
         
         await this.api.create.updateInvoice(invoice.id, {
-          customPdfUrl: pdfUrl
+          metadata: {
+            ...(invoice.metadata || {}),
+            customPdfUrl: pdfUrl
+          }
         });
 
         await this.api.log.info('Custom PDF regenerated for invoice', {
@@ -138,7 +144,7 @@ export class InvoicePdfCustomizerPlugin extends BasePlugin {
         });
       }
     } catch (error) {
-      await this.api.log.error('Failed to regenerate custom PDF', { error: error.message });
+      await this.api.log.error('Failed to regenerate custom PDF', { error: error instanceof Error ? error.message : String(error) });
     }
   }
 
@@ -155,7 +161,7 @@ export class InvoicePdfCustomizerPlugin extends BasePlugin {
       
       return pdfUrl;
     } catch (error) {
-      throw new Error(`Failed to generate PDF: ${error.message}`);
+      throw new Error(`Failed to generate PDF: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -282,7 +288,7 @@ export class InvoicePdfCustomizerPlugin extends BasePlugin {
       }
     };
 
-    return defaultTemplates[templateName] || defaultTemplates.modern;
+    return (defaultTemplates as Record<string, any>)[templateName] || defaultTemplates.modern;
   }
 
   /**
@@ -341,7 +347,7 @@ export class InvoicePdfCustomizerPlugin extends BasePlugin {
     } catch (error) {
       await this.api.log.error('Failed to save custom template', { 
         templateName, 
-        error: error.message 
+        error: error instanceof Error ? error.message : String(error)
       });
       throw error;
     }
@@ -365,7 +371,7 @@ export class InvoicePdfCustomizerPlugin extends BasePlugin {
       // Return preview URL
       return `https://preview.financbase.com/templates/${templateName}/preview.pdf`;
     } catch (error) {
-      throw new Error(`Failed to preview template: ${error.message}`);
+      throw new Error(`Failed to preview template: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }
