@@ -262,7 +262,7 @@ export async function withAIDecisionLogging<T>(
   }
 ): Promise<T> {
   const startTime = Date.now();
-  let responseData: T;
+  let responseData: T | undefined;
   let error: Error | null = null;
 
   try {
@@ -276,7 +276,7 @@ export async function withAIDecisionLogging<T>(
     const processingTime = metadata?.processingTime || (Date.now() - startTime);
     
     // Only log successful decisions
-    if (!error && responseData) {
+    if (!error && responseData !== undefined) {
       const context = extractDecisionContext(
         organizationId,
         userId,
