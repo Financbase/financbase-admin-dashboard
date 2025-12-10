@@ -147,7 +147,7 @@ export class SecurityService {
 			}
 
 			// Create endpoint-specific Arcjet instance with selected rate limit
-			const endpointSecurity = arcjet({
+			const endpointSecurity: typeof arcjetSecurity = arcjet({
 				key: process.env.ARCJET_KEY!,
 				rules: [
 					selectedRateLimitRule,
