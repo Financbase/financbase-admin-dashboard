@@ -222,9 +222,12 @@ export class SecurityService {
 
 			// Also check results array for bot-related denials
 			const botResult = decision.results?.find(
-				result => (result as any).state === 'DENY' && 
-					((result as any).reason?.toLowerCase().includes('bot') || 
-					 (result as any).reason?.toLowerCase().includes('automated'))
+				(result: unknown) => {
+					const r = result as any;
+					return r?.state === 'DENY' && 
+						(r?.reason?.toLowerCase().includes('bot') || 
+						 r?.reason?.toLowerCase().includes('automated'));
+				}
 			);
 
 			return {
@@ -282,10 +285,13 @@ export class SecurityService {
 
 			// Also check results array for threat-related denials
 			const threatResult = decision.results?.find(
-				result => (result as any).state === 'DENY' && 
-					((result as any).reason?.toLowerCase().includes('shield') ||
-					 (result as any).reason?.toLowerCase().includes('threat') ||
-					 (result as any).reason?.toLowerCase().includes('attack'))
+				(result: unknown) => {
+					const r = result as any;
+					return r?.state === 'DENY' && 
+						(r?.reason?.toLowerCase().includes('shield') ||
+						 r?.reason?.toLowerCase().includes('threat') ||
+						 r?.reason?.toLowerCase().includes('attack'));
+				}
 			);
 
 			return {
