@@ -137,7 +137,8 @@ export class SecurityService {
 		try {
 			// Use the existing arcjetSecurity instance which includes all rate limit rules
 			// Arcjet will evaluate all rules and apply the most restrictive one
-			const decision = await arcjetSecurity.protect(request);
+			// Type assertion needed due to TypeScript type definition issue in beta version
+			const decision = await (arcjetSecurity.protect as (req: Request) => Promise<any>)(request);
 
 			// Check for errors in rule execution (fail open)
 			checkDecisionErrors(decision, `rate-limit:${endpoint}`);
@@ -201,7 +202,8 @@ export class SecurityService {
 	 */
 	static async detectBot(request: Request) {
 		try {
-			const decision = await arcjetSecurity.protect(request);
+			// Type assertion needed due to TypeScript type definition issue in beta version
+			const decision = await (arcjetSecurity.protect as (req: Request) => Promise<any>)(request);
 			
 			// Check for errors in rule execution (fail open)
 			checkDecisionErrors(decision, 'bot-detection');
@@ -258,7 +260,8 @@ export class SecurityService {
 	 */
 	static async detectThreats(request: Request) {
 		try {
-			const decision = await arcjetSecurity.protect(request);
+			// Type assertion needed due to TypeScript type definition issue in beta version
+			const decision = await (arcjetSecurity.protect as (req: Request) => Promise<any>)(request);
 			
 			// Check for errors in rule execution (fail open)
 			checkDecisionErrors(decision, 'threat-detection');
