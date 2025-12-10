@@ -135,27 +135,9 @@ export class SecurityService {
 	 */
 	static async applyRateLimit(request: Request, endpoint: string) {
 		try {
-			// Determine which rate limit rule to use based on endpoint
-			let selectedRateLimitRule = rateLimitRules[0]; // Default
-
-			if (endpoint.includes('/auth') || endpoint.includes('/login')) {
-				selectedRateLimitRule = rateLimitRules[1]; // Stricter for auth
-			} else if (endpoint.includes('/upload') || endpoint.includes('/files')) {
-				selectedRateLimitRule = rateLimitRules[2]; // File upload limits
-			} else if (endpoint.includes('/contact') || endpoint.includes('/support')) {
-				selectedRateLimitRule = rateLimitRules[3]; // Stricter for public forms
-			}
-
-			// Create endpoint-specific Arcjet instance with selected rate limit
-			const endpointSecurity = arcjet({
-				key: process.env.ARCJET_KEY!,
-				rules: [
-					selectedRateLimitRule,
-					...protectionRules,
-				],
-			}) as typeof arcjetSecurity;
-
-			const decision = await endpointSecurity.protect(request);
+			// Use the existing arcjetSecurity instance which includes all rate limit rules
+			// Arcjet will evaluate all rules and apply the most restrictive one
+			const decision = await arcjetSecurity.protect(request);
 
 			// Check for errors in rule execution (fail open)
 			checkDecisionErrors(decision, `rate-limit:${endpoint}`);
